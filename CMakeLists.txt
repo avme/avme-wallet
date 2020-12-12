@@ -1,6 +1,18 @@
+# Pre-setup
 cmake_minimum_required(VERSION 3.9.3)
 
-# Get and setup Hunter
+include(cmake/cable/bootstrap.cmake)
+include(CableBuildInfo)
+include(CableBuildType)
+include(GNUInstallDirs)
+
+cable_set_build_type(DEFAULT RelWithDebInfo CONFIGURATION_TYPES Debug;Release;RelWithDebInfo)
+
+# Map current configuration to configurations of imported targets.
+set(CMAKE_MAP_IMPORTED_CONFIG_DEBUG Release)
+set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release)
+
+# Get Hunter
 include("cmake/HunterGate.cmake")
 HunterGate(
   URL "https://github.com/ruslo/hunter/archive/v0.23.211.tar.gz"
@@ -8,12 +20,13 @@ HunterGate(
 )
 
 # Project data
-project(avme-wallet)
+project(avme_wallet)
 set(PROJECT_VERSION 0.0.1)
 # TODO: set compiler flags and C++ standard
 
+cable_add_buildinfo_library(PROJECT_NAME avme_wallet)
+
 # Boost options
-# TODO: re-check deps
 set(Boost_USE_STATIC_LIBS ON) # Link to static versions of Boost libraries
 set(Boost_USE_MULTITHREADED ON) # Use multithreaded libs
 
@@ -23,6 +36,7 @@ find_package(Boost CONFIG REQUIRED program_options filesystem system thread cont
 
 hunter_add_package(cryptopp)
 find_package(cryptopp CONFIG REQUIRED)
+message("Crypto++: ${HUNTER_cryptopp_VERSION}")
 
 hunter_add_package(libscrypt)
 find_package(libscrypt CONFIG REQUIRED)
@@ -30,26 +44,23 @@ find_package(libscrypt CONFIG REQUIRED)
 hunter_add_package(ethash)
 find_package(ethash CONFIG REQUIRED)
 
-message("Crypto++: ${HUNTER_cryptopp_VERSION}")
-
-# TODO: find out what are those about
-#include(ProjectSecp256k1)
-#include(ProjectLibFF)
+include(ProjectSecp256k1)
+include(ProjectLibFF)
 find_package(Threads)
-#configure_project()
 
-# Global include path for all libs
-# TODO: Check this out later
-include_directories("${CMAKE_SOURCE_DIR}")
+#Include paths for libs and headers
+include_directories("${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/build")
 
-add_subdirectory(lib/devcore)
-add_subdirectory(lib/devcrypto)
-add_subdirectory(lib/ethcore)
-#add_subdirectory(lib/json_spirit)  # TODO: get rid of this dependency if possible
+# Add dirs with required libraries
+add_subdirectory(libdevcore)
+add_subdirectory(libdevcrypto)
+add_subdirectory(libethcore)
 
 # Project executable
 add_executable(avme-wallet src/avme-wallet.cpp src/avme-wallet.h src/main.cpp)
 target_link_libraries(avme-wallet PUBLIC devcore devcrypto ethcore)
+
+# TODO: the install part
 
 # CPack stuff for packaging cross-platform binaries
 # TODO: understand what this does

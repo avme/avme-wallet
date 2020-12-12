@@ -36,7 +36,7 @@ int main () {
       "4 - Send a TAEX Transaction\n" <<
       "5 - Create a new account\n" <<
       "6 - Erase account\n" <<
-      "7 - Create private key from Word/Phrase" <<
+      "7 - Create private key from Word/Phrase\n" <<
       "8 - Exit" << std::endl;
     /**
      * Clean input beforehand. Uncomment these and you will see some
@@ -62,14 +62,16 @@ int main () {
         SignTAEXTransaction(wallet);
         break;
       case 5:
-        std::string m_name;
-        std::cout << "Please inform an account name" << std::endl;
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::getline(std::cin, m_name);
-        CreateNewAccount(wallet, m_name);
-        std::cout << "Reloading account..." << std::endl;
-        wallet = LoadWallet();
+        {
+          std::string name;
+          std::cout << "Please inform an account name" << std::endl;
+          std::cin.clear();
+          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+          std::getline(std::cin, name);
+          CreateNewAccount(wallet, name);
+          std::cout << "Reloading account..." << std::endl;
+          wallet = LoadWallet();
+        }
         break;
       case 6:
         EraseAccount(wallet);
@@ -77,12 +79,14 @@ int main () {
         wallet = LoadWallet();
         break;
       case 7:
-        std::string my_phrase;
-        std::cout << "Please input the passphrase for the wallet" << std::endl;
-        std::cin.clear();
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        std::getline(std::cin, my_phrase);
-        CreateKeyPairFromPhrase(my_phrase);
+        {
+          std::string phrase;
+          std::cout << "Please input the passphrase for the wallet" << std::endl;
+          std::cin.clear();
+          std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+          std::getline(std::cin, phrase);
+          CreateKeyPairFromPhrase(phrase);
+        }
         break;
       case 8:
         std::cout << "Exiting..." << std::endl;

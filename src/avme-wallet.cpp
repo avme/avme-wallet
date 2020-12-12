@@ -23,7 +23,7 @@ KeyManager LoadWallet() {
   if(!boost::filesystem::exists(m_walletPath)) {
     wallet = CreateNewWallet(false);
   } else {
-    std::cout << "Default wallet found." <<
+    std::cout << "Default wallet found.\n" <<
                  "Do you still want to load or create a different wallet?\n" <<
                  "1 - No\n2 - Yes" << std::endl;
     int user_answer;
@@ -422,16 +422,16 @@ std::string convertWeiToFixedPoint(std::string amount, size_t digits) {
  * back to the original 18-digit Wei amount to create transactions.
  */
 std::string convertFixedPointToWei(std::string amount, int digits) {
-  double amount = 0;
+  double amountValue = 0;
 
   std::stringstream ssi;
   ssi.precision(digits);
-  ssi << std::fixed << amountStr;
-  ssi >> amount;
+  ssi << std::fixed << amount;
+  ssi >> amountValue;
 
   std::stringstream ss;
   ss.precision(digits);
-  ss << std::fixed << amount;
+  ss << std::fixed << amountValue;
 
   std::string valuestr = ss.str();
 

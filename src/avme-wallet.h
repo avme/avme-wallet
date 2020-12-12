@@ -34,12 +34,6 @@ using namespace dev;
 using namespace dev::eth;
 using namespace boost::algorithm;
 
-boost::filesystem::path m_walletPath;
-boost::filesystem::path m_secretsPath;
-
-unique_ptr<SecretStore> m_secretStore;
-unique_ptr<KeyManager> m_keyManager;
-
 class BadArgument: public Exception {};
 
 // Load a wallet.
