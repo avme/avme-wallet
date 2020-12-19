@@ -15,14 +15,23 @@ set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release)
 # Get Hunter
 include("cmake/HunterGate.cmake")
 HunterGate(
-  URL "https://github.com/ruslo/hunter/archive/v0.23.211.tar.gz"
-  SHA1 "c022f0c2480e835a6bafdd734035ec2071b51897"
+  URL "https://github.com/cpp-pm/hunter/archive/v0.23.288.tar.gz"
+  SHA1 "6c9b2bc606d86ae31f96a62fc68f0a593024815b"
+  LOCAL # Load config from `${CMAKE_CURRENT_LIST_DIR}/cmake/Hunter/config.cmake`
 )
 
 # Project data
 project(avme_wallet)
 set(PROJECT_VERSION 0.0.1)
-# TODO: set compiler flags and C++ standard
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+message("C++ Standard: ${CMAKE_CXX_STANDARD}")
+message("C++ Standard is required: ${CMAKE_CXX_STANDARD_REQUIRED}")
+message("C++ extensions: ${CMAKE_CXX_EXTENSIONS}")
+message("Using PIC: ${CMAKE_POSITION_INDEPENDENT_CODE}")
 
 cable_add_buildinfo_library(PROJECT_NAME avme_wallet)
 
@@ -31,8 +40,8 @@ set(Boost_USE_STATIC_LIBS ON) # Link to static versions of Boost libraries
 set(Boost_USE_MULTITHREADED ON) # Use multithreaded libs
 
 # External packages
-hunter_add_package(Boost COMPONENTS program_options filesystem system thread context fiber log)
-find_package(Boost CONFIG REQUIRED program_options filesystem system thread context fiber log)
+hunter_add_package(Boost COMPONENTS filesystem log program_options system thread)
+find_package(Boost CONFIG REQUIRED filesystem log program_options system thread)
 
 hunter_add_package(cryptopp)
 find_package(cryptopp CONFIG REQUIRED)
