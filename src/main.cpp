@@ -51,7 +51,7 @@ int main () {
         walletPath = KeyManager::defaultPath();
         secretsPath = SecretStore::defaultPath();
         std::cout << "Loading default wallet..." << std::endl;
-        wallet = LoadWallet(walletPath, secretsPath);
+        wallet = loadWallet(walletPath, secretsPath);
         break;
       }
     case 2:
@@ -69,7 +69,7 @@ int main () {
         secretsPath = sPath;
 
         std::cout << "Loading wallet..." << std::endl;
-        wallet = LoadWallet(walletPath, secretsPath);
+        wallet = loadWallet(walletPath, secretsPath);
         break;
       }
     case 3:
@@ -97,7 +97,7 @@ int main () {
         walletPath = (wPath != "") ? wPath : KeyManager::defaultPath();
         secretsPath = (sPath != "") ? sPath : SecretStore::defaultPath();
         std::cout << "Creating new wallet..." << std::endl;
-        wallet = CreateNewWallet(walletPath, secretsPath, wPass);
+        wallet = createNewWallet(walletPath, secretsPath, wPass);
         break;
       }
   }
@@ -126,7 +126,7 @@ int main () {
     switch (userinput) {
       case 1:
         {
-          std::vector<std::string> ETHAccounts = ListETHAccounts(wallet);
+          std::vector<std::string> ETHAccounts = listETHAccounts(wallet);
           if (!ETHAccounts.empty()) {
             for (auto account : ETHAccounts) {
               std::cout << account << std::endl;
@@ -138,7 +138,7 @@ int main () {
         }
       case 2:
         {
-          std::vector<std::string> TAEXAccounts = ListTAEXAccounts(wallet);
+          std::vector<std::string> TAEXAccounts = listTAEXAccounts(wallet);
           if (!TAEXAccounts.empty()) {
             for (auto account : TAEXAccounts) {
               std::cout << account << std::endl;
@@ -184,7 +184,24 @@ int main () {
             std::cout << "Passwords were different. Try again." << std::endl;
           }
 
-          SignETHTransaction(wallet, pass, signKey, destWallet, txValue, txGas, txGasPrice);
+          TransactionSkeleton txSkel;
+          std::string signedTx;
+          std::string transactionLink;
+
+          std::cout << "Building transaction..." << std::endl;
+          txSkel = buildETHTransaction(signKey, destWallet, txValue, txGas, txGasPrice);
+          std::cout << "Signing transaction..." << std::endl;
+          signedTx = signTransaction(wallet, pass, signKey, txSkel);
+          std::cout << "Transaction signed, broadcasting..." << std::endl;
+          transactionLink = sendTransaction(signedTx);
+          while (transactionLink.find("Transaction nonce is too low") != std::string::npos ||
+              transactionLink.find("Transaction with the same hash was already imported") != std::string::npos) {
+            std::cout << "Transaction nonce is too low, trying again with a higher nonce..." << std::endl;
+            txSkel.nonce++;
+            signedTx = signTransaction(wallet, pass, signKey, txSkel);
+            transactionLink = sendTransaction(signedTx);
+          }
+          std::cout << "Transaction sent! Link: " << transactionLink << std::endl;
           break;
         }
       case 4:
@@ -223,7 +240,24 @@ int main () {
             std::cout << "Passwords were different. Try again." << std::endl;
           }
 
-          SignTAEXTransaction(wallet, pass, signKey, destWallet, txValue, txGas, txGasPrice);
+          TransactionSkeleton txSkel;
+          std::string signedTx;
+          std::string transactionLink;
+
+          std::cout << "Building transaction..." << std::endl;
+          txSkel = buildTAEXTransaction(signKey, destWallet, txValue, txGas, txGasPrice);
+          std::cout << "Signing transaction..." << std::endl;
+          signedTx = signTransaction(wallet, pass, signKey, txSkel);
+          std::cout << "Transaction signed, broadcasting..." << std::endl;
+          transactionLink = sendTransaction(signedTx);
+          while (transactionLink.find("Transaction nonce is too low") != std::string::npos ||
+              transactionLink.find("Transaction with the same hash was already imported") != std::string::npos) {
+            std::cout << "Transaction nonce is too low, trying again with a higher nonce..." << std::endl;
+            txSkel.nonce++;
+            signedTx = signTransaction(wallet, pass, signKey, txSkel);
+            transactionLink = sendTransaction(signedTx);
+          }
+          std::cout << "Transaction sent! Link: " << transactionLink << std::endl;
           break;
         }
       case 5:
@@ -249,9 +283,9 @@ int main () {
           }
 
           std::cout << "Creating a new account..." << std::endl;
-          CreateNewAccount(wallet, name, aPass, aPassHint);
+          createNewAccount(wallet, name, aPass, aPassHint);
           std::cout << "Reloading wallet..." << std::endl;
-          wallet = LoadWallet(walletPath, secretsPath);
+          wallet = loadWallet(walletPath, secretsPath);
         }
         break;
       case 6:
@@ -260,10 +294,10 @@ int main () {
           std::cout << "Please inform the account that you want to delete (no going back from here!)." << std::endl;
           std::getline(std::cin, account);
           std::cout << "Erasing account..." << std::endl;
-          if (EraseAccount(wallet, account)) {
+          if (eraseAccount(wallet, account)) {
             std::cout << "Account " << account << " erased." << std::endl;
             std::cout << "Reloading wallet..." << std::endl;
-            wallet = LoadWallet(walletPath, secretsPath);
+            wallet = loadWallet(walletPath, secretsPath);
           } else {
             std::cout << "Couldn't erase account " << account << "; not found." << std::endl;
           }
@@ -275,7 +309,7 @@ int main () {
           std::cout << "Please input the passphrase for the wallet." << std::endl;
           std::getline(std::cin, phrase);
           std::cout << "Creating a key pair..." << std::endl;
-          CreateKeyPairFromPhrase(phrase);
+          createKeyPairFromPhrase(phrase);
         }
         break;
       case 8:

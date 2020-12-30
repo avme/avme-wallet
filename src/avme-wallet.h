@@ -37,7 +37,7 @@ using namespace boost::filesystem;
 class BadArgument: public Exception {};
 
 // Load a wallet.
-KeyManager LoadWallet(path walletPath, path secretsPath);
+KeyManager loadWallet(path walletPath, path secretsPath);
 
 /**
  * Load the SecretStore (an object inside KeyManager that contains all secrets
@@ -46,16 +46,16 @@ KeyManager LoadWallet(path walletPath, path secretsPath);
 SecretStore& secretStore(KeyManager wallet);
 
 // Create a new wallet.
-KeyManager CreateNewWallet(path walletPath, path secretsPath, std::string pass);
+KeyManager createNewWallet(path walletPath, path secretsPath, std::string pass);
 
 // Create a new Account in the user wallet and encrypt it.
-void CreateNewAccount(KeyManager wallet, std::string name, std::string pass, std::string hint);
+void createNewAccount(KeyManager wallet, std::string name, std::string pass, std::string hint);
 
 // Hash a given phrase to create a new address based on that phrase.
-void CreateKeyPairFromPhrase(std::string phrase);
+void createKeyPairFromPhrase(std::string phrase);
 
 // Erase an Account from the wallet.
-bool EraseAccount(KeyManager wallet, std::string account);
+bool eraseAccount(KeyManager wallet, std::string account);
 
 // Select the appropriate address stored in KeyManager from user input string.
 Address userToAddress(std::string const& input, KeyManager wallet);
@@ -73,7 +73,7 @@ KeyPair makeKey();
 std::string httpGetRequest(std::string httpquery);
 
 // Parse a JSON string and get the appropriate value from the API provider.
-std::vector<std::string> GetJSONValue(std::string json, std::string value);
+std::vector<std::string> getJSONValue(std::string json, std::string value);
 
 // Convert a full amount of ETH in Wei to a fixed point, more human-friendly value.
 std::string convertWeiToFixedPoint(std::string amount, size_t digits);
@@ -85,7 +85,7 @@ std::string convertFixedPointToWei(std::string amount, int digits);
  * List all the ETH accounts contained in a given wallet.
  * Also asks for the API provider to get the balances from these addresses.
  */
-std::vector<std::string> ListETHAccounts(KeyManager wallet);
+std::vector<std::string> listETHAccounts(KeyManager wallet);
 
 /**
  * Same as above, but for TAEX.
@@ -93,29 +93,35 @@ std::vector<std::string> ListETHAccounts(KeyManager wallet);
  * differently and from their proper contract address, beside the respective
  * wallet address.
  */
-std::vector<std::string> ListTAEXAccounts(KeyManager wallet);
+std::vector<std::string> listTAEXAccounts(KeyManager wallet);
 
 // Get the ETH balance from an address from the API provider.
-std::string GetETHBalance(std::string address);
+std::string getETHBalance(std::string address);
 
 // Same thing as above, but for TAEX.
-std::string GetTAEXBalance(std::string address);
-
-// Broadcast a transaction to the API provider.
-std::string sendTransaction(std::string txidHex);
+std::string getTAEXBalance(std::string address);
 
 // Build a transaction data to send tokens.
-std::string BuildTXData(std::string txValue, std::string destWallet);
+std::string buildTXData(std::string txValue, std::string destWallet);
 
-// Issue an ETH transaction, sign it and broadcast it.
-void SignETHTransaction(
-  KeyManager wallet, std::string pass, std::string signKey, std::string destWallet,
+// Build an ETH transaction from user data.
+TransactionSkeleton buildETHTransaction(
+  std::string signKey, std::string destWallet,
   std::string txValue, std::string txGas, std::string txGasPrice
 );
 
-// Issue a TAEX transaction, sign it and broadcast it.
-void SignTAEXTransaction(
-  KeyManager wallet, std::string pass, std::string signKey, std::string destWallet,
+// Build a TAEX transaction from user data.
+TransactionSkeleton buildTAEXTransaction(
+  std::string signKey, std::string destWallet,
   std::string txValue, std::string txGas, std::string txGasPrice
 );
+
+// Sign a transaction with user credentials.
+std::string signTransaction(
+  KeyManager wallet, std::string pass,
+  std::string signKey, TransactionSkeleton txSkel
+);
+
+// Broadcast a signed transaction to the API provider.
+std::string sendTransaction(std::string txidHex);
 

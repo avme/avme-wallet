@@ -8,7 +8,7 @@
 #include "avme-wallet.h"
 
 // Load a wallet.
-KeyManager LoadWallet(path walletPath, path secretsPath) {
+KeyManager loadWallet(path walletPath, path secretsPath) {
   dev::eth::KeyManager wallet(walletPath, secretsPath);
   return wallet;
 }
@@ -22,7 +22,7 @@ SecretStore& secretStore(KeyManager wallet) {
 }
 
 // Create a new wallet.
-KeyManager CreateNewWallet(path walletPath, path secretsPath, std::string pass) {
+KeyManager createNewWallet(path walletPath, path secretsPath, std::string pass) {
   dev::eth::KeyManager wallet(walletPath, secretsPath);
   try {
     wallet.create(pass);
@@ -37,7 +37,7 @@ KeyManager CreateNewWallet(path walletPath, path secretsPath, std::string pass) 
  * An Account contains an ETH address and other stuff.
  * See https://ethereum.org/en/developers/docs/accounts/ for more info.
  */
-void CreateNewAccount(KeyManager wallet, std::string name, std::string pass, std::string hint) {
+void createNewAccount(KeyManager wallet, std::string name, std::string pass, std::string hint) {
   // Use the wallet's master passphrase if no passphrase was entered
   auto k = makeKey();
   h128 u = (pass.empty()) ? wallet.import(k.secret(), name) : wallet.import(k.secret(), name, pass, hint);
@@ -56,7 +56,7 @@ void CreateNewAccount(KeyManager wallet, std::string name, std::string pass, std
  * It's easier to hash since hashing creates the 256-bit variable used by
  * the private key.
  */
-void CreateKeyPairFromPhrase(std::string phrase) {
+void createKeyPairFromPhrase(std::string phrase) {
   std::string shahash = dev::sha3(phrase, false);
   for (auto i = 0; i < 1048577; ++i) {
     shahash = dev::sha3(shahash, false);
@@ -69,7 +69,7 @@ void CreateKeyPairFromPhrase(std::string phrase) {
 }
 
 // Erase an Account from the wallet.
-bool EraseAccount(KeyManager wallet, std::string account) {
+bool eraseAccount(KeyManager wallet, std::string account) {
   if (Address a = userToAddress(account, wallet)) {
     wallet.kill(a);
     return true;
@@ -227,7 +227,7 @@ std::string httpGetRequest(std::string httpquery) {
 }
 
 // Parse a JSON string and get the appropriate value from the API provider.
-std::vector<std::string> GetJSONValue(std::string json, std::string value) {
+std::vector<std::string> getJSONValue(std::string json, std::string value) {
   std::vector<std::string> jsonInputs;
   std::vector<std::string> resultValue;
   bool found = false;
@@ -326,13 +326,12 @@ std::string convertFixedPointToWei(std::string amount, int digits) {
  * List all the ETH accounts contained in a given wallet.
  * Also asks for the API provider to get the balances from these addresses.
  */
-// TODO: maybe join this with TAEX
-std::vector<std::string> ListETHAccounts(KeyManager wallet) {
+std::vector<std::string> listETHAccounts(KeyManager wallet) {
   if (wallet.store().keys().empty()) { return {}; }
 
   std::vector<std::string> WalletList;
   std::vector<std::string> AddressList;
-  std::vector<u128> BareList;
+  std::vector<std::string> BareList;
   AddressHash got;
 
   // Separating normal accounts from bare accounts
@@ -349,20 +348,19 @@ std::vector<std::string> ListETHAccounts(KeyManager wallet) {
       WalletList.push_back(buffer.str());
       AddressList.push_back(addressbuffer.str());
     } else {
-      // TODO: find out how to deal with bare accounts
-      //barebuffer << u << " (Bare)";
-      //BareList.push_back(barebuffer);
+      barebuffer << "0x" << u << " (Bare)";
+      BareList.push_back(barebuffer.str());
     }
   }
 
   // Querying account balances and joining bare accounts at the end
   for (std::size_t i = 0; i < AddressList.size(); ++i) {
-    WalletList[i] += GetETHBalance(AddressList[i]);
+    WalletList[i] += getETHBalance(AddressList[i]);
     WalletList[i] += "\n";
   }
-  //if (!BareList.empty()) {
-  //  WalletList.insert(WalletList.end(), BareList.begin(), BareList.end());
-  //}
+  if (!BareList.empty()) {
+    WalletList.insert(WalletList.end(), BareList.begin(), BareList.end());
+  }
 
   return WalletList;
 }
@@ -373,13 +371,12 @@ std::vector<std::string> ListETHAccounts(KeyManager wallet) {
  * differently and from their proper contract address, beside the respective
  * wallet address.
  */
-// TODO: maybe join this with ETH
-std::vector<std::string> ListTAEXAccounts(KeyManager wallet) {
+std::vector<std::string> listTAEXAccounts(KeyManager wallet) {
   if (wallet.store().keys().empty()) { return {}; }
 
   std::vector<std::string> WalletList;
   std::vector<std::string> AddressList;
-  std::vector<u128> BareList;
+  std::vector<std::string> BareList;
   AddressHash got;
 
   // Separating normal accounts from bare accounts
@@ -396,27 +393,25 @@ std::vector<std::string> ListTAEXAccounts(KeyManager wallet) {
       WalletList.push_back(buffer.str());
       AddressList.push_back(addressbuffer.str());
     } else {
-      // TODO: find out how to deal with bare accounts
-      //barebuffer << u << " (Bare)";
-      //BareList.push_back(barebuffer.str());
+      barebuffer << "0x" << u << " (Bare)";
+      BareList.push_back(barebuffer.str());
     }
   }
 
   // Querying account balances and joining bare accounts at the end
   for (std::size_t i = 0; i < AddressList.size(); ++i) {
-    WalletList[i] += GetTAEXBalance(AddressList[i]);
+    WalletList[i] += getTAEXBalance(AddressList[i]);
     WalletList[i] += "\n";
   }
-  //if (!BareList.empty()) {
-  //  WalletList.insert(WalletList.end(), BareList.begin(), BareList.end());
-  //}
+  if (!BareList.empty()) {
+    WalletList.insert(WalletList.end(), BareList.begin(), BareList.end());
+  }
 
   return WalletList;
 }
 
 // Get the ETH balance from an address from the API provider.
-// TODO: maybe join this with TAEX
-std::string GetETHBalance(std::string address) {
+std::string getETHBalance(std::string address) {
   std::string balance;
 
   std::stringstream query;
@@ -425,7 +420,7 @@ std::string GetETHBalance(std::string address) {
   query << "&tag=latest&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
 
   balance = httpGetRequest(query.str());
-  std::vector<std::string> jsonResult = GetJSONValue(balance, "result");
+  std::vector<std::string> jsonResult = getJSONValue(balance, "result");
   balance = jsonResult[0];
   balance.pop_back();
   balance.erase(0,10);
@@ -435,8 +430,7 @@ std::string GetETHBalance(std::string address) {
 }
 
 // Same thing as above, but for TAEX.
-// TODO: maybe join this with ETH
-std::string GetTAEXBalance(std::string address) {
+std::string getTAEXBalance(std::string address) {
   std::string balance;
 
   std::stringstream query;
@@ -445,7 +439,7 @@ std::string GetTAEXBalance(std::string address) {
   query << "&tag=latest&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
 
   balance = httpGetRequest(query.str());
-  std::vector<std::string> jsonResult = GetJSONValue(balance, "result");
+  std::vector<std::string> jsonResult = getJSONValue(balance, "result");
   balance = jsonResult[0];
   balance.pop_back();
   balance.erase(0,10);
@@ -454,26 +448,8 @@ std::string GetTAEXBalance(std::string address) {
   return balance;
 }
 
-// Broadcast a transaction to the API provider.
-std::string sendTransaction(std::string txidHex) {
-  std::stringstream txidquery;
-  txidquery << "/api?module=proxy&action=eth_sendRawTransaction&hex=";
-  txidquery << txidHex;
-  txidquery << "&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
-
-  std::string txid = httpGetRequest(txidquery.str());
-  std::vector<std::string> txidJsonResult = GetJSONValue(txid, "result");
-  std::string transactionLink = "https://ropsten.etherscan.io/tx/";
-  std::string tmptxid = txidJsonResult[0];
-  tmptxid.pop_back();
-  tmptxid.erase(0,10);
-  transactionLink += tmptxid;
-
-  return transactionLink;
-}
-
 // Build a transaction data to send tokens.
-std::string BuildTXData(std::string txValue, std::string destWallet) {
+std::string buildTXData(std::string txValue, std::string destWallet) {
   std::string txdata;
   // Hex and padding that will call the "send" function of the address
   std::string sendpadding = "a9059cbb000000000000000000000000";
@@ -510,16 +486,13 @@ std::string BuildTXData(std::string txValue, std::string destWallet) {
   return txdata;
 }
 
-// Issue an ETH transaction, sign it and broadcast it.
-// TODO: maybe rename this to sendETHTransaction and merge it with TAEX, also
-// maybe split this in three - build, sign and send
-void SignETHTransaction(
-  KeyManager wallet, std::string pass, std::string signKey, std::string destWallet,
+// Build an ETH transaction from user data.
+TransactionSkeleton buildETHTransaction(
+  std::string signKey, std::string destWallet,
   std::string txValue, std::string txGas, std::string txGasPrice
 ) {
-  TransactionSkeleton toSign;
-  int TxNonce;
-
+  TransactionSkeleton txSkel;
+  int txNonce;
   std::stringstream query;
   query << "/api?module=proxy&action=eth_getTransactionCount&address=";
   query << signKey;
@@ -527,75 +500,35 @@ void SignETHTransaction(
 
   // Requesting a nonce from the API provider
   std::string nonceRequest = httpGetRequest(query.str());
-  std::vector<std::string> jsonResult = GetJSONValue(nonceRequest, "result");
+  std::vector<std::string> jsonResult = getJSONValue(nonceRequest, "result");
   jsonResult[0].pop_back();
   jsonResult[0].erase(0,10);
   std::stringstream nonceStrm;
   nonceStrm << std::hex << jsonResult[0];
-  nonceStrm >> TxNonce;
-  if (TxNonce == 0) {
-    ++TxNonce;
+  nonceStrm >> txNonce;
+  if (txNonce == 0) {
+    ++txNonce;
   }
 
   // Building the transaction structure
-  toSign.nonce = TxNonce;
-  toSign.creation = false;
-  toSign.to = toAddress(destWallet);
-  toSign.gas = u256(txGas);
-  toSign.gasPrice = u256(txGasPrice);
-  toSign.value = u256(txValue);
+  txSkel.creation = false;
+  txSkel.to = toAddress(destWallet);
+  txSkel.value = u256(txValue);
+  txSkel.nonce = txNonce;
+  txSkel.gas = u256(txGas);
+  txSkel.gasPrice = u256(txGasPrice);
 
-  // Signing the transaction
-  Secret s = getSecret(wallet, signKey, pass);
-  std::stringstream txHexBuffer;
-  std::cout << "Signing transaction..." << std::endl;
-  try {
-    TransactionBase t = TransactionBase(toSign);
-    t.setNonce(TxNonce);
-    t.sign(s);
-    txHexBuffer << toHex(t.rlp());
-  } catch (Exception& ex) {
-    std::cerr << "Invalid transaction: " << ex.what() << std::endl;
-  }
-
-  // Broadcasting the signed transaction
-  std::string transactionHex = txHexBuffer.str();
-  std::cout << "Transaction signed, broadcasting..." << std::endl;
-  std::string transactionLink = sendTransaction(transactionHex);
-  while (transactionLink.find("Transaction nonce is too low") != std::string::npos ||
-      transactionLink.find("Transaction with the same hash was already imported") != std::string::npos) {
-    std::cout << "Transaction nonce is too low, trying again with a higher nonce..." << std::endl;
-    txHexBuffer.str(std::string());
-    std::cout << "TxNonce: " << TxNonce << std::endl;
-    ++TxNonce;
-    toSign.nonce = TxNonce;
-    try {
-      TransactionBase t = TransactionBase(toSign);
-      t.setNonce(TxNonce);
-      t.sign(s);
-      txHexBuffer << toHex(t.rlp());
-    } catch (Exception& ex) {
-      std::cerr << "Invalid transaction: " << ex.what() << std::endl;
-    }
-    std::string transactionHex = txHexBuffer.str();
-    std::string transactionLink = sendTransaction(transactionHex);
-  }
-
-  std::cout << "Transaction successful! Link: " << transactionLink << std::endl;
-  return;
+  return txSkel;
 }
 
-// Issue a TAEX transaction, sign it and broadcast it.
-// TODO: maybe rename this to sendTAEXTransaction and merge it with ETH, also
-// maybe split this in three - build, sign and send
-void SignTAEXTransaction(
-  KeyManager wallet, std::string pass, std::string signKey, std::string destWallet,
+// Build a TAEX transaction from user data.
+TransactionSkeleton buildTAEXTransaction(
+  std::string signKey, std::string destWallet,
   std::string txValue, std::string txGas, std::string txGasPrice
 ) {
-  TransactionSkeleton toSign;
-  int TxNonce;
+  TransactionSkeleton txSkel;
+  int txNonce;
   std::string contractWallet = "9c19d746472978750778f334b262de532d9a85f9";
-
   std::stringstream query;
   query << "/api?module=proxy&action=eth_getTransactionCount&address=";
   query << signKey;
@@ -603,62 +536,63 @@ void SignTAEXTransaction(
 
   // Requesting a nonce from the API provider
   std::string nonceRequest = httpGetRequest(query.str());
-  std::vector<std::string> jsonResult = GetJSONValue(nonceRequest, "result");
+  std::vector<std::string> jsonResult = getJSONValue(nonceRequest, "result");
   jsonResult[0].pop_back();
   jsonResult[0].erase(0,10);
   std::stringstream nonceStrm;
   nonceStrm << std::hex << jsonResult[0];
-  nonceStrm >> TxNonce;
-  if (TxNonce == 0) {
-    ++TxNonce;
+  nonceStrm >> txNonce;
+  if (txNonce == 0) {
+    ++txNonce;
   }
 
   // Building the transaction structure
-  toSign.nonce = TxNonce;
-  toSign.creation = false;
-  toSign.to = toAddress(contractWallet);
-  toSign.data = fromHex(BuildTXData(txValue, destWallet));
-  toSign.gas = u256(txGas);
-  toSign.gasPrice = u256(txGasPrice);
-  toSign.value = u256(0);
+  txSkel.creation = false;
+  txSkel.to = toAddress(contractWallet);
+  txSkel.value = u256(0);
+  txSkel.data = fromHex(buildTXData(txValue, destWallet));
+  txSkel.nonce = txNonce;
+  txSkel.gas = u256(txGas);
+  txSkel.gasPrice = u256(txGasPrice);
 
-  // Signing the transaction
+  return txSkel;
+}
+
+// Sign a transaction with user credentials.
+std::string signTransaction(
+  KeyManager wallet, std::string pass,
+  std::string signKey, TransactionSkeleton txSkel
+) {
   Secret s = getSecret(wallet, signKey, pass);
   std::stringstream txHexBuffer;
-  std::cout << "Signing transaction..." << std::endl;
+
   try {
-    TransactionBase t = TransactionBase(toSign);
-    t.setNonce(TxNonce);
+    TransactionBase t = TransactionBase(txSkel);
+    t.setNonce(txSkel.nonce);
     t.sign(s);
     txHexBuffer << toHex(t.rlp());
   } catch (Exception& ex) {
     std::cerr << "Invalid transaction: " << ex.what() << std::endl;
   }
 
-  // Broadcasting the signed transaction
-  std::string transactionHex = txHexBuffer.str();
-  std::cout << "Transaction signed, broadcasting..." << std::endl;
-  std::string transactionLink = sendTransaction(transactionHex);
-  while (transactionLink.find("Transaction nonce is too low") != std::string::npos ||
-      transactionLink.find("Transaction with the same hash was already imported") != std::string::npos) {
-    std::cout << "Transaction nonce is too low, trying again with a higher nonce..." << std::endl;
-    txHexBuffer.str(std::string());
-    std::cout << "TxNonce: " << TxNonce << std::endl;
-    ++TxNonce;
-    toSign.nonce = TxNonce;
-    try {
-      TransactionBase t = TransactionBase(toSign);
-      t.setNonce(TxNonce);
-      t.sign(s);
-      txHexBuffer << toHex(t.rlp());
-    } catch (Exception& ex) {
-      std::cerr << "Invalid transaction: " << ex.what() << std::endl;
-    }
-    std::string transactionHex = txHexBuffer.str();
-    std::string transactionLink = sendTransaction(transactionHex);
-  }
+  return txHexBuffer.str();
+}
 
-  std::cout << "Transaction successful! Link: " << transactionLink << std::endl;
-  return;
+// Broadcast a transaction to the API provider.
+std::string sendTransaction(std::string txidHex) {
+  std::stringstream txidquery;
+  txidquery << "/api?module=proxy&action=eth_sendRawTransaction&hex=";
+  txidquery << txidHex;
+  txidquery << "&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
+
+  std::string txid = httpGetRequest(txidquery.str());
+  std::vector<std::string> txidJsonResult = getJSONValue(txid, "result");
+  std::string transactionLink = "https://ropsten.etherscan.io/tx/";
+  std::string tmptxid = txidJsonResult[0];
+  tmptxid.pop_back();
+  tmptxid.erase(0,10);
+  transactionLink += tmptxid;
+
+  return transactionLink;
 }
 
