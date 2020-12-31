@@ -73,7 +73,7 @@ KeyPair makeKey();
 std::string httpGetRequest(std::string httpquery);
 
 // Parse a JSON string and get the appropriate value from the API provider.
-std::vector<std::string> getJSONValue(std::string json, std::string value);
+std::vector<std::string> getJSONValue(std::string myJson, std::string myValue);
 
 // Convert a full amount of ETH in Wei to a fixed point, more human-friendly value.
 std::string convertWeiToFixedPoint(std::string amount, size_t digits);

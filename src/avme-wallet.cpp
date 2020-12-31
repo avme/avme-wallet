@@ -227,29 +227,30 @@ std::string httpGetRequest(std::string httpquery) {
 }
 
 // Parse a JSON string and get the appropriate value from the API provider.
-std::vector<std::string> getJSONValue(std::string json, std::string value) {
+std::vector<std::string> getJSONValue(std::string myJson, std::string myValue) {
   std::vector<std::string> jsonInputs;
   std::vector<std::string> resultValue;
+  std::string value;
   bool found = false;
 
-  for (std::size_t i = 0; i < json.size(); ++i) {
-    if (json[i] == ',') {
+  for (std::size_t i = 0; i < myJson.size(); ++i) {
+    if (myJson[i] == ',') {
       jsonInputs.push_back(value);
       value = "";
       continue;
     }
-    if (json[i] == '}') {
+    if (myJson[i] == '}') {
       jsonInputs.push_back(value);
       continue;
     }
-    if (json[i] == '{') {
+    if (myJson[i] == '{') {
       continue;
     }
-    value += json[i];
+    value += myJson[i];
   }
 
   for (std::size_t i = 0; i < jsonInputs.size(); ++i) {
-    if (jsonInputs[i].find(value) != std::string::npos) {
+    if (jsonInputs[i].find(myValue) != std::string::npos) {
       found = true;
       resultValue.push_back(jsonInputs[i]);
     }
@@ -500,6 +501,7 @@ TransactionSkeleton buildETHTransaction(
 
   // Requesting a nonce from the API provider
   std::string nonceRequest = httpGetRequest(query.str());
+  std::cout << nonceRequest << std::endl;
   std::vector<std::string> jsonResult = getJSONValue(nonceRequest, "result");
   jsonResult[0].pop_back();
   jsonResult[0].erase(0,10);
