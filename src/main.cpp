@@ -157,7 +157,7 @@ int main () {
           std::string txValue;
           std::string txGas;
           std::string txGasPrice;
-          int op;
+          std::string op;
 
           std::cout << "From which address do you want to send a transaction?" << std::endl;
           std::getline(std::cin, signKey);
@@ -168,8 +168,8 @@ int main () {
           txValue = convertFixedPointToWei(txValue, 18);
           std::cout << "Do you want to set your own fee or use an automatic fee?\n" <<
                        "1 - Automatic (default)\n2 - Set my own" << std::endl;
-          std::cin >> op;
-          if (op == 2) {
+          std::getline(std::cin, op);
+          if (op == "2") {
             // TODO: set custom tax
           } else {
             txGas = "70000";
