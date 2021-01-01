@@ -37,7 +37,7 @@ using namespace boost::filesystem;
 class BadArgument: public Exception {};
 
 // Load a wallet.
-KeyManager loadWallet(path walletPath, path secretsPath);
+bool loadWallet(KeyManager wallet, std::string walletPass);
 
 /**
  * Load the SecretStore (an object inside KeyManager that contains all secrets
@@ -46,10 +46,12 @@ KeyManager loadWallet(path walletPath, path secretsPath);
 SecretStore& secretStore(KeyManager wallet);
 
 // Create a new wallet.
-KeyManager createNewWallet(path walletPath, path secretsPath, std::string pass);
+KeyManager createNewWallet(path walletPath, path secretsPath, std::string walletPass);
 
-// Create a new Account in the user wallet and encrypt it.
-void createNewAccount(KeyManager wallet, std::string name, std::string pass, std::string hint);
+// Create a new Account in the given wallet and encrypt it.
+std::string createNewAccount(
+  KeyManager wallet, std::string name, std::string pass, std::string hint, bool usesMasterPass
+);
 
 // Hash a given phrase to create a new address based on that phrase.
 void createKeyPairFromPhrase(std::string phrase);

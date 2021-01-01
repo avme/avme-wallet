@@ -8,9 +8,8 @@
 #include "avme-wallet.h"
 
 // Load a wallet.
-KeyManager loadWallet(path walletPath, path secretsPath) {
-  dev::eth::KeyManager wallet(walletPath, secretsPath);
-  return wallet;
+bool loadWallet(KeyManager wallet, std::string walletPass) {
+  return wallet.load(walletPass);
 }
 
 /**
@@ -22,10 +21,10 @@ SecretStore& secretStore(KeyManager wallet) {
 }
 
 // Create a new wallet.
-KeyManager createNewWallet(path walletPath, path secretsPath, std::string pass) {
+KeyManager createNewWallet(path walletPath, path secretsPath, std::string walletPass) {
   dev::eth::KeyManager wallet(walletPath, secretsPath);
   try {
-    wallet.create(pass);
+    wallet.create(walletPass);
   } catch (Exception const& _e) {
     std::cerr << "Unable to create wallet" << std::endl << boost::diagnostic_information(_e);
   }
@@ -37,18 +36,23 @@ KeyManager createNewWallet(path walletPath, path secretsPath, std::string pass) 
  * An Account contains an ETH address and other stuff.
  * See https://ethereum.org/en/developers/docs/accounts/ for more info.
  */
-void createNewAccount(KeyManager wallet, std::string name, std::string pass, std::string hint) {
-  // Use the wallet's master passphrase if no passphrase was entered
+std::string createNewAccount(
+  KeyManager wallet, std::string name, std::string pass, std::string hint, bool usesMasterPass
+) {
   auto k = makeKey();
-  h128 u = (pass.empty()) ? wallet.import(k.secret(), name) : wallet.import(k.secret(), name, pass, hint);
-  std::cout << "Created key " << toUUID(u) << std::endl;
-  std::cout << "  Name: " << name << std::endl;
-  if (pass.empty()) {
-    std::cout << "  Uses master passphrase." << std::endl;
+  h128 u = wallet.import(k.secret(), name, pass, hint);
+  std::stringstream ret;
+
+  ret << "Created key " << toUUID(u) << std::endl
+      << "  Name: " << name << std::endl
+      << "  Address: " << k.address().hex() << std::endl;
+  if (usesMasterPass) {
+    ret << "  Uses master passphrase" << std::endl;
   } else {
-    std::cout << "  Password hint: " << hint << std::endl;
+    ret << "  Passphrase hint: " << hint << std::endl;
   }
-  std::cout << "  Address: " << k.address().hex() << std::endl;
+
+  return ret.str();
 }
 
 /**
