@@ -14,8 +14,8 @@ ExternalProject_Add(
     PREFIX "${prefix}"
     DOWNLOAD_NAME secp256k1-ac8ccf29.tar.gz
     DOWNLOAD_NO_PROGRESS 1
-    URL https://github.com/itamarcps/secp256k1/archive/0ac22b3fb07373d98b1873424c3438f0cbba6868.tar.gz
-    URL_HASH SHA256=d11e68c6ef733d970214e18bfe58d7ec9e8aa83136fda54fe582531067e0d169
+    URL https://github.com/itamarcps/secp256k1/archive/a74a75089ff65740cc14b3a084fa7c9d27a49174.tar.gz
+    URL_HASH SHA256=3d5e56561690397862869e6d58f312db045709a9b7438c3462f865b4841aeac0
     PATCH_COMMAND ${CMAKE_COMMAND} -E copy_if_different
         ${CMAKE_CURRENT_LIST_DIR}/secp256k1/CMakeLists.txt <SOURCE_DIR>
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
