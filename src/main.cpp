@@ -168,6 +168,10 @@ int main () {
 
       std::cout << "Building transaction..." << std::endl;
       txSkel = buildETHTransaction(signKey, destWallet, txValue, txGas, txGasPrice);
+      if (txSkel.nonce == MAX_U256_VALUE()) {
+          std::cout << "Error in transaction building" << std::endl;
+          continue;
+      }
       std::cout << "Signing transaction..." << std::endl;
       signedTx = signTransaction(wallet, pass, signKey, txSkel);
       std::cout << "Transaction signed, broadcasting..." << std::endl;
@@ -221,6 +225,10 @@ int main () {
 
       std::cout << "Building transaction..." << std::endl;
       txSkel = buildTAEXTransaction(signKey, destWallet, txValue, txGas, txGasPrice);
+      if (txSkel.nonce == MAX_U256_VALUE()) {
+        std::cout << "Error in transaction building" << std::endl;
+        continue;
+      }
       std::cout << "Signing transaction..." << std::endl;
       signedTx = signTransaction(wallet, pass, signKey, txSkel);
       std::cout << "Transaction signed, broadcasting..." << std::endl;

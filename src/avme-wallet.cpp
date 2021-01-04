@@ -7,6 +7,25 @@
 
 #include "avme-wallet.h"
 
+
+// u256 Max Value
+
+u256 MAX_U256_VALUE() {
+    return 2^256-1;
+}
+
+// Get object and array item for JSON API calls.
+
+const json_spirit::mValue get_object_item(const json_spirit::mValue element, const std::string name)
+{
+  return element.get_obj().at(name);
+}
+
+const json_spirit::mValue get_array_item(const json_spirit::mValue element, size_t index)
+{
+  return element.get_array().at(index);
+}
+
 // Load a wallet.
 bool loadWallet(KeyManager wallet, std::string walletPass) {
   return wallet.load(walletPass);
@@ -230,48 +249,6 @@ std::string httpGetRequest(std::string httpquery) {
   return server_answer;
 }
 
-// Parse a JSON string and get the appropriate value from the API provider.
-std::vector<std::string> getJSONValue(std::string myJson, std::string myValue) {
-  std::vector<std::string> jsonInputs;
-  std::vector<std::string> resultValue;
-  std::string value;
-  bool found = false;
-
-  for (std::size_t i = 0; i < myJson.size(); ++i) {
-    if (myJson[i] == ',') {
-      jsonInputs.push_back(value);
-      value = "";
-      continue;
-    }
-    if (myJson[i] == '}') {
-      jsonInputs.push_back(value);
-      continue;
-    }
-    if (myJson[i] == '{') {
-      continue;
-    }
-    value += myJson[i];
-  }
-
-  for (std::size_t i = 0; i < jsonInputs.size(); ++i) {
-    if (jsonInputs[i].find(myValue) != std::string::npos) {
-      found = true;
-      resultValue.push_back(jsonInputs[i]);
-    }
-  }
-
-  if (!found) {
-    for (std::size_t i = 0; i < jsonInputs.size(); ++i) {
-      if (jsonInputs[i].find("message") != std::string::npos) {
-        found = true;
-        resultValue.push_back(jsonInputs[i]);
-      }
-    }
-  }
-
-  return resultValue;
-}
-
 /**
  * Convert a full amount of ETH in Wei to a fixed point, more human-friendly value.
  * BTC has 8 decimals but is considered a full integer in code, so 1.0 BTC
@@ -417,18 +394,30 @@ std::vector<std::string> listTAEXAccounts(KeyManager wallet) {
 
 // Get the ETH balance from an address from the API provider.
 std::string getETHBalance(std::string address) {
+  std::string balanceApiRequest;
   std::string balance;
-
   std::stringstream query;
   query << "/api?module=account&action=balance&address=";
   query << address;
   query << "&tag=latest&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
 
-  balance = httpGetRequest(query.str());
-  std::vector<std::string> jsonResult = getJSONValue(balance, "result");
-  balance = jsonResult[0];
-  balance.pop_back();
-  balance.erase(0,10);
+  balanceApiRequest = httpGetRequest(query.str());
+  json_spirit::mValue balanceJson;
+  auto success = json_spirit::read_string(balanceApiRequest, balanceJson);
+  if (success) {
+    try {
+      auto jsonResult = get_object_item(balanceJson, "result");
+      balance = jsonResult.get_str();
+    } catch (std::exception &e) {
+      std::cout << "Error when reading json for \"result\": " << e.what() << std::endl;
+      auto jsonResult = get_object_item(get_object_item(balanceJson,"error"), "message");
+      balance = jsonResult.get_str();
+      std::cout << "Json message: " << balance << std::endl;
+      return "ERROR";
+    }
+  } else {
+    std::cout << "Error reading json, check json value: " << balanceApiRequest << std::endl;
+  }
   balance = convertWeiToFixedPoint(balance, 18);
 
   return balance;
@@ -436,18 +425,31 @@ std::string getETHBalance(std::string address) {
 
 // Same thing as above, but for TAEX.
 std::string getTAEXBalance(std::string address) {
+  std::string balanceApiRequest;
   std::string balance;
-
   std::stringstream query;
   query << "/api?module=account&action=tokenbalance&contractaddress=0x9c19d746472978750778f334b262de532d9a85f9&address=";
   query << address;
   query << "&tag=latest&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
 
-  balance = httpGetRequest(query.str());
-  std::vector<std::string> jsonResult = getJSONValue(balance, "result");
-  balance = jsonResult[0];
-  balance.pop_back();
-  balance.erase(0,10);
+  balanceApiRequest = httpGetRequest(query.str());
+  json_spirit::mValue balanceJson;
+  auto success = json_spirit::read_string(balanceApiRequest, balanceJson);
+  if (success) {
+    try {
+      auto jsonResult = get_object_item(balanceJson, "result");
+      balance = jsonResult.get_str();
+    } catch (std::exception &e) {
+      std::cout << "Error when reading json for \"result\": " << e.what() << std::endl;
+      auto jsonResult = get_object_item(get_object_item(balanceJson,"error"), "message");
+      balance = jsonResult.get_str();
+      std::cout << "Json message: " << balance << std::endl;
+      return "ERROR";
+    }
+  } else {
+    std::cout << "Error reading json, check json value: " << balanceApiRequest << std::endl;
+  }
+  
   balance = convertWeiToFixedPoint(balance, 4);
 
   return balance;
@@ -502,16 +504,27 @@ TransactionSkeleton buildETHTransaction(
   query << "/api?module=proxy&action=eth_getTransactionCount&address=";
   query << signKey;
   query << "&tag=latest&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
-
   // Requesting a nonce from the API provider
-  std::string nonceRequest = httpGetRequest(query.str());
-  std::cout << nonceRequest << std::endl;
-  std::vector<std::string> jsonResult = getJSONValue(nonceRequest, "result");
-  jsonResult[0].pop_back();
-  jsonResult[0].erase(0,10);
-  std::stringstream nonceStrm;
-  nonceStrm << std::hex << jsonResult[0];
-  nonceStrm >> txNonce;
+  std::string nonceApiRequest = httpGetRequest(query.str());
+  json_spirit::mValue nonceJson;
+  
+  auto success = json_spirit::read_string(nonceApiRequest, nonceJson);
+  if (success) {
+    try {
+      auto jsonResult = get_object_item(nonceJson, "result");
+      std::stringstream nonceStrm;
+      nonceStrm << std::hex << jsonResult.get_str();
+      nonceStrm >> txNonce;
+    } catch (std::exception &e) {
+      std::cout << "Error when reading json for \"result\": " << e.what() << std::endl;
+      auto jsonResult = get_object_item(get_object_item(nonceJson,"error"), "message");
+      std::cout << "Json message: " << jsonResult.get_str() << std::endl;
+      txSkel.nonce = MAX_U256_VALUE();
+      return txSkel;
+    }
+  } else {
+    std::cout << "Error reading json, check json value: " << nonceApiRequest << std::endl;
+  }
 
   // Building the transaction structure
   txSkel.creation = false;
@@ -538,13 +551,26 @@ TransactionSkeleton buildTAEXTransaction(
   query << "&tag=latest&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
 
   // Requesting a nonce from the API provider
-  std::string nonceRequest = httpGetRequest(query.str());
-  std::vector<std::string> jsonResult = getJSONValue(nonceRequest, "result");
-  jsonResult[0].pop_back();
-  jsonResult[0].erase(0,10);
-  std::stringstream nonceStrm;
-  nonceStrm << std::hex << jsonResult[0];
-  nonceStrm >> txNonce;
+  std::string nonceApiRequest = httpGetRequest(query.str());
+
+  json_spirit::mValue nonceJson;
+  auto success = json_spirit::read_string(nonceApiRequest, nonceJson);
+  if (success) {
+    try {
+      auto jsonResult = get_object_item(nonceJson, "result");
+      std::stringstream nonceStrm;
+      nonceStrm << std::hex << jsonResult.get_str();
+      nonceStrm >> txNonce;
+    } catch (std::exception &e) {
+      std::cout << "Error when reading json for \"result\": " << e.what() << std::endl;
+      auto jsonResult = get_object_item(get_object_item(nonceJson,"error"), "message");
+      std::cout << "Json message: " << jsonResult.get_str() << std::endl;
+      txSkel.nonce = MAX_U256_VALUE();
+      return txSkel;
+    }
+  } else {
+    std::cout << "Error reading json, check json value: " << nonceApiRequest << std::endl;
+  }
 
   // Building the transaction structure
   txSkel.creation = false;
@@ -584,13 +610,25 @@ std::string sendTransaction(std::string txidHex) {
   txidquery << "/api?module=proxy&action=eth_sendRawTransaction&hex=";
   txidquery << txidHex;
   txidquery << "&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
-
-  std::string txid = httpGetRequest(txidquery.str());
-  std::vector<std::string> txidJsonResult = getJSONValue(txid, "result");
+  std::string tmptxid; 
   std::string transactionLink = "https://ropsten.etherscan.io/tx/";
-  std::string tmptxid = txidJsonResult[0];
-  tmptxid.pop_back();
-  tmptxid.erase(0,10);
+  
+  std::string txidApiRequest = httpGetRequest(txidquery.str());
+  json_spirit::mValue txidJson;
+  auto success = json_spirit::read_string(txidApiRequest, txidJson);
+  if (success) {
+    try {
+      auto jsonResult = get_object_item(txidJson, "result");
+      tmptxid = jsonResult.get_str();
+    } catch (std::exception &e) {
+      std::cout << "Error when reading json for \"result\": " << e.what() << std::endl;
+      auto jsonResult = get_object_item(get_object_item(txidJson,"error"), "message");
+      tmptxid = jsonResult.get_str();
+      std::cout << "Json message: " << tmptxid << std::endl;
+    }
+  } else {
+    std::cout << "Error reading json, check json value: " << txidApiRequest << std::endl;
+  }
   transactionLink += tmptxid;
 
   return transactionLink;
