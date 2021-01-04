@@ -603,7 +603,7 @@ std::string sendTransaction(std::string txidHex) {
 }
 
 void decodeRawTransaction(std::string rawTxHex) {
-  TransactionBase transaction = TransactionBase(inputData(rawTxHex));
+  TransactionBase transaction = TransactionBase(fromHex(rawTxHex), CheckTransaction::None);
   std::cout << "Transaction: " << transaction.sha3().hex() << std::endl;
   if (transaction.isCreation())
   {
