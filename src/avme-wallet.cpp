@@ -602,3 +602,38 @@ std::string sendTransaction(std::string txidHex) {
   return transactionLink;
 }
 
+void decodeRawTransaction(std::string rawTxHex) {
+  TransactionBase transaction = TransactionBase(InputData(rawTxHex));
+  std::cout << "Transaction: " << transaction.sha3().hex() << std::endl;
+  if (transaction.isCreation())
+  {
+    std::cout << "type: creation" << endl;
+    std::cout << "code: " << toHex(transaction.data()) << endl;
+  } else {
+    std::cout << "type: message" << endl;
+    std::cout << "to: " << transaction.to() << endl;
+    std::cout << "data: " << (transaction.data().empty() ? "none" : toHex(transaction.data())) << endl;
+  }
+  try {
+    auto s = transaction.sender();
+    if (transaction.isCreation())
+      std::cout << "creates: " << toAddress(s, transaction.nonce()) << endl;
+    std::cout << "from: " << s << endl;
+  }
+  catch (...)
+  {
+    std::cout << "from: <unsigned>" << endl;
+  }
+  std::cout << "value: " << formatBalance(transaction.value()) << " (" << transaction.value() << " wei)" << endl;
+  std::cout << "nonce: " << transaction.nonce() << endl;
+  std::cout << "gas: " << transaction.gas() << endl;
+  std::cout << "gas price: " << formatBalance(transaction.gasPrice()) << " (" << transaction.gasPrice() << " wei)" << endl;
+  std::cout << "signing hash: " << transaction.sha3(WithoutSignature).hex() << endl;
+  if (transaction.safeSender())
+  {
+    std::cout << "v: " << (int)transaction.signature().v << endl;
+    std::cout << "r: " << transaction.signature().r << endl;
+    std::cout << "s: " << transaction.signature().s << endl;
+  }
+}
+
