@@ -44,7 +44,7 @@ int main () {
   }
   std::getline(std::cin, menuOp);
 
-  if (menuOp == "1") {
+  if (menuOp == "1") { 
     walletPath = KeyManager::defaultPath();
     secretsPath = SecretStore::defaultPath();
     wallet = KeyManager(walletPath, secretsPath);
@@ -152,10 +152,22 @@ int main () {
                    "1 - Automatic (default)\n2 - Set my own" << std::endl;
       std::getline(std::cin, menuOp);
       if (menuOp == "1") {
-        txGas = "70000";
-        txGasPrice = "2500000000";
+        txGas = "21000";
+        txGasPrice = getNetworkTxFees();
       } else if (menuOp == "2") {
-        // TODO: set custom tax
+        std::cout << "Set tx Gas limit   recommended: 21000" << std::endl;
+        std::getline(std::cin, menuOp);
+        txGas = menuOp;
+        std::cout << "Set tx Gas Price (in GWEI)   recommended: 50" << std::endl;
+        std::getline(std::cin, menuOp);
+        std::stringstream strstrm;
+        u256 GasPrice;
+        strstrm << menuOp;
+        strstrm >> GasPrice;
+        GasPrice = GasPrice * raiseToPow(10,9);
+        std::stringstream strstrm2;
+        strstrm2 << GasPrice;
+        txGasPrice = strstrm2.str();
       }
       while (true) {
         std::cout << "Enter your account's passphrase." << std::endl;
@@ -209,10 +221,22 @@ int main () {
                    "1 - Automatic (default)\n2 - Set my own" << std::endl;
       std::getline(std::cin, menuOp);
       if (menuOp == "1") {
-        txGas = "70000";
-        txGasPrice = "2500000000";
+        txGas = "80000";
+        txGasPrice = getNetworkTxFees();
       } else if (menuOp == "2") {
-        // TODO: set custom tax
+        std::cout << "Set tx Gas limit   recommended: 80000" << std::endl;
+        std::getline(std::cin, menuOp);
+        txGas = menuOp;
+        std::cout << "Set tx Gas Price (in GWEI)   recommended: 50" << std::endl;
+        std::getline(std::cin, menuOp);
+        std::stringstream strstrm;
+        u256 GasPrice;
+        strstrm << menuOp;
+        strstrm >> GasPrice;
+        GasPrice = GasPrice * raiseToPow(10,9);
+        std::stringstream strstrm2;
+        strstrm2 << GasPrice;
+        txGasPrice = strstrm2.str();
       }
       while (true) {
         std::cout << "Enter your account's passphrase." << std::endl;

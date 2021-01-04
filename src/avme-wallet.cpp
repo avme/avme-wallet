@@ -11,7 +11,8 @@
 // u256 Max Value
 
 u256 MAX_U256_VALUE() {
-    return 2^256-1;
+    u256 maxvalue = (raiseToPow(2, 256) - 1);
+    return maxvalue;
 }
 
 // Get object and array item for JSON API calls.
@@ -667,5 +668,44 @@ void decodeRawTransaction(std::string rawTxHex) {
     std::cout << "r: " << transaction.signature().r << std::endl;
     std::cout << "s: " << transaction.signature().s << std::endl;
   }
+}
+
+
+// TODO 
+// Make the user choice between slow or faster fee
+// check https://ropsten.etherscan.io/api?module=gastracker&action=gasoracle&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ
+std::string getNetworkTxFees() {
+  std::string txGasPrice;
+  std::string txGasPriceGwei;
+  u256 txGasPriceu256;
+  std::stringstream txGasPriceQuery;
+  txGasPriceQuery << "/api?module=gastracker&action=gasoracle&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
+  
+  std::string txGasPriceRequest = httpGetRequest(txGasPriceQuery.str());
+  json_spirit::mValue txGasPriceJson;
+  auto success = json_spirit::read_string(txGasPriceRequest, txGasPriceJson);
+  if (success) {
+    try {
+      auto jsonResult = get_object_item(get_object_item(txGasPriceJson,"result"), "SafeGasPrice");
+      txGasPriceGwei = jsonResult.get_str();
+    } catch (std::exception &e) {
+      std::cout << "Error when reading json for SafeGasPrice: " << e.what() << std::endl;
+      auto jsonResult = get_object_item(get_object_item(txGasPriceJson,"error"), "message");
+      std::cout << "Json message: " << jsonResult.get_str() << std::endl;
+      std::cout << "Setting txGasPrice to default..." << std::endl;
+      txGasPriceGwei = "50";
+    }
+  } else {
+  std::cout << "Error reading json, check json value: " << txGasPriceRequest << std::endl;
+  }
+  std::stringstream strstrm;
+  strstrm << txGasPriceGwei;
+  strstrm >> txGasPriceu256;
+  txGasPriceu256 = txGasPriceu256 * raiseToPow(10, 9);
+  std::stringstream strstrm2;
+  strstrm2 << txGasPriceu256;
+  txGasPrice = strstrm2.str();
+  
+  return txGasPrice;
 }
 

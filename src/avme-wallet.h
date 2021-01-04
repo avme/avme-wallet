@@ -137,3 +137,5 @@ std::string sendTransaction(std::string txidHex);
 
 void decodeRawTransaction(std::string rawTxHex);
 
+std::string getNetworkTxFees();
+
