@@ -512,9 +512,6 @@ TransactionSkeleton buildETHTransaction(
   std::stringstream nonceStrm;
   nonceStrm << std::hex << jsonResult[0];
   nonceStrm >> txNonce;
-  if (txNonce == 0) {
-    ++txNonce;
-  }
 
   // Building the transaction structure
   txSkel.creation = false;
@@ -548,9 +545,6 @@ TransactionSkeleton buildTAEXTransaction(
   std::stringstream nonceStrm;
   nonceStrm << std::hex << jsonResult[0];
   nonceStrm >> txNonce;
-  if (txNonce == 0) {
-    ++txNonce;
-  }
 
   // Building the transaction structure
   txSkel.creation = false;
