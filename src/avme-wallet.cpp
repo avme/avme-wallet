@@ -607,33 +607,33 @@ void decodeRawTransaction(std::string rawTxHex) {
   std::cout << "Transaction: " << transaction.sha3().hex() << std::endl;
   if (transaction.isCreation())
   {
-    std::cout << "type: creation" << endl;
-    std::cout << "code: " << toHex(transaction.data()) << endl;
+    std::cout << "type: creation" << std::endl;
+    std::cout << "code: " << toHex(transaction.data()) << std::endl;
   } else {
-    std::cout << "type: message" << endl;
-    std::cout << "to: " << transaction.to() << endl;
-    std::cout << "data: " << (transaction.data().empty() ? "none" : toHex(transaction.data())) << endl;
+    std::cout << "type: message" << std::endl;
+    std::cout << "to: " << transaction.to() << std::endl;
+    std::cout << "data: " << (transaction.data().empty() ? "none" : toHex(transaction.data())) << std::endl;
   }
   try {
     auto s = transaction.sender();
     if (transaction.isCreation())
-      std::cout << "creates: " << toAddress(s, transaction.nonce()) << endl;
-    std::cout << "from: " << s << endl;
+      std::cout << "creates: " << toAddress(s, transaction.nonce()) << std::endl;
+    std::cout << "from: " << s << std::endl;
   }
   catch (...)
   {
-    std::cout << "from: <unsigned>" << endl;
+    std::cout << "from: <unsigned>" << std::endl;
   }
-  std::cout << "value: " << formatBalance(transaction.value()) << " (" << transaction.value() << " wei)" << endl;
-  std::cout << "nonce: " << transaction.nonce() << endl;
-  std::cout << "gas: " << transaction.gas() << endl;
-  std::cout << "gas price: " << formatBalance(transaction.gasPrice()) << " (" << transaction.gasPrice() << " wei)" << endl;
-  std::cout << "signing hash: " << transaction.sha3(WithoutSignature).hex() << endl;
+  std::cout << "value: " << formatBalance(transaction.value()) << " (" << transaction.value() << " wei)" << std::endl;
+  std::cout << "nonce: " << transaction.nonce() << std::endl;
+  std::cout << "gas: " << transaction.gas() << std::endl;
+  std::cout << "gas price: " << formatBalance(transaction.gasPrice()) << " (" << transaction.gasPrice() << " wei)" << std::endl;
+  std::cout << "signing hash: " << transaction.sha3(WithoutSignature).hex() << std::endl;
   if (transaction.safeSender())
   {
-    std::cout << "v: " << (int)transaction.signature().v << endl;
-    std::cout << "r: " << transaction.signature().r << endl;
-    std::cout << "s: " << transaction.signature().s << endl;
+    std::cout << "v: " << (int)transaction.signature().v << std::endl;
+    std::cout << "r: " << transaction.signature().r << std::endl;
+    std::cout << "s: " << transaction.signature().s << std::endl;
   }
 }
 
