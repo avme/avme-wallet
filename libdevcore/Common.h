@@ -112,6 +112,8 @@ using u160s = std::vector<u160>;
 using u256Set = std::set<u256>;
 using u160Set = std::set<u160>;
 
+u256 raiseToPow(u256 x, u256 power);
+
 // Map types.
 using StringMap = std::map<std::string, std::string>;
 using BytesMap = std::map<bytes, bytes>;

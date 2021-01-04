@@ -84,6 +84,18 @@ string inUnits(bigint const& _b, strings const& _units)
     return ret.str();
 }
 
+u256 raiseToPow(u256 x, u256 power)
+{
+    u256 result;
+    u256 i;
+    result = 1;
+    for (i=1; i<=power;i++)
+    {
+        result = result*x;
+    }
+    return(result);
+}
+
 /*
 The equivalent of setlocale(LC_ALL, “C”) is called before any user code is run.
 If the user has an invalid environment setting then it is possible for the call
