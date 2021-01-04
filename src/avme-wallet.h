@@ -127,3 +127,7 @@ std::string signTransaction(
 // Broadcast a signed transaction to the API provider.
 std::string sendTransaction(std::string txidHex);
 
+// Decode raw transaction and show information about the specified transaction
+
+void decodeRawTransaction(std::string rawTxHex);
+

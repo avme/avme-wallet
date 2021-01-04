@@ -512,9 +512,6 @@ TransactionSkeleton buildETHTransaction(
   std::stringstream nonceStrm;
   nonceStrm << std::hex << jsonResult[0];
   nonceStrm >> txNonce;
-  if (txNonce == 0) {
-    ++txNonce;
-  }
 
   // Building the transaction structure
   txSkel.creation = false;
@@ -548,9 +545,6 @@ TransactionSkeleton buildTAEXTransaction(
   std::stringstream nonceStrm;
   nonceStrm << std::hex << jsonResult[0];
   nonceStrm >> txNonce;
-  if (txNonce == 0) {
-    ++txNonce;
-  }
 
   // Building the transaction structure
   txSkel.creation = false;
@@ -600,5 +594,40 @@ std::string sendTransaction(std::string txidHex) {
   transactionLink += tmptxid;
 
   return transactionLink;
+}
+
+void decodeRawTransaction(std::string rawTxHex) {
+  TransactionBase transaction = TransactionBase(fromHex(rawTxHex), CheckTransaction::None);
+  std::cout << "Transaction: " << transaction.sha3().hex() << std::endl;
+  if (transaction.isCreation())
+  {
+    std::cout << "type: creation" << std::endl;
+    std::cout << "code: " << toHex(transaction.data()) << std::endl;
+  } else {
+    std::cout << "type: message" << std::endl;
+    std::cout << "to: " << transaction.to() << std::endl;
+    std::cout << "data: " << (transaction.data().empty() ? "none" : toHex(transaction.data())) << std::endl;
+  }
+  try {
+    auto s = transaction.sender();
+    if (transaction.isCreation())
+      std::cout << "creates: " << toAddress(s, transaction.nonce()) << std::endl;
+    std::cout << "from: " << s << std::endl;
+  }
+  catch (...)
+  {
+    std::cout << "from: <unsigned>" << std::endl;
+  }
+  std::cout << "value: " << formatBalance(transaction.value()) << " (" << transaction.value() << " wei)" << std::endl;
+  std::cout << "nonce: " << transaction.nonce() << std::endl;
+  std::cout << "gas: " << transaction.gas() << std::endl;
+  std::cout << "gas price: " << formatBalance(transaction.gasPrice()) << " (" << transaction.gasPrice() << " wei)" << std::endl;
+  std::cout << "signing hash: " << transaction.sha3(WithoutSignature).hex() << std::endl;
+  if (transaction.safeSender())
+  {
+    std::cout << "v: " << (int)transaction.signature().v << std::endl;
+    std::cout << "r: " << transaction.signature().r << std::endl;
+    std::cout << "s: " << transaction.signature().s << std::endl;
+  }
 }
 

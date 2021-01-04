@@ -104,7 +104,8 @@ int main () {
       "5 - Create a new account\n" <<
       "6 - Erase account\n" <<
       "7 - Create private key from Word/Phrase\n" <<
-      "8 - Exit" << std::endl;
+      "8 - Decode raw transaction\n" <<
+      "9 - Exit" << std::endl;
     std::getline(std::cin, menuOp);
 
     // List accounts
@@ -295,6 +296,11 @@ int main () {
 
     // Exit
     } else if (menuOp == "8") {
+      std::string rawTxHex;
+      std::cout << "Please input the raw transaction in Hex." << std::endl;
+      std::getline(std::cin, rawTxHex);
+      decodeRawTransaction(rawTxHex);
+    } else if (menuOp == "9") {
       std::cout << "Exiting..." << std::endl;
       exit(0);
 
