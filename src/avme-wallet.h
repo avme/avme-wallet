@@ -29,12 +29,18 @@
 #include <libethcore/KeyManager.h>
 #include <libethcore/TransactionBase.h>
 
+#include <json_spirit/JsonSpiritHeaders.h>
 using namespace dev;
 using namespace dev::eth;
 using namespace boost::algorithm;
 using namespace boost::filesystem;
 
 class BadArgument: public Exception {};
+
+
+// Set MAX_U256_VALUE for error handling
+
+u256 MAX_U256_VALUE();
 
 // Load a wallet.
 bool loadWallet(KeyManager wallet, std::string walletPass);
