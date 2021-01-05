@@ -721,10 +721,10 @@ std::string getNetworkTxFees() {
   std::stringstream strstrm;
   strstrm << txGasPriceGwei;
   strstrm >> txGasPriceu256;
-  txGasPriceu256 = txGasPriceu256 * raiseToPow(10, 9);
+  txGasPriceu256 = boost::lexical_cast<u256>(txGasPriceGwei) * raiseToPow(10, 9);
   std::stringstream strstrm2;
   strstrm2 << txGasPriceu256;
-  txGasPrice = strstrm2.str();
+  txGasPrice = boost::lexical_cast<std::string>(txGasPriceu256);
   
   return txGasPrice;
 }
