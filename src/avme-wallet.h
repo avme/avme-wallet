@@ -21,6 +21,7 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/thread.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <libdevcore/CommonIO.h>
 #include <libdevcore/FileSystem.h>
@@ -138,4 +139,3 @@ std::string sendTransaction(std::string txidHex);
 void decodeRawTransaction(std::string rawTxHex);
 
 std::string getNetworkTxFees();
-

@@ -161,17 +161,20 @@ int main () {
       } else if (menuOp == "2") {
         std::cout << "Set tx Gas limit   recommended: 21000" << std::endl;
         std::getline(std::cin, menuOp);
+		if(!is_digits(menuOp)) {
+		  std::cout << "Wrong input, please check your input" << std::endl;
+		  continue;
+		}
         txGas = menuOp;
         std::cout << "Set tx Gas Price (in GWEI)   recommended: 50" << std::endl;
         std::getline(std::cin, menuOp);
-        std::stringstream strstrm;
+		if(!is_digits(menuOp)) {
+		  std::cout << "Wrong input, please check your input" << std::endl;
+		  continue;
+		}
         u256 GasPrice;
-        strstrm << menuOp;
-        strstrm >> GasPrice;
-        GasPrice = GasPrice * raiseToPow(10,9);
-        std::stringstream strstrm2;
-        strstrm2 << GasPrice;
-        txGasPrice = strstrm2.str();
+        GasPrice = boost::lexical_cast<u256>(menuOp) * raiseToPow(10,9);
+        txGasPrice = boost::lexical_cast<std::string>(GasPrice);
       }
       while (true) {
         std::cout << "Enter your account's passphrase." << std::endl;
@@ -232,19 +235,22 @@ int main () {
         txGas = "80000";
         txGasPrice = getNetworkTxFees();
       } else if (menuOp == "2") {
-        std::cout << "Set tx Gas limit   recommended: 80000" << std::endl;
+        std::cout << "Set tx Gas limit   recommended: 21000" << std::endl;
         std::getline(std::cin, menuOp);
+		if(!is_digits(menuOp)) {
+		  std::cout << "Wrong input, please check your input" << std::endl;
+		  continue;
+		}
         txGas = menuOp;
         std::cout << "Set tx Gas Price (in GWEI)   recommended: 50" << std::endl;
         std::getline(std::cin, menuOp);
-        std::stringstream strstrm;
+		if(!is_digits(menuOp)) {
+		  std::cout << "Wrong input, please check your input" << std::endl;
+		  continue;
+		}
         u256 GasPrice;
-        strstrm << menuOp;
-        strstrm >> GasPrice;
-        GasPrice = GasPrice * raiseToPow(10,9);
-        std::stringstream strstrm2;
-        strstrm2 << GasPrice;
-        txGasPrice = strstrm2.str();
+        GasPrice = boost::lexical_cast<u256>(menuOp) * raiseToPow(10,9);
+        txGasPrice = boost::lexical_cast<std::string>(GasPrice);
       }
       while (true) {
         std::cout << "Enter your account's passphrase." << std::endl;
