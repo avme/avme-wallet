@@ -96,6 +96,11 @@ u256 raiseToPow(u256 x, u256 power)
     return(result);
 }
 
+bool is_digits(const std::string &str)
+{
+    return std::all_of(str.begin(), str.end(), std::isdigit);
+}
+
 /*
 The equivalent of setlocale(LC_ALL, “C”) is called before any user code is run.
 If the user has an invalid environment setting then it is possible for the call
