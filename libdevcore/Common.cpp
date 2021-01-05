@@ -98,7 +98,7 @@ u256 raiseToPow(u256 x, u256 power)
 
 bool is_digits(const std::string &str)
 {
-    return std::all_of(str.begin(), str.end(), std::isdigit);
+    return std::all_of(str.begin(), str.end(), ::isdigit);
 }
 
 /*
