@@ -281,26 +281,46 @@ std::string convertWeiToFixedPoint(std::string amount, size_t digits) {
 /**
  * Convert a fixed point amount of ETH to a full amount in Wei.
  * Likewise, we also need to convert user-provided fixed point values
- * back to the original 18-digit Wei amount to create transactions.
+ * back to the original 18-decimals Wei amount to create transactions.
  */
-std::string convertFixedPointToWei(std::string amount, int digits) {
-  double amountValue = 0;
+std::string convertFixedPointToWei(std::string amount, int decimals) {
+  std::string digitPadding = "";
+  std::string valuestr = "";
+  // Check if input is valid
+  for (auto &c : amount)
+    if (!std::isdigit(c) && c != '.')
+      return "";
 
-  std::stringstream ssi;
-  ssi.precision(digits);
-  ssi << std::fixed << amount;
-  ssi >> amountValue;
-
-  std::stringstream ss;
-  ss.precision(digits);
-  ss << std::fixed << amountValue;
-
-  std::string valuestr = ss.str();
-
-  valuestr.erase(std::remove(valuestr.begin(), valuestr.end(), '.'), valuestr.end());
-  while (valuestr[0] == '0') {
-    valuestr.erase(0,1);
+  // Read value from input string
+  size_t index = 0;
+  while (index < amount.size() && amount[index] != '.') {
+    valuestr += amount[index];
+    ++index;
   }
+  
+  // Jump fixed point.
+  ++index;
+  
+  // Check if fixed point exists 
+  if (amount[index-1] == '.' && (amount.size() - (index)) > decimals)
+    return "";
+  
+  // check if the precision of input match digit precision
+  if(index < amount.size()) {
+    // Read precision point into digitPadding
+    while (index < amount.size()) {
+      digitPadding += amount[index];
+      ++index;
+    }  
+  }
+  
+  // Create padding if missing decimals are found
+  while(digitPadding.size() < decimals)
+    digitPadding += '0';
+
+  valuestr += digitPadding;
+  while(valuestr[0] == '0')
+    valuestr.erase(0,1);
 
   return valuestr;
 }
