@@ -491,13 +491,10 @@ std::string buildTXData(std::string txValue, std::string destWallet) {
   txdata += destWallet;
 
   // Convert to HEX
-  u256 intValue;
+  u256 intValue = boost::lexical_cast<u256>(intValue);
   std::stringstream ss;
-  ss << txValue;
-  ss >> intValue;
-  std::stringstream ssi;
-  ssi << std::hex << intValue;
-  std::string amountStrHex = ssi.str();
+  ss << std::hex << intValue;
+  std::string amountStrHex = ss.str();
 
   for (auto& c : amountStrHex) {
     if (std::isupper(c)) {
@@ -718,12 +715,7 @@ std::string getNetworkTxFees() {
   } else {
   std::cout << "Error reading json, check json value: " << txGasPriceRequest << std::endl;
   }
-  std::stringstream strstrm;
-  strstrm << txGasPriceGwei;
-  strstrm >> txGasPriceu256;
   txGasPriceu256 = boost::lexical_cast<u256>(txGasPriceGwei) * raiseToPow(10, 9);
-  std::stringstream strstrm2;
-  strstrm2 << txGasPriceu256;
   txGasPrice = boost::lexical_cast<std::string>(txGasPriceu256);
   
   return txGasPrice;
