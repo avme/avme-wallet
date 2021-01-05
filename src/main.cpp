@@ -148,10 +148,10 @@ int main () {
       std::cout << "How much ETH will you send? (value in fixed point, e.g. 0.5)" << std::endl;
       std::getline(std::cin, txValue);
       txValue = convertFixedPointToWei(txValue, 18);
-	  if (txValue == "") {
-	    std::cout << "Invalid input, did you typed correctly?" << std::endl;
-	    continue;
-	  }
+      if (txValue == "") {
+        std::cout << "Invalid input, did you typed correctly?" << std::endl;
+        continue;
+      }
       std::cout << "Do you want to set your own fee or use an automatic fee?\n" <<
                    "1 - Automatic (default)\n2 - Set my own" << std::endl;
       std::getline(std::cin, menuOp);
@@ -221,10 +221,10 @@ int main () {
       std::cout << "How much TAEX will you send? (value in fixed point, e.g. 0.5 - MAXIMUM 4 DECIMALS!)" << std::endl;
       std::getline(std::cin, txValue);
       txValue = convertFixedPointToWei(txValue, 4);
-	  if (txValue == "") {
-	    std::cout << "Invalid input, did you typed correctly?" << std::endl;
-	    continue;
-	  }
+      if (txValue == "") {
+        std::cout << "Invalid input, did you typed correctly?" << std::endl;
+        continue;
+      }
       std::cout << "Do you want to set your own fee or use an automatic fee?\n" <<
                    "1 - Automatic (default)\n2 - Set my own" << std::endl;
       std::getline(std::cin, menuOp);
