@@ -44,7 +44,7 @@ int main () {
   }
   std::getline(std::cin, menuOp);
 
-  if (menuOp == "1") {
+  if (menuOp == "1") { 
     walletPath = KeyManager::defaultPath();
     secretsPath = SecretStore::defaultPath();
     wallet = KeyManager(walletPath, secretsPath);
@@ -148,14 +148,33 @@ int main () {
       std::cout << "How much ETH will you send? (value in fixed point, e.g. 0.5)" << std::endl;
       std::getline(std::cin, txValue);
       txValue = convertFixedPointToWei(txValue, 18);
+      if (txValue == "") {
+        std::cout << "Invalid input, did you typed correctly?" << std::endl;
+        continue;
+      }
       std::cout << "Do you want to set your own fee or use an automatic fee?\n" <<
                    "1 - Automatic (default)\n2 - Set my own" << std::endl;
       std::getline(std::cin, menuOp);
       if (menuOp == "1") {
-        txGas = "70000";
-        txGasPrice = "2500000000";
+        txGas = "21000";
+        txGasPrice = getNetworkTxFees();
       } else if (menuOp == "2") {
-        // TODO: set custom tax
+        std::cout << "Set tx Gas limit   recommended: 21000" << std::endl;
+        std::getline(std::cin, menuOp);
+        if(!is_digits(menuOp)) {
+          std::cout << "Wrong input, please check your input" << std::endl;
+          continue;
+        }
+        txGas = menuOp;
+        std::cout << "Set tx Gas Price (in GWEI)   recommended: 50" << std::endl;
+        std::getline(std::cin, menuOp);
+        if(!is_digits(menuOp)) {
+          std::cout << "Wrong input, please check your input" << std::endl;
+          continue;
+        }
+        u256 GasPrice;
+        GasPrice = boost::lexical_cast<u256>(menuOp) * raiseToPow(10,9);
+        txGasPrice = boost::lexical_cast<std::string>(GasPrice);
       }
       while (true) {
         std::cout << "Enter your account's passphrase." << std::endl;
@@ -205,14 +224,33 @@ int main () {
       std::cout << "How much TAEX will you send? (value in fixed point, e.g. 0.5 - MAXIMUM 4 DECIMALS!)" << std::endl;
       std::getline(std::cin, txValue);
       txValue = convertFixedPointToWei(txValue, 4);
+      if (txValue == "") {
+        std::cout << "Invalid input, did you typed correctly?" << std::endl;
+        continue;
+      }
       std::cout << "Do you want to set your own fee or use an automatic fee?\n" <<
                    "1 - Automatic (default)\n2 - Set my own" << std::endl;
       std::getline(std::cin, menuOp);
       if (menuOp == "1") {
-        txGas = "70000";
-        txGasPrice = "2500000000";
+        txGas = "80000";
+        txGasPrice = getNetworkTxFees();
       } else if (menuOp == "2") {
-        // TODO: set custom tax
+        std::cout << "Set tx Gas limit   recommended: 21000" << std::endl;
+        std::getline(std::cin, menuOp);
+        if(!is_digits(menuOp)) {
+          std::cout << "Wrong input, please check your input" << std::endl;
+          continue;
+        }
+        txGas = menuOp;
+        std::cout << "Set tx Gas Price (in GWEI)   recommended: 50" << std::endl;
+        std::getline(std::cin, menuOp);
+        if(!is_digits(menuOp)) {
+          std::cout << "Wrong input, please check your input" << std::endl;
+          continue;
+        }
+        u256 GasPrice;
+        GasPrice = boost::lexical_cast<u256>(menuOp) * raiseToPow(10,9);
+        txGasPrice = boost::lexical_cast<std::string>(GasPrice);
       }
       while (true) {
         std::cout << "Enter your account's passphrase." << std::endl;
