@@ -161,17 +161,17 @@ int main () {
       } else if (menuOp == "2") {
         std::cout << "Set tx Gas limit   recommended: 21000" << std::endl;
         std::getline(std::cin, menuOp);
-		if(!is_digits(menuOp)) {
-		  std::cout << "Wrong input, please check your input" << std::endl;
-		  continue;
-		}
+        if(!is_digits(menuOp)) {
+          std::cout << "Wrong input, please check your input" << std::endl;
+          continue;
+        }
         txGas = menuOp;
         std::cout << "Set tx Gas Price (in GWEI)   recommended: 50" << std::endl;
         std::getline(std::cin, menuOp);
-		if(!is_digits(menuOp)) {
-		  std::cout << "Wrong input, please check your input" << std::endl;
-		  continue;
-		}
+        if(!is_digits(menuOp)) {
+          std::cout << "Wrong input, please check your input" << std::endl;
+          continue;
+        }
         u256 GasPrice;
         GasPrice = boost::lexical_cast<u256>(menuOp) * raiseToPow(10,9);
         txGasPrice = boost::lexical_cast<std::string>(GasPrice);
@@ -237,17 +237,17 @@ int main () {
       } else if (menuOp == "2") {
         std::cout << "Set tx Gas limit   recommended: 21000" << std::endl;
         std::getline(std::cin, menuOp);
-		if(!is_digits(menuOp)) {
-		  std::cout << "Wrong input, please check your input" << std::endl;
-		  continue;
-		}
+        if(!is_digits(menuOp)) {
+          std::cout << "Wrong input, please check your input" << std::endl;
+          continue;
+        }
         txGas = menuOp;
         std::cout << "Set tx Gas Price (in GWEI)   recommended: 50" << std::endl;
         std::getline(std::cin, menuOp);
-		if(!is_digits(menuOp)) {
-		  std::cout << "Wrong input, please check your input" << std::endl;
-		  continue;
-		}
+        if(!is_digits(menuOp)) {
+          std::cout << "Wrong input, please check your input" << std::endl;
+          continue;
+        }
         u256 GasPrice;
         GasPrice = boost::lexical_cast<u256>(menuOp) * raiseToPow(10,9);
         txGasPrice = boost::lexical_cast<std::string>(GasPrice);
