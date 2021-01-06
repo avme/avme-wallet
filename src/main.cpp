@@ -111,8 +111,8 @@ int main () {
     if (menuOp == "1") {
       std::vector<std::string> ETHAccounts = wm.listETHAccounts();
       if (!ETHAccounts.empty()) {
-        for (auto account : ETHAccounts) {
-          std::cout << account << std::endl;
+        for (std::string accountData : ETHAccounts) {
+          std::cout << accountData << std::endl;
         }
       } else {
         std::cout << "No accounts found." << std::endl;
@@ -120,8 +120,8 @@ int main () {
     } else if (menuOp == "2") {
       std::vector<std::string> TAEXAccounts = wm.listTAEXAccounts();
       if (!TAEXAccounts.empty()) {
-        for (auto account : TAEXAccounts) {
-          std::cout << account << std::endl;
+        for (std::string accountData : TAEXAccounts) {
+          std::cout << accountData << std::endl;
         }
       } else {
         std::cout << "No accounts found." << std::endl;
@@ -176,12 +176,13 @@ int main () {
         txGasPrice = boost::lexical_cast<std::string>(GasPrice);
       }
       while (true) {
-        std::cout << "Enter your account's passphrase." << std::endl;
+        // TODO: fix passphrase logic (should be the account's pass, not the wallet's)
+        std::cout << "Enter your wallet's passphrase." << std::endl;
         std::getline(std::cin, pass);
         std::cout << "Please confirm the passphrase by entering it again." << std::endl;
         std::getline(std::cin, passConf);
-        if (pass == passConf) { break; }
-        std::cout << "Passwords were different. Try again." << std::endl;
+        if (pass == passConf && pass == walletPass) { break; }
+        std::cout << "Passphrases were different or don't match the wallet's. Try again." << std::endl;
       }
 
       std::cout << "Building transaction..." << std::endl;
@@ -252,12 +253,13 @@ int main () {
         txGasPrice = boost::lexical_cast<std::string>(GasPrice);
       }
       while (true) {
-        std::cout << "Enter your account's passphrase." << std::endl;
+        // TODO: fix passphrase logic (should be the account's pass, not the wallet's)
+        std::cout << "Enter your wallet's passphrase." << std::endl;
         std::getline(std::cin, pass);
         std::cout << "Please confirm the passphrase by entering it again." << std::endl;
         std::getline(std::cin, passConf);
-        if (pass == passConf) { break; }
-        std::cout << "Passwords were different. Try again." << std::endl;
+        if (pass == passConf && pass == walletPass) { break; }
+        std::cout << "Passphrases were different or don't match the wallet's. Try again." << std::endl;
       }
 
       std::cout << "Building transaction..." << std::endl;
@@ -306,7 +308,7 @@ int main () {
           }
           break;
         }
-        std::cout << "Passwords were different. Try again." << std::endl;
+        std::cout << "Passphrases were different. Try again." << std::endl;
       }
       std::cout << "Creating a new account..." << std::endl;
       std::vector<std::string> data = wm.createNewAccount(name, aPass, aPassHint, usesMasterPass);
@@ -318,26 +320,37 @@ int main () {
       wm.loadWallet(walletPath, secretsPath, walletPass);
 
     // Erase account
-    // TODO: erase by account name (when the display gets fixed),
-    // maybe ask for passphrase too
+    // TODO: erase by account name
     } else if (menuOp == "6") {
       std::string account;
-      std::cout << "Please inform the account that you want to delete (no going back from here!)." << std::endl;
+      std::string pass;
+      std::string passConf;
+
+      std::cout << "Please inform the account that you want to delete." << std::endl;
       std::getline(std::cin, account);
+      while (true) {
+        // TODO: fix passphrase logic (should be the account's pass, not the wallet's)
+        std::cout << "Enter your wallet's passphrase." << std::endl;
+        std::getline(std::cin, pass);
+        std::cout << "Please confirm the passphrase by entering it again." << std::endl;
+        std::getline(std::cin, passConf);
+        if (pass == passConf && pass == walletPass) { break; }
+        std::cout << "Passphrases were different or don't match the wallet's. Try again." << std::endl;
+      }
       std::cout << "Erasing account..." << std::endl;
       if (wm.eraseAccount(account)) {
         std::cout << "Account erased: " << account << std::endl;
         std::cout << "Reloading wallet..." << std::endl;
         wm.loadWallet(walletPath, secretsPath, walletPass);
       } else {
-        std::cout << "Couldn't erase account" << account
+        std::cout << "Couldn't erase account " << account
                   << "; either it doesn't exist or has funds in it." << std::endl;
       }
 
     // Create private key
     } else if (menuOp == "7") {
       std::string phrase;
-      std::cout << "Please input the passphrase for the wallet." << std::endl;
+      std::cout << "Enter your wallet's passphrase." << std::endl;
       std::getline(std::cin, phrase);
       std::cout << "Creating a key pair..." << std::endl;
       wm.createKeyPairFromPhrase(phrase);

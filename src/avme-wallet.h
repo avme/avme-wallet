@@ -80,6 +80,9 @@ class WalletManager {
     // Erase an Account from the wallet.
     bool eraseAccount(std::string account);
 
+    // Check if an account is completely empty.
+    bool accountIsEmpty(std::string account);
+
     // Select the appropriate address stored in KeyManager from user input string.
     Address userToAddress(std::string const& input);
 

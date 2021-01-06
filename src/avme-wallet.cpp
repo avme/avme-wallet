@@ -100,14 +100,48 @@ void WalletManager::createKeyPairFromPhrase(std::string phrase) {
 }
 
 // Erase an Account from the wallet.
-// TODO: prevent erasing account if there are any funds in it
 bool WalletManager::eraseAccount(std::string account) {
   if (Address a = userToAddress(account)) {
-    this->wallet.kill(a);
-    return true;
-  } else {
-    return false; // Account was not found
+    if (accountIsEmpty(account)) {
+      this->wallet.kill(a);
+      return true;
+    }
   }
+  return false; // Account was either not found or has funds in it
+}
+
+// Check if an account is completely empty.
+bool WalletManager::accountIsEmpty(std::string account) {
+  std::string requestETH = Network::getETHBalance(account);
+  std::string requestTAEX = Network::getTAEXBalance(account);
+  json_spirit::mValue jsonETH;
+  json_spirit::mValue jsonTAEX;
+  std::string amountETH;
+  std::string amountTAEX;
+
+  // TODO: maybe turn this into a generic JSON checking function
+  auto successETH = json_spirit::read_string(requestETH, jsonETH);
+  auto successTAEX = json_spirit::read_string(requestTAEX, jsonTAEX);
+  if (successETH && successTAEX) {
+    try {
+      auto jsonResultETH = get_object_item(jsonETH, "result");
+      auto jsonResultTAEX = get_object_item(jsonTAEX, "result");
+      amountETH = jsonResultETH.get_str();
+      amountTAEX = jsonResultTAEX.get_str();
+    } catch (std::exception &e) {
+      std::cout << "Error when reading json for \"result\": " << e.what() << std::endl;
+      auto jsonResultETH = get_object_item(get_object_item(jsonETH,"error"), "message");
+      auto jsonResultTAEX = get_object_item(get_object_item(jsonTAEX,"error"), "message");
+      amountETH = jsonResultETH.get_str();
+      amountTAEX = jsonResultTAEX.get_str();
+      std::cout << "Json message: " << amountETH << std::endl << amountTAEX << std::endl;
+      return false;
+    }
+  } else {
+    std::cout << "Error reading json, check json value: " << requestETH << std::endl << requestTAEX << std::endl;
+  }
+
+  return (amountETH == "0" && amountTAEX == "0");
 }
 
 // Select the appropriate address stored in KeyManager from user input string.
@@ -234,7 +268,7 @@ std::string WalletManager::convertFixedPointToWei(std::string amount, int decima
 }
 
 // List the wallet's ETH accounts and their amounts.
-// TODO: make this return a proper structure with the data
+// TODO: make the data be a proper structure instead of a big string
 std::vector<std::string> WalletManager::listETHAccounts() {
   if (this->wallet.store().keys().empty()) { return {}; }
 
@@ -298,6 +332,7 @@ std::vector<std::string> WalletManager::listETHAccounts() {
  * ERC-20 tokens need to be loaded in a different way, from their proper
  * contract address, beside their respective wallet address.
  */
+// TODO: make the data be a proper structure instead of a big string
 std::vector<std::string> WalletManager::listTAEXAccounts() {
   if (this->wallet.store().keys().empty()) { return {}; }
 
