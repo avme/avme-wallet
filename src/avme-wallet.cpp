@@ -7,48 +7,54 @@
 
 #include "avme-wallet.h"
 
-
-// u256 Max Value
-
-u256 MAX_U256_VALUE() {
-    u256 maxvalue = (raiseToPow(2, 256) - 1);
-    return maxvalue;
-}
-
-// Get object and array item for JSON API calls.
-
-const json_spirit::mValue get_object_item(const json_spirit::mValue element, const std::string name)
-{
+// Get object item from a JSON element.
+const json_spirit::mValue WalletManager::get_object_item(
+  const json_spirit::mValue element, const std::string name
+) {
   return element.get_obj().at(name);
 }
 
-const json_spirit::mValue get_array_item(const json_spirit::mValue element, size_t index)
-{
+// Get array item from a JSON element.
+const json_spirit::mValue WalletManager::get_array_item(
+  const json_spirit::mValue element, size_t index
+) {
   return element.get_array().at(index);
 }
 
-// Load a wallet.
-bool loadWallet(KeyManager wallet, std::string walletPass) {
-  return wallet.load(walletPass);
+// Set MAX_U256_VALUE for error handling.
+u256 WalletManager::MAX_U256_VALUE() {
+  return (raiseToPow(2, 256) - 1);
+}
+
+// Load and authenticate a wallet from the given paths.
+bool WalletManager::loadWallet(path walletPath, path secretsPath, std::string walletPass) {
+  KeyManager w(walletPath, secretsPath);
+  if (w.load(walletPass)) {
+    this->wallet = w;
+    return true;
+  } else {
+    return false;
+  }
 }
 
 /**
  * Load the SecretStore (an object inside KeyManager that contains all secrets
  * for the addresses stored in it).
  */
-SecretStore& secretStore(KeyManager wallet) {
-  return wallet.store();
+SecretStore& WalletManager::secretStore() {
+  return this->wallet.store();
 }
 
-// Create a new wallet.
-KeyManager createNewWallet(path walletPath, path secretsPath, std::string walletPass) {
-  dev::eth::KeyManager wallet(walletPath, secretsPath);
+// Create a new wallet, which should be loaded manually afterwards.
+bool WalletManager::createNewWallet(path walletPath, path secretsPath, std::string walletPass) {
+  KeyManager w(walletPath, secretsPath);
   try {
-    wallet.create(walletPass);
+    w.create(walletPass);
+    return true;
   } catch (Exception const& _e) {
     std::cerr << "Unable to create wallet" << std::endl << boost::diagnostic_information(_e);
+    return false;
   }
-  return wallet;
 }
 
 /**
@@ -56,23 +62,24 @@ KeyManager createNewWallet(path walletPath, path secretsPath, std::string wallet
  * An Account contains an ETH address and other stuff.
  * See https://ethereum.org/en/developers/docs/accounts/ for more info.
  */
-std::string createNewAccount(
-  KeyManager wallet, std::string name, std::string pass, std::string hint, bool usesMasterPass
+std::vector<std::string> WalletManager::createNewAccount(
+  std::string name, std::string pass, std::string hint, bool usesMasterPass
 ) {
   auto k = makeKey();
-  h128 u = wallet.import(k.secret(), name, pass, hint);
-  std::stringstream ret;
+  h128 u = this->wallet.import(k.secret(), name, pass, hint);
+  std::vector<std::string> ret;
 
-  ret << "Created key " << toUUID(u) << std::endl
-      << "  Name: " << name << std::endl
-      << "  Address: " << k.address().hex() << std::endl;
+  // In this order: ID, name, address and hint
+  ret.push_back(toUUID(u));
+  ret.push_back(name);
+  ret.push_back(k.address().hex());
   if (usesMasterPass) {
-    ret << "  Uses master passphrase" << std::endl;
+    ret.push_back("Uses master passphrase");
   } else {
-    ret << "  Passphrase hint: " << hint << std::endl;
+    ret.push_back(hint);
   }
 
-  return ret.str();
+  return ret;
 }
 
 /**
@@ -80,7 +87,7 @@ std::string createNewAccount(
  * It's easier to hash since hashing creates the 256-bit variable used by
  * the private key.
  */
-void createKeyPairFromPhrase(std::string phrase) {
+void WalletManager::createKeyPairFromPhrase(std::string phrase) {
   std::string shahash = dev::sha3(phrase, false);
   for (auto i = 0; i < 1048577; ++i) {
     shahash = dev::sha3(shahash, false);
@@ -93,9 +100,10 @@ void createKeyPairFromPhrase(std::string phrase) {
 }
 
 // Erase an Account from the wallet.
-bool eraseAccount(KeyManager wallet, std::string account) {
-  if (Address a = userToAddress(account, wallet)) {
-    wallet.kill(a);
+// TODO: prevent erasing account if there are any funds in it
+bool WalletManager::eraseAccount(std::string account) {
+  if (Address a = userToAddress(account)) {
+    this->wallet.kill(a);
     return true;
   } else {
     return false; // Account was not found
@@ -103,31 +111,31 @@ bool eraseAccount(KeyManager wallet, std::string account) {
 }
 
 // Select the appropriate address stored in KeyManager from user input string.
-Address userToAddress(std::string const& input, KeyManager wallet) {
-  if (h128 u = fromUUID(input)) { return wallet.address(u); }
+Address WalletManager::userToAddress(std::string const& input) {
+  if (h128 u = fromUUID(input)) { return this->wallet.address(u); }
   DEV_IGNORE_EXCEPTIONS(return toAddress(input));
-  for (Address const& a: wallet.accounts()) {
-    if (wallet.accountName(a) == input) { return a; }
+  for (Address const& a: this->wallet.accounts()) {
+    if (this->wallet.accountName(a) == input) { return a; }
   }
   return Address();
 }
 
-// Load the secret key for a designed address from the KeyManager wallet.
-Secret getSecret(KeyManager wallet, std::string const& signKey, std::string pass) {
+// Load the secret key for a given address in the wallet.
+Secret WalletManager::getSecret(std::string const& signKey, std::string pass) {
   std::string json = contentsString(signKey);
   if (!json.empty()) {
-    return Secret(secretStore(wallet).secret(secretStore(wallet).readKeyContent(json), [&](){ return pass; }));
+    return Secret(secretStore().secret(secretStore().readKeyContent(json), [&](){ return pass; }));
   } else {
     if (h128 u = fromUUID(signKey)) {
-      return Secret(secretStore(wallet).secret(u, [&](){ return pass; }));
+      return Secret(secretStore().secret(u, [&](){ return pass; }));
     }
 
     Address a;
     try {
       a = toAddress(signKey);
     } catch (...) {
-      for (Address const& aa: wallet.accounts()) {
-        if (wallet.accountName(aa) == signKey) {
+      for (Address const& aa: this->wallet.accounts()) {
+        if (this->wallet.accountName(aa) == signKey) {
           a = aa;
           break;
         }
@@ -135,7 +143,7 @@ Secret getSecret(KeyManager wallet, std::string const& signKey, std::string pass
     }
 
     if (a) {
-      return wallet.secret(a, [&](){ return pass; });
+      return this->wallet.secret(a, [&](){ return pass; });
     } else {
       std::cerr << "Bad file, UUID or address: " << signKey << std::endl;
       exit(-1);
@@ -144,110 +152,10 @@ Secret getSecret(KeyManager wallet, std::string const& signKey, std::string pass
 }
 
 // Create a key from a random string of characters. Check FixedHash.h for more info.
-KeyPair makeKey() {
+KeyPair WalletManager::makeKey() {
   KeyPair k(Secret::random());
   k = KeyPair(Secret(sha3(k.secret().ref())));
   return k;
-}
-
-/**
- * Send an HTTP GET Request to the blockchain API provider for everything
- * related to transactions and balances. Currently using Etherscan.
- */
-std::string httpGetRequest(std::string httpquery) {
-  using boost::asio::ip::tcp;
-  std::string server_answer;
-
-  try {
-    boost::asio::io_service io_service;
-    std::string ipAddress = "api-ropsten.etherscan.io"; // IP address or hostname
-    std::string portNum = "80"; // "8000" for instance
-    std::string hostAddress;
-    // Add ":" only if port number is not 80
-    if (portNum.compare("80") != 0) {
-      hostAddress = ipAddress + ":" + portNum;
-    } else {
-      hostAddress = ipAddress;
-    }
-    //string wordToQuery = "aha";
-    //string queryStr = argv[3]; //"/api/v1/similar?word=" + wordToQuery;
-
-    // Get a list of endpoints corresponding to the server name.
-    tcp::resolver resolver(io_service);
-    tcp::resolver::query query(ipAddress, portNum);
-    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-
-    // Try each endpoint until we successfully establish a connection.
-    tcp::socket socket(io_service);
-    boost::asio::connect(socket, endpoint_iterator);
-
-    /**
-     * Form the request. We specify the "Connection: close" header so that the
-     * server will close the socket after transmitting the response. This will
-     * allow us to treat all data up until the EOF as the content.
-     */
-    boost::asio::streambuf request;
-    std::ostream request_stream(&request);
-    request_stream << "GET " << httpquery << " HTTP/1.1\r\n";  // note that you can change it if you wish to HTTP/1.0
-    request_stream << "Host: " << hostAddress << "\r\n";
-    request_stream << "Accept: */*\r\n";
-    request_stream << "Connection: close\r\n\r\n";
-
-    // Send the request.
-    boost::asio::write(socket, request);
-
-    /**
-     * Read the response status line. The response streambuf will automatically
-     * grow to accommodate the entire line. The growth may be limited by passing
-     * a maximum size to the streambuf constructor.
-     */
-    boost::asio::streambuf response;
-    boost::asio::read_until(socket, response, "\r\n");
-
-    // Check that response is OK.
-    std::istream response_stream(&response);
-    std::string http_version;
-    response_stream >> http_version;
-    unsigned int status_code;
-    response_stream >> status_code;
-    std::string status_message;
-    std::getline(response_stream, status_message);
-    if (!response_stream || http_version.substr(0, 5) != "HTTP/") {
-      std::cout << "Invalid response\n";
-      return "CANNOT GET BALANCE";
-    }
-    if (status_code != 200) {
-      std::cout << "Response returned with status code " << status_code << "\n";
-      return "CANNOT GET BALANCE";
-    }
-
-    // Read the response headers, which are terminated by a blank line.
-    boost::asio::read_until(socket, response, "\r\n\r\n");
-
-    // Process the response headers.
-    std::string header;
-    while (std::getline(response_stream, header) && header != "\r") {}
-
-    // Write whatever content we already have to output.
-    if (response.size() > 0) {
-      std::stringstream answer_buffer;
-      answer_buffer << &response;
-      server_answer = answer_buffer.str();
-    }
-
-    // Read until EOF, writing data to output as we go.
-    boost::system::error_code error;
-    while (boost::asio::read(socket, response,boost::asio::transfer_at_least(1), error)) {
-      std::cout << &response;
-    }
-    if (error != boost::asio::error::eof) {
-      throw boost::system::system_error(error);
-    }
-  } catch (std::exception& e) {
-    std::cout << "Exception: " << e.what() << "\n";
-  }
-
-  return server_answer;
 }
 
 /**
@@ -259,7 +167,7 @@ std::string httpGetRequest(std::string httpquery) {
  * To make it easier/better for the user to e.g. view their balance, we have
  * to convert this many digits to a fixed point value.
  */
-std::string convertWeiToFixedPoint(std::string amount, size_t digits) {
+std::string WalletManager::convertWeiToFixedPoint(std::string amount, size_t digits) {
   std::string result;
 
   if (amount.size() <= digits) {
@@ -283,7 +191,7 @@ std::string convertWeiToFixedPoint(std::string amount, size_t digits) {
  * Likewise, we also need to convert user-provided fixed point values
  * back to the original 18-decimals Wei amount to create transactions.
  */
-std::string convertFixedPointToWei(std::string amount, int decimals) {
+std::string WalletManager::convertFixedPointToWei(std::string amount, int decimals) {
   std::string digitPadding = "";
   std::string valuestr = "";
   // Check if input is valid
@@ -297,24 +205,24 @@ std::string convertFixedPointToWei(std::string amount, int decimals) {
     valuestr += amount[index];
     ++index;
   }
-  
+
   // Jump fixed point.
   ++index;
-  
-  // Check if fixed point exists 
+
+  // Check if fixed point exists
   if (amount[index-1] == '.' && (amount.size() - (index)) > decimals)
     return "";
-  
-  // check if the precision of input match digit precision
-  if(index < amount.size()) {
+
+  // Check if input precision matches digit precision
+  if (index < amount.size()) {
     // Read precision point into digitPadding
     while (index < amount.size()) {
       digitPadding += amount[index];
       ++index;
-    }  
+    }
   }
-  
-  // Create padding if missing decimals are found
+
+  // Create padding if there are missing decimals
   while(digitPadding.size() < decimals)
     digitPadding += '0';
 
@@ -325,12 +233,10 @@ std::string convertFixedPointToWei(std::string amount, int decimals) {
   return valuestr;
 }
 
-/**
- * List all the ETH accounts contained in a given wallet.
- * Also asks for the API provider to get the balances from these addresses.
- */
-std::vector<std::string> listETHAccounts(KeyManager wallet) {
-  if (wallet.store().keys().empty()) { return {}; }
+// List the wallet's ETH accounts and their amounts.
+// TODO: make this return a proper structure with the data
+std::vector<std::string> WalletManager::listETHAccounts() {
+  if (this->wallet.store().keys().empty()) { return {}; }
 
   std::vector<std::string> WalletList;
   std::vector<std::string> AddressList;
@@ -338,16 +244,16 @@ std::vector<std::string> listETHAccounts(KeyManager wallet) {
   AddressHash got;
 
   // Separating normal accounts from bare accounts
-  for (auto const& u: wallet.store().keys()) {
+  for (auto const& u: this->wallet.store().keys()) {
     std::stringstream buffer;
     std::stringstream barebuffer;
     std::stringstream addressbuffer;
-    if (Address a = wallet.address(u)) {
+    if (Address a = this->wallet.address(u)) {
       got.insert(a);
-      buffer << toUUID(u) << " " << a.abridged();
-      buffer << " " << "0x" << a << " ";
+      buffer << toUUID(u) << " " << a.abridged() << " ";
+      buffer << "0x" << a << " ";
       addressbuffer << "0x" << a;
-      buffer << " " << wallet.accountName(a);
+      buffer << this->wallet.accountName(a) << " ";
       WalletList.push_back(buffer.str());
       AddressList.push_back(addressbuffer.str());
     } else {
@@ -358,8 +264,27 @@ std::vector<std::string> listETHAccounts(KeyManager wallet) {
 
   // Querying account balances and joining bare accounts at the end
   for (std::size_t i = 0; i < AddressList.size(); ++i) {
-    WalletList[i] += getETHBalance(AddressList[i]);
-    WalletList[i] += "\n";
+    std::string balanceApiRequest = Network::getETHBalance(AddressList[i]);
+    std::string balance;
+    json_spirit::mValue balanceJson;
+    // TODO: maybe turn this into a generic JSON checking function
+    auto success = json_spirit::read_string(balanceApiRequest, balanceJson);
+    if (success) {
+      try {
+        auto jsonResult = get_object_item(balanceJson, "result");
+        balance = jsonResult.get_str();
+      } catch (std::exception &e) {
+        std::cout << "Error when reading json for \"result\": " << e.what() << std::endl;
+        auto jsonResult = get_object_item(get_object_item(balanceJson,"error"), "message");
+        balance = jsonResult.get_str();
+        std::cout << "Json message: " << balance << std::endl;
+        return {};
+      }
+    } else {
+      std::cout << "Error reading json, check json value: " << balanceApiRequest << std::endl;
+    }
+    balance = convertWeiToFixedPoint(balance, 18);
+    WalletList[i] += (balance + "\n");
   }
   if (!BareList.empty()) {
     WalletList.insert(WalletList.end(), BareList.begin(), BareList.end());
@@ -369,13 +294,12 @@ std::vector<std::string> listETHAccounts(KeyManager wallet) {
 }
 
 /**
- * Same as above, but for TAEX.
- * Here is where it starts to become tricky. Tokens needs to be loaded
- * differently and from their proper contract address, beside the respective
- * wallet address.
+ * List the wallet's TAEX accounts and their amounts.
+ * ERC-20 tokens need to be loaded in a different way, from their proper
+ * contract address, beside their respective wallet address.
  */
-std::vector<std::string> listTAEXAccounts(KeyManager wallet) {
-  if (wallet.store().keys().empty()) { return {}; }
+std::vector<std::string> WalletManager::listTAEXAccounts() {
+  if (this->wallet.store().keys().empty()) { return {}; }
 
   std::vector<std::string> WalletList;
   std::vector<std::string> AddressList;
@@ -383,16 +307,16 @@ std::vector<std::string> listTAEXAccounts(KeyManager wallet) {
   AddressHash got;
 
   // Separating normal accounts from bare accounts
-  for (auto const& u: wallet.store().keys()) {
+  for (auto const& u: this->wallet.store().keys()) {
     std::stringstream buffer;
     std::stringstream barebuffer;
     std::stringstream addressbuffer;
-    if (Address a = wallet.address(u)) {
+    if (Address a = this->wallet.address(u)) {
       got.insert(a);
-      buffer << toUUID(u) << " " << a.abridged();
-      buffer << " " << "0x" << a << " ";
+      buffer << toUUID(u) << " " << a.abridged() << " ";
+      buffer << "0x" << a << " ";
       addressbuffer << "0x" << a;
-      buffer << " " << wallet.accountName(a);
+      buffer << this->wallet.accountName(a) << " ";
       WalletList.push_back(buffer.str());
       AddressList.push_back(addressbuffer.str());
     } else {
@@ -403,8 +327,27 @@ std::vector<std::string> listTAEXAccounts(KeyManager wallet) {
 
   // Querying account balances and joining bare accounts at the end
   for (std::size_t i = 0; i < AddressList.size(); ++i) {
-    WalletList[i] += getTAEXBalance(AddressList[i]);
-    WalletList[i] += "\n";
+    std::string balanceApiRequest = Network::getTAEXBalance(AddressList[i]);
+    std::string balance;
+    json_spirit::mValue balanceJson;
+    // TODO: maybe put this JSON checking in a function
+    auto success = json_spirit::read_string(balanceApiRequest, balanceJson);
+    if (success) {
+      try {
+        auto jsonResult = get_object_item(balanceJson, "result");
+        balance = jsonResult.get_str();
+      } catch (std::exception &e) {
+        std::cout << "Error when reading json for \"result\": " << e.what() << std::endl;
+        auto jsonResult = get_object_item(get_object_item(balanceJson,"error"), "message");
+        balance = jsonResult.get_str();
+        std::cout << "Json message: " << balance << std::endl;
+        return {};
+      }
+    } else {
+      std::cout << "Error reading json, check json value: " << balanceApiRequest << std::endl;
+    }
+    balance = convertWeiToFixedPoint(balance, 4);
+    WalletList[i] += (balance + "\n");
   }
   if (!BareList.empty()) {
     WalletList.insert(WalletList.end(), BareList.begin(), BareList.end());
@@ -413,71 +356,40 @@ std::vector<std::string> listTAEXAccounts(KeyManager wallet) {
   return WalletList;
 }
 
-// Get the ETH balance from an address from the API provider.
-std::string getETHBalance(std::string address) {
-  std::string balanceApiRequest;
-  std::string balance;
-  std::stringstream query;
-  query << "/api?module=account&action=balance&address=";
-  query << address;
-  query << "&tag=latest&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
+// Get an automatic amount of fees for the transaction.
+// TODO: make the user choose between slower or faster fees from the data at:
+// https://ropsten.etherscan.io/api?module=gastracker&action=gasoracle&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ
+std::string WalletManager::getAutomaticFee() {
+  std::string txGasPrice;
+  std::string txGasPriceGwei;
+  u256 txGasPriceu256;
+  std::string txGasPriceRequest = Network::getTxFees();
+  json_spirit::mValue txGasPriceJson;
 
-  balanceApiRequest = httpGetRequest(query.str());
-  json_spirit::mValue balanceJson;
-  auto success = json_spirit::read_string(balanceApiRequest, balanceJson);
+  // TODO: maybe put this JSON checking in a function
+  auto success = json_spirit::read_string(txGasPriceRequest, txGasPriceJson);
   if (success) {
     try {
-      auto jsonResult = get_object_item(balanceJson, "result");
-      balance = jsonResult.get_str();
+      auto jsonResult = get_object_item(get_object_item(txGasPriceJson,"result"), "SafeGasPrice");
+      txGasPriceGwei = jsonResult.get_str();
     } catch (std::exception &e) {
-      std::cout << "Error when reading json for \"result\": " << e.what() << std::endl;
-      auto jsonResult = get_object_item(get_object_item(balanceJson,"error"), "message");
-      balance = jsonResult.get_str();
-      std::cout << "Json message: " << balance << std::endl;
-      return "ERROR";
+      std::cout << "Error when reading json for SafeGasPrice: " << e.what() << std::endl;
+      auto jsonResult = get_object_item(get_object_item(txGasPriceJson,"error"), "message");
+      std::cout << "Json message: " << jsonResult.get_str() << std::endl;
+      std::cout << "Setting txGasPrice to default..." << std::endl;
+      txGasPriceGwei = "50";
     }
   } else {
-    std::cout << "Error reading json, check json value: " << balanceApiRequest << std::endl;
+    std::cout << "Error reading json, check json value: " << txGasPriceRequest << std::endl;
   }
-  balance = convertWeiToFixedPoint(balance, 18);
+  txGasPriceu256 = boost::lexical_cast<u256>(txGasPriceGwei) * raiseToPow(10, 9);
+  txGasPrice = boost::lexical_cast<std::string>(txGasPriceu256);
 
-  return balance;
+  return txGasPrice;
 }
 
-// Same thing as above, but for TAEX.
-std::string getTAEXBalance(std::string address) {
-  std::string balanceApiRequest;
-  std::string balance;
-  std::stringstream query;
-  query << "/api?module=account&action=tokenbalance&contractaddress=0x9c19d746472978750778f334b262de532d9a85f9&address=";
-  query << address;
-  query << "&tag=latest&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
-
-  balanceApiRequest = httpGetRequest(query.str());
-  json_spirit::mValue balanceJson;
-  auto success = json_spirit::read_string(balanceApiRequest, balanceJson);
-  if (success) {
-    try {
-      auto jsonResult = get_object_item(balanceJson, "result");
-      balance = jsonResult.get_str();
-    } catch (std::exception &e) {
-      std::cout << "Error when reading json for \"result\": " << e.what() << std::endl;
-      auto jsonResult = get_object_item(get_object_item(balanceJson,"error"), "message");
-      balance = jsonResult.get_str();
-      std::cout << "Json message: " << balance << std::endl;
-      return "ERROR";
-    }
-  } else {
-    std::cout << "Error reading json, check json value: " << balanceApiRequest << std::endl;
-  }
-  
-  balance = convertWeiToFixedPoint(balance, 4);
-
-  return balance;
-}
-
-// Build a transaction data to send tokens.
-std::string buildTXData(std::string txValue, std::string destWallet) {
+// Build transaction data to send ERC-20 tokens.
+std::string WalletManager::buildTxData(std::string txValue, std::string destWallet) {
   std::string txdata;
   // Hex and padding that will call the "send" function of the address
   std::string sendpadding = "a9059cbb000000000000000000000000";
@@ -512,20 +424,16 @@ std::string buildTXData(std::string txValue, std::string destWallet) {
 }
 
 // Build an ETH transaction from user data.
-TransactionSkeleton buildETHTransaction(
+TransactionSkeleton WalletManager::buildETHTransaction(
   std::string signKey, std::string destWallet,
   std::string txValue, std::string txGas, std::string txGasPrice
 ) {
   TransactionSkeleton txSkel;
   int txNonce;
-  std::stringstream query;
-  query << "/api?module=proxy&action=eth_getTransactionCount&address=";
-  query << signKey;
-  query << "&tag=latest&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
-  // Requesting a nonce from the API provider
-  std::string nonceApiRequest = httpGetRequest(query.str());
+  std::string nonceApiRequest = Network::getTxNonce(signKey);
   json_spirit::mValue nonceJson;
-  
+
+  // TODO: maybe put this JSON checking in a function
   auto success = json_spirit::read_string(nonceApiRequest, nonceJson);
   if (success) {
     try {
@@ -556,22 +464,17 @@ TransactionSkeleton buildETHTransaction(
 }
 
 // Build a TAEX transaction from user data.
-TransactionSkeleton buildTAEXTransaction(
+TransactionSkeleton WalletManager::buildTAEXTransaction(
   std::string signKey, std::string destWallet,
   std::string txValue, std::string txGas, std::string txGasPrice
 ) {
   TransactionSkeleton txSkel;
   int txNonce;
   std::string contractWallet = "9c19d746472978750778f334b262de532d9a85f9";
-  std::stringstream query;
-  query << "/api?module=proxy&action=eth_getTransactionCount&address=";
-  query << signKey;
-  query << "&tag=latest&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
-
-  // Requesting a nonce from the API provider
-  std::string nonceApiRequest = httpGetRequest(query.str());
-
+  std::string nonceApiRequest = Network::getTxNonce(signKey);
   json_spirit::mValue nonceJson;
+
+  // TODO: maybe put this JSON checking in a function
   auto success = json_spirit::read_string(nonceApiRequest, nonceJson);
   if (success) {
     try {
@@ -594,7 +497,7 @@ TransactionSkeleton buildTAEXTransaction(
   txSkel.creation = false;
   txSkel.to = toAddress(contractWallet);
   txSkel.value = u256(0);
-  txSkel.data = fromHex(buildTXData(txValue, destWallet));
+  txSkel.data = fromHex(buildTxData(txValue, destWallet));
   txSkel.nonce = txNonce;
   txSkel.gas = u256(txGas);
   txSkel.gasPrice = u256(txGasPrice);
@@ -603,11 +506,10 @@ TransactionSkeleton buildTAEXTransaction(
 }
 
 // Sign a transaction with user credentials.
-std::string signTransaction(
-  KeyManager wallet, std::string pass,
-  std::string signKey, TransactionSkeleton txSkel
+std::string WalletManager::signTransaction(
+  TransactionSkeleton txSkel, std::string pass, std::string signKey
 ) {
-  Secret s = getSecret(wallet, signKey, pass);
+  Secret s = getSecret(signKey, pass);
   std::stringstream txHexBuffer;
 
   try {
@@ -622,17 +524,14 @@ std::string signTransaction(
   return txHexBuffer.str();
 }
 
-// Broadcast a transaction to the API provider.
-std::string sendTransaction(std::string txidHex) {
-  std::stringstream txidquery;
-  txidquery << "/api?module=proxy&action=eth_sendRawTransaction&hex=";
-  txidquery << txidHex;
-  txidquery << "&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
-  std::string tmptxid; 
+// Send a transaction to the API provider for processing.
+std::string WalletManager::sendTransaction(std::string txidHex) {
+  std::string tmptxid;
   std::string transactionLink = "https://ropsten.etherscan.io/tx/";
-  
-  std::string txidApiRequest = httpGetRequest(txidquery.str());
+  std::string txidApiRequest = Network::broadcastTransaction(txidHex);
   json_spirit::mValue txidJson;
+
+  // TODO: maybe put this JSON checking in a function
   auto success = json_spirit::read_string(txidApiRequest, txidJson);
   if (success) {
     try {
@@ -652,7 +551,9 @@ std::string sendTransaction(std::string txidHex) {
   return transactionLink;
 }
 
-void decodeRawTransaction(std::string rawTxHex) {
+// Decode a raw transaction and show information about it.
+// TODO: get those couts out (what a mouthful)
+void WalletManager::decodeRawTransaction(std::string rawTxHex) {
   TransactionBase transaction = TransactionBase(fromHex(rawTxHex), CheckTransaction::None);
   std::cout << "Transaction: " << transaction.sha3().hex() << std::endl;
   if (transaction.isCreation())
@@ -685,39 +586,5 @@ void decodeRawTransaction(std::string rawTxHex) {
     std::cout << "r: " << transaction.signature().r << std::endl;
     std::cout << "s: " << transaction.signature().s << std::endl;
   }
-}
-
-
-// TODO 
-// Make the user choice between slow or faster fee
-// check https://ropsten.etherscan.io/api?module=gastracker&action=gasoracle&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ
-std::string getNetworkTxFees() {
-  std::string txGasPrice;
-  std::string txGasPriceGwei;
-  u256 txGasPriceu256;
-  std::stringstream txGasPriceQuery;
-  txGasPriceQuery << "/api?module=gastracker&action=gasoracle&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
-  
-  std::string txGasPriceRequest = httpGetRequest(txGasPriceQuery.str());
-  json_spirit::mValue txGasPriceJson;
-  auto success = json_spirit::read_string(txGasPriceRequest, txGasPriceJson);
-  if (success) {
-    try {
-      auto jsonResult = get_object_item(get_object_item(txGasPriceJson,"result"), "SafeGasPrice");
-      txGasPriceGwei = jsonResult.get_str();
-    } catch (std::exception &e) {
-      std::cout << "Error when reading json for SafeGasPrice: " << e.what() << std::endl;
-      auto jsonResult = get_object_item(get_object_item(txGasPriceJson,"error"), "message");
-      std::cout << "Json message: " << jsonResult.get_str() << std::endl;
-      std::cout << "Setting txGasPrice to default..." << std::endl;
-      txGasPriceGwei = "50";
-    }
-  } else {
-  std::cout << "Error reading json, check json value: " << txGasPriceRequest << std::endl;
-  }
-  txGasPriceu256 = boost::lexical_cast<u256>(txGasPriceGwei) * raiseToPow(10, 9);
-  txGasPrice = boost::lexical_cast<std::string>(txGasPriceu256);
-  
-  return txGasPrice;
 }
 

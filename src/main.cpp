@@ -21,7 +21,7 @@ int main () {
   dev::LoggingOptions loggingOptions;
   dev::setupLogging(loggingOptions);
 
-  dev::eth::KeyManager wallet;
+  WalletManager wm;
   std::string walletPass;
   boost::filesystem::path walletPath;
   boost::filesystem::path secretsPath;
@@ -44,10 +44,9 @@ int main () {
   }
   std::getline(std::cin, menuOp);
 
-  if (menuOp == "1") { 
+  if (menuOp == "1") {
     walletPath = KeyManager::defaultPath();
     secretsPath = SecretStore::defaultPath();
-    wallet = KeyManager(walletPath, secretsPath);
     std::cout << "Enter your wallet's passphrase." << std::endl;
     std::getline(std::cin, walletPass);
   } else if (menuOp == "2") {
@@ -61,7 +60,6 @@ int main () {
     std::cout << "Please inform the full path for your wallet's secrets." << std::endl;
     std::getline(std::cin, sBuf);
     secretsPath = sBuf;
-    wallet = KeyManager(walletPath, secretsPath);
     std::cout << "Enter your wallet's passphrase." << std::endl;
     std::getline(std::cin, walletPass);
   } else if (menuOp == "3") {
@@ -85,10 +83,11 @@ int main () {
       std::cout << "Passwords were different. Try again." << std::endl;
     }
     std::cout << "Creating new wallet..." << std::endl;
-    wallet = createNewWallet(walletPath, secretsPath, walletPass);
+    wm.createNewWallet(walletPath, secretsPath, walletPass);
   }
+
   std::cout << "Loading wallet..." << std::endl;
-  if (!loadWallet(wallet, walletPass)) {
+  if (!wm.loadWallet(walletPath, secretsPath, walletPass)) {
     std::cout << "Error loading wallet: wrong passphrase" << std::endl;
     exit(0);
   }
@@ -110,7 +109,7 @@ int main () {
 
     // List accounts
     if (menuOp == "1") {
-      std::vector<std::string> ETHAccounts = listETHAccounts(wallet);
+      std::vector<std::string> ETHAccounts = wm.listETHAccounts();
       if (!ETHAccounts.empty()) {
         for (auto account : ETHAccounts) {
           std::cout << account << std::endl;
@@ -119,7 +118,7 @@ int main () {
         std::cout << "No accounts found." << std::endl;
       }
     } else if (menuOp == "2") {
-      std::vector<std::string> TAEXAccounts = listTAEXAccounts(wallet);
+      std::vector<std::string> TAEXAccounts = wm.listTAEXAccounts();
       if (!TAEXAccounts.empty()) {
         for (auto account : TAEXAccounts) {
           std::cout << account << std::endl;
@@ -147,7 +146,7 @@ int main () {
       std::getline(std::cin, destWallet);
       std::cout << "How much ETH will you send? (value in fixed point, e.g. 0.5)" << std::endl;
       std::getline(std::cin, txValue);
-      txValue = convertFixedPointToWei(txValue, 18);
+      txValue = wm.convertFixedPointToWei(txValue, 18);
       if (txValue == "") {
         std::cout << "Invalid input, did you typed correctly?" << std::endl;
         continue;
@@ -157,7 +156,7 @@ int main () {
       std::getline(std::cin, menuOp);
       if (menuOp == "1") {
         txGas = "21000";
-        txGasPrice = getNetworkTxFees();
+        txGasPrice = wm.getAutomaticFee();
       } else if (menuOp == "2") {
         std::cout << "Set tx Gas limit   recommended: 21000" << std::endl;
         std::getline(std::cin, menuOp);
@@ -186,21 +185,21 @@ int main () {
       }
 
       std::cout << "Building transaction..." << std::endl;
-      txSkel = buildETHTransaction(signKey, destWallet, txValue, txGas, txGasPrice);
-      if (txSkel.nonce == MAX_U256_VALUE()) {
+      txSkel = wm.buildETHTransaction(signKey, destWallet, txValue, txGas, txGasPrice);
+      if (txSkel.nonce == wm.MAX_U256_VALUE()) {
           std::cout << "Error in transaction building" << std::endl;
           continue;
       }
       std::cout << "Signing transaction..." << std::endl;
-      signedTx = signTransaction(wallet, pass, signKey, txSkel);
+      signedTx = wm.signTransaction(txSkel, pass, signKey);
       std::cout << "Transaction signed, broadcasting..." << std::endl;
-      transactionLink = sendTransaction(signedTx);
+      transactionLink = wm.sendTransaction(signedTx);
       while (transactionLink.find("Transaction nonce is too low") != std::string::npos ||
           transactionLink.find("Transaction with the same hash was already imported") != std::string::npos) {
         std::cout << "Transaction nonce is too low, trying again with a higher nonce..." << std::endl;
         txSkel.nonce++;
-        signedTx = signTransaction(wallet, pass, signKey, txSkel);
-        transactionLink = sendTransaction(signedTx);
+        signedTx = wm.signTransaction(txSkel, pass, signKey);
+        transactionLink = wm.sendTransaction(signedTx);
       }
       std::cout << "Transaction sent! Link: " << transactionLink << std::endl;
 
@@ -223,7 +222,7 @@ int main () {
       std::getline(std::cin, destWallet);
       std::cout << "How much TAEX will you send? (value in fixed point, e.g. 0.5 - MAXIMUM 4 DECIMALS!)" << std::endl;
       std::getline(std::cin, txValue);
-      txValue = convertFixedPointToWei(txValue, 4);
+      txValue = wm.convertFixedPointToWei(txValue, 4);
       if (txValue == "") {
         std::cout << "Invalid input, did you typed correctly?" << std::endl;
         continue;
@@ -233,7 +232,7 @@ int main () {
       std::getline(std::cin, menuOp);
       if (menuOp == "1") {
         txGas = "80000";
-        txGasPrice = getNetworkTxFees();
+        txGasPrice = wm.getAutomaticFee();
       } else if (menuOp == "2") {
         std::cout << "Set tx Gas limit   recommended: 21000" << std::endl;
         std::getline(std::cin, menuOp);
@@ -262,21 +261,21 @@ int main () {
       }
 
       std::cout << "Building transaction..." << std::endl;
-      txSkel = buildTAEXTransaction(signKey, destWallet, txValue, txGas, txGasPrice);
-      if (txSkel.nonce == MAX_U256_VALUE()) {
+      txSkel = wm.buildTAEXTransaction(signKey, destWallet, txValue, txGas, txGasPrice);
+      if (txSkel.nonce == wm.MAX_U256_VALUE()) {
         std::cout << "Error in transaction building" << std::endl;
         continue;
       }
       std::cout << "Signing transaction..." << std::endl;
-      signedTx = signTransaction(wallet, pass, signKey, txSkel);
+      signedTx = wm.signTransaction(txSkel, pass, signKey);
       std::cout << "Transaction signed, broadcasting..." << std::endl;
-      transactionLink = sendTransaction(signedTx);
+      transactionLink = wm.sendTransaction(signedTx);
       while (transactionLink.find("Transaction nonce is too low") != std::string::npos ||
           transactionLink.find("Transaction with the same hash was already imported") != std::string::npos) {
         std::cout << "Transaction nonce is too low, trying again with a higher nonce..." << std::endl;
         txSkel.nonce++;
-        signedTx = signTransaction(wallet, pass, signKey, txSkel);
-        transactionLink = sendTransaction(signedTx);
+        signedTx = wm.signTransaction(txSkel, pass, signKey);
+        transactionLink = wm.sendTransaction(signedTx);
       }
       std::cout << "Transaction sent! Link: " << transactionLink << std::endl;
 
@@ -310,10 +309,13 @@ int main () {
         std::cout << "Passwords were different. Try again." << std::endl;
       }
       std::cout << "Creating a new account..." << std::endl;
-      std::cout << createNewAccount(wallet, name, aPass, aPassHint, usesMasterPass);
+      std::vector<std::string> data = wm.createNewAccount(name, aPass, aPassHint, usesMasterPass);
+      std::cout << "Created key " << data[0] << std::endl
+                << "  Name: " << data[1] << std::endl
+                << "  Address: " << data[2] << std::endl
+                << "  Hint: " << data[3] << std::endl;
       std::cout << "Reloading wallet..." << std::endl;
-      wallet = KeyManager(walletPath, secretsPath);
-      loadWallet(wallet, walletPass);
+      wm.loadWallet(walletPath, secretsPath, walletPass);
 
     // Erase account
     // TODO: erase by account name (when the display gets fixed),
@@ -323,13 +325,13 @@ int main () {
       std::cout << "Please inform the account that you want to delete (no going back from here!)." << std::endl;
       std::getline(std::cin, account);
       std::cout << "Erasing account..." << std::endl;
-      if (eraseAccount(wallet, account)) {
+      if (wm.eraseAccount(account)) {
         std::cout << "Account erased: " << account << std::endl;
         std::cout << "Reloading wallet..." << std::endl;
-        wallet = KeyManager(walletPath, secretsPath);
-        loadWallet(wallet, walletPass);
+        wm.loadWallet(walletPath, secretsPath, walletPass);
       } else {
-        std::cout << "Couldn't erase " << account << "; account not found." << std::endl;
+        std::cout << "Couldn't erase account" << account
+                  << "; either it doesn't exist or has funds in it." << std::endl;
       }
 
     // Create private key
@@ -338,14 +340,14 @@ int main () {
       std::cout << "Please input the passphrase for the wallet." << std::endl;
       std::getline(std::cin, phrase);
       std::cout << "Creating a key pair..." << std::endl;
-      createKeyPairFromPhrase(phrase);
+      wm.createKeyPairFromPhrase(phrase);
 
     // Exit
     } else if (menuOp == "8") {
       std::string rawTxHex;
       std::cout << "Please input the raw transaction in Hex." << std::endl;
       std::getline(std::cin, rawTxHex);
-      decodeRawTransaction(rawTxHex);
+      wm.decodeRawTransaction(rawTxHex);
     } else if (menuOp == "9") {
       std::cout << "Exiting..." << std::endl;
       exit(0);
