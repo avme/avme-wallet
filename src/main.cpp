@@ -50,14 +50,12 @@ int main () {
     std::cout << "Enter your wallet's passphrase." << std::endl;
     std::getline(std::cin, walletPass);
   } else if (menuOp == "2") {
-    // TODO: fix program not finding just the ".ethereum" folder
-    // (it needs to be ".ethereum/keys.info", just ".web3" works fine tho)
     std::string wBuf;
     std::string sBuf;
-    std::cout << "Please inform the full path for your wallet." << std::endl;
+    std::cout << "Please inform the full path of your wallet file." << std::endl;
     std::getline(std::cin, wBuf);
     walletPath = wBuf;
-    std::cout << "Please inform the full path for your wallet's secrets." << std::endl;
+    std::cout << "Please inform the full path of your wallet secrets folder." << std::endl;
     std::getline(std::cin, sBuf);
     secretsPath = sBuf;
     std::cout << "Enter your wallet's passphrase." << std::endl;
@@ -65,11 +63,11 @@ int main () {
   } else if (menuOp == "3") {
     std::string wBuf;
     std::string sBuf;
-    std::cout << "Please inform the full path for your wallet, or leave blank for the default." << std::endl;
+    std::cout << "Please inform the full path of your wallet file, or leave blank for the default." << std::endl;
     std::cout << "Default is " << KeyManager::defaultPath() << std::endl;
     std::getline(std::cin, wBuf);
     walletPath = (wBuf.empty()) ? KeyManager::defaultPath() : wBuf;
-    std::cout << "Please inform the full path for your wallet's secrets, or leave blank for the default." << std::endl;
+    std::cout << "Please inform the full path of your wallet secrets folder, or leave blank for the default." << std::endl;
     std::cout << "Default is " << SecretStore::defaultPath() << std::endl;
     std::getline(std::cin, sBuf);
     secretsPath = (sBuf.empty()) ? SecretStore::defaultPath() : sBuf;

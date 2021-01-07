@@ -47,6 +47,16 @@ SecretStore& WalletManager::secretStore() {
 
 // Create a new wallet, which should be loaded manually afterwards.
 bool WalletManager::createNewWallet(path walletPath, path secretsPath, std::string walletPass) {
+  // Create the paths if they don't exist yet.
+  // Remember walletPath points to a *file*, and secretsPath points to a *dir*.
+  if (!exists(walletPath.parent_path())) {
+    create_directories(walletPath.parent_path());
+  }
+  if (!exists(secretsPath)) {
+    create_directories(secretsPath);
+  }
+
+  // Initialize the new wallet
   KeyManager w(walletPath, secretsPath);
   try {
     w.create(walletPass);
