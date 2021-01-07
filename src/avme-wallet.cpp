@@ -166,14 +166,6 @@ Address WalletManager::userToAddress(std::string const& input) {
 
 // Load the secret key for a given address in the wallet.
 Secret WalletManager::getSecret(std::string const& signKey, std::string pass) {
-  std::string json = contentsString(signKey);
-  if (!json.empty()) {
-    return Secret(secretStore().secret(secretStore().readKeyContent(json), [&](){ return pass; }));
-  } else {
-    if (h128 u = fromUUID(signKey)) {
-      return Secret(secretStore().secret(u, [&](){ return pass; }));
-    }
-
     Address a;
     try {
       a = toAddress(signKey);
