@@ -53,6 +53,9 @@ class WalletManager {
       const json_spirit::mValue element, size_t index
     );
 
+    // Get a specific value from a JSON element.
+    std::string get_json_value(std::string json, std::string value);
+
   public:
     // Set MAX_U256_VALUE for error handling.
     u256 MAX_U256_VALUE();

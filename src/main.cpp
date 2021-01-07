@@ -165,7 +165,7 @@ int main () {
         txGas = menuOp;
         std::cout << "Set a gas price (in GWEI) for the transaction (recommended: 50)." << std::endl;
         std::getline(std::cin, menuOp);
-        if(!is_digits(menuOp)) {
+        if (!is_digits(menuOp)) {
           std::cout << "Invalid amount, please check if your input is correct." << std::endl;
           continue;
         }
@@ -193,6 +193,9 @@ int main () {
       signedTx = wm.signTransaction(txSkel, pass, signKey);
       std::cout << "Transaction signed, broadcasting..." << std::endl;
       transactionLink = wm.sendTransaction(signedTx);
+      if (transactionLink == "") {
+        std::cout << "Transaction failed. Please try again." << std::endl;
+      }
       while (transactionLink.find("Transaction nonce is too low") != std::string::npos ||
           transactionLink.find("Transaction with the same hash was already imported") != std::string::npos) {
         std::cout << "Transaction failed. Either the nonce is too low, or a "
@@ -244,8 +247,8 @@ int main () {
         txGas = menuOp;
         std::cout << "Set a gas price (in GWEI) for the transaction (recommended: 50)." << std::endl;
         std::getline(std::cin, menuOp);
-        if(!is_digits(menuOp)) {
-          std::cout << "Invalid amount, please check if your input is correct" << std::endl;
+        if (!is_digits(menuOp)) {
+          std::cout << "Invalid amount, please check if your input is correct." << std::endl;
           continue;
         }
         u256 GasPrice;

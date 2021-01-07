@@ -21,6 +21,28 @@ const json_spirit::mValue WalletManager::get_array_item(
   return element.get_array().at(index);
 }
 
+// Get a specific value from a JSON element.
+std::string WalletManager::get_json_value(std::string json, std::string value) {
+  std::string ret;
+  json_spirit::mValue jsonValue;
+  auto jsonSuccess = json_spirit::read_string(json, jsonValue);
+
+  if (jsonSuccess) {
+    try {
+      ret = get_object_item(jsonValue, value).get_str();
+    } catch (std::exception &e) {
+      std::cout << "Error when reading json for \"" << value << "\": " << e.what() << std::endl;
+      ret = get_object_item(get_object_item(jsonValue, "error"), "message").get_str();
+      std::cout << "Message: " << ret << std::endl;
+    }
+  } else {
+    std::cout << "Error reading json, check json value: " << json << std::endl;
+    ret = "";
+  }
+
+  return ret;
+}
+
 // Set MAX_U256_VALUE for error handling.
 u256 WalletManager::MAX_U256_VALUE() {
   return (raiseToPow(2, 256) - 1);
@@ -122,35 +144,13 @@ bool WalletManager::eraseAccount(std::string account) {
 
 // Check if an account is completely empty.
 bool WalletManager::accountIsEmpty(std::string account) {
+  if (account.find("0x") == std::string::npos) {
+    account = "0x" + boost::lexical_cast<std::string>(userToAddress(account));
+  }
   std::string requestETH = Network::getETHBalance(account);
   std::string requestTAEX = Network::getTAEXBalance(account);
-  json_spirit::mValue jsonETH;
-  json_spirit::mValue jsonTAEX;
-  std::string amountETH;
-  std::string amountTAEX;
-
-  // TODO: maybe turn this into a generic JSON checking function
-  auto successETH = json_spirit::read_string(requestETH, jsonETH);
-  auto successTAEX = json_spirit::read_string(requestTAEX, jsonTAEX);
-  if (successETH && successTAEX) {
-    try {
-      auto jsonResultETH = get_object_item(jsonETH, "result");
-      auto jsonResultTAEX = get_object_item(jsonTAEX, "result");
-      amountETH = jsonResultETH.get_str();
-      amountTAEX = jsonResultTAEX.get_str();
-    } catch (std::exception &e) {
-      std::cout << "Error when reading json for \"result\": " << e.what() << std::endl;
-      auto jsonResultETH = get_object_item(get_object_item(jsonETH,"error"), "message");
-      auto jsonResultTAEX = get_object_item(get_object_item(jsonTAEX,"error"), "message");
-      amountETH = jsonResultETH.get_str();
-      amountTAEX = jsonResultTAEX.get_str();
-      std::cout << "Json message: " << amountETH << std::endl << amountTAEX << std::endl;
-      return false;
-    }
-  } else {
-    std::cout << "Error reading json, check json value: " << requestETH << std::endl << requestTAEX << std::endl;
-  }
-
+  std::string amountETH = get_json_value(requestETH, "result");
+  std::string amountTAEX = get_json_value(requestTAEX, "result");
   return (amountETH == "0" && amountTAEX == "0");
 }
 
@@ -304,23 +304,13 @@ std::vector<std::string> WalletManager::listETHAccounts() {
   // Querying account balances and joining bare accounts at the end
   for (std::size_t i = 0; i < AddressList.size(); ++i) {
     std::string balanceApiRequest = Network::getETHBalance(AddressList[i]);
-    std::string balance;
-    json_spirit::mValue balanceJson;
-    // TODO: maybe turn this into a generic JSON checking function
-    auto success = json_spirit::read_string(balanceApiRequest, balanceJson);
-    if (success) {
-      try {
-        auto jsonResult = get_object_item(balanceJson, "result");
-        balance = jsonResult.get_str();
-      } catch (std::exception &e) {
-        std::cout << "Error when reading json for \"result\": " << e.what() << std::endl;
-        auto jsonResult = get_object_item(get_object_item(balanceJson,"error"), "message");
-        balance = jsonResult.get_str();
-        std::cout << "Json message: " << balance << std::endl;
+    std::string balance = get_json_value(balanceApiRequest, "result");
+    // Check if balance is valid (not an error message)
+    if (balance == "") { return {}; }
+    for (auto &c : balance) {
+      if (!std::isdigit(c) && c != '.') {
         return {};
       }
-    } else {
-      std::cout << "Error reading json, check json value: " << balanceApiRequest << std::endl;
     }
     balance = convertWeiToFixedPoint(balance, 18);
     WalletList[i] += (balance + "\n");
@@ -368,23 +358,13 @@ std::vector<std::string> WalletManager::listTAEXAccounts() {
   // Querying account balances and joining bare accounts at the end
   for (std::size_t i = 0; i < AddressList.size(); ++i) {
     std::string balanceApiRequest = Network::getTAEXBalance(AddressList[i]);
-    std::string balance;
-    json_spirit::mValue balanceJson;
-    // TODO: maybe put this JSON checking in a function
-    auto success = json_spirit::read_string(balanceApiRequest, balanceJson);
-    if (success) {
-      try {
-        auto jsonResult = get_object_item(balanceJson, "result");
-        balance = jsonResult.get_str();
-      } catch (std::exception &e) {
-        std::cout << "Error when reading json for \"result\": " << e.what() << std::endl;
-        auto jsonResult = get_object_item(get_object_item(balanceJson,"error"), "message");
-        balance = jsonResult.get_str();
-        std::cout << "Json message: " << balance << std::endl;
+    std::string balance = get_json_value(balanceApiRequest, "result");
+    // Check if balance is valid (not an error message)
+    if (balance == "") { return {}; }
+    for (auto &c : balance) {
+      if (!std::isdigit(c) && c != '.') {
         return {};
       }
-    } else {
-      std::cout << "Error reading json, check json value: " << balanceApiRequest << std::endl;
     }
     balance = convertWeiToFixedPoint(balance, 4);
     WalletList[i] += (balance + "\n");
@@ -406,7 +386,7 @@ std::string WalletManager::getAutomaticFee() {
   std::string txGasPriceRequest = Network::getTxFees();
   json_spirit::mValue txGasPriceJson;
 
-  // TODO: maybe put this JSON checking in a function
+  // TODO: incorporate this into get_json_value somehow (try block has two layers instead of one)
   auto success = json_spirit::read_string(txGasPriceRequest, txGasPriceJson);
   if (success) {
     try {
@@ -470,27 +450,17 @@ TransactionSkeleton WalletManager::buildETHTransaction(
 ) {
   TransactionSkeleton txSkel;
   int txNonce;
-  std::string nonceApiRequest = Network::getTxNonce(signKey);
-  json_spirit::mValue nonceJson;
 
-  // TODO: maybe put this JSON checking in a function
-  auto success = json_spirit::read_string(nonceApiRequest, nonceJson);
-  if (success) {
-    try {
-      auto jsonResult = get_object_item(nonceJson, "result");
-      std::stringstream nonceStrm;
-      nonceStrm << std::hex << jsonResult.get_str();
-      nonceStrm >> txNonce;
-    } catch (std::exception &e) {
-      std::cout << "Error when reading json for \"result\": " << e.what() << std::endl;
-      auto jsonResult = get_object_item(get_object_item(nonceJson,"error"), "message");
-      std::cout << "Json message: " << jsonResult.get_str() << std::endl;
-      txSkel.nonce = MAX_U256_VALUE();
-      return txSkel;
-    }
-  } else {
-    std::cout << "Error reading json, check json value: " << nonceApiRequest << std::endl;
+  std::string nonceApiRequest = Network::getTxNonce(signKey);
+  std::string txNonceStr = get_json_value(nonceApiRequest, "result");
+  // Check if nonce is valid (not an error message)
+  if (txNonceStr == "") {
+    txSkel.nonce = MAX_U256_VALUE();
+    return txSkel;
   }
+  std::stringstream nonceStrm;
+  nonceStrm << std::hex << txNonceStr;
+  nonceStrm >> txNonce;
 
   // Building the transaction structure
   txSkel.creation = false;
@@ -511,27 +481,17 @@ TransactionSkeleton WalletManager::buildTAEXTransaction(
   TransactionSkeleton txSkel;
   int txNonce;
   std::string contractWallet = "9c19d746472978750778f334b262de532d9a85f9";
-  std::string nonceApiRequest = Network::getTxNonce(signKey);
-  json_spirit::mValue nonceJson;
 
-  // TODO: maybe put this JSON checking in a function
-  auto success = json_spirit::read_string(nonceApiRequest, nonceJson);
-  if (success) {
-    try {
-      auto jsonResult = get_object_item(nonceJson, "result");
-      std::stringstream nonceStrm;
-      nonceStrm << std::hex << jsonResult.get_str();
-      nonceStrm >> txNonce;
-    } catch (std::exception &e) {
-      std::cout << "Error when reading json for \"result\": " << e.what() << std::endl;
-      auto jsonResult = get_object_item(get_object_item(nonceJson,"error"), "message");
-      std::cout << "Json message: " << jsonResult.get_str() << std::endl;
-      txSkel.nonce = MAX_U256_VALUE();
-      return txSkel;
-    }
-  } else {
-    std::cout << "Error reading json, check json value: " << nonceApiRequest << std::endl;
+  std::string nonceApiRequest = Network::getTxNonce(signKey);
+  std::string txNonceStr = get_json_value(nonceApiRequest, "result");
+  // Check if nonce is valid (not an error message)
+  if (txNonceStr == "") {
+    txSkel.nonce = MAX_U256_VALUE();
+    return txSkel;
   }
+  std::stringstream nonceStrm;
+  nonceStrm << std::hex << txNonceStr;
+  nonceStrm >> txNonce;
 
   // Building the transaction structure
   txSkel.creation = false;
@@ -566,29 +526,10 @@ std::string WalletManager::signTransaction(
 
 // Send a transaction to the API provider for processing.
 std::string WalletManager::sendTransaction(std::string txidHex) {
-  std::string tmptxid;
-  std::string transactionLink = "https://ropsten.etherscan.io/tx/";
   std::string txidApiRequest = Network::broadcastTransaction(txidHex);
-  json_spirit::mValue txidJson;
-
-  // TODO: maybe put this JSON checking in a function
-  auto success = json_spirit::read_string(txidApiRequest, txidJson);
-  if (success) {
-    try {
-      auto jsonResult = get_object_item(txidJson, "result");
-      tmptxid = jsonResult.get_str();
-    } catch (std::exception &e) {
-      std::cout << "Error when reading json for \"result\": " << e.what() << std::endl;
-      auto jsonResult = get_object_item(get_object_item(txidJson,"error"), "message");
-      tmptxid = jsonResult.get_str();
-      std::cout << "Json message: " << tmptxid << std::endl;
-    }
-  } else {
-    std::cout << "Error reading json, check json value: " << txidApiRequest << std::endl;
-  }
-  transactionLink += tmptxid;
-
-  return transactionLink;
+  std::string txid = get_json_value(txidApiRequest, "result");
+  std::string txLink = "https://ropsten.etherscan.io/tx/" + txid;
+  return txLink;
 }
 
 // Decode a raw transaction and show information about it.
