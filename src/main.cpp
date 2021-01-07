@@ -245,7 +245,7 @@ int main () {
         std::cout << "Set a gas price (in GWEI) for the transaction (recommended: 50)." << std::endl;
         std::getline(std::cin, menuOp);
         if(!is_digits(menuOp)) {
-          std::cout << "Invalid amount, please check if your input is correct". << std::endl;
+          std::cout << "Invalid amount, please check if your input is correct" << std::endl;
           continue;
         }
         u256 GasPrice;
