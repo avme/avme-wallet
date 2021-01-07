@@ -166,24 +166,27 @@ Address WalletManager::userToAddress(std::string const& input) {
 
 // Load the secret key for a given address in the wallet.
 Secret WalletManager::getSecret(std::string const& signKey, std::string pass) {
-    Address a;
-    try {
-      a = toAddress(signKey);
-    } catch (...) {
-      for (Address const& aa: this->wallet.accounts()) {
-        if (this->wallet.accountName(aa) == signKey) {
-          a = aa;
-          break;
-        }
+  if (h128 u = fromUUID(signKey)) {
+    return Secret(secretStore().secret(u, [&](){ return pass; }));
+  }
+
+  Address a;
+  try {
+    a = toAddress(signKey);
+  } catch (...) {
+    for (Address const& aa: this->wallet.accounts()) {
+      if (this->wallet.accountName(aa) == signKey) {
+        a = aa;
+        break;
       }
     }
+  }
 
-    if (a) {
-      return this->wallet.secret(a, [&](){ return pass; });
-    } else {
-      std::cerr << "Bad file, UUID or address: " << signKey << std::endl;
-      exit(-1);
-    }
+  if (a) {
+    return this->wallet.secret(a, [&](){ return pass; });
+  } else {
+    std::cerr << "Bad file, UUID or address: " << signKey << std::endl;
+    exit(-1);
   }
 }
 
