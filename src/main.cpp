@@ -28,7 +28,7 @@ int main () {
   std::string menuOp;
 
   // Block that loads/creates the wallet
-  std::cout << "Hello! Welcome to the AVME TAEX-CLI wallet." << std::endl;
+  std::cout << "Hello! Welcome to the AVME CLI wallet." << std::endl;
   bool defaultWalletExists = boost::filesystem::exists(KeyManager::defaultPath());
   bool defaultSecretExists = boost::filesystem::exists(SecretStore::defaultPath());
 
@@ -99,9 +99,9 @@ int main () {
       "3 - Send an ETH Transaction\n" <<
       "4 - Send a TAEX Transaction\n" <<
       "5 - Create a new account\n" <<
-      "6 - Erase account\n" <<
-      "7 - Create private key from Word/Phrase\n" <<
-      "8 - Decode raw transaction\n" <<
+      "6 - Erase an existing account\n" <<
+      "7 - Create a private key from a word/phrase\n" <<
+      "8 - Decode a raw transaction\n" <<
       "9 - Exit" << std::endl;
     std::getline(std::cin, menuOp);
 
@@ -142,31 +142,31 @@ int main () {
       std::getline(std::cin, signKey);
       std::cout << "Which address are you sending ETH to?" << std::endl;
       std::getline(std::cin, destWallet);
-      std::cout << "How much ETH will you send? (value in fixed point, e.g. 0.5)" << std::endl;
+      std::cout << "How much ETH will you send? (amount in fixed point, e.g. 0.5)" << std::endl;
       std::getline(std::cin, txValue);
       txValue = wm.convertFixedPointToWei(txValue, 18);
       if (txValue == "") {
-        std::cout << "Invalid input, did you typed correctly?" << std::endl;
+        std::cout << "Invalid amount, please check if your input is correct." << std::endl;
         continue;
       }
       std::cout << "Do you want to set your own fee or use an automatic fee?\n" <<
-                   "1 - Automatic (default)\n2 - Set my own" << std::endl;
+                   "1 - Automatic\n2 - Set my own" << std::endl;
       std::getline(std::cin, menuOp);
       if (menuOp == "1") {
         txGas = "21000";
         txGasPrice = wm.getAutomaticFee();
       } else if (menuOp == "2") {
-        std::cout << "Set tx Gas limit   recommended: 21000" << std::endl;
+        std::cout << "Set a gas limit for the transaction (recommended: 21000)." << std::endl;
         std::getline(std::cin, menuOp);
         if(!is_digits(menuOp)) {
-          std::cout << "Wrong input, please check your input" << std::endl;
+          std::cout << "Invalid amount, please check if your input is correct." << std::endl;
           continue;
         }
         txGas = menuOp;
-        std::cout << "Set tx Gas Price (in GWEI)   recommended: 50" << std::endl;
+        std::cout << "Set a gas price (in GWEI) for the transaction (recommended: 50)." << std::endl;
         std::getline(std::cin, menuOp);
         if(!is_digits(menuOp)) {
-          std::cout << "Wrong input, please check your input" << std::endl;
+          std::cout << "Invalid amount, please check if your input is correct." << std::endl;
           continue;
         }
         u256 GasPrice;
@@ -195,7 +195,9 @@ int main () {
       transactionLink = wm.sendTransaction(signedTx);
       while (transactionLink.find("Transaction nonce is too low") != std::string::npos ||
           transactionLink.find("Transaction with the same hash was already imported") != std::string::npos) {
-        std::cout << "Transaction nonce is too low, trying again with a higher nonce..." << std::endl;
+        std::cout << "Transaction failed. Either the nonce is too low, or a "
+                  << "transaction with the same hash was already imported." << std::endl
+                  << "Trying again with a higher nonce..." << std::endl;
         txSkel.nonce++;
         signedTx = wm.signTransaction(txSkel, pass, signKey);
         transactionLink = wm.sendTransaction(signedTx);
@@ -219,31 +221,31 @@ int main () {
       std::getline(std::cin, signKey);
       std::cout << "Which address are you sending TAEX to?" << std::endl;
       std::getline(std::cin, destWallet);
-      std::cout << "How much TAEX will you send? (value in fixed point, e.g. 0.5 - MAXIMUM 4 DECIMALS!)" << std::endl;
+      std::cout << "How much TAEX will you send? (amount in fixed point, e.g. 0.5 - MAXIMUM 4 DECIMALS!)" << std::endl;
       std::getline(std::cin, txValue);
       txValue = wm.convertFixedPointToWei(txValue, 4);
       if (txValue == "") {
-        std::cout << "Invalid input, did you typed correctly?" << std::endl;
+        std::cout << "Invalid amount, please check if your input is correct." << std::endl;
         continue;
       }
       std::cout << "Do you want to set your own fee or use an automatic fee?\n" <<
-                   "1 - Automatic (default)\n2 - Set my own" << std::endl;
+                   "1 - Automatic\n2 - Set my own" << std::endl;
       std::getline(std::cin, menuOp);
       if (menuOp == "1") {
         txGas = "80000";
         txGasPrice = wm.getAutomaticFee();
       } else if (menuOp == "2") {
-        std::cout << "Set tx Gas limit   recommended: 21000" << std::endl;
+        std::cout << "Set a gas limit for the transaction (recommended: 21000)." << std::endl;
         std::getline(std::cin, menuOp);
         if(!is_digits(menuOp)) {
-          std::cout << "Wrong input, please check your input" << std::endl;
+          std::cout << "Invalid amount, please check if your input is correct." << std::endl;
           continue;
         }
         txGas = menuOp;
-        std::cout << "Set tx Gas Price (in GWEI)   recommended: 50" << std::endl;
+        std::cout << "Set a gas price (in GWEI) for the transaction (recommended: 50)." << std::endl;
         std::getline(std::cin, menuOp);
         if(!is_digits(menuOp)) {
-          std::cout << "Wrong input, please check your input" << std::endl;
+          std::cout << "Invalid amount, please check if your input is correct". << std::endl;
           continue;
         }
         u256 GasPrice;
@@ -272,7 +274,9 @@ int main () {
       transactionLink = wm.sendTransaction(signedTx);
       while (transactionLink.find("Transaction nonce is too low") != std::string::npos ||
           transactionLink.find("Transaction with the same hash was already imported") != std::string::npos) {
-        std::cout << "Transaction nonce is too low, trying again with a higher nonce..." << std::endl;
+        std::cout << "Transaction failed. Either the nonce is too low, or a "
+                  << "transaction with the same hash was already imported." << std::endl
+                  << "Trying again with a higher nonce..." << std::endl;
         txSkel.nonce++;
         signedTx = wm.signTransaction(txSkel, pass, signKey);
         transactionLink = wm.sendTransaction(signedTx);
@@ -287,7 +291,7 @@ int main () {
       std::string aPassHint;
       bool usesMasterPass;
 
-      std::cout << "Give a name to your account (for ease of use)." << std::endl;
+      std::cout << "Give a name to your account." << std::endl;
       std::getline(std::cin, name);
       while (true) {
         std::cout << "Enter a passphrase to secure this account (or leave blank to use the wallet's master passphrase)." << std::endl;
@@ -318,13 +322,12 @@ int main () {
       wm.loadWallet(walletPath, secretsPath, walletPass);
 
     // Erase account
-    // TODO: erase by account name
     } else if (menuOp == "6") {
       std::string account;
       std::string pass;
       std::string passConf;
 
-      std::cout << "Please inform the account that you want to delete." << std::endl;
+      std::cout << "Please inform the account name or address that you want to delete." << std::endl;
       std::getline(std::cin, account);
       while (true) {
         // TODO: fix passphrase logic (should be the account's pass, not the wallet's)
@@ -353,12 +356,14 @@ int main () {
       std::cout << "Creating a key pair..." << std::endl;
       wm.createKeyPairFromPhrase(phrase);
 
-    // Exit
+    // Decode raw transaction
     } else if (menuOp == "8") {
       std::string rawTxHex;
       std::cout << "Please input the raw transaction in Hex." << std::endl;
       std::getline(std::cin, rawTxHex);
       wm.decodeRawTransaction(rawTxHex);
+
+    // Exit
     } else if (menuOp == "9") {
       std::cout << "Exiting..." << std::endl;
       exit(0);

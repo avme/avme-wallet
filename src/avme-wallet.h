@@ -83,7 +83,7 @@ class WalletManager {
     // Check if an account is completely empty.
     bool accountIsEmpty(std::string account);
 
-    // Select the appropriate address stored in KeyManager from user input string.
+    // Select the appropriate account name or address stored in KeyManager from user input string.
     Address userToAddress(std::string const& input);
 
     // Load the secret key for a given address in the wallet.

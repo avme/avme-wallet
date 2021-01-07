@@ -154,7 +154,7 @@ bool WalletManager::accountIsEmpty(std::string account) {
   return (amountETH == "0" && amountTAEX == "0");
 }
 
-// Select the appropriate address stored in KeyManager from user input string.
+// Select the appropriate account name or address stored in KeyManager from user input string.
 Address WalletManager::userToAddress(std::string const& input) {
   if (h128 u = fromUUID(input)) { return this->wallet.address(u); }
   DEV_IGNORE_EXCEPTIONS(return toAddress(input));
@@ -597,7 +597,7 @@ std::string WalletManager::sendTransaction(std::string txidHex) {
 }
 
 // Decode a raw transaction and show information about it.
-// TODO: get those couts out (what a mouthful)
+// TODO: return a proper structure instead of using couts here
 void WalletManager::decodeRawTransaction(std::string rawTxHex) {
   TransactionBase transaction = TransactionBase(fromHex(rawTxHex), CheckTransaction::None);
   std::cout << "Transaction: " << transaction.sha3().hex() << std::endl;
