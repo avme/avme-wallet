@@ -94,22 +94,17 @@ bool WalletManager::createNewWallet(path walletPath, path secretsPath, std::stri
  * An Account contains an ETH address and other stuff.
  * See https://ethereum.org/en/developers/docs/accounts/ for more info.
  */
-std::vector<std::string> WalletManager::createNewAccount(
+WalletAccount WalletManager::createNewAccount(
   std::string name, std::string pass, std::string hint, bool usesMasterPass
 ) {
   auto k = makeKey();
   h128 u = this->wallet.import(k.secret(), name, pass, hint);
-  std::vector<std::string> ret;
+  WalletAccount ret;
 
-  // In this order: ID, name, address and hint
-  ret.push_back(toUUID(u));
-  ret.push_back(name);
-  ret.push_back(k.address().hex());
-  if (usesMasterPass) {
-    ret.push_back("Uses master passphrase");
-  } else {
-    ret.push_back(hint);
-  }
+  ret.id = toUUID(u);
+  ret.name = name;
+  ret.address = k.address().hex();
+  ret.hint = (usesMasterPass) ? "Uses master passphrase" : hint;
 
   return ret;
 }
@@ -233,6 +228,7 @@ std::string WalletManager::convertWeiToFixedPoint(std::string amount, size_t dig
 std::string WalletManager::convertFixedPointToWei(std::string amount, int decimals) {
   std::string digitPadding = "";
   std::string valuestr = "";
+
   // Check if input is valid
   for (auto &c : amount)
     if (!std::isdigit(c) && c != '.')
@@ -264,7 +260,6 @@ std::string WalletManager::convertFixedPointToWei(std::string amount, int decima
   // Create padding if there are missing decimals
   while(digitPadding.size() < decimals)
     digitPadding += '0';
-
   valuestr += digitPadding;
   while(valuestr[0] == '0')
     valuestr.erase(0,1);
@@ -272,54 +267,35 @@ std::string WalletManager::convertFixedPointToWei(std::string amount, int decima
   return valuestr;
 }
 
-// List the wallet's ETH accounts and their amounts.
-// TODO: make the data be a proper structure instead of a big string
-std::vector<std::string> WalletManager::listETHAccounts() {
+// List the wallet's ETH accounts and their balances.
+std::vector<WalletAccount> WalletManager::listETHAccounts() {
   if (this->wallet.store().keys().empty()) { return {}; }
-
-  std::vector<std::string> WalletList;
-  std::vector<std::string> AddressList;
-  std::vector<std::string> BareList;
   AddressHash got;
+  std::vector<WalletAccount> ret;
 
-  // Separating normal accounts from bare accounts
   for (auto const& u: this->wallet.store().keys()) {
-    std::stringstream buffer;
-    std::stringstream barebuffer;
-    std::stringstream addressbuffer;
-    if (Address a = this->wallet.address(u)) {
+    WalletAccount wa;
+    if (Address a = this->wallet.address(u)) {  // Normal accounts
       got.insert(a);
-      buffer << toUUID(u) << " " << a.abridged() << " ";
-      buffer << "0x" << a << " ";
-      addressbuffer << "0x" << a;
-      buffer << this->wallet.accountName(a) << " ";
-      WalletList.push_back(buffer.str());
-      AddressList.push_back(addressbuffer.str());
-    } else {
-      barebuffer << "0x" << u << " (Bare)";
-      BareList.push_back(barebuffer.str());
-    }
-  }
-
-  // Querying account balances and joining bare accounts at the end
-  for (std::size_t i = 0; i < AddressList.size(); ++i) {
-    std::string balanceApiRequest = Network::getETHBalance(AddressList[i]);
-    std::string balance = get_json_value(balanceApiRequest, "result");
-    // Check if balance is valid (not an error message)
-    if (balance == "") { return {}; }
-    for (auto &c : balance) {
-      if (!std::isdigit(c) && c != '.') {
-        return {};
+      wa.id = toUUID(u);
+      wa.privKey = a.abridged();
+      wa.name = this->wallet.accountName(a);
+      wa.address = "0x" + boost::lexical_cast<std::string>(a);
+      std::string balance = get_json_value(Network::getETHBalance(wa.address), "result");
+      if (balance == "") { return {}; }
+      for (auto &c : balance) {
+        if (!std::isdigit(c) && c != '.') {
+          return {};
+        }
       }
+      wa.balanceETH = convertWeiToFixedPoint(balance, 18);
+    } else {  // Bare accounts
+      wa.address = "0x" + boost::lexical_cast<std::string>(a) + " (Bare)";
     }
-    balance = convertWeiToFixedPoint(balance, 18);
-    WalletList[i] += (balance + "\n");
-  }
-  if (!BareList.empty()) {
-    WalletList.insert(WalletList.end(), BareList.begin(), BareList.end());
+    ret.push_back(wa);
   }
 
-  return WalletList;
+  return ret;
 }
 
 /**
@@ -327,53 +303,34 @@ std::vector<std::string> WalletManager::listETHAccounts() {
  * ERC-20 tokens need to be loaded in a different way, from their proper
  * contract address, beside their respective wallet address.
  */
-// TODO: make the data be a proper structure instead of a big string
-std::vector<std::string> WalletManager::listTAEXAccounts() {
+std::vector<WalletAccount> WalletManager::listTAEXAccounts() {
   if (this->wallet.store().keys().empty()) { return {}; }
-
-  std::vector<std::string> WalletList;
-  std::vector<std::string> AddressList;
-  std::vector<std::string> BareList;
   AddressHash got;
+  std::vector<WalletAccount> ret;
 
-  // Separating normal accounts from bare accounts
   for (auto const& u: this->wallet.store().keys()) {
-    std::stringstream buffer;
-    std::stringstream barebuffer;
-    std::stringstream addressbuffer;
-    if (Address a = this->wallet.address(u)) {
+    WalletAccount wa;
+    if (Address a = this->wallet.address(u)) {  // Normal accounts
       got.insert(a);
-      buffer << toUUID(u) << " " << a.abridged() << " ";
-      buffer << "0x" << a << " ";
-      addressbuffer << "0x" << a;
-      buffer << this->wallet.accountName(a) << " ";
-      WalletList.push_back(buffer.str());
-      AddressList.push_back(addressbuffer.str());
-    } else {
-      barebuffer << "0x" << u << " (Bare)";
-      BareList.push_back(barebuffer.str());
-    }
-  }
-
-  // Querying account balances and joining bare accounts at the end
-  for (std::size_t i = 0; i < AddressList.size(); ++i) {
-    std::string balanceApiRequest = Network::getTAEXBalance(AddressList[i]);
-    std::string balance = get_json_value(balanceApiRequest, "result");
-    // Check if balance is valid (not an error message)
-    if (balance == "") { return {}; }
-    for (auto &c : balance) {
-      if (!std::isdigit(c) && c != '.') {
-        return {};
+      wa.id = toUUID(u);
+      wa.privKey = a.abridged();
+      wa.name = this->wallet.accountName(a);
+      wa.address = "0x" + boost::lexical_cast<std::string>(a);
+      std::string balance = get_json_value(Network::getTAEXBalance(wa.address), "result");
+      if (balance == "") { return {}; }
+      for (auto &c : balance) {
+        if (!std::isdigit(c) && c != '.') {
+          return {};
+        }
       }
+      wa.balanceTAEX = convertWeiToFixedPoint(balance, 4);
+    } else {  // Bare accounts
+      wa.address = "0x" + boost::lexical_cast<std::string>(a) + " (Bare)";
     }
-    balance = convertWeiToFixedPoint(balance, 4);
-    WalletList[i] += (balance + "\n");
-  }
-  if (!BareList.empty()) {
-    WalletList.insert(WalletList.end(), BareList.begin(), BareList.end());
+    ret.push_back(wa);
   }
 
-  return WalletList;
+  return ret;
 }
 
 // Get an automatic amount of fees for the transaction.
@@ -533,39 +490,41 @@ std::string WalletManager::sendTransaction(std::string txidHex) {
 }
 
 // Decode a raw transaction and show information about it.
-// TODO: return a proper structure instead of using couts here
-void WalletManager::decodeRawTransaction(std::string rawTxHex) {
+WalletTxData WalletManager::decodeRawTransaction(std::string rawTxHex) {
   TransactionBase transaction = TransactionBase(fromHex(rawTxHex), CheckTransaction::None);
-  std::cout << "Transaction: " << transaction.sha3().hex() << std::endl;
-  if (transaction.isCreation())
-  {
-    std::cout << "type: creation" << std::endl;
-    std::cout << "code: " << toHex(transaction.data()) << std::endl;
+  WalletTxData ret;
+
+  ret.hex = transaction.sha3().hex();
+  if (transaction.isCreation()) {
+    ret.type = "creation";
+    ret.code = toHex(transaction.data());
   } else {
-    std::cout << "type: message" << std::endl;
-    std::cout << "to: " << transaction.to() << std::endl;
-    std::cout << "data: " << (transaction.data().empty() ? "none" : toHex(transaction.data())) << std::endl;
+    ret.type = "message";
+    ret.to = boost::lexical_cast<std::string>(transaction.to());
+    ret.data = (transaction.data().empty() ? "none" : toHex(transaction.data()));
   }
   try {
     auto s = transaction.sender();
-    if (transaction.isCreation())
-      std::cout << "creates: " << toAddress(s, transaction.nonce()) << std::endl;
-    std::cout << "from: " << s << std::endl;
+    if (transaction.isCreation()) {
+      ret.creates = boost::lexical_cast<std::string>(toAddress(s, transaction.nonce()));
+    }
+    ret.from = boost::lexical_cast<std::string>(s);
+  } catch(...) {
+    ret.from = "<unsigned>";
   }
-  catch (...)
-  {
-    std::cout << "from: <unsigned>" << std::endl;
+  ret.value = formatBalance(transaction.value()) + " (" +
+    boost::lexical_cast<std::string>(transaction.value()) + " wei)";
+  ret.nonce = boost::lexical_cast<std::string>(transaction.nonce());
+  ret.gas = boost::lexical_cast<std::string>(transaction.gas());
+  ret.price = formatBalance(transaction.gasPrice()) + " (" +
+    boost::lexical_cast<std::string>(transaction.gasPrice()) + " wei)";
+  ret.hash = transaction.sha3(WithoutSignature).hex();
+  if (transaction.safeSender()) {
+    ret.v = boost::lexical_cast<std::string>(transaction.signature().v);
+    ret.r = boost::lexical_cast<std::string>(transaction.signature().r);
+    ret.s = boost::lexical_cast<std::string>(transaction.signature().s);
   }
-  std::cout << "value: " << formatBalance(transaction.value()) << " (" << transaction.value() << " wei)" << std::endl;
-  std::cout << "nonce: " << transaction.nonce() << std::endl;
-  std::cout << "gas: " << transaction.gas() << std::endl;
-  std::cout << "gas price: " << formatBalance(transaction.gasPrice()) << " (" << transaction.gasPrice() << " wei)" << std::endl;
-  std::cout << "signing hash: " << transaction.sha3(WithoutSignature).hex() << std::endl;
-  if (transaction.safeSender())
-  {
-    std::cout << "v: " << (int)transaction.signature().v << std::endl;
-    std::cout << "r: " << transaction.signature().r << std::endl;
-    std::cout << "s: " << transaction.signature().s << std::endl;
-  }
+
+  return ret;
 }
 

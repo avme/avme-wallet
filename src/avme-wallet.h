@@ -38,6 +38,36 @@ using namespace boost::filesystem;
 
 class BadArgument: public Exception {};
 
+// Struct for account data
+typedef struct WalletAccount {
+  std::string id;
+  std::string privKey;
+  std::string name;
+  std::string address;
+  std::string hint;
+  std::string balanceETH;
+  std::string balanceTAEX;
+} WalletAccount;
+
+// Struct for raw transaction data
+typedef struct WalletTxData {
+  std::string hex;
+  std::string type;
+  std::string code;
+  std::string to;
+  std::string from;
+  std::string data;
+  std::string creates;
+  std::string value;
+  std::string nonce;
+  std::string gas;
+  std::string price;
+  std::string hash;
+  std::string v;
+  std::string r;
+  std::string s;
+} WalletTxData;
+
 class WalletManager {
   private:
     // The proper wallet
@@ -73,7 +103,7 @@ class WalletManager {
     bool createNewWallet(path walletPath, path secretsPath, std::string walletPass);
 
     // Create a new Account in the given wallet and encrypt it.
-    std::vector<std::string> createNewAccount(
+    WalletAccount createNewAccount(
       std::string name, std::string pass, std::string hint, bool usesMasterPass
     );
 
@@ -101,15 +131,15 @@ class WalletManager {
     // Convert a fixed point amount of ETH to a full amount in Wei.
     std::string convertFixedPointToWei(std::string amount, int digits);
 
-    // List the wallet's ETH accounts and their amounts.
-    std::vector<std::string> listETHAccounts();
+    // List the wallet's ETH accounts and their balances.
+    std::vector<WalletAccount> listETHAccounts();
 
     /**
      * List the wallet's TAEX accounts and their amounts.
      * ERC-20 tokens need to be loaded in a different way, from their proper
      * contract address, beside their respective wallet address.
      */
-    std::vector<std::string> listTAEXAccounts();
+    std::vector<WalletAccount> listTAEXAccounts();
 
     // Get an automatic amount of fees for the transaction.
     std::string getAutomaticFee();
@@ -138,6 +168,6 @@ class WalletManager {
     std::string sendTransaction(std::string txidHex);
 
     // Decode a raw transaction and show information about it.
-    void decodeRawTransaction(std::string rawTxHex);
+    WalletTxData decodeRawTransaction(std::string rawTxHex);
 };
 

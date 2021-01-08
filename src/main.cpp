@@ -107,19 +107,27 @@ int main () {
 
     // List accounts
     if (menuOp == "1") {
-      std::vector<std::string> ETHAccounts = wm.listETHAccounts();
+      std::vector<WalletAccount> ETHAccounts = wm.listETHAccounts();
       if (!ETHAccounts.empty()) {
-        for (std::string accountData : ETHAccounts) {
-          std::cout << accountData << std::endl;
+        for (WalletAccount accountData : ETHAccounts) {
+          std::cout << accountData.id << " "
+                    << accountData.privKey << " "
+                    << accountData.name << " "
+                    << accountData.address << " "
+                    << accountData.balanceETH << std::endl;
         }
       } else {
         std::cout << "No accounts found." << std::endl;
       }
     } else if (menuOp == "2") {
-      std::vector<std::string> TAEXAccounts = wm.listTAEXAccounts();
+      std::vector<WalletAccount> TAEXAccounts = wm.listTAEXAccounts();
       if (!TAEXAccounts.empty()) {
-        for (std::string accountData : TAEXAccounts) {
-          std::cout << accountData << std::endl;
+        for (WalletAccount accountData : TAEXAccounts) {
+          std::cout << accountData.id << " "
+                    << accountData.privKey << " "
+                    << accountData.name << " "
+                    << accountData.address << " "
+                    << accountData.balanceTAEX << std::endl;
         }
       } else {
         std::cout << "No accounts found." << std::endl;
@@ -186,12 +194,13 @@ int main () {
       std::cout << "Building transaction..." << std::endl;
       txSkel = wm.buildETHTransaction(signKey, destWallet, txValue, txGas, txGasPrice);
       if (txSkel.nonce == wm.MAX_U256_VALUE()) {
-          std::cout << "Error in transaction building" << std::endl;
-          continue;
+        std::cout << "Error in transaction building" << std::endl;
+        continue;
       }
       std::cout << "Signing transaction..." << std::endl;
       signedTx = wm.signTransaction(txSkel, pass, signKey);
-      std::cout << "Transaction signed, broadcasting..." << std::endl;
+      std::cout << "Transaction signed: " << signedTx << std::endl;
+      std::cout << "Broadcasting transaction..." << std::endl;
       transactionLink = wm.sendTransaction(signedTx);
       if (transactionLink == "") {
         std::cout << "Transaction failed. Please try again." << std::endl;
@@ -273,7 +282,8 @@ int main () {
       }
       std::cout << "Signing transaction..." << std::endl;
       signedTx = wm.signTransaction(txSkel, pass, signKey);
-      std::cout << "Transaction signed, broadcasting..." << std::endl;
+      std::cout << "Transaction signed: " << signedTx;
+      std::cout << "Broadcasting transaction..." << std::endl;
       transactionLink = wm.sendTransaction(signedTx);
       while (transactionLink.find("Transaction nonce is too low") != std::string::npos ||
           transactionLink.find("Transaction with the same hash was already imported") != std::string::npos) {
@@ -316,11 +326,11 @@ int main () {
         std::cout << "Passphrases were different. Try again." << std::endl;
       }
       std::cout << "Creating a new account..." << std::endl;
-      std::vector<std::string> data = wm.createNewAccount(name, aPass, aPassHint, usesMasterPass);
-      std::cout << "Created key " << data[0] << std::endl
-                << "  Name: " << data[1] << std::endl
-                << "  Address: " << data[2] << std::endl
-                << "  Hint: " << data[3] << std::endl;
+      WalletAccount data = wm.createNewAccount(name, aPass, aPassHint, usesMasterPass);
+      std::cout << "Created key " << data.id << std::endl
+                << "  Name: " << data.name << std::endl
+                << "  Address: " << data.address << std::endl
+                << "  Hint: " << data.hint << std::endl;
       std::cout << "Reloading wallet..." << std::endl;
       wm.loadWallet(walletPath, secretsPath, walletPass);
 
@@ -364,8 +374,21 @@ int main () {
       std::string rawTxHex;
       std::cout << "Please input the raw transaction in Hex." << std::endl;
       std::getline(std::cin, rawTxHex);
-      wm.decodeRawTransaction(rawTxHex);
-
+      WalletTxData txData = wm.decodeRawTransaction(rawTxHex);
+      std::cout << "Transaction: " << txData.hex << std::endl
+                << "Type: " << txData.type << std::endl
+                << "Code: " << txData.code << std::endl
+                << "To: " << txData.to << std::endl
+                << "From: " << txData.from << std::endl
+                << "Creates: " << txData.creates << std::endl
+                << "Value: " << txData.value << std::endl
+                << "Nonce: " << txData.nonce << std::endl
+                << "Gas: " << txData.gas << std::endl
+                << "Gas Price: " << txData.price << std::endl
+                << "Hash: " << txData.hash << std::endl
+                << "v: " << txData.v << std::endl
+                << "r: " << txData.r << std::endl
+                << "s: " << txData.s << std::endl;
     // Exit
     } else if (menuOp == "9") {
       std::cout << "Exiting..." << std::endl;
