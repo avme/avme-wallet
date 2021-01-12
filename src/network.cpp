@@ -3,8 +3,8 @@
 // TODO: find a way to toggle between testnet and mainnet later
 std::string Network::hostName = "api-ropsten.etherscan.io";
 std::string Network::hostPort = "80";
+std::string Network::apiKey = "6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
 
-// Send an HTTP GET Request to the blockchain API.
 std::string Network::httpGetRequest(std::string httpquery) {
   using boost::asio::ip::tcp;
   std::string server_answer;
@@ -29,8 +29,8 @@ std::string Network::httpGetRequest(std::string httpquery) {
 
     /**
      * Form the request. We specify the "Connection: close" header so that the
-     * server will close the socket after transmitting the response. This will
-     * allow us to treat all data up until the EOF as the content.
+     * server will close the socket after transmitting the response.
+     * This allows to treat all data up until the EOF as the content.
      */
     boost::asio::streambuf request;
     std::ostream request_stream(&request);
@@ -60,11 +60,11 @@ std::string Network::httpGetRequest(std::string httpquery) {
     std::getline(response_stream, status_message);
     if (!response_stream || http_version.substr(0, 5) != "HTTP/") {
       std::cout << "Invalid response\n";
-      return "CANNOT GET BALANCE";
+      return "";
     }
     if (status_code != 200) {
       std::cout << "Response returned with status code " << status_code << "\n";
-      return "CANNOT GET BALANCE";
+      return "";
     }
 
     // Read the response headers, which are terminated by a blank line.
@@ -91,51 +91,48 @@ std::string Network::httpGetRequest(std::string httpquery) {
     }
   } catch (std::exception& e) {
     std::cout << "Exception: " << e.what() << "\n";
+    return "";
   }
 
   return server_answer;
 }
 
-// Get the ETH balance from an address in the blockchain API.
 std::string Network::getETHBalance(std::string address) {
   std::stringstream query;
-  query << "/api?module=account&action=balance&address=";
-  query << address;
-  query << "&tag=latest&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
+  query << "/api?module=account&action=balance"
+        << "&address=" << address
+        << "&tag=latest&apikey=" << apiKey;
   return Network::httpGetRequest(query.str());
 }
 
-// Same thing as above, but for TAEX.
 std::string Network::getTAEXBalance(std::string address) {
   std::stringstream query;
-  query << "/api?module=account&action=tokenbalance&contractaddress=0x9c19d746472978750778f334b262de532d9a85f9&address=";
-  query << address;
-  query << "&tag=latest&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
+  query << "/api?module=account&action=tokenbalance"
+        << "&contractaddress=0x9c19d746472978750778f334b262de532d9a85f9"
+        << "&address=" << address
+        << "&tag=latest&apikey=" << apiKey;
   return Network::httpGetRequest(query.str());
 }
 
-// Get recommended fees at the moment from the blockchain API.
 std::string Network::getTxFees() {
   std::stringstream query;
-  query << "/api?module=gastracker&action=gasoracle&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
+  query << "/api?module=gastracker&action=gasoracle&apikey=" << apiKey;
   return Network::httpGetRequest(query.str());
 }
 
-// Get the latest nonce for an address from the blockchain API.
 std::string Network::getTxNonce(std::string address) {
   std::stringstream query;
-  query << "/api?module=proxy&action=eth_getTransactionCount&address=";
-  query << address;
-  query << "&tag=latest&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
+  query << "/api?module=proxy&action=eth_getTransactionCount"
+        << "&address=" << address
+        << "&tag=latest&apikey=" << apiKey;
   return Network::httpGetRequest(query.str());
 }
 
-// Broadcast a signed transaction to the blockchain.
 std::string Network::broadcastTransaction(std::string txidHex) {
   std::stringstream query;
-  query << "/api?module=proxy&action=eth_sendRawTransaction&hex=";
-  query << txidHex;
-  query << "&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
+  query << "/api?module=proxy&action=eth_sendRawTransaction"
+        << "&hex=" << txidHex
+        << "&apikey=" << apiKey;
   return Network::httpGetRequest(query.str());
 }
 
