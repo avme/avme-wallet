@@ -73,7 +73,9 @@ int main () {
     std::cout << "Enter your wallet's passphrase." << std::endl;
     std::getline(std::cin, walletPass);
     std::cout << "Loading wallet..." << std::endl;
-    if (!wm.loadWallet(walletPath, secretsPath, walletPass)) {
+    if (wm.loadWallet(walletPath, secretsPath, walletPass)) {
+      break;
+    } else {
       std::cout << "Error loading wallet: wrong passphrase. Please try again." << std::endl;
     }
   }
