@@ -1,18 +1,7 @@
 #include "avme-wallet.h"
 
-/**
- * The structure of this program is very simple:
- * - Check if a default wallet exists already. If it does, ask the user if
- *   he wants to load their default wallet or create/load from a different
- *   place. If it doesn't, ask the user to create a new one.
- * - After loading the wallet, store it in a dev::eth::KeyManager object, which
- *   will be used to call different functions for the wallet (e.g. looking up
- *   an address, signing a transaction, etc.)
- * - Use those different functions accordingly to the user input, which is
- *   filtered and processed in the switch case block below
- * Check the header file for more information on what does what.
- * NOTE: some features may not exist or be buggy, take caution.
- */
+// Implementation of AVME Wallet as a CLI program.
+
 int main () {
   /**
    * Setup logging options to default so we're not flooded with thousands of
@@ -22,20 +11,17 @@ int main () {
   dev::setupLogging(loggingOptions);
 
   WalletManager wm;
-  std::string walletPass;
-  boost::filesystem::path walletPath;
-  boost::filesystem::path secretsPath;
-  std::string menuOp;
+  std::string walletPass, menuOp;
+  boost::filesystem::path walletPath, secretsPath;
 
-  // Block that loads/creates the wallet
+  // Prompt for loading/creating user wallet
   std::cout << "Hello! Welcome to the AVME CLI wallet." << std::endl;
   bool defaultWalletExists = boost::filesystem::exists(KeyManager::defaultPath());
   bool defaultSecretExists = boost::filesystem::exists(SecretStore::defaultPath());
-
   if (defaultWalletExists && defaultSecretExists) {
     std::cout << "Default wallet found. How do you want to proceed?\n" <<
                  "1 - Load the default wallet\n" <<
-                 "2 - Load another existing wallet\n" <<
+                 "2 - Load an existing wallet\n" <<
                  "3 - Create and load a new wallet" << std::endl;
   } else {
     std::cout << "Default wallet not found. How do you want to proceed?\n" <<
@@ -44,35 +30,33 @@ int main () {
   }
   std::getline(std::cin, menuOp);
 
+  // Load the default wallet (if it exists)
   if (menuOp == "1") {
     walletPath = KeyManager::defaultPath();
     secretsPath = SecretStore::defaultPath();
-    std::cout << "Enter your wallet's passphrase." << std::endl;
-    std::getline(std::cin, walletPass);
+
+  // Load an existing wallet
   } else if (menuOp == "2") {
-    std::string wBuf;
-    std::string sBuf;
+    std::string wBuf, sBuf;
     std::cout << "Please inform the full path of your wallet file." << std::endl;
     std::getline(std::cin, wBuf);
-    walletPath = wBuf;
     std::cout << "Please inform the full path of your wallet secrets folder." << std::endl;
     std::getline(std::cin, sBuf);
+    walletPath = wBuf;
     secretsPath = sBuf;
-    std::cout << "Enter your wallet's passphrase." << std::endl;
-    std::getline(std::cin, walletPass);
+
+  // Create and load a new wallet
   } else if (menuOp == "3") {
-    std::string wBuf;
-    std::string sBuf;
-    std::cout << "Please inform the full path of your wallet file, or leave blank for the default." << std::endl;
+    std::string wBuf, sBuf, passConf;
+    std::cout << "Please inform the full path of your wallet file, or leave blank for default." << std::endl;
     std::cout << "Default is " << KeyManager::defaultPath() << std::endl;
     std::getline(std::cin, wBuf);
-    walletPath = (wBuf.empty()) ? KeyManager::defaultPath() : wBuf;
-    std::cout << "Please inform the full path of your wallet secrets folder, or leave blank for the default." << std::endl;
+    std::cout << "Please inform the full path of your wallet secrets folder, or leave blank for default." << std::endl;
     std::cout << "Default is " << SecretStore::defaultPath() << std::endl;
     std::getline(std::cin, sBuf);
+    walletPath = (wBuf.empty()) ? KeyManager::defaultPath() : wBuf;
     secretsPath = (sBuf.empty()) ? SecretStore::defaultPath() : sBuf;
     while (true) {
-      std::string passConf;
       std::cout << "Enter a master passphrase to protect your key store (make it strong!)." << std::endl;
       std::getline(std::cin, walletPass);
       std::cout << "Please confirm the master passphrase by entering it again." << std::endl;
@@ -84,10 +68,14 @@ int main () {
     wm.createNewWallet(walletPath, secretsPath, walletPass);
   }
 
-  std::cout << "Loading wallet..." << std::endl;
-  if (!wm.loadWallet(walletPath, secretsPath, walletPass)) {
-    std::cout << "Error loading wallet: wrong passphrase" << std::endl;
-    exit(0);
+  // Load the proper wallet
+  while (true) {
+    std::cout << "Enter your wallet's passphrase." << std::endl;
+    std::getline(std::cin, walletPass);
+    std::cout << "Loading wallet..." << std::endl;
+    if (!wm.loadWallet(walletPath, secretsPath, walletPass)) {
+      std::cout << "Error loading wallet: wrong passphrase. Please try again." << std::endl;
+    }
   }
   std::cout << "Wallet loaded." << std::endl;
 
@@ -135,16 +123,9 @@ int main () {
 
     // Send ETH transactions
     } else if (menuOp == "3") {
-      std::string pass;
-      std::string passConf;
-      std::string signKey;
-      std::string destWallet;
-      std::string txValue;
-      std::string txGas;
-      std::string txGasPrice;
+      std::string signKey, destWallet, txValue, txGas, txGasPrice,
+                  signedTx, transactionLink, pass, passConf;
       TransactionSkeleton txSkel;
-      std::string signedTx;
-      std::string transactionLink;
 
       std::cout << "From which address do you want to send a transaction?" << std::endl;
       std::getline(std::cin, signKey);
@@ -187,7 +168,7 @@ int main () {
         std::getline(std::cin, pass);
         std::cout << "Please confirm the passphrase by entering it again." << std::endl;
         std::getline(std::cin, passConf);
-        if (pass == passConf && pass == walletPass) { break; }
+        if (pass == passConf) { break; }
         std::cout << "Passphrases were different or don't match the wallet's. Try again." << std::endl;
       }
 
@@ -218,16 +199,9 @@ int main () {
 
     // Send TAEX transactions
     } else if (menuOp == "4") {
-      std::string pass;
-      std::string passConf;
-      std::string signKey;
-      std::string destWallet;
-      std::string txValue;
-      std::string txGas;
-      std::string txGasPrice;
+      std::string signKey, destWallet, txValue, txGas, txGasPrice,
+                  signedTx, transactionLink, pass, passConf;
       TransactionSkeleton txSkel;
-      std::string signedTx;
-      std::string transactionLink;
 
       std::cout << "From which address do you want to send a transaction?" << std::endl;
       std::getline(std::cin, signKey);
@@ -298,10 +272,7 @@ int main () {
 
     // Create new account
     } else if (menuOp == "5") {
-      std::string name;
-      std::string aPass;
-      std::string aPassConf;
-      std::string aPassHint;
+      std::string name, aPass, aPassConf, aPassHint;
       bool usesMasterPass;
 
       std::cout << "Give a name to your account." << std::endl;
@@ -336,9 +307,7 @@ int main () {
 
     // Erase account
     } else if (menuOp == "6") {
-      std::string account;
-      std::string pass;
-      std::string passConf;
+      std::string account, pass, passConf;
 
       std::cout << "Please inform the account name or address that you want to delete." << std::endl;
       std::getline(std::cin, account);

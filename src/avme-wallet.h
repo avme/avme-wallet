@@ -110,7 +110,7 @@ class WalletManager {
     // Hash a given phrase to create a new address based on that phrase.
     void createKeyPairFromPhrase(std::string phrase);
 
-    // Erase an Account from the wallet.
+    // Erase an Account from the wallet. Will only erase if account is empty.
     bool eraseAccount(std::string account);
 
     // Check if an account is completely empty.
@@ -167,7 +167,7 @@ class WalletManager {
     // Send a transaction to the API provider for processing.
     std::string sendTransaction(std::string txidHex);
 
-    // Decode a raw transaction and show information about it.
+    // Decode a raw transaction (in Hex).
     WalletTxData decodeRawTransaction(std::string rawTxHex);
 };
 

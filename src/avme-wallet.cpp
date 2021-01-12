@@ -126,7 +126,7 @@ void WalletManager::createKeyPairFromPhrase(std::string phrase) {
   return;
 }
 
-// Erase an Account from the wallet.
+// Erase an Account from the wallet. Will only erase if account is empty.
 bool WalletManager::eraseAccount(std::string account) {
   if (Address a = userToAddress(account)) {
     if (accountIsEmpty(account)) {
@@ -489,7 +489,7 @@ std::string WalletManager::sendTransaction(std::string txidHex) {
   return txLink;
 }
 
-// Decode a raw transaction and show information about it.
+// Decode a raw transaction (in Hex).
 WalletTxData WalletManager::decodeRawTransaction(std::string rawTxHex) {
   TransactionBase transaction = TransactionBase(fromHex(rawTxHex), CheckTransaction::None);
   WalletTxData ret;
