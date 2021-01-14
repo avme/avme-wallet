@@ -102,7 +102,33 @@ std::string Network::getETHBalance(std::string address) {
   query << "/api?module=account&action=balance"
         << "&address=" << address
         << "&tag=latest&apikey=" << apiKey;
-  return Network::httpGetRequest(query.str());
+  return httpGetRequest(query.str());
+}
+
+std::string Network::getETHBalances(std::vector<std::string> addresses) {
+  std::stringstream query;
+  std::vector<std::string> ret;
+  int ct = 0;
+
+  for (std::string address : addresses) {
+    // Start a new query
+    if (ct == 0) {
+      query << "/api?module=account&action=balancemulti&address=";
+    }
+
+    // Add the address and count it towards the batch limit
+    query << address;
+    ct++;
+
+    // When we reach the batch limit, wrap it up and send the request
+    if (ct == 20 || address == addresses.back()) {
+      query << "&tag=latest&apikey=" << apiKey;
+    } else {
+      query << ","; // Separate addresses with a comma
+    }
+  }
+
+  return httpGetRequest(query.str());
 }
 
 std::string Network::getTAEXBalance(std::string address) {
@@ -111,13 +137,13 @@ std::string Network::getTAEXBalance(std::string address) {
         << "&contractaddress=0x9c19d746472978750778f334b262de532d9a85f9"
         << "&address=" << address
         << "&tag=latest&apikey=" << apiKey;
-  return Network::httpGetRequest(query.str());
+  return httpGetRequest(query.str());
 }
 
 std::string Network::getTxFees() {
   std::stringstream query;
   query << "/api?module=gastracker&action=gasoracle&apikey=" << apiKey;
-  return Network::httpGetRequest(query.str());
+  return httpGetRequest(query.str());
 }
 
 std::string Network::getTxNonce(std::string address) {
@@ -125,7 +151,7 @@ std::string Network::getTxNonce(std::string address) {
   query << "/api?module=proxy&action=eth_getTransactionCount"
         << "&address=" << address
         << "&tag=latest&apikey=" << apiKey;
-  return Network::httpGetRequest(query.str());
+  return httpGetRequest(query.str());
 }
 
 std::string Network::broadcastTransaction(std::string txidHex) {
@@ -133,6 +159,6 @@ std::string Network::broadcastTransaction(std::string txidHex) {
   query << "/api?module=proxy&action=eth_sendRawTransaction"
         << "&hex=" << txidHex
         << "&apikey=" << apiKey;
-  return Network::httpGetRequest(query.str());
+  return httpGetRequest(query.str());
 }
 
