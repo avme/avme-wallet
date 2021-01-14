@@ -3,54 +3,14 @@
 // Licensed under the GNU General Public License, Version 3.
 /// @file
 /// CLI module for key management.
-#pragma once
-
 #include "avme-wallet.h"
 
-// Get object item from a JSON element.
-const json_spirit::mValue WalletManager::get_object_item(
-  const json_spirit::mValue element, const std::string name
-) {
-  return element.get_obj().at(name);
-}
-
-// Get array item from a JSON element.
-const json_spirit::mValue WalletManager::get_array_item(
-  const json_spirit::mValue element, size_t index
-) {
-  return element.get_array().at(index);
-}
-
-// Get a specific value from a JSON element.
-std::string WalletManager::get_json_value(std::string json, std::string value) {
-  std::string ret;
-  json_spirit::mValue jsonValue;
-  auto jsonSuccess = json_spirit::read_string(json, jsonValue);
-
-  if (jsonSuccess) {
-    try {
-      ret = get_object_item(jsonValue, value).get_str();
-    } catch (std::exception &e) {
-      std::cout << "Error when reading json for \"" << value << "\": " << e.what() << std::endl;
-      ret = get_object_item(get_object_item(jsonValue, "error"), "message").get_str();
-      std::cout << "Message: " << ret << std::endl;
-    }
-  } else {
-    std::cout << "Error reading json, check json value: " << json << std::endl;
-    ret = "";
-  }
-
-  return ret;
-}
-
-// Set MAX_U256_VALUE for error handling.
 u256 WalletManager::MAX_U256_VALUE() {
   return (raiseToPow(2, 256) - 1);
 }
 
-// Load and authenticate a wallet from the given paths.
-bool WalletManager::loadWallet(path walletPath, path secretsPath, std::string walletPass) {
-  KeyManager w(walletPath, secretsPath);
+bool WalletManager::loadWallet(path walletFile, path secretsPath, std::string walletPass) {
+  KeyManager w(walletFile, secretsPath);
   if (w.load(walletPass)) {
     this->wallet = w;
     return true;
@@ -59,27 +19,18 @@ bool WalletManager::loadWallet(path walletPath, path secretsPath, std::string wa
   }
 }
 
-/**
- * Load the SecretStore (an object inside KeyManager that contains all secrets
- * for the addresses stored in it).
- */
-SecretStore& WalletManager::secretStore() {
-  return this->wallet.store();
-}
-
-// Create a new wallet, which should be loaded manually afterwards.
-bool WalletManager::createNewWallet(path walletPath, path secretsPath, std::string walletPass) {
+bool WalletManager::createNewWallet(path walletFile, path secretsPath, std::string walletPass) {
   // Create the paths if they don't exist yet.
-  // Remember walletPath points to a *file*, and secretsPath points to a *dir*.
-  if (!exists(walletPath.parent_path())) {
-    create_directories(walletPath.parent_path());
+  // Remember walletFile points to a *file*, and secretsPath points to a *dir*.
+  if (!exists(walletFile.parent_path())) {
+    create_directories(walletFile.parent_path());
   }
   if (!exists(secretsPath)) {
     create_directories(secretsPath);
   }
 
   // Initialize the new wallet
-  KeyManager w(walletPath, secretsPath);
+  KeyManager w(walletFile, secretsPath);
   try {
     w.create(walletPass);
     return true;
@@ -89,11 +40,6 @@ bool WalletManager::createNewWallet(path walletPath, path secretsPath, std::stri
   }
 }
 
-/**
- * Create a new Account in the given wallet and encrypt it.
- * An Account contains an ETH address and other stuff.
- * See https://ethereum.org/en/developers/docs/accounts/ for more info.
- */
 WalletAccount WalletManager::createNewAccount(
   std::string name, std::string pass, std::string hint, bool usesMasterPass
 ) {
@@ -114,6 +60,7 @@ WalletAccount WalletManager::createNewAccount(
  * It's easier to hash since hashing creates the 256-bit variable used by
  * the private key.
  */
+// TODO: decide on this
 void WalletManager::createKeyPairFromPhrase(std::string phrase) {
   std::string shahash = dev::sha3(phrase, false);
   for (auto i = 0; i < 1048577; ++i) {
@@ -126,7 +73,6 @@ void WalletManager::createKeyPairFromPhrase(std::string phrase) {
   return;
 }
 
-// Erase an Account from the wallet. Will only erase if account is empty.
 bool WalletManager::eraseAccount(std::string account) {
   if (Address a = userToAddress(account)) {
     if (accountIsEmpty(account)) {
@@ -137,19 +83,17 @@ bool WalletManager::eraseAccount(std::string account) {
   return false; // Account was either not found or has funds in it
 }
 
-// Check if an account is completely empty.
 bool WalletManager::accountIsEmpty(std::string account) {
   if (account.find("0x") == std::string::npos) {
     account = "0x" + boost::lexical_cast<std::string>(userToAddress(account));
   }
   std::string requestETH = Network::getETHBalance(account);
   std::string requestTAEX = Network::getTAEXBalance(account);
-  std::string amountETH = get_json_value(requestETH, "result");
-  std::string amountTAEX = get_json_value(requestTAEX, "result");
+  std::string amountETH = JSON::getValue(requestETH, "result").get_str();
+  std::string amountTAEX = JSON::getValue(requestTAEX, "result").get_str();
   return (amountETH == "0" && amountTAEX == "0");
 }
 
-// Select the appropriate account name or address stored in KeyManager from user input string.
 Address WalletManager::userToAddress(std::string const& input) {
   if (h128 u = fromUUID(input)) { return this->wallet.address(u); }
   DEV_IGNORE_EXCEPTIONS(return toAddress(input));
@@ -159,18 +103,18 @@ Address WalletManager::userToAddress(std::string const& input) {
   return Address();
 }
 
-// Load the secret key for a given address in the wallet.
-Secret WalletManager::getSecret(std::string const& signKey, std::string pass) {
-  if (h128 u = fromUUID(signKey)) {
-    return Secret(secretStore().secret(u, [&](){ return pass; }));
+// TODO: make the program not abort on failure but do something else
+Secret WalletManager::getSecret(std::string const& address, std::string pass) {
+  if (h128 u = fromUUID(address)) {
+    return Secret(this->wallet.store().secret(u, [&](){ return pass; }));
   }
 
   Address a;
   try {
-    a = toAddress(signKey);
+    a = toAddress(address);
   } catch (...) {
     for (Address const& aa: this->wallet.accounts()) {
-      if (this->wallet.accountName(aa) == signKey) {
+      if (this->wallet.accountName(aa) == address) {
         a = aa;
         break;
       }
@@ -180,27 +124,18 @@ Secret WalletManager::getSecret(std::string const& signKey, std::string pass) {
   if (a) {
     return this->wallet.secret(a, [&](){ return pass; });
   } else {
-    std::cerr << "Bad file, UUID or address: " << signKey << std::endl;
+    std::cerr << "Bad file, UUID or address: " << address << std::endl;
     exit(-1);
   }
 }
 
-// Create a key from a random string of characters. Check FixedHash.h for more info.
+// TODO: decide on this
 KeyPair WalletManager::makeKey() {
   KeyPair k(Secret::random());
   k = KeyPair(Secret(sha3(k.secret().ref())));
   return k;
 }
 
-/**
- * Convert a full amount of ETH in Wei to a fixed point, more human-friendly value.
- * BTC has 8 decimals but is considered a full integer in code, so 1.0 BTC
- * actually means 100000000 satoshis.
- * Likewise with ETH, which has 18 digits, so 1.0 ETH actually means
- * 1000000000000000000 Wei.
- * To make it easier/better for the user to e.g. view their balance, we have
- * to convert this many digits to a fixed point value.
- */
 std::string WalletManager::convertWeiToFixedPoint(std::string amount, size_t digits) {
   std::string result;
 
@@ -220,19 +155,14 @@ std::string WalletManager::convertWeiToFixedPoint(std::string amount, size_t dig
   return result;
 }
 
-/**
- * Convert a fixed point amount of ETH to a full amount in Wei.
- * Likewise, we also need to convert user-provided fixed point values
- * back to the original 18-decimals Wei amount to create transactions.
- */
 std::string WalletManager::convertFixedPointToWei(std::string amount, int decimals) {
   std::string digitPadding = "";
   std::string valuestr = "";
 
   // Check if input is valid
-  for (auto &c : amount)
-    if (!std::isdigit(c) && c != '.')
-      return "";
+  if (amount.find_first_not_of("0123456789.") != std::string::npos) {
+    return "";
+  }
 
   // Read value from input string
   size_t index = 0;
@@ -267,105 +197,111 @@ std::string WalletManager::convertFixedPointToWei(std::string amount, int decima
   return valuestr;
 }
 
-// List the wallet's ETH accounts and their balances.
 std::vector<WalletAccount> WalletManager::listETHAccounts() {
   if (this->wallet.store().keys().empty()) { return {}; }
-  AddressHash got;
   std::vector<WalletAccount> ret;
+  std::vector<std::string> waList;
+  std::vector<std::string> accList;
+  std::vector<std::string> balList;
+  json_spirit::mValue jsonList;
+  AddressHash got;
+  int ct = 0;
 
-  for (auto const& u: this->wallet.store().keys()) {
-    WalletAccount wa;
+  std::vector<h128> keys = this->wallet.store().keys();
+  for (auto const& u : keys) {
     if (Address a = this->wallet.address(u)) {  // Normal accounts
+      // Fill account details, except the balance
+      WalletAccount wa;
       got.insert(a);
       wa.id = toUUID(u);
       wa.privKey = a.abridged();
       wa.name = this->wallet.accountName(a);
       wa.address = "0x" + boost::lexical_cast<std::string>(a);
-      std::string balance = get_json_value(Network::getETHBalance(wa.address), "result");
-      if (balance == "") { return {}; }
-      for (auto &c : balance) {
-        if (!std::isdigit(c) && c != '.') {
-          return {};
+      waList.push_back(wa.address);
+      ret.push_back(wa);
+      ct++;
+
+      // When we reach the batch quota, get the balances so far
+      if (ct == 20 || u == keys.back()) {
+        jsonList = JSON::getValue(Network::getETHBalances(waList), "result");
+        for (size_t i = 0; i < jsonList.get_array().size(); i++) {
+          std::string acc = JSON::objectItem(JSON::arrayItem(jsonList, i), "account").get_str();
+          std::string bal = JSON::objectItem(JSON::arrayItem(jsonList, i), "balance").get_str();
+          if (bal == "" || bal.find_first_not_of("0123456789.") != std::string::npos) {
+            return {};
+          }
+          accList.push_back(acc);
+          balList.push_back(bal);
         }
+        waList.clear();
+        ct = 0;
       }
-      wa.balanceETH = convertWeiToFixedPoint(balance, 18);
     } else {  // Bare accounts
+      WalletAccount wa;
       wa.address = "0x" + boost::lexical_cast<std::string>(a) + " (Bare)";
+      ret.push_back(wa);
     }
-    ret.push_back(wa);
+  }
+
+  // Add the balances to the accounts
+  for (int i = 0; i < ret.size(); i++) {
+    auto it = std::find(accList.begin(), accList.end(), ret[i].address);
+    if (it != accList.end()) {
+      ret[i].balanceETH = convertWeiToFixedPoint(balList.at(it - accList.begin()), 18);
+    }
   }
 
   return ret;
 }
 
-/**
- * List the wallet's TAEX accounts and their amounts.
- * ERC-20 tokens need to be loaded in a different way, from their proper
- * contract address, beside their respective wallet address.
- */
 std::vector<WalletAccount> WalletManager::listTAEXAccounts() {
   if (this->wallet.store().keys().empty()) { return {}; }
-  AddressHash got;
   std::vector<WalletAccount> ret;
+  AddressHash got;
 
-  for (auto const& u: this->wallet.store().keys()) {
-    WalletAccount wa;
+  std::vector<h128> keys = this->wallet.store().keys();
+  for (auto const& u: keys) {
     if (Address a = this->wallet.address(u)) {  // Normal accounts
+      WalletAccount wa;
       got.insert(a);
       wa.id = toUUID(u);
       wa.privKey = a.abridged();
       wa.name = this->wallet.accountName(a);
       wa.address = "0x" + boost::lexical_cast<std::string>(a);
-      std::string balance = get_json_value(Network::getTAEXBalance(wa.address), "result");
-      if (balance == "") { return {}; }
-      for (auto &c : balance) {
-        if (!std::isdigit(c) && c != '.') {
-          return {};
-        }
+      std::string balance = JSON::getValue(Network::getTAEXBalance(wa.address), "result").get_str();
+      if (balance == "" || balance.find_first_not_of("0123456789.") != std::string::npos) {
+        return {};
       }
       wa.balanceTAEX = convertWeiToFixedPoint(balance, 4);
+      ret.push_back(wa);
     } else {  // Bare accounts
+      WalletAccount wa;
       wa.address = "0x" + boost::lexical_cast<std::string>(a) + " (Bare)";
+      ret.push_back(wa);
     }
-    ret.push_back(wa);
   }
 
   return ret;
 }
 
-// Get an automatic amount of fees for the transaction.
 // TODO: make the user choose between slower or faster fees from the data at:
-// https://ropsten.etherscan.io/api?module=gastracker&action=gasoracle&apikey=6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ
+// https://ropsten.etherscan.io/api?module=gastracker&action=gasoracle&apikey=
 std::string WalletManager::getAutomaticFee() {
-  std::string txGasPrice;
-  std::string txGasPriceGwei;
-  u256 txGasPriceu256;
-  std::string txGasPriceRequest = Network::getTxFees();
-  json_spirit::mValue txGasPriceJson;
+  std::string gasPrice;
+  std::string gasRequest = Network::getTxFees();
+  std::string gasPriceGwei = JSON::getValue(gasRequest, "result/SafeGasPrice", "/").get_str();
 
-  // TODO: incorporate this into get_json_value somehow (try block has two layers instead of one)
-  auto success = json_spirit::read_string(txGasPriceRequest, txGasPriceJson);
-  if (success) {
-    try {
-      auto jsonResult = get_object_item(get_object_item(txGasPriceJson,"result"), "SafeGasPrice");
-      txGasPriceGwei = jsonResult.get_str();
-    } catch (std::exception &e) {
-      std::cout << "Error when reading json for SafeGasPrice: " << e.what() << std::endl;
-      auto jsonResult = get_object_item(get_object_item(txGasPriceJson,"error"), "message");
-      std::cout << "Json message: " << jsonResult.get_str() << std::endl;
-      std::cout << "Setting txGasPrice to default..." << std::endl;
-      txGasPriceGwei = "50";
-    }
+  if (!gasPriceGwei.empty()) {
+    gasPrice = boost::lexical_cast<std::string>(
+      boost::lexical_cast<u256>(gasPriceGwei) * raiseToPow(10, 9)
+    );
   } else {
-    std::cout << "Error reading json, check json value: " << txGasPriceRequest << std::endl;
+    gasPrice = "50";  // Set gas price to default if querying fails
   }
-  txGasPriceu256 = boost::lexical_cast<u256>(txGasPriceGwei) * raiseToPow(10, 9);
-  txGasPrice = boost::lexical_cast<std::string>(txGasPriceu256);
 
-  return txGasPrice;
+  return gasPrice;
 }
 
-// Build transaction data to send ERC-20 tokens.
 std::string WalletManager::buildTxData(std::string txValue, std::string destWallet) {
   std::string txdata;
   // Hex and padding that will call the "send" function of the address
@@ -400,16 +336,15 @@ std::string WalletManager::buildTxData(std::string txValue, std::string destWall
   return txdata;
 }
 
-// Build an ETH transaction from user data.
 TransactionSkeleton WalletManager::buildETHTransaction(
-  std::string signKey, std::string destWallet,
+  std::string srcAddress, std::string destAddress,
   std::string txValue, std::string txGas, std::string txGasPrice
 ) {
   TransactionSkeleton txSkel;
   int txNonce;
 
-  std::string nonceApiRequest = Network::getTxNonce(signKey);
-  std::string txNonceStr = get_json_value(nonceApiRequest, "result");
+  std::string nonceApiRequest = Network::getTxNonce(srcAddress);
+  std::string txNonceStr = JSON::getValue(nonceApiRequest, "result").get_str();
   // Check if nonce is valid (not an error message)
   if (txNonceStr == "") {
     txSkel.nonce = MAX_U256_VALUE();
@@ -421,7 +356,7 @@ TransactionSkeleton WalletManager::buildETHTransaction(
 
   // Building the transaction structure
   txSkel.creation = false;
-  txSkel.to = toAddress(destWallet);
+  txSkel.to = toAddress(destAddress);
   txSkel.value = u256(txValue);
   txSkel.nonce = txNonce;
   txSkel.gas = u256(txGas);
@@ -430,17 +365,16 @@ TransactionSkeleton WalletManager::buildETHTransaction(
   return txSkel;
 }
 
-// Build a TAEX transaction from user data.
 TransactionSkeleton WalletManager::buildTAEXTransaction(
-  std::string signKey, std::string destWallet,
+  std::string srcAddress, std::string destAddress,
   std::string txValue, std::string txGas, std::string txGasPrice
 ) {
   TransactionSkeleton txSkel;
   int txNonce;
   std::string contractWallet = "9c19d746472978750778f334b262de532d9a85f9";
 
-  std::string nonceApiRequest = Network::getTxNonce(signKey);
-  std::string txNonceStr = get_json_value(nonceApiRequest, "result");
+  std::string nonceApiRequest = Network::getTxNonce(srcAddress);
+  std::string txNonceStr = JSON::getValue(nonceApiRequest, "result").get_str();
   // Check if nonce is valid (not an error message)
   if (txNonceStr == "") {
     txSkel.nonce = MAX_U256_VALUE();
@@ -454,7 +388,7 @@ TransactionSkeleton WalletManager::buildTAEXTransaction(
   txSkel.creation = false;
   txSkel.to = toAddress(contractWallet);
   txSkel.value = u256(0);
-  txSkel.data = fromHex(buildTxData(txValue, destWallet));
+  txSkel.data = fromHex(buildTxData(txValue, destAddress));
   txSkel.nonce = txNonce;
   txSkel.gas = u256(txGas);
   txSkel.gasPrice = u256(txGasPrice);
@@ -462,11 +396,10 @@ TransactionSkeleton WalletManager::buildTAEXTransaction(
   return txSkel;
 }
 
-// Sign a transaction with user credentials.
 std::string WalletManager::signTransaction(
-  TransactionSkeleton txSkel, std::string pass, std::string signKey
+  TransactionSkeleton txSkel, std::string pass, std::string address
 ) {
-  Secret s = getSecret(signKey, pass);
+  Secret s = getSecret(address, pass);
   std::stringstream txHexBuffer;
 
   try {
@@ -481,15 +414,14 @@ std::string WalletManager::signTransaction(
   return txHexBuffer.str();
 }
 
-// Send a transaction to the API provider for processing.
+// TODO: change the hardcoded link when switching between mainnet and testnet
 std::string WalletManager::sendTransaction(std::string txidHex) {
   std::string txidApiRequest = Network::broadcastTransaction(txidHex);
-  std::string txid = get_json_value(txidApiRequest, "result");
+  std::string txid = JSON::getValue(txidApiRequest, "result").get_str();
   std::string txLink = "https://ropsten.etherscan.io/tx/" + txid;
   return txLink;
 }
 
-// Decode a raw transaction (in Hex).
 WalletTxData WalletManager::decodeRawTransaction(std::string rawTxHex) {
   TransactionBase transaction = TransactionBase(fromHex(rawTxHex), CheckTransaction::None);
   WalletTxData ret;
