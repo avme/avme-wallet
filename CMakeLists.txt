@@ -67,6 +67,7 @@ add_subdirectory(libethcore)
 
 # Project executable
 add_executable(avme-wallet
+  src/json.h src/json.cpp
   src/network.h src/network.cpp
   src/avme-wallet.h src/avme-wallet.cpp
   src/main.cpp
