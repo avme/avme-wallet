@@ -102,16 +102,14 @@ class WalletManager {
     );
 
     /**
-     * Hash a given phrase to create a new address based on that phrase.
-     * It's easier to hash since hashing creates the 256-bit variable used by
-     * the private key.
+     * Create a private/public key pair from random or a given string of characters.
+     * Check FixedHash.h for more info.
+     * Returns the key pair.
      */
-    void createKeyPairFromPhrase(std::string phrase);
+    KeyPair makeKey(std::string phrase = "");
 
     /**
      * Erase an Account from the wallet.
-     * The Account will only be erased if it's completely empty (no ETH and no
-     * token amounts), otherwise it fails.
      * Returns true on success, false on failure.
      */
     bool eraseAccount(std::string account);
@@ -135,13 +133,6 @@ class WalletManager {
      * Returns the proper Secret, or aborts the program on failure.
      */
     Secret getSecret(std::string const& address, std::string pass);
-
-    /**
-     * Create a key from a random string of characters.
-     * Check FixedHash.h for more info.
-     * Returns a private/public key pair.
-     */
-    KeyPair makeKey();
 
     /**
      * Convert a full Wei amount to a fixed point ETH amount and vice-versa.

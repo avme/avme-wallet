@@ -83,13 +83,12 @@ int main () {
     std::cout << "What are you looking to do?\n" <<
       "1 - List ETH accounts and balances\n" <<
       "2 - List TAEX accounts and balances\n" <<
-      "3 - Send an ETH Transaction\n" <<
-      "4 - Send a TAEX Transaction\n" <<
+      "3 - Send an ETH transaction\n" <<
+      "4 - Send a TAEX transaction\n" <<
       "5 - Create a new account\n" <<
       "6 - Erase an existing account\n" <<
-      "7 - Create a private key from a word/phrase\n" <<
-      "8 - Decode a raw transaction\n" <<
-      "9 - Exit" << std::endl;
+      "7 - Decode a raw transaction\n" <<
+      "8 - Exit" << std::endl;
     std::getline(std::cin, menuOp);
 
     // List accounts
@@ -214,8 +213,8 @@ int main () {
         std::cout << "Invalid amount, please check if your input is correct." << std::endl;
         continue;
       }
-      std::cout << "Do you want to set your own fee or use an automatic fee?\n" <<
-                   "1 - Automatic\n2 - Set my own" << std::endl;
+      std::cout << "Do you want to set your own fee or use an automatic fee?" << std::endl
+                << "1 - Automatic\n2 - Set my own" << std::endl;
       std::getline(std::cin, feeOp);
       if (feeOp == "1") {
         txGas = "80000";
@@ -315,35 +314,37 @@ int main () {
 
       std::cout << "Please inform the account name or address that you want to delete." << std::endl;
       std::getline(std::cin, account);
-      while (true) {
-        // TODO: fix passphrase logic (should be the account's pass, not the wallet's)
-        std::cout << "Enter your wallet's passphrase." << std::endl;
-        std::getline(std::cin, pass);
-        std::cout << "Please confirm the passphrase by entering it again." << std::endl;
-        std::getline(std::cin, passConf);
-        if (pass == passConf && pass == walletPass) { break; }
-        std::cout << "Passphrases were different or don't match the wallet's. Try again." << std::endl;
+      if (!wm.accountIsEmpty(account)) {
+        std::cout << "The account " << account << " has funds in it." << std::endl
+                  << "If you choose to erase it, all funds will be *permanently* lost." << std::endl;
       }
-      std::cout << "Erasing account..." << std::endl;
-      if (wm.eraseAccount(account)) {
-        std::cout << "Account erased: " << account << std::endl;
-        std::cout << "Reloading wallet..." << std::endl;
-        wm.loadWallet(walletFile, secretsPath, walletPass);
-      } else {
-        std::cout << "Couldn't erase account " << account
-                  << "; either it doesn't exist or has funds in it." << std::endl;
+      std::cout << "Are you sure you want to erase this account?" << std::endl
+                << "1 - Yes\n2 - No" << std::endl;
+      std::getline(std::cin, menuOp);
+      if (menuOp == "1") {
+        while (true) {
+          // TODO: fix passphrase logic (should be the account's pass, not the wallet's)
+          std::cout << "Enter your wallet's passphrase." << std::endl;
+          std::getline(std::cin, pass);
+          std::cout << "Please confirm the passphrase by entering it again." << std::endl;
+          std::getline(std::cin, passConf);
+          if (pass == passConf && pass == walletPass) { break; }
+          std::cout << "Passphrases were different or don't match the wallet's. Try again." << std::endl;
+        }
+        std::cout << "Erasing account..." << std::endl;
+        if (wm.eraseAccount(account)) {
+          std::cout << "Account erased: " << account << std::endl;
+          std::cout << "Reloading wallet..." << std::endl;
+          wm.loadWallet(walletFile, secretsPath, walletPass);
+        } else {
+          std::cout << "Failed to erase account " << account << "; account doesn't exist" << std::endl;
+        }
+      } else if (menuOp == "2") {
+        std::cout << "Aborted." << std::endl;
       }
-
-    // Create private key
-    } else if (menuOp == "7") {
-      std::string phrase;
-      std::cout << "Enter your wallet's passphrase." << std::endl;
-      std::getline(std::cin, phrase);
-      std::cout << "Creating a key pair..." << std::endl;
-      wm.createKeyPairFromPhrase(phrase);
 
     // Decode raw transaction
-    } else if (menuOp == "8") {
+    } else if (menuOp == "7") {
       std::string rawTxHex;
       std::cout << "Please input the raw transaction in Hex." << std::endl;
       std::getline(std::cin, rawTxHex);
@@ -363,7 +364,7 @@ int main () {
                 << "r: " << txData.r << std::endl
                 << "s: " << txData.s << std::endl;
     // Exit
-    } else if (menuOp == "9") {
+    } else if (menuOp == "8") {
       std::cout << "Exiting..." << std::endl;
       exit(0);
 

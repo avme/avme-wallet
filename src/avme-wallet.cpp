@@ -43,7 +43,7 @@ bool WalletManager::createNewWallet(path walletFile, path secretsPath, std::stri
 WalletAccount WalletManager::createNewAccount(
   std::string name, std::string pass, std::string hint, bool usesMasterPass
 ) {
-  auto k = makeKey();
+  KeyPair k = makeKey();
   h128 u = this->wallet.import(k.secret(), name, pass, hint);
   WalletAccount ret;
 
@@ -55,32 +55,30 @@ WalletAccount WalletManager::createNewAccount(
   return ret;
 }
 
-/**
- * Hash a given phrase to create a new address based on that phrase.
- * It's easier to hash since hashing creates the 256-bit variable used by
- * the private key.
- */
-// TODO: decide on this
-void WalletManager::createKeyPairFromPhrase(std::string phrase) {
-  std::string shahash = dev::sha3(phrase, false);
-  for (auto i = 0; i < 1048577; ++i) {
-    shahash = dev::sha3(shahash, false);
+KeyPair WalletManager::makeKey(std::string phrase) {
+  if (!phrase.empty()) {
+    // Create key based on phrase
+    std::string shahash = dev::sha3(phrase, false);
+    for (auto i = 0; i < 1048577; ++i) {
+      shahash = dev::sha3(shahash, false);
+    }
+    KeyPair k(Secret::fromString(shahash));
+    k = KeyPair(Secret(sha3(k.secret().ref())));
+    return k;
+  } else {
+    // Create a random key
+    KeyPair k(Secret::random());
+    k = KeyPair(Secret(sha3(k.secret().ref())));
+    return k;
   }
-  KeyPair k(Secret::fromString(shahash));
-  k = KeyPair(Secret(sha3(k.secret().ref())));
-  std::cout << "Wallet generated! Address: " << k.address().hex() << std::endl;
-  std::cout << "Hashed: " << shahash << "Size: " << shahash.size() << std::endl;
-  return;
 }
 
 bool WalletManager::eraseAccount(std::string account) {
   if (Address a = userToAddress(account)) {
-    if (accountIsEmpty(account)) {
-      this->wallet.kill(a);
-      return true;
-    }
+    this->wallet.kill(a);
+    return true;
   }
-  return false; // Account was either not found or has funds in it
+  return false; // Account was not found
 }
 
 bool WalletManager::accountIsEmpty(std::string account) {
@@ -127,13 +125,6 @@ Secret WalletManager::getSecret(std::string const& address, std::string pass) {
     std::cerr << "Bad file, UUID or address: " << address << std::endl;
     exit(-1);
   }
-}
-
-// TODO: decide on this
-KeyPair WalletManager::makeKey() {
-  KeyPair k(Secret::random());
-  k = KeyPair(Secret(sha3(k.secret().ref())));
-  return k;
 }
 
 std::string WalletManager::convertWeiToFixedPoint(std::string amount, size_t digits) {
