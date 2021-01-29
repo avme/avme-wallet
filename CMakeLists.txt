@@ -60,33 +60,21 @@ find_package(Threads)
 
 # Include paths for local libs and headers
 include_directories(
-  "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/build" "${CMAKE_SOURCE_DIR}/build/${DEPENDS_PREFIX}/include"
+  "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/build" "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/include"
 )
 link_directories(
-  "${CMAKE_SOURCE_DIR}/build/${DEPENDS_PREFIX}/lib"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib"
 )
 
-# Declare external libs
-add_library(Boost::filesystem STATIC IMPORTED)
-add_library(Boost::log STATIC IMPORTED)
-add_library(Boost::program_options STATIC IMPORTED)
-add_library(Boost::system STATIC IMPORTED)
-add_library(Boost::thread STATIC IMPORTED)
-add_library(Qt5::Core STATIC IMPORTED)
-add_library(Qt5::Gui STATIC IMPORTED)
-add_library(Qt5::Qml STATIC IMPORTED)
-add_library(Qt5::Quick STATIC IMPORTED)
-
-# Set external lib sources
-set_target_properties(Boost::filesystem PROPERTIES IMPORTED_LOCATION libboost_filesystem-mt-x64.a)
-set_target_properties(Boost::log PROPERTIES IMPORTED_LOCATION libboost_log-mt-x64.a)
-set_target_properties(Boost::program_options PROPERTIES IMPORTED_LOCATION libboost_program_options-mt-x64.a)
-set_target_properties(Boost::system PROPERTIES IMPORTED_LOCATION libboost_system-mt-x64.a)
-set_target_properties(Boost::thread PROPERTIES IMPORTED_LOCATION libboost_thread-mt-x64.a)
-set_target_properties(Qt5::Core PROPERTIES IMPORTED_LOCATION libQt5Core.a)
-set_target_properties(Qt5::Gui PROPERTIES IMPORTED_LOCATION libQt5Gui.a)
-set_target_properties(Qt5::Qml PROPERTIES IMPORTED_LOCATION libQt5Qml.a)
-set_target_properties(Qt5::Quick PROPERTIES IMPORTED_LOCATION libQt5Quick.a)
+# Uncomment to see include and link directories
+#get_property(inc_dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+#get_property(link_dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY LINK_DIRECTORIES)
+#foreach(dir ${inc_dirs})
+#  message(STATUS "dir='${dir}'")
+#endforeach()
+#foreach(dir ${link_dirs})
+#  message(STATUS "dir='${dir}'")
+#endforeach()
 
 # Add local libs
 add_subdirectory(libdevcore)
@@ -100,10 +88,18 @@ add_executable(avme-wallet
   src/avme-wallet.h src/avme-wallet.cpp
   src/main.cpp
 )
+# TODO: link those in a more clean way (here and on libdevcore)
 target_link_libraries(avme-wallet PUBLIC
-  devcore devcrypto ethcore
-  Boost::filesystem Boost::log Boost::program_options Boost::system Boost::thread
-  Qt5::Core Qt5::Gui Qt5::Qml Qt5::Quick
+  devcore devcrypto ethcore ethash::ethash
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libboost_filesystem-mt-x64.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libboost_log-mt-x64.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libboost_program_options-mt-x64.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libboost_system-mt-x64.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libboost_thread-mt-x64.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Core.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Gui.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Qml.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Quick.a"
 )
 
 # TODO: the install part

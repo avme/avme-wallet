@@ -7,8 +7,12 @@ add_library(devcore ${SOURCES} ${HEADERS})
 target_include_directories(devcore SYSTEM PUBLIC ${Boost_INCLUDE_DIR})
 target_link_libraries(devcore
   PUBLIC
-    avme_wallet-buildinfo Boost::filesystem Boost::system
-    Boost::program_options Boost::log Boost::thread Threads::Threads
+    avme_wallet-buildinfo
+    "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libboost_filesystem-mt-x64.a"
+    "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libboost_log-mt-x64.a"
+    "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libboost_program_options-mt-x64.a"
+    "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libboost_system-mt-x64.a"
+    "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libboost_thread-mt-x64.a"
   PRIVATE
     ethash::ethash
 )
