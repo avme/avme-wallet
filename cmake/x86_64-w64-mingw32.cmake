@@ -3,7 +3,7 @@
 # Typical usage:
 #    *) install cross compiler: `sudo apt-get install mingw-w64`
 #    *) cd build
-#    *) cmake -DCMAKE_TOOLCHAIN_FILE=~/mingw-w64-x86_64.cmake ..
+#    *) cmake -DCMAKE_TOOLCHAIN_FILE=<path-to-cmake>/x86_64-w64-mingw32.cmake ..
 
 set(CMAKE_SYSTEM_NAME Windows)
 set(TOOLCHAIN_PREFIX x86_64-w64-mingw32)

@@ -23,7 +23,7 @@ created. To use it for Bitcoin:
 Common `host-platform-triplets` for cross compilation are:
 
 - `i686-pc-linux-gnu` for Linux 32 bit
-- `x86_64-pc-linux-gnu` for x86 Linux
+- `x86_64-pc-linux-gnu` for Linux 64 bit
 - `x86_64-w64-mingw32` for Win64
 - `x86_64-apple-darwin16` for macOS
 - `arm-linux-gnueabihf` for Linux ARM 32 bit
@@ -48,7 +48,7 @@ The paths are automatically configured and no other options are needed unless ta
 
 #### For Win64 cross compilation
 
-- see [build-windows.md](../doc/build-windows.md#cross-compilation-for-ubuntu-and-windows-subsystem-for-linux)
+- see [build-windows.md](build-windows.md#cross-compilation-for-ubuntu-and-windows-subsystem-for-linux)
 
 #### For linux (including i386, ARM) cross compilation
 

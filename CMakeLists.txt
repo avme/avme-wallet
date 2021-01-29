@@ -33,19 +33,20 @@ message("C++ Standard is required: ${CMAKE_CXX_STANDARD_REQUIRED}")
 message("C++ extensions: ${CMAKE_CXX_EXTENSIONS}")
 message("Using PIC: ${CMAKE_POSITION_INDEPENDENT_CODE}")
 
+set(DEPENDS_PREFIX "")
+if("${TOOLCHAIN_PREFIX}" STREQUAL "x86_64-w64-mingw32")
+  message("Toolchain: x86_64-w64-mingw32")
+  set(DEPENDS_PREFIX "x86_64-w64-mingw32")
+else()
+  message("Toolchain: x86_64-pc-linux-gnu")
+  set(DEPENDS_PREFIX "x86_64-pc-linux-gnu")
+endif()
+
 cable_add_buildinfo_library(PROJECT_NAME avme_wallet)
 
-# Boost options
-set(Boost_USE_STATIC_LIBS ON) # Link to static versions of Boost libraries
-set(Boost_USE_MULTITHREADED ON) # Use multithreaded libs
-
-# External packages
-hunter_add_package(Boost COMPONENTS filesystem log program_options system thread)
-find_package(Boost CONFIG REQUIRED filesystem log program_options system thread)
-
+# Add Hunter packages
 hunter_add_package(cryptopp)
 find_package(cryptopp CONFIG REQUIRED)
-message("Crypto++: ${HUNTER_cryptopp_VERSION}")
 
 hunter_add_package(libscrypt)
 find_package(libscrypt CONFIG REQUIRED)
@@ -57,22 +58,53 @@ include(ProjectSecp256k1)
 include(ProjectLibFF)
 find_package(Threads)
 
-#Include paths for libs and headers
-include_directories("${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/build")
+# Include paths for local libs and headers
+include_directories(
+  "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/build" "${CMAKE_SOURCE_DIR}/build/${DEPENDS_PREFIX}/include"
+)
+link_directories(
+  "${CMAKE_SOURCE_DIR}/build/${DEPENDS_PREFIX}/lib"
+)
 
-# Add dirs with required libraries
+# Declare external libs
+add_library(Boost::filesystem STATIC IMPORTED)
+add_library(Boost::log STATIC IMPORTED)
+add_library(Boost::program_options STATIC IMPORTED)
+add_library(Boost::system STATIC IMPORTED)
+add_library(Boost::thread STATIC IMPORTED)
+add_library(Qt5::Core STATIC IMPORTED)
+add_library(Qt5::Gui STATIC IMPORTED)
+add_library(Qt5::Qml STATIC IMPORTED)
+add_library(Qt5::Quick STATIC IMPORTED)
+
+# Set external lib sources
+set_target_properties(Boost::filesystem PROPERTIES IMPORTED_LOCATION libboost_filesystem-mt-x64.a)
+set_target_properties(Boost::log PROPERTIES IMPORTED_LOCATION libboost_log-mt-x64.a)
+set_target_properties(Boost::program_options PROPERTIES IMPORTED_LOCATION libboost_program_options-mt-x64.a)
+set_target_properties(Boost::system PROPERTIES IMPORTED_LOCATION libboost_system-mt-x64.a)
+set_target_properties(Boost::thread PROPERTIES IMPORTED_LOCATION libboost_thread-mt-x64.a)
+set_target_properties(Qt5::Core PROPERTIES IMPORTED_LOCATION libQt5Core.a)
+set_target_properties(Qt5::Gui PROPERTIES IMPORTED_LOCATION libQt5Gui.a)
+set_target_properties(Qt5::Qml PROPERTIES IMPORTED_LOCATION libQt5Qml.a)
+set_target_properties(Qt5::Quick PROPERTIES IMPORTED_LOCATION libQt5Quick.a)
+
+# Add local libs
 add_subdirectory(libdevcore)
 add_subdirectory(libdevcrypto)
 add_subdirectory(libethcore)
 
-# Project executable
+# Add project executable
 add_executable(avme-wallet
   src/json.h src/json.cpp
   src/network.h src/network.cpp
   src/avme-wallet.h src/avme-wallet.cpp
   src/main.cpp
 )
-target_link_libraries(avme-wallet PUBLIC devcore devcrypto ethcore)
+target_link_libraries(avme-wallet PUBLIC
+  devcore devcrypto ethcore
+  Boost::filesystem Boost::log Boost::program_options Boost::system Boost::thread
+  Qt5::Core Qt5::Gui Qt5::Qml Qt5::Quick
+)
 
 # TODO: the install part
 
