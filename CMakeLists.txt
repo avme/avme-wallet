@@ -1,5 +1,5 @@
 # Pre-setup
-cmake_minimum_required(VERSION 3.9.3)
+cmake_minimum_required(VERSION 3.18.0)
 
 include(cmake/cable/bootstrap.cmake)
 include(CableBuildInfo)
@@ -59,9 +59,24 @@ include(ProjectLibFF)
 find_package(Threads)
 
 # Include paths for local libs and headers
+# Macro adapted from https://stackoverflow.com/a/31004567
+macro(get_depends_includes_rec list)
+    FILE(GLOB_RECURSE new_list "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/include/Qt*/*.h")
+    SET(dir_list "")
+    FOREACH(file_path ${new_list})
+        GET_FILENAME_COMPONENT(dir_path ${file_path} PATH)
+        SET(dir_list ${dir_list} ${dir_path})
+    ENDFOREACH()
+    LIST(REMOVE_DUPLICATES dir_list)
+    SET(${list} ${dir_list})
+ENDMACRO()
+
+#get_depends_includes_rec(DEPENDS_INCLUDES)
+
 include_directories(
-  "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/build" "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/include"
+  "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/build" "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/include" #${DEPENDS_INCLUDES}
 )
+
 link_directories(
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib"
 )
@@ -76,30 +91,63 @@ link_directories(
 #  message(STATUS "dir='${dir}'")
 #endforeach()
 
-# Add local libs
-add_subdirectory(libdevcore)
-add_subdirectory(libdevcrypto)
-add_subdirectory(libethcore)
-
-# Add project executable
-add_executable(avme-wallet
-  src/json.h src/json.cpp
-  src/network.h src/network.cpp
-  src/avme-wallet.h src/avme-wallet.cpp
-  src/main.cpp
-)
-# TODO: link those in a more clean way (here and on libdevcore)
-target_link_libraries(avme-wallet PUBLIC
-  devcore devcrypto ethcore ethash::ethash
+# Organize libs
+file(GLOB BOOST_LIBS
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libboost_filesystem-mt-x64.a"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libboost_log-mt-x64.a"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libboost_program_options-mt-x64.a"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libboost_system-mt-x64.a"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libboost_thread-mt-x64.a"
+)
+
+file(GLOB QT_LIBS
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Core.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Network.a"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Gui.a"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Qml.a"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Quick.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libqtlibpng.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libqtharfbuzz.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libz.a"
+)
+
+# Add local libs
+add_subdirectory(libdevcore)
+add_subdirectory(libdevcrypto)
+add_subdirectory(libethcore)
+
+# Organize executable sources and headers
+file(GLOB AVME_HEADERS "src/lib/*.h")
+file(GLOB AVME_SOURCES "src/lib/*.cpp")
+
+# Compile project executables
+add_executable(avme-cli
+  ${AVME_HEADERS} ${AVME_SOURCES} src/main-cli.h src/main-cli.cpp
+)
+target_link_libraries(avme-cli PUBLIC
+  devcore devcrypto ethcore ethash::ethash ${BOOST_LIBS}
+)
+
+add_custom_command(
+  OUTPUT "${CMAKE_SOURCE_DIR}/src/moc_main-gui.cpp"
+  COMMAND "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/native/bin/moc" "${CMAKE_SOURCE_DIR}/src/main-gui.h" -o "${CMAKE_SOURCE_DIR}/src/moc_main-gui.cpp"
+)
+
+add_executable(avme-gui
+  ${AVME_HEADERS} ${AVME_SOURCES} src/main-gui.h src/main-gui.cpp src/moc_main-gui.cpp #src/qml.qrc
+)
+target_link_libraries(avme-gui PUBLIC
+  devcore devcrypto ethcore ethash::ethash -ldl ${BOOST_LIBS}
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Network.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Gui.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Qml.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Quick.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libqtlibpng.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libqtharfbuzz.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libz.a"
+  #"${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5DBus.a"
+  #"${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5XcbQpa.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Core.a"
 )
 
 # TODO: the install part
