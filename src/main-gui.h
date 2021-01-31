@@ -5,6 +5,9 @@
 #include <QtQml/QQmlContext>
 #include <QtQml/QQmlApplicationEngine>
 #include <QtCore/QString>
+#include <QtCore/qplugin.h>
+
+Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
 
 #include "lib/wallet.h"
 
