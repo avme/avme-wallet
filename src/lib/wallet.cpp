@@ -3,7 +3,7 @@
 // Licensed under the GNU General Public License, Version 3.
 /// @file
 /// CLI module for key management.
-#include "avme-wallet.h"
+#include "wallet.h"
 
 u256 WalletManager::MAX_U256_VALUE() {
   return (raiseToPow(2, 256) - 1);

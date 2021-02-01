@@ -3,8 +3,8 @@
 // Licensed under the GNU General Public License, Version 3.
 /// @file
 /// CLI module for key management.
-#ifndef AVME_WALLET_H
-#define AVME_WALLET_H
+#ifndef WALLET_H
+#define WALLET_H
 
 #include <atomic>
 #include <chrono>
@@ -206,5 +206,5 @@ class WalletManager {
     WalletTxData decodeRawTransaction(std::string rawTxHex);
 };
 
-#endif // AVME_WALLET_H
+#endif // WALLET_H
 
