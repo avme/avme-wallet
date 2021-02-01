@@ -7,7 +7,11 @@
 #include <QtCore/QString>
 #include <QtCore/qplugin.h>
 
+#ifdef __MINGW32__
+Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+#else
 Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
+#endif
 Q_IMPORT_PLUGIN(QtQuick2Plugin)
 Q_IMPORT_PLUGIN(QtQuick2WindowPlugin)
 Q_IMPORT_PLUGIN(QtQuickTemplates2Plugin)
