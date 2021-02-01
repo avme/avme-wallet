@@ -116,7 +116,7 @@ target_link_libraries(avme-lib PUBLIC devcore devcrypto ethcore ethash::ethash $
 # Compile the CLI executable (for testing)
 # TODO: have a macro somewhere that makes this optional
 add_executable(avme-cli src/main-cli.h src/main-cli.cpp)
-target_link_libraries(avme-cli PUBLIC avme-lib)
+target_link_libraries(avme-cli PUBLIC avme-lib -static)
 
 # Compile Qt-specific stuff to embed into GUI executable.
 # First command is a dummy output to force whatever depends on it to always be rebuilt. Adapted from https://stackoverflow.com/a/32062884
