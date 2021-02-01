@@ -54,6 +54,7 @@ hunter_add_package(ethash)
 find_package(ethash CONFIG REQUIRED)
 
 include(ProjectSecp256k1)
+include(ProjectLibFF)
 find_package(Threads)
 
 #Include paths for libs and headers
@@ -72,7 +73,6 @@ add_executable(avme-wallet
   src/main.cpp
 )
 target_link_libraries(avme-wallet PUBLIC devcore devcrypto ethcore)
-
 
 # TODO: the install part
 

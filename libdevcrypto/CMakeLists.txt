@@ -7,6 +7,6 @@ target_link_libraries(devcrypto
   PUBLIC
     devcore Secp256k1
   PRIVATE
-    cryptopp-static libscrypt::scrypt
+    libff::ff cryptopp-static libscrypt::scrypt
 )
 
