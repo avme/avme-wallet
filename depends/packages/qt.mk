@@ -24,9 +24,13 @@ $(package)_qttools_sha256_hash=a97556eb7b2f30252cdd8a598c396cfce2b2f79d2bae883af
 $(package)_qtdeclarative_file_name=qtdeclarative-$($(package)_suffix)
 $(package)_qtdeclarative_sha256_hash=b4e47b6038f3c604dee8128aeed12a0e9558a7b2bba63a2c44e4ad0743de5450
 
+$(package)_qtquickcontrols2_file_name=qtquickcontrols2-$($(package)_suffix)
+$(package)_qtquickcontrols2_sha256_hash=6c1e47188facca82f443e2d3d9692d5a9574db073c37e218b1d89f795b697018
+
 $(package)_extra_sources  = $($(package)_qttranslations_file_name)
 $(package)_extra_sources += $($(package)_qttools_file_name)
 $(package)_extra_sources += $($(package)_qtdeclarative_file_name)
+$(package)_extra_sources += $($(package)_qtquickcontrols2_file_name)
 
 define $(package)_set_vars
 $(package)_config_opts_release = -release
@@ -181,7 +185,8 @@ define $(package)_fetch_cmds
 $(call fetch_file,$(package),$($(package)_download_path),$($(package)_download_file),$($(package)_file_name),$($(package)_sha256_hash)) && \
 $(call fetch_file,$(package),$($(package)_download_path),$($(package)_qttranslations_file_name),$($(package)_qttranslations_file_name),$($(package)_qttranslations_sha256_hash)) && \
 $(call fetch_file,$(package),$($(package)_download_path),$($(package)_qttools_file_name),$($(package)_qttools_file_name),$($(package)_qttools_sha256_hash)) && \
-$(call fetch_file,$(package),$($(package)_download_path),$($(package)_qtdeclarative_file_name),$($(package)_qtdeclarative_file_name),$($(package)_qtdeclarative_sha256_hash))
+$(call fetch_file,$(package),$($(package)_download_path),$($(package)_qtdeclarative_file_name),$($(package)_qtdeclarative_file_name),$($(package)_qtdeclarative_sha256_hash)) && \
+$(call fetch_file,$(package),$($(package)_download_path),$($(package)_qtquickcontrols2_file_name),$($(package)_qtquickcontrols2_file_name),$($(package)_qtquickcontrols2_sha256_hash))
 endef
 
 define $(package)_extract_cmds
@@ -190,6 +195,7 @@ define $(package)_extract_cmds
   echo "$($(package)_qttranslations_sha256_hash)  $($(package)_source_dir)/$($(package)_qttranslations_file_name)" >> $($(package)_extract_dir)/.$($(package)_file_name).hash && \
   echo "$($(package)_qttools_sha256_hash)  $($(package)_source_dir)/$($(package)_qttools_file_name)" >> $($(package)_extract_dir)/.$($(package)_file_name).hash && \
   echo "$($(package)_qtdeclarative_sha256_hash)  $($(package)_source_dir)/$($(package)_qtdeclarative_file_name)" >> $($(package)_extract_dir)/.$($(package)_file_name).hash && \
+  echo "$($(package)_qtquickcontrols2_sha256_hash)  $($(package)_source_dir)/$($(package)_qtquickcontrols2_file_name)" >> $($(package)_extract_dir)/.$($(package)_file_name).hash && \
   $(build_SHA256SUM) -c $($(package)_extract_dir)/.$($(package)_file_name).hash && \
   mkdir qtbase && \
   tar --no-same-owner --strip-components=1 -xf $($(package)_source) -C qtbase && \
@@ -198,37 +204,39 @@ define $(package)_extract_cmds
   mkdir qttools && \
   tar --no-same-owner --strip-components=1 -xf $($(package)_source_dir)/$($(package)_qttools_file_name) -C qttools && \
   mkdir qtdeclarative && \
-  tar --no-same-owner --strip-components=1 -xf $($(package)_source_dir)/$($(package)_qtdeclarative_file_name) -C qtdeclarative
+  tar --no-same-owner --strip-components=1 -xf $($(package)_source_dir)/$($(package)_qtdeclarative_file_name) -C qtdeclarative && \
+  mkdir qtquickcontrols2 && \
+  tar --no-same-owner --strip-components=1 -xf $($(package)_source_dir)/$($(package)_qtquickcontrols2_file_name) -C qtquickcontrols2
 endef
 
 define $(package)_preprocess_cmds
   patch -p1 -i $($(package)_patch_dir)/freetype_back_compat.patch && \
   patch -p1 -i $($(package)_patch_dir)/fix_powerpc_libpng.patch && \
-  patch -p1 -i $($(package)_patch_dir)/fix_qpainter_non_determinism.patch &&\
+  patch -p1 -i $($(package)_patch_dir)/fix_qpainter_non_determinism.patch && \
   sed -i.old "s|updateqm.commands = \$$$$\$$$$LRELEASE|updateqm.commands = $($(package)_extract_dir)/qttools/bin/lrelease|" qttranslations/translations/translations.pro && \
   patch -p1 -i $($(package)_patch_dir)/drop_lrelease_dependency.patch && \
-  patch -p1 -i $($(package)_patch_dir)/dont_hardcode_pwd.patch &&\
-  mkdir -p qtbase/mkspecs/macx-clang-linux &&\
-  cp -f qtbase/mkspecs/macx-clang/Info.plist.lib qtbase/mkspecs/macx-clang-linux/ &&\
-  cp -f qtbase/mkspecs/macx-clang/Info.plist.app qtbase/mkspecs/macx-clang-linux/ &&\
-  cp -f qtbase/mkspecs/macx-clang/qplatformdefs.h qtbase/mkspecs/macx-clang-linux/ &&\
+  patch -p1 -i $($(package)_patch_dir)/dont_hardcode_pwd.patch && \
+  mkdir -p qtbase/mkspecs/macx-clang-linux && \
+  cp -f qtbase/mkspecs/macx-clang/Info.plist.lib qtbase/mkspecs/macx-clang-linux/ && \
+  cp -f qtbase/mkspecs/macx-clang/Info.plist.app qtbase/mkspecs/macx-clang-linux/ && \
+  cp -f qtbase/mkspecs/macx-clang/qplatformdefs.h qtbase/mkspecs/macx-clang-linux/ && \
   cp -f $($(package)_patch_dir)/mac-qmake.conf qtbase/mkspecs/macx-clang-linux/qmake.conf && \
   cp -r qtbase/mkspecs/linux-arm-gnueabi-g++ qtbase/mkspecs/bitcoin-linux-g++ && \
   sed -i.old "s/arm-linux-gnueabi-/$(host)-/g" qtbase/mkspecs/bitcoin-linux-g++/qmake.conf && \
-  patch -p1 -i $($(package)_patch_dir)/fix_qt_pkgconfig.patch &&\
-  patch -p1 -i $($(package)_patch_dir)/fix_configure_mac.patch &&\
-  patch -p1 -i $($(package)_patch_dir)/fix_no_printer.patch &&\
-  patch -p1 -i $($(package)_patch_dir)/fix_rcc_determinism.patch &&\
-  patch -p1 -i $($(package)_patch_dir)/xkb-default.patch &&\
-  patch -p1 -i $($(package)_patch_dir)/fix_android_qmake_conf.patch &&\
-  patch -p1 -i $($(package)_patch_dir)/fix_android_jni_static.patch &&\
+  patch -p1 -i $($(package)_patch_dir)/fix_qt_pkgconfig.patch && \
+  patch -p1 -i $($(package)_patch_dir)/fix_configure_mac.patch && \
+  patch -p1 -i $($(package)_patch_dir)/fix_no_printer.patch && \
+  patch -p1 -i $($(package)_patch_dir)/fix_rcc_determinism.patch && \
+  patch -p1 -i $($(package)_patch_dir)/xkb-default.patch && \
+  patch -p1 -i $($(package)_patch_dir)/fix_android_qmake_conf.patch && \
+  patch -p1 -i $($(package)_patch_dir)/fix_android_jni_static.patch && \
   echo "!host_build: QMAKE_CFLAGS     += $($(package)_cflags) $($(package)_cppflags)" >> qtbase/mkspecs/common/gcc-base.conf && \
   echo "!host_build: QMAKE_CXXFLAGS   += $($(package)_cxxflags) $($(package)_cppflags)" >> qtbase/mkspecs/common/gcc-base.conf && \
   echo "!host_build: QMAKE_LFLAGS     += $($(package)_ldflags)" >> qtbase/mkspecs/common/gcc-base.conf && \
-  patch -p1 -i $($(package)_patch_dir)/fix_riscv64_arch.patch &&\
-  patch -p1 -i $($(package)_patch_dir)/no-xlib.patch &&\
-  echo "QMAKE_LINK_OBJECT_MAX = 10" >> qtbase/mkspecs/win32-g++/qmake.conf &&\
-  echo "QMAKE_LINK_OBJECT_SCRIPT = object_script" >> qtbase/mkspecs/win32-g++/qmake.conf &&\
+  patch -p1 -i $($(package)_patch_dir)/fix_riscv64_arch.patch && \
+  patch -p1 -i $($(package)_patch_dir)/no-xlib.patch && \
+  echo "QMAKE_LINK_OBJECT_MAX = 10" >> qtbase/mkspecs/win32-g++/qmake.conf && \
+  echo "QMAKE_LINK_OBJECT_SCRIPT = object_script" >> qtbase/mkspecs/win32-g++/qmake.conf && \
   sed -i.old "s|QMAKE_CFLAGS           += |!host_build: QMAKE_CFLAGS            = $($(package)_cflags) $($(package)_cppflags) |" qtbase/mkspecs/win32-g++/qmake.conf && \
   sed -i.old "s|QMAKE_CXXFLAGS         += |!host_build: QMAKE_CXXFLAGS            = $($(package)_cxxflags) $($(package)_cppflags) |" qtbase/mkspecs/win32-g++/qmake.conf && \
   sed -i.old "0,/^QMAKE_LFLAGS_/s|^QMAKE_LFLAGS_|!host_build: QMAKE_LFLAGS            = $($(package)_ldflags)\n&|" qtbase/mkspecs/win32-g++/qmake.conf && \
@@ -250,6 +258,9 @@ define $(package)_config_cmds
   cd qttools/src/linguist/lrelease/ && ../../../../qtbase/bin/qmake lrelease.pro -o Makefile && \
   cd ../lupdate/ && ../../../../qtbase/bin/qmake lupdate.pro -o Makefile && cd ../../../.. && \
   cd qtdeclarative/ && ../qtbase/bin/qmake qtdeclarative.pro -o Makefile && cd ..
+  # qtquickcontrols2 can't be compiled along with qtdeclarative because we need its mkspecs folder to properly compile it.
+  # we copy that folder there so it can detect the quick module - this is why qtquickcontrols2 is configured at build_cmds and not here.
+  # don't ask me why, that's how qt works when not doing it the way they want you to do it and it's absolutely *bonkers* :(
 endef
 
 define $(package)_build_cmds
@@ -257,7 +268,10 @@ define $(package)_build_cmds
   $(MAKE) -C ../qttools/src/linguist/lrelease && \
   $(MAKE) -C ../qttools/src/linguist/lupdate && \
   $(MAKE) -C ../qttranslations && \
-  $(MAKE) -C ../qtdeclarative
+  $(MAKE) -C ../qtdeclarative && \
+  cp -r ../qtdeclarative/mkspecs ../qtquickcontrols2/mkspecs && \
+  cd ../qtquickcontrols2/ && ../qtbase/bin/qmake qtquickcontrols2.pro -o Makefile && cd - && \
+  $(MAKE) -C ../qtquickcontrols2
 endef
 
 define $(package)_stage_cmds
@@ -266,6 +280,7 @@ define $(package)_stage_cmds
   $(MAKE) -C qttools/src/linguist/lupdate INSTALL_ROOT=$($(package)_staging_dir) install_target && \
   $(MAKE) -C qttranslations INSTALL_ROOT=$($(package)_staging_dir) install_subtargets && \
   $(MAKE) -C qtdeclarative INSTALL_ROOT=$($(package)_staging_dir) install_subtargets && \
+  $(MAKE) -C qtquickcontrols2 INSTALL_ROOT=$($(package)_staging_dir) install_subtargets && \
   if `test -f qtbase/src/plugins/platforms/xcb/xcb-static/libxcb-static.a`; then \
     cp qtbase/src/plugins/platforms/xcb/xcb-static/libxcb-static.a $($(package)_staging_prefix_dir)/lib; \
   fi

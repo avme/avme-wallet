@@ -1,7 +1,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
-import "qrc:/qml/components"
+import "../components"
 
 Item {
   Column {
@@ -17,7 +17,7 @@ Item {
 
       Image {
         id: logo_png
-        source: "qrc:/img/avme_logo.png"
+        source: "../../img/avme_logo.png"
       }
 
       Text {

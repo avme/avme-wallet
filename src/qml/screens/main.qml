@@ -2,7 +2,7 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 import QtQuick.Window 2.2
 
-import "qrc:/qml/components"
+import "../components"
 
 Window {
   id: window
@@ -38,7 +38,7 @@ Window {
     id: content
     z: 3
     width: parent.width - sideMenu.width
-    source: "qrc:/qml/screens/Wallets.qml"
+    source: "../screens/Wallets.qml"
     anchors {
       left: sideMenu.right
       right: parent.right

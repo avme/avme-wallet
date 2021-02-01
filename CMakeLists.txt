@@ -60,6 +60,7 @@ find_package(Threads)
 
 # Include paths for local libs and headers
 # Macro adapted from https://stackoverflow.com/a/31004567
+# TODO: decide if we'll be using this anyway or not
 macro(get_depends_includes_rec list)
     FILE(GLOB_RECURSE new_list "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/include/Qt*/*.h")
     SET(dir_list "")
@@ -100,17 +101,6 @@ file(GLOB BOOST_LIBS
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libboost_thread-mt-x64.a"
 )
 
-file(GLOB QT_LIBS
-  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Core.a"
-  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Network.a"
-  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Gui.a"
-  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Qml.a"
-  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Quick.a"
-  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libqtlibpng.a"
-  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libqtharfbuzz.a"
-  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libz.a"
-)
-
 # Add local libs
 add_subdirectory(libdevcore)
 add_subdirectory(libdevcrypto)
@@ -128,11 +118,14 @@ target_link_libraries(avme-cli PUBLIC
   devcore devcrypto ethcore ethash::ethash ${BOOST_LIBS}
 )
 
+# Create a moc file to be able to use the Q_OBJECT macro for C++/Qt interfacing
 add_custom_command(
   OUTPUT "${CMAKE_SOURCE_DIR}/src/moc_main-gui.cpp"
   COMMAND "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/native/bin/moc" "${CMAKE_SOURCE_DIR}/src/main-gui.h" -o "${CMAKE_SOURCE_DIR}/src/moc_main-gui.cpp"
 )
 
+# Add project executable and link libraries to it
+# TODO: re-enable qrc when it's fixed
 add_executable(avme-gui
   ${AVME_HEADERS} ${AVME_SOURCES} src/main-gui.h src/main-gui.cpp src/moc_main-gui.cpp #src/qml.qrc
 )
@@ -143,6 +136,8 @@ target_link_libraries(avme-gui PUBLIC
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Network.a"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Gui.a"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Qml.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/qml/QtQuick.2/libqtquick2plugin.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/qml/QtQuick/Window.2/libwindowplugin.a"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Quick.a"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libqtlibpng.a"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libqtharfbuzz.a"
@@ -160,9 +155,16 @@ target_link_libraries(avme-gui PUBLIC
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libfreetype.so.6.13.0"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libfontconfig.so.1.9.2"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libxcb-static.a"
-  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libxcb.so.1.1.0" 
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libxcb.so.1.1.0"
+  # I don't know why this works the way it does, it just *does*, let's roll with it
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Network.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Gui.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/qml/QtQuick/Controls.2/libqtquickcontrols2plugin.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5QuickControls2.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5XcbQpa.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/qml/QtQuick/Templates.2/libqtquicktemplates2plugin.a"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5QuickTemplates2.a"
 )
-
 
 # TODO: the install part
 
