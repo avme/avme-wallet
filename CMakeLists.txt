@@ -65,8 +65,15 @@ add_subdirectory(libdevcrypto)
 add_subdirectory(libethcore)
 
 # Project executable
-add_executable(avme-wallet src/avme-wallet.cpp src/avme-wallet.h src/main.cpp)
+
+add_executable(avme-wallet
+  src/json.h src/json.cpp
+  src/network.h src/network.cpp
+  src/avme-wallet.h src/avme-wallet.cpp
+  src/main.cpp
+)
 target_link_libraries(avme-wallet PUBLIC devcore devcrypto ethcore -static)
+
 
 # TODO: the install part
 
