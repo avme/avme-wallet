@@ -55,7 +55,6 @@ hunter_add_package(ethash)
 find_package(ethash CONFIG REQUIRED)
 
 include(ProjectSecp256k1)
-include(ProjectLibFF)
 find_package(Threads)
 
 # Include paths for local libs and headers
@@ -176,7 +175,9 @@ target_link_libraries(avme-gui PUBLIC avme-lib -ldl
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5XcbQpa.a"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/qml/QtQuick/Templates.2/libqtquicktemplates2plugin.a"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5QuickTemplates2.a"
+  "-static"
 )
+
 
 # TODO: the install part (is this even necessary?)
 
