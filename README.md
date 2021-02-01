@@ -1,13 +1,19 @@
 # avme-wallet
 
-Official ETH/TAEX wallet for the AVME Project.
+Official wallet for the AVME Project.
 
 ## Compiling
 
 ### Dependencies
+TODO: re-check deps
+* **CMake 3.18.0** or higher
+* **GCC** (native Linux) *or* **MinGW** (cross-compile from Linux to Windows)
+* **Build deps for Qt 5.9.8** or higher (see [Qt docs](https://wiki.qt.io/Building_Qt_5_from_Git) for more info)
+* Required packages for Bitcoin Core's depends system (see [depends/README.md](depends/README.md) for more info)
 
-* **CMake 3.9.3** or higher (if on Windows, get the **latest** version - at least 3.19.2 will do)
-* The **GNU GCC Toolchain** (Linux) or the **MSVC Toolchain** (Windows - get it [here](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2019))
+Example steps for APT-based distros:
+* `sudo apt-get build-dep qt5-default`
+* `sudo apt-get install build-essential mingw-w64 make automake autotools-dev cmake curl g++-multilib libtool binutils-gold bsdmainutils pkg-config python3 patch libxcb-xinerama0-dev`
 
 ### Instructions
 
@@ -15,10 +21,15 @@ Open a terminal at project root and do the following:
 
 ```
 mkdir build && cd build
-cmake ..
-For Linux/GCC: cmake --build .
-For Windows/MSVC: cmake --build . -- /p:Configuration=Release
-```
 
-Executable should be in `build` (Linux) or `build/Release` (Windows).
+[For GCC]
+make -C ../depends -j$(nproc)
+cmake ..
+
+[For MinGW]
+make HOST=x86_64-w64-mingw32 -C ../depends -j$(nproc)
+cmake -DCMAKE_TOOLCHAIN_FILE=cmake/x86_64-w64-mingw32.cmake ..
+
+cmake --build .
+```
 

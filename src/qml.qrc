@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/screens/main.qml</file>
+        <file>qml/screens/Accounts.qml</file>
+        <file>qml/screens/Wallets.qml</file>
+        <file>qml/components/AVMEMenu.qml</file>
+        <file>qml/components/AVMEButton.qml</file>
+        <file>qml/components/AVMEWalletList.qml</file>
+        <file>img/avme_logo.png</file>
+    </qresource>
+</RCC>
