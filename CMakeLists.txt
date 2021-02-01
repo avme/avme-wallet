@@ -110,13 +110,14 @@ add_subdirectory(libethcore)
 file(GLOB AVME_HEADERS "src/lib/*.h")
 file(GLOB AVME_SOURCES "src/lib/*.cpp")
 
-# Compile project executables
-add_executable(avme-cli
-  ${AVME_HEADERS} ${AVME_SOURCES} src/main-cli.h src/main-cli.cpp
-)
-target_link_libraries(avme-cli PUBLIC
-  devcore devcrypto ethcore ethash::ethash ${BOOST_LIBS}
-)
+# Compile the project library
+add_library(avme-lib ${AVME_HEADERS} ${AVME_SOURCES})
+target_link_libraries(avme-lib PUBLIC devcore devcrypto ethcore ethash::ethash ${BOOST_LIBS})
+
+# Compile the CLI executable (for testing)
+# TODO: have a macro somewhere that makes this optional
+add_executable(avme-cli src/main-cli.h src/main-cli.cpp)
+target_link_libraries(avme-cli PUBLIC avme-lib)
 
 # Compile Qt-specific stuff to embed into GUI executable.
 # First command is a dummy output to force whatever depends on it to always be rebuilt. Adapted from https://stackoverflow.com/a/32062884
@@ -138,14 +139,12 @@ add_custom_command(
   DEPENDS always_rebuild
 )
 
-# Add project executable and link libraries to it
+# Compile the GUI executable
 add_executable(avme-gui
-  ${AVME_HEADERS} ${AVME_SOURCES} src/main-gui.h src/main-gui.cpp build/moc_main-gui.cpp build/qml.cpp
+  src/main-gui.h src/main-gui.cpp build/moc_main-gui.cpp build/qml.cpp
 )
-
 # TODO: Fix library order, it is very messy currently
-target_link_libraries(avme-gui PUBLIC
-  devcore devcrypto ethcore ethash::ethash -ldl ${BOOST_LIBS}
+target_link_libraries(avme-gui PUBLIC avme-lib -ldl
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Network.a"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Gui.a"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Qml.a"
@@ -179,10 +178,10 @@ target_link_libraries(avme-gui PUBLIC
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5QuickTemplates2.a"
 )
 
-# TODO: the install part
+# TODO: the install part (is this even necessary?)
 
 # CPack stuff for packaging cross-platform binaries
-# TODO: understand what this does
+# TODO: understand what this does (is this also even necessary?)
 if(WIN32)
   set(CPACK_GENERATOR ZIP)
 else()
