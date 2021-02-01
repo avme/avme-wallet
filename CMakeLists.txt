@@ -118,16 +118,29 @@ target_link_libraries(avme-cli PUBLIC
   devcore devcrypto ethcore ethash::ethash ${BOOST_LIBS}
 )
 
-# Create a moc file to be able to use the Q_OBJECT macro for C++/Qt interfacing
+# Compile Qt-specific stuff to embed into GUI executable.
+# First command is a dummy output to force whatever depends on it to always be rebuilt. Adapted from https://stackoverflow.com/a/32062884
+# moc creates a source file with meta-object data that allows for C++/Qt interfacing (e.g. classes that use the Q_OBJECT macro).
+# rcc creates a source file with all the resources used in the .qrc file to be compiled into the executable.
+# TODO: understand why those commands are being run twice
 add_custom_command(
-  OUTPUT "${CMAKE_SOURCE_DIR}/src/moc_main-gui.cpp"
-  COMMAND "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/native/bin/moc" "${CMAKE_SOURCE_DIR}/src/main-gui.h" -o "${CMAKE_SOURCE_DIR}/src/moc_main-gui.cpp"
+  OUTPUT always_rebuild
+  COMMAND ""
+)
+add_custom_command(
+  OUTPUT "${CMAKE_SOURCE_DIR}/build/moc_main-gui.cpp"
+  COMMAND "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/native/bin/moc" "${CMAKE_SOURCE_DIR}/src/main-gui.h" -o "${CMAKE_SOURCE_DIR}/build/moc_main-gui.cpp"
+  DEPENDS always_rebuild
+)
+add_custom_command(
+  OUTPUT "${CMAKE_SOURCE_DIR}/build/qml.cpp"
+  COMMAND "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/native/bin/rcc" "${CMAKE_SOURCE_DIR}/src/qml.qrc" -o "${CMAKE_SOURCE_DIR}/build/qml.cpp"
+  DEPENDS always_rebuild
 )
 
 # Add project executable and link libraries to it
-# TODO: re-enable qrc when it's fixed
 add_executable(avme-gui
-  ${AVME_HEADERS} ${AVME_SOURCES} src/main-gui.h src/main-gui.cpp src/moc_main-gui.cpp #src/qml.qrc
+  ${AVME_HEADERS} ${AVME_SOURCES} src/main-gui.h src/main-gui.cpp build/moc_main-gui.cpp build/qml.cpp
 )
 
 # TODO: Fix library order, it is very messy currently

@@ -22,8 +22,7 @@ class System : public QObject {
   public:
     // Change the current loaded screen
     Q_INVOKABLE void setScreen(QObject* loader, QString qmlFile) {
-      //loader->setProperty("source", "qrc:/" + qmlFile);
-      loader->setProperty("source", "qml/" + qmlFile); // TODO: revert this when qrc compiling is fixed
+      loader->setProperty("source", "qrc:/" + qmlFile);
     }
 };
 

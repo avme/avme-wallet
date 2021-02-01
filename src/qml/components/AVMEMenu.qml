@@ -44,7 +44,7 @@ Rectangle {
       }
       MouseArea {
         anchors.fill: parent
-        onClicked: System.setScreen(content, "screens/Wallets.qml")
+        onClicked: System.setScreen(content, "qml/screens/Wallets.qml")
       }
     }
 
@@ -58,7 +58,7 @@ Rectangle {
       }
       MouseArea {
         anchors.fill: parent
-        onClicked: System.setScreen(content, "screens/Accounts.qml")
+        onClicked: System.setScreen(content, "qml/screens/Accounts.qml")
       }
     }
 
