@@ -141,8 +141,6 @@ add_custom_command(
 add_executable(avme-gui
   src/main-gui.h src/main-gui.cpp build/moc_main-gui.cpp build/qml.cpp
 )
-
-
 target_link_libraries(avme-gui PUBLIC avme-lib ${QT_LIBS})
 
 # TODO: the install part (is this even necessary?)

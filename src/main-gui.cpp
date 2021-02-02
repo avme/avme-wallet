@@ -3,8 +3,12 @@
 // Implementation of AVME Wallet as a GUI (Qt) program.
 
 int main(int argc, char *argv[]) {
+  // Set logging options to default to suppress debug strings (e.g. when reading key files).
+  dev::LoggingOptions loggingOptions;
+  dev::setupLogging(loggingOptions);
+
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-  QGuiApplication app(argc, argv);
+  QApplication app(argc, argv);
   QQmlApplicationEngine engine;
   System sys;
   engine.rootContext()->setContextProperty("System", &sys);

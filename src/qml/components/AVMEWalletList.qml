@@ -2,11 +2,10 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 /**
- * Custom list for a wallet's addresses and amounts in ETH and TAEX.
- * Requires a ListModel named "model" with the following items:
+ * Custom list for a wallet's addresses and amounts.
+ * Requires a ListModel with the following items:
  * - "account": the address
- * - "eth": the account's ETH amount
- * - "taex": the account's TAEX amount
+ * - "amount": the account's amount
  */
 
 ListView {
@@ -38,18 +37,10 @@ ListView {
     }
     Row {
       anchors.verticalCenter: parent.verticalCenter
-      width: parent.width / 4
+      width: parent.width / 2
       x: parent.width / 2
       Text {
-        text: "ETH"; font.pixelSize: 18; color: "white"; padding: 5;
-      }
-    }
-    Row {
-      anchors.verticalCenter: parent.verticalCenter
-      width: parent.width / 4
-      x: parent.width - (parent.width / 4)
-      Text {
-        text: "TAEX"; font.pixelSize: 18; color: "white"; padding: 5;
+        text: "Amount"; font.pixelSize: 18; color: "white"; padding: 5;
       }
     }
   }
@@ -69,15 +60,9 @@ ListView {
       }
       Row {
         anchors.verticalCenter: parent.verticalCenter
-        width: parent.width / 4
+        width: parent.width / 2
         x: parent.width / 2
-        Text { text: eth; font.pixelSize: 18; color: "white"; padding: 5; }
-      }
-      Row {
-        anchors.verticalCenter: parent.verticalCenter
-        width: parent.width / 4
-        x: parent.width - (parent.width / 4)
-        Text { text: taex; font.pixelSize: 18; color: "white"; padding: 5; }
+        Text { text: amount; font.pixelSize: 18; color: "white"; padding: 5; }
       }
       MouseArea {
         anchors.fill: parent

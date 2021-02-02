@@ -6,7 +6,7 @@ Official wallet for the AVME Project.
 
 ### Dependencies
 TODO: re-check deps
-* **CMake 3.18.0** or higher
+* **CMake 3.19.0** or higher
 * **GCC** (native Linux) *or* **MinGW** (cross-compile from Linux to Windows)
 * **Build deps for Qt 5.9.8** or higher (see [Qt docs](https://wiki.qt.io/Building_Qt_5_from_Git) for more info)
 * Required packages for Bitcoin Core's depends system (see [depends/README.md](depends/README.md) for more info)

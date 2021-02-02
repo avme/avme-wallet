@@ -1,8 +1,10 @@
 <RCC>
     <qresource prefix="/">
         <file>qml/screens/main.qml</file>
-        <file>qml/screens/Accounts.qml</file>
-        <file>qml/screens/Wallets.qml</file>
+        <file>qml/screens/StartScreen.qml</file>
+        <file>qml/screens/NewWalletScreen.qml</file>
+        <file>qml/screens/LoadWalletScreen.qml</file>
+        <file>qml/screens/AccountsScreen.qml</file>
         <file>qml/components/AVMEMenu.qml</file>
         <file>qml/components/AVMEButton.qml</file>
         <file>qml/components/AVMEWalletList.qml</file>

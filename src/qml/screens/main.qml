@@ -4,7 +4,7 @@ import QtQuick.Window 2.2
 
 import "qrc:/qml/components"
 
-Window {
+ApplicationWindow {
   id: window
   title: qsTr("AVME Wallet")
   width: 1280
@@ -23,27 +23,12 @@ Window {
     }
   }
 
-  AVMEMenu {
-    id: sideMenu
-    z: 2
-    width: 200
-    anchors {
-      left: parent.left
-      top: parent.top
-      bottom: parent.bottom
-    }
-  }
-
   Loader {
     id: content
     z: 3
-    width: parent.width - sideMenu.width
-    source: "qrc:/qml/screens/Wallets.qml"
-    anchors {
-      left: sideMenu.right
-      right: parent.right
-      top: parent.top
-      bottom: parent.bottom
-    }
+    width: parent.width
+    source: "qrc:/qml/screens/StartScreen.qml"
+    anchors.fill: parent
   }
 }
+

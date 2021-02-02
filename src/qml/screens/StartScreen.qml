@@ -4,6 +4,8 @@ import QtQuick.Controls 2.2
 import "qrc:/qml/components"
 
 Item {
+  id: start_screen
+
   Column {
     id: buttons
     anchors.fill: parent
@@ -30,34 +32,32 @@ Item {
     }
 
     AVMEButton {
-      id: btnLoadDefaultWallet
-      height: 60
-      width: parent.width / 2
-      text: "Load the default Wallet"
-      anchors.horizontalCenter: parent.horizontalCenter
-    }
-
-    AVMEButton {
       id: btnNewWallet
       height: 60
-      width: parent.width / 2
-      text: "Create and load a new Wallet"
+      width: parent.width / 4
+      text: "Create a new Wallet"
       anchors.horizontalCenter: parent.horizontalCenter
+      onClicked: {
+        System.setScreen(content, "qml/screens/NewWalletScreen.qml")
+      }
     }
 
     AVMEButton {
       id: btnLoadWallet
       height: 60
-      width: parent.width / 2
+      width: parent.width / 4
       text: "Load an existing Wallet"
       anchors.horizontalCenter: parent.horizontalCenter
+      onClicked: {
+        System.setScreen(content, "qml/screens/LoadWalletScreen.qml")
+      }
     }
 
     AVMEButton {
       id: btnImportSeed
       height: 60
-      width: parent.width / 2
-      text: "Import a Wallet with a Seed"
+      width: parent.width / 4
+      text: "Import a Wallet Seed (WIP)"
       anchors.horizontalCenter: parent.horizontalCenter
     }
   }
