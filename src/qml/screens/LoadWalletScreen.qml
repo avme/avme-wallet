@@ -148,6 +148,7 @@ Item {
           var walletPass = passphrase_input.text
           if (System.loadWallet(walletFile, secretsPath, walletPass)) {
             console.log("Wallet loaded successfully")
+            System.setWalletPass(walletPass)
             System.setScreen(content, "qml/screens/AccountsScreen.qml")
           } else {
             // TODO: show this message on screen with a label

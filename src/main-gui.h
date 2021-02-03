@@ -11,11 +11,7 @@
 //#include <QtCore/QJsonArray>
 #include <QtCore/qplugin.h>
 
-#ifdef __MINGW32__
-Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
-#else
 Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
-#endif
 Q_IMPORT_PLUGIN(QtQuick2Plugin)
 Q_IMPORT_PLUGIN(QtQuick2WindowPlugin)
 Q_IMPORT_PLUGIN(QtQuickTemplates2Plugin)
@@ -30,11 +26,21 @@ class System : public QObject {
 
   private:
     WalletManager wm;
+    std::string walletPass;
 
   public:
     // Change the current loaded screen
     Q_INVOKABLE void setScreen(QObject* loader, QString qmlFile) {
       loader->setProperty("source", "qrc:/" + qmlFile);
+    }
+
+    // Get/Set wallet password
+    Q_INVOKABLE QString getWalletPass() {
+      return QString::fromStdString(this->walletPass);
+    }
+
+    Q_INVOKABLE void setWalletPass(QString pass) {
+      this->walletPass = pass.toStdString();
     }
 
     // Create a new Wallet
@@ -68,18 +74,39 @@ class System : public QObject {
       if (type == "eth") {
         walist = this->wm.listETHAccounts();
         for (WalletAccount wa : walist) {
-          std::string obj = "{\"account\": \"" + wa.address + "\", \"amount\": \"" + wa.balanceETH + "\"}";
+          std::string obj;
+          obj += "{\"name\": \"" + wa.name;
+          obj += "\", \"account\": \"" + wa.address;
+          obj += "\", \"amount\": \"" + wa.balanceETH + "\"}";
           ret << QString::fromStdString(obj);
         }
       } else if (type == "taex") {
         walist = this->wm.listTAEXAccounts();
         for (WalletAccount wa : walist) {
-          std::string obj = "{\"account\": \"" + wa.address + "\", \"amount\": \"" + wa.balanceTAEX + "\"}";
+          std::string obj;
+          obj += "{\"name\": \"" + wa.name;
+          obj += "\", \"account\": \"" + wa.address;
+          obj += "\", \"amount\": \"" + wa.balanceTAEX + "\"}";
           ret << QString::fromStdString(obj);
         }
       }
 
       return ret;
+    }
+
+    // Create a new Account
+    Q_INVOKABLE bool createNewAccount(
+      QString name, QString pass, QString hint, bool usesMasterPass
+    ) {
+      WalletAccount wa = this->wm.createNewAccount(
+        name.toStdString(), pass.toStdString(), hint.toStdString(), usesMasterPass
+      );
+      return !wa.id.empty();
+    }
+
+    // Erase an Account
+    Q_INVOKABLE bool eraseAccount(QString account) {
+      return this->wm.eraseAccount(account.toStdString());
     }
 };
 
