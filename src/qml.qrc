@@ -6,6 +6,8 @@
         <file>qml/screens/LoadWalletScreen.qml</file>
         <file>qml/screens/AccountsScreen.qml</file>
         <file>qml/screens/NewAccountScreen.qml</file>
+        <file>qml/screens/TransactionScreen.qml</file>
+        <file>qml/screens/ProgressScreen.qml</file>
         <file>qml/components/AVMEMenu.qml</file>
         <file>qml/components/AVMEButton.qml</file>
         <file>qml/components/AVMEWalletList.qml</file>

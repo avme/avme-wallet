@@ -121,10 +121,11 @@ int main() {
         txGasPrice = wm.getAutomaticFee();
       } else if (feeOp == "2") {
         txGasLimit = menuSetGasLimit();
-        txGasPrice = boost::lexical_cast<std::string>(
-          boost::lexical_cast<u256>(menuSetGasPrice()) * raiseToPow(10,9)
-        );
+        txGasPrice = menuSetGasPrice();
       }
+      txGasPrice = boost::lexical_cast<std::string>(
+        boost::lexical_cast<u256>(txGasPrice) * raiseToPow(10,9)
+      );
 
       std::string pass, conf;
       while (true) {

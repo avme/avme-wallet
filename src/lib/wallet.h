@@ -160,8 +160,9 @@ class WalletManager {
     std::vector<WalletAccount> listTAEXAccounts();
 
     /**
-     * Get the recommended amount of fees for a transaction.
-     * Returns the amount in Gwei.
+     * Get the recommended gas price for a transaction.
+     * Returns the gas price in Gwei, which has to be converted to Wei
+     * when building a transaction.
      */
     std::string getAutomaticFee();
 

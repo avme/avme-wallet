@@ -278,19 +278,9 @@ std::vector<WalletAccount> WalletManager::listTAEXAccounts() {
 // TODO: make the user choose between slower or faster fees from the data at:
 // https://ropsten.etherscan.io/api?module=gastracker&action=gasoracle&apikey=
 std::string WalletManager::getAutomaticFee() {
-  std::string gasPrice;
   std::string gasRequest = Network::getTxFees();
-  std::string gasPriceGwei = JSON::getValue(gasRequest, "result/SafeGasPrice", "/").get_str();
-
-  if (!gasPriceGwei.empty()) {
-    gasPrice = boost::lexical_cast<std::string>(
-      boost::lexical_cast<u256>(gasPriceGwei) * raiseToPow(10, 9)
-    );
-  } else {
-    gasPrice = "50";  // Set gas price to default if querying fails
-  }
-
-  return gasPrice;
+  std::string gasPrice = JSON::getValue(gasRequest, "result/SafeGasPrice", "/").get_str();
+  return (!gasPrice.empty()) ? gasPrice : "50"; // 50 is the default value in case the query fails
 }
 
 std::string WalletManager::buildTxData(std::string txValue, std::string destWallet) {
@@ -341,6 +331,7 @@ TransactionSkeleton WalletManager::buildETHTransaction(
     txSkel.nonce = MAX_U256_VALUE();
     return txSkel;
   }
+
   std::stringstream nonceStrm;
   nonceStrm << std::hex << txNonceStr;
   nonceStrm >> txNonce;

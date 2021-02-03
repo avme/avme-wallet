@@ -56,7 +56,12 @@ Item {
     AVMEButton {
       id: btnSendETH
       width: (parent.width / 3) - parent.spacing
-      text: "Send Transaction (WIP)"
+      text: "Send Transaction"
+      onClicked: {
+        System.setTxSenderAccount(walletList.currentItem.listItemAccount)
+        System.setTxSenderAmount(walletList.currentItem.listItemAmount)
+        System.setScreen(content, "qml/screens/TransactionScreen.qml")
+      }
     }
     AVMEButton {
       id: btnEraseAccount
