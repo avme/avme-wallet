@@ -235,7 +235,6 @@ Item {
     padding: 0  // Remove white borders
     closePolicy: Popup.CloseOnPressOutside
 
-    // TODO: maybe put a warning icon here
     Rectangle {
       id: popupBg
       anchors.fill: parent

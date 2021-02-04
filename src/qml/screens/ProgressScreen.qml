@@ -33,29 +33,37 @@ Item {
       if (b) {
         buildText.color = "limegreen"
         buildText.text = "Transaction built!"
+        buildPng.source = "qrc:/img/ok.png"
         signText.color = "black"
+        signPng.visible = true
       } else {
         buildText.color = "crimson"
         buildText.text = "Error on building transaction."
+        buildPng.source = "qrc:/img/no.png"
       }
     }
     onTxSigned: {
       if (b) {
         signText.color = "limegreen"
         signText.text = "Transaction signed!"
+        signPng.source = "qrc:/img/ok.png"
         sendText.color = "black"
+        sendPng.visible = true
       } else {
         signText.color = "crimson"
         signText.text = "Error on signing transaction."
+        signPng.source = "qrc:/img/no.png"
       }
     }
     onTxSent: {
       if (b) {
         sendText.color = "limegreen"
         sendText.text = "Transaction sent!"
+        sendPng.source = "qrc:/img/ok.png"
       } else {
         sendText.color = "crimson"
         sendText.text = "Error on sending transaction."
+        sendPng.source = "qrc:/img/no.png"
       }
     }
   }
@@ -98,11 +106,19 @@ Item {
     }
 
     // Progress texts
-    // TODO: put animated icons beside the texts
     Row {
       id: buildRow
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
+
+      Image {
+        id: buildPng
+        height: 50
+        anchors.verticalCenter: buildText.verticalCenter
+        fillMode: Image.PreserveAspectFit
+        source: "qrc:/img/wait.png"
+        visible: true
+      }
 
       Text {
         id: buildText
@@ -117,6 +133,15 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
+      Image {
+        id: signPng
+        height: 50
+        anchors.verticalCenter: signText.verticalCenter
+        fillMode: Image.PreserveAspectFit
+        source: "qrc:/img/wait.png"
+        visible: false
+      }
+
       Text {
         id: signText
         font.pointSize: 14.0
@@ -129,6 +154,15 @@ Item {
       id: sendRow
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
+
+      Image {
+        id: sendPng
+        height: 50
+        anchors.verticalCenter: sendText.verticalCenter
+        fillMode: Image.PreserveAspectFit
+        source: "qrc:/img/wait.png"
+        visible: false
+      }
 
       Text {
         id: sendText

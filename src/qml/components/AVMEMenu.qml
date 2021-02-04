@@ -123,26 +123,44 @@ Rectangle {
     padding: 0  // Remove white borders
     closePolicy: Popup.CloseOnPressOutside
 
-    // TODO: maybe put a warning icon here
     Rectangle {
       id: popupBg
       anchors.fill: parent
       color: "#9A4FAD"
-      Text {
-        id: popupText
+
+      // Popup info
+      Row {
+        id: popupInfo
         anchors {
           horizontalCenter: parent.horizontalCenter
           top: parent.top
-          topMargin: parent.height / 4
+          topMargin: parent.height / 6
         }
-        text: "Are you sure you want to close this Wallet?"
+        spacing: 10
+
+        Image {
+          id: popupPng
+          height: 50
+          anchors.verticalCenter: parent.verticalCenter
+          fillMode: Image.PreserveAspectFit
+          source: "qrc:/img/warn.png"
+        }
+
+        Text {
+          id: popupText
+          anchors.verticalCenter: popupPng.verticalCenter
+          horizontalAlignment: Text.AlignHCenter
+          text: "Are you sure you want to close this Wallet?"
+        }
       }
+
+      // Popup buttons
       Row {
         id: popupBtns
         anchors {
           horizontalCenter: parent.horizontalCenter
           bottom: parent.bottom
-          bottomMargin: parent.height / 4
+          bottomMargin: parent.height / 6
         }
         spacing: 10
 
@@ -156,6 +174,7 @@ Rectangle {
           text: "Yes"
           onClicked: {
             closeWalletPopup.close()
+            console.log("Wallet closed successfully")
             System.setScreen(content, "qml/screens/StartScreen.qml")
           }
         }

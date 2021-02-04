@@ -82,22 +82,39 @@ Item {
     padding: 0  // Remove white borders
     closePolicy: Popup.CloseOnPressOutside
 
-    // TODO: maybe put a warning icon here
     Rectangle {
       id: popupBg
       anchors.fill: parent
       color: "#9A4FAD"
-      Text {
-        id: popupText
+
+      // Popup info
+      Row {
+        id: popupInfo
         anchors {
           horizontalCenter: parent.horizontalCenter
           top: parent.top
-          topMargin: parent.height / 4
+          topMargin: parent.height / 6
         }
-        horizontalAlignment: Text.AlignHCenter
-        text: "Are you sure you want to completely erase this Account?<br>"
-        + "All funds on it will be <b>permanently lost</b>."
+        spacing: 10
+
+        Image {
+          id: popupPng
+          height: 50
+          anchors.verticalCenter: parent.verticalCenter
+          fillMode: Image.PreserveAspectFit
+          source: "qrc:/img/warn.png"
+        }
+
+        Text {
+          id: popupText
+          anchors.verticalCenter: popupPng.verticalCenter
+          horizontalAlignment: Text.AlignHCenter
+          text: "Are you sure you want to completely erase this Account?<br>"
+          + "All funds on it will be <b>permanently lost</b>."
+        }
       }
+
+      // Popup buttons
       Row {
         id: popupBtns
         anchors {

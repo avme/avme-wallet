@@ -12,5 +12,9 @@
         <file>qml/components/AVMEButton.qml</file>
         <file>qml/components/AVMEWalletList.qml</file>
         <file>img/avme_logo.png</file>
+        <file>img/warn.png</file>
+        <file>img/wait.png</file>
+        <file>img/ok.png</file>
+        <file>img/no.png</file>
     </qresource>
 </RCC>
