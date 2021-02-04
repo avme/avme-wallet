@@ -4,8 +4,10 @@ import Qt.labs.platform 1.0
 
 import "qrc:/qml/components"
 
+// Screen for creating a new Wallet
+
 Item {
-  id: new_wallet_screen
+  id: newWalletScreen
 
   Column {
     id: items
@@ -13,18 +15,23 @@ Item {
     spacing: 30
     topPadding: 50
 
+    // TODO: turn logo into an image (for better/easier scaling)
     Row {
       id: logo
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
-      Image { id: logo_png; source: "qrc:/img/avme_logo.png" }
+      Image {
+        id: logoPng
+        source: "qrc:/img/avme_logo.png"
+      }
+
       Text {
-        id: logo_text
-        text: "AVME"
+        id: logoText
+        anchors.verticalCenter: logoPng.verticalCenter
         font.bold: true
         font.pointSize: 72.0
-        anchors.verticalCenter: logo_png.verticalCenter
+        text: "AVME"
       }
     }
 
@@ -34,108 +41,112 @@ Item {
       text: "Enter the following details to create a new Wallet."
     }
 
+    // Wallet folder
     Row {
-      id: wallet_folder_row
+      id: folderRow
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
       Text {
-        id: wallet_folder_text
+        id: folderText
         anchors.verticalCenter: parent.verticalCenter
         width: 10
         horizontalAlignment: Text.AlignRight
         text: "Wallet path:"
       }
       TextField {
-        id: wallet_folder_input
+        id: folderInput
         width: items.width / 2
         readOnly: true
-        placeholderText: "Choose a wallet folder"
+        placeholderText: "Folder path for your wallet file"
       }
       AVMEButton {
-        id: wallet_folder_dialog_btn
-        text: "..."
+        id: folderDialogBtn
         width: 40
-        height: wallet_folder_input.height
-        onClicked: wallet_folder_dialog.visible = true
+        height: folderInput.height
+        text: "..."
+        onClicked: folderDialog.visible = true
       }
       FolderDialog {
-        id: wallet_folder_dialog
-        title: "Choose a wallet folder"
+        id: folderDialog
+        title: "Choose a folder for your wallet file"
         onAccepted: {
-          wallet_folder_input.text = wallet_folder_dialog.folder
+          folderInput.text = folderDialog.folder
         }
       }
     }
 
+    // Wallet file name
     Row {
-      id: wallet_file_row
+      id: fileRow
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
       Text {
-        id: wallet_file_text
+        id: fileText
         anchors.verticalCenter: parent.verticalCenter
         width: 10
         horizontalAlignment: Text.AlignRight
         text: "Wallet file name:"
       }
       TextField {
-        id: wallet_file_input
+        id: fileInput
         width: items.width / 4
         selectByMouse: true
-        placeholderText: "Give a name to your wallet file"
+        placeholderText: "Name of your wallet file"
       }
     }
 
+    // Secrets folder
     Row {
-      id: wallet_secrets_row
+      id: secretsRow
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
       Text {
-        id: wallet_secrets_text
+        id: secretsText
         anchors.verticalCenter: parent.verticalCenter
         width: 10
         horizontalAlignment: Text.AlignRight
         text: "Secrets path:"
       }
       TextField {
-        id: wallet_secrets_input
+        id: secretsInput
         width: items.width / 2
         readOnly: true
-        placeholderText: "Choose a secrets folder"
+        placeholderText: "Folder path for your wallet secrets"
       }
       AVMEButton {
-        id: wallet_secrets_dialog_btn
-        text: "..."
+        id: secretsDialogBtn
         width: 40
-        height: wallet_secrets_input.height
-        onClicked: wallet_secrets_dialog.visible = true
+        height: secretsInput.height
+        text: "..."
+        onClicked: secretsDialog.visible = true
       }
       FolderDialog {
-        id: wallet_secrets_dialog
-        title: "Choose a secrets folder"
+        id: secretsDialog
+        title: "Choose a folder for your wallet secrets"
         onAccepted: {
-          wallet_secrets_input.text = wallet_secrets_dialog.folder
+          secretsInput.text = secretsDialog.folder
         }
       }
     }
 
+    // Passphrase
     Row {
-      id: passphrase_row
+      id: passRow
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
       Text {
-        id: passphrase_text
+        id: passText
         anchors.verticalCenter: parent.verticalCenter
         width: 10
         horizontalAlignment: Text.AlignRight
         text: "Passphrase:"
       }
       TextField {
-        id: passphrase_input
+        id: passInput
         width: items.width / 4
         selectByMouse: true
         echoMode: TextInput.Password
@@ -144,28 +155,29 @@ Item {
       }
     }
 
+    // Buttons
     Row {
-      id: btn_row
+      id: btnRow
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
       AVMEButton {
-        id: btn_back
-        height: 60
+        id: btnBack
         width: items.width / 8
+        height: 60
         text: "Back"
         onClicked: System.setScreen(content, "qml/screens/StartScreen.qml")
       }
 
       AVMEButton {
-        id: btn_done
-        height: 60
+        id: btnDone
         width: items.width / 8
+        height: 60
         text: "Done"
         onClicked: {
-          var walletFile = wallet_folder_input.text + "/" + wallet_file_input.text
-          var secretsPath = wallet_secrets_input.text
-          var walletPass = passphrase_input.text
+          var walletFile = folderInput.text + "/" + fileInput.text
+          var secretsPath = secretsInput.text
+          var walletPass = passInput.text
           try {
             System.createNewWallet(walletFile, secretsPath, walletPass)
             console.log("Wallet created successfully, now loading it...")
@@ -175,7 +187,7 @@ Item {
             System.setScreen(content, "qml/screens/AccountsScreen.qml")
           } catch (error) {
             // TODO: show this message on screen with a label
-            print ("Error on wallet creation/loading.")
+            print ("Error on wallet creation/loading")
             for (var i = 0; i < error.qmlErrors.length; i++) {
               print("lineNumber: " + error.qmlErrors[i].lineNumber)
               print("columnNumber: " + error.qmlErrors[i].columnNumber)

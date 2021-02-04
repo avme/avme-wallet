@@ -4,8 +4,10 @@ import Qt.labs.platform 1.0
 
 import "qrc:/qml/components"
 
+// Screen for loading an existing Wallet
+
 Item {
-  id: load_wallet_screen
+  id: loadWalletScreen
 
   Column {
     id: items
@@ -13,18 +15,23 @@ Item {
     spacing: 30
     topPadding: 50
 
+    // TODO: turn logo into an image (for better/easier scaling)
     Row {
       id: logo
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
-      Image { id: logo_png; source: "qrc:/img/avme_logo.png" }
+      Image {
+        id: logoPng
+        source: "qrc:/img/avme_logo.png"
+      }
+
       Text {
-        id: logo_text
-        text: "AVME"
+        id: logoText
+        anchors.verticalCenter: logoPng.verticalCenter
         font.bold: true
         font.pointSize: 72.0
-        anchors.verticalCenter: logo_png.verticalCenter
+        text: "AVME"
       }
     }
 
@@ -34,88 +41,91 @@ Item {
       text: "Enter the following details to load a Wallet."
     }
 
+    // Wallet file path
     Row {
-      id: wallet_file_row
+      id: fileRow
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
       Text {
-        id: wallet_file_text
+        id: fileText
         anchors.verticalCenter: parent.verticalCenter
         width: 10
         horizontalAlignment: Text.AlignRight
         text: "Wallet file:"
       }
       TextField {
-        id: wallet_file_input
+        id: fileInput
         width: items.width / 2
         readOnly: true
-        placeholderText: "Choose a wallet file"
+        placeholderText: "Your wallet file"
       }
       AVMEButton {
-        id: wallet_file_dialog_btn
-        text: "..."
+        id: fileDialogBtn
         width: 40
-        height: wallet_file_input.height
-        onClicked: wallet_file_dialog.visible = true
+        height: fileInput.height
+        text: "..."
+        onClicked: fileDialog.visible = true
       }
       FileDialog {
-        id: wallet_file_dialog
+        id: fileDialog
         title: "Choose a wallet file"
         onAccepted: {
-          wallet_file_input.text = wallet_file_dialog.file
+          fileInput.text = fileDialog.file
         }
       }
     }
 
+    // Secrets folder path
     Row {
-      id: wallet_secrets_row
+      id: secretsRow
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
       Text {
-        id: wallet_secrets_text
+        id: secretsText
         anchors.verticalCenter: parent.verticalCenter
         width: 10
         horizontalAlignment: Text.AlignRight
-        text: "Secrets path:"
+        text: "Secrets folder:"
       }
       TextField {
-        id: wallet_secrets_input
+        id: secretsInput
         width: items.width / 2
         readOnly: true
-        placeholderText: "Choose a secrets folder"
+        placeholderText: "Your wallet secrets folder"
       }
       AVMEButton {
-        id: wallet_secrets_dialog_btn
-        text: "..."
+        id: secretsDialogBtn
         width: 40
-        height: wallet_secrets_input.height
-        onClicked: wallet_secrets_dialog.visible = true
+        height: secretsInput.height
+        text: "..."
+        onClicked: secretsDialog.visible = true
       }
       FolderDialog {
-        id: wallet_secrets_dialog
+        id: secretsDialog
         title: "Choose a secrets folder"
         onAccepted: {
-          wallet_secrets_input.text = wallet_secrets_dialog.folder
+          secretsInput.text = secretsDialog.folder
         }
       }
     }
 
+    // Passphrase
     Row {
-      id: passphrase_row
+      id: passRow
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
       Text {
-        id: passphrase_text
+        id: passText
         anchors.verticalCenter: parent.verticalCenter
         width: 10
         horizontalAlignment: Text.AlignRight
         text: "Passphrase:"
       }
       TextField {
-        id: passphrase_input
+        id: passInput
         width: items.width / 4
         selectByMouse: true
         echoMode: TextInput.Password
@@ -124,35 +134,36 @@ Item {
       }
     }
 
+    // Buttons
     Row {
-      id: btn_row
+      id: btnRow
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
       AVMEButton {
-        id: btn_back
-        height: 60
+        id: btnBack
         width: items.width / 8
+        height: 60
         text: "Back"
         onClicked: System.setScreen(content, "qml/screens/StartScreen.qml")
       }
 
       AVMEButton {
-        id: btn_done
-        height: 60
+        id: btnDone
         width: items.width / 8
+        height: 60
         text: "Done"
         onClicked: {
-          var walletFile = wallet_file_input.text
-          var secretsPath = wallet_secrets_input.text
-          var walletPass = passphrase_input.text
+          var walletFile = fileInput.text
+          var secretsPath = secretsInput.text
+          var walletPass = passInput.text
           if (System.loadWallet(walletFile, secretsPath, walletPass)) {
             console.log("Wallet loaded successfully")
             System.setWalletPass(walletPass)
             System.setScreen(content, "qml/screens/AccountsScreen.qml")
           } else {
             // TODO: show this message on screen with a label
-            console.log("Error on wallet load. Please check the paths and/or passphrase.")
+            console.log("Error on wallet load. Please check the paths and/or passphrase")
           }
         }
       }

@@ -3,55 +3,59 @@ import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
 
-// TODO: transaction is done already before the screen even shows up!
-// Maybe put this in TransactionScreen's popup instead of a separate screen?
-Item {
-  id: progress_screen
+// Screen for showing transaction progress and results
 
+Item {
+  id: progressScreen
+
+  // Start the transaction process once screen is loaded
+  // TODO: transaction is done already before the screen even shows up!
+  // Maybe put this in TransactionScreen's popup instead of a separate screen?
   Component.onCompleted: {
-    var link_url = System.makeTransaction()
-    if (link_url != "") {
-      link_text.text = 'Transaction successful! '
+    var linkUrl = System.makeTransaction()
+    if (linkUrl != "") {
+      linkText.text = 'Transaction successful! '
       + '<html><style type="text/css"></style>'
-      + '<a href="' + link_url + '">'
+      + '<a href="' + linkUrl + '">'
       + 'Link'
       + '</a></html>'
     } else {
-      link_text.text = "Transaction failed. Please try again."
+      linkText.text = "Transaction failed. Please try again."
     }
-    link_text.visible = true
+    linkText.visible = true
     btn.visible = true
   }
 
+  // Signal connections
   Connections {
     target: System
     onTxBuilt: {
       if (b) {
-        build_text.color = "limegreen"
-        build_text.text = "Transaction built!"
-        sign_text.color = "black"
+        buildText.color = "limegreen"
+        buildText.text = "Transaction built!"
+        signText.color = "black"
       } else {
-        build_text.color = "crimson"
-        build_text.text = "Error on building transaction."
+        buildText.color = "crimson"
+        buildText.text = "Error on building transaction."
       }
     }
     onTxSigned: {
       if (b) {
-        sign_text.color = "limegreen"
-        sign_text.text = "Transaction signed!"
-        send_text.color = "black"
+        signText.color = "limegreen"
+        signText.text = "Transaction signed!"
+        sendText.color = "black"
       } else {
-        sign_text.color = "crimson"
-        sign_text.text = "Error on signing transaction."
+        signText.color = "crimson"
+        signText.text = "Error on signing transaction."
       }
     }
     onTxSent: {
       if (b) {
-        send_text.color = "limegreen"
-        send_text.text = "Transaction sent!"
+        sendText.color = "limegreen"
+        sendText.text = "Transaction sent!"
       } else {
-        send_text.color = "crimson"
-        send_text.text = "Error on sending transaction."
+        sendText.color = "crimson"
+        sendText.text = "Error on sending transaction."
       }
     }
   }
@@ -62,48 +66,46 @@ Item {
     spacing: 30
     topPadding: 50
 
+    // TODO: turn logo into an image (for better/easier scaling)
     Row {
       id: logo
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
       Image {
-        id: logo_png
+        id: logoPng
         source: "qrc:/img/avme_logo.png"
       }
 
       Text {
-        id: logo_text
-        text: "AVME"
+        id: logoText
+        anchors.verticalCenter: logoPng.verticalCenter
         font.bold: true
         font.pointSize: 72.0
-        anchors.verticalCenter: logo_png.verticalCenter
+        text: "AVME"
       }
     }
 
+    // Info about transaction
+    Text {
+      id: infoText
+      anchors.horizontalCenter: parent.horizontalCenter
+      font.pointSize: 18.0
+      color: "black"
+      horizontalAlignment: Text.AlignHCenter
+      text: "Sending <b>" + System.getTxAmount() + " " + System.getTxLabel()
+      + "</b> to address<br><b>" + System.getTxReceiverAccount() + "</b>..."
+    }
+
+    // Progress texts
     // TODO: put animated icons beside the texts
     Row {
-      id: info_row
+      id: buildRow
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
       Text {
-        id: info_text
-        font.pointSize: 18.0
-        color: "black"
-        horizontalAlignment: Text.AlignHCenter
-        text: "Sending <b>" + System.getTxAmount() + " " + System.getTxLabel()
-        + "</b> to address<br><b>" + System.getTxReceiverAccount() + "</b>..."
-      }
-    }
-
-    Row {
-      id: build_row
-      anchors.horizontalCenter: parent.horizontalCenter
-      spacing: 10
-
-      Text {
-        id: build_text
+        id: buildText
         font.pointSize: 14.0
         color: "black"
         text: "Building transaction..."
@@ -111,12 +113,12 @@ Item {
     }
 
     Row {
-      id: sign_row
+      id: signRow
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
       Text {
-        id: sign_text
+        id: signText
         font.pointSize: 14.0
         color: "grey"
         text: "Signing transaction..."
@@ -124,26 +126,28 @@ Item {
     }
 
     Row {
-      id: send_row
+      id: sendRow
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
       Text {
-        id: send_text
+        id: sendText
         font.pointSize: 14.0
         color: "grey"
         text: "Broadcasting transaction..."
       }
     }
 
+    // Result text w/ link to transaction (or error message)
     Text {
-      id: link_text
+      id: linkText
       anchors.horizontalCenter: parent.horizontalCenter
       visible: false
       text: ""
       onLinkActivated: Qt.openUrlExternally(link)
     }
 
+    // Button to go back to Accounts
     AVMEButton {
       id: btn
       anchors.horizontalCenter: parent.horizontalCenter

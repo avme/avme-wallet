@@ -10,7 +10,7 @@ import QtQuick.Controls 2.2
  */
 
 ListView {
-  id: list
+  id: walletList
   highlight: Rectangle { color: "#7AC1EB"; radius: 5 }
   implicitWidth: 500
   implicitHeight: 500
@@ -20,14 +20,15 @@ ListView {
   highlightResizeVelocity: 1000
   focus: true
   clip: true
+  boundsBehavior: Flickable.StopAtBounds
 
+  // Header (top bar)
   header: Rectangle {
     id: listHeader
-    color: "#58A0C9"
     width: parent.width
     height: 30
     anchors.horizontalCenter: parent.horizontalCenter
-    z: 2
+    color: "#58A0C9"
 
     Row {
       id: headerNameRow
@@ -58,16 +59,17 @@ ListView {
   }
   headerPositioning: ListView.OverlayHeader // Prevent header scrolling along
 
+  // Delegate (structure for each item in the list)
   delegate: Component {
     id: listDelegate
     Item {
       id: listItem
-      property alias listItemName: itemName.text
-      property alias listItemAccount: itemAccount.text
-      property alias listItemAmount: itemAmount.text
+      readonly property alias listItemName: itemName.text
+      readonly property alias listItemAccount: itemAccount.text
+      readonly property alias listItemAmount: itemAmount.text
       width: parent.width
       height: 40
-      z: 1
+
       Row {
         id: delegateNameRow
         anchors.verticalCenter: parent.verticalCenter
@@ -90,7 +92,7 @@ ListView {
       }
       MouseArea {
         anchors.fill: parent
-        onClicked: list.currentIndex = index
+        onClicked: walletList.currentIndex = index
       }
     }
   }
