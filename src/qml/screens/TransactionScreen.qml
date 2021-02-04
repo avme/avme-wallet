@@ -226,10 +226,10 @@ Item {
   // Popup for confirming the transaction
   Popup {
     id: confirmPopup
-    width: parent.width / 2
-    height: parent.height / 2
-    x: (parent.width / 2) - (width / 2)
-    y: (parent.height / 2) - (height / 2)
+    width: window.width / 2
+    height: window.height / 2
+    x: (window.width / 2) - (width / 2)
+    y: (window.height / 2) - (height / 2)
     modal: true
     focus: true
     padding: 0  // Remove white borders

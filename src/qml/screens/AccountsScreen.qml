@@ -73,10 +73,10 @@ Item {
   // Modal for confirming Account erasure
   Popup {
     id: erasePopup
-    width: parent.width / 2
-    height: parent.height / 4
-    x: (parent.width / 2) - (width / 2)
-    y: (parent.height / 2) - (height / 2)
+    width: window.width / 2
+    height: window.height / 4
+    x: (window.width / 2) - (width / 2)
+    y: (window.height / 2) - (height / 2)
     modal: true
     focus: true
     padding: 0  // Remove white borders
@@ -94,14 +94,16 @@ Item {
           top: parent.top
           topMargin: parent.height / 4
         }
-        text: "Are you sure you want to completely erase this account?"
+        horizontalAlignment: Text.AlignHCenter
+        text: "Are you sure you want to completely erase this Account?<br>"
+        + "All funds on it will be <b>permanently lost</b>."
       }
       Row {
         id: popupBtns
         anchors {
           horizontalCenter: parent.horizontalCenter
           bottom: parent.bottom
-          bottomMargin: parent.height / 4
+          bottomMargin: parent.height / 6
         }
         spacing: 10
 

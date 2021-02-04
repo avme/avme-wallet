@@ -85,18 +85,17 @@ Rectangle {
       }
     }
 
-    // TODO: popup for closing wallet
     Rectangle {
       width: parent.width
       height: 40
       color: "#F66986"
       Label {
         anchors.centerIn: parent
-        text: "Close Wallet (WIP)"
+        text: "Close Wallet"
       }
       MouseArea {
         anchors.fill: parent
-        onClicked: console.log("Clicked Close Wallet")
+        onClicked: closeWalletPopup.open()
       }
     }
   }
@@ -110,5 +109,57 @@ Rectangle {
       bottomMargin: 10
     }
     text: "© 2021 AVME"
+  }
+
+  // Modal for confirming Wallet closure
+  Popup {
+    id: closeWalletPopup
+    width: window.width / 2
+    height: window.height / 4
+    x: (window.width / 2) - (width / 2)
+    y: (window.height / 2) - (height / 2)
+    modal: true
+    focus: true
+    padding: 0  // Remove white borders
+    closePolicy: Popup.CloseOnPressOutside
+
+    // TODO: maybe put a warning icon here
+    Rectangle {
+      id: popupBg
+      anchors.fill: parent
+      color: "#9A4FAD"
+      Text {
+        id: popupText
+        anchors {
+          horizontalCenter: parent.horizontalCenter
+          top: parent.top
+          topMargin: parent.height / 4
+        }
+        text: "Are you sure you want to close this Wallet?"
+      }
+      Row {
+        id: popupBtns
+        anchors {
+          horizontalCenter: parent.horizontalCenter
+          bottom: parent.bottom
+          bottomMargin: parent.height / 4
+        }
+        spacing: 10
+
+        AVMEButton {
+          id: btnNo
+          text: "No"
+          onClicked: closeWalletPopup.close()
+        }
+        AVMEButton {
+          id: btnYes
+          text: "Yes"
+          onClicked: {
+            closeWalletPopup.close()
+            System.setScreen(content, "qml/screens/StartScreen.qml")
+          }
+        }
+      }
+    }
   }
 }
