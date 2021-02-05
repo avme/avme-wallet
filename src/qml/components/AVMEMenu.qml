@@ -1,6 +1,8 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
+import "qrc:/qml/components"
+
 // Side menu with general options for wallet management.
 
 Rectangle {
@@ -23,24 +25,15 @@ Rectangle {
     anchors.top: parent.top
     color: "#9A4FAD"
 
-    Row {
-      spacing: 10
-      anchors.fill: parent
-      anchors.leftMargin: (parent.width / 10) - spacing
-      Image {
-        id: logoPng
-        height: parent.height / 1.5
-        anchors.verticalCenter: parent.verticalCenter
-        fillMode: Image.PreserveAspectFit
-        source: "qrc:/img/avme_logo.png"
+    Image {
+      id: logo
+      anchors {
+        fill: parent
+        centerIn: parent
+        margins: 10
       }
-      Text {
-        id: logoText
-        anchors.verticalCenter: logoPng.verticalCenter
-        font.bold: true
-        font.pointSize: 24.0
-        text: "AVME"
-      }
+      fillMode: Image.PreserveAspectFit
+      source: "qrc:/img/avme_banner.png"
     }
   }
 
@@ -111,74 +104,16 @@ Rectangle {
     text: "© 2021 AVME"
   }
 
-  // Modal for confirming Wallet closure
-  Popup {
+  // Yes/No popup for confirming Wallet closure
+  AVMEPopupYesNo {
     id: closeWalletPopup
-    width: window.width / 2
-    height: window.height / 4
-    x: (window.width / 2) - (width / 2)
-    y: (window.height / 2) - (height / 2)
-    modal: true
-    focus: true
-    padding: 0  // Remove white borders
-    closePolicy: Popup.CloseOnPressOutside
-
-    Rectangle {
-      id: popupBg
-      anchors.fill: parent
-      color: "#9A4FAD"
-
-      // Popup info
-      Row {
-        id: popupInfo
-        anchors {
-          horizontalCenter: parent.horizontalCenter
-          top: parent.top
-          topMargin: parent.height / 6
-        }
-        spacing: 10
-
-        Image {
-          id: popupPng
-          height: 50
-          anchors.verticalCenter: parent.verticalCenter
-          fillMode: Image.PreserveAspectFit
-          source: "qrc:/img/warn.png"
-        }
-
-        Text {
-          id: popupText
-          anchors.verticalCenter: popupPng.verticalCenter
-          horizontalAlignment: Text.AlignHCenter
-          text: "Are you sure you want to close this Wallet?"
-        }
-      }
-
-      // Popup buttons
-      Row {
-        id: popupBtns
-        anchors {
-          horizontalCenter: parent.horizontalCenter
-          bottom: parent.bottom
-          bottomMargin: parent.height / 6
-        }
-        spacing: 10
-
-        AVMEButton {
-          id: btnNo
-          text: "No"
-          onClicked: closeWalletPopup.close()
-        }
-        AVMEButton {
-          id: btnYes
-          text: "Yes"
-          onClicked: {
-            closeWalletPopup.close()
-            console.log("Wallet closed successfully")
-            System.setScreen(content, "qml/screens/StartScreen.qml")
-          }
-        }
-      }
+    icon: "qrc:/img/warn.png"
+    info: "Are you sure you want to close this Wallet?"
+    yesBtn.onClicked: {
+      closeWalletPopup.close()
+      console.log("Wallet closed successfully")
+      System.setScreen(content, "qml/screens/StartScreen.qml")
     }
+    noBtn.onClicked: closeWalletPopup.close()
   }
 }

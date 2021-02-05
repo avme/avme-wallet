@@ -15,24 +15,13 @@ Item {
     spacing: 30
     topPadding: 50
 
-    // TODO: turn logo into an image (for better/easier scaling)
-    Row {
+    // Logo
+    Image {
       id: logo
+      height: 120
       anchors.horizontalCenter: parent.horizontalCenter
-      spacing: 10
-
-      Image {
-        id: logoPng
-        source: "qrc:/img/avme_logo.png"
-      }
-
-      Text {
-        id: logoText
-        anchors.verticalCenter: logoPng.verticalCenter
-        font.bold: true
-        font.pointSize: 72.0
-        text: "AVME"
-      }
+      fillMode: Image.PreserveAspectFit
+      source: "qrc:/img/avme_banner.png"
     }
 
     Text {
@@ -186,17 +175,17 @@ Item {
             System.setWalletPass(walletPass)
             System.setScreen(content, "qml/screens/AccountsScreen.qml")
           } catch (error) {
-            // TODO: show this message on screen with a label
-            print ("Error on wallet creation/loading")
-            for (var i = 0; i < error.qmlErrors.length; i++) {
-              print("lineNumber: " + error.qmlErrors[i].lineNumber)
-              print("columnNumber: " + error.qmlErrors[i].columnNumber)
-              print("fileName: " + error.qmlErrors[i].fileName)
-              print("message: " + error.qmlErrors[i].message)
-            }
+            walletFailPopup.open()
           }
         }
       }
     }
+  }
+
+  // Info popup for if the Wallet creation fails
+  AVMEPopupInfo {
+    id: walletFailPopup
+    icon: "qrc:/img/warn.png"
+    info: "Error on Wallet creation/loading.<br>Please check the paths and/or passphrase."
   }
 }

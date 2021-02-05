@@ -8,9 +8,13 @@
         <file>qml/screens/NewAccountScreen.qml</file>
         <file>qml/screens/TransactionScreen.qml</file>
         <file>qml/screens/ProgressScreen.qml</file>
-        <file>qml/components/AVMEMenu.qml</file>
         <file>qml/components/AVMEButton.qml</file>
+        <file>qml/components/AVMEMenu.qml</file>
+        <file>qml/components/AVMEPopup.qml</file>
+        <file>qml/components/AVMEPopupInfo.qml</file>
+        <file>qml/components/AVMEPopupYesNo.qml</file>
         <file>qml/components/AVMEWalletList.qml</file>
+        <file>img/avme_banner.png</file>
         <file>img/avme_logo.png</file>
         <file>img/warn.png</file>
         <file>img/wait.png</file>

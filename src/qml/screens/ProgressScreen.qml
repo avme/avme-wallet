@@ -72,24 +72,13 @@ Item {
     spacing: 30
     topPadding: 50
 
-    // TODO: turn logo into an image (for better/easier scaling)
-    Row {
+    // Logo
+    Image {
       id: logo
+      height: 120
       anchors.horizontalCenter: parent.horizontalCenter
-      spacing: 10
-
-      Image {
-        id: logoPng
-        source: "qrc:/img/avme_logo.png"
-      }
-
-      Text {
-        id: logoText
-        anchors.verticalCenter: logoPng.verticalCenter
-        font.bold: true
-        font.pointSize: 72.0
-        text: "AVME"
-      }
+      fillMode: Image.PreserveAspectFit
+      source: "qrc:/img/avme_banner.png"
     }
 
     // Info about transaction

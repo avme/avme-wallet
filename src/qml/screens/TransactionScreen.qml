@@ -188,11 +188,13 @@ Item {
         checked: true
         onClicked: {
           if (!gasLimitInput.enabled && !gasPriceInput.enabled) {
+            // Disabled fields (auto fees on)
             gasLimitInput.text = prevLimit
             gasPriceInput.text = prevPrice
             prevLimit = ""
             prevPrice = ""
           } else {
+            // Enabled fields (auto fees off)
             prevLimit = gasLimitInput.text
             prevPrice = gasPriceInput.text
             gasLimitInput.text = ""
@@ -227,26 +229,9 @@ Item {
   }
 
   // Popup for fetching network fees
-  Popup {
+  AVMEPopup {
     id: fetchFeesPopup
-    width: window.width / 4
-    height: window.height / 8
-    x: (window.width / 2) - (width / 2)
-    y: (window.height / 2) - (height / 2)
-    modal: true
-    focus: true
-    padding: 0  // Remove white borders
-    closePolicy: Popup.NoAutoClose
-
-    Rectangle {
-      anchors.fill: parent
-      color: "#9A4FAD"
-      Text {
-        anchors.centerIn: parent
-        horizontalAlignment: Text.AlignHCenter
-        text: "Requesting optimal fees..."
-      }
-    }
+    info: "Requesting optimal fees..."
   }
 
   // Popup for confirming the transaction

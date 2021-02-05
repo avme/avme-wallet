@@ -5,7 +5,6 @@ import Qt.labs.platform 1.0
 import "qrc:/qml/components"
 
 // Screen for creating a new Account
-// TODO: maybe put this in a modal in AccountsScreen instead of a separate screen?
 
 Item {
   id: newAccountScreen
@@ -145,18 +144,17 @@ Item {
             console.log("Account created successfully")
             System.setScreen(content, "qml/screens/AccountsScreen.qml")
           } catch (error) {
-            // TODO: show this message on screen with a label
-            // Also I think this actually doesn't work but I haven't tested
-            print ("Error on account creation")
-            for (var i = 0; i < error.qmlErrors.length; i++) {
-              print("lineNumber: " + error.qmlErrors[i].lineNumber)
-              print("columnNumber: " + error.qmlErrors[i].columnNumber)
-              print("fileName: " + error.qmlErrors[i].fileName)
-              print("message: " + error.qmlErrors[i].message)
-            }
+            accountFailPopup.open()
           }
         }
       }
     }
+  }
+
+  // Info popup for if the Account creation fails
+  AVMEPopupInfo {
+    id: accountFailPopup
+    icon: "qrc:/img/warn.png"
+    info: "Error on Account creation. Please try again."
   }
 }
