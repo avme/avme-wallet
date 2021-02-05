@@ -9,6 +9,12 @@ import "qrc:/qml/components"
 Item {
   id: transactionScreen
 
+  Component.onCompleted: {
+    fetchFeesPopup.open()
+    gasPriceInput.text = System.getAutomaticFee()
+    fetchFeesPopup.close()
+  }
+
   AVMEMenu {
     id: sideMenu
   }
@@ -156,9 +162,6 @@ Item {
         width: items.width / 4
         selectByMouse: true
         text: ""
-        Component.onCompleted: {
-          gasPriceInput.text = System.getAutomaticFee()
-        }
         placeholderText: "Recommended: 50"
         enabled: !autoFeesCheck.checked
       }
@@ -219,6 +222,29 @@ Item {
         height: 60
         text: "Done"
         onClicked: confirmPopup.open()
+      }
+    }
+  }
+
+  // Popup for fetching network fees
+  Popup {
+    id: fetchFeesPopup
+    width: window.width / 4
+    height: window.height / 8
+    x: (window.width / 2) - (width / 2)
+    y: (window.height / 2) - (height / 2)
+    modal: true
+    focus: true
+    padding: 0  // Remove white borders
+    closePolicy: Popup.NoAutoClose
+
+    Rectangle {
+      anchors.fill: parent
+      color: "#9A4FAD"
+      Text {
+        anchors.centerIn: parent
+        horizontalAlignment: Text.AlignHCenter
+        text: "Requesting optimal fees..."
       }
     }
   }
@@ -315,8 +341,8 @@ Item {
               System.setTxLabel(amountLabel.text)
               System.setTxGasLimit(gasLimitInput.text)
               System.setTxGasPrice(gasPriceInput.text)
-              System.setScreen(content, "qml/screens/ProgressScreen.qml")
               confirmPopup.close()
+              System.setScreen(content, "qml/screens/ProgressScreen.qml")
             } else {
               popupPassTimer.start()
             }

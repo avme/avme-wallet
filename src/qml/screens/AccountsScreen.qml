@@ -8,6 +8,15 @@ import "qrc:/qml/components"
 Item {
   id: accountsScreen
 
+  Component.onCompleted: {
+    fetchAccountsPopup.open()
+    var accList = System.listAccounts("eth")
+    for (var i = 0; i < accList.length; i++) {
+      accountsList.append(JSON.parse(accList[i]))
+    }
+    fetchAccountsPopup.close()
+  }
+
   AVMEMenu {
     id: sideMenu
   }
@@ -25,12 +34,6 @@ Item {
     }
     model: ListModel {
       id: accountsList
-      Component.onCompleted: {
-        var accList = System.listAccounts("eth")
-        for (var i = 0; i < accList.length; i++) {
-          accountsList.append(JSON.parse(accList[i]))
-        }
-      }
     }
   }
 
@@ -70,7 +73,30 @@ Item {
     }
   }
 
-  // Modal for confirming Account erasure
+  // Popup for fetching Accounts
+  Popup {
+    id: fetchAccountsPopup
+    width: window.width / 4
+    height: window.height / 8
+    x: (window.width / 2) - (width / 2)
+    y: (window.height / 2) - (height / 2)
+    modal: true
+    focus: true
+    padding: 0  // Remove white borders
+    closePolicy: Popup.NoAutoClose
+
+    Rectangle {
+      anchors.fill: parent
+      color: "#9A4FAD"
+      Text {
+        anchors.centerIn: parent
+        horizontalAlignment: Text.AlignHCenter
+        text: "Fetching Accounts..."
+      }
+    }
+  }
+
+  // Popup for confirming Account erasure
   Popup {
     id: erasePopup
     width: window.width / 2

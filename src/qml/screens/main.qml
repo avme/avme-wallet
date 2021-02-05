@@ -11,10 +11,11 @@ ApplicationWindow {
   title: "AVME Wallet"
   width: 1280
   height: 720
-  minimumWidth: 1280
-  minimumHeight: 720
+  minimumWidth: width
+  minimumHeight: height
+  maximumWidth: width
+  maximumHeight: height
   visible: true
-  // TODO: see if a fixed size window (maximumWidth/maximumHeight) is a good idea
 
   // Background
   Rectangle {

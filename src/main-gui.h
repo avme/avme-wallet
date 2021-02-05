@@ -137,6 +137,7 @@ class System : public QObject {
 
     // List the Wallet's Accounts
     Q_INVOKABLE QVariantList listAccounts(QString type) {
+      QApplication::processEvents();  // Un-freeze GUI when called
       QVariantList ret;
       std::string delim = " ";
       std::vector<WalletAccount> walist;
@@ -181,6 +182,7 @@ class System : public QObject {
 
     // Get gas price from network
     Q_INVOKABLE QString getAutomaticFee() {
+      QApplication::processEvents();  // Un-freeze GUI when called
       return QString::fromStdString(this->wm.getAutomaticFee());
     }
 
@@ -190,6 +192,7 @@ class System : public QObject {
       // Part 1: Build
       // Remember txGasPrice is in Gwei and txAmount is in fixed point,
       // we have to convert both to Wei.
+      QApplication::processEvents();
       this->txAmount = wm.convertFixedPointToWei(this->txAmount, 18);
       this->txGasPrice = boost::lexical_cast<std::string>(
         boost::lexical_cast<u256>(this->txGasPrice) * raiseToPow(10, 9)
@@ -208,6 +211,7 @@ class System : public QObject {
       // Part 2: Sign
       // TODO: see if checking for empty string is really the right way to know
       // whether the function worked or not
+      QApplication::processEvents();
       std::string signedTx = wm.signTransaction(
         txSkel, this->walletPass, this->txSenderAccount
       );
@@ -220,6 +224,7 @@ class System : public QObject {
 
       // Part 3: Send
       // TODO: maybe show on screen "Trying again with a higher nonce"?
+      QApplication::processEvents();
       std::string txLink = wm.sendTransaction(signedTx);
       if (txLink.empty()) {
         emit txSent(false);

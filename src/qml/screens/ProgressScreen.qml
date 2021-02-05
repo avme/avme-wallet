@@ -8,9 +8,7 @@ import "qrc:/qml/components"
 Item {
   id: progressScreen
 
-  // Start the transaction process once screen is loaded
-  // TODO: transaction is done already before the screen even shows up!
-  // Maybe put this in TransactionScreen's popup instead of a separate screen?
+  // Start the transaction process once screen is loaded.
   Component.onCompleted: {
     var linkUrl = System.makeTransaction()
     if (linkUrl != "") {
