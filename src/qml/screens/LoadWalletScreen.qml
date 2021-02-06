@@ -12,7 +12,7 @@ Item {
   Column {
     id: items
     anchors.fill: parent
-    spacing: 30
+    spacing: 40
     topPadding: 50
 
     // Logo
@@ -36,18 +36,12 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
-      Text {
-        id: fileText
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        horizontalAlignment: Text.AlignRight
-        text: "Wallet file:"
-      }
-      TextField {
+      AVMEInput {
         id: fileInput
         width: items.width / 2
         readOnly: true
-        placeholderText: "Your wallet file"
+        label: "Wallet file"
+        placeholder: "Your Wallet file"
       }
       AVMEButton {
         id: fileDialogBtn
@@ -58,7 +52,7 @@ Item {
       }
       FileDialog {
         id: fileDialog
-        title: "Choose a wallet file"
+        title: "Choose a Wallet file"
         onAccepted: {
           fileInput.text = fileDialog.file
         }
@@ -71,18 +65,12 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
-      Text {
-        id: secretsText
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        horizontalAlignment: Text.AlignRight
-        text: "Secrets folder:"
-      }
-      TextField {
+      AVMEInput {
         id: secretsInput
         width: items.width / 2
         readOnly: true
-        placeholderText: "Your wallet secrets folder"
+        label: "Secrets folder"
+        placeholder: "Your Wallet secrets folder"
       }
       AVMEButton {
         id: secretsDialogBtn
@@ -106,20 +94,13 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
-      Text {
-        id: passText
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        horizontalAlignment: Text.AlignRight
-        text: "Passphrase:"
-      }
-      TextField {
+      AVMEInput {
         id: passInput
         width: items.width / 4
-        selectByMouse: true
         echoMode: TextInput.Password
         passwordCharacter: "*"
-        placeholderText: "Enter your wallet's passphrase"
+        label: "Passphrase"
+        placeholder: "Your Wallet's passphrase"
       }
     }
 

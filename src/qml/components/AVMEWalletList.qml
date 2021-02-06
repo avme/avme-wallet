@@ -91,8 +91,30 @@ ListView {
         Text { id: itemAmount; text: amount; elide: Text.ElideRight; font.pixelSize: 18; color: "white"; padding: 5; }
       }
       MouseArea {
+        id: itemMouseArea
         anchors.fill: parent
-        onClicked: walletList.currentIndex = index
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: {
+          walletList.currentIndex = index
+          if (mouse.button == Qt.RightButton) {
+            listItemMenu.open()
+          }
+        }
+      }
+      Menu {
+        id: listItemMenu
+        x: itemMouseArea.mouseX
+        y: itemMouseArea.mouseY
+        implicitWidth: 250
+        implicitHeight: 30
+        background: Rectangle { anchors.fill: parent; color: "#58A0B9" }
+        MenuItem {
+          id: menuItem
+          hoverEnabled: true
+          background: Rectangle { color: menuItem.hovered ? "#7AC1DB" : "#58A0B9" }
+          text: "Copy Address to Clipboard"
+          onTriggered: System.copyToClipboard(listItemAccount)
+        }
       }
     }
   }

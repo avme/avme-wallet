@@ -21,7 +21,7 @@ Item {
       top: parent.top
       bottom: parent.bottom
     }
-    spacing: 30
+    spacing: 40
     topPadding: 50
 
     Text {
@@ -36,18 +36,11 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
-      Text {
-        id: nameText
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        horizontalAlignment: Text.AlignRight
-        text: "Name:"
-      }
-      TextField {
+      AVMEInput {
         id: nameInput
         width: items.width / 2
-        selectByMouse: true
-        placeholderText: "(Optional) Label for your Account"
+        label: "Name (optional)"
+        placeholder: "Label for your Account"
       }
     }
 
@@ -57,20 +50,13 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
-      Text {
-        id: passText
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        horizontalAlignment: Text.AlignRight
-        text: "Passphrase:"
-      }
-      TextField {
+      AVMEInput {
         id: passInput
-        width: items.width / 2
-        selectByMouse: true
+        width: items.width / 4
         echoMode: TextInput.Password
         passwordCharacter: "*"
-        placeholderText: "Passphrase to protect your Account"
+        label: "Passphrase"
+        placeholder: "Passphrase for your Account"
       }
     }
 
@@ -80,18 +66,13 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
-      Text {
-        id: hintText
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        horizontalAlignment: Text.AlignRight
-        text: "Hint:"
-      }
-      TextField {
+      AVMEInput {
         id: hintInput
         width: items.width / 2
-        selectByMouse: true
-        placeholderText: "(Optional) Hint to help you remember the passphrase"
+        echoMode: TextInput.Password
+        passwordCharacter: "*"
+        label: "Hint (optional)"
+        placeholder: "Hint to help you remember the passphrase"
       }
     }
 

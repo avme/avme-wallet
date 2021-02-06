@@ -9,7 +9,15 @@ Button {
   implicitWidth: 120
   implicitHeight: 40
   background: Rectangle {
-    color: btn.down ? "#D44764" : "#F66986"
+    color: {
+      if (btn.down) {
+        color: "#D44764"
+      } else if (btn.hovered) {
+        color: "#F88BA8"
+      } else {
+        color: "#F66986"
+      }
+    }
     opacity: btn.down ? "0.7" : "1.0"
     radius: 5
   }

@@ -38,6 +38,7 @@ Rectangle {
   }
 
   // Middle (options)
+  // TODO: make those options a component of its own
   Column {
     id: options
     width: parent.width

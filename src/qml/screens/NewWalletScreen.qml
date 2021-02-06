@@ -12,7 +12,7 @@ Item {
   Column {
     id: items
     anchors.fill: parent
-    spacing: 30
+    spacing: 40
     topPadding: 50
 
     // Logo
@@ -36,18 +36,12 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
-      Text {
-        id: folderText
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        horizontalAlignment: Text.AlignRight
-        text: "Wallet path:"
-      }
-      TextField {
+      AVMEInput {
         id: folderInput
         width: items.width / 2
         readOnly: true
-        placeholderText: "Folder path for your wallet file"
+        label: "Wallet path"
+        placeholder: "Path to your Wallet file"
       }
       AVMEButton {
         id: folderDialogBtn
@@ -58,7 +52,7 @@ Item {
       }
       FolderDialog {
         id: folderDialog
-        title: "Choose a folder for your wallet file"
+        title: "Choose a folder for your Wallet file"
         onAccepted: {
           folderInput.text = folderDialog.folder
         }
@@ -71,18 +65,11 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
-      Text {
-        id: fileText
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        horizontalAlignment: Text.AlignRight
-        text: "Wallet file name:"
-      }
-      TextField {
+      AVMEInput {
         id: fileInput
         width: items.width / 4
-        selectByMouse: true
-        placeholderText: "Name of your wallet file"
+        label: "Wallet file name"
+        placeholder: "Name for your Wallet file"
       }
     }
 
@@ -92,18 +79,12 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
-      Text {
-        id: secretsText
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        horizontalAlignment: Text.AlignRight
-        text: "Secrets path:"
-      }
-      TextField {
+      AVMEInput {
         id: secretsInput
         width: items.width / 2
         readOnly: true
-        placeholderText: "Folder path for your wallet secrets"
+        label: "Secrets path"
+        placeholder: "Path to your Wallet secrets"
       }
       AVMEButton {
         id: secretsDialogBtn
@@ -114,7 +95,7 @@ Item {
       }
       FolderDialog {
         id: secretsDialog
-        title: "Choose a folder for your wallet secrets"
+        title: "Choose a folder for your Wallet secrets"
         onAccepted: {
           secretsInput.text = secretsDialog.folder
         }
@@ -127,20 +108,13 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
-      Text {
-        id: passText
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        horizontalAlignment: Text.AlignRight
-        text: "Passphrase:"
-      }
-      TextField {
+      AVMEInput {
         id: passInput
         width: items.width / 4
-        selectByMouse: true
         echoMode: TextInput.Password
         passwordCharacter: "*"
-        placeholderText: "Enter a passphrase for your wallet"
+        label: "Passphrase"
+        placeholder: "Passphrase for your Wallet"
       }
     }
 

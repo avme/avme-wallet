@@ -7,6 +7,7 @@
 #include <QtCore/QString>
 #include <QtCore/QVariant>
 #include <QtCore/qplugin.h>
+#include <QtGui/QClipboard>
 
 Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
 Q_IMPORT_PLUGIN(QtQuick2Plugin)
@@ -111,6 +112,11 @@ class System : public QObject {
     // Check if given passphrase equals the wallet's
     Q_INVOKABLE bool checkWalletPass(QString pass) {
       return (pass.toStdString() == this->walletPass);
+    }
+
+    // Copy a string to the system clipboard
+    Q_INVOKABLE void copyToClipboard(QString str) {
+      QApplication::clipboard()->setText(str);
     }
 
     // Create a new Wallet

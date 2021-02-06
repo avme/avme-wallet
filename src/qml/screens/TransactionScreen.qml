@@ -27,7 +27,7 @@ Item {
       top: parent.top
       bottom: parent.bottom
     }
-    spacing: 30
+    spacing: 40
     topPadding: 50
 
     Text {
@@ -42,17 +42,11 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
-      Text {
-        id: senderText
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        horizontalAlignment: Text.AlignRight
-        text: "From:"
-      }
-      TextField {
+      AVMEInput {
         id: senderInput
         width: items.width / 2
         readOnly: true
+        label: "Sender Address"
         text: System.getTxSenderAccount()
       }
     }
@@ -62,6 +56,7 @@ Item {
     Text {
       id: senderAmount
       anchors.horizontalCenter: parent.horizontalCenter
+      anchors.topMargin: -items.spacing
       text: "Total: " + System.getTxSenderAmount() + " ETH" // TODO: change according to token
     }
 
@@ -71,18 +66,11 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
-      Text {
-        id: receiverText
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        horizontalAlignment: Text.AlignRight
-        text: "To:"
-      }
-      TextField {
+      AVMEInput {
         id: receiverInput
         width: items.width / 2
-        selectByMouse: true
-        placeholderText: "Receiving address (e.g. 0x123456789ABCDEF...)"
+        label: "Receiver Address"
+        placeholder: "e.g. 0x123456789ABCDEF..."
       }
     }
 
@@ -92,85 +80,41 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
-      Text {
-        id: amountText
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        horizontalAlignment: Text.AlignRight
-        text: "Amount:"
-      }
-      TextField {
+      AVMEInput {
         id: amountInput
         width: items.width / 4
-        selectByMouse: true
-        placeholderText: "Fixed point amount (e.g. 0.5)"
-      }
-      Text {
-        id: amountLabel
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        horizontalAlignment: Text.AlignLeft
-        text: "ETH" // TODO: change according to token
+        label: "Amount"
+        placeholder: "Fixed point amount (e.g. 0.5)"
+        Text {
+          id: amountLabel
+          anchors.left: parent.right
+          anchors.leftMargin: 10
+          anchors.verticalCenter: parent.verticalCenter
+          text: "ETH" // TODO: change according to token
+        }
       }
     }
 
-    // Gas Limit
+    // Gas Limit and Gas Price
     Row {
       id: gasLimitRow
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
-      Text {
-        id: gasLimitText
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        horizontalAlignment: Text.AlignRight
-        text: "Gas Limit:"
-      }
-      TextField {
+      AVMEInput {
         id: gasLimitInput
         width: items.width / 4
-        selectByMouse: true
-        text: "21000" // TODO: change according to token
-        placeholderText: "Recommended: 21000"
+        label: "Gas Limit (Wei)"
+        placeholder: "Recommended: 21000"
+        text: "21000"
         enabled: !autoFeesCheck.checked
       }
-      Text {
-        id: gasLimitLabel
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        horizontalAlignment: Text.AlignLeft
-        text: "Wei"
-      }
-    }
-
-    // Gas Price
-    Row {
-      id: gasPriceRow
-      anchors.horizontalCenter: parent.horizontalCenter
-      spacing: 10
-
-      Text {
-        id: gasPriceText
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        horizontalAlignment: Text.AlignRight
-        text: "Gas Price:"
-      }
-      TextField {
+      AVMEInput {
         id: gasPriceInput
         width: items.width / 4
-        selectByMouse: true
-        text: ""
-        placeholderText: "Recommended: 50"
+        label: "Gas Price (Gwei)"
+        placeholder: "Recommended: 50"
         enabled: !autoFeesCheck.checked
-      }
-      Text {
-        id: gasPriceLabel
-        anchors.verticalCenter: parent.verticalCenter
-        width: 10
-        horizontalAlignment: Text.AlignLeft
-        text: "Gwei"
       }
     }
 
@@ -287,17 +231,16 @@ Item {
       }
 
       // Passphrase input
-      TextField {
+      AVMEInput {
         id: passInput
+        width: items.width / 4
+        echoMode: TextInput.Password
+        passwordCharacter: "*"
         anchors {
           horizontalCenter: parent.horizontalCenter
           top: popupPassText.bottom
           topMargin: 10
         }
-        width: items.width / 4
-        selectByMouse: true
-        echoMode: TextInput.Password
-        passwordCharacter: "*"
       }
 
       // Buttons
