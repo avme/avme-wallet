@@ -64,6 +64,7 @@ Item {
       onClicked: {
         System.setTxSenderAccount(walletList.currentItem.listItemAccount)
         System.setTxSenderAmount(walletList.currentItem.listItemAmount)
+        System.setTxLabel("ETH")  // TODO: change according to token
         System.setScreen(content, "qml/screens/TransactionScreen.qml")
       }
     }
@@ -92,7 +93,7 @@ Item {
   AVMEPopupYesNo {
     id: erasePopup
     icon: "qrc:/img/warn.png"
-    info: "Are you sure you want to completely erase this Account?<br>"
+    info: "Are you sure you want to erase this Account?<br>"
     + "All funds on it will be <b>permanently lost</b>."
     yesBtn.onClicked: {
       var acc = walletList.currentItem.listItemAccount

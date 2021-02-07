@@ -8,6 +8,7 @@
 #include <QtCore/QVariant>
 #include <QtCore/qplugin.h>
 #include <QtGui/QClipboard>
+#include <QtGui/QFont>
 
 Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
 Q_IMPORT_PLUGIN(QtQuick2Plugin)

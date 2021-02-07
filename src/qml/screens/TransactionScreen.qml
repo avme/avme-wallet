@@ -56,8 +56,7 @@ Item {
     Text {
       id: senderAmount
       anchors.horizontalCenter: parent.horizontalCenter
-      anchors.topMargin: -items.spacing
-      text: "Total: " + System.getTxSenderAmount() + " ETH" // TODO: change according to token
+      text: "Total: " + System.getTxSenderAmount() + " " + System.getTxLabel()
     }
 
     // Receiver Account
@@ -69,6 +68,7 @@ Item {
       AVMEInput {
         id: receiverInput
         width: items.width / 2
+        validator: RegExpValidator { regExp: /0x[0-9a-fA-F]{40}/ }
         label: "Receiver Address"
         placeholder: "e.g. 0x123456789ABCDEF..."
       }
@@ -82,7 +82,8 @@ Item {
 
       AVMEInput {
         id: amountInput
-        width: items.width / 4
+        width: items.width / 2
+        validator: RegExpValidator { regExp: /[0-9]{1,}\.[0-9]{1,18}/ }
         label: "Amount"
         placeholder: "Fixed point amount (e.g. 0.5)"
         Text {
@@ -90,7 +91,7 @@ Item {
           anchors.left: parent.right
           anchors.leftMargin: 10
           anchors.verticalCenter: parent.verticalCenter
-          text: "ETH" // TODO: change according to token
+          text: System.getTxLabel()
         }
       }
     }
@@ -105,6 +106,7 @@ Item {
         id: gasLimitInput
         width: items.width / 4
         label: "Gas Limit (Wei)"
+        validator: RegExpValidator { regExp: /[0-9]+/ }
         placeholder: "Recommended: 21000"
         text: "21000"
         enabled: !autoFeesCheck.checked
@@ -113,6 +115,7 @@ Item {
         id: gasPriceInput
         width: items.width / 4
         label: "Gas Price (Gwei)"
+        validator: RegExpValidator { regExp: /[0-9]+/ }
         placeholder: "Recommended: 50"
         enabled: !autoFeesCheck.checked
       }

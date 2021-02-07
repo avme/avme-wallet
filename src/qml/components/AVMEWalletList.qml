@@ -33,7 +33,7 @@ ListView {
     Row {
       id: headerNameRow
       anchors.verticalCenter: parent.verticalCenter
-      width: parent.width / 8
+      width: parent.width / 4
       Text {
         text: "Name"; font.pixelSize: 18; color: "white"; padding: 5;
       }
@@ -73,22 +73,46 @@ ListView {
       Row {
         id: delegateNameRow
         anchors.verticalCenter: parent.verticalCenter
-        width: parent.width / 8
-        Text { id: itemName; text: name; elide: Text.ElideRight; font.pixelSize: 18; color: "white"; padding: 5; }
+        width: parent.width / 4
+        Text {
+          id: itemName
+          text: name
+          width: parent.width
+          elide: Text.ElideRight
+          font.pixelSize: 18
+          color: "white"
+          padding: 5
+        }
       }
       Row {
         id: delegateAccountRow
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width / 2
         x: delegateNameRow.width
-        Text { id: itemAccount; text: account; elide: Text.ElideRight; font.pixelSize: 18; color: "white"; padding: 5; }
+        Text {
+          id: itemAccount
+          text: account
+          width: parent.width
+          elide: Text.ElideRight
+          font.pixelSize: 18
+          color: "white"
+          padding: 5
+        }
       }
       Row {
         id: delegateAmountRow
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width / 4
         x: delegateNameRow.width + delegateAccountRow.width
-        Text { id: itemAmount; text: amount; elide: Text.ElideRight; font.pixelSize: 18; color: "white"; padding: 5; }
+        Text {
+          id: itemAmount
+          text: amount
+          width: parent.width
+          elide: Text.ElideRight
+          font.pixelSize: 18
+          color: "white"
+          padding: 5
+        }
       }
       MouseArea {
         id: itemMouseArea
@@ -105,7 +129,7 @@ ListView {
         id: listItemMenu
         x: itemMouseArea.mouseX
         y: itemMouseArea.mouseY
-        implicitWidth: 250
+        implicitWidth: 300
         implicitHeight: 30
         background: Rectangle { anchors.fill: parent; color: "#58A0B9" }
         MenuItem {

@@ -52,7 +52,7 @@ Item {
 
       AVMEInput {
         id: passInput
-        width: items.width / 4
+        width: items.width / 2
         echoMode: TextInput.Password
         passwordCharacter: "*"
         label: "Passphrase"
