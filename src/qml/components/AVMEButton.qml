@@ -14,6 +14,8 @@ Button {
         color: "#D44764"
       } else if (btn.hovered) {
         color: "#F88BA8"
+      } else if (!btn.enabled) {
+        color: "#88F66986"
       } else {
         color: "#F66986"
       }

@@ -137,6 +137,7 @@ Item {
         width: items.width / 8
         height: 60
         text: "Done"
+        enabled: (folderInput.text !== "" && fileInput.text !== "" && secretsInput.text !== "" && passInput.text !== "")
         onClicked: {
           var walletFile = folderInput.text + "/" + fileInput.text
           var secretsPath = secretsInput.text

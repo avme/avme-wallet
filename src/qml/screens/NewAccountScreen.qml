@@ -57,6 +57,7 @@ Item {
         passwordCharacter: "*"
         label: "Passphrase"
         placeholder: "Passphrase for your Account"
+        enabled: !passCheck.checked
       }
     }
 
@@ -69,10 +70,9 @@ Item {
       AVMEInput {
         id: hintInput
         width: items.width / 2
-        echoMode: TextInput.Password
-        passwordCharacter: "*"
         label: "Hint (optional)"
         placeholder: "Hint to help you remember the passphrase"
+        enabled: !passCheck.checked
       }
     }
 
@@ -86,8 +86,11 @@ Item {
         id: passCheck
         text: "Use wallet passphrase"
         onClicked: {
-          passInput.enabled = !passInput.enabled
-          hintInput.enabled = !hintInput.enabled
+          if (!passInput.enabled && !hintInput.enabled) {
+            // Disabled fields (use master pass)
+            passInput.text = ""
+            hintInput.text = ""
+          }
         }
       }
     }
@@ -111,6 +114,7 @@ Item {
         width: items.width / 8
         height: 60
         text: "Done"
+        enabled: (passInput.text !== "" || passCheck.checked)
         onClicked: {
           var name = nameInput.text
           var pass = passInput.text

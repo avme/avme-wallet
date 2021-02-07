@@ -193,6 +193,43 @@ class System : public QObject {
       return QString::fromStdString(this->wm.getAutomaticFee());
     }
 
+    /**
+     * Calculate the total cost of a transaction.
+     * Calculation is done with values converted to Wei, while the result
+     * is converted back to fixed point.
+     */
+    // TODO: probably this will have to change when dealing with tokens
+    Q_INVOKABLE QString calculateTransactionCost(
+      QString amount, QString gasLimit, QString gasPrice
+    ) {
+      std::string amountStr = this->wm.convertFixedPointToWei(amount.toStdString(), 18);  // ETH, so 10^18 Wei
+      std::string gasLimitStr = gasLimit.toStdString(); // Already in Wei
+      std::string gasPriceStr = this->wm.convertFixedPointToWei(gasPrice.toStdString(), 9); // Gwei, so 10^9 Wei
+      u256 amountU256 = u256(amountStr);
+      u256 gasLimitU256 = u256(gasLimitStr);
+      u256 gasPriceU256 = u256(gasPriceStr);
+      u256 totalU256 = amountU256 + gasLimitU256 + gasPriceU256;
+      // Uncomment to see the values in Wei
+      //std::cout << "Total: " << totalU256 << std::endl;
+      //std::cout << "Amount: " << amountU256 << std::endl;
+      //std::cout << "Gas Limit: " << gasLimitU256 << std::endl;
+      //std::cout << "Gas Price: " << gasPriceU256 << std::endl;
+      std::string totalStr = this->wm.convertWeiToFixedPoint(
+        boost::lexical_cast<std::string>(totalU256), 18
+      );
+      return QString::fromStdString(totalStr);
+    }
+
+    // Check for insufficient funds in an ETH transaction
+    // TODO: probably this will have to change when dealing with tokens
+    Q_INVOKABLE bool hasInsufficientFunds(QString senderAmount, QString receiverAmount) {
+      std::string senderStr = this->wm.convertFixedPointToWei(senderAmount.toStdString(), 18);
+      std::string receiverStr = this->wm.convertFixedPointToWei(receiverAmount.toStdString(), 18);
+      u256 senderU256 = u256(senderStr);
+      u256 receiverU256 = u256(receiverStr);
+      return (receiverAmount > senderAmount);
+    }
+
     // Make a transaction with the collected data
     // TODO: support tokens later on
     Q_INVOKABLE QString makeTransaction() {

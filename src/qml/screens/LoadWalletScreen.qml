@@ -123,6 +123,7 @@ Item {
         width: items.width / 8
         height: 60
         text: "Done"
+        enabled: (fileInput.text !== "" && secretsInput.text !== "" && passInput.text !== "")
         onClicked: {
           var walletFile = fileInput.text
           var secretsPath = secretsInput.text

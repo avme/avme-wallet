@@ -9,9 +9,16 @@ import "qrc:/qml/components"
 Item {
   id: transactionScreen
 
+  function updateTxCost() {
+    txCost.text = "Transaction Cost: "
+    + System.calculateTransactionCost(amountInput.text, gasLimitInput.text, gasPriceInput.text)
+    + " " + System.getTxLabel()
+  }
+
   Component.onCompleted: {
     fetchFeesPopup.open()
     gasPriceInput.text = System.getAutomaticFee()
+    updateTxCost()
     fetchFeesPopup.close()
   }
 
@@ -46,17 +53,17 @@ Item {
         id: senderInput
         width: items.width / 2
         readOnly: true
+        validator: RegExpValidator { regExp: /0x[0-9a-fA-F]{40}/ }
         label: "Sender Address"
         text: System.getTxSenderAccount()
       }
     }
 
     // Sender total amount (display)
-    // TODO: check for insufficient funds
     Text {
       id: senderAmount
       anchors.horizontalCenter: parent.horizontalCenter
-      text: "Total: " + System.getTxSenderAmount() + " " + System.getTxLabel()
+      text: "Sender Total: " + System.getTxSenderAmount() + " " + System.getTxLabel()
     }
 
     // Receiver Account
@@ -93,6 +100,7 @@ Item {
           anchors.verticalCenter: parent.verticalCenter
           text: System.getTxLabel()
         }
+        onTextEdited: updateTxCost()
       }
     }
 
@@ -110,6 +118,7 @@ Item {
         placeholder: "Recommended: 21000"
         text: "21000"
         enabled: !autoFeesCheck.checked
+        onTextEdited: updateTxCost()
       }
       AVMEInput {
         id: gasPriceInput
@@ -118,7 +127,15 @@ Item {
         validator: RegExpValidator { regExp: /[0-9]+/ }
         placeholder: "Recommended: 50"
         enabled: !autoFeesCheck.checked
+        onTextEdited: updateTxCost()
       }
+    }
+
+    // Transaction total cost (display)
+    Text {
+      id: txCost
+      anchors.horizontalCenter: parent.horizontalCenter
+      text: updateTxCost()
     }
 
     // Checkbox for using automatic fees from the network
@@ -147,6 +164,7 @@ Item {
             gasLimitInput.text = ""
             gasPriceInput.text = ""
           }
+          updateTxCost()
         }
       }
     }
@@ -170,7 +188,24 @@ Item {
         width: items.width / 8
         height: 60
         text: "Done"
-        onClicked: confirmPopup.open()
+        enabled: {
+          var senderOK = senderInput.acceptableInput
+          var receiverOK = receiverInput.acceptableInput
+          var amountOK = amountInput.acceptableInput
+          var gasLimitOK = gasLimitInput.acceptableInput
+          var gasPriceOK = gasPriceInput.acceptableInput
+          enabled: (senderOK && receiverOK && amountOK && gasLimitOK && gasPriceOK)
+        }
+        onClicked: {
+          if (System.hasInsufficientFunds(
+            System.getTxSenderAmount(),
+            System.calculateTransactionCost(amountInput.text, gasLimitInput.text, gasPriceInput.text)
+          )) {
+            fundsPopup.open()
+          } else {
+            confirmPopup.open()
+          }
+        }
       }
     }
   }
@@ -179,6 +214,13 @@ Item {
   AVMEPopup {
     id: fetchFeesPopup
     info: "Requesting optimal fees..."
+  }
+
+  // Popup for warning about insufficient funds
+  AVMEPopupInfo {
+    id: fundsPopup
+    icon: "qrc:/img/warn.png"
+    info: "Insufficient funds. Please check your transaction cost."
   }
 
   // Popup for confirming the transaction
@@ -264,6 +306,7 @@ Item {
         AVMEButton {
           id: btnConfirm
           text: "Confirm"
+          enabled: (passInput.text != "")
           onClicked: {
             if (System.checkWalletPass(passInput.text)) {
               System.setTxSenderAccount(senderInput.text)
