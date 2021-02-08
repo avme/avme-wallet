@@ -10,7 +10,7 @@
         <file>qml/screens/ProgressScreen.qml</file>
         <file>qml/components/AVMEButton.qml</file>
         <file>qml/components/AVMEInput.qml</file>
-        <file>qml/components/AVMEMenu.qml</file>
+        <file>qml/components/AVMESideMenu.qml</file>
         <file>qml/components/AVMEPopup.qml</file>
         <file>qml/components/AVMEPopupInfo.qml</file>
         <file>qml/components/AVMEPopupYesNo.qml</file>

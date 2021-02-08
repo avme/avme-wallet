@@ -5,19 +5,25 @@ import QtQuick.Controls 2.2
 
 Button {
   id: btn
+  property color btnColor: "#F66986"
+  property color btnPressedColor: "#D44764"
+  property color btnHoveredColor: "#F88BA8"
+  property color btnDisabledColor: "#88F66986"
+
   text: "Button"
   implicitWidth: 120
   implicitHeight: 40
+
   background: Rectangle {
     color: {
       if (btn.down) {
-        color: "#D44764"
+        color: btnPressedColor
       } else if (btn.hovered) {
-        color: "#F88BA8"
+        color: btnHoveredColor
       } else if (!btn.enabled) {
-        color: "#88F66986"
+        color: btnDisabledColor
       } else {
-        color: "#F66986"
+        color: btnColor
       }
     }
     opacity: btn.down ? "0.7" : "1.0"

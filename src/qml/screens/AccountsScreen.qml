@@ -19,7 +19,7 @@ Item {
 
   Component.onCompleted: fetchAccounts()
 
-  AVMEMenu {
+  AVMESideMenu {
     id: sideMenu
   }
 

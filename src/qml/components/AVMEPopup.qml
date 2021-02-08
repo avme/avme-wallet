@@ -10,6 +10,7 @@ import QtQuick.Controls 2.2
 Popup {
   id: popup
   property string info
+  property color popupBgColor: "#9A4FAD"
 
   width: window.width / 4
   height: window.height / 8
@@ -22,7 +23,7 @@ Popup {
 
   Rectangle {
     anchors.fill: parent
-    color: "#9A4FAD"
+    color: popupBgColor
     Text {
       anchors.centerIn: parent
       horizontalAlignment: Text.AlignHCenter

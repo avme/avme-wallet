@@ -9,7 +9,7 @@ import "qrc:/qml/components"
 Item {
   id: newAccountScreen
 
-  AVMEMenu {
+  AVMESideMenu {
     id: sideMenu
   }
 

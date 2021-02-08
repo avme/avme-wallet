@@ -1,16 +1,19 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
+import "qrc:/qml"
 import "qrc:/qml/components"
 
 // Side menu with general options for wallet management.
 
 Rectangle {
   id: sideMenu
+  property color sideMenuColor: "#9CE3FD"
+  property color sideMenuHeaderColor: "#9A4FAD"
+  property color sideMenuOpColor: "#F66986"
+
   width: 200
-  color: "#9CE3FD"
-  border.width: 2
-  border.color: "#7AC1DB"
+  color: sideMenuColor
   anchors {
     left: parent.left
     top: parent.top
@@ -23,7 +26,7 @@ Rectangle {
     width: parent.width
     height: 80
     anchors.top: parent.top
-    color: "#9A4FAD"
+    color: sideMenuHeaderColor
 
     Image {
       id: logo
@@ -53,7 +56,7 @@ Rectangle {
     Rectangle {
       width: parent.width
       height: 40
-      color: "#F66986"
+      color: sideMenuOpColor
       Label {
         anchors.centerIn: parent
         text: "Accounts"
@@ -68,7 +71,7 @@ Rectangle {
     Rectangle {
       width: parent.width
       height: 40
-      color: "#F66986"
+      color: sideMenuOpColor
       Label {
         anchors.centerIn: parent
         text: "Settings (WIP)"
@@ -82,7 +85,7 @@ Rectangle {
     Rectangle {
       width: parent.width
       height: 40
-      color: "#F66986"
+      color: sideMenuOpColor
       Label {
         anchors.centerIn: parent
         text: "Close Wallet"

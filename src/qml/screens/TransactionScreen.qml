@@ -22,7 +22,7 @@ Item {
     fetchFeesPopup.close()
   }
 
-  AVMEMenu {
+  AVMESideMenu {
     id: sideMenu
   }
 

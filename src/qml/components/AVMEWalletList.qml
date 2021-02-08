@@ -11,7 +11,11 @@ import QtQuick.Controls 2.2
 
 ListView {
   id: walletList
-  highlight: Rectangle { color: "#7AC1EB"; radius: 5 }
+  property color listHighlightColor: "#7AC1EB"
+  property color listBgColor: "#58A0C9"
+  property color listHoverColor: "#7AC1DB"
+
+  highlight: Rectangle { color: listHighlightColor; radius: 5 }
   implicitWidth: 500
   implicitHeight: 500
   highlightMoveDuration: 100
@@ -28,7 +32,7 @@ ListView {
     width: parent.width
     height: 30
     anchors.horizontalCenter: parent.horizontalCenter
-    color: "#58A0C9"
+    color: listBgColor
 
     Row {
       id: headerNameRow
@@ -131,11 +135,11 @@ ListView {
         y: itemMouseArea.mouseY
         implicitWidth: 300
         implicitHeight: 30
-        background: Rectangle { anchors.fill: parent; color: "#58A0B9" }
+        background: Rectangle { anchors.fill: parent; color: listBgColor }
         MenuItem {
           id: menuItem
           hoverEnabled: true
-          background: Rectangle { color: menuItem.hovered ? "#7AC1DB" : "#58A0B9" }
+          background: Rectangle { color: menuItem.hovered ? listHoverColor : listBgColor }
           text: "Copy Address to Clipboard"
           onTriggered: System.copyToClipboard(listItemAccount)
         }

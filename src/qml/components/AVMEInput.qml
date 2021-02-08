@@ -12,17 +12,23 @@ TextField {
   id: input
   property string label
   property string placeholder
+  property color inputColor: "#449CE3FD"
+  property color inputDisabledColor: "#44888888"
+  property color inputSelectionColor: "#9CE3FD"
+  property color inputLineColor: "#7AC1DB"
+  property color inputLineDisabledColor: "#888888"
+  property color inputPlaceholderColor: "#88000000"
 
   implicitWidth: 320
   implicitHeight: 40
   selectByMouse: true
   color: "black"
-  selectionColor: "#9CE3FD"
+  selectionColor: inputSelectionColor
   background: Rectangle {
     width: parent.width
     height: parent.height
     anchors.bottom: parent.bottom
-    color: input.enabled ? "#449CE3FD" : "#44888888"
+    color: input.enabled ? inputColor : inputDisabledColor
   }
 
   // "Neon" line below the input field
@@ -31,7 +37,7 @@ TextField {
     height: 2
     anchors.bottom: parent.bottom
     border.width: 2
-    border.color: input.enabled ? "#7AC1DB" : "#888888"
+    border.color: input.enabled ? inputLineColor : inputLineDisabledColor
     color: "transparent"
   }
 
@@ -50,7 +56,7 @@ TextField {
     id: labelPlaceholder
     anchors.verticalCenter: parent.verticalCenter
     leftPadding: 10
-    color: "#88000000"
+    color: inputPlaceholderColor
     text: placeholder
     visible: !input.text
   }

@@ -16,12 +16,13 @@ Popup {
   property string info
   property alias yesBtn: yes
   property alias noBtn: no
+  property color popupBgColor: "#9A4FAD"
 
   width: window.width / 2
   height: window.height / 4
   x: (window.width / 2) - (width / 2)
   y: (window.height / 2) - (height / 2)
-  background: Rectangle { anchors.fill: parent; color: "#9A4FAD" }
+  background: Rectangle { anchors.fill: parent; color: popupBgColor }
   modal: true
   focus: true
   padding: 0  // Remove white borders
