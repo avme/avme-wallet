@@ -22,14 +22,10 @@ Item {
     fetchFeesPopup.close()
   }
 
-  AVMESideMenu {
-    id: sideMenu
-  }
-
   Column {
     id: items
     anchors {
-      left: sideMenu.right
+      left: parent.left
       right: parent.right
       top: parent.top
       bottom: parent.bottom

@@ -4,9 +4,8 @@ import QtQuick.Controls 2.2
 /**
  * Custom list for a wallet's addresses and amounts.
  * Requires a ListModel with the following items:
- * - "name": the account's name/label
  * - "account": the account's actual address
- * - "amount": the account's amount
+ * - "name": the account's name/label
  */
 
 ListView {
@@ -31,34 +30,27 @@ ListView {
     id: listHeader
     width: parent.width
     height: 30
+    radius: 5
     anchors.horizontalCenter: parent.horizontalCenter
     color: listBgColor
 
-    Row {
-      id: headerNameRow
-      anchors.verticalCenter: parent.verticalCenter
-      width: parent.width / 4
-      Text {
-        text: "Name"; font.pixelSize: 18; color: "white"; padding: 5;
-      }
-    }
-    Row {
-      id: headerAccountRow
+    Text {
+      id: headerAccount
       anchors.verticalCenter: parent.verticalCenter
       width: parent.width / 2
-      x: headerNameRow.width
-      Text {
-        text: "Account"; font.pixelSize: 18; color: "white"; padding: 5;
-      }
+      color: "white"
+      padding: 5
+      text: "Account"
     }
-    Row {
-      id: headerAmountRow
+
+    Text {
+      id: headerName
       anchors.verticalCenter: parent.verticalCenter
-      width: parent.width / 4
-      x: headerNameRow.width + headerAccountRow.width
-      Text {
-        text: "Amount"; font.pixelSize: 18; color: "white"; padding: 5;
-      }
+      width: parent.width / 2
+      x: headerAccount.width
+      color: "white"
+      padding: 5
+      text: "Name"
     }
   }
   headerPositioning: ListView.OverlayHeader // Prevent header scrolling along
@@ -68,81 +60,35 @@ ListView {
     id: listDelegate
     Item {
       id: listItem
-      readonly property alias listItemName: itemName.text
-      readonly property alias listItemAccount: itemAccount.text
-      readonly property alias listItemAmount: itemAmount.text
+      readonly property string itemAccount: account
+      readonly property string itemName: name
+      readonly property string itemAmount: amount
       width: parent.width
-      height: 40
+      height: 30
 
-      Row {
-        id: delegateNameRow
-        anchors.verticalCenter: parent.verticalCenter
-        width: parent.width / 4
-        Text {
-          id: itemName
-          text: name
-          width: parent.width
-          elide: Text.ElideRight
-          font.pixelSize: 18
-          color: "white"
-          padding: 5
-        }
-      }
-      Row {
-        id: delegateAccountRow
+      Text {
+        id: delegateAccount
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width / 2
-        x: delegateNameRow.width
-        Text {
-          id: itemAccount
-          text: account
-          width: parent.width
-          elide: Text.ElideRight
-          font.pixelSize: 18
-          color: "white"
-          padding: 5
-        }
+        color: "white"
+        padding: 5
+        elide: Text.ElideRight
+        text: itemAccount
       }
-      Row {
-        id: delegateAmountRow
+      Text {
+        id: delegateName
         anchors.verticalCenter: parent.verticalCenter
-        width: parent.width / 4
-        x: delegateNameRow.width + delegateAccountRow.width
-        Text {
-          id: itemAmount
-          text: amount
-          width: parent.width
-          elide: Text.ElideRight
-          font.pixelSize: 18
-          color: "white"
-          padding: 5
-        }
+        width: parent.width / 2
+        x: delegateAccount.width
+        color: "white"
+        padding: 5
+        elide: Text.ElideRight
+        text: itemName
       }
       MouseArea {
-        id: itemMouseArea
+        id: delegateMouseArea
         anchors.fill: parent
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
-        onClicked: {
-          walletList.currentIndex = index
-          if (mouse.button == Qt.RightButton) {
-            listItemMenu.open()
-          }
-        }
-      }
-      Menu {
-        id: listItemMenu
-        x: itemMouseArea.mouseX
-        y: itemMouseArea.mouseY
-        implicitWidth: 300
-        implicitHeight: 30
-        background: Rectangle { anchors.fill: parent; color: listBgColor }
-        MenuItem {
-          id: menuItem
-          hoverEnabled: true
-          background: Rectangle { color: menuItem.hovered ? listHoverColor : listBgColor }
-          text: "Copy Address to Clipboard"
-          onTriggered: System.copyToClipboard(listItemAccount)
-        }
+        onClicked: walletList.currentIndex = index
       }
     }
   }

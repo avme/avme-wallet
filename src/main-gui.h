@@ -153,8 +153,8 @@ class System : public QObject {
         walist = this->wm.listETHAccounts();
         for (WalletAccount wa : walist) {
           std::string obj;
-          obj += "{\"name\": \"" + wa.name;
-          obj += "\", \"account\": \"" + wa.address;
+          obj += "{\"account\": \"" + wa.address;
+          obj += "\", \"name\": \"" + wa.name;
           obj += "\", \"amount\": \"" + wa.balanceETH + "\"}";
           ret << QString::fromStdString(obj);
         }
@@ -162,8 +162,8 @@ class System : public QObject {
         walist = this->wm.listTAEXAccounts();
         for (WalletAccount wa : walist) {
           std::string obj;
-          obj += "{\"name\": \"" + wa.name;
-          obj += "\", \"account\": \"" + wa.address;
+          obj += "{\"account\": \"" + wa.address;
+          obj += "\", \"name\": \"" + wa.name;
           obj += "\", \"amount\": \"" + wa.balanceTAEX + "\"}";
           ret << QString::fromStdString(obj);
         }
