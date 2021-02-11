@@ -14,12 +14,14 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <mutex>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/trim_all.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/chrono.hpp>
 
 #include <libdevcore/CommonIO.h>
 #include <libdevcore/FileSystem.h>
@@ -156,9 +158,12 @@ class WalletManager {
      * to API limitations, only one can be checked at a time.
      * Returns a list of accounts and their AVAX/token amounts, respectively.
      */
-    std::vector<WalletAccount> listAVAXAccounts();
-    std::vector<WalletAccount> listTAEXAccounts();
-
+	 
+	void reloadAccountsBalances();
+	void loadWalletAccounts(bool start);
+	void reloadAccountsBalancesThread();
+	std::vector<WalletAccount> ReadWriteWalletVector(bool write, bool changeVector, std::vector<WalletAccount> accountToWrite);
+	
     /**
      * Get the recommended gas price for a transaction.
      * Returns the gas price in Gwei, which has to be converted to Wei

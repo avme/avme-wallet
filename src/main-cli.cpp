@@ -51,7 +51,8 @@ int main() {
       std::cout << "Error loading wallet: wrong passphrase. Please try again." << std::endl;
     }
   }
-
+  std::cout << "Loading wallet accounts" << std::endl;
+  wm.loadWalletAccounts(true);
   // Menu loop
   while (true) {
     std::string menuOp;
@@ -68,7 +69,7 @@ int main() {
 
     // List AVAX accounts
     if (menuOp == "1") {
-      std::vector<WalletAccount> AVAXAccounts = wm.listAVAXAccounts();
+      std::vector<WalletAccount> AVAXAccounts = wm.ReadWriteWalletVector(false, false, {});
       if (!AVAXAccounts.empty()) {
         for (WalletAccount accountData : AVAXAccounts) {
           std::cout << accountData.id << " "
@@ -83,7 +84,7 @@ int main() {
 
     // List TAEX accounts
     } else if (menuOp == "2") {
-      std::vector<WalletAccount> TAEXAccounts = wm.listTAEXAccounts();
+      std::vector<WalletAccount> TAEXAccounts = wm.ReadWriteWalletVector(false, false, {});
       if (!TAEXAccounts.empty()) {
         for (WalletAccount accountData : TAEXAccounts) {
           std::cout << accountData.id << " "
@@ -169,7 +170,7 @@ int main() {
         transactionLink = wm.sendTransaction(signedTx);
       }
       std::cout << "Transaction sent! Link: " << transactionLink << std::endl;
-
+      wm.reloadAccountsBalances();
     // Create new account
     } else if (menuOp == "5") {
       std::string name, aPass, aPassConf, aPassHint;
@@ -198,6 +199,8 @@ int main() {
                 << "  Hint: " << data.hint << std::endl;
       std::cout << "Reloading wallet..." << std::endl;
       wm.loadWallet(walletFile, secretsPath, walletPass);
+	  std::cout << "Reloading accounts..." << std::endl;
+	  wm.loadWalletAccounts(false);
 
     // Erase account
     } else if (menuOp == "6") {
@@ -224,6 +227,8 @@ int main() {
           std::cout << "Account erased: " << account << std::endl;
           std::cout << "Reloading wallet..." << std::endl;
           wm.loadWallet(walletFile, secretsPath, walletPass);
+	      std::cout << "Reloading accounts..." << std::endl;
+	      wm.loadWalletAccounts(false);
         } else {
           std::cout << "Failed to erase account " << account << "; account doesn't exist" << std::endl;
         }
