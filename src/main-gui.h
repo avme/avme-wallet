@@ -150,12 +150,12 @@ class System : public QObject {
       std::vector<WalletAccount> walist;
 
       if (type == "eth") {
-        walist = this->wm.listETHAccounts();
+        walist = this->wm.listAVAXAccounts();
         for (WalletAccount wa : walist) {
           std::string obj;
           obj += "{\"name\": \"" + wa.name;
           obj += "\", \"account\": \"" + wa.address;
-          obj += "\", \"amount\": \"" + wa.balanceETH + "\"}";
+          obj += "\", \"amount\": \"" + wa.balanceAVAX + "\"}";
           ret << QString::fromStdString(obj);
         }
       } else if (type == "taex") {
@@ -202,7 +202,7 @@ class System : public QObject {
     Q_INVOKABLE QString calculateTransactionCost(
       QString amount, QString gasLimit, QString gasPrice
     ) {
-      std::string amountStr = this->wm.convertFixedPointToWei(amount.toStdString(), 18);  // ETH, so 10^18 Wei
+      std::string amountStr = this->wm.convertFixedPointToWei(amount.toStdString(), 18);  // AVAX, so 10^18 Wei
       std::string gasLimitStr = gasLimit.toStdString(); // Already in Wei
       std::string gasPriceStr = this->wm.convertFixedPointToWei(gasPrice.toStdString(), 9); // Gwei, so 10^9 Wei
       u256 amountU256 = u256(amountStr);
@@ -220,7 +220,7 @@ class System : public QObject {
       return QString::fromStdString(totalStr);
     }
 
-    // Check for insufficient funds in an ETH transaction
+    // Check for insufficient funds in an AVAX transaction
     // TODO: probably this will have to change when dealing with tokens
     Q_INVOKABLE bool hasInsufficientFunds(QString senderAmount, QString receiverAmount) {
       std::string senderStr = this->wm.convertFixedPointToWei(senderAmount.toStdString(), 18);
@@ -241,7 +241,7 @@ class System : public QObject {
       this->txGasPrice = boost::lexical_cast<std::string>(
         boost::lexical_cast<u256>(this->txGasPrice) * raiseToPow(10, 9)
       );
-      TransactionSkeleton txSkel = wm.buildETHTransaction(
+      TransactionSkeleton txSkel = wm.buildAVAXTransaction(
         this->txSenderAccount, this->txReceiverAccount, this->txAmount,
         this->txGasLimit, this->txGasPrice
       );

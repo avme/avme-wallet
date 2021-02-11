@@ -56,9 +56,9 @@ int main() {
   while (true) {
     std::string menuOp;
     std::cout << "What are you looking to do?" << std::endl
-              << "1 - List ETH accounts and balances" << std::endl
+              << "1 - List AVAX accounts and balances" << std::endl
               << "2 - List TAEX accounts and balances" << std::endl
-              << "3 - Send an ETH transaction" << std::endl
+              << "3 - Send an AVAX transaction" << std::endl
               << "4 - Send a TAEX transaction" << std::endl
               << "5 - Create a new account" << std::endl
               << "6 - Erase an existing account" << std::endl
@@ -66,18 +66,18 @@ int main() {
               << "8 - Exit" << std::endl;
     std::getline(std::cin, menuOp);
 
-    // List ETH accounts
+    // List AVAX accounts
     if (menuOp == "1") {
-      std::vector<WalletAccount> ETHAccounts = wm.listETHAccounts();
-      if (!ETHAccounts.empty()) {
-        for (WalletAccount accountData : ETHAccounts) {
+      std::vector<WalletAccount> AVAXAccounts = wm.listAVAXAccounts();
+      if (!AVAXAccounts.empty()) {
+        for (WalletAccount accountData : AVAXAccounts) {
           std::cout << accountData.id << " "
                     << accountData.privKey << " "
                     << accountData.name << " "
                     << accountData.address << " "
-                    << accountData.balanceETH << std::endl;
+                    << accountData.balanceAVAX << std::endl;
         }
-      } else {
+      } else {AVAX
         std::cout << "No accounts found." << std::endl;
       }
 
@@ -96,7 +96,7 @@ int main() {
         std::cout << "No accounts found." << std::endl;
       }
 
-    // Send ETH/TAEX transactions
+    // Send AVAX/TAEX transactions
     } else if (menuOp == "3" || menuOp == "4") {
       TransactionSkeleton txSkel;
       std::string srcAddress, destAddress, txValue, txGasLimit, txGasPrice,
@@ -104,8 +104,8 @@ int main() {
 
       srcAddress = menuChooseSenderAddress(wm);
       destAddress = menuChooseReceiverAddress();
-      if (menuOp == "3") {  // ETH
-        txValue = menuChooseETHAmount(srcAddress, wm);
+      if (menuOp == "3") {  // AVAX
+        txValue = menuChooseAVAXAmount(srcAddress, wm);
       } else if (menuOp == "4") { // TAEX
         txValue = menuChooseTAEXAmount(srcAddress, wm);
       }
@@ -113,7 +113,7 @@ int main() {
                    "1 - Automatic\n2 - Set my own" << std::endl;
       std::getline(std::cin, feeOp);
       if (feeOp == "1") {
-        if (menuOp == "3") {  // ETH
+        if (menuOp == "3") {  // AVAX
           txGasLimit = "21000";
         } else if (menuOp == "4") { // TAEX
           txGasLimit = "80000";
@@ -139,8 +139,8 @@ int main() {
       }
 
       std::cout << "Building transaction..." << std::endl;
-      if (menuOp == "3") {  // ETH
-        txSkel = wm.buildETHTransaction(srcAddress, destAddress, txValue, txGasLimit, txGasPrice);
+      if (menuOp == "3") {  // AVAX
+        txSkel = wm.buildAVAXTransaction(srcAddress, destAddress, txValue, txGasLimit, txGasPrice);
       } else if (menuOp == "4") { // TAEX
         txSkel = wm.buildTAEXTransaction(srcAddress, destAddress, txValue, txGasLimit, txGasPrice);
       }

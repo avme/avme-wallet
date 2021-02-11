@@ -58,13 +58,13 @@ Item {
       onClicked: System.setScreen(content, "qml/screens/NewAccountScreen.qml")
     }
     AVMEButton {
-      id: btnSendETH
+      id: btnSendAVAX
       width: (parent.width / 3) - parent.spacing
       text: "Send Transaction"
       onClicked: {
         System.setTxSenderAccount(walletList.currentItem.listItemAccount)
         System.setTxSenderAmount(walletList.currentItem.listItemAmount)
-        System.setTxLabel("ETH")  // TODO: change according to token
+        System.setTxLabel("AVAX")  // TODO: change according to token
         System.setScreen(content, "qml/screens/TransactionScreen.qml")
       }
     }

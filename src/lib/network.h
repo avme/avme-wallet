@@ -46,8 +46,8 @@ class Network {
      * - Tokens unfortunately can't be batched, so only one address at a time
      *   can be requested.
      */
-    static std::string getETHBalance(std::string address);
-    static std::string getETHBalances(std::vector<std::string> addresses);
+    static std::string getAVAXBalance(std::string address);
+    static std::string getAVAXBalances(std::vector<std::string> addresses);
     static std::string getTAEXBalance(std::string address);
 
     // Get recommended fees at the moment from the blockchain API.

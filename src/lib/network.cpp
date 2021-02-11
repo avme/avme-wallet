@@ -80,7 +80,7 @@ std::string Network::httpGetRequest(std::string target)
     return result;
 }
 
-std::string Network::getETHBalance(std::string address) {
+std::string Network::getAVAXBalance(std::string address) {
   std::stringstream query;
   query << "/api?module=account&action=balance"
         << "&address=" << address
@@ -88,7 +88,7 @@ std::string Network::getETHBalance(std::string address) {
   return httpGetRequest(query.str());
 }
 
-std::string Network::getETHBalances(std::vector<std::string> addresses) {
+std::string Network::getAVAXBalances(std::vector<std::string> addresses) {
   std::stringstream query;
   std::vector<std::string> ret;
   int ct = 0;

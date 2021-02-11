@@ -85,11 +85,11 @@ bool WalletManager::accountIsEmpty(std::string account) {
   if (account.find("0x") == std::string::npos) {
     account = "0x" + boost::lexical_cast<std::string>(userToAddress(account));
   }
-  std::string requestETH = Network::getETHBalance(account);
+  std::string requestAVAX = Network::getAVAXBalance(account);
   std::string requestTAEX = Network::getTAEXBalance(account);
-  std::string amountETH = JSON::getValue(requestETH, "result").get_str();
+  std::string amountAVAX = JSON::getValue(requestAVAX, "result").get_str();
   std::string amountTAEX = JSON::getValue(requestTAEX, "result").get_str();
-  return (amountETH == "0" && amountTAEX == "0");
+  return (amountAVAX == "0" && amountTAEX == "0");
 }
 
 Address WalletManager::userToAddress(std::string const& input) {
@@ -188,7 +188,7 @@ std::string WalletManager::convertFixedPointToWei(std::string amount, int decima
   return valuestr;
 }
 
-std::vector<WalletAccount> WalletManager::listETHAccounts() {
+std::vector<WalletAccount> WalletManager::listAVAXAccounts() {
   if (this->wallet.store().keys().empty()) { return {}; }
   std::vector<WalletAccount> ret;
   std::vector<std::string> waList;
@@ -214,7 +214,7 @@ std::vector<WalletAccount> WalletManager::listETHAccounts() {
 
       // When we reach the batch quota, get the balances so far
       if (ct == 20 || u == keys.back()) {
-        jsonList = JSON::getValue(Network::getETHBalances(waList), "result");
+        jsonList = JSON::getValue(Network::getAVAXBalances(waList), "result");
         for (size_t i = 0; i < jsonList.get_array().size(); i++) {
           std::string acc = JSON::objectItem(JSON::arrayItem(jsonList, i), "account").get_str();
           std::string bal = JSON::objectItem(JSON::arrayItem(jsonList, i), "balance").get_str();
@@ -238,7 +238,7 @@ std::vector<WalletAccount> WalletManager::listETHAccounts() {
   for (int i = 0; i < ret.size(); i++) {
     auto it = std::find(accList.begin(), accList.end(), ret[i].address);
     if (it != accList.end()) {
-      ret[i].balanceETH = convertWeiToFixedPoint(balList.at(it - accList.begin()), 18);
+      ret[i].balanceAVAX = convertWeiToFixedPoint(balList.at(it - accList.begin()), 18);
     }
   }
 
@@ -317,7 +317,7 @@ std::string WalletManager::buildTxData(std::string txValue, std::string destWall
   return txdata;
 }
 
-TransactionSkeleton WalletManager::buildETHTransaction(
+TransactionSkeleton WalletManager::buildAVAXTransaction(
   std::string srcAddress, std::string destAddress,
   std::string txValue, std::string txGas, std::string txGasPrice
 ) {
