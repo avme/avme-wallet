@@ -429,29 +429,29 @@ WalletTxData WalletManager::decodeRawTransaction(std::string rawTxHex) {
   return ret;
 }
 
-std::vector<WalletAccount> WalletManager::ReadWriteWalletVector(bool write, bool add, bool remove, WalletAccount accountToWrite) {
+std::vector<WalletAccount> WalletManager::ReadWriteWalletVector(bool write, bool add, bool remove, std::vector<WalletAccount> accountToWrite) {
 	std::mutex m;
 	m.lock();
 	static std::vector<WalletAccount> WalletAccounts;
 	if (write) {
 		json_spirit::mValue jsonBal;
 		if(add) {
-			WalletAccounts.push_back(accountToWrite);
-			return {};
+			for (auto &accountToRead : accountToWrite)
+				WalletAccounts.push_back(accountToRead);
 		}
 		
 		if(remove) {	
 			for (int i = 0; i < WalletAccounts.size(); ++i) {					
-				if(WalletAccounts[i].address == accountToWrite.address)
-					WalletAccounts.erase(i);
-				return {};
+				if(WalletAccounts[i].address == accountToWrite[0].address)
+					WalletAccounts.erase(i+WalletAccounts.begin());
 			}
 		}
 		
 		std::string balanceStr;
-		for(auto &accountToRead : WalletsAccounts) {
+		u256 balance = 0;
+		for(auto &accountToRead : WalletAccounts) {
 			jsonBal = JSON::getValue(Network::getAVAXBalance(accountToRead.address), "result");
-			u256 balance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
+			balance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
 			balanceStr = boost::lexical_cast<std::string>(balance);
 			// Don't write to vector if an error occurs while reading the JSON
 			if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
@@ -462,7 +462,7 @@ std::vector<WalletAccount> WalletManager::ReadWriteWalletVector(bool write, bool
 			
 			std::string TAEXAddress = accountToRead.address.substr(0, 2) == "0x" ? accountToRead.address.substr(2) : accountToRead.address
 		    jsonBal = JSON::getValue(Network::getTAEXBalance(TAEXAddress, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"), "result");
-            u256 balance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
+            balance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
 			balanceStr = boost::lexical_cast<std::string>(balance);
 			if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
 				m.unlock();
