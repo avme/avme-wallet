@@ -71,8 +71,6 @@ typedef struct WalletTxData {
   std::string s;
 } WalletTxData;
 
-std::vector<WalletAccount> ReadWriteWalletVector(bool write, bool add, bool remove, WalletAccount accountToWrite);
-
 class WalletManager {
   private:
     // The proper wallet
@@ -161,7 +159,8 @@ class WalletManager {
      */
     std::vector<WalletAccount> listAVAXAccounts();
     std::vector<WalletAccount> listTAEXAccounts();
-
+	std::vector<WalletAccount> ReadWriteWalletVector(bool write, bool add, bool remove, WalletAccount accountToWrite);
+	
     /**
      * Get the recommended gas price for a transaction.
      * Returns the gas price in Gwei, which has to be converted to Wei

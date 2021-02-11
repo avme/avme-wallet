@@ -429,7 +429,7 @@ WalletTxData WalletManager::decodeRawTransaction(std::string rawTxHex) {
   return ret;
 }
 
-std::vector<WalletAccount> ReadWriteWalletVector(bool write, bool add, bool remove, WalletAccount accountToWrite) {
+std::vector<WalletAccount> WalletManager::ReadWriteWalletVector(bool write, bool add, bool remove, WalletAccount accountToWrite) {
 	std::mutex m;
 	m.lock();
 	static std::vector<WalletAccount> WalletAccounts;
@@ -442,7 +442,7 @@ std::vector<WalletAccount> ReadWriteWalletVector(bool write, bool add, bool remo
 		
 		if(remove) {	
 			for (int i = 0; i < WalletAccounts.size(); ++i) {					
-				if(WalletAccounts[i].address == accountToWrite)
+				if(WalletAccounts[i].address == accountToWrite.address)
 					WalletAccounts.erase(i);
 				return {};
 			}
