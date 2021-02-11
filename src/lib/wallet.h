@@ -14,6 +14,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <mutex>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/trim_all.hpp>
@@ -69,6 +70,8 @@ typedef struct WalletTxData {
   std::string r;
   std::string s;
 } WalletTxData;
+
+std::vector<WalletAccount> ReadWriteWalletVector(bool write, bool add, bool remove, WalletAccount accountToWrite);
 
 class WalletManager {
   private:
