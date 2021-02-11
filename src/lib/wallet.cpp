@@ -241,7 +241,7 @@ std::vector<WalletAccount> WalletManager::listTAEXAccounts() {
       wa.privKey = a.abridged();
       wa.name = this->wallet.accountName(a);
       wa.address = "0x" + boost::lexical_cast<std::string>(a);
-	  jsonBal = JSON::getValue(Network::getTAEXBalance(wa.address, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"), "result");
+	  jsonBal = JSON::getValue(Network::getTAEXBalance(boost::lexical_cast<std::string>(a), "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"), "result");
       u256 balance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
 	  std::string balanceStr = boost::lexical_cast<std::string>(balance);
       if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
