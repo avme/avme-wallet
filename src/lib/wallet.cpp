@@ -460,7 +460,7 @@ std::vector<WalletAccount> WalletManager::ReadWriteWalletVector(bool write, bool
 			}
 			accountToRead.balanceAVAX = convertWeiToFixedPoint(balanceStr, 18);
 			
-			std::string TAEXAddress = accountToRead.address.substr(0, 2) == "0x" ? accountToRead.address.substr(2) : accountToRead.address
+			std::string TAEXAddress = accountToRead.address.substr(0, 2) == "0x" ? accountToRead.address.substr(2) : accountToRead.address;
 		    jsonBal = JSON::getValue(Network::getTAEXBalance(TAEXAddress, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"), "result");
             balance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
 			balanceStr = boost::lexical_cast<std::string>(balance);
