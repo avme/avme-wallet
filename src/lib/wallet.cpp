@@ -5,57 +5,6 @@
 /// CLI module for key management.
 #include "wallet.h"
 
-std::vector<WalletAccount> ReadWriteWalletVector(bool write, bool add, bool remove, WalletAccount accountToWrite) {
-	static std::vector<WalletAccount> WalletAccounts;
-	std::mutex m;
-	m.lock();
-	if (write) {
-		json_spirit::mValue jsonBal;
-		if(add) {
-			WalletAccounts.append(accountToWrite);
-			return {};
-		}
-		
-		if(remove) {	
-			for (int i = 0; i < WalletAccounts.size(); ++i) {					
-				if(WalletAccounts[i].address == accountToWrite)
-					WalletAccounts.erase(i);
-				return {};
-			}
-		}
-		
-		std::string balanceStr;
-		for(auto &accountToRead : WalletsAccounts) {
-			jsonBal = JSON::getValue(Network::getAVAXBalance(accountToRead.address), "result");
-			u256 balance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
-			balanceStr = boost::lexical_cast<std::string>(balance);
-			// Don't write to vector if an error occurs while reading the JSON
-			if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
-				m.unlock();
-				return {};
-			}
-			accountToRead.balanceAVAX = convertWeiToFixedPoint(balanceStr, 18);
-			
-			std::string TAEXAddress = accountToRead.address.substr(0, 2) == "0x" ? accountToRead.address.substr(2) : accountToRead.address
-		    jsonBal = JSON::getValue(Network::getTAEXBalance(TAEXAddress, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"), "result");
-            u256 balance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
-			balanceStr = boost::lexical_cast<std::string>(balance);
-			if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
-				m.unlock();
-				return {};
-			}
-	        accountToRead.balanceTAEX = convertWeiToFixedPoint(balanceStr, 18);
-		}
-		m.unlock();
-		return {};
-	}
-	
-	std::vector<WalletAccount> safeWalletAcccounts = WalletAccounts;
-	m.unlock();
-	return safeWalletAcccounts;
-}
-
-
 u256 WalletManager::MAX_U256_VALUE() {
   return (raiseToPow(2, 256) - 1);
 }
@@ -478,5 +427,55 @@ WalletTxData WalletManager::decodeRawTransaction(std::string rawTxHex) {
   }
 
   return ret;
+}
+
+std::vector<WalletAccount> ReadWriteWalletVector(bool write, bool add, bool remove, WalletAccount accountToWrite) {
+	std::mutex m;
+	m.lock();
+	static std::vector<WalletAccount> WalletAccounts;
+	if (write) {
+		json_spirit::mValue jsonBal;
+		if(add) {
+			WalletAccounts.push_back(accountToWrite);
+			return {};
+		}
+		
+		if(remove) {	
+			for (int i = 0; i < WalletAccounts.size(); ++i) {					
+				if(WalletAccounts[i].address == accountToWrite)
+					WalletAccounts.erase(i);
+				return {};
+			}
+		}
+		
+		std::string balanceStr;
+		for(auto &accountToRead : WalletsAccounts) {
+			jsonBal = JSON::getValue(Network::getAVAXBalance(accountToRead.address), "result");
+			u256 balance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
+			balanceStr = boost::lexical_cast<std::string>(balance);
+			// Don't write to vector if an error occurs while reading the JSON
+			if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
+				m.unlock();
+				return {};
+			}
+			accountToRead.balanceAVAX = convertWeiToFixedPoint(balanceStr, 18);
+			
+			std::string TAEXAddress = accountToRead.address.substr(0, 2) == "0x" ? accountToRead.address.substr(2) : accountToRead.address
+		    jsonBal = JSON::getValue(Network::getTAEXBalance(TAEXAddress, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"), "result");
+            u256 balance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
+			balanceStr = boost::lexical_cast<std::string>(balance);
+			if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
+				m.unlock();
+				return {};
+			}
+	        accountToRead.balanceTAEX = convertWeiToFixedPoint(balanceStr, 18);
+		}
+		m.unlock();
+		return {};
+	}
+	
+	std::vector<WalletAccount> safeWalletAcccounts = WalletAccounts;
+	m.unlock();
+	return safeWalletAcccounts;
 }
 
