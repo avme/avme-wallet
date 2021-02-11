@@ -5,12 +5,10 @@
         <file>qml/screens/NewWalletScreen.qml</file>
         <file>qml/screens/LoadWalletScreen.qml</file>
         <file>qml/screens/AccountsScreen.qml</file>
-        <file>qml/screens/NewAccountScreen.qml</file>
         <file>qml/screens/TransactionScreen.qml</file>
         <file>qml/screens/ProgressScreen.qml</file>
         <file>qml/components/AVMEButton.qml</file>
         <file>qml/components/AVMEInput.qml</file>
-        <file>qml/components/AVMESideMenu.qml</file>
         <file>qml/components/AVMEPopup.qml</file>
         <file>qml/components/AVMEPopupInfo.qml</file>
         <file>qml/components/AVMEPopupYesNo.qml</file>

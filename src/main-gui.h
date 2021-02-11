@@ -105,6 +105,13 @@ class System : public QObject {
       this->txGasPrice = price.toStdString();
     }
 
+    // Get an Account's private keys
+    Q_INVOKABLE QString getPrivateKeys(QString account, QString pass) {
+      Secret s = wm.getSecret(account.toStdString(), pass.toStdString());
+      std::string key = toHex(s.ref());
+      return QString::fromStdString(key);
+    }
+
     // Change the current loaded screen
     Q_INVOKABLE void setScreen(QObject* loader, QString qmlFile) {
       loader->setProperty("source", "qrc:/" + qmlFile);
@@ -162,8 +169,8 @@ class System : public QObject {
         walist = this->wm.listTAEXAccounts();
         for (WalletAccount wa : walist) {
           std::string obj;
-          obj += "{\"name\": \"" + wa.name;
-          obj += "\", \"account\": \"" + wa.address;
+          obj += "{\"account\": \"" + wa.address;
+          obj += "\", \"name\": \"" + wa.name;
           obj += "\", \"amount\": \"" + wa.balanceTAEX + "\"}";
           ret << QString::fromStdString(obj);
         }

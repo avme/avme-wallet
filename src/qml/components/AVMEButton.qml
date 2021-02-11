@@ -13,6 +13,8 @@ Button {
   text: "Button"
   implicitWidth: 120
   implicitHeight: 40
+  focus: false
+  focusPolicy: Qt.NoFocus
 
   background: Rectangle {
     color: {

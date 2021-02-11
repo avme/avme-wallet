@@ -22,14 +22,10 @@ Item {
     fetchFeesPopup.close()
   }
 
-  AVMESideMenu {
-    id: sideMenu
-  }
-
   Column {
     id: items
     anchors {
-      left: sideMenu.right
+      left: parent.left
       right: parent.right
       top: parent.top
       bottom: parent.bottom
@@ -233,7 +229,7 @@ Item {
     modal: true
     focus: true
     padding: 0  // Remove white borders
-    closePolicy: Popup.CloseOnPressOutside
+    closePolicy: Popup.NoAutoClose
 
     Rectangle {
       id: popupBg
