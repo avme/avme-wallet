@@ -1,6 +1,7 @@
 #ifndef NETWORK_H
 #define NETWORK_H
 
+#include <cstdlib>
 #include <iostream>
 #include <string>
 
@@ -9,9 +10,6 @@
 #include <boost/beast/version.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/asio.hpp>
-#include <cstdlib>
-#include <iostream>
-#include <string>
 
 #include "json.h"
 #include "root_certificates.hpp"
@@ -48,8 +46,6 @@ class Network {
      */
     static std::string getAVAXBalance(std::string address);
     static std::string getTAEXBalance(std::string address, std::string contractAddress);
-
-    // Get recommended fees at the moment from the blockchain API.
 
     // Get the highest available nonce for an address from the blockchain API.
     static std::string getTxNonce(std::string address);

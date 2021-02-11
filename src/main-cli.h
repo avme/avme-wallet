@@ -195,7 +195,7 @@ std::string menuChooseTAEXAmount(std::string address, WalletManager wm) {
     ret = wm.convertFixedPointToWei(ret, 18);
     if (ret == "") {
       std::cout << "Invalid amount, please check if your input is correct." << std::endl;
-    } else if (ret > Network::getTAEXBalance(address, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232")) {
+    } else if (ret > Network::getTAEXBalance(address, "0xa687a9cff994973314c6e2cb313f82d6d78cd232")) {
       std::cout << "Insufficient funds, please try again." << std::endl;
     } else {
       break;

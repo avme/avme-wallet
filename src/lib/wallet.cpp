@@ -41,8 +41,8 @@ bool WalletManager::createNewWallet(path walletFile, path secretsPath, std::stri
 }
 
 WalletAccount WalletManager::createNewAccount(
-  std::string name, std::string pass, std::string hint, bool usesMasterPass
-) {
+    std::string name, std::string pass, std::string hint, bool usesMasterPass
+    ) {
   KeyPair k = makeKey();
   h128 u = this->wallet.import(k.secret(), name, pass, hint);
   WalletAccount ret;
@@ -85,12 +85,18 @@ bool WalletManager::accountIsEmpty(std::string account) {
   if (account.find("0x") == std::string::npos) {
     account = "0x" + boost::lexical_cast<std::string>(userToAddress(account));
   }
-  
-  // For being able to convert to an integer value from an hex string, it is needed to pass through an integer variable
-  // The following example converts hex strings into u256 and then back to an integer string
-  u256 requestAVAX = boost::lexical_cast<u256>(JSON::getValue(Network::getAVAXBalance(account), "result").get_str());
-  u256 requestTAEX = boost::lexical_cast<u256>(JSON::getValue(Network::getTAEXBalance(account, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"), "result").get_str());
-  
+
+  /**
+   * To convert a hex string to an int value, we need to pass through an int variable.
+   * So we convert the hex string into u256 and then u256 back to int string.
+   */
+  u256 requestAVAX = boost::lexical_cast<u256>(
+    JSON::getValue(Network::getAVAXBalance(account), "result").get_str()
+  );
+  u256 requestTAEX = boost::lexical_cast<u256>(
+    JSON::getValue(Network::getTAEXBalance(account, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"), "result").get_str()
+  );
+
   std::string amountAVAX = boost::lexical_cast<std::string>(requestAVAX);
   std::string amountTAEX = boost::lexical_cast<std::string>(requestTAEX);
   return (amountAVAX == "0" && amountTAEX == "0");
@@ -202,7 +208,6 @@ std::vector<WalletAccount> WalletManager::listAVAXAccounts() {
   std::vector<h128> keys = this->wallet.store().keys();
   for (auto const& u : keys) {
     if (Address a = this->wallet.address(u)) {  // Normal accounts
-      // Fill account details, except the balance
       WalletAccount wa;
       got.insert(a);
       wa.id = toUUID(u);
@@ -211,12 +216,12 @@ std::vector<WalletAccount> WalletManager::listAVAXAccounts() {
       wa.address = "0x" + boost::lexical_cast<std::string>(a);
       jsonBal = JSON::getValue(Network::getAVAXBalance(wa.address), "result");
       u256 balance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
-	  std::string balanceStr = boost::lexical_cast<std::string>(balance);
+      std::string balanceStr = boost::lexical_cast<std::string>(balance);
       if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
         return {};
       }
-	  wa.balanceAVAX = convertWeiToFixedPoint(balanceStr, 18);
-	  ret.push_back(wa);
+      wa.balanceAVAX = convertWeiToFixedPoint(balanceStr, 18);
+      ret.push_back(wa);
     } else {  // Bare accounts
       WalletAccount wa;
       wa.address = "0x" + boost::lexical_cast<std::string>(a) + " (Bare)";
@@ -241,9 +246,11 @@ std::vector<WalletAccount> WalletManager::listTAEXAccounts() {
       wa.privKey = a.abridged();
       wa.name = this->wallet.accountName(a);
       wa.address = "0x" + boost::lexical_cast<std::string>(a);
-	  jsonBal = JSON::getValue(Network::getTAEXBalance(boost::lexical_cast<std::string>(a), "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"), "result");
+      jsonBal = JSON::getValue(Network::getTAEXBalance(
+        boost::lexical_cast<std::string>(a), "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"), "result"
+      );
       u256 balance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
-	  std::string balanceStr = boost::lexical_cast<std::string>(balance);
+      std::string balanceStr = boost::lexical_cast<std::string>(balance);
       if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
         return {};
       }
@@ -260,8 +267,7 @@ std::vector<WalletAccount> WalletManager::listTAEXAccounts() {
 }
 
 std::string WalletManager::getAutomaticFee() {
-	// Avax Fees are fixed
-	return "470";
+  return "470"; // AVAX fees are fixed
 }
 
 std::string WalletManager::buildTxData(std::string txValue, std::string destWallet) {
@@ -329,12 +335,12 @@ TransactionSkeleton WalletManager::buildAVAXTransaction(
 }
 
 TransactionSkeleton WalletManager::buildTAEXTransaction(
-  std::string srcAddress, std::string destAddress,
-  std::string txValue, std::string txGas, std::string txGasPrice
-) {
+    std::string srcAddress, std::string destAddress,
+    std::string txValue, std::string txGas, std::string txGasPrice
+    ) {
   TransactionSkeleton txSkel;
   int txNonce;
-  std::string contractWallet = "A687A9cff994973314c6e2cb313F82D6d78Cd232";
+  std::string contractWallet = "a687a9cff994973314c6e2cb313f82d6d78cd232";
 
   std::string nonceApiRequest = Network::getTxNonce(srcAddress);
   std::string txNonceStr = JSON::getValue(nonceApiRequest, "result").get_str();
@@ -360,8 +366,8 @@ TransactionSkeleton WalletManager::buildTAEXTransaction(
 }
 
 std::string WalletManager::signTransaction(
-  TransactionSkeleton txSkel, std::string pass, std::string address
-) {
+    TransactionSkeleton txSkel, std::string pass, std::string address
+    ) {
   Secret s = getSecret(address, pass);
   std::stringstream txHexBuffer;
 
