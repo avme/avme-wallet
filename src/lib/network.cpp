@@ -2,99 +2,82 @@
 
 // TODO: find a way to toggle between testnet and mainnet later
 std::string Network::hostName = "api-ropsten.etherscan.io";
-std::string Network::hostPort = "80";
+std::string Network::hostPort = "443";
 std::string Network::apiKey = "6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
 
-std::string Network::httpGetRequest(std::string httpquery) {
-  using boost::asio::ip::tcp;
-  std::string server_answer;
+std::string Network::httpGetRequest(std::string target)
+{
+	std::string result = "";
+	using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
+	namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
+	namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
+    try
+    {
+        std::string host = Network::hostName;
+        std::string port = Network::hostPort;
 
-  try {
-    // Initialize the ASIO service.
-    boost::asio::io_service io_service;
-    std::string hostAddress = Network::hostName;
-    if (Network::hostPort.compare("80") != 0) {
-      // Add ":port" if port number is something other than 80
-      hostAddress += (":" + Network::hostPort);
+        boost::asio::io_context ioc;
+
+        // Load certificates into context
+        ssl::context ctx{ssl::context::sslv23_client};
+        load_root_certificates(ctx);
+
+        tcp::resolver resolver{ioc};
+        ssl::stream<tcp::socket> stream{ioc, ctx};
+
+        // Set SNI Hostname (many hosts need this to handshake successfully)
+        if(! SSL_set_tlsext_host_name(stream.native_handle(), host.c_str()))
+        {
+            boost::system::error_code ec{static_cast<int>(::ERR_get_error()), boost::asio::error::get_ssl_category()};
+            throw boost::system::system_error{ec};
+        }
+        auto const results = resolver.resolve(host, port);
+
+        // Connect and Handshake
+        boost::asio::connect(stream.next_layer(), results.begin(), results.end());
+        stream.handshake(ssl::stream_base::client);
+
+        // Set up an HTTP GET request message
+        http::request<http::string_body> req{http::verb::post, target, 11};
+        req.set(http::field::host, host);
+        req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+		/*
+		req.set(http::field::content_type, "application/json");
+		req.body() = "{\"jsonrpc\": \"2.0\",\"method\": \"eth_getBalance\",\"params\": [\"0x8cB085C40D8342A30F1005bC79D1C08D2D09a976\",\"latest\"],\"id\": 1}";*/
+		req.prepare_payload();
+		
+        // Send the HTTP request to the remote host
+        http::write(stream, req);
+        boost::beast::flat_buffer buffer;
+
+        // Declare a container to hold the response
+        http::response<http::dynamic_body> res;
+
+        // Receive the HTTP response
+        http::read(stream, buffer, res);
+
+	// Write to output only body answer
+		std::string body { boost::asio::buffers_begin(res.body().data()),boost::asio::buffers_end(res.body().data()) };
+		result = body;
+
+        boost::system::error_code ec;
+        stream.shutdown(ec);
+		
+		// SSL Connections return stream_truncated when closed
+		// For that reason, we need to exclude this issue as an error.
+        if(ec == boost::asio::error::eof || boost::asio::ssl::error::stream_truncated)
+        {
+            ec.assign(0, ec.category());
+        }
+        if(ec) 
+            throw boost::system::system_error{ec};
     }
-
-    // Get a list of endpoints corresponding to the server name.
-    tcp::resolver resolver(io_service);
-    tcp::resolver::query query(Network::hostName, Network::hostPort);
-    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-
-    // Try each endpoint until we successfully establish a connection.
-    tcp::socket socket(io_service);
-    boost::asio::connect(socket, endpoint_iterator);
-
-    /**
-     * Form the request. We specify the "Connection: close" header so that the
-     * server will close the socket after transmitting the response.
-     * This allows to treat all data up until the EOF as the content.
-     */
-    boost::asio::streambuf request;
-    std::ostream request_stream(&request);
-    request_stream << "GET " << httpquery << " HTTP/1.1\r\n";
-    request_stream << "Host: " << hostAddress << "\r\n";
-    request_stream << "Accept: */*\r\n";
-    request_stream << "Connection: close\r\n\r\n";
-
-    // Send the request.
-    boost::asio::write(socket, request);
-
-    /**
-     * Read the response status line. The response streambuf will automatically
-     * grow to accommodate the entire line. The growth may be limited by passing
-     * a maximum size to the streambuf constructor.
-     */
-    boost::asio::streambuf response;
-    boost::asio::read_until(socket, response, "\r\n");
-
-    // Check that response is OK.
-    std::istream response_stream(&response);
-    std::string http_version;
-    response_stream >> http_version;
-    unsigned int status_code;
-    response_stream >> status_code;
-    std::string status_message;
-    std::getline(response_stream, status_message);
-    if (!response_stream || http_version.substr(0, 5) != "HTTP/") {
-      std::cout << "Invalid response\n";
-      return "";
+    catch(std::exception const& e)
+    {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return "";
     }
-    if (status_code != 200) {
-      std::cout << "Response returned with status code " << status_code << "\n";
-      return "";
-    }
-
-    // Read the response headers, which are terminated by a blank line.
-    boost::asio::read_until(socket, response, "\r\n\r\n");
-
-    // Process the response headers.
-    std::string header;
-    while (std::getline(response_stream, header) && header != "\r") {}
-
-    // Write whatever content we already have to output.
-    if (response.size() > 0) {
-      std::stringstream answer_buffer;
-      answer_buffer << &response;
-      server_answer = answer_buffer.str();
-    }
-
-    // Read until EOF, writing data to output as we go.
-    boost::system::error_code error;
-    while (boost::asio::read(socket, response,boost::asio::transfer_at_least(1), error)) {
-      std::cout << &response;
-    }
-    if (error != boost::asio::error::eof) {
-      throw boost::system::system_error(error);
-    }
-  } catch (std::exception& e) {
-    std::cout << "Exception: " << e.what() << "\n";
-    return "";
-  }
-
-  return server_answer;
+    return result;
 }
 
 std::string Network::getETHBalance(std::string address) {

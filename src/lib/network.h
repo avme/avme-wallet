@@ -4,9 +4,17 @@
 #include <iostream>
 #include <string>
 
+#include <boost/beast/core.hpp>
+#include <boost/beast/http.hpp>
+#include <boost/beast/version.hpp>
+#include <boost/asio/ssl.hpp>
 #include <boost/asio.hpp>
+#include <cstdlib>
+#include <iostream>
+#include <string>
 
 #include "json.h"
+#include "root_certificates.hpp"
 
 /**
  * Collection of network/API-related functions (e.g. requesting data from
