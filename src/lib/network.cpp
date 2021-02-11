@@ -1,11 +1,10 @@
 #include "network.h"
 
 // TODO: find a way to toggle between testnet and mainnet later
-std::string Network::hostName = "api-ropsten.etherscan.io";
+std::string Network::hostName = "api.avax-test.network";
 std::string Network::hostPort = "443";
-std::string Network::apiKey = "6342MIVP4CD1ZFDN3HEZZG4QB66NGFZ6RZ";
 
-std::string Network::httpGetRequest(std::string target)
+std::string Network::httpGetRequest(std::string reqBody)
 {
 	std::string result = "";
 	using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
@@ -15,6 +14,7 @@ std::string Network::httpGetRequest(std::string target)
     {
         std::string host = Network::hostName;
         std::string port = Network::hostPort;
+		std::string target = "/ext/bc/C/rpc"; // RPC Endpoint target
 
         boost::asio::io_context ioc;
 
@@ -41,9 +41,8 @@ std::string Network::httpGetRequest(std::string target)
         http::request<http::string_body> req{http::verb::post, target, 11};
         req.set(http::field::host, host);
         req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
-		/*
 		req.set(http::field::content_type, "application/json");
-		req.body() = "{\"jsonrpc\": \"2.0\",\"method\": \"eth_getBalance\",\"params\": [\"0x8cB085C40D8342A30F1005bC79D1C08D2D09a976\",\"latest\"],\"id\": 1}";*/
+		req.body() = reqBody;
 		req.prepare_payload();
 		
         // Send the HTTP request to the remote host
@@ -82,66 +81,37 @@ std::string Network::httpGetRequest(std::string target)
 
 std::string Network::getAVAXBalance(std::string address) {
   std::stringstream query;
-  query << "/api?module=account&action=balance"
-        << "&address=" << address
-        << "&tag=latest&apikey=" << apiKey;
+  query << "{\"jsonrpc\": \"2.0\",\"method\": \"eth_getBalance\",\"params\": [\""
+        << address
+        << "\",\"latest\"],\"id\": 1}";
   return httpGetRequest(query.str());
 }
 
-std::string Network::getAVAXBalances(std::vector<std::string> addresses) {
+std::string Network::getTAEXBalance(std::string address, std::string contractAddress) {
   std::stringstream query;
-  std::vector<std::string> ret;
-  int ct = 0;
-
-  for (std::string address : addresses) {
-    // Start a new query
-    if (ct == 0) {
-      query << "/api?module=account&action=balancemulti&address=";
-    }
-
-    // Add the address and count it towards the batch limit
-    query << address;
-    ct++;
-
-    // When we reach the batch limit, wrap it up and send the request
-    if (ct == 20 || address == addresses.back()) {
-      query << "&tag=latest&apikey=" << apiKey;
-    } else {
-      query << ","; // Separate addresses with a comma
-    }
-  }
-
-  return httpGetRequest(query.str());
-}
-
-std::string Network::getTAEXBalance(std::string address) {
-  std::stringstream query;
-  query << "/api?module=account&action=tokenbalance"
-        << "&contractaddress=0x9c19d746472978750778f334b262de532d9a85f9"
-        << "&address=" << address
-        << "&tag=latest&apikey=" << apiKey;
-  return httpGetRequest(query.str());
-}
-
-std::string Network::getTxFees() {
-  std::stringstream query;
-  query << "/api?module=gastracker&action=gasoracle&apikey=" << apiKey;
+  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\",\"params\": [{\"to\": \""
+        << contractAddress
+		<< "\",\"data\": \"0x70a08231000000000000000000000000"
+		<< address
+		<< "\"},\"latest\"]}";
   return httpGetRequest(query.str());
 }
 
 std::string Network::getTxNonce(std::string address) {
   std::stringstream query;
-  query << "/api?module=proxy&action=eth_getTransactionCount"
-        << "&address=" << address
-        << "&tag=latest&apikey=" << apiKey;
+  query << "{\"jsonrpc\": \"2.0\",\"method\": \"eth_getTransactionCount\",\"params\": [\""
+        << address
+        << "\",\"latest\"],\"id\": 1}";
   return httpGetRequest(query.str());
 }
 
 std::string Network::broadcastTransaction(std::string txidHex) {
   std::stringstream query;
-  query << "/api?module=proxy&action=eth_sendRawTransaction"
-        << "&hex=" << txidHex
-        << "&apikey=" << apiKey;
+  std::string ApitxidHex = "0x";
+  ApitxidHex += txidHex;
+  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_sendRawTransaction\",\"params\": [\""
+        << ApitxidHex
+        << "\"]}";
   return httpGetRequest(query.str());
 }
 

@@ -35,7 +35,7 @@ class Network {
      * Returns the requested pure JSON data, or an empty string at failure.
      * All other functions return whatever this one does.
      */
-    static std::string httpGetRequest(std::string httpquery);
+    static std::string httpGetRequest(std::string reqBody);
 
     /**
      * Get ETH/token balances from one or more addresses in the blockchain API.
@@ -47,11 +47,9 @@ class Network {
      *   can be requested.
      */
     static std::string getAVAXBalance(std::string address);
-    static std::string getAVAXBalances(std::vector<std::string> addresses);
-    static std::string getTAEXBalance(std::string address);
+    static std::string getTAEXBalance(std::string address, std::string contractAddress);
 
     // Get recommended fees at the moment from the blockchain API.
-    static std::string getTxFees();
 
     // Get the highest available nonce for an address from the blockchain API.
     static std::string getTxNonce(std::string address);

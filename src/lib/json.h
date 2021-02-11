@@ -6,6 +6,17 @@
 
 #include <json_spirit/JsonSpiritHeaders.h>
 
+// For usage with boost lexical cast
+template <typename ElemT>
+struct HexTo {
+    ElemT value;
+    operator ElemT() const {return value;}
+    friend std::istream& operator>>(std::istream& in, HexTo& out) {
+        in >> std::hex >> out.value;
+        return in;
+    }
+};
+
 // Collection of JSON-related functions (e.g. parsing, handling, etc.).
 
 class JSON {

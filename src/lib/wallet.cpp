@@ -85,10 +85,14 @@ bool WalletManager::accountIsEmpty(std::string account) {
   if (account.find("0x") == std::string::npos) {
     account = "0x" + boost::lexical_cast<std::string>(userToAddress(account));
   }
-  std::string requestAVAX = Network::getAVAXBalance(account);
-  std::string requestTAEX = Network::getTAEXBalance(account);
-  std::string amountAVAX = JSON::getValue(requestAVAX, "result").get_str();
-  std::string amountTAEX = JSON::getValue(requestTAEX, "result").get_str();
+  
+  // For being able to convert to an integer value from an hex string, it is needed to pass through an integer variable
+  // The following example converts hex strings into u256 and then back to an integer string
+  u256 requestAVAX = boost::lexical_cast<u256>(JSON::getValue(Network::getAVAXBalance(account), "result").get_str());
+  u256 requestTAEX = boost::lexical_cast<u256>(JSON::getValue(Network::getTAEXBalance(account, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"), "result").get_str());
+  
+  std::string amountAVAX = boost::lexical_cast<std::string>(requestAVAX);
+  std::string amountTAEX = boost::lexical_cast<std::string>(requestTAEX);
   return (amountAVAX == "0" && amountTAEX == "0");
 }
 
@@ -191,10 +195,7 @@ std::string WalletManager::convertFixedPointToWei(std::string amount, int decima
 std::vector<WalletAccount> WalletManager::listAVAXAccounts() {
   if (this->wallet.store().keys().empty()) { return {}; }
   std::vector<WalletAccount> ret;
-  std::vector<std::string> waList;
-  std::vector<std::string> accList;
-  std::vector<std::string> balList;
-  json_spirit::mValue jsonList;
+  json_spirit::mValue jsonBal;
   AddressHash got;
   int ct = 0;
 
@@ -208,46 +209,27 @@ std::vector<WalletAccount> WalletManager::listAVAXAccounts() {
       wa.privKey = a.abridged();
       wa.name = this->wallet.accountName(a);
       wa.address = "0x" + boost::lexical_cast<std::string>(a);
-      waList.push_back(wa.address);
-      ret.push_back(wa);
-      ct++;
-
-      // When we reach the batch quota, get the balances so far
-      if (ct == 20 || u == keys.back()) {
-        jsonList = JSON::getValue(Network::getAVAXBalances(waList), "result");
-        for (size_t i = 0; i < jsonList.get_array().size(); i++) {
-          std::string acc = JSON::objectItem(JSON::arrayItem(jsonList, i), "account").get_str();
-          std::string bal = JSON::objectItem(JSON::arrayItem(jsonList, i), "balance").get_str();
-          if (bal == "" || bal.find_first_not_of("0123456789.") != std::string::npos) {
-            return {};
-          }
-          accList.push_back(acc);
-          balList.push_back(bal);
-        }
-        waList.clear();
-        ct = 0;
+      jsonBal = JSON::getValue(Network::getAVAXBalance(wa.address), "result");
+      u256 balance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
+	  std::string balanceStr = boost::lexical_cast<std::string>(balance);
+      if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
+        return {};
       }
+	  wa.balanceAVAX = convertWeiToFixedPoint(balanceStr, 18);
+	  ret.push_back(wa);
     } else {  // Bare accounts
       WalletAccount wa;
       wa.address = "0x" + boost::lexical_cast<std::string>(a) + " (Bare)";
       ret.push_back(wa);
     }
   }
-
-  // Add the balances to the accounts
-  for (int i = 0; i < ret.size(); i++) {
-    auto it = std::find(accList.begin(), accList.end(), ret[i].address);
-    if (it != accList.end()) {
-      ret[i].balanceAVAX = convertWeiToFixedPoint(balList.at(it - accList.begin()), 18);
-    }
-  }
-
   return ret;
 }
 
 std::vector<WalletAccount> WalletManager::listTAEXAccounts() {
   if (this->wallet.store().keys().empty()) { return {}; }
   std::vector<WalletAccount> ret;
+  json_spirit::mValue jsonBal;
   AddressHash got;
 
   std::vector<h128> keys = this->wallet.store().keys();
@@ -259,11 +241,13 @@ std::vector<WalletAccount> WalletManager::listTAEXAccounts() {
       wa.privKey = a.abridged();
       wa.name = this->wallet.accountName(a);
       wa.address = "0x" + boost::lexical_cast<std::string>(a);
-      std::string balance = JSON::getValue(Network::getTAEXBalance(wa.address), "result").get_str();
-      if (balance == "" || balance.find_first_not_of("0123456789.") != std::string::npos) {
+	  jsonBal = JSON::getValue(Network::getTAEXBalance(wa.address, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"), "result");
+      u256 balance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
+	  std::string balanceStr = boost::lexical_cast<std::string>(balance);
+      if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
         return {};
       }
-      wa.balanceTAEX = convertWeiToFixedPoint(balance, 4);
+      wa.balanceTAEX = convertWeiToFixedPoint(balanceStr, 18);
       ret.push_back(wa);
     } else {  // Bare accounts
       WalletAccount wa;
@@ -275,12 +259,9 @@ std::vector<WalletAccount> WalletManager::listTAEXAccounts() {
   return ret;
 }
 
-// TODO: make the user choose between slower or faster fees from the data at:
-// https://ropsten.etherscan.io/api?module=gastracker&action=gasoracle&apikey=
 std::string WalletManager::getAutomaticFee() {
-  std::string gasRequest = Network::getTxFees();
-  std::string gasPrice = JSON::getValue(gasRequest, "result/SafeGasPrice", "/").get_str();
-  return (!gasPrice.empty()) ? gasPrice : "50"; // 50 is the default value in case the query fails
+	// Avax Fees are fixed
+	return "470";
 }
 
 std::string WalletManager::buildTxData(std::string txValue, std::string destWallet) {
@@ -297,7 +278,7 @@ std::string WalletManager::buildTxData(std::string txValue, std::string destWall
   txdata += destWallet;
 
   // Convert to HEX
-  u256 intValue = boost::lexical_cast<u256>(intValue);
+  u256 intValue = boost::lexical_cast<u256>(txValue);
   std::stringstream ss;
   ss << std::hex << intValue;
   std::string amountStrHex = ss.str();
@@ -353,7 +334,7 @@ TransactionSkeleton WalletManager::buildTAEXTransaction(
 ) {
   TransactionSkeleton txSkel;
   int txNonce;
-  std::string contractWallet = "9c19d746472978750778f334b262de532d9a85f9";
+  std::string contractWallet = "A687A9cff994973314c6e2cb313F82D6d78Cd232";
 
   std::string nonceApiRequest = Network::getTxNonce(srcAddress);
   std::string txNonceStr = JSON::getValue(nonceApiRequest, "result").get_str();
@@ -400,7 +381,7 @@ std::string WalletManager::signTransaction(
 std::string WalletManager::sendTransaction(std::string txidHex) {
   std::string txidApiRequest = Network::broadcastTransaction(txidHex);
   std::string txid = JSON::getValue(txidApiRequest, "result").get_str();
-  std::string txLink = "https://ropsten.etherscan.io/tx/" + txid;
+  std::string txLink = "https://cchain.explorer.avax-test.network/tx/" + txid;
   return txLink;
 }
 
