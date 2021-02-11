@@ -157,7 +157,7 @@ class WalletManager {
      * Returns a list of accounts and their AVAX/token amounts, respectively.
      */
     std::vector<WalletAccount> listAVAXAccounts();
-    std::vector<WalletAccount> listAVAXAccounts();
+    std::vector<WalletAccount> listTAEXAccounts();
 
     /**
      * Get the recommended gas price for a transaction.
