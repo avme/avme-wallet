@@ -143,18 +143,22 @@ Item {
           }
         }
         AVMEButton {
-          id: btnExportKeys
+          id: btnViewKey
           width: parent.width
-          text: "Export Private Keys (WIP)"
+          text: "View Private Key"
           onClicked: {
-
+            viewKeyPopup.account = accountRow.walletList.currentItem.itemAccount
+            viewKeyPopup.open()
           }
         }
         AVMEButton {
           id: btnEraseAccount
           width: parent.width
-          text: "Erase Account"
-          onClicked: erasePopup.open()
+          text: "Erase this Account"
+          onClicked: {
+            erasePopup.account = accountRow.walletList.currentItem.itemAccount
+            erasePopup.open()
+          }
         }
       }
     }
@@ -208,11 +212,11 @@ Item {
     modal: true
     focus: true
     padding: 0  // Remove white borders
-    closePolicy: Popup.CloseOnPressOutside
+    closePolicy: Popup.NoAutoClose
     background: Rectangle { anchors.fill: parent; color: "#9A4FAD" }
 
     Column {
-      id: items
+      id: newAccountCol
       anchors.fill: parent
       spacing: 30
       topPadding: 20
@@ -227,7 +231,7 @@ Item {
       AVMEInput {
         id: nameInput
         anchors.horizontalCenter: parent.horizontalCenter
-        width: items.width / 1.5
+        width: parent.width / 1.5
         label: "Name (optional)"
         placeholder: "Label for your Account"
       }
@@ -236,7 +240,7 @@ Item {
       AVMEInput {
         id: passInput
         anchors.horizontalCenter: parent.horizontalCenter
-        width: items.width / 1.5
+        width: parent.width / 1.5
         echoMode: TextInput.Password
         passwordCharacter: "*"
         label: "Passphrase"
@@ -248,7 +252,7 @@ Item {
       AVMEInput {
         id: hintInput
         anchors.horizontalCenter: parent.horizontalCenter
-        width: items.width / 1.5
+        width: parent.width / 1.5
         label: "Hint (optional)"
         placeholder: "Hint to help you remember the passphrase"
         enabled: !passCheck.checked
@@ -276,14 +280,14 @@ Item {
 
         AVMEButton {
           id: btnBack
-          width: items.width / 4
+          width: newAccountCol.width / 4
           text: "Back"
           onClicked: newAccountPopup.close()
         }
 
         AVMEButton {
           id: btnDone
-          width: items.width / 4
+          width: newAccountCol.width / 4
           text: "Done"
           enabled: (passInput.text !== "" || passCheck.checked)
           onClicked: {
@@ -305,6 +309,99 @@ Item {
             } catch (error) {
               accountFailPopup.open()
               newAccountPopup.close()
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Popup for viewing the Account's private key
+  Popup {
+    id: viewKeyPopup
+    property string account
+    width: (window.width / 2) + 200
+    height: (window.height / 2) + 50
+    x: (width / 2) - 200
+    y: (height / 2) - 50
+    modal: true
+    focus: true
+    padding: 0  // Remove white borders
+    closePolicy: Popup.NoAutoClose
+    background: Rectangle { anchors.fill: parent; color: "#9A4FAD" }
+
+    Column {
+      id: viewKeyCol
+      anchors.fill: parent
+      spacing: 30
+      topPadding: 40
+
+      Text {
+        id: warningText
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        text: "Please authenticate with your Wallet's passphrase to view the key for the Account:<br>"
+        + "<b>" + viewKeyPopup.account + "</b>"
+        + "<br><br><b>YOU ARE FULLY RESPONSIBLE FOR GUARDING YOUR PRIVATE KEYS."
+        + "<br>KEEP THEM AWAY FROM PRYING EYES AND DO NOT SHARE THEM WITH ANYONE."
+        + "<br>WE ARE NOT HELD LIABLE FOR ANY FUND LOSSES IF YOU DECIDE TO PROCEED.</b>"
+      }
+
+      AVMEInput {
+        id: keyPassInput
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: parent.width / 3
+        echoMode: TextInput.Password
+        passwordCharacter: "*"
+      }
+
+      TextArea {
+        id: keyArea
+        property alias timer: keyTextTimer
+        width: parent.width - 100
+        height: 50
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        readOnly: true
+        selectByMouse: true
+        selectionColor: "#9CE3FD"
+        color: "black"
+        background: Rectangle {
+          width: parent.width
+          height: parent.height
+          color: "#782D8B"
+        }
+        Timer { id: keyTextTimer; interval: 2000; onTriggered: keyArea.text = "" }
+      }
+
+      Row {
+        id: keyBtnRow
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: 10
+
+        AVMEButton {
+          id: keyBtnClose
+          text: "Close"
+          onClicked: {
+            viewKeyPopup.account = ""
+            keyPassInput.text = ""
+            keyArea.text = ""
+            viewKeyPopup.close()
+          }
+        }
+        AVMEButton {
+          id: keyBtnShow
+          text: "Show"
+          onClicked: {
+            var acc = viewKeyPopup.account
+            var pass = keyPassInput.text
+            if (System.checkWalletPass(keyPassInput.text)) {
+              if (keyArea.timer.running) { keyArea.timer.stop() }
+              keyArea.text = System.getPrivateKeys(acc, pass)
+            } else {
+              keyArea.text = "Wrong password, please try again"
+              keyArea.timer.start()
             }
           }
         }
@@ -348,21 +445,28 @@ Item {
   // Yes/No popup for confirming Account erasure
   AVMEPopupYesNo {
     id: erasePopup
+    property string account
     icon: "qrc:/img/warn.png"
     info: "Are you sure you want to erase this Account?<br>"
-    + "All funds on it will be <b>permanently lost</b>."
+    + "<b>" + account + "</b>"
+    + "<br>All funds on it will be <b>permanently lost</b>."
     yesBtn.onClicked: {
       var acc = accountRow.walletList.currentItem.itemAccount
       if (System.eraseAccount(acc)) {
         console.log("Account erased successfully")
         accountsList.clear()
         erasePopup.close()
+        erasePopup.account = ""
         fetchAccounts()
       } else {
         erasePopup.close()
+        erasePopup.account = ""
         eraseFailPopup.open()
       }
     }
-    noBtn.onClicked: erasePopup.close()
+    noBtn.onClicked: {
+      erasePopup.account = ""
+      erasePopup.close()
+    }
   }
 }

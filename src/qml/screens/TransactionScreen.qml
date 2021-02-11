@@ -229,7 +229,7 @@ Item {
     modal: true
     focus: true
     padding: 0  // Remove white borders
-    closePolicy: Popup.CloseOnPressOutside
+    closePolicy: Popup.NoAutoClose
 
     Rectangle {
       id: popupBg
