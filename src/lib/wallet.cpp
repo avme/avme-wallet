@@ -198,74 +198,6 @@ std::string WalletManager::convertFixedPointToWei(std::string amount, int decima
   return valuestr;
 }
 
-std::vector<WalletAccount> WalletManager::listAVAXAccounts() {
-  if (this->wallet.store().keys().empty()) { return {}; }
-  std::vector<WalletAccount> ret;
-  json_spirit::mValue jsonBal;
-  AddressHash got;
-  int ct = 0;
-
-  std::vector<h128> keys = this->wallet.store().keys();
-  for (auto const& u : keys) {
-    if (Address a = this->wallet.address(u)) {  // Normal accounts
-      WalletAccount wa;
-      got.insert(a);
-      wa.id = toUUID(u);
-      wa.privKey = a.abridged();
-      wa.name = this->wallet.accountName(a);
-      wa.address = "0x" + boost::lexical_cast<std::string>(a);
-      jsonBal = JSON::getValue(Network::getAVAXBalance(wa.address), "result");
-      u256 balance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
-      std::string balanceStr = boost::lexical_cast<std::string>(balance);
-      if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
-        return {};
-      }
-      wa.balanceAVAX = convertWeiToFixedPoint(balanceStr, 18);
-      ret.push_back(wa);
-    } else {  // Bare accounts
-      WalletAccount wa;
-      wa.address = "0x" + boost::lexical_cast<std::string>(a) + " (Bare)";
-      ret.push_back(wa);
-    }
-  }
-  return ret;
-}
-
-std::vector<WalletAccount> WalletManager::listTAEXAccounts() {
-  if (this->wallet.store().keys().empty()) { return {}; }
-  std::vector<WalletAccount> ret;
-  json_spirit::mValue jsonBal;
-  AddressHash got;
-
-  std::vector<h128> keys = this->wallet.store().keys();
-  for (auto const& u: keys) {
-    if (Address a = this->wallet.address(u)) {  // Normal accounts
-      WalletAccount wa;
-      got.insert(a);
-      wa.id = toUUID(u);
-      wa.privKey = a.abridged();
-      wa.name = this->wallet.accountName(a);
-      wa.address = "0x" + boost::lexical_cast<std::string>(a);
-      jsonBal = JSON::getValue(Network::getTAEXBalance(
-        boost::lexical_cast<std::string>(a), "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"), "result"
-      );
-      u256 balance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
-      std::string balanceStr = boost::lexical_cast<std::string>(balance);
-      if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
-        return {};
-      }
-      wa.balanceTAEX = convertWeiToFixedPoint(balanceStr, 18);
-      ret.push_back(wa);
-    } else {  // Bare accounts
-      WalletAccount wa;
-      wa.address = "0x" + boost::lexical_cast<std::string>(a) + " (Bare)";
-      ret.push_back(wa);
-    }
-  }
-
-  return ret;
-}
-
 std::string WalletManager::getAutomaticFee() {
   return "470"; // AVAX fees are fixed
 }
@@ -429,30 +361,23 @@ WalletTxData WalletManager::decodeRawTransaction(std::string rawTxHex) {
   return ret;
 }
 
-std::vector<WalletAccount> WalletManager::ReadWriteWalletVector(bool write, bool add, bool remove, std::vector<WalletAccount> accountToWrite) {
+std::vector<WalletAccount> WalletManager::ReadWriteWalletVector(bool write, bool changeVector, std::vector<WalletAccount> accountToWrite) {
 	std::mutex m;
 	m.lock();
 	static std::vector<WalletAccount> WalletAccounts;
 	if (write) {
 		json_spirit::mValue jsonBal;
-		if(add) {
+		if(changeVector) {
+			WalletAccounts = {};
 			for (auto &accountToRead : accountToWrite)
 				WalletAccounts.push_back(accountToRead);
 		}
 		
-		if(remove) {	
-			for (int i = 0; i < WalletAccounts.size(); ++i) {					
-				if(WalletAccounts[i].address == accountToWrite[0].address)
-					WalletAccounts.erase(i+WalletAccounts.begin());
-			}
-		}
-		
 		std::string balanceStr;
-		u256 balance = 0;
 		for(auto &accountToRead : WalletAccounts) {
 			jsonBal = JSON::getValue(Network::getAVAXBalance(accountToRead.address), "result");
-			balance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
-			balanceStr = boost::lexical_cast<std::string>(balance);
+			u256 AVAXbalance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
+			balanceStr = boost::lexical_cast<std::string>(AVAXbalance);
 			// Don't write to vector if an error occurs while reading the JSON
 			if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
 				m.unlock();
@@ -462,8 +387,8 @@ std::vector<WalletAccount> WalletManager::ReadWriteWalletVector(bool write, bool
 			
 			std::string TAEXAddress = accountToRead.address.substr(0, 2) == "0x" ? accountToRead.address.substr(2) : accountToRead.address;
 		    jsonBal = JSON::getValue(Network::getTAEXBalance(TAEXAddress, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"), "result");
-            balance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
-			balanceStr = boost::lexical_cast<std::string>(balance);
+            u256 TAEXbalance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
+			balanceStr = boost::lexical_cast<std::string>(TAEXbalance);
 			if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
 				m.unlock();
 				return {};
@@ -477,5 +402,47 @@ std::vector<WalletAccount> WalletManager::ReadWriteWalletVector(bool write, bool
 	std::vector<WalletAccount> safeWalletAcccounts = WalletAccounts;
 	m.unlock();
 	return safeWalletAcccounts;
+}
+void WalletManager::reloadAccountsBalancesThread() {
+	while(true) {
+		boost::this_thread::sleep_for(boost::chrono::seconds(10));
+		ReadWriteWalletVector(true, false, {});
+	}
+	return;
+}
+
+void WalletManager::reloadAccountsBalances() {
+	ReadWriteWalletVector(true, false, {});
+	return;
+}
+
+void WalletManager::loadWalletAccounts(bool start) {
+	if (this->wallet.store().keys().empty()) { return; }
+	std::vector<WalletAccount> AccountsToLoad;
+	AddressHash got;
+	
+	std::vector<h128> keys = this->wallet.store().keys();
+	for (auto const& u : keys) {
+    if (Address a = this->wallet.address(u)) {  // Normal accounts
+      WalletAccount wa;
+      got.insert(a);
+      wa.id = toUUID(u);
+      wa.privKey = a.abridged();
+      wa.name = this->wallet.accountName(a);
+      wa.address = "0x" + boost::lexical_cast<std::string>(a);
+	  AccountsToLoad.push_back(wa);
+    } else {  // Bare accounts
+      WalletAccount wa;
+      wa.address = "0x" + boost::lexical_cast<std::string>(a) + " (Bare)";
+      AccountsToLoad.push_back(wa);
+    }
+  }
+  if (start) {
+	boost::thread t(&WalletManager::reloadAccountsBalancesThread, this);
+	t.detach();
+  }
+  
+  ReadWriteWalletVector(true, true, AccountsToLoad);
+  return;
 }
 

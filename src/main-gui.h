@@ -157,7 +157,7 @@ class System : public QObject {
       std::vector<WalletAccount> walist;
 
       if (type == "eth") {
-        walist = this->wm.listAVAXAccounts();
+        walist = this->wm.ReadWriteWalletVector(false, false, {});
         for (WalletAccount wa : walist) {
           std::string obj;
           obj += "{\"name\": \"" + wa.name;
@@ -166,7 +166,7 @@ class System : public QObject {
           ret << QString::fromStdString(obj);
         }
       } else if (type == "taex") {
-        walist = this->wm.listTAEXAccounts();
+        walist = this->wm.ReadWriteWalletVector(false, false, {});
         for (WalletAccount wa : walist) {
           std::string obj;
           obj += "{\"account\": \"" + wa.address;
@@ -290,6 +290,7 @@ class System : public QObject {
         txLink = wm.sendTransaction(signedTx);
       }
       emit txSent(true);
+	  wm.reloadAccountsBalances();
       return QString::fromStdString(txLink);
     }
 };
