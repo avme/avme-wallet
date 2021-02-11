@@ -159,7 +159,7 @@ class WalletManager {
      */
     std::vector<WalletAccount> listAVAXAccounts();
     std::vector<WalletAccount> listTAEXAccounts();
-	std::vector<WalletAccount> ReadWriteWalletVector(bool write, bool add, bool remove, WalletAccount accountToWrite);
+	std::vector<WalletAccount> ReadWriteWalletVector(bool write, bool add, bool remove, std::vector<WalletAccount> accountToWrite);
 	
     /**
      * Get the recommended gas price for a transaction.
