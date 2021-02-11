@@ -166,17 +166,17 @@ std::string menuChooseReceiverAddress() {
   return ret;
 }
 
-// Choose an ETH/TAEX amount, respectively, to send from a given address
-std::string menuChooseETHAmount(std::string address, WalletManager wm) {
+// Choose an AVAX/TAEX amount, respectively, to send from a given address
+std::string menuChooseAVAXAmount(std::string address, WalletManager wm) {
   std::string ret;
 
   while (true) {
-    std::cout << "How much ETH do you want to send? (amount in fixed point, e.g. 0.5)" << std::endl;
+    std::cout << "How much AVAX do you want to send? (amount in fixed point, e.g. 0.5)" << std::endl;
     std::getline(std::cin, ret);
     ret = wm.convertFixedPointToWei(ret, 18);
     if (ret == "") {
       std::cout << "Invalid amount, please check if your input is correct." << std::endl;
-    } else if (ret > Network::getETHBalance(address)) {
+    } else if (ret > Network::getAVAXBalance(address)) {
       std::cout << "Insufficient funds, please try again." << std::endl;
     } else {
       break;
@@ -190,12 +190,12 @@ std::string menuChooseTAEXAmount(std::string address, WalletManager wm) {
   std::string ret;
 
   while (true) {
-    std::cout << "How much TAEX do you want to send? (amount in fixed point, e.g. 0.5 - MAXIMUM 4 DECIMALS!)" << std::endl;
+    std::cout << "How much TAEX do you want to send? (amount in fixed point, e.g. 0.5 - MAXIMUM 18 DECIMALS!)" << std::endl;
     std::getline(std::cin, ret);
-    ret = wm.convertFixedPointToWei(ret, 4);
+    ret = wm.convertFixedPointToWei(ret, 18);
     if (ret == "") {
       std::cout << "Invalid amount, please check if your input is correct." << std::endl;
-    } else if (ret > Network::getTAEXBalance(address)) {
+    } else if (ret > Network::getTAEXBalance(address, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232")) {
       std::cout << "Insufficient funds, please try again." << std::endl;
     } else {
       break;

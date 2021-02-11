@@ -192,11 +192,15 @@ Item {
       onClicked: newAccountPopup.open()
     }
     AVMEButton {
-      id: btnChangeToken
+      id: btnSendAVAX
       width: (parent.width / 3) - parent.spacing
       anchors.verticalCenter: parent.verticalCenter
       text: "Change Current Token (WIP)"
       onClicked: {
+        System.setTxSenderAccount(walletList.currentItem.listItemAccount)
+        System.setTxSenderAmount(walletList.currentItem.listItemAmount)
+        System.setTxLabel("AVAX")  // TODO: change according to token
+        System.setScreen(content, "qml/screens/TransactionScreen.qml")
 
       }
     }

@@ -4,9 +4,17 @@
 #include <iostream>
 #include <string>
 
+#include <boost/beast/core.hpp>
+#include <boost/beast/http.hpp>
+#include <boost/beast/version.hpp>
+#include <boost/asio/ssl.hpp>
 #include <boost/asio.hpp>
+#include <cstdlib>
+#include <iostream>
+#include <string>
 
 #include "json.h"
+#include "root_certificates.hpp"
 
 /**
  * Collection of network/API-related functions (e.g. requesting data from
@@ -27,7 +35,7 @@ class Network {
      * Returns the requested pure JSON data, or an empty string at failure.
      * All other functions return whatever this one does.
      */
-    static std::string httpGetRequest(std::string httpquery);
+    static std::string httpGetRequest(std::string reqBody);
 
     /**
      * Get ETH/token balances from one or more addresses in the blockchain API.
@@ -38,12 +46,10 @@ class Network {
      * - Tokens unfortunately can't be batched, so only one address at a time
      *   can be requested.
      */
-    static std::string getETHBalance(std::string address);
-    static std::string getETHBalances(std::vector<std::string> addresses);
-    static std::string getTAEXBalance(std::string address);
+    static std::string getAVAXBalance(std::string address);
+    static std::string getTAEXBalance(std::string address, std::string contractAddress);
 
     // Get recommended fees at the moment from the blockchain API.
-    static std::string getTxFees();
 
     // Get the highest available nonce for an address from the blockchain API.
     static std::string getTxNonce(std::string address);

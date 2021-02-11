@@ -47,7 +47,7 @@ typedef struct WalletAccount {
   std::string name;
   std::string address;
   std::string hint;
-  std::string balanceETH;
+  std::string balanceAVAX;
   std::string balanceTAEX;
 } WalletAccount;
 
@@ -93,7 +93,7 @@ class WalletManager {
 
     /**
      * Create a new Account in the given wallet and encrypt it.
-     * An Account contains an ETH address and other stuff.
+     * An Account contains an AVAX address and other stuff.
      * See https://ethereum.org/en/developers/docs/accounts/ for more info.
      * Returns a struct with the account's data.
      */
@@ -115,7 +115,7 @@ class WalletManager {
     bool eraseAccount(std::string account);
 
     /**
-     * Check if an Account is completely empty (no ETH and no token amounts).
+     * Check if an Account is completely empty (no AVAX and no token amounts).
      * Returns true on success, false on failure.
      */
     bool accountIsEmpty(std::string account);
@@ -135,28 +135,28 @@ class WalletManager {
     Secret getSecret(std::string const& address, std::string pass);
 
     /**
-     * Convert a full Wei amount to a fixed point ETH amount and vice-versa.
+     * Convert a full Wei amount to a fixed point AVAX amount and vice-versa.
      * BTC has 8 decimals but is considered a full integer in code, so 1.0 BTC
      * actually means 100000000 satoshis.
-     * Likewise with ETH, which has 18 digits, so 1.0 ETH actually means
+     * Likewise with AVAX, which has 18 digits, so 1.0 AVAX actually means
      * 1000000000000000000 Wei.
      * Operations are actually done with the full amounts in Wei, but to make
      * those operations more human-friendly, we show to/collect from the user
      * fixed point values, and convert those to Wei and back as required.
-     * Returns the fixed point and full amounts of ETH/Wei, respectively.
+     * Returns the fixed point and full amounts of AVAX/Wei, respectively.
      */
     std::string convertWeiToFixedPoint(std::string amount, size_t digits);
     std::string convertFixedPointToWei(std::string amount, int decimals);
 
     /**
-     * List the wallet's Accounts and their ETH and token balances.
-     * ETH balances are checked in batches of up to 20.
+     * List the wallet's Accounts and their AVAX and token balances.
+     * AVAX balances are checked in batches of up to 20.
      * ERC-20 tokens need to be loaded in a different way, from their proper
      * contract address, beside their respective wallet address. Plus, due
      * to API limitations, only one can be checked at a time.
-     * Returns a list of accounts and their ETH/token amounts, respectively.
+     * Returns a list of accounts and their AVAX/token amounts, respectively.
      */
-    std::vector<WalletAccount> listETHAccounts();
+    std::vector<WalletAccount> listAVAXAccounts();
     std::vector<WalletAccount> listTAEXAccounts();
 
     /**
@@ -173,11 +173,11 @@ class WalletManager {
     std::string buildTxData(std::string txValue, std::string destWallet);
 
     /**
-     * Build an ETH or token transaction from user data.
-     * Returns a skeleton filled with data for an ETH/token transaction,
+     * Build an AVAX or token transaction from user data.
+     * Returns a skeleton filled with data for an AVAX/token transaction,
      * respectively, which has to be signed.
      */
-    TransactionSkeleton buildETHTransaction(
+    TransactionSkeleton buildAVAXTransaction(
       std::string srcAddress, std::string destAddress,
       std::string txValue, std::string txGas, std::string txGasPrice
     );
