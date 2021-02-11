@@ -77,7 +77,7 @@ int main() {
                     << accountData.address << " "
                     << accountData.balanceAVAX << std::endl;
         }
-      } else {AVAX
+      } else {
         std::cout << "No accounts found." << std::endl;
       }
 
