@@ -72,10 +72,16 @@ typedef struct WalletTxData {
   std::string s;
 } WalletTxData;
 
+// Mutex for account refresh thread
+static std::mutex balancesThreadLock;
+
 class WalletManager {
   private:
     // The proper wallet
     KeyManager wallet;
+
+    // Called by loadWalletAccounts()
+    void reloadAccountsBalancesThread();
 
   public:
     // Set MAX_U256_VALUE for error handling.
@@ -151,19 +157,24 @@ class WalletManager {
     std::string convertFixedPointToWei(std::string amount, int decimals);
 
     /**
-     * List the wallet's Accounts and their AVAX and token balances.
-     * AVAX balances are checked in batches of up to 20.
-     * ERC-20 tokens need to be loaded in a different way, from their proper
+     * List the wallet's Accounts and their coin and token balances.
+     * Coin balances are checked in batches of up to 20.
+     * Tokens need to be loaded in a different way, from their proper
      * contract address, beside their respective wallet address. Plus, due
      * to API limitations, only one can be checked at a time.
-     * Returns a list of accounts and their AVAX/token amounts, respectively.
+     * Returns a list of accounts and their coin/token amounts, respectively.
      */
-	 
-	void reloadAccountsBalances();
-	void loadWalletAccounts(bool start);
-	void reloadAccountsBalancesThread();
-	std::vector<WalletAccount> ReadWriteWalletVector(bool write, bool changeVector, std::vector<WalletAccount> accountToWrite);
-	
+    // TODO: expand docs:
+    // reloadAccountsBalances = forced Account balances refresh
+    // bool in loadWalletAccounts:
+    // - true = only use once right after loading the Wallet, creates a thread for auto-refreshing
+    // - false = create a fresh new vector after an add/remove Account operation
+    void reloadAccountsBalances();
+    void loadWalletAccounts(bool start);
+    std::vector<WalletAccount> ReadWriteWalletVector(
+      bool write, bool changeVector, std::vector<WalletAccount> accountToWrite
+    );
+
     /**
      * Get the recommended gas price for a transaction.
      * Returns the gas price in Gwei, which has to be converted to Wei
@@ -213,4 +224,3 @@ class WalletManager {
 };
 
 #endif // WALLET_H
-

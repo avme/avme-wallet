@@ -22,6 +22,7 @@ Item {
     }
     linkText.visible = true
     btn.visible = true
+    System.updateScreen()
   }
 
   // Signal connections
@@ -39,6 +40,7 @@ Item {
         buildText.text = "Error on building transaction."
         buildPng.source = "qrc:/img/no.png"
       }
+      System.updateScreen()
     }
     onTxSigned: {
       if (b) {
@@ -52,6 +54,7 @@ Item {
         signText.text = "Error on signing transaction."
         signPng.source = "qrc:/img/no.png"
       }
+      System.updateScreen()
     }
     onTxSent: {
       if (b) {
@@ -63,6 +66,7 @@ Item {
         sendText.text = "Error on sending transaction."
         sendPng.source = "qrc:/img/no.png"
       }
+      System.updateScreen()
     }
   }
 
@@ -88,8 +92,17 @@ Item {
       font.pointSize: 18.0
       color: "black"
       horizontalAlignment: Text.AlignHCenter
-      text: "Sending <b>" + System.getTxAmount() + " " + System.getTxLabel()
-      + "</b> to address<br><b>" + System.getTxReceiverAccount() + "</b>..."
+      text: {
+        if (System.getTxTokenFlag()) {
+          text = "Sending <b>"
+          + System.getTxReceiverTokenAmount() + " " + System.getCurrentToken()
+          + "</b> to address<br><b>" + System.getTxReceiverAccount() + "</b>..."
+        } else {
+          text = "Sending <b>"
+          + System.getTxReceiverCoinAmount() + " " + System.getCurrentCoin()
+          + "</b> to address<br><b>" + System.getTxReceiverAccount() + "</b>..."
+        }
+      }
     }
 
     // Progress texts

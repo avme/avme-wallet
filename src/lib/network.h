@@ -36,9 +36,9 @@ class Network {
     static std::string httpGetRequest(std::string reqBody);
 
     /**
-     * Get ETH/token balances from one or more addresses in the blockchain API.
+     * Get coin/token balances from one or more addresses in the blockchain API.
      * Due to API lmitations, the following restraints apply:
-     * - Only up to 20 ETH accounts can be batch requested at once.
+     * - Only up to 20 accounts can be batch requested at once.
      *   If a list has more than that, it's suggested to split it in smaller
      *   batches of 20 and make multiple requests.
      * - Tokens unfortunately can't be batched, so only one address at a time

@@ -7,12 +7,12 @@ import "qrc:/qml/components"
 // Screen for making a transaction with the selected Account
 
 Item {
-  id: transactionScreen
+  id: coinTransactionScreen
 
   function updateTxCost() {
     txCost.text = "Transaction Cost: "
     + System.calculateTransactionCost(amountInput.text, gasLimitInput.text, gasPriceInput.text)
-    + " " + System.getTxLabel()
+    + " " + System.getCurrentCoin()
   }
 
   Component.onCompleted: {
@@ -59,7 +59,8 @@ Item {
     Text {
       id: senderAmount
       anchors.horizontalCenter: parent.horizontalCenter
-      text: "Sender Total: " + System.getTxSenderAmount() + " " + System.getTxLabel()
+      text: "Sender Total: "
+      + System.getTxSenderCoinAmount() + " " + System.getCurrentCoin()
     }
 
     // Receiver Account
@@ -86,15 +87,15 @@ Item {
       AVMEInput {
         id: amountInput
         width: items.width / 2
-        validator: RegExpValidator { regExp: /[0-9]{1,}\.[0-9]{1,18}/ }
-        label: "Amount"
+        validator: RegExpValidator { regExp: System.createCoinRegExp() }
+        label: "Amount (w/ decimals)"
         placeholder: "Fixed point amount (e.g. 0.5)"
         Text {
           id: amountLabel
           anchors.left: parent.right
           anchors.leftMargin: 10
           anchors.verticalCenter: parent.verticalCenter
-          text: System.getTxLabel()
+          text: System.getCurrentCoin()
         }
         onTextEdited: updateTxCost()
       }
@@ -111,7 +112,6 @@ Item {
         width: items.width / 4
         label: "Gas Limit (Wei)"
         validator: RegExpValidator { regExp: /[0-9]+/ }
-        placeholder: "Recommended: 21000"
         text: "21000"
         enabled: !autoFeesCheck.checked
         onTextEdited: updateTxCost()
@@ -121,7 +121,6 @@ Item {
         width: items.width / 4
         label: "Gas Price (Gwei)"
         validator: RegExpValidator { regExp: /[0-9]+/ }
-        placeholder: "Recommended: 50"
         enabled: !autoFeesCheck.checked
         onTextEdited: updateTxCost()
       }
@@ -193,10 +192,11 @@ Item {
           enabled: (senderOK && receiverOK && amountOK && gasLimitOK && gasPriceOK)
         }
         onClicked: {
-          if (System.hasInsufficientFunds(
-            System.getTxSenderAmount(),
+          var noCoinFunds = System.hasInsufficientCoinFunds(
+            System.getTxSenderCoinAmount(),
             System.calculateTransactionCost(amountInput.text, gasLimitInput.text, gasPriceInput.text)
-          )) {
+          ) 
+          if (noCoinFunds) {
             fundsPopup.open()
           } else {
             confirmPopup.open()
@@ -216,7 +216,7 @@ Item {
   AVMEPopupInfo {
     id: fundsPopup
     icon: "qrc:/img/warn.png"
-    info: "Insufficient funds. Please check your transaction cost."
+    info: "Insufficient funds. Please check your transaction values."
   }
 
   // Popup for confirming the transaction
@@ -261,14 +261,10 @@ Item {
           topMargin: 30
         }
         horizontalAlignment: Text.AlignHCenter
+        Timer { id: popupPassTimer; interval: 2000 }
         text: (!popupPassTimer.running) ?
         "Enter your wallet's passphrase to confirm the transaction." :
         "Wrong passphrase, please try again."
-
-        Timer {
-          id: popupPassTimer
-          interval: 2000
-        }
       }
 
       // Passphrase input
@@ -305,10 +301,8 @@ Item {
           enabled: (passInput.text != "")
           onClicked: {
             if (System.checkWalletPass(passInput.text)) {
-              System.setTxSenderAccount(senderInput.text)
               System.setTxReceiverAccount(receiverInput.text)
-              System.setTxAmount(amountInput.text)
-              System.setTxLabel(amountLabel.text)
+              System.setTxReceiverCoinAmount(amountInput.text)
               System.setTxGasLimit(gasLimitInput.text)
               System.setTxGasPrice(gasPriceInput.text)
               confirmPopup.close()

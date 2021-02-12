@@ -4,21 +4,42 @@ import QtQuick.Controls 2.2
 import "qrc:/qml/components"
 
 // Screen for listing Accounts and their general operations
-// TODO: fix bug where many Accounts created overflow the balance request
 
 Item {
   id: accountsScreen
+  property alias wList: accountRow.accountList
+  property bool hasCoin
+  property bool hasToken
 
   function fetchAccounts() {
-    fetchAccountsPopup.open()
-    var accList = System.listAccounts("eth")
+    var accList = System.listAccounts()
     for (var i = 0; i < accList.length; i++) {
       accountsList.append(JSON.parse(accList[i]))
     }
-    fetchAccountsPopup.close()
   }
 
-  Component.onCompleted: fetchAccounts()
+  Component.onCompleted: {
+    // Always default to AVAX & TAEX on first load
+    if (System.getCurrentCoin() == "") {
+      System.setCurrentCoin("AVAX")
+      System.setCurrentCoinDecimals(18)
+    }
+    if (System.getCurrentToken() == "") {
+      System.setCurrentToken("TAEX")
+      System.setCurrentTokenDecimals(18)
+    }
+    hasCoin = (System.getCurrentCoin() != "");
+    hasToken = (System.getCurrentToken() != "");
+    fetchAccountsPopup.open()
+    System.updateScreen()
+    //console.log("First load:" + System.getFirstLoad())
+    if (System.getFirstLoad()) {
+      System.loadWalletAccounts(System.getFirstLoad())
+      System.setFirstLoad(false)
+    }
+    fetchAccounts()
+    fetchAccountsPopup.close()
+  }
 
   // Background icon
   Image {
@@ -33,7 +54,7 @@ Item {
   // Account list and stats
   Row {
     id: accountRow
-    property alias walletList: wList
+    property alias accountList: walletList
     height: parent.height - buttons.height
     spacing: 5
     anchors {
@@ -52,7 +73,7 @@ Item {
       color: "#4458A0C9"
 
       AVMEWalletList {
-        id: wList
+        id: walletList
         width: listRect.width
         height: listRect.height
         model: ListModel { id: accountsList }
@@ -67,38 +88,76 @@ Item {
       color: "#44AB5FBE"
 
       Text {
-        id: balanceLabel
+        id: balanceCoinLabel
         anchors {
           top: parent.top
           left: parent.left
           right: parent.right
           margins: 20
         }
-        text: "Balance"
+        text: "Coin Balance"
       }
 
       Text {
-        id: balanceText
+        id: balanceCoinText
+        visible: accountsScreen.hasCoin
         anchors {
-          top: balanceLabel.bottom
+          top: balanceCoinLabel.bottom
           left: parent.left
           margins: 20
         }
-        font.pointSize: 18.0
-        text: (accountRow.walletList.currentItem) ? accountRow.walletList.currentItem.itemAmount : ""
+        font.bold: true
+        text: (wList.currentItem) ? wList.currentItem.itemCoinAmount : ""
       }
 
       Text {
-        id: balanceType
+        id: balanceCoinType
+        visible: accountsScreen.hasCoin
         anchors {
-          top: balanceLabel.bottom
-          left: balanceText.right
+          top: balanceCoinLabel.bottom
+          left: balanceCoinText.right
           right: parent.right
           margins: 20
-          leftMargin: 20
+          leftMargin: 10
         }
-        font.pointSize: 18.0
-        text: (accountRow.walletList.currentItem) ? "ETH" : ""  // TODO: change according to token
+        text: (wList.currentItem) ? System.getCurrentCoin() : ""
+      }
+
+      Text {
+        id: balanceTokenLabel
+        visible: accountsScreen.hasToken
+        anchors {
+          top: balanceCoinText.bottom
+          left: parent.left
+          right: parent.right
+          margins: 20
+        }
+        text: "Token Balance"
+      }
+
+      Text {
+        id: balanceTokenText
+        visible: accountsScreen.hasToken
+        anchors {
+          top: balanceTokenLabel.bottom
+          left: parent.left
+          margins: 20
+        }
+        font.bold: true
+        text: (wList.currentItem) ? wList.currentItem.itemTokenAmount : ""
+      }
+
+      Text {
+        id: balanceTokenType
+        visible: accountsScreen.hasToken
+        anchors {
+          top: balanceTokenLabel.bottom
+          left: balanceTokenText.right
+          right: parent.right
+          margins: 20
+          leftMargin: 10
+        }
+        text: (wList.currentItem) ? System.getCurrentToken() : ""
       }
 
       Column {
@@ -106,7 +165,7 @@ Item {
         width: parent.width
         spacing: 20
         anchors {
-          top: balanceText.bottom
+          top: balanceTokenText.bottom
           bottom: parent.bottom
           left: parent.left
           right: parent.right
@@ -117,27 +176,42 @@ Item {
           id: btnCopyAccount
           width: parent.width
           text: (!textTimer.running) ? "Copy Account to Clipboard" : "Copied!"
+          enabled: !textTimer.running
           Timer { id: textTimer; interval: 2000 }
           onClicked: {
-            System.copyToClipboard(accountRow.walletList.currentItem.itemAccount)
+            System.copyToClipboard(wList.currentItem.itemAccount)
             textTimer.start()
           }
         }
         AVMEButton {
-          id: btnSendTx
+          id: btnSendCoinTx
           width: parent.width
-          text: "Send Transaction"
+          enabled: accountsScreen.hasCoin
+          text: "Send Coin Transaction"
           onClicked: {
-            System.setTxSenderAccount(accountRow.walletList.currentItem.itemAccount)
-            System.setTxSenderAmount(accountRow.walletList.currentItem.itemAmount)
-            System.setTxLabel("ETH")  // TODO: change according to token
-            System.setScreen(content, "qml/screens/TransactionScreen.qml")
+            System.setTxSenderAccount(wList.currentItem.itemAccount)
+            System.setTxSenderCoinAmount(wList.currentItem.itemCoinAmount)
+            System.setTxTokenFlag(false)
+            System.setScreen(content, "qml/screens/CoinTransactionScreen.qml")
+          }
+        }
+        AVMEButton {
+          id: btnSendTokenTx
+          width: parent.width
+          enabled: accountsScreen.hasToken
+          text: "Send Token Transaction"
+          onClicked: {
+            System.setTxSenderAccount(wList.currentItem.itemAccount)
+            System.setTxSenderCoinAmount(wList.currentItem.itemCoinAmount)
+            System.setTxSenderTokenAmount(wList.currentItem.itemTokenAmount)
+            System.setTxTokenFlag(true)
+            System.setScreen(content, "qml/screens/TokenTransactionScreen.qml")
           }
         }
         AVMEButton {
           id: btnTxHistory
           width: parent.width
-          text: "Check Tx History (WIP)"
+          text: "Check Transaction History (WIP)"
           onClicked: {
 
           }
@@ -147,7 +221,7 @@ Item {
           width: parent.width
           text: "View Private Key"
           onClicked: {
-            viewKeyPopup.account = accountRow.walletList.currentItem.itemAccount
+            viewKeyPopup.account = wList.currentItem.itemAccount
             viewKeyPopup.open()
           }
         }
@@ -156,7 +230,7 @@ Item {
           width: parent.width
           text: "Erase this Account"
           onClicked: {
-            erasePopup.account = accountRow.walletList.currentItem.itemAccount
+            erasePopup.account = wList.currentItem.itemAccount
             erasePopup.open()
           }
         }
@@ -192,16 +266,13 @@ Item {
       onClicked: newAccountPopup.open()
     }
     AVMEButton {
+      // TODO: add fiat pricing here too when the time comes
       id: btnSendAVAX
       width: (parent.width / 3) - parent.spacing
       anchors.verticalCenter: parent.verticalCenter
-      text: "Change Current Token (WIP)"
+      text: "Change Current Coin/Token (WIP)"
       onClicked: {
-        System.setTxSenderAccount(walletList.currentItem.listItemAccount)
-        System.setTxSenderAmount(walletList.currentItem.listItemAmount)
-        System.setTxLabel("AVAX")  // TODO: change according to token
-        System.setScreen(content, "qml/screens/TransactionScreen.qml")
-
+        
       }
     }
   }
@@ -309,7 +380,12 @@ Item {
               accountsList.clear()
               nameInput.text = passInput.text = hintInput.text = ""
               newAccountPopup.close()
+              fetchAccountsPopup.open()
+              System.updateScreen()
+              console.log("Reloading Accounts...")
+              System.loadWalletAccounts(false)
               fetchAccounts()
+              fetchAccountsPopup.close()
             } catch (error) {
               accountFailPopup.open()
               newAccountPopup.close()
@@ -416,7 +492,7 @@ Item {
   // Popup for fetching Accounts
   AVMEPopup {
     id: fetchAccountsPopup
-    info: "Fetching Accounts..."
+    info: "Loading Accounts...<br>This may take a while."
   }
 
   // Info popup for if the Account creation fails
@@ -455,13 +531,18 @@ Item {
     + "<b>" + account + "</b>"
     + "<br>All funds on it will be <b>permanently lost</b>."
     yesBtn.onClicked: {
-      var acc = accountRow.walletList.currentItem.itemAccount
+      var acc = wList.currentItem.itemAccount
       if (System.eraseAccount(acc)) {
         console.log("Account erased successfully")
         accountsList.clear()
         erasePopup.close()
         erasePopup.account = ""
+        fetchAccountsPopup.open()
+        System.updateScreen()
+        console.log("Reloading Accounts...")
+        System.loadWalletAccounts(false)
         fetchAccounts()
+        fetchAccountsPopup.close()
       } else {
         erasePopup.close()
         erasePopup.account = ""

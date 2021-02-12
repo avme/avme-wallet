@@ -10,6 +10,8 @@ std::string Network::httpGetRequest(std::string reqBody) {
   namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
   namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
 
+  //std::cout << reqBody << std::endl;  // Uncomment for debugging
+
   try {
     std::string host = Network::hostName;
     std::string port = Network::hostPort;
@@ -56,6 +58,8 @@ std::string Network::httpGetRequest(std::string reqBody) {
     // Write only the body answer to output
     std::string body { boost::asio::buffers_begin(res.body().data()),boost::asio::buffers_end(res.body().data()) };
     result = body;
+
+    //std::cout << result << std::endl; // Uncomment for debugging
 
     boost::system::error_code ec;
     stream.shutdown(ec);

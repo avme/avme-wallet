@@ -6,6 +6,8 @@ import QtQuick.Controls 2.2
  * Requires a ListModel with the following items:
  * - "account": the account's actual address
  * - "name": the account's name/label
+ * - "coinAmount": the account's amount in <coin-name>
+ * - "tokenAmount": the account's amount in <token-name>
  */
 
 ListView {
@@ -62,7 +64,8 @@ ListView {
       id: listItem
       readonly property string itemAccount: account
       readonly property string itemName: name
-      readonly property string itemAmount: amount
+      readonly property string itemCoinAmount: coinAmount
+      readonly property string itemTokenAmount: tokenAmount
       width: parent.width
       height: 30
 
