@@ -5,7 +5,7 @@ Official wallet for the AVME Project.
 ## Compiling
 
 ### Dependencies
-TODO: re-check deps
+
 * **CMake 3.19.0** or higher
 * **GCC** (native Linux) *or* **MinGW** (cross-compile from Linux to Windows)
 * **Build deps for Qt 5.9.8** or higher (see [Qt docs](https://wiki.qt.io/Building_Qt_5_from_Git) for more info)
@@ -17,7 +17,7 @@ Example steps for APT-based distros:
 
 ### Instructions
 
-First, clone the project with `git clone --recurse-submodules` (or, if you've already cloned it, do a `git submodule update --init external/openssl/cmake`).
+First, clone the project with `git clone --recurse-submodules` (or, if you've already cloned it, do a `git submodule update --init external/openssl-cmake`).
 
 Then, open a terminal at project root and do the following:
 
