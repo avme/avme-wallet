@@ -61,6 +61,8 @@ find_package(ethash CONFIG REQUIRED)
 include(ProjectSecp256k1)
 find_package(Threads)
 
+add_subdirectory(external/openssl-cmake)
+
 # Include paths for local libs and headers
 # Macro adapted from https://stackoverflow.com/a/31004567
 # TODO: decide if we'll be using this anyway or not
@@ -106,7 +108,7 @@ file(GLOB AVME_SOURCES "src/lib/*.cpp")
 
 # Compile the project library
 add_library(avme-lib ${AVME_HEADERS} ${AVME_SOURCES})
-target_link_libraries(avme-lib PUBLIC devcore devcrypto ethcore ethash::ethash ${BOOST_LIBS})
+target_link_libraries(avme-lib PUBLIC devcore devcrypto ethcore ethash::ethash ssl crypto ${BOOST_LIBS})
 
 # Compile the CLI executable (for testing)
 # TODO: have a macro somewhere that makes this optional
