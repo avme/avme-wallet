@@ -195,7 +195,7 @@ Item {
           var noCoinFunds = System.hasInsufficientCoinFunds(
             System.getTxSenderCoinAmount(),
             System.calculateTransactionCost(amountInput.text, gasLimitInput.text, gasPriceInput.text)
-          ) 
+          )
           if (noCoinFunds) {
             fundsPopup.open()
           } else {
@@ -258,13 +258,13 @@ Item {
         anchors {
           horizontalCenter: parent.horizontalCenter
           top: popupText.bottom
-          topMargin: 30
+          topMargin: 15
         }
         horizontalAlignment: Text.AlignHCenter
         Timer { id: popupPassTimer; interval: 2000 }
-        text: (!popupPassTimer.running) ?
-        "Enter your wallet's passphrase to confirm the transaction." :
-        "Wrong passphrase, please try again."
+        text: (!popupPassTimer.running)
+        ? "Please authenticate to confirm the transaction."
+        : "Wrong passphrase, please try again"
       }
 
       // Passphrase input
@@ -273,10 +273,12 @@ Item {
         width: items.width / 4
         echoMode: TextInput.Password
         passwordCharacter: "*"
+        label: "Passphrase"
+        placeholder: "Your Wallet's passphrase"
         anchors {
           horizontalCenter: parent.horizontalCenter
           top: popupPassText.bottom
-          topMargin: 10
+          topMargin: 25
         }
       }
 
@@ -307,6 +309,8 @@ Item {
               System.setTxGasPrice(gasPriceInput.text)
               confirmPopup.close()
               System.setScreen(content, "qml/screens/ProgressScreen.qml")
+              System.txStart(passInput.text)
+              System.updateScreen()
             } else {
               popupPassTimer.start()
             }

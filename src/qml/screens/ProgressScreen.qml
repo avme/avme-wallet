@@ -8,26 +8,24 @@ import "qrc:/qml/components"
 Item {
   id: progressScreen
 
-  // Start the transaction process once screen is loaded.
-  Component.onCompleted: {
-    var linkUrl = System.makeTransaction()
-    if (linkUrl != "") {
-      linkText.text = 'Transaction successful! '
-      + '<html><style type="text/css"></style>'
-      + '<a href="' + linkUrl + '">'
-      + 'Link'
-      + '</a></html>'
-    } else {
-      linkText.text = "Transaction failed. Please try again."
-    }
-    linkText.visible = true
-    btn.visible = true
-    System.updateScreen()
-  }
-
   // Signal connections
   Connections {
     target: System
+    onTxStart: {
+      var linkUrl = System.makeTransaction(pass)
+      if (linkUrl != "") {
+        linkText.text = 'Transaction successful! '
+        + '<html><style type="text/css"></style>'
+        + '<a href="' + linkUrl + '">'
+        + 'Link'
+        + '</a></html>'
+      } else {
+        linkText.text = "Transaction failed. Please try again."
+      }
+      linkText.visible = true
+      btn.visible = true
+      System.updateScreen()
+    }
     onTxBuilt: {
       if (b) {
         buildText.color = "limegreen"
@@ -66,6 +64,10 @@ Item {
         sendText.text = "Error on sending transaction."
         sendPng.source = "qrc:/img/no.png"
       }
+      System.updateScreen()
+    }
+    onTxRetry: {
+      sendText.text = "Nonce too low or Tx w/ same hash imported, retrying..."
       System.updateScreen()
     }
   }

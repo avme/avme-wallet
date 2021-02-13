@@ -1,17 +1,26 @@
+// Wallet management, based on Ethereum's Aleth libraries.
 // Aleth: Ethereum C++ client, tools and libraries.
 // Copyright 2015-2019 Aleth Authors.
 // Licensed under the GNU General Public License, Version 3.
-/// @file
-/// CLI module for key management.
 #include "wallet.h"
 
 u256 WalletManager::MAX_U256_VALUE() {
   return (raiseToPow(2, 256) - 1);
 }
 
-bool WalletManager::loadWallet(path walletFile, path secretsPath, std::string walletPass) {
+void WalletManager::storeWalletPass(std::string pass) {
+   passSalt = h256::random();
+   passHash = dev::pbkdf2(pass, passSalt.asBytes(), passIterations);
+}
+
+bool WalletManager::checkWalletPass(std::string pass) {
+  bytesSec hash = dev::pbkdf2(pass, passSalt.asBytes(), passIterations);
+  return (hash.ref().toString() == passHash.ref().toString());
+}
+
+bool WalletManager::loadWallet(path walletFile, path secretsPath, std::string pass) {
   KeyManager w(walletFile, secretsPath);
-  if (w.load(walletPass)) {
+  if (w.load(pass)) {
     this->wallet = w;
     return true;
   } else {
@@ -19,7 +28,7 @@ bool WalletManager::loadWallet(path walletFile, path secretsPath, std::string wa
   }
 }
 
-bool WalletManager::createNewWallet(path walletFile, path secretsPath, std::string walletPass) {
+bool WalletManager::createNewWallet(path walletFile, path secretsPath, std::string pass) {
   // Create the paths if they don't exist yet.
   // Remember walletFile points to a *file*, and secretsPath points to a *dir*.
   if (!exists(walletFile.parent_path())) {
@@ -32,7 +41,7 @@ bool WalletManager::createNewWallet(path walletFile, path secretsPath, std::stri
   // Initialize the new wallet
   KeyManager w(walletFile, secretsPath);
   try {
-    w.create(walletPass);
+    w.create(pass);
     return true;
   } catch (Exception const& _e) {
     std::cerr << "Unable to create wallet" << std::endl << boost::diagnostic_information(_e);
@@ -40,17 +49,14 @@ bool WalletManager::createNewWallet(path walletFile, path secretsPath, std::stri
   }
 }
 
-WalletAccount WalletManager::createNewAccount(
-    std::string name, std::string pass, std::string hint, bool usesMasterPass
-    ) {
+WalletAccount WalletManager::createNewAccount(std::string name, std::string pass) {
   KeyPair k = makeKey();
-  h128 u = this->wallet.import(k.secret(), name, pass, hint);
+  h128 u = this->wallet.import(k.secret(), name, pass, "");
   WalletAccount ret;
 
   ret.id = toUUID(u);
   ret.name = name;
   ret.address = k.address().hex();
-  ret.hint = (usesMasterPass) ? "Uses master passphrase" : hint;
 
   return ret;
 }
@@ -79,27 +85,6 @@ bool WalletManager::eraseAccount(std::string account) {
     return true;
   }
   return false; // Account was not found
-}
-
-bool WalletManager::accountIsEmpty(std::string account) {
-  if (account.find("0x") == std::string::npos) {
-    account = "0x" + boost::lexical_cast<std::string>(userToAddress(account));
-  }
-
-  /**
-   * To convert a hex string to an int value, we need to pass through an int variable.
-   * So we convert the hex string into u256 and then u256 back to int string.
-   */
-  u256 requestAVAX = boost::lexical_cast<u256>(
-    JSON::getValue(Network::getAVAXBalance(account), "result").get_str()
-  );
-  u256 requestTAEX = boost::lexical_cast<u256>(
-    JSON::getValue(Network::getTAEXBalance(account, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"), "result").get_str()
-  );
-
-  std::string amountAVAX = boost::lexical_cast<std::string>(requestAVAX);
-  std::string amountTAEX = boost::lexical_cast<std::string>(requestTAEX);
-  return (amountAVAX == "0" && amountTAEX == "0");
 }
 
 Address WalletManager::userToAddress(std::string const& input) {

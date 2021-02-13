@@ -25,13 +25,14 @@ class System : public QObject {
 
   signals:
     void walletFirstLoad();
+    void txStart(QString pass);
     void txBuilt(bool b);
     void txSigned(bool b);
     void txSent(bool b);
+    void txRetry();
 
   private:
     WalletManager wm;
-    std::string walletPass;
     bool firstLoad;
     std::string currentCoin;
     int currentCoinDecimals;
@@ -49,9 +50,6 @@ class System : public QObject {
 
   public:
     // Getters/Setters for private vars
-    Q_INVOKABLE QString getWalletPass() { return QString::fromStdString(this->walletPass); }
-    Q_INVOKABLE void setWalletPass(QString pass) { this->walletPass = pass.toStdString(); }
-
     Q_INVOKABLE bool getFirstLoad() { return this->firstLoad; }
     Q_INVOKABLE void setFirstLoad(bool b) { this->firstLoad = b; }
 
@@ -107,30 +105,35 @@ class System : public QObject {
       QApplication::clipboard()->setText(str);
     }
 
-    // Check if given passphrase equals the wallet's
+    // Store the Wallet password
+    Q_INVOKABLE void storeWalletPass(QString pass) {
+      wm.storeWalletPass(pass.toStdString());
+    }
+
+    // Check if given passphrase equals the Wallet's
     Q_INVOKABLE bool checkWalletPass(QString pass) {
-      return (pass.toStdString() == this->walletPass);
+      return wm.checkWalletPass(pass.toStdString());
     }
 
     // Create a new Wallet
     Q_INVOKABLE bool createNewWallet(
-      QString walletFile, QString secretsPath, QString walletPass
+      QString walletFile, QString secretsPath, QString pass
     ) {
       return this->wm.createNewWallet(
         walletFile.remove("file://").toStdString(),
         secretsPath.remove("file://").toStdString(),
-        walletPass.toStdString()
+        pass.toStdString()
       );
     }
 
     // Load a Wallet
     Q_INVOKABLE bool loadWallet(
-      QString walletFile, QString secretsPath, QString walletPass
+      QString walletFile, QString secretsPath, QString pass
     ) {
       return this->wm.loadWallet(
         walletFile.remove("file://").toStdString(),
         secretsPath.remove("file://").toStdString(),
-        walletPass.toStdString()
+        pass.toStdString()
       );
     }
 
@@ -165,12 +168,8 @@ class System : public QObject {
     }
 
     // Create a new Account
-    Q_INVOKABLE bool createNewAccount(
-      QString name, QString pass, QString hint, bool usesMasterPass
-    ) {
-      WalletAccount wa = this->wm.createNewAccount(
-        name.toStdString(), pass.toStdString(), hint.toStdString(), usesMasterPass
-      );
+    Q_INVOKABLE bool createNewAccount(QString name, QString pass) {
+      WalletAccount wa = this->wm.createNewAccount(name.toStdString(), pass.toStdString());
       return !wa.id.empty();
     }
 
@@ -252,7 +251,7 @@ class System : public QObject {
     }
 
     // Make a coin or token transaction with the collected data
-    Q_INVOKABLE QString makeTransaction() {
+    Q_INVOKABLE QString makeTransaction(QString pass) {
       // Part 1: Build
       // Remember gas price is in Gwei (10^9 Wei) and amount is in fixed point,
       // we have to convert both to Wei.
@@ -290,9 +289,7 @@ class System : public QObject {
       // Part 2: Sign
       // TODO: see if checking for empty string is really the right way to know
       // whether the function worked or not
-      std::string signedTx = wm.signTransaction(
-        txSkel, this->walletPass, this->txSenderAccount
-      );
+      std::string signedTx = wm.signTransaction(txSkel, pass.toStdString(), this->txSenderAccount);
       if (!signedTx.empty()) {
         emit txSigned(true);
       } else {
@@ -301,7 +298,6 @@ class System : public QObject {
       }
 
       // Part 3: Send
-      // TODO: maybe show on screen "Trying again with a higher nonce"?
       std::string txLink = wm.sendTransaction(signedTx);
       if (txLink.empty()) {
         emit txSent(false);
@@ -309,10 +305,9 @@ class System : public QObject {
       }
       while (txLink.find("Transaction nonce is too low") != std::string::npos ||
           txLink.find("Transaction with the same hash was already imported") != std::string::npos) {
+        emit txRetry();
         txSkel.nonce++;
-        signedTx = wm.signTransaction(
-          txSkel, this->walletPass, this->txSenderAccount
-        );
+        signedTx = wm.signTransaction(txSkel, pass.toStdString(), this->txSenderAccount);
         txLink = wm.sendTransaction(signedTx);
       }
       emit txSent(true);

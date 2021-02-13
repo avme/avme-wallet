@@ -47,6 +47,9 @@ Item {
       width: parent.width / 4
       height: 60
       text: "Import a Wallet Seed (WIP)"
+      onClicked: {
+        
+      }
     }
   }
 }

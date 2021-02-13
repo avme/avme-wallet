@@ -147,7 +147,7 @@ Item {
             console.log("Wallet created successfully, now loading it...")
             System.loadWallet(walletFile, secretsPath, walletPass)
             console.log("Wallet loaded successfully")
-            System.setWalletPass(walletPass)
+            System.storeWalletPass(walletPass)
             System.setFirstLoad(true)
             System.setScreen(content, "qml/screens/AccountsScreen.qml")
           } catch (error) {
