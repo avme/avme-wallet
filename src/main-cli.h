@@ -8,46 +8,32 @@
  * and user input error handling, according to each menu's context.
  */
 
-// Check the existence of the wallet
+// Check the existence of the Wallet
 std::string menuCheckWallet() {
   std::string ret;
 
   while (true) {
-    if (boost::filesystem::exists(KeyManager::defaultPath()) &&
-        boost::filesystem::exists(SecretStore::defaultPath())) {
-      std::cout << "Default wallet found. How do you want to proceed?\n" <<
-                   "1 - Load the default wallet\n" <<
-                   "2 - Load an existing wallet\n" <<
-                   "3 - Create and load a new wallet" << std::endl;
-      std::getline(std::cin, ret);
-      if (ret.find_first_not_of("123") == std::string::npos) {
-        break;
-      } else {
-        std::cout << "Invalid option, please try again." << std::endl;
-      }
+    std::cout << "How do you want to proceed?\n"
+              << "1 - Create and load a new Wallet\n"
+              << "2 - Load an existing Wallet" << std::endl;
+    std::getline(std::cin, ret);
+    if (ret.find_first_not_of("12") == std::string::npos) {
+      break;
     } else {
-      std::cout << "Default wallet not found. How do you want to proceed?\n" <<
-                   "2 - Load an existing wallet\n" <<
-                   "3 - Create and load a new wallet" << std::endl;
-      std::getline(std::cin, ret);
-      if (ret.find_first_not_of("23") == std::string::npos) {
-        break;
-      } else {
-        std::cout << "Invalid option, please try again." << std::endl;
-      }
+      std::cout << "Invalid option, please try again." << std::endl;
     }
   }
 
   return ret;
 }
 
-// Load a wallet file
+// Load a Wallet file
 // TODO: check correctly for file contents instead of just if the file exists
 std::string menuLoadWalletFile() {
   std::string ret;
 
   while (true) {
-    std::cout << "Please inform the full path of your wallet file." << std::endl;
+    std::cout << "Please inform the full path of your Wallet file." << std::endl;
     std::getline(std::cin, ret);
     if (boost::filesystem::exists(ret)) {
       break;
@@ -65,7 +51,7 @@ std::string menuLoadWalletSecrets() {
   std::string ret;
 
   while (true) {
-    std::cout << "Please inform the full path of your wallet secrets folder." << std::endl;
+    std::cout << "Please inform the full path of your Wallet secrets folder." << std::endl;
     std::getline(std::cin, ret);
     if (boost::filesystem::exists(ret)) {
       break;
@@ -77,12 +63,12 @@ std::string menuLoadWalletSecrets() {
   return ret;
 }
 
-// Create a new wallet file
+// Create a new Wallet file
 std::string menuCreateWalletFile() {
   std::string ret;
 
   while (true) {
-    std::cout << "Please inform the full path of your wallet file, or leave blank for default." << std::endl;
+    std::cout << "Please inform the full path of your Wallet file, or leave blank for default." << std::endl;
     std::cout << "Default is " << KeyManager::defaultPath() << std::endl;
     std::getline(std::cin, ret);
     if (ret.empty()) { ret = KeyManager::defaultPath().string(); }
@@ -96,12 +82,12 @@ std::string menuCreateWalletFile() {
   return ret;
 }
 
-// Create a new wallet secrets path
+// Create a new Wallet secrets path
 std::string menuCreateWalletSecrets() {
   std::string ret;
 
   while (true) {
-    std::cout << "Please inform the full path of your wallet secrets folder, or leave blank for default." << std::endl;
+    std::cout << "Please inform the full path of your Wallet secrets folder, or leave blank for default." << std::endl;
     std::cout << "Default is " << SecretStore::defaultPath() << std::endl;
     std::getline(std::cin, ret);
     if (ret.empty()) { ret = SecretStore::defaultPath().string(); }
@@ -115,7 +101,7 @@ std::string menuCreateWalletSecrets() {
   return ret;
 }
 
-// Create a passphrase for the wallet/account
+// Create a passphrase for the Wallet/Account
 std::string menuCreatePass() {
   std::string ret, conf;
 
@@ -141,7 +127,7 @@ std::string menuChooseSenderAddress(WalletManager wm) {
     if (ret.find("0x") == std::string::npos || ret.length() != 42) {
       std::cout << "Not a valid address, please check the formatting." << std::endl;
     } else if (ret != ("0x" + boost::lexical_cast<std::string>(wm.userToAddress(ret)))) {
-      std::cout << "Address not found in wallet, please try another." << std::endl;
+      std::cout << "Address not found in Wallet, please try another." << std::endl;
     } else {
       break;
     }
@@ -238,13 +224,13 @@ std::string menuSetGasPrice() {
   return ret;
 }
 
-// Choose an account to erase
-// TODO: check for actually invalid accounts (42 chars in length but don't actually exist)
+// Choose an Account to erase
+// TODO: check for actually invalid Accounts (42 chars in length but don't actually exist)
 std::string menuChooseAccountErase(WalletManager wm) {
   std::string ret;
 
   while (true) {
-    std::cout << "Please inform the account name or address that you want to delete." << std::endl;
+    std::cout << "Please inform the Account name or address that you want to delete." << std::endl;
     std::getline(std::cin, ret);
     if (ret.find("0x") == std::string::npos) {
       ret = "0x" + boost::lexical_cast<std::string>(wm.userToAddress(ret));
@@ -259,11 +245,12 @@ std::string menuChooseAccountErase(WalletManager wm) {
   return ret;
 }
 
-// Confirm account erasure
+// Confirm Account erasure
 bool menuConfirmAccountErase() {
   while (true) {
     std::string conf;
-    std::cout << "Are you absolutely sure you want to erase this account?" << std::endl
+    std::cout << "Are you absolutely sure you want to erase this Account?" << std::endl
+              << "All funds in it will be PERMANENTLY LOST." << std::endl
               << "1 - Yes\n2 - No" << std::endl;
     std::getline(std::cin, conf);
     if (conf == "1") {

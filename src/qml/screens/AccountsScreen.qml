@@ -32,7 +32,6 @@ Item {
     hasToken = (System.getCurrentToken() != "");
     fetchAccountsPopup.open()
     System.updateScreen()
-    //console.log("First load:" + System.getFirstLoad())
     if (System.getFirstLoad()) {
       System.loadWalletAccounts(System.getFirstLoad())
       System.setFirstLoad(false)
@@ -176,7 +175,7 @@ Item {
           id: btnCopyAccount
           width: parent.width
           text: (!textTimer.running) ? "Copy Account to Clipboard" : "Copied!"
-          enabled: !textTimer.running
+          enabled: (wList.currentItem && !textTimer.running)
           Timer { id: textTimer; interval: 2000 }
           onClicked: {
             System.copyToClipboard(wList.currentItem.itemAccount)
@@ -186,7 +185,7 @@ Item {
         AVMEButton {
           id: btnSendCoinTx
           width: parent.width
-          enabled: accountsScreen.hasCoin
+          enabled: (wList.currentItem && accountsScreen.hasCoin)
           text: "Send Coin Transaction"
           onClicked: {
             System.setTxSenderAccount(wList.currentItem.itemAccount)
@@ -198,7 +197,7 @@ Item {
         AVMEButton {
           id: btnSendTokenTx
           width: parent.width
-          enabled: accountsScreen.hasToken
+          enabled: (wList.currentItem && accountsScreen.hasToken)
           text: "Send Token Transaction"
           onClicked: {
             System.setTxSenderAccount(wList.currentItem.itemAccount)
@@ -211,6 +210,7 @@ Item {
         AVMEButton {
           id: btnTxHistory
           width: parent.width
+          enabled: (wList.currentItem)
           text: "Check Transaction History (WIP)"
           onClicked: {
 
@@ -219,6 +219,7 @@ Item {
         AVMEButton {
           id: btnViewKey
           width: parent.width
+          enabled: (wList.currentItem)
           text: "View Private Key"
           onClicked: {
             viewKeyPopup.account = wList.currentItem.itemAccount
@@ -228,6 +229,7 @@ Item {
         AVMEButton {
           id: btnEraseAccount
           width: parent.width
+          enabled: (wList.currentItem)
           text: "Erase this Account"
           onClicked: {
             erasePopup.account = wList.currentItem.itemAccount
@@ -281,7 +283,7 @@ Item {
   Popup {
     id: newAccountPopup
     width: window.width / 2
-    height: (window.height / 2) + 50
+    height: window.height / 2
     x: width / 2
     y: height / 2
     modal: true
@@ -294,15 +296,15 @@ Item {
       id: newAccountCol
       anchors.fill: parent
       spacing: 30
-      topPadding: 20
-
-      Text {
-        id: info
-        anchors.horizontalCenter: parent.horizontalCenter
-        text: "Enter the following details to create a new Account."
-      }
+      topPadding: 40
 
       // Account name/label
+      Text {
+        id: nameInfo
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: "You can give a name to your Account, or leave blank for nothing."
+      }
+
       AVMEInput {
         id: nameInput
         anchors.horizontalCenter: parent.horizontalCenter
@@ -311,40 +313,25 @@ Item {
         placeholder: "Label for your Account"
       }
 
-      // Account passphrase
+      // Passphrase
+      Text {
+        id: passInfo
+        property alias timer: passInfoTimer
+        anchors.horizontalCenter: parent.horizontalCenter
+        Timer { id: passInfoTimer; interval: 2000 }
+        text: (!passInfoTimer.running)
+        ? "Please authenticate to confirm the action."
+        : "Wrong passphrase, please try again"
+      }
+
       AVMEInput {
         id: passInput
         anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width / 1.5
+        width: parent.width / 2
         echoMode: TextInput.Password
         passwordCharacter: "*"
         label: "Passphrase"
-        placeholder: "Passphrase for your Account"
-        enabled: !passCheck.checked
-      }
-
-      // Account hint
-      AVMEInput {
-        id: hintInput
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width / 1.5
-        label: "Hint (optional)"
-        placeholder: "Hint to help you remember the passphrase"
-        enabled: !passCheck.checked
-      }
-
-      // Checkbox for using Wallet passphrase as the Account passphrase
-      CheckBox {
-        id: passCheck
-        anchors.horizontalCenter: parent.horizontalCenter
-        text: "Use wallet passphrase"
-        onClicked: {
-          if (!passInput.enabled && !hintInput.enabled) {
-            // Disabled fields (use master pass)
-            passInput.text = ""
-            hintInput.text = ""
-          }
-        }
+        placeholder: "Your Wallet's passphrase"
       }
 
       // Buttons
@@ -364,31 +351,27 @@ Item {
           id: btnDone
           width: newAccountCol.width / 4
           text: "Done"
-          enabled: (passInput.text !== "" || passCheck.checked)
+          enabled: (passInput.text !== "")
           onClicked: {
-            var name = nameInput.text
-            var pass = passInput.text
-            var hint = hintInput.text
-            var usesMasterPass = passCheck.checked
-            if (usesMasterPass) {
-              pass = System.getWalletPass()
-              hint = ""
-            }
-            try {
-              System.createNewAccount(name, pass, hint, passCheck)
-              console.log("Account created successfully")
-              accountsList.clear()
-              nameInput.text = passInput.text = hintInput.text = ""
-              newAccountPopup.close()
-              fetchAccountsPopup.open()
-              System.updateScreen()
-              console.log("Reloading Accounts...")
-              System.loadWalletAccounts(false)
-              fetchAccounts()
-              fetchAccountsPopup.close()
-            } catch (error) {
-              accountFailPopup.open()
-              newAccountPopup.close()
+            if (System.checkWalletPass(passInput.text)) {
+              try {
+                System.createNewAccount(nameInput.text, passInput.text)
+                console.log("Account created successfully")
+                accountsList.clear()
+                nameInput.text = passInput.text = ""
+                newAccountPopup.close()
+                fetchAccountsPopup.open()
+                System.updateScreen()
+                console.log("Reloading Accounts...")
+                System.loadWalletAccounts(false)
+                fetchAccounts()
+                fetchAccountsPopup.close()
+              } catch (error) {
+                accountFailPopup.open()
+                newAccountPopup.close()
+              }
+            } else {
+              passInfo.timer.start()
             }
           }
         }
@@ -420,7 +403,7 @@ Item {
         id: warningText
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
-        text: "Please authenticate with your Wallet's passphrase to view the key for the Account:<br>"
+        text: "Please authenticate to view the private key for the Account:<br>"
         + "<b>" + viewKeyPopup.account + "</b>"
         + "<br><br><b>YOU ARE FULLY RESPONSIBLE FOR GUARDING YOUR PRIVATE KEYS."
         + "<br>KEEP THEM AWAY FROM PRYING EYES AND DO NOT SHARE THEM WITH ANYONE."
@@ -433,6 +416,8 @@ Item {
         width: parent.width / 3
         echoMode: TextInput.Password
         passwordCharacter: "*"
+        label: "Passphrase"
+        placeholder: "Your Wallet's passphrase"
       }
 
       TextArea {
@@ -474,13 +459,11 @@ Item {
           id: keyBtnShow
           text: "Show"
           onClicked: {
-            var acc = viewKeyPopup.account
-            var pass = keyPassInput.text
             if (System.checkWalletPass(keyPassInput.text)) {
               if (keyArea.timer.running) { keyArea.timer.stop() }
-              keyArea.text = System.getPrivateKeys(acc, pass)
+              keyArea.text = System.getPrivateKeys(viewKeyPopup.account, keyPassInput.text)
             } else {
-              keyArea.text = "Wrong password, please try again"
+              keyArea.text = "Wrong passphrase, please try again"
               keyArea.timer.start()
             }
           }
@@ -526,27 +509,56 @@ Item {
   AVMEPopupYesNo {
     id: erasePopup
     property string account
+    height: window.height / 2
     icon: "qrc:/img/warn.png"
     info: "Are you sure you want to erase this Account?<br>"
     + "<b>" + account + "</b>"
-    + "<br>All funds on it will be <b>permanently lost</b>."
+    + "<br>All funds on it will be <b>PERMANENTLY LOST</b>."
+    
+    Text {
+      id: erasePassInfo
+      property alias timer: passInfoTimer
+      y: (parent.height / 2) - 30
+      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.bottomMargin: (parent.height / 2) + 50
+      Timer { id: erasePassInfoTimer; interval: 2000 }
+      text: (!erasePassInfoTimer.running)
+      ? "Please authenticate to confirm the action."
+      : "Wrong passphrase, please try again"
+    }
+
+    AVMEInput {
+      id: erasePassInput
+      width: parent.width / 2
+      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.top: erasePassInfo.bottom
+      anchors.topMargin: 30
+      echoMode: TextInput.Password
+      passwordCharacter: "*"
+      label: "Passphrase"
+      placeholder: "Your Wallet's passphrase"
+    }
+
     yesBtn.onClicked: {
-      var acc = wList.currentItem.itemAccount
-      if (System.eraseAccount(acc)) {
-        console.log("Account erased successfully")
-        accountsList.clear()
-        erasePopup.close()
-        erasePopup.account = ""
-        fetchAccountsPopup.open()
-        System.updateScreen()
-        console.log("Reloading Accounts...")
-        System.loadWalletAccounts(false)
-        fetchAccounts()
-        fetchAccountsPopup.close()
+      if (System.checkWalletPass(erasePassInput.text)) {
+        if (System.eraseAccount(wList.currentItem.itemAccount)) {
+          console.log("Account erased successfully")
+          accountsList.clear()
+          erasePopup.close()
+          erasePopup.account = ""
+          fetchAccountsPopup.open()
+          System.updateScreen()
+          console.log("Reloading Accounts...")
+          System.loadWalletAccounts(false)
+          fetchAccounts()
+          fetchAccountsPopup.close()
+        } else {
+          erasePopup.close()
+          erasePopup.account = ""
+          eraseFailPopup.open()
+        }
       } else {
-        erasePopup.close()
-        erasePopup.account = ""
-        eraseFailPopup.open()
+        erasePassInfoTimer.start()
       }
     }
     noBtn.onClicked: {

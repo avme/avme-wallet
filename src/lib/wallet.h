@@ -48,7 +48,6 @@ typedef struct WalletAccount {
   std::string privKey;
   std::string name;
   std::string address;
-  std::string hint;
   std::string balanceAVAX;
   std::string balanceTAEX;
 } WalletAccount;
@@ -77,8 +76,13 @@ static std::mutex balancesThreadLock;
 
 class WalletManager {
   private:
-    // The proper wallet
+    // The proper Wallet
     KeyManager wallet;
+
+    // The Wallet's password hash, salt and iterations for the hash
+    bytesSec passHash;
+    h256 passSalt;
+    int passIterations = 100000;
 
     // Called by loadWalletAccounts()
     void reloadAccountsBalancesThread();
@@ -87,27 +91,31 @@ class WalletManager {
     // Set MAX_U256_VALUE for error handling.
     u256 MAX_U256_VALUE();
 
+    // Hash the Wallet's password with a random salt and store both for auth checks
+    void storeWalletPass(std::string pass);
+
+    // Check if the password input matches the stored hash
+    bool checkWalletPass(std::string pass);
+
     /**
      * Load and authenticate a wallet from the given paths.
      * Returns true on success, false on failure.
      */
-    bool loadWallet(path walletFile, path secretsPath, std::string walletPass);
+    bool loadWallet(path walletFile, path secretsPath, std::string pass);
 
     /**
-     * Create a new wallet, which should be loaded manually afterwards.
+     * Create a new Wallet, which should be loaded manually afterwards.
      * Returns true on success, false on failure.
      */
-    bool createNewWallet(path walletFile, path secretsPath, std::string walletPass);
+    bool createNewWallet(path walletFile, path secretsPath, std::string pass);
 
     /**
-     * Create a new Account in the given wallet and encrypt it.
+     * Create a new Account in the given Wallet and encrypt it.
      * An Account contains an AVAX address and other stuff.
      * See https://ethereum.org/en/developers/docs/accounts/ for more info.
      * Returns a struct with the account's data.
      */
-    WalletAccount createNewAccount(
-      std::string name, std::string pass, std::string hint, bool usesMasterPass
-    );
+    WalletAccount createNewAccount(std::string name, std::string pass);
 
     /**
      * Create a private/public key pair from random or a given string of characters.
@@ -117,16 +125,10 @@ class WalletManager {
     KeyPair makeKey(std::string phrase = "");
 
     /**
-     * Erase an Account from the wallet.
+     * Erase an Account from the Wallet.
      * Returns true on success, false on failure.
      */
     bool eraseAccount(std::string account);
-
-    /**
-     * Check if an Account is completely empty (no AVAX and no token amounts).
-     * Returns true on success, false on failure.
-     */
-    bool accountIsEmpty(std::string account);
 
     /**
      * Select the appropriate Account name or address stored in KeyManager
@@ -157,7 +159,7 @@ class WalletManager {
     std::string convertFixedPointToWei(std::string amount, int decimals);
 
     /**
-     * List the wallet's Accounts and their coin and token balances.
+     * List the Wallet's Accounts and their coin and token balances.
      * Coin balances are checked in batches of up to 20.
      * Tokens need to be loaded in a different way, from their proper
      * contract address, beside their respective wallet address. Plus, due
@@ -183,7 +185,7 @@ class WalletManager {
     std::string getAutomaticFee();
 
     /**
-     * Build transaction data to send ERC-20 tokens.
+     * Build transaction data to send tokens.
      * Returns a string with said data.
      */
     std::string buildTxData(std::string txValue, std::string destWallet);

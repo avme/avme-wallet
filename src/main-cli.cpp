@@ -8,7 +8,6 @@ int main() {
   dev::setupLogging(loggingOptions);
 
   WalletManager wm;
-  std::string walletPass;
   boost::filesystem::path walletFile, secretsPath;
 
   std::cout << "Hello! Welcome to the AVME CLI wallet." << std::endl;
@@ -16,53 +15,53 @@ int main() {
   // Handle wallet loading/creation options
   while (true) {
     std::string menuOp = menuCheckWallet();
-    if (menuOp == "1") {  // Load the default wallet
-      walletFile = KeyManager::defaultPath();
-      secretsPath = SecretStore::defaultPath();
-      break;
-    } else if (menuOp == "2") { // Load an existing wallet
+    if (menuOp == "1") { // Load an existing wallet
       walletFile = menuLoadWalletFile();
       secretsPath = menuLoadWalletSecrets();
       break;
-    } else if (menuOp == "3") { // Create a new wallet
+    } else if (menuOp == "2") { // Create a new wallet
       walletFile = menuCreateWalletFile();
       secretsPath = menuCreateWalletSecrets();
-      std::cout << "Protect your wallet with a master passphrase (make it strong!)." << std::endl;
-      walletPass = menuCreatePass();
-      std::cout << "Creating new wallet..." << std::endl;
-      if (wm.createNewWallet(walletFile, secretsPath, walletPass)) {
+      std::cout << "Protect your Wallet with a master passphrase (make it strong!)." << std::endl;
+      std::string pass = menuCreatePass();
+      std::cout << "Creating new Wallet..." << std::endl;
+      if (wm.createNewWallet(walletFile, secretsPath, pass)) {
         std::cout << "Wallet successfully created!" << std::endl;
+        pass = "";
         break;
       } else {
-        std::cout << "Failed to create wallet, please try again." << std::endl;
+        std::cout << "Failed to create Wallet, please try again." << std::endl;
       }
     }
   }
 
   // Load the proper wallet with the given paths
   while (true) {
-    std::cout << "Enter your wallet's passphrase." << std::endl;
-    std::getline(std::cin, walletPass);
-    std::cout << "Loading wallet..." << std::endl;
-    if (wm.loadWallet(walletFile, secretsPath, walletPass)) {
+    std::string pass;
+    std::cout << "Enter your Wallet's passphrase." << std::endl;
+    std::getline(std::cin, pass);
+    std::cout << "Loading Wallet..." << std::endl;
+    if (wm.loadWallet(walletFile, secretsPath, pass)) {
       std::cout << "Wallet loaded." << std::endl;
+      wm.storeWalletPass(pass);
+      pass = "";
       break;
     } else {
-      std::cout << "Error loading wallet: wrong passphrase. Please try again." << std::endl;
+      std::cout << "Error loading Wallet: wrong passphrase. Please try again." << std::endl;
     }
   }
-  std::cout << "Loading wallet accounts" << std::endl;
+  std::cout << "Loading Wallet Accounts. This may take a while, please wait..." << std::endl;
   wm.loadWalletAccounts(true);
   // Menu loop
   while (true) {
     std::string menuOp;
     std::cout << "What are you looking to do?" << std::endl
-              << "1 - List AVAX accounts and balances" << std::endl
-              << "2 - List TAEX accounts and balances" << std::endl
+              << "1 - List AVAX Accounts and balances" << std::endl
+              << "2 - List TAEX Accounts and balances" << std::endl
               << "3 - Send an AVAX transaction" << std::endl
               << "4 - Send a TAEX transaction" << std::endl
-              << "5 - Create a new account" << std::endl
-              << "6 - Erase an existing account" << std::endl
+              << "5 - Create a new Account" << std::endl
+              << "6 - Erase an existing Account" << std::endl
               << "7 - Decode a raw transaction" << std::endl
               << "8 - Exit" << std::endl;
     std::getline(std::cin, menuOp);
@@ -79,7 +78,7 @@ int main() {
                     << accountData.balanceAVAX << std::endl;
         }
       } else {
-        std::cout << "No accounts found." << std::endl;
+        std::cout << "No Accounts found." << std::endl;
       }
 
     // List TAEX accounts
@@ -94,7 +93,7 @@ int main() {
                     << accountData.balanceTAEX << std::endl;
         }
       } else {
-        std::cout << "No accounts found." << std::endl;
+        std::cout << "No Accounts found." << std::endl;
       }
 
     // Send AVAX/TAEX transactions
@@ -128,15 +127,12 @@ int main() {
         boost::lexical_cast<u256>(txGasPrice) * raiseToPow(10,9)
       );
 
-      std::string pass, conf;
+      std::string pass;
       while (true) {
-        // TODO: fix passphrase logic (should be the account's pass, not the wallet's)
-        std::cout << "Enter your wallet's passphrase." << std::endl;
+        std::cout << "Please authenticate with your Wallet's passphrase to confirm the action." << std::endl;
         std::getline(std::cin, pass);
-        std::cout << "Please confirm the passphrase by entering it again." << std::endl;
-        std::getline(std::cin, conf);
-        if (pass == conf && pass == walletPass) { break; }
-        std::cout << "Passphrases were different or don't match the wallet's. Try again." << std::endl;
+        if (wm.checkWalletPass(pass)) { pass = ""; break; }
+        std::cout << "Wrong passphrase, please try again." << std::endl;
       }
 
       std::cout << "Building transaction..." << std::endl;
@@ -171,66 +167,51 @@ int main() {
       }
       std::cout << "Transaction sent! Link: " << transactionLink << std::endl;
       wm.reloadAccountsBalances();
+
     // Create new account
     } else if (menuOp == "5") {
-      std::string name, aPass, aPassConf, aPassHint;
-      bool usesMasterPass;
+      std::string name, pass;
 
-      std::cout << "Give a name to your account (optional)." << std::endl;
+      std::cout << "Give a name to your Account (optional, leave blank for nothing)." << std::endl;
       std::getline(std::cin, name);
-      std::cout << "Protect your account with a passphrase." << std::endl
-                << "Leave blank to use your wallet's master passphrase." << std::endl;
-      aPass = menuCreatePass();
-      if (aPass == "") {  // Using the master passphrase
-        usesMasterPass = true;
-        aPass = walletPass;
-        aPassHint = "";
-      } else {  // Using a normal passphrase
-        usesMasterPass = false;
-        std::cout << "Enter a hint to help you remember this passphrase (optional)." << std::endl;
-        std::getline(std::cin, aPassHint);
+      while (true) {
+        std::cout << "Please authenticate with your Wallet's passphrase to confirm the action." << std::endl;
+        std::getline(std::cin, pass);
+        if (wm.checkWalletPass(pass)) { pass = ""; break; }
+        std::cout << "Wrong passphrase, please try again." << std::endl;
       }
 
-      std::cout << "Creating a new account..." << std::endl;
-      WalletAccount data = wm.createNewAccount(name, aPass, aPassHint, usesMasterPass);
+      std::cout << "Creating a new Account..." << std::endl;
+      WalletAccount data = wm.createNewAccount(name, pass);
       std::cout << "Created key " << data.id << std::endl
                 << "  Name: " << data.name << std::endl
-                << "  Address: " << data.address << std::endl
-                << "  Hint: " << data.hint << std::endl;
-      std::cout << "Reloading wallet..." << std::endl;
-      wm.loadWallet(walletFile, secretsPath, walletPass);
-	  std::cout << "Reloading accounts..." << std::endl;
-	  wm.loadWalletAccounts(false);
+                << "  Address: " << data.address << std::endl;
+      std::cout << "Reloading Wallet..." << std::endl;
+      wm.loadWallet(walletFile, secretsPath, pass);
+      std::cout << "Reloading Accounts..." << std::endl;
+      wm.loadWalletAccounts(false);
 
     // Erase account
     } else if (menuOp == "6") {
-      std::string account;
-
-      account = menuChooseAccountErase(wm);
-      if (!wm.accountIsEmpty(account)) {
-        std::cout << "The account " << account << " has funds in it." << std::endl
-                  << "If you choose to erase it, all funds will be *permanently* lost." << std::endl;
-      }
+      std::string account = menuChooseAccountErase(wm);
       if (menuConfirmAccountErase()) {
+        std::string pass;
         while (true) {
-          // TODO: fix passphrase logic (should be the account's pass, not the wallet's)
-          std::string pass, conf;
-          std::cout << "Enter your wallet's passphrase." << std::endl;
+          std::cout << "Please authenticate with your Wallet's passphrase to confirm the action." << std::endl;
           std::getline(std::cin, pass);
-          std::cout << "Please confirm the passphrase by entering it again." << std::endl;
-          std::getline(std::cin, conf);
-          if (pass == conf && pass == walletPass) { break; }
-          std::cout << "Passphrases were different or don't match the wallet's. Try again." << std::endl;
+          if (wm.checkWalletPass(pass)) { pass = ""; break; }
+          std::cout << "Wrong passphrase, please try again." << std::endl;
         }
-        std::cout << "Erasing account..." << std::endl;
+
+        std::cout << "Erasing Account..." << std::endl;
         if (wm.eraseAccount(account)) {
           std::cout << "Account erased: " << account << std::endl;
-          std::cout << "Reloading wallet..." << std::endl;
-          wm.loadWallet(walletFile, secretsPath, walletPass);
-	      std::cout << "Reloading accounts..." << std::endl;
-	      wm.loadWalletAccounts(false);
+          std::cout << "Reloading Wallet..." << std::endl;
+          wm.loadWallet(walletFile, secretsPath, pass);
+          std::cout << "Reloading Accounts..." << std::endl;
+          wm.loadWalletAccounts(false);
         } else {
-          std::cout << "Failed to erase account " << account << "; account doesn't exist" << std::endl;
+          std::cout << "Failed to erase Account " << account << "; Account doesn't exist" << std::endl;
         }
       } else {
         std::cout << "Aborted." << std::endl;
