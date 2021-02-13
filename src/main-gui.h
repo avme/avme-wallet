@@ -10,7 +10,11 @@
 #include <QtGui/QClipboard>
 #include <QtGui/QFont>
 
+#ifdef __MINGW32__
+Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+#else
 Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
+#endif
 Q_IMPORT_PLUGIN(QtQuick2Plugin)
 Q_IMPORT_PLUGIN(QtQuick2WindowPlugin)
 Q_IMPORT_PLUGIN(QtQuickTemplates2Plugin)
@@ -117,8 +121,8 @@ class System : public QObject {
       QString walletFile, QString secretsPath, QString walletPass
     ) {
       return this->wm.createNewWallet(
-        walletFile.remove("file://").toStdString(),
-        secretsPath.remove("file://").toStdString(),
+        walletFile.remove("file:///").toStdString(),
+        secretsPath.remove("file:///").toStdString(),
         walletPass.toStdString()
       );
     }
@@ -128,8 +132,14 @@ class System : public QObject {
       QString walletFile, QString secretsPath, QString walletPass
     ) {
       return this->wm.loadWallet(
+	    #ifdef __MINGW32__
         walletFile.remove("file://").toStdString(),
         secretsPath.remove("file://").toStdString(),
+        #else
+        walletFile.remove("file://").toStdString(),
+        secretsPath.remove("file://").toStdString(),
+        #endif
+        #endif
         walletPass.toStdString()
       );
     }
