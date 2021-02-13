@@ -139,7 +139,6 @@ class System : public QObject {
         walletFile.remove("file://").toStdString(),
         secretsPath.remove("file://").toStdString(),
         #endif
-        #endif
         walletPass.toStdString()
       );
     }
