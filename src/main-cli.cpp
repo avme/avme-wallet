@@ -5,6 +5,7 @@
 int main() {
   // Set logging options to default to suppress debug strings (e.g. when reading key files).
   dev::LoggingOptions loggingOptions;
+  loggingOptions.verbosity = 0; // No WARN messages
   dev::setupLogging(loggingOptions);
 
   WalletManager wm;
@@ -15,11 +16,7 @@ int main() {
   // Handle wallet loading/creation options
   while (true) {
     std::string menuOp = menuCheckWallet();
-    if (menuOp == "1") { // Load an existing wallet
-      walletFile = menuLoadWalletFile();
-      secretsPath = menuLoadWalletSecrets();
-      break;
-    } else if (menuOp == "2") { // Create a new wallet
+    if (menuOp == "1") { // Create a new wallet
       walletFile = menuCreateWalletFile();
       secretsPath = menuCreateWalletSecrets();
       std::cout << "Protect your Wallet with a master passphrase (make it strong!)." << std::endl;
@@ -32,6 +29,10 @@ int main() {
       } else {
         std::cout << "Failed to create Wallet, please try again." << std::endl;
       }
+    } else if (menuOp == "2") { // Load an existing wallet
+      walletFile = menuLoadWalletFile();
+      secretsPath = menuLoadWalletSecrets();
+      break;
     }
   }
 

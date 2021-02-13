@@ -71,30 +71,30 @@ typedef struct WalletTxData {
   std::string s;
 } WalletTxData;
 
-// Mutex for account refresh thread
+// Mutex for account refresh thread.
 static std::mutex balancesThreadLock;
 
 class WalletManager {
   private:
-    // The proper Wallet
+    // The proper Wallet.
     KeyManager wallet;
 
-    // The Wallet's password hash, salt and iterations for the hash
+    // The Wallet's password hash, salt and iterations for the hash.
     bytesSec passHash;
     h256 passSalt;
     int passIterations = 100000;
 
-    // Called by loadWalletAccounts()
+    // Called by loadWalletAccounts().
     void reloadAccountsBalancesThread();
 
   public:
     // Set MAX_U256_VALUE for error handling.
     u256 MAX_U256_VALUE();
 
-    // Hash the Wallet's password with a random salt and store both for auth checks
+    // Hash the Wallet's password with a random salt and store both for auth checks.
     void storeWalletPass(std::string pass);
 
-    // Check if the password input matches the stored hash
+    // Check if the password input matches the stored hash.
     bool checkWalletPass(std::string pass);
 
     /**
@@ -139,38 +139,42 @@ class WalletManager {
     Address userToAddress(std::string const& input);
 
     /**
+     * Check if an Account exists.
+     * Returns true on success, false on failure.
+     */
+    bool accountExists(std::string account);
+
+    /**
      * Load the secret key for a given address in the wallet.
      * Returns the proper Secret, or aborts the program on failure.
      */
     Secret getSecret(std::string const& address, std::string pass);
 
     /**
-     * Convert a full Wei amount to a fixed point AVAX amount and vice-versa.
+     * Convert a full Wei amount to a fixed point amount and vice-versa.
      * BTC has 8 decimals but is considered a full integer in code, so 1.0 BTC
      * actually means 100000000 satoshis.
-     * Likewise with AVAX, which has 18 digits, so 1.0 AVAX actually means
-     * 1000000000000000000 Wei.
+     * Likewise with ETH, AVAX, etc., which have 18 digits, so 1.0 ETH/AVAX
+     * actually means 1000000000000000000 Wei.
      * Operations are actually done with the full amounts in Wei, but to make
      * those operations more human-friendly, we show to/collect from the user
      * fixed point values, and convert those to Wei and back as required.
-     * Returns the fixed point and full amounts of AVAX/Wei, respectively.
+     * Returns the fixed point and full amounts, respectively.
      */
     std::string convertWeiToFixedPoint(std::string amount, size_t digits);
     std::string convertFixedPointToWei(std::string amount, int decimals);
 
     /**
-     * List the Wallet's Accounts and their coin and token balances.
-     * Coin balances are checked in batches of up to 20.
-     * Tokens need to be loaded in a different way, from their proper
-     * contract address, beside their respective wallet address. Plus, due
-     * to API limitations, only one can be checked at a time.
-     * Returns a list of accounts and their coin/token amounts, respectively.
+     * Load the Wallet's Accounts and their coin and token balances.
+     * Tokens are loaded from their proper contract address, beside their
+     * respective Wallet Accounts.
+     * loadWalletAccounts(true) should be called only once, right after
+     * loading the Wallet, which will create a thread that occasionally calls
+     * ReadWriteWalletVector, which refreshes the Account list on the background.
+     * loadWalletAccounts(false) should be called after any add/remove Account
+     * operation, or after a transaction has been done.
+     * reloadAccountsBalances is a forced Account balance refresh.
      */
-    // TODO: expand docs:
-    // reloadAccountsBalances = forced Account balances refresh
-    // bool in loadWalletAccounts:
-    // - true = only use once right after loading the Wallet, creates a thread for auto-refreshing
-    // - false = create a fresh new vector after an add/remove Account operation
     void reloadAccountsBalances();
     void loadWalletAccounts(bool start);
     std::vector<WalletAccount> ReadWriteWalletVector(
@@ -191,8 +195,8 @@ class WalletManager {
     std::string buildTxData(std::string txValue, std::string destWallet);
 
     /**
-     * Build an AVAX or token transaction from user data.
-     * Returns a skeleton filled with data for an AVAX/token transaction,
+     * Build a coin or token transaction from user data.
+     * Returns a skeleton filled with data for a coin/token transaction,
      * respectively, which has to be signed.
      */
     TransactionSkeleton buildAVAXTransaction(
@@ -206,7 +210,8 @@ class WalletManager {
 
     /**
      * Sign a transaction with user credentials.
-     * Returns a string with the raw signed transaction in Hex.
+     * Returns a string with the raw signed transaction in Hex,
+     * or an empty string on failure.
      */
     std::string signTransaction(
       TransactionSkeleton txSkel, std::string pass, std::string address

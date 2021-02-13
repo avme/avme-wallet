@@ -28,7 +28,6 @@ std::string menuCheckWallet() {
 }
 
 // Load a Wallet file
-// TODO: check correctly for file contents instead of just if the file exists
 std::string menuLoadWalletFile() {
   std::string ret;
 
@@ -46,7 +45,6 @@ std::string menuLoadWalletFile() {
 }
 
 // Load a secrets path
-// TODO: check correctly for directory contents instead of only if the directory exists
 std::string menuLoadWalletSecrets() {
   std::string ret;
 
@@ -225,7 +223,6 @@ std::string menuSetGasPrice() {
 }
 
 // Choose an Account to erase
-// TODO: check for actually invalid Accounts (42 chars in length but don't actually exist)
 std::string menuChooseAccountErase(WalletManager wm) {
   std::string ret;
 
@@ -236,7 +233,9 @@ std::string menuChooseAccountErase(WalletManager wm) {
       ret = "0x" + boost::lexical_cast<std::string>(wm.userToAddress(ret));
     }
     if (ret.length() != 42) {
-      std::cout << "Address not found or invalid, please check the formatting or try another." << std::endl;
+      std::cout << "Invalid Account, please check the formatting." << std::endl;
+    } else if (!wm.accountExists(ret)) {
+      std::cout << "Account doesn't exist, please try another." << std::endl;
     } else {
       break;
     }

@@ -96,12 +96,19 @@ Address WalletManager::userToAddress(std::string const& input) {
   return Address();
 }
 
-// TODO: make the program not abort on failure but do something else
+bool WalletManager::accountExists(std::string account) {
+  for (Address const& a: this->wallet.accounts()) {
+    std::string acc = "0x" + boost::lexical_cast<std::string>(a);
+    std::string acc2 = "0x" + boost::lexical_cast<std::string>(userToAddress(account));
+    if (acc == acc2) { return true; }
+  }
+  return false;
+}
+
 Secret WalletManager::getSecret(std::string const& address, std::string pass) {
   if (h128 u = fromUUID(address)) {
-    return Secret(this->wallet.store().secret(u, [&](){ return pass; }));
+    return Secret(this->wallet.store().secret(u, [&](){ return pass; }, false));
   }
-
   Address a;
   try {
     a = toAddress(address);
@@ -113,12 +120,11 @@ Secret WalletManager::getSecret(std::string const& address, std::string pass) {
       }
     }
   }
-
-  if (a) {
-    return this->wallet.secret(a, [&](){ return pass; });
+  if (a && accountExists(boost::lexical_cast<std::string>(a))) {
+    return this->wallet.secret(a, [&](){ return pass; }, false);
   } else {
     std::cerr << "Bad file, UUID or address: " << address << std::endl;
-    exit(-1);
+    return Secret();
   }
 }
 
@@ -343,9 +349,9 @@ TransactionSkeleton WalletManager::buildAVAXTransaction(
 }
 
 TransactionSkeleton WalletManager::buildTAEXTransaction(
-    std::string srcAddress, std::string destAddress,
-    std::string txValue, std::string txGas, std::string txGasPrice
-    ) {
+  std::string srcAddress, std::string destAddress,
+  std::string txValue, std::string txGas, std::string txGasPrice
+) {
   TransactionSkeleton txSkel;
   int txNonce;
   std::string contractWallet = "a687a9cff994973314c6e2cb313f82d6d78cd232";
@@ -374,8 +380,8 @@ TransactionSkeleton WalletManager::buildTAEXTransaction(
 }
 
 std::string WalletManager::signTransaction(
-    TransactionSkeleton txSkel, std::string pass, std::string address
-    ) {
+  TransactionSkeleton txSkel, std::string pass, std::string address
+) {
   Secret s = getSecret(address, pass);
   std::stringstream txHexBuffer;
 
@@ -386,6 +392,7 @@ std::string WalletManager::signTransaction(
     txHexBuffer << toHex(t.rlp());
   } catch (Exception& ex) {
     std::cerr << "Invalid transaction: " << ex.what() << std::endl;
+    return "";
   }
 
   return txHexBuffer.str();

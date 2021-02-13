@@ -125,11 +125,11 @@ class System : public QObject {
     ) {
       return this->wm.createNewWallet(
         #ifdef __MINGW32__
-        walletFile.remove("file:///").toStdString(),
-        secretsPath.remove("file:///").toStdString(),
+          walletFile.remove("file:///").toStdString(),
+          secretsPath.remove("file:///").toStdString(),
         #else
-        walletFile.remove("file://").toStdString(),
-        secretsPath.remove("file://").toStdString(),
+          walletFile.remove("file://").toStdString(),
+          secretsPath.remove("file://").toStdString(),
         #endif
         pass.toStdString()
       );
@@ -137,15 +137,15 @@ class System : public QObject {
 
     // Load a Wallet
     Q_INVOKABLE bool loadWallet(
-      QString walletFile, QString secretsPath, QString pass
-    ) {
+        QString walletFile, QString secretsPath, QString pass
+        ) {
       return this->wm.loadWallet(
-	      #ifdef __MINGW32__
-        walletFile.remove("file:///").toStdString(),
-        secretsPath.remove("file:///").toStdString(),
+        #ifdef __MINGW32__
+          walletFile.remove("file:///").toStdString(),
+          secretsPath.remove("file:///").toStdString(),
         #else
-        walletFile.remove("file://").toStdString(),
-        secretsPath.remove("file://").toStdString(),
+          walletFile.remove("file://").toStdString(),
+          secretsPath.remove("file://").toStdString(),
         #endif
         pass.toStdString()
       );
@@ -190,6 +190,11 @@ class System : public QObject {
     // Erase an Account
     Q_INVOKABLE bool eraseAccount(QString account) {
       return this->wm.eraseAccount(account.toStdString());
+    }
+
+    // Check if Account exists
+    Q_INVOKABLE bool accountExists(QString account) {
+      return this->wm.accountExists(account.toStdString());
     }
 
     // Get an Account's private keys
@@ -301,8 +306,6 @@ class System : public QObject {
       }
 
       // Part 2: Sign
-      // TODO: see if checking for empty string is really the right way to know
-      // whether the function worked or not
       std::string signedTx = wm.signTransaction(txSkel, pass.toStdString(), this->txSenderAccount);
       if (!signedTx.empty()) {
         emit txSigned(true);

@@ -17,7 +17,9 @@ Example steps for APT-based distros:
 
 ### Instructions
 
-Open a terminal at project root and do the following:
+First, clone the project with `git clone --recurse-submodules` (or, if you've already cloned it, do a `git submodule update --init external/openssl/cmake`).
+
+Then, open a terminal at project root and do the following:
 
 ```
 mkdir build && cd build
