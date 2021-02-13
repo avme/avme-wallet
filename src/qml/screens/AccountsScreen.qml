@@ -19,13 +19,13 @@ Item {
   }
 
   Component.onCompleted: {
-    // Always default to AVAX & TAEX on first load
+    // Always default to AVAX & AVME on first load
     if (System.getCurrentCoin() == "") {
       System.setCurrentCoin("AVAX")
       System.setCurrentCoinDecimals(18)
     }
     if (System.getCurrentToken() == "") {
-      System.setCurrentToken("TAEX")
+      System.setCurrentToken("AVME")
       System.setCurrentTokenDecimals(18)
     }
     hasCoin = (System.getCurrentCoin() != "");
@@ -269,10 +269,10 @@ Item {
     }
     AVMEButton {
       // TODO: add fiat pricing here too when the time comes
-      id: btnSendAVAX
+      id: btnChangeToken
       width: (parent.width / 3) - parent.spacing
       anchors.verticalCenter: parent.verticalCenter
-      text: "Change Current Coin/Token (WIP)"
+      text: "Change Current Token (WIP)"
       onClicked: {
         
       }

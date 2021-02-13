@@ -86,7 +86,7 @@ std::string Network::getAVAXBalance(std::string address) {
   return httpGetRequest(query.str());
 }
 
-std::string Network::getTAEXBalance(std::string address, std::string contractAddress) {
+std::string Network::getAVMEBalance(std::string address, std::string contractAddress) {
   std::stringstream query;
   query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\",\"params\": [{\"to\": \""
         << contractAddress

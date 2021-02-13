@@ -30,22 +30,19 @@ class Network {
   public:
     /**
      * Send an HTTP GET Request to the blockchain API.
-     * Returns the requested pure JSON data, or an empty string at failure.
+     * Returns the requested pure JSON data, or an empty string at connection failure.
      * All other functions return whatever this one does.
      */
     static std::string httpGetRequest(std::string reqBody);
 
+    // TODO: build JSON queries with json_spirit instead of stringstream
+
     /**
-     * Get coin/token balances from one or more addresses in the blockchain API.
-     * Due to API lmitations, the following restraints apply:
-     * - Only up to 20 accounts can be batch requested at once.
-     *   If a list has more than that, it's suggested to split it in smaller
-     *   batches of 20 and make multiple requests.
-     * - Tokens unfortunately can't be batched, so only one address at a time
-     *   can be requested.
+     * Get coin/token balances from a given address in the blockchain API.
+     * For a list of addresses, make one call per address in the list.
      */
     static std::string getAVAXBalance(std::string address);
-    static std::string getTAEXBalance(std::string address, std::string contractAddress);
+    static std::string getAVMEBalance(std::string address, std::string contractAddress);
 
     // Get the highest available nonce for an address from the blockchain API.
     static std::string getTxNonce(std::string address);

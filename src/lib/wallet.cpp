@@ -1,7 +1,3 @@
-// Wallet management, based on Ethereum's Aleth libraries.
-// Aleth: Ethereum C++ client, tools and libraries.
-// Copyright 2015-2019 Aleth Authors.
-// Licensed under the GNU General Public License, Version 3.
 #include "wallet.h"
 
 u256 WalletManager::MAX_U256_VALUE() {
@@ -259,17 +255,17 @@ std::vector<WalletAccount> WalletManager::ReadWriteWalletVector(
       }
       accountToRead.balanceAVAX = convertWeiToFixedPoint(balanceStr, 18);
 
-      std::string TAEXAddress = (accountToRead.address.substr(0, 2) == "0x") ? accountToRead.address.substr(2) : accountToRead.address;
-      jsonBal = JSON::getValue(Network::getTAEXBalance(
-        TAEXAddress, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"
+      std::string AVMEAddress = (accountToRead.address.substr(0, 2) == "0x") ? accountToRead.address.substr(2) : accountToRead.address;
+      jsonBal = JSON::getValue(Network::getAVMEBalance(
+        AVMEAddress, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"
       ), "result");
-      u256 TAEXbalance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
-      balanceStr = boost::lexical_cast<std::string>(TAEXbalance);
+      u256 AVMEbalance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
+      balanceStr = boost::lexical_cast<std::string>(AVMEbalance);
       if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
         balancesThreadLock.unlock();
         return {};
       }
-      accountToRead.balanceTAEX = convertWeiToFixedPoint(balanceStr, 18);
+      accountToRead.balanceAVME = convertWeiToFixedPoint(balanceStr, 18);
     }
     balancesThreadLock.unlock();
     return {};
@@ -280,6 +276,7 @@ std::vector<WalletAccount> WalletManager::ReadWriteWalletVector(
   return safeWalletAcccounts;
 }
 
+// TODO: change this when more coins/tokens are added
 std::string WalletManager::getAutomaticFee() {
   return "470"; // AVAX fees are fixed
 }
@@ -348,7 +345,7 @@ TransactionSkeleton WalletManager::buildAVAXTransaction(
   return txSkel;
 }
 
-TransactionSkeleton WalletManager::buildTAEXTransaction(
+TransactionSkeleton WalletManager::buildAVMETransaction(
   std::string srcAddress, std::string destAddress,
   std::string txValue, std::string txGas, std::string txGasPrice
 ) {

@@ -173,7 +173,7 @@ class System : public QObject {
         obj += "{\"account\": \"" + wa.address;
         obj += "\", \"name\": \"" + wa.name;
         obj += "\", \"coinAmount\": \"" + wa.balanceAVAX;
-        obj += "\", \"tokenAmount\": \"" + wa.balanceTAEX;
+        obj += "\", \"tokenAmount\": \"" + wa.balanceAVME;
         obj += "\"}";
         ret << QString::fromStdString(obj);
       }
@@ -282,7 +282,7 @@ class System : public QObject {
         this->txGasPrice = boost::lexical_cast<std::string>(
           boost::lexical_cast<u256>(this->txGasPrice) * raiseToPow(10, 9)
         );
-        txSkel = wm.buildTAEXTransaction(
+        txSkel = wm.buildAVMETransaction(
           this->txSenderAccount, this->txReceiverAccount, this->txReceiverTokenAmount,
           this->txGasLimit, this->txGasPrice
         );

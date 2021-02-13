@@ -1,8 +1,7 @@
+// Wallet management, based on Ethereum's Aleth libraries.
 // Aleth: Ethereum C++ client, tools and libraries.
 // Copyright 2015-2019 Aleth Authors.
 // Licensed under the GNU General Public License, Version 3.
-/// @file
-/// CLI module for key management.
 #ifndef WALLET_H
 #define WALLET_H
 
@@ -42,17 +41,17 @@ using namespace boost::filesystem;
 
 class BadArgument: public Exception {};
 
-// Struct for account data
+// Struct for account data.
 typedef struct WalletAccount {
   std::string id;
   std::string privKey;
   std::string name;
   std::string address;
   std::string balanceAVAX;
-  std::string balanceTAEX;
+  std::string balanceAVME;
 } WalletAccount;
 
-// Struct for raw transaction data
+// Struct for raw transaction data.
 typedef struct WalletTxData {
   std::string hex;
   std::string type;
@@ -91,14 +90,14 @@ class WalletManager {
     // Set MAX_U256_VALUE for error handling.
     u256 MAX_U256_VALUE();
 
-    // Hash the Wallet's password with a random salt and store both for auth checks.
+    // Hash the Wallet's passphrase with a random salt and store both for auth checks.
     void storeWalletPass(std::string pass);
 
-    // Check if the password input matches the stored hash.
+    // Check if the passphrase input matches the stored hash.
     bool checkWalletPass(std::string pass);
 
     /**
-     * Load and authenticate a wallet from the given paths.
+     * Load and authenticate a Wallet from the given paths.
      * Returns true on success, false on failure.
      */
     bool loadWallet(path walletFile, path secretsPath, std::string pass);
@@ -111,9 +110,9 @@ class WalletManager {
 
     /**
      * Create a new Account in the given Wallet and encrypt it.
-     * An Account contains an AVAX address and other stuff.
+     * An Account contains a currency address and other stuff.
      * See https://ethereum.org/en/developers/docs/accounts/ for more info.
-     * Returns a struct with the account's data.
+     * Returns a struct with the Account's data.
      */
     WalletAccount createNewAccount(std::string name, std::string pass);
 
@@ -131,34 +130,36 @@ class WalletManager {
     bool eraseAccount(std::string account);
 
     /**
-     * Select the appropriate Account name or address stored in KeyManager
-     * from user input string.
-     * Returns the proper address in Hex (without the "0x" part), or an empty
-     * address on failure.
+     * Select the appropriate Account name or address stored in
+     * KeyManager from user input string.
+     * Returns the proper address in Hex (without the "0x" part),
+     * or an empty address on failure.
      */
     Address userToAddress(std::string const& input);
 
     /**
-     * Check if an Account exists.
+     * Check if an Account exists in the Wallet.
      * Returns true on success, false on failure.
      */
     bool accountExists(std::string account);
 
     /**
-     * Load the secret key for a given address in the wallet.
-     * Returns the proper Secret, or aborts the program on failure.
+     * Load the secret key for a given address in the Wallet.
+     * Returns the proper Secret, or an "empty" Secret on failure.
      */
     Secret getSecret(std::string const& address, std::string pass);
 
     /**
-     * Convert a full Wei amount to a fixed point amount and vice-versa.
+     * Convert a full Wei amount to a fixed point amount and vice-versa,
+     * in the given amount of digits/decimals.
      * BTC has 8 decimals but is considered a full integer in code, so 1.0 BTC
      * actually means 100000000 satoshis.
      * Likewise with ETH, AVAX, etc., which have 18 digits, so 1.0 ETH/AVAX
      * actually means 1000000000000000000 Wei.
-     * Operations are actually done with the full amounts in Wei, but to make
-     * those operations more human-friendly, we show to/collect from the user
-     * fixed point values, and convert those to Wei and back as required.
+     * This also applies to their respective tokens.
+     * Operations are actually done with full amounts, but to make those
+     * operations more human-friendly, we show to and collect from the user
+     * fixed point values, then convert those to full amounts and back.
      * Returns the fixed point and full amounts, respectively.
      */
     std::string convertWeiToFixedPoint(std::string amount, size_t digits);
@@ -184,7 +185,7 @@ class WalletManager {
     /**
      * Get the recommended gas price for a transaction.
      * Returns the gas price in Gwei, which has to be converted to Wei
-     * when building a transaction.
+     * when building a transaction (1 Gwei = 10^9 Wei).
      */
     std::string getAutomaticFee();
 
@@ -196,14 +197,14 @@ class WalletManager {
 
     /**
      * Build a coin or token transaction from user data.
-     * Returns a skeleton filled with data for a coin/token transaction,
+     * Returns a skeleton filled with data for a coin or token transaction,
      * respectively, which has to be signed.
      */
     TransactionSkeleton buildAVAXTransaction(
       std::string srcAddress, std::string destAddress,
       std::string txValue, std::string txGas, std::string txGasPrice
     );
-    TransactionSkeleton buildTAEXTransaction(
+    TransactionSkeleton buildAVMETransaction(
       std::string srcAddress, std::string destAddress,
       std::string txValue, std::string txGas, std::string txGasPrice
     );

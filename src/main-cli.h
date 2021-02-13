@@ -150,7 +150,7 @@ std::string menuChooseReceiverAddress() {
   return ret;
 }
 
-// Choose an AVAX/TAEX amount, respectively, to send from a given address
+// Choose a coin or token amount to send from a given address
 std::string menuChooseAVAXAmount(std::string address, WalletManager wm) {
   std::string ret;
 
@@ -170,16 +170,16 @@ std::string menuChooseAVAXAmount(std::string address, WalletManager wm) {
   return ret;
 }
 
-std::string menuChooseTAEXAmount(std::string address, WalletManager wm) {
+std::string menuChooseAVMEAmount(std::string address, WalletManager wm) {
   std::string ret;
 
   while (true) {
-    std::cout << "How much TAEX do you want to send? (amount in fixed point, e.g. 0.5 - MAXIMUM 18 DECIMALS!)" << std::endl;
+    std::cout << "How much AVME do you want to send? (amount in fixed point, e.g. 0.5 - MAXIMUM 18 DECIMALS!)" << std::endl;
     std::getline(std::cin, ret);
     ret = wm.convertFixedPointToWei(ret, 18);
     if (ret == "") {
       std::cout << "Invalid amount, please check if your input is correct." << std::endl;
-    } else if (ret > Network::getTAEXBalance(address, "0xa687a9cff994973314c6e2cb313f82d6d78cd232")) {
+    } else if (ret > Network::getAVMEBalance(address, "0xa687a9cff994973314c6e2cb313f82d6d78cd232")) {
       std::cout << "Insufficient funds, please try again." << std::endl;
     } else {
       break;

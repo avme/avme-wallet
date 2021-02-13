@@ -5,6 +5,7 @@
 int main(int argc, char *argv[]) {
   // Set logging options to default to suppress debug strings (e.g. when reading key files).
   dev::LoggingOptions loggingOptions;
+  loggingOptions.verbosity = 0; // No WARN messages
   dev::setupLogging(loggingOptions);
 
   // Create the application and register our custom class into it

@@ -53,14 +53,15 @@ int main() {
   }
   std::cout << "Loading Wallet Accounts. This may take a while, please wait..." << std::endl;
   wm.loadWalletAccounts(true);
+
   // Menu loop
   while (true) {
     std::string menuOp;
     std::cout << "What are you looking to do?" << std::endl
               << "1 - List AVAX Accounts and balances" << std::endl
-              << "2 - List TAEX Accounts and balances" << std::endl
+              << "2 - List AVME Accounts and balances" << std::endl
               << "3 - Send an AVAX transaction" << std::endl
-              << "4 - Send a TAEX transaction" << std::endl
+              << "4 - Send an AVME transaction" << std::endl
               << "5 - Create a new Account" << std::endl
               << "6 - Erase an existing Account" << std::endl
               << "7 - Decode a raw transaction" << std::endl
@@ -82,22 +83,22 @@ int main() {
         std::cout << "No Accounts found." << std::endl;
       }
 
-    // List TAEX accounts
+    // List AVME accounts
     } else if (menuOp == "2") {
-      std::vector<WalletAccount> TAEXAccounts = wm.ReadWriteWalletVector(false, false, {});
-      if (!TAEXAccounts.empty()) {
-        for (WalletAccount accountData : TAEXAccounts) {
+      std::vector<WalletAccount> AVMEAccounts = wm.ReadWriteWalletVector(false, false, {});
+      if (!AVMEAccounts.empty()) {
+        for (WalletAccount accountData : AVMEAccounts) {
           std::cout << accountData.id << " "
                     << accountData.privKey << " "
                     << accountData.name << " "
                     << accountData.address << " "
-                    << accountData.balanceTAEX << std::endl;
+                    << accountData.balanceAVME << std::endl;
         }
       } else {
         std::cout << "No Accounts found." << std::endl;
       }
 
-    // Send AVAX/TAEX transactions
+    // Send AVAX/AVME transactions
     } else if (menuOp == "3" || menuOp == "4") {
       TransactionSkeleton txSkel;
       std::string srcAddress, destAddress, txValue, txGasLimit, txGasPrice,
@@ -107,8 +108,8 @@ int main() {
       destAddress = menuChooseReceiverAddress();
       if (menuOp == "3") {  // AVAX
         txValue = menuChooseAVAXAmount(srcAddress, wm);
-      } else if (menuOp == "4") { // TAEX
-        txValue = menuChooseTAEXAmount(srcAddress, wm);
+      } else if (menuOp == "4") { // AVME
+        txValue = menuChooseAVMEAmount(srcAddress, wm);
       }
       std::cout << "Do you want to set your own fee or use an automatic fee?\n" <<
                    "1 - Automatic\n2 - Set my own" << std::endl;
@@ -116,7 +117,7 @@ int main() {
       if (feeOp == "1") {
         if (menuOp == "3") {  // AVAX
           txGasLimit = "21000";
-        } else if (menuOp == "4") { // TAEX
+        } else if (menuOp == "4") { // AVME
           txGasLimit = "80000";
         }
         txGasPrice = wm.getAutomaticFee();
@@ -139,8 +140,8 @@ int main() {
       std::cout << "Building transaction..." << std::endl;
       if (menuOp == "3") {  // AVAX
         txSkel = wm.buildAVAXTransaction(srcAddress, destAddress, txValue, txGasLimit, txGasPrice);
-      } else if (menuOp == "4") { // TAEX
-        txSkel = wm.buildTAEXTransaction(srcAddress, destAddress, txValue, txGasLimit, txGasPrice);
+      } else if (menuOp == "4") { // AVME
+        txSkel = wm.buildAVMETransaction(srcAddress, destAddress, txValue, txGasLimit, txGasPrice);
       }
       if (txSkel.nonce == wm.MAX_U256_VALUE()) {
         std::cout << "Error in transaction building" << std::endl;
