@@ -59,28 +59,15 @@ hunter_add_package(ethash)
 find_package(ethash CONFIG REQUIRED)
 
 include(ProjectSecp256k1)
+include(ProjectBip3x)
 find_package(Threads)
 
-add_subdirectory(external/openssl-cmake)
-
-# Include paths for local libs and headers
-# Macro adapted from https://stackoverflow.com/a/31004567
-# TODO: decide if we'll be using this anyway or not
-macro(get_depends_includes_rec list)
-    FILE(GLOB_RECURSE new_list "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/include/Qt*/*.h")
-    SET(dir_list "")
-    FOREACH(file_path ${new_list})
-        GET_FILENAME_COMPONENT(dir_path ${file_path} PATH)
-        SET(dir_list ${dir_list} ${dir_path})
-    ENDFOREACH()
-    LIST(REMOVE_DUPLICATES dir_list)
-    SET(${list} ${dir_list})
-ENDMACRO()
-
-#get_depends_includes_rec(DEPENDS_INCLUDES)
-
+# Include headers and libs
 include_directories(
-  "${CMAKE_SOURCE_DIR}" "${CMAKE_SOURCE_DIR}/build" "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/include" #${DEPENDS_INCLUDES}
+  "${CMAKE_SOURCE_DIR}"
+  "${CMAKE_SOURCE_DIR}/build"
+  "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/include"
+  #${DEPENDS_INCLUDES}
 )
 
 link_directories(
@@ -108,7 +95,9 @@ file(GLOB AVME_SOURCES "src/lib/*.cpp")
 
 # Compile the project library
 add_library(avme-lib ${AVME_HEADERS} ${AVME_SOURCES})
-target_link_libraries(avme-lib PUBLIC devcore devcrypto ethcore ethash::ethash ssl crypto ${BOOST_LIBS})
+target_link_libraries(avme-lib PUBLIC
+  devcore devcrypto ethcore ethash::ethash ssl crypto bip39 ${BOOST_LIBS}
+)
 
 # Compile the CLI executable (for testing)
 # TODO: have a macro somewhere that makes this optional

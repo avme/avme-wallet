@@ -31,6 +31,10 @@
 
 #include <json_spirit/JsonSpiritHeaders.h>
 
+#include <bip3x/Bip39Mnemonic.h>
+#include <bip3x/HDKeyEncoder.h>
+#include <bip3x/utils.h>
+
 #include "network.h"
 #include "json.h"
 
