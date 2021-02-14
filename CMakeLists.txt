@@ -59,6 +59,7 @@ hunter_add_package(ethash)
 find_package(ethash CONFIG REQUIRED)
 
 include(ProjectSecp256k1)
+include(ProjectToolbox)
 include(ProjectBip3x)
 find_package(Threads)
 
@@ -96,7 +97,7 @@ file(GLOB AVME_SOURCES "src/lib/*.cpp")
 # Compile the project library
 add_library(avme-lib ${AVME_HEADERS} ${AVME_SOURCES})
 target_link_libraries(avme-lib PUBLIC
-  devcore devcrypto ethcore ethash::ethash ssl crypto bip39 ${BOOST_LIBS}
+  devcore devcrypto ethcore ethash::ethash ssl crypto toolbox bip39 ${BOOST_LIBS}
 )
 
 # Compile the CLI executable (for testing)
