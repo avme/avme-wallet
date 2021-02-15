@@ -441,3 +441,56 @@ WalletTxData WalletManager::decodeRawTransaction(std::string rawTxHex) {
   return ret;
 }
 
+
+bip3x::Bip39Mnemonic::MnemonicResult WalletManager::createNewMnemonic() {
+		return bip3x::Bip39Mnemonic::generate();
+}
+
+bip3x::HDKey WalletManager::createBip32RootKey(bip3x::Bip39Mnemonic::MnemonicResult phrase) {
+	bip3x::bytes_64 seed = bip3x::HDKeyEncoder::makeBip39Seed(phrase.words);
+	return bip3x::HDKeyEncoder::makeBip32RootKey(seed);
+}
+
+
+bip3x::HDKey WalletManager::createBip32Key(bip3x::HDKey rootkey, std::string rootPath) {
+	bip3x::HDKeyEncoder::makeExtendedKey(rootkey, rootPath);
+	return rootkey;
+}
+
+
+std::vector<std::string> WalletManager::addressListBasedOnRootIndex(bip3x::HDKey rootkey, int64_t index) {
+	std::vector<std::string> ret;
+	for(int64_t i = 0; i < 10; ++i, ++index) {
+		std::string toPushBack;
+		std::string rootPath = "m/44'/60'/0'/0/";
+		rootPath += boost::lexical_cast<std::string>(index);
+		bip3x::HDKeyEncoder::makeExtendedKey(rootkey, rootPath);
+		KeyPair k(Secret::frombip3x(rootkey.privateKey));
+		toPushBack += "index: " + boost::lexical_cast<std::string>(index);
+		toPushBack += " Address: 0x" + k.address().hex();
+		
+		// Get balance to display for user
+		json_spirit::mValue jsonBal = JSON::getValue(Network::getAVAXBalance("0x" + k.address().hex()), "result");
+        u256 AVAXbalance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
+        std::string balanceStr = boost::lexical_cast<std::string>(AVAXbalance);
+        // Don't write to vector if an error occurs while reading the JSON
+        if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
+          return {};
+        }
+        toPushBack += " Balance: " + convertWeiToFixedPoint(balanceStr, 18);
+		ret.push_back(toPushBack);
+	}
+	return ret;
+}
+
+WalletAccount WalletManager::createNewBip32Account(std::string name, std::string pass, bip3x::HDKey bip32key) {
+	KeyPair k(Secret::frombip3x(bip32key.privateKey));
+	h128 u = this->wallet.import(k.secret(), name, pass, "");
+	WalletAccount ret;
+	
+	ret.id = toUUID(u);
+    ret.name = name;
+    ret.address = k.address().hex();
+
+	return ret;
+}

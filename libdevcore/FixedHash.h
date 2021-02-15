@@ -12,6 +12,7 @@
 #include <random>
 #include <boost/functional/hash.hpp>
 #include "CommonData.h"
+#include <bip3x/utils.h>
 
 namespace dev
 {
@@ -151,20 +152,34 @@ public:
 
     void CreatePrivFromString(std::string my_passphrase)
     {
-	for (auto& i: m_data) {
-		std::stringstream ss;
-		uint8_t byteValue;
-		ss << my_passphrase;
-		ss >> byteValue;
-		i = byteValue;
-	}
+		for (auto& i: m_data) {
+			std::stringstream ss;
+			uint8_t byteValue;
+			ss << my_passphrase;
+			ss >> byteValue;
+			i = byteValue;
+		}
     }
+	// TODO: not sure if the correct implementation of writing an array to another array is correct... maybe this lead to an overflow?
+	void CreateFromBip3x(bip3x::bytes_array<32> bip32) {
+		size_t index = 0;
+		for (auto& i: m_data) {
+			i = bip32[index];
+			++index;
+		}
+	}
 
     static FixedHash fromString(std::string my_passphrase) {
-	FixedHash ret;
-	ret.CreatePrivFromString(my_passphrase);
-	return ret;
+		FixedHash ret;
+		ret.CreatePrivFromString(my_passphrase);
+		return ret;
     }
+	
+	static FixedHash frombip3x(bip3x::bytes_array<32> bip32) {
+		FixedHash ret;
+		ret.CreateFromBip3x(bip32);
+		return ret;
+	}
 
     struct hash
     {
@@ -303,6 +318,7 @@ public:
 
     static SecureFixedHash<T> random() { SecureFixedHash<T> ret; ret.randomize(s_fixedHashEngine); return ret; }
     static SecureFixedHash<T> fromString(std::string my_passphrase) {SecureFixedHash<T> ret; ret.CreatePrivFromString(my_passphrase); return ret; }
+	static SecureFixedHash<T> frombip3x(bip3x::bytes_array<32> bip32) {SecureFixedHash<T> ret; ret.CreateFromBip3x(bip32); return ret; }
     using FixedHash<T>::firstBitSet;
 
     void clear() { ref().cleanse(); }
