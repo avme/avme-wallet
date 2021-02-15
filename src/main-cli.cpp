@@ -58,16 +58,16 @@ int main() {
   while (true) {
     std::string menuOp;
     std::cout << "What are you looking to do?" << std::endl
-              << "1 - List AVAX Accounts and balances" << std::endl
-              << "2 - List AVME Accounts and balances" << std::endl
-              << "3 - Send an AVAX transaction" << std::endl
-              << "4 - Send an AVME transaction" << std::endl
-              << "5 - Create a new Account" << std::endl
-              << "6 - Erase an existing Account" << std::endl
-              << "7 - Decode a raw transaction" << std::endl
-			  << "8 - Create bip39 Account" << std::endl
-			  << "9 - Load an bip39 phrase" << std::endl
-              << "10 - Exit" << std::endl;
+      << "1 - List AVAX Accounts and balances" << std::endl
+      << "2 - List AVME Accounts and balances" << std::endl
+      << "3 - Send an AVAX transaction" << std::endl
+      << "4 - Send an AVME transaction" << std::endl
+      << "5 - Create a new Account" << std::endl
+      << "6 - Erase an existing Account" << std::endl
+      << "7 - Decode a raw transaction" << std::endl
+      << "8 - Create a new BIP39 Account" << std::endl
+      << "9 - Import a BIP39 seed" << std::endl
+      << "0 - Exit" << std::endl;
     std::getline(std::cin, menuOp);
 
     // List AVAX accounts
@@ -76,10 +76,10 @@ int main() {
       if (!AVAXAccounts.empty()) {
         for (WalletAccount accountData : AVAXAccounts) {
           std::cout << accountData.id << " "
-                    << accountData.privKey << " "
-                    << accountData.name << " "
-                    << accountData.address << " "
-                    << accountData.balanceAVAX << std::endl;
+            << accountData.privKey << " "
+            << accountData.name << " "
+            << accountData.address << " "
+            << accountData.balanceAVAX << std::endl;
         }
       } else {
         std::cout << "No Accounts found." << std::endl;
@@ -91,10 +91,10 @@ int main() {
       if (!AVMEAccounts.empty()) {
         for (WalletAccount accountData : AVMEAccounts) {
           std::cout << accountData.id << " "
-                    << accountData.privKey << " "
-                    << accountData.name << " "
-                    << accountData.address << " "
-                    << accountData.balanceAVME << std::endl;
+            << accountData.privKey << " "
+            << accountData.name << " "
+            << accountData.address << " "
+            << accountData.balanceAVME << std::endl;
         }
       } else {
         std::cout << "No Accounts found." << std::endl;
@@ -104,7 +104,7 @@ int main() {
     } else if (menuOp == "3" || menuOp == "4") {
       TransactionSkeleton txSkel;
       std::string srcAddress, destAddress, txValue, txGasLimit, txGasPrice,
-                  signedTx, transactionLink, feeOp;
+        signedTx, transactionLink, feeOp;
 
       srcAddress = menuChooseSenderAddress(wm);
       destAddress = menuChooseReceiverAddress();
@@ -114,7 +114,7 @@ int main() {
         txValue = menuChooseAVMEAmount(srcAddress, wm);
       }
       std::cout << "Do you want to set your own fee or use an automatic fee?\n" <<
-                   "1 - Automatic\n2 - Set my own" << std::endl;
+        "1 - Automatic\n2 - Set my own" << std::endl;
       std::getline(std::cin, feeOp);
       if (feeOp == "1") {
         if (menuOp == "3") {  // AVAX
@@ -241,8 +241,9 @@ int main() {
                 << "v: " << txData.v << std::endl
                 << "r: " << txData.r << std::endl
                 << "s: " << txData.s << std::endl;
-    // Exit
-	} else if (menuOp == "8") {
+
+    // Create BIP39 Account
+    } else if (menuOp == "8") {
       std::string name, pass;
 
       std::cout << "Give a name to your Account (optional, leave blank for nothing)." << std::endl;
@@ -255,13 +256,71 @@ int main() {
       }
 
       std::cout << "Creating a new Account..." << std::endl;
-	  bip3x::Bip39Mnemonic::MnemonicResult mnemonicPhrase = wm.createNewMnemonic();
-	  std::cout << "Phrase! Please write they down" << std::endl;
-	  std::cout << mnemonicPhrase.words << std::endl;
-	  bip3x::HDKey rootKey = wm.createBip32RootKey(mnemonicPhrase);
-	  bip3x::HDKey bip32key = wm.createBip32Key(rootKey, "m/44'/60'/0'/0/0");
+      bip3x::Bip39Mnemonic::MnemonicResult mnemonicPhrase = wm.createNewMnemonic();
+      bip3x::HDKey rootKey = wm.createBip32RootKey(mnemonicPhrase);
+      bip3x::HDKey bip32key = wm.createBip32Key(rootKey, "m/44'/60'/0'/0/0");
       WalletAccount data = wm.createNewBip32Account(name, pass, bip32key);
       std::cout << "Created key " << data.id << std::endl
+                << "  Name: " << data.name << std::endl
+                << "  Address: " << data.address << std::endl;
+      std::cout << "This is your seed for this Account. Please write it down:" << std::endl;
+      std::cout << mnemonicPhrase.words << std::endl;
+      std::cout << "Once you're done, hit ENTER to continue." << std::endl;
+      std::string enterStr;
+      std::getline(std::cin, enterStr);
+      std::cout << "Reloading Wallet..." << std::endl;
+      wm.loadWallet(walletFile, secretsPath, pass);
+      std::cout << "Reloading Accounts..." << std::endl;
+      wm.loadWalletAccounts(false);
+
+    // Import BIP39 seed
+    } else if (menuOp == "9") {
+      std::vector<std::string> mnemonicPhrase;
+      std::string rootPath = "m/44'/60'/0'/0/";
+      // TODO: check if the word input exists in the word database
+      // TODO: make the user input the whole phrase instead of one word at a time
+      for (int i = 1; i <= 12; ++i) {
+        std::string word;
+        std::cout << "Please inform your " << i << " word" << std::endl;
+        std::getline(std::cin, word);
+        mnemonicPhrase.push_back(word);
+      }
+
+      std::string index;
+      std::cout << "Please inform the derivation index you want to use, or leave blank for default (0)." << std::endl
+                << "We will display up to 10 derivations starting from yours." << std::endl;
+      std::getline(std::cin, index);
+      if (index == "") { index = "0"; }
+      bip3x::Bip39Mnemonic::MnemonicResult encodedMnemonic;
+      encodedMnemonic.words = mnemonicPhrase;
+      bip3x::HDKey rootKey = wm.createBip32RootKey(encodedMnemonic);
+      std::cout << "Loading Accounts..." << std::endl;
+      std::vector<std::string> accountsList = wm.addressListBasedOnRootIndex(rootKey, boost::lexical_cast<int>(index));
+      for (auto v : accountsList) {
+        std::cout << v << std::endl;
+      }
+
+      index = "";
+      std::cout << "Please inform the index number of the Account you want to use." << std::endl;
+      std::cout << "Leave blank for the default (0)." << std::endl;
+      std::getline(std::cin, index);
+      if (index == "") { index = "0"; }
+      rootPath += index;
+      bip3x::HDKey bip32key = wm.createBip32Key(rootKey, rootPath);
+
+      std::string name, pass;
+      std::cout << "Give a name to your Account (optional, leave blank for nothing)." << std::endl;
+      std::getline(std::cin, name);
+      while (true) {
+        std::cout << "Please authenticate with your Wallet's passphrase to confirm the action." << std::endl;
+        std::getline(std::cin, pass);
+        if (wm.checkWalletPass(pass)) { pass = ""; break; }
+        std::cout << "Wrong passphrase, please try again." << std::endl;
+      }
+
+      std::cout << "Importing Account..." << std::endl;
+      WalletAccount data = wm.createNewBip32Account(name, pass, bip32key);
+      std::cout << "Imported key " << data.id << std::endl
                 << "  Name: " << data.name << std::endl
                 << "  Address: " << data.address << std::endl;
       std::cout << "Reloading Wallet..." << std::endl;
@@ -269,51 +328,8 @@ int main() {
       std::cout << "Reloading Accounts..." << std::endl;
       wm.loadWalletAccounts(false);
 
-    // Erase account
-	// TODO: Check word input
-    } else if (menuOp == "9") {
-		std::vector<std::string> mnemonicPhrase;
-		std::string rootPath = "m/44'/60'/0'/0/";
-		for(int i = 1; i <= 12; ++i) {
-			std::string word;
-			std::cout << "Please inform your " << i << " word" << std::endl;
-			std::getline(std::cin, word);
-			mnemonicPhrase.push_back(word);
-		}
-		std::string index;
-		std::cout << "Please inform which derivation index you looking to use? we will display up to 10 derivations starting from yours" << std::endl;
-		std::getline(std::cin, index);
-		bip3x::Bip39Mnemonic::MnemonicResult encodedMnemonic;
-		encodedMnemonic.words = mnemonicPhrase;
-		bip3x::HDKey rootKey = wm.createBip32RootKey(encodedMnemonic);
-		std::cout << "Loading your accounts..." << std::endl;
-		std::vector<std::string> accountsList = wm.addressListBasedOnRootIndex(rootKey, boost::lexical_cast<int>(index));
-		for (auto v : accountsList)
-			std::cout << v << std::endl;
-		std::cout << "Which account you want to use? Please inform index number" << std::endl;
-		index = "";
-		std::getline(std::cin, index);
-		rootPath += index;
-		bip3x::HDKey bip32key = wm.createBip32Key(rootKey, rootPath);
-		std::string name, pass;
-
-        std::cout << "Give a name to your Account (optional, leave blank for nothing)." << std::endl;
-        std::getline(std::cin, name);
-        while (true) {
-          std::cout << "Please authenticate with your Wallet's passphrase to confirm the action." << std::endl;
-          std::getline(std::cin, pass);
-            if (wm.checkWalletPass(pass)) { pass = ""; break; }
-          std::cout << "Wrong passphrase, please try again." << std::endl;
-        }
-		WalletAccount data = wm.createNewBip32Account(name, pass, bip32key);
-		std::cout << "Created key " << data.id << std::endl
-                  << "  Name: " << data.name << std::endl
-                  << "  Address: " << data.address << std::endl;
-        std::cout << "Reloading Wallet..." << std::endl;
-        wm.loadWallet(walletFile, secretsPath, pass);
-        std::cout << "Reloading Accounts..." << std::endl;
-        wm.loadWalletAccounts(false);
-	} else if (menuOp == "10") {
+    // Exit
+    } else if (menuOp == "0") {
       std::cout << "Exiting..." << std::endl;
       exit(0);
 
