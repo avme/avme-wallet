@@ -31,9 +31,11 @@
 
 #include <json_spirit/JsonSpiritHeaders.h>
 
+#include <bip3x/bip39.h>
 #include <bip3x/Bip39Mnemonic.h>
 #include <bip3x/HDKeyEncoder.h>
 #include <bip3x/utils.h>
+#include <bip3x/wordlist.h>
 
 #include "network.h"
 #include "json.h"
@@ -51,6 +53,7 @@ typedef struct WalletAccount {
   std::string privKey;
   std::string name;
   std::string address;
+  std::vector<std::string> seed;
   std::string balanceAVAX;
   std::string balanceAVME;
 } WalletAccount;
@@ -113,12 +116,63 @@ class WalletManager {
     bool createNewWallet(path walletFile, path secretsPath, std::string pass);
 
     /**
+     * Generate a new random mnemonic phrase.
+     * Returns the mnemonic phrase.
+     */
+    bip3x::Bip39Mnemonic::MnemonicResult createNewMnemonic();
+
+    /**
+     * Create a new public/private root key pair based on a mnemonic phrase.
+     * This is used in conjunction with a derivation path (see below)
+     * and index (starting at 0) to generate "infinite" Accounts/key pairs.
+     * Returns the root key pair.
+     */
+    bip3x::HDKey createBip32RootKey(bip3x::Bip39Mnemonic::MnemonicResult phrase);
+
+    /**
+     * Create a public/private key pair for an Account using the
+     * root key pair and a derivation path.
+     * Returns the key pair for the Account.
+     */
+    bip3x::HDKey createBip32Key(bip3x::HDKey rootKey, std::string derivPath);
+
+    /**
+     * Provide a list of "infinite" Accounts based on the root key pair,
+     * derivation path and starting from a given index. e.g.:
+     * "m/44'/60'/0'/0" is the default derivation path for Ethereum.
+     * "m/44'/60'/0'/0/0" will generate the address 0xaaaaaaaaaaaaaaaaaa...
+     * "m/44'/60'/0'/0/1" will generate the address 0xbbbbbbbbbbbbbbbbbb...
+     * "m/44'/60'/0'/0/2" will generate the address 0xcccccccccccccccccc...
+     * and so on and so forth.
+     * Since we are storing the keys in keystore files, we can only store
+     * one key pair at a time, so the user has to choose an Account from
+     * the list to be imported into the Wallet.
+     * Returns the Account list.
+     */
+    // TODO: find a way to store the root key so the user won't need to
+    // re-enter the mnemonic to create a second Account based on the same mnemonic
+    // TODO: the user should be able to choose the derivation path they want to use (it's hardcoded right now)
+    std::vector<std::string> addressListBasedOnRootIndex(bip3x::HDKey rootKey, int64_t index);
+
+    /**
+     * Check if a word exists in the English BIP39 wordlist.
+     * Returns true on success, false on failure.
+     */
+    bool wordExists(std::string word);
+
+    /**
      * Create a new Account in the given Wallet and encrypt it.
-     * An Account contains a currency address and other stuff.
-     * See https://ethereum.org/en/developers/docs/accounts/ for more info.
+     * See the WalletAccount struct for details on what an Account has, or
+     * https://ethereum.org/en/developers/docs/accounts/ for more info on Accounts.
      * Returns a struct with the Account's data.
      */
     WalletAccount createNewAccount(std::string name, std::string pass);
+
+    /**
+     * Import an Account from a given BIP39 key pair.
+     * Returns a struct with the Account's data.
+     */
+    WalletAccount importAccount(std::string name, std::string pass, bip3x::HDKey keyPair);
 
     /**
      * Create a private/public key pair from random or a given string of characters.
@@ -233,51 +287,6 @@ class WalletManager {
      * Returns a structure with the transaction's data.
      */
     WalletTxData decodeRawTransaction(std::string rawTxHex);
-
-    /**
-     * Generate a new random mnemonic phrase.
-     * Returns the mnemonic phrase.
-     */
-    bip3x::Bip39Mnemonic::MnemonicResult createNewMnemonic();
-
-    /**
-     * Create a new public/private root key pair based on a mnemonic phrase.
-     * This is used in conjunction with a derivation path (see below)
-     * and index (starting at 0) to generate "infinite" Accounts/key pairs.
-     * Returns the root key pair.
-     */
-    bip3x::HDKey createBip32RootKey(bip3x::Bip39Mnemonic::MnemonicResult phrase);
-
-    /**
-     * Create a public/private key pair for an Account using the
-     * root key pair and a derivation path.
-     * Returns the key pair for the Account.
-     */
-    bip3x::HDKey createBip32Key(bip3x::HDKey rootKey, std::string derivPath);
-
-    /**
-     * Provide a list of "infinite" Accounts based on the root key pair,
-     * derivation path and starting from a given index. e.g.:
-     * "m/44'/60'/0'/0" is the default derivation path for Ethereum.
-     * "m/44'/60'/0'/0/0" will generate the address 0xaaaaaaaaaaaaaaaaaa...
-     * "m/44'/60'/0'/0/1" will generate the address 0xbbbbbbbbbbbbbbbbbb...
-     * "m/44'/60'/0'/0/2" will generate the address 0xcccccccccccccccccc...
-     * and so on and so forth.
-     * Since we are storing the keys in keystore files, we can only store
-     * one key pair at a time, so the user has to choose an Account from
-     * the list to be imported into the Wallet.
-     * Returns the Account list.
-     */
-    // TODO: find a way to store the root key so the user won't need to
-    // re-enter the mnemonic to create a second Account based on the same mnemonic
-    // TODO: the user should be able to choose the derivation path they want to use (it's hardcoded right now)
-    std::vector<std::string> addressListBasedOnRootIndex(bip3x::HDKey rootKey, int64_t index);
-
-    /**
-     * Create a new Account based on a BIP39 key pair.
-     * Returns the Account data.
-     */
-    WalletAccount createNewBip32Account(std::string name, std::string pass, bip3x::HDKey bip32key);
 };
 
 #endif // WALLET_H

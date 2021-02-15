@@ -227,7 +227,7 @@ std::string menuChooseAccountErase(WalletManager wm) {
   std::string ret;
 
   while (true) {
-    std::cout << "Please inform the Account name or address that you want to delete." << std::endl;
+    std::cout << "Please inform the Account name or address that you want to erase." << std::endl;
     std::getline(std::cin, ret);
     if (ret.find("0x") == std::string::npos) {
       ret = "0x" + boost::lexical_cast<std::string>(wm.userToAddress(ret));
