@@ -204,7 +204,7 @@ int main() {
     // Import BIP39 seed
     } else if (menuOp == "6") {
       std::vector<std::string> mnemonicPhrase;
-      std::string rootPath = "m/44'/60'/0'/0/";
+      std::string derivPath = "m/44'/60'/0'/0/";
 
       // Check if seed is valid (12-word length and all words are valid)
       while (true) {
@@ -251,7 +251,7 @@ int main() {
       bip3x::Bip39Mnemonic::MnemonicResult encodedMnemonic;
       encodedMnemonic.words = mnemonicPhrase;
       bip3x::HDKey rootKey = wm.createBip32RootKey(encodedMnemonic);
-      std::cout << "Loading Accounts..." << std::endl;
+      std::cout << "Generating Accounts..." << std::endl;
       std::vector<std::string> accountsList = wm.addressListBasedOnRootIndex(rootKey, boost::lexical_cast<int>(index));
       for (auto v : accountsList) {
         std::cout << v << std::endl;
@@ -263,8 +263,8 @@ int main() {
       std::cout << "Leave blank for the default (0)." << std::endl;
       std::getline(std::cin, index);
       if (index == "") { index = "0"; }
-      rootPath += index;
-      bip3x::HDKey bip32key = wm.createBip32Key(rootKey, rootPath);
+      derivPath += index;
+      bip3x::HDKey bip32key = wm.createBip32Key(rootKey, derivPath);
 
       // Add a name to it (or not) and authenticate
       std::string name, pass;

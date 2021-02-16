@@ -22,6 +22,16 @@ Item {
       source: "qrc:/img/avme_banner.png"
     }
 
+    // Welcome text
+    Text {
+      id: welcomeText
+      font.pointSize: 18.0
+      font.bold: true
+      anchors.horizontalCenter: parent.horizontalCenter
+      horizontalAlignment: Text.AlignHCenter
+      text: "Welcome to the AVME Wallet"
+    }
+
     // Buttons
     AVMEButton {
       id: btnNewWallet
@@ -39,17 +49,6 @@ Item {
       height: 60
       text: "Load an existing Wallet"
       onClicked: System.setScreen(content, "qml/screens/LoadWalletScreen.qml")
-    }
-
-    AVMEButton {
-      id: btnImportSeed
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: parent.width / 4
-      height: 60
-      text: "Import a Wallet Seed (WIP)"
-      onClicked: {
-        
-      }
     }
   }
 }

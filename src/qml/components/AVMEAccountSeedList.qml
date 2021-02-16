@@ -2,16 +2,15 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 /**
- * Custom list for a wallet's addresses and amounts.
+ * Custom list for the Accounts generated with a BIP39 seed.
  * Requires a ListModel with the following items:
- * - "account": the account's actual address
- * - "name": the account's name/label
- * - "coinAmount": the account's amount in <coin-name>
- * - "tokenAmount": the account's amount in <token-name>
+ * - "index": the Account's index on the list
+ * - "account": the Account's actual address
+ * - "balance": the Account's balance in <coin-name>
  */
 
 ListView {
-  id: walletList
+  id: accountSeedList
   property color listHighlightColor: "#7AC1EB"
   property color listBgColor: "#58A0C9"
   property color listHoverColor: "#7AC1DB"
@@ -38,22 +37,32 @@ ListView {
     color: listBgColor
 
     Text {
+      id: headerIndex
+      anchors.verticalCenter: parent.verticalCenter
+      width: parent.width / 8
+      color: "white"
+      padding: 5
+      text: "Index"
+    }
+
+    Text {
       id: headerAccount
       anchors.verticalCenter: parent.verticalCenter
       width: parent.width / 2
+      x: headerIndex.width
       color: "white"
       padding: 5
       text: "Account"
     }
 
     Text {
-      id: headerName
+      id: headerBalance
       anchors.verticalCenter: parent.verticalCenter
       width: parent.width / 2
-      x: headerAccount.width
+      x: headerIndex.width + headerAccount.width
       color: "white"
       padding: 5
-      text: "Name"
+      text: "Balance"
     }
   }
   headerPositioning: ListView.OverlayHeader // Prevent header scrolling along
@@ -63,36 +72,45 @@ ListView {
     id: listDelegate
     Item {
       id: listItem
+      readonly property string itemIndex: index
       readonly property string itemAccount: account
-      readonly property string itemName: name
-      readonly property string itemCoinAmount: coinAmount
-      readonly property string itemTokenAmount: tokenAmount
+      readonly property string itemBalance: balance
       width: parent.width
       height: 30
 
       Text {
+        id: delegateIndex
+        anchors.verticalCenter: parent.verticalCenter
+        width: parent.width / 8
+        color: "white"
+        padding: 5
+        elide: Text.ElideRight
+        text: itemIndex
+      }
+      Text {
         id: delegateAccount
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width / 2
+        x: delegateIndex.width
         color: "white"
         padding: 5
         elide: Text.ElideRight
         text: itemAccount
       }
       Text {
-        id: delegateName
+        id: delegateBalance
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width / 2
-        x: delegateAccount.width
+        x: delegateIndex.width + delegateAccount.width
         color: "white"
         padding: 5
         elide: Text.ElideRight
-        text: itemName
+        text: itemBalance
       }
       MouseArea {
         id: delegateMouseArea
         anchors.fill: parent
-        onClicked: walletList.currentIndex = index
+        onClicked: accountSeedList.currentIndex = index
       }
     }
   }

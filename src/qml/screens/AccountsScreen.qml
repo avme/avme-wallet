@@ -8,6 +8,7 @@ import "qrc:/qml/components"
 Item {
   id: accountsScreen
   property alias wList: accountRow.accountList
+  property alias sList: seedPopup.seedAccountsList
   property bool hasCoin
   property bool hasToken
 
@@ -16,6 +17,25 @@ Item {
     for (var i = 0; i < accList.length; i++) {
       accountsList.append(JSON.parse(accList[i]))
     }
+  }
+
+  function generateAccounts(seed) {
+    var accList = System.generateAccountSeedList(seed)
+    for (var i = 0; i < accList.length; i++) {
+      accountSeedList.append(JSON.parse(accList[i]))
+    }
+  }
+
+  function showNewAccountData(data) {
+    newAccountDataPopup.accText = "<b>Id:</b> " + data.accId
+    + "<br><b>Name:</b> " + data.accName
+    + "<br><b>Address:</b> 0x" + data.accAddress
+    var seedStr = "";
+    for (var i = 0; i < 12; i++) {
+      seedStr += data.accSeed[i];
+      if (i != 11) { seedStr += " "; }
+    }
+    newAccountDataPopup.accSeedText = seedStr;
   }
 
   Component.onCompleted: {
@@ -71,6 +91,7 @@ Item {
       radius: 5
       color: "#4458A0C9"
 
+      // TODO: add fiat pricing here too when the time comes
       AVMEWalletList {
         id: walletList
         width: listRect.width
@@ -212,9 +233,7 @@ Item {
           width: parent.width
           enabled: (wList.currentItem)
           text: "Check Transaction History (WIP)"
-          onClicked: {
-
-          }
+          onClicked: {}
         }
         AVMEButton {
           id: btnViewKey
@@ -268,14 +287,11 @@ Item {
       onClicked: newAccountPopup.open()
     }
     AVMEButton {
-      // TODO: add fiat pricing here too when the time comes
-      id: btnChangeToken
+      id: btnImportSeed
       width: (parent.width / 3) - parent.spacing
       anchors.verticalCenter: parent.verticalCenter
-      text: "Change Current Token (WIP)"
-      onClicked: {
-        
-      }
+      text: "Import Account Seed"
+      onClicked: importSeedPopup.open()
     }
   }
 
@@ -355,17 +371,12 @@ Item {
           onClicked: {
             if (System.checkWalletPass(passInput.text)) {
               try {
-                System.createNewAccount(nameInput.text, passInput.text)
+                var wa = System.createNewAccount(nameInput.text, passInput.text)
                 console.log("Account created successfully")
-                accountsList.clear()
+                showNewAccountData(wa)
                 nameInput.text = passInput.text = ""
                 newAccountPopup.close()
-                fetchAccountsPopup.open()
-                System.updateScreen()
-                console.log("Reloading Accounts...")
-                System.loadWalletAccounts(false)
-                fetchAccounts()
-                fetchAccountsPopup.close()
+                newAccountDataPopup.open()
               } catch (error) {
                 accountFailPopup.open()
                 newAccountPopup.close()
@@ -376,6 +387,266 @@ Item {
           }
         }
       }
+    }
+  }
+
+  // Popup for viewing a new Account's data and seed
+  Popup {
+    id: newAccountDataPopup
+    property alias accText: accountText.text
+    property alias accSeedText: accountSeedArea.text
+    width: window.width - 200
+    height: (window.height / 2) + 100
+    x: 100
+    y: (height / 2) - 100
+    modal: true
+    focus: true
+    padding: 0  // Remove white borders
+    closePolicy: Popup.NoAutoClose
+    background: Rectangle { anchors.fill: parent; color: "#9A4FAD" }
+
+    Column {
+      id: accountDataCol
+      anchors.fill: parent
+      spacing: 30
+      topPadding: 40
+
+      Text {
+        id: accountLabel
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        text: "Account successfully created!"
+      }
+
+      Text {
+        id: accountText
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignLeft
+      }
+      
+      Text {
+        id: accountSeedLabel
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        text: "This is your seed for this Account. Please write it down."
+        + "<br><b>YOU ARE FULLY RESPONSIBLE FOR GUARDING YOUR SEED."
+        + "<br>KEEP IT AWAY FROM PRYING EYES AND DO NOT SHARE IT WITH ANYONE."
+        + "<br>WE ARE NOT HELD LIABLE FOR ANY FUND LOSSES IF YOU DECIDE TO PROCEED.</b>"
+      }
+
+      TextArea {
+        id: accountSeedArea
+        width: parent.width - 100
+        height: 50
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        readOnly: true
+        selectByMouse: true
+        selectionColor: "#9CE3FD"
+        color: "black"
+        background: Rectangle {
+          width: parent.width
+          height: parent.height
+          color: "#782D8B"
+        }
+      }
+
+      // TODO: solve freezing here
+      AVMEButton {
+        id: accountBtnOk
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: "OK"
+        onClicked: {
+          accountsList.clear()
+          newAccountDataPopup.close()
+          fetchAccountsPopup.open()
+          System.updateScreen()
+          console.log("Reloading Accounts...")
+          System.loadWalletAccounts(false)
+          fetchAccounts()
+          fetchAccountsPopup.close()
+        }
+      }
+    }
+  }
+
+  // Popup for importing an Account seed
+  Popup {
+    id: importSeedPopup
+    width: window.width - 200
+    height: (window.height / 4) + 50
+    x: 100
+    y: (window.height / 2) - 100
+    modal: true
+    focus: true
+    padding: 0  // Remove white borders
+    closePolicy: Popup.NoAutoClose
+    background: Rectangle { anchors.fill: parent; color: "#9A4FAD" }
+
+    Column {
+      id: importSeedCol
+      anchors.fill: parent
+      spacing: 30
+      topPadding: 40
+
+      Text {
+        id: infoText
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        text: "Please enter your Account's 12-word seed (words separated by SPACE)."
+      }
+
+      AVMEInput {
+        id: seedInput
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: parent.width - 100
+        label: "Seed"
+        placeholder: "Your 12-word seed"
+      }
+
+      Text {
+        id: errorText
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        visible: false
+        text: "Invalid seed, please check the words and/or length."
+        Timer { id: errorTimer; interval: 2000; onTriggered: errorText.visible = false }
+      }
+
+      Row {
+        id: seedBtnRow
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: 10
+
+        AVMEButton {
+          id: seedBtnBack
+          text: "Back"
+          onClicked: {
+            seedInput.text = ""
+            importSeedPopup.close()
+          }
+        }
+        // TODO: solve freezing here
+        AVMEButton {
+          id: seedBtnDone
+          text: "Done"
+          enabled: (seedInput.text !== "")
+          onClicked: {
+            if (System.seedIsValid(seedInput.text)) {
+              console.log("Generating Accounts...")
+              generateAccounts(seedInput.text)
+              seedPopup.seed = seedInput.text
+              importSeedPopup.close()
+              seedPopup.open()
+            } else {
+              errorText.visible = true;
+              errorTimer.start();
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Popup for selecting an Account from a seed list
+  Popup {
+    id: seedPopup
+    property string seed
+    property alias seedAccountsList: seedList
+    width: (window.width / 2) + 200
+    height: (window.height / 2) + 300
+    x: (width / 2) - 200
+    y: (height / 2) - 300
+    modal: true
+    focus: true
+    padding: 0  // Remove white borders
+    closePolicy: Popup.NoAutoClose
+    background: Rectangle { anchors.fill: parent; color: "#9A4FAD" }
+
+    Column {
+      id: seedCol
+      anchors.fill: parent
+      spacing: 30
+      topPadding: 20
+
+      Text {
+        id: seedText
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        text: "Choose the Account you want to import."
+      }
+      
+      Rectangle {
+        id: seedListRect
+        width: seedPopup.width - 50
+        height: seedPopup.height - 300
+        anchors.horizontalCenter: parent.horizontalCenter
+        radius: 5
+        color: "#4458A0C9"
+
+        AVMEAccountSeedList {
+          id: seedList
+          width: parent.width
+          height: parent.height
+          anchors.horizontalCenter: parent.horizontalCenter
+          model: ListModel { id: accountSeedList }
+        }
+      }
+
+      AVMEInput {
+        id: seedName
+        width: (parent.width / 2) - parent.spacing
+        anchors.horizontalCenter: parent.horizontalCenter
+        label: "Name (optional)"
+        placeholder: "Name/label for your Account"
+      }
+
+      AVMEInput {
+        id: seedPassInput
+        width: (parent.width / 2) - parent.spacing
+        anchors.horizontalCenter: parent.horizontalCenter
+        echoMode: TextInput.Password
+        passwordCharacter: "*"
+        label: "Passphrase"
+        placeholder: "Your Wallet's passphrase"
+      }
+
+      Row {
+        id: seedListBtnRow
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: 10
+
+        // TODO: clear list when closing
+        AVMEButton {
+          id: seedListBtnClose
+          text: "Close"
+          onClicked: seedPopup.close()
+        }
+        // TODO: error handling
+        AVMEButton {
+          id: seedListBtnDone
+          text: "Done"
+          enabled: (seedPassInput.text !== "")
+          onClicked: {
+            if (System.checkWalletPass(seedPassInput.text)) {
+              var idx = accountsScreen.sList.currentItem.itemIndex
+              System.importAccount(seedPopup.seed, idx, seedName.text, seedPassInput.text)
+              seedPopup.close()
+              accountsList.clear()
+              fetchAccountsPopup.open()
+              System.updateScreen()
+              console.log("Reloading Accounts...")
+              System.loadWalletAccounts(false)
+              fetchAccounts()
+              fetchAccountsPopup.close()
+            } else {
+              seedPopup.close()
+            }
+          }
+        }
+      }
+      
     }
   }
 

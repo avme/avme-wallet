@@ -69,8 +69,7 @@ std::vector<std::string> WalletManager::addressListBasedOnRootIndex(bip3x::HDKey
     derivPath += boost::lexical_cast<std::string>(index);
     bip3x::HDKeyEncoder::makeExtendedKey(rootKey, derivPath);
     KeyPair k(Secret::frombip3x(rootKey.privateKey));
-    toPushBack += "Index: " + boost::lexical_cast<std::string>(index);
-    toPushBack += " Address: 0x" + k.address().hex();
+    toPushBack += boost::lexical_cast<std::string>(index) + " " + k.address().hex();
 
     // Get the balance
     json_spirit::mValue jsonBal = JSON::getValue(Network::getAVAXBalance("0x" + k.address().hex()), "result");
@@ -81,7 +80,7 @@ std::vector<std::string> WalletManager::addressListBasedOnRootIndex(bip3x::HDKey
     if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
       return {};
     }
-    toPushBack += " Balance: " + convertWeiToFixedPoint(balanceStr, 18);
+    toPushBack += " " + convertWeiToFixedPoint(balanceStr, 18);
     ret.push_back(toPushBack);
   }
   return ret;
