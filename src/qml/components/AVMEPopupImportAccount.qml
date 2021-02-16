@@ -29,7 +29,7 @@ Popup {
   }
 
   function clean() {
-    seedList.clear()
+    accountSeedList.clear()
     seedName.text = seedPass.text = seed = ""
   }
 
