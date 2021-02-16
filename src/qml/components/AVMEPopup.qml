@@ -4,7 +4,7 @@ import QtQuick.Controls 2.2
 /**
  * Popup for just showing a short message. Has to be opened/closed manually.
  * Requires the following items:
- * "info": the text that will be shown
+ * - "info": the text that will be shown
  */
 
 Popup {

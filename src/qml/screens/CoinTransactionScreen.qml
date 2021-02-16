@@ -199,7 +199,11 @@ Item {
           if (noCoinFunds) {
             fundsPopup.open()
           } else {
-            confirmPopup.open()
+            confirmTxPopup.setTxData(
+              amountInput.text, amountLabel.text, senderInput.text,
+              receiverInput.text, gasLimitInput.text, gasPriceInput.text
+            )
+            confirmTxPopup.open()
           }
         }
       }
@@ -220,102 +224,20 @@ Item {
   }
 
   // Popup for confirming the transaction
-  Popup {
-    id: confirmPopup
-    width: window.width / 2
-    height: window.height / 2
-    x: (window.width / 2) - (width / 2)
-    y: (window.height / 2) - (height / 2)
-    modal: true
-    focus: true
-    padding: 0  // Remove white borders
-    closePolicy: Popup.NoAutoClose
-
-    Rectangle {
-      id: popupBg
-      anchors.fill: parent
-      color: "#9A4FAD"
-
-      // Transaction summary
-      Text {
-        id: popupText
-        anchors {
-          horizontalCenter: parent.horizontalCenter
-          top: parent.top
-          topMargin: parent.height / 8
-        }
-        horizontalAlignment: Text.AlignHCenter
-        text: "You will send <b>" + amountInput.text + " " + amountLabel.text
-        + "</b> from the address<br><b>" + senderInput.text + "</b>"
-        + "<br>to the address<br><b>" + receiverInput.text + "</b>"
-        + "<br>Gas Limit: <b>" + gasLimitInput.text + " Wei</b>"
-        + "<br>Gas Price: <b>" + gasPriceInput.text + " Gwei</b>"
-      }
-
-      // Passphrase status text ("enter your pass", or "wrong pass")
-      Text {
-        id: popupPassText
-        anchors {
-          horizontalCenter: parent.horizontalCenter
-          top: popupText.bottom
-          topMargin: 15
-        }
-        horizontalAlignment: Text.AlignHCenter
-        Timer { id: popupPassTimer; interval: 2000 }
-        text: (!popupPassTimer.running)
-        ? "Please authenticate to confirm the transaction."
-        : "Wrong passphrase, please try again"
-      }
-
-      // Passphrase input
-      AVMEInput {
-        id: passInput
-        width: items.width / 4
-        echoMode: TextInput.Password
-        passwordCharacter: "*"
-        label: "Passphrase"
-        placeholder: "Your Wallet's passphrase"
-        anchors {
-          horizontalCenter: parent.horizontalCenter
-          top: popupPassText.bottom
-          topMargin: 25
-        }
-      }
-
-      // Buttons
-      Row {
-        id: popupBtns
-        anchors {
-          horizontalCenter: parent.horizontalCenter
-          bottom: parent.bottom
-          bottomMargin: parent.height / 8
-        }
-        spacing: 10
-
-        AVMEButton {
-          id: btnCancel
-          text: "Cancel"
-          onClicked: confirmPopup.close()
-        }
-        AVMEButton {
-          id: btnConfirm
-          text: "Confirm"
-          enabled: (passInput.text != "")
-          onClicked: {
-            if (System.checkWalletPass(passInput.text)) {
-              System.setTxReceiverAccount(receiverInput.text)
-              System.setTxReceiverCoinAmount(amountInput.text)
-              System.setTxGasLimit(gasLimitInput.text)
-              System.setTxGasPrice(gasPriceInput.text)
-              confirmPopup.close()
-              System.setScreen(content, "qml/screens/ProgressScreen.qml")
-              System.txStart(passInput.text)
-              System.updateScreen()
-            } else {
-              popupPassTimer.start()
-            }
-          }
-        }
+  AVMEPopupConfirmTx {
+    id: confirmTxPopup
+    confirmBtn.onClicked: {
+      if (System.checkWalletPass(pass)) {
+        System.setTxReceiverAccount(to)
+        System.setTxReceiverCoinAmount(amount)
+        System.setTxGasLimit(gasLimit)
+        System.setTxGasPrice(gasPrice)
+        confirmTxPopup.close()
+        System.setScreen(content, "qml/screens/ProgressScreen.qml")
+        System.txStart(pass)
+        System.updateScreen()
+      } else {
+        confirmTxPopup.showErrorMsg()
       }
     }
   }
