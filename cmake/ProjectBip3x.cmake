@@ -12,10 +12,10 @@ set(BIP3X_INCLUDE_DIR "${prefix}/include")
 ExternalProject_Add(
     bip3x
     PREFIX "${prefix}"
-    DOWNLOAD_NAME bip3x-189486c.tar.gz
+    DOWNLOAD_NAME bip3x-21ee9e6.tar.gz
     DOWNLOAD_NO_PROGRESS 1
-    URL https://github.com/itamarcps/bip3x/archive/189486c345431e7986fd403d705bdab0b5558679.tar.gz
-    URL_HASH SHA256=1c84ba00a92a1ee7e92ac55e78b4a6f30fd06f6c4848d8d086b24612a70db92d
+    URL https://github.com/itamarcps/bip3x/archive/21ee9e6e71018c9073179d671b362dacac8025de.tar.gz
+    URL_HASH SHA256=7f6dcab711c81ae11e1966b5341d08f89e8526fc0c9ee64efd5260539b6bee4c
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
                -DCMAKE_POSITION_INDEPENDENT_CODE=${BUILD_SHARED_LIBS}
                -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
@@ -28,6 +28,7 @@ ExternalProject_Add(
     ${_overwrite_install_command}
     LOG_INSTALL 1
     BUILD_BYPRODUCTS "${BIP3X_LIBRARY}"
+	DEPENDS ssl crypto
 )
 
 add_library(bip39 STATIC IMPORTED)
