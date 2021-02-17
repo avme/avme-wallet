@@ -1,5 +1,5 @@
 # Pre-setup
-cmake_minimum_required(VERSION 3.18.0)
+cmake_minimum_required(VERSION 3.19.0)
 
 include(cmake/cable/bootstrap.cmake)
 include(CableBuildInfo)
@@ -89,6 +89,7 @@ link_directories(
 add_subdirectory(libdevcore)
 add_subdirectory(libdevcrypto)
 add_subdirectory(libethcore)
+add_subdirectory(external/openssl-cmake)
 
 # Organize executable sources and headers
 file(GLOB AVME_HEADERS "src/lib/*.h")
