@@ -12,10 +12,10 @@ set(BIP3X_INCLUDE_DIR "${prefix}/include")
 ExternalProject_Add(
     bip3x
     PREFIX "${prefix}"
-    DOWNLOAD_NAME bip3x-21ee9e6.tar.gz
+    DOWNLOAD_NAME bip3x-77585ff.tar.gz
     DOWNLOAD_NO_PROGRESS 1
-    URL https://github.com/itamarcps/bip3x/archive/21ee9e6e71018c9073179d671b362dacac8025de.tar.gz
-    URL_HASH SHA256=7f6dcab711c81ae11e1966b5341d08f89e8526fc0c9ee64efd5260539b6bee4c
+    URL https://github.com/itamarcps/bip3x/archive/77585ff29ce89af12baf860ab5f7afeedb81a7ce.tar.gz
+    URL_HASH SHA256=fbffefc73b9974b393a1b3fccabfc32c18c6746ec3e03c439aba309f99406816
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
                -DCMAKE_POSITION_INDEPENDENT_CODE=${BUILD_SHARED_LIBS}
                -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
