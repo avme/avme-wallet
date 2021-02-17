@@ -290,13 +290,13 @@ class System : public QObject {
     // Create a RegExp for coin and token transaction amount input, respectively
     Q_INVOKABLE QRegExp createCoinRegExp() {
       QRegExp rx;
-      rx.setPattern("[0-9]{1,}\\.[0-9]{1," + QString::number(this->currentCoinDecimals) + "}");
+      rx.setPattern("[0-9]{1,}(?:\\.[0-9]{1," + QString::number(this->currentCoinDecimals) + "})?");
       return rx;
     }
 
     Q_INVOKABLE QRegExp createTokenRegExp() {
       QRegExp rx;
-      rx.setPattern("[0-9]{1,}\\.[0-9]{1," + QString::number(this->currentTokenDecimals) + "}");
+      rx.setPattern("[0-9]{1,}(?:\\.[0-9]{1," + QString::number(this->currentTokenDecimals) + "})?");
       return rx;
     }
 

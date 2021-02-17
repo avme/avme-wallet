@@ -88,7 +88,7 @@ Item {
         id: amountInput
         width: items.width / 2
         validator: RegExpValidator { regExp: System.createCoinRegExp() }
-        label: "Amount (w/ decimals)"
+        label: "Amount"
         placeholder: "Fixed point amount (e.g. 0.5)"
         Text {
           id: amountLabel

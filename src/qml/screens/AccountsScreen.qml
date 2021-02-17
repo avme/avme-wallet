@@ -339,9 +339,11 @@ Item {
   AVMEPopupImportAccount {
     id: importAccountPopup
     doneBtn.onClicked: {
-      // TODO: error handling
-      if (System.checkWalletPass(pass)) {
-        var idx = importAccountPopup.curItem.itemIndex
+      var idx = importAccountPopup.curItem.itemIndex
+      var acc = importAccountPopup.curItem.itemAccount
+      if (System.accountExists(acc)) {
+        importAccountPopup.showErrorMsg()
+      } else if (System.checkWalletPass(pass)) {
         System.importAccount(seed, idx, name, pass)
         importAccountPopup.close()
         accountsList.clear()

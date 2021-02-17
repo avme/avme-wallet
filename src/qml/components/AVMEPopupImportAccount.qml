@@ -9,6 +9,7 @@ import QtQuick.Controls 2.2
  * - "pass" (readonly): the Wallet password input
  * - "seed": the 12-word seed input
  * - "doneBtn.onClicked": what to do when confirming the action
+ * - "showErrorMsg()": self-explanatory
  * - "setAccountListData(accList)": fill the list with the generated Accounts
  * - "clean()": helper function to clean up inputs/data
  */
@@ -26,6 +27,10 @@ Popup {
     for (var i = 0; i < accList.length; i++) {
       accountSeedList.append(JSON.parse(accList[i]))
     }
+  }
+
+  function showErrorMsg() {
+    infoTextTimer.start()
   }
 
   function clean() {
@@ -52,7 +57,10 @@ Popup {
       id: infoText
       anchors.horizontalCenter: parent.horizontalCenter
       horizontalAlignment: Text.AlignHCenter
-      text: "Choose the Account you want to import."
+      Timer { id: infoTextTimer; interval: 2000 }
+      text: (!infoTextTimer.running)
+      ? "Choose the Account you want to import."
+      : "Account exists in the Wallet, please try another."
     }
     
     Rectangle {
