@@ -62,7 +62,7 @@ Popup {
       ? "Choose the Account you want to import."
       : "Account exists in the Wallet, please try another."
     }
-    
+
     Rectangle {
       width: importAccountPopup.width - 50
       height: importAccountPopup.height - 300

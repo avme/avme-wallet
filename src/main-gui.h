@@ -9,6 +9,7 @@
 #include <QtCore/qplugin.h>
 #include <QtGui/QClipboard>
 #include <QtGui/QFont>
+#include <QtConcurrent>
 
 #ifdef __MINGW32__
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
@@ -223,7 +224,7 @@ class System : public QObject {
         ct++;
       }
       if (ct != 12) { return false; }
-      
+
       return true;
     }
 
@@ -236,7 +237,7 @@ class System : public QObject {
       std::string derivPath = "m/44'/60'/0'/0/";
       while (std::getline(seedss, word, ' ')) { words.push_back(word); }
       for (std::string word : words) { mnemonicPhrase.push_back(word); }
-      
+
       bip3x::Bip39Mnemonic::MnemonicResult encodedMnemonic;
       encodedMnemonic.words = mnemonicPhrase;
       bip3x::HDKey rootKey = wm.createBip32RootKey(encodedMnemonic);
@@ -272,7 +273,7 @@ class System : public QObject {
       std::string derivPath = "m/44'/60'/0'/0/";
       while (std::getline(seedss, word, ' ')) { words.push_back(word); }
       for (std::string word : words) { mnemonicPhrase.push_back(word); }
-      
+
       bip3x::Bip39Mnemonic::MnemonicResult encodedMnemonic;
       encodedMnemonic.words = mnemonicPhrase;
       bip3x::HDKey rootKey = wm.createBip32RootKey(encodedMnemonic);
