@@ -69,7 +69,6 @@ include_directories(
   "${CMAKE_SOURCE_DIR}"
   "${CMAKE_SOURCE_DIR}/build"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/include"
-  #${DEPENDS_INCLUDES}
 )
 
 link_directories(
