@@ -36,9 +36,8 @@ Popup {
     accId = accName = accAddress = accSeed = ""
   }
 
-  width: window.width - 200
+  width: window.width
   height: (window.height / 2) + 50
-  x: 100
   y: (height / 2) - 50
   modal: true
   focus: true
@@ -78,7 +77,7 @@ Popup {
 
     TextArea {
       id: seedText
-      width: parent.width - 100
+      width: parent.width - 10
       height: 50
       anchors.horizontalCenter: parent.horizontalCenter
       horizontalAlignment: Text.AlignHCenter
