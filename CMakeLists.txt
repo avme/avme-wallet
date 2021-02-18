@@ -58,6 +58,7 @@ find_package(libscrypt CONFIG REQUIRED)
 hunter_add_package(ethash)
 find_package(ethash CONFIG REQUIRED)
 
+add_subdirectory(external/openssl-cmake)
 include(ProjectSecp256k1)
 include(ProjectToolbox)
 include(ProjectBip3x)
@@ -68,7 +69,6 @@ include_directories(
   "${CMAKE_SOURCE_DIR}"
   "${CMAKE_SOURCE_DIR}/build"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/include"
-  #${DEPENDS_INCLUDES}
 )
 
 link_directories(
@@ -89,7 +89,6 @@ link_directories(
 add_subdirectory(libdevcore)
 add_subdirectory(libdevcrypto)
 add_subdirectory(libethcore)
-add_subdirectory(external/openssl-cmake)
 
 # Organize executable sources and headers
 file(GLOB AVME_HEADERS "src/lib/*.h")

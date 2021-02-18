@@ -12,14 +12,16 @@ set(BIP3X_INCLUDE_DIR "${prefix}/include")
 ExternalProject_Add(
     bip3x
     PREFIX "${prefix}"
-    DOWNLOAD_NAME bip3x-189486c.tar.gz
+    DOWNLOAD_NAME bip3x-9363c7b.tar.gz
     DOWNLOAD_NO_PROGRESS 1
-    URL https://github.com/itamarcps/bip3x/archive/189486c345431e7986fd403d705bdab0b5558679.tar.gz
-    URL_HASH SHA256=1c84ba00a92a1ee7e92ac55e78b4a6f30fd06f6c4848d8d086b24612a70db92d
+    URL https://github.com/itamarcps/bip3x/archive/9363c7b20ccf3318eb04354547aacedc907e9ad0.tar.gz
+    URL_HASH SHA256=26691fcf3532afac1798c2651fc2d8f9afe16c1b37c1cd7b0a9906edf995fd25
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
                -DCMAKE_POSITION_INDEPENDENT_CODE=${BUILD_SHARED_LIBS}
                -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
                -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+               -DCMAKE_C_FLAGS=-I${BIP3X_INCLUDE_DIR}\ -I${CMAKE_SOURCE_DIR}/build/external/openssl-cmake/include
+               -DCMAKE_CXX_FLAGS=-I${BIP3X_INCLUDE_DIR}\ -I${CMAKE_SOURCE_DIR}/build/external/openssl-cmake/include
                -DENABLE_CONAN=OFF
                -DENABLE_BIP39_JNI=OFF
                ${_only_release_configuration}
@@ -28,6 +30,7 @@ ExternalProject_Add(
     ${_overwrite_install_command}
     LOG_INSTALL 1
     BUILD_BYPRODUCTS "${BIP3X_LIBRARY}"
+	DEPENDS openssl
 )
 
 add_library(bip39 STATIC IMPORTED)
@@ -35,4 +38,4 @@ file(MAKE_DIRECTORY "${BIP3X_INCLUDE_DIR}")  # Must exist.
 set_property(TARGET bip39 PROPERTY IMPORTED_CONFIGURATIONS Release)
 set_property(TARGET bip39 PROPERTY IMPORTED_LOCATION_RELEASE "${BIP3X_LIBRARY}")
 set_property(TARGET bip39 PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${BIP3X_INCLUDE_DIR}")
-add_dependencies(bip39 bip3x)
+add_dependencies(bip39 Toolbox bip3x ssl crypto openssl)
