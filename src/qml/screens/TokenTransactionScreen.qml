@@ -239,7 +239,6 @@ Item {
         confirmTxPopup.close()
         System.setScreen(content, "qml/screens/ProgressScreen.qml")
         System.txStart(pass)
-        System.updateScreen()
       } else {
         confirmTxPopup.showErrorMsg()
       }

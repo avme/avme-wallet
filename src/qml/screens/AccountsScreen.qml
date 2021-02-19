@@ -10,6 +10,41 @@ Item {
   property bool hasCoin
   property bool hasToken
 
+  Connections {
+    target: System
+
+    onRefreshAccountList: {
+      console.log("Loading Accounts...")
+      System.loadWalletAccounts(System.getFirstLoad())
+      if (System.getFirstLoad()) { System.setFirstLoad(false) }
+      accountsList.clear()
+      fetchAccounts()
+      fetchAccountsPopup.close()
+    }
+    onAccountCreated: {
+      console.log("Account created successfully")
+      accountDataPopup.setData(data.accId, data.accName, data.accAddress, data.accSeed)
+      createAccountPopup.close()
+      accountDataPopup.open()
+    }
+    onAccountsGenerated: {
+      importAccountPopup.setAccountListData(data)
+      importAccountPopup.seed = seed
+      generateAccountsPopup.close()
+      importAccountPopup.open()
+    }
+    onAccountImported: {
+      if (success) {
+        importSeedAccountPopup.close()
+        fetchAccountsPopup.open()
+        System.refreshAccounts()
+      } else {
+        importSeedAccountPopup.close()
+        importFailPopup.open()
+      }
+    }
+  }
+
   function fetchAccounts() {
     var accList = System.listAccounts()
     for (var i = 0; i < accList.length; i++) {
@@ -30,13 +65,7 @@ Item {
     hasCoin = (System.getCurrentCoin() != "");
     hasToken = (System.getCurrentToken() != "");
     fetchAccountsPopup.open()
-    System.updateScreen()
-    if (System.getFirstLoad()) {
-      System.loadWalletAccounts(System.getFirstLoad())
-      System.setFirstLoad(false)
-    }
-    fetchAccounts()
-    fetchAccountsPopup.close()
+    System.refreshAccounts()
   }
 
   // Background icon
@@ -279,15 +308,14 @@ Item {
     doneBtn.onClicked: {
       if (System.checkWalletPass(pass)) {
         try {
-          var wa = System.createNewAccount(name, pass)
-          console.log("Account created successfully")
-          accountDataPopup.setData(wa.accId, wa.accName, wa.accAddress, wa.accSeed)
+          console.log("Creating new Account...")
+          System.createNewAccount(name, pass)
           newAccountPopup.clean()
           newAccountPopup.close()
-          accountDataPopup.open()
+          createAccountPopup.open()
         } catch (error) {
-          accountFailPopup.open()
           newAccountPopup.close()
+          accountFailPopup.open()
         }
       } else {
         passInfo.timer.start()
@@ -299,16 +327,10 @@ Item {
   AVMEPopupAccountData {
     id: accountDataPopup
     okBtn.onClicked: {
-      // TODO: solve freezing here
-      accountsList.clear()
       accountDataPopup.clean()
       accountDataPopup.close()
       fetchAccountsPopup.open()
-      System.updateScreen()
-      console.log("Reloading Accounts...")
-      System.loadWalletAccounts(false)
-      fetchAccounts()
-      fetchAccountsPopup.close()
+      System.refreshAccounts()
     }
   }
 
@@ -317,17 +339,11 @@ Item {
     id: importSeedPopup
     doneBtn.onClicked: {
       if (System.seedIsValid(seed)) {
-        // TODO: solve freezing here
+        console.log("Generating Accounts...")
+        System.generateAccountsFromSeed(seed)
+        importSeedPopup.clean()
         importSeedPopup.close()
         generateAccountsPopup.open()
-        System.updateScreen()
-        console.log("Generating Accounts...")
-        var accList = System.generateAccountSeedList(seed)
-        importAccountPopup.setAccountListData(accList)
-        generateAccountsPopup.close()
-        importAccountPopup.seed = seed
-        importSeedPopup.clean()
-        importAccountPopup.open()
       } else {
         errorText.visible = true;
         errorTimer.start();
@@ -344,15 +360,9 @@ Item {
       if (System.accountExists(acc)) {
         importAccountPopup.showErrorMsg()
       } else if (System.checkWalletPass(pass)) {
-        System.importAccount(seed, idx, name, pass)
         importAccountPopup.close()
-        accountsList.clear()
-        fetchAccountsPopup.open()
-        System.updateScreen()
-        console.log("Reloading Accounts...")
-        System.loadWalletAccounts(false)
-        fetchAccounts()
-        fetchAccountsPopup.close()
+        importSeedAccountPopup.open()
+        System.importAccount(seed, idx, name, pass)
       } else {
         importAccountPopup.close()
       }
@@ -377,10 +387,22 @@ Item {
     info: "Loading Accounts...<br>This may take a while."
   }
 
+  // Popup for waiting for a new Account to be created
+  AVMEPopup {
+    id: createAccountPopup
+    info: "Creating a new Account..."
+  }
+
   // Popup for generating Accounts from a seed
   AVMEPopup {
     id: generateAccountsPopup
     info: "Generating up to 10 Accounts..."
+  }
+
+  // Popup for waiting for a new Account to be imported
+  AVMEPopup {
+    id: importSeedAccountPopup
+    info: "Importing Account..."
   }
 
   // Info popup for if the Account creation fails
@@ -388,6 +410,13 @@ Item {
     id: accountFailPopup
     icon: "qrc:/img/warn.png"
     info: "Error on Account creation. Please try again."
+  }
+
+  // Info popup for if the Account import fails
+  AVMEPopupInfo {
+    id: importFailPopup
+    icon: "qrc:/img/warn.png"
+    info: "Error on importing Account. Please try again."
   }
 
   // Info popup for if the Account erasure fails
@@ -448,18 +477,15 @@ Item {
       if (System.checkWalletPass(erasePassInput.text)) {
         if (System.eraseAccount(walletList.currentItem.itemAccount)) {
           console.log("Account erased successfully")
-          accountsList.clear()
           erasePopup.close()
           erasePopup.account = ""
+          erasePassInput.text = ""
           fetchAccountsPopup.open()
-          System.updateScreen()
-          console.log("Reloading Accounts...")
-          System.loadWalletAccounts(false)
-          fetchAccounts()
-          fetchAccountsPopup.close()
+          System.refreshAccounts()
         } else {
           erasePopup.close()
           erasePopup.account = ""
+          erasePassInput.text = ""
           eraseFailPopup.open()
         }
       } else {
@@ -468,6 +494,7 @@ Item {
     }
     noBtn.onClicked: {
       erasePopup.account = ""
+      erasePassInput.text = ""
       erasePopup.close()
     }
   }

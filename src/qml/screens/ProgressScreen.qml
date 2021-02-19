@@ -11,21 +11,8 @@ Item {
   // Signal connections
   Connections {
     target: System
-    onTxStart: {
-      var linkUrl = System.makeTransaction(pass)
-      if (linkUrl != "") {
-        linkText.text = 'Transaction successful! '
-        + '<html><style type="text/css"></style>'
-        + '<a href="' + linkUrl + '">'
-        + 'Link'
-        + '</a></html>'
-      } else {
-        linkText.text = "Transaction failed. Please try again."
-      }
-      linkText.visible = true
-      btn.visible = true
-      System.updateScreen()
-    }
+
+    onTxStart: System.makeTransaction(pass)
     onTxBuilt: {
       if (b) {
         buildText.color = "limegreen"
@@ -37,8 +24,8 @@ Item {
         buildText.color = "crimson"
         buildText.text = "Error on building transaction."
         buildPng.source = "qrc:/img/no.png"
+        btn.visible = true
       }
-      System.updateScreen()
     }
     onTxSigned: {
       if (b) {
@@ -51,24 +38,34 @@ Item {
         signText.color = "crimson"
         signText.text = "Error on signing transaction."
         signPng.source = "qrc:/img/no.png"
+        btn.visible = true
       }
-      System.updateScreen()
     }
     onTxSent: {
       if (b) {
         sendText.color = "limegreen"
         sendText.text = "Transaction sent!"
         sendPng.source = "qrc:/img/ok.png"
+        if (linkUrl != "") {
+          linkText.text = 'Transaction successful! '
+          + '<html><style type="text/css"></style>'
+          + '<a href="' + linkUrl + '">'
+          + 'Link'
+          + '</a></html>'
+        } else {
+          linkText.text = "Transaction failed. Please try again."
+        }
+        linkText.visible = true
+        btn.visible = true
       } else {
         sendText.color = "crimson"
         sendText.text = "Error on sending transaction."
         sendPng.source = "qrc:/img/no.png"
+        btn.visible = true
       }
-      System.updateScreen()
     }
     onTxRetry: {
       sendText.text = "Nonce too low or Tx w/ same hash imported, retrying..."
-      System.updateScreen()
     }
   }
 
