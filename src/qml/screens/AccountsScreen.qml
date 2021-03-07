@@ -78,227 +78,263 @@ Item {
     source: "qrc:/img/avme_logo.png"
   }
 
-  // Account list and stats
   Row {
-    id: accountRow
-    height: parent.height - buttons.height
+    anchors.fill: parent
+    anchors.margins: 5
     spacing: 5
-    anchors {
-      top: parent.top
-      bottom: buttons.top
-      left: parent.left
-      right: parent.right
-      margins: spacing
-    }
 
-    Rectangle {
-      id: listRect
-      width: ((parent.width / 3) * 2) - parent.spacing
+    // List and stats column
+    Column {
+      id: accountStats
+      width: (parent.width / 3) * 2
       height: parent.height
-      radius: 5
-      color: "#4458A0C9"
+      spacing: 5
 
-      // TODO: add fiat pricing here too when the time comes
-      AVMEWalletList {
-        id: walletList
-        width: listRect.width
-        height: listRect.height
-        model: ListModel { id: accountsList }
-      }
-    }
-
-    Rectangle {
-      id: statsRect
-      width: (parent.width / 3) - parent.spacing
-      height: parent.height
-      radius: 5
-      color: "#44AB5FBE"
-
-      Text {
-        id: balanceCoinLabel
-        anchors {
-          top: parent.top
-          left: parent.left
-          right: parent.right
-          margins: 20
-        }
-        text: "Coin Balance"
-      }
-
-      Text {
-        id: balanceCoinText
-        visible: accountsScreen.hasCoin
-        anchors {
-          top: balanceCoinLabel.bottom
-          left: parent.left
-          margins: 20
-        }
-        font.bold: true
-        text: (walletList.currentItem) ? walletList.currentItem.itemCoinAmount : ""
-      }
-
-      Text {
-        id: balanceCoinType
-        visible: accountsScreen.hasCoin
-        anchors {
-          top: balanceCoinLabel.bottom
-          left: balanceCoinText.right
-          right: parent.right
-          margins: 20
-          leftMargin: 10
-        }
-        text: (walletList.currentItem) ? System.getCurrentCoin() : ""
-      }
-
-      Text {
-        id: balanceTokenLabel
-        visible: accountsScreen.hasToken
-        anchors {
-          top: balanceCoinText.bottom
-          left: parent.left
-          right: parent.right
-          margins: 20
-        }
-        text: "Token Balance"
-      }
-
-      Text {
-        id: balanceTokenText
-        visible: accountsScreen.hasToken
-        anchors {
-          top: balanceTokenLabel.bottom
-          left: parent.left
-          margins: 20
-        }
-        font.bold: true
-        text: (walletList.currentItem) ? walletList.currentItem.itemTokenAmount : ""
-      }
-
-      Text {
-        id: balanceTokenType
-        visible: accountsScreen.hasToken
-        anchors {
-          top: balanceTokenLabel.bottom
-          left: balanceTokenText.right
-          right: parent.right
-          margins: 20
-          leftMargin: 10
-        }
-        text: (walletList.currentItem) ? System.getCurrentToken() : ""
-      }
-
-      Column {
-        id: accountOps
+      Rectangle {
+        id: listRect
         width: parent.width
-        spacing: 20
-        anchors {
-          top: balanceTokenText.bottom
-          bottom: parent.bottom
-          left: parent.left
-          right: parent.right
-          margins: 20
+        height: parent.height * 0.8
+        radius: 5
+        color: "#4458A0C9"
+
+        // TODO: add fiat pricing here too when the time comes
+        AVMEWalletList {
+          id: walletList
+          width: listRect.width
+          height: listRect.height
+          model: ListModel { id: accountsList }
+        }
+      }
+
+      Rectangle {
+        id: statsRect
+        width: parent.width
+        height: (parent.height * 0.2) - parent.spacing
+        radius: 5
+        color: "#44671B7A"
+
+        Text {
+          id: balanceCoinText
+          visible: accountsScreen.hasCoin
+          anchors {
+            top: parent.top
+            left: parent.left
+            margins: 10
+          }
+          font.bold: true
+          font.pointSize: 14.0
+          text: (walletList.currentItem) ? walletList.currentItem.itemCoinAmount : ""
         }
 
-        AVMEButton {
-          id: btnCopyAccount
-          width: parent.width
-          text: (!textTimer.running) ? "Copy Account to Clipboard" : "Copied!"
-          enabled: (walletList.currentItem && !textTimer.running)
-          Timer { id: textTimer; interval: 2000 }
-          onClicked: {
-            System.copyToClipboard(walletList.currentItem.itemAccount)
-            textTimer.start()
+        Text {
+          id: balanceCoinType
+          visible: accountsScreen.hasCoin
+          anchors {
+            top: parent.top
+            right: parent.right
+            margins: 10
+            leftMargin: 10
           }
+          font.pointSize: 14.0
+          text: (walletList.currentItem) ? System.getCurrentCoin() : ""
         }
-        AVMEButton {
-          id: btnSendCoinTx
-          width: parent.width
-          enabled: (walletList.currentItem && accountsScreen.hasCoin)
-          text: "Send Coin Transaction"
-          onClicked: {
-            System.setTxSenderAccount(walletList.currentItem.itemAccount)
-            System.setTxSenderCoinAmount(walletList.currentItem.itemCoinAmount)
-            System.setTxTokenFlag(false)
-            System.setScreen(content, "qml/screens/CoinTransactionScreen.qml")
+
+        Text {
+          id: balanceTokenText
+          visible: accountsScreen.hasToken
+          anchors {
+            top: balanceCoinText.bottom
+            left: parent.left
+            margins: 10
           }
+          font.bold: true
+          font.pointSize: 14.0
+          text: (walletList.currentItem) ? walletList.currentItem.itemTokenAmount : ""
         }
-        AVMEButton {
-          id: btnSendTokenTx
-          width: parent.width
-          enabled: (walletList.currentItem && accountsScreen.hasToken)
-          text: "Send Token Transaction"
-          onClicked: {
-            System.setTxSenderAccount(walletList.currentItem.itemAccount)
-            System.setTxSenderCoinAmount(walletList.currentItem.itemCoinAmount)
-            System.setTxSenderTokenAmount(walletList.currentItem.itemTokenAmount)
-            System.setTxTokenFlag(true)
-            System.setScreen(content, "qml/screens/TokenTransactionScreen.qml")
+
+        Text {
+          id: balanceTokenType
+          visible: accountsScreen.hasToken
+          anchors {
+            top: balanceCoinText.bottom
+            right: parent.right
+            margins: 10
+            leftMargin: 10
           }
+          font.pointSize: 14.0
+          text: (walletList.currentItem) ? System.getCurrentToken() : ""
         }
-        AVMEButton {
-          id: btnTxHistory
-          width: parent.width
-          enabled: (walletList.currentItem)
-          text: "Check Transaction History (WIP)"
-          onClicked: {}
-        }
-        AVMEButton {
-          id: btnViewKey
-          width: parent.width
-          enabled: (walletList.currentItem)
-          text: "View Private Key"
-          onClicked: {
-            viewPrivKeyPopup.account = walletList.currentItem.itemAccount
-            viewPrivKeyPopup.open()
+
+        Text {
+          id: balanceLPFreeText
+          visible: accountsScreen.hasToken
+          anchors {
+            top: balanceTokenText.bottom
+            left: parent.left
+            margins: 10
           }
+          font.bold: true
+          font.pointSize: 14.0
+          text: (walletList.currentItem) ? walletList.currentItem.itemFreeLPAmount : ""
         }
-        AVMEButton {
-          id: btnEraseAccount
-          width: parent.width
-          enabled: (walletList.currentItem)
-          text: "Erase this Account"
-          onClicked: {
-            erasePopup.account = walletList.currentItem.itemAccount
-            erasePopup.open()
+
+        Text {
+          id: balanceLPFreeType
+          visible: accountsScreen.hasToken
+          anchors {
+            top: balanceTokenText.bottom
+            right: parent.right
+            margins: 10
+            leftMargin: 10
           }
+          font.pointSize: 14.0
+          text: (walletList.currentItem) ? "LP (Free)" : ""
+        }
+
+        Text {
+          id: balanceLPLockedText
+          visible: accountsScreen.hasToken
+          anchors {
+            top: balanceLPFreeText.bottom
+            left: parent.left
+            margins: 10
+          }
+          font.bold: true
+          font.pointSize: 14.0
+          text: (walletList.currentItem) ? walletList.currentItem.itemLockedLPAmount : ""
+        }
+
+        Text {
+          id: balanceLPLockedType
+          visible: accountsScreen.hasToken
+          anchors {
+            top: balanceLPFreeText.bottom
+            right: parent.right
+            margins: 10
+            leftMargin: 10
+          }
+          font.pointSize: 14.0
+          text: (walletList.currentItem) ? "LP (Locked)" : ""
         }
       }
     }
-  }
 
-  // Buttons for Wallet operations
-  Row {
-    id: buttons
-    width: parent.width
-    height: 50
-    spacing: 5
-    anchors {
-      bottom: parent.bottom
-      left: parent.left
-      right: parent.right
-      leftMargin: spacing
-    }
+    // Options column
+    Column {
+      id: accountOps
+      width: (parent.width / 3)
+      height: parent.height
+      spacing: 20
 
-    AVMEButton {
-      id: btnCloseWallet
-      width: (parent.width / 3) - parent.spacing
-      anchors.verticalCenter: parent.verticalCenter
-      text: "Close Wallet"
-      onClicked: closeWalletPopup.open()
-    }
-    AVMEButton {
-      id: btnNewAccount
-      width: (parent.width / 3) - parent.spacing
-      anchors.verticalCenter: parent.verticalCenter
-      text: "Create New Account"
-      onClicked: newAccountPopup.open()
-    }
-    AVMEButton {
-      id: btnImportSeed
-      width: (parent.width / 3) - parent.spacing
-      anchors.verticalCenter: parent.verticalCenter
-      text: "Import Account Seed"
-      onClicked: importSeedPopup.open()
+      Text {
+        id: accountOpsLabel
+        width: parent.width - 5
+        height: 30
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignBottom
+        font.pointSize: 14.0
+        text: "Account Options"
+      }
+
+      AVMEButton {
+        id: btnSendCoinTx
+        width: parent.width - 5
+        enabled: (walletList.currentItem && accountsScreen.hasCoin)
+        text: "Send Coin Transaction"
+        onClicked: {
+          System.setTxSenderAccount(walletList.currentItem.itemAccount)
+          System.setTxSenderCoinAmount(walletList.currentItem.itemCoinAmount)
+          System.setTxTokenFlag(false)
+          System.setScreen(content, "qml/screens/CoinTransactionScreen.qml")
+        }
+      }
+
+      AVMEButton {
+        id: btnSendTokenTx
+        width: parent.width - 5
+        enabled: (walletList.currentItem && accountsScreen.hasToken)
+        text: "Send Token Transaction"
+        onClicked: {
+          System.setTxSenderAccount(walletList.currentItem.itemAccount)
+          System.setTxSenderCoinAmount(walletList.currentItem.itemCoinAmount)
+          System.setTxSenderTokenAmount(walletList.currentItem.itemTokenAmount)
+          System.setTxTokenFlag(true)
+          System.setScreen(content, "qml/screens/TokenTransactionScreen.qml")
+        }
+      }
+
+      AVMEButton {
+        id: btnCopyAccount
+        width: parent.width - 5
+        text: (!textTimer.running) ? "Copy Account to Clipboard" : "Copied!"
+        enabled: (walletList.currentItem && !textTimer.running)
+        Timer { id: textTimer; interval: 2000 }
+        onClicked: {
+          System.copyToClipboard(walletList.currentItem.itemAccount)
+          textTimer.start()
+        }
+      }
+
+      AVMEButton {
+        id: btnTxHistory
+        width: parent.width - 5
+        enabled: (walletList.currentItem)
+        text: "Check Transaction History (WIP)"
+        onClicked: {}
+      }
+
+      AVMEButton {
+        id: btnViewKey
+        width: parent.width - 5
+        enabled: (walletList.currentItem)
+        text: "View Private Key"
+        onClicked: {
+          viewPrivKeyPopup.account = walletList.currentItem.itemAccount
+          viewPrivKeyPopup.open()
+        }
+      }
+
+      AVMEButton {
+        id: btnEraseAccount
+        width: parent.width - 5
+        enabled: (walletList.currentItem)
+        text: "Erase this Account"
+        onClicked: {
+          erasePopup.account = walletList.currentItem.itemAccount
+          erasePopup.open()
+        }
+      }
+
+      Text {
+        id: walletOpsLabel
+        width: parent.width - 5
+        height: 30
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignBottom
+        font.pointSize: 14.0
+        text: "Wallet Options"
+      }
+
+      AVMEButton {
+        id: btnNewAccount
+        width: parent.width - 5
+        text: "Create New Account"
+        onClicked: newAccountPopup.open()
+      }
+
+      AVMEButton {
+        id: btnImportSeed
+        width: parent.width - 5
+        text: "Import Account Seed"
+        onClicked: importSeedPopup.open()
+      }
+
+      AVMEButton {
+        id: btnCloseWallet
+        width: parent.width - 5
+        text: "Close Wallet"
+        onClicked: closeWalletPopup.open()
+      }
     }
   }
 

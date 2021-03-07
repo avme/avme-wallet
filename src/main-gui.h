@@ -183,6 +183,8 @@ class System : public QObject {
         obj += "\", \"name\": \"" + wa.name;
         obj += "\", \"coinAmount\": \"" + wa.balanceAVAX;
         obj += "\", \"tokenAmount\": \"" + wa.balanceAVME;
+        obj += "\", \"freeLPAmount\": \"" + wa.balanceLPFree;
+        obj += "\", \"lockedLPAmount\": \"" + wa.balanceLPLocked;
         obj += "\"}";
         ret << QString::fromStdString(obj);
       }

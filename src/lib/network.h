@@ -25,7 +25,6 @@ class Network {
   private:
     static std::string hostName;
     static std::string hostPort;
-    static std::string apiKey;
 
   public:
     /**

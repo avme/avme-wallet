@@ -56,6 +56,8 @@ typedef struct WalletAccount {
   std::vector<std::string> seed;
   std::string balanceAVAX;
   std::string balanceAVME;
+  std::string balanceLPFree;
+  std::string balanceLPLocked;
 } WalletAccount;
 
 // Struct for raw transaction data.

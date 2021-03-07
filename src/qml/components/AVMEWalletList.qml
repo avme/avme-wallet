@@ -8,6 +8,8 @@ import QtQuick.Controls 2.2
  * - "name": the account's name/label
  * - "coinAmount": the account's amount in <coin-name>
  * - "tokenAmount": the account's amount in <token-name>
+ * - "freeLPAmount": the account's free amount in <liquidity-token>
+ * - "lockedLPAmount": the account's locked amount in <liquidity-token>
  */
 
 ListView {
@@ -67,6 +69,8 @@ ListView {
       readonly property string itemName: name
       readonly property string itemCoinAmount: coinAmount
       readonly property string itemTokenAmount: tokenAmount
+      readonly property string itemFreeLPAmount: freeLPAmount
+      readonly property string itemLockedLPAmount: lockedLPAmount
       width: parent.width
       height: 30
 

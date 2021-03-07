@@ -60,16 +60,17 @@ int main() {
     std::cout << "What are you looking to do?" << std::endl
       << "1 - List AVAX Accounts and balances" << std::endl
       << "2 - List AVME Accounts and balances" << std::endl
-      << "3 - Send an AVAX transaction" << std::endl
-      << "4 - Send an AVME transaction" << std::endl
-      << "5 - Create a new Account" << std::endl
-      << "6 - Import an Account with a BIP39 seed" << std::endl
-      << "7 - Erase an existing Account" << std::endl
-      << "8 - Decode a raw transaction" << std::endl
-      << "9 - Exit" << std::endl;
+      << "3 - List LP Accounts and balances" << std::endl
+      << "4 - Send an AVAX transaction" << std::endl
+      << "5 - Send an AVME transaction" << std::endl
+      << "6 - Create a new Account" << std::endl
+      << "7 - Import an Account with a BIP39 seed" << std::endl
+      << "8 - Erase an existing Account" << std::endl
+      << "9 - Decode a raw transaction" << std::endl
+      << "0 - Exit" << std::endl;
     std::getline(std::cin, menuOp);
 
-    // List AVAX accounts
+    // List AVAX Accounts and balances
     if (menuOp == "1") {
       std::vector<WalletAccount> AVAXAccounts = wm.ReadWriteWalletVector(false, false, {});
       if (!AVAXAccounts.empty()) {
@@ -84,7 +85,7 @@ int main() {
         std::cout << "No Accounts found." << std::endl;
       }
 
-    // List AVME accounts
+    // List AVME Accounts and balances
     } else if (menuOp == "2") {
       std::vector<WalletAccount> AVMEAccounts = wm.ReadWriteWalletVector(false, false, {});
       if (!AVMEAccounts.empty()) {
@@ -99,26 +100,42 @@ int main() {
         std::cout << "No Accounts found." << std::endl;
       }
 
+    // List LP Accounts and balances
+    } else if (menuOp == "3") {
+      std::vector<WalletAccount> LPAccounts = wm.ReadWriteWalletVector(false, false, {});
+      if (!LPAccounts.empty()) {
+        for (WalletAccount accountData : LPAccounts) {
+          std::cout << accountData.id << " "
+            << accountData.privKey << " "
+            << accountData.name << " "
+            << accountData.address << " "
+            << accountData.balanceLPFree << " "
+            << accountData.balanceLPLocked << std::endl;
+        }
+      } else {
+        std::cout << "No Accounts found." << std::endl;
+      }
+
     // Send AVAX/AVME transactions
-    } else if (menuOp == "3" || menuOp == "4") {
+    } else if (menuOp == "4" || menuOp == "5") {
       TransactionSkeleton txSkel;
       std::string srcAddress, destAddress, txValue, txGasLimit, txGasPrice,
         signedTx, transactionLink, feeOp;
 
       srcAddress = menuChooseSenderAddress(wm);
       destAddress = menuChooseReceiverAddress();
-      if (menuOp == "3") {  // AVAX
+      if (menuOp == "4") {  // AVAX
         txValue = menuChooseAVAXAmount(srcAddress, wm);
-      } else if (menuOp == "4") { // AVME
+      } else if (menuOp == "5") { // AVME
         txValue = menuChooseAVMEAmount(srcAddress, wm);
       }
       std::cout << "Do you want to set your own fee or use an automatic fee?\n" <<
         "1 - Automatic\n2 - Set my own" << std::endl;
       std::getline(std::cin, feeOp);
       if (feeOp == "1") {
-        if (menuOp == "3") {  // AVAX
+        if (menuOp == "4") {  // AVAX
           txGasLimit = "21000";
-        } else if (menuOp == "4") { // AVME
+        } else if (menuOp == "5") { // AVME
           txGasLimit = "80000";
         }
         txGasPrice = wm.getAutomaticFee();
@@ -139,9 +156,9 @@ int main() {
       }
 
       std::cout << "Building transaction..." << std::endl;
-      if (menuOp == "3") {  // AVAX
+      if (menuOp == "4") {  // AVAX
         txSkel = wm.buildAVAXTransaction(srcAddress, destAddress, txValue, txGasLimit, txGasPrice);
-      } else if (menuOp == "4") { // AVME
+      } else if (menuOp == "5") { // AVME
         txSkel = wm.buildAVMETransaction(srcAddress, destAddress, txValue, txGasLimit, txGasPrice);
       }
       if (txSkel.nonce == wm.MAX_U256_VALUE()) {
@@ -172,7 +189,7 @@ int main() {
       wm.reloadAccountsBalances();
 
     // Create new account
-    } else if (menuOp == "5") {
+    } else if (menuOp == "6") {
       std::string name, pass;
 
       // Get Account name (or not)
@@ -202,7 +219,7 @@ int main() {
       wm.loadWalletAccounts(false);
 
     // Import BIP39 seed
-    } else if (menuOp == "6") {
+    } else if (menuOp == "7") {
       std::vector<std::string> mnemonicPhrase;
       std::string derivPath = "m/44'/60'/0'/0/";
 
@@ -289,7 +306,7 @@ int main() {
       wm.loadWalletAccounts(false);
 
     // Erase account
-    } else if (menuOp == "7") {
+    } else if (menuOp == "8") {
       std::string account = menuChooseAccountErase(wm);
       if (menuConfirmAccountErase()) {
         std::string pass;
@@ -315,7 +332,7 @@ int main() {
       }
 
     // Decode raw transaction
-    } else if (menuOp == "8") {
+    } else if (menuOp == "9") {
       std::string rawTxHex;
       std::cout << "Please input the raw transaction in Hex." << std::endl;
       std::getline(std::cin, rawTxHex);
@@ -336,7 +353,7 @@ int main() {
                 << "s: " << txData.s << std::endl;
 
     // Exit
-    } else if (menuOp == "9") {
+    } else if (menuOp == "0") {
       std::cout << "Exiting..." << std::endl;
       exit(0);
 

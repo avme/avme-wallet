@@ -315,7 +315,11 @@ std::vector<WalletAccount> WalletManager::ReadWriteWalletVector(
         WalletAccounts.push_back(accountToRead);
       }
     }
+
     for (auto &accountToRead : WalletAccounts) {
+      std::string AVMEAddress = (accountToRead.address.substr(0, 2) == "0x") ? accountToRead.address.substr(2) : accountToRead.address;
+
+      // Get AVAX balance
       jsonBal = JSON::getValue(Network::getAVAXBalance(accountToRead.address), "result");
       u256 AVAXbalance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
       balanceStr = boost::lexical_cast<std::string>(AVAXbalance);
@@ -326,7 +330,7 @@ std::vector<WalletAccount> WalletManager::ReadWriteWalletVector(
       }
       accountToRead.balanceAVAX = convertWeiToFixedPoint(balanceStr, 18);
 
-      std::string AVMEAddress = (accountToRead.address.substr(0, 2) == "0x") ? accountToRead.address.substr(2) : accountToRead.address;
+      // Get AVME balance
       jsonBal = JSON::getValue(Network::getAVMEBalance(
         AVMEAddress, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"
       ), "result");
@@ -337,6 +341,31 @@ std::vector<WalletAccount> WalletManager::ReadWriteWalletVector(
         return {};
       }
       accountToRead.balanceAVME = convertWeiToFixedPoint(balanceStr, 18);
+
+      // Get free LP balance
+      jsonBal = JSON::getValue(Network::getAVMEBalance(
+        AVMEAddress, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232" // TODO: change this to the real LP address
+      ), "result");
+      u256 LPFreebalance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
+      balanceStr = boost::lexical_cast<std::string>(LPFreebalance);
+      if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
+        balancesThreadLock.unlock();
+        return {};
+      }
+      accountToRead.balanceLPFree = convertWeiToFixedPoint(balanceStr, 18);
+
+      // Get locked LP balance
+      jsonBal = JSON::getValue(Network::getAVMEBalance(
+        AVMEAddress, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232" // TODO: change this to the real LP address
+      ), "result");
+      u256 LPLockedbalance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
+      balanceStr = boost::lexical_cast<std::string>(LPLockedbalance);
+      if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
+        balancesThreadLock.unlock();
+        return {};
+      }
+      accountToRead.balanceLPLocked = convertWeiToFixedPoint(balanceStr, 18);
+
     }
     balancesThreadLock.unlock();
     return {};
