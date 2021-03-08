@@ -237,6 +237,18 @@ Item {
       }
 
       AVMEButton {
+        id: btnCopyAccount
+        width: parent.width - 5
+        text: (!textTimer.running) ? "Copy Account to Clipboard" : "Copied!"
+        enabled: (walletList.currentItem && !textTimer.running)
+        Timer { id: textTimer; interval: 2000 }
+        onClicked: {
+          System.copyToClipboard(walletList.currentItem.itemAccount)
+          textTimer.start()
+        }
+      }
+
+      AVMEButton {
         id: btnSendCoinTx
         width: parent.width - 5
         enabled: (walletList.currentItem && accountsScreen.hasCoin)
@@ -264,14 +276,15 @@ Item {
       }
 
       AVMEButton {
-        id: btnCopyAccount
+        id: btnStaking
         width: parent.width - 5
-        text: (!textTimer.running) ? "Copy Account to Clipboard" : "Copied!"
-        enabled: (walletList.currentItem && !textTimer.running)
-        Timer { id: textTimer; interval: 2000 }
+        enabled: (walletList.currentItem)
+        text: "Use Account for Staking"
         onClicked: {
-          System.copyToClipboard(walletList.currentItem.itemAccount)
-          textTimer.start()
+          System.setTxSenderAccount(walletList.currentItem.itemAccount)
+          System.setTxSenderLPFreeAmount(walletList.currentItem.itemFreeLPAmount)
+          System.setTxSenderLPLockedAmount(walletList.currentItem.itemLockedLPAmount)
+          System.setScreen(content, "qml/screens/StakingScreen.qml")
         }
       }
 

@@ -53,6 +53,8 @@ class System : public QObject {
     std::string txSenderAccount;
     std::string txSenderCoinAmount;
     std::string txSenderTokenAmount;
+    std::string txSenderLPFreeAmount;
+    std::string txSenderLPLockedAmount;
     std::string txReceiverAccount;
     std::string txReceiverCoinAmount;
     std::string txReceiverTokenAmount;
@@ -87,6 +89,12 @@ class System : public QObject {
 
     Q_INVOKABLE QString getTxSenderTokenAmount() { return QString::fromStdString(this->txSenderTokenAmount); }
     Q_INVOKABLE void setTxSenderTokenAmount(QString amount) { this->txSenderTokenAmount = amount.toStdString(); }
+
+    Q_INVOKABLE QString getTxSenderLPFreeAmount() { return QString::fromStdString(this->txSenderLPFreeAmount); }
+    Q_INVOKABLE void setTxSenderLPFreeAmount(QString amount) { this->txSenderLPFreeAmount = amount.toStdString(); }
+
+    Q_INVOKABLE QString getTxSenderLPLockedAmount() { return QString::fromStdString(this->txSenderLPLockedAmount); }
+    Q_INVOKABLE void setTxSenderLPLockedAmount(QString amount) { this->txSenderLPLockedAmount = amount.toStdString(); }
 
     Q_INVOKABLE QString getTxReceiverAccount() { return QString::fromStdString(this->txReceiverAccount); }
     Q_INVOKABLE void setTxReceiverAccount(QString account) { this->txReceiverAccount = account.toStdString(); }

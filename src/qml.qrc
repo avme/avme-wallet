@@ -8,6 +8,7 @@
         <file>qml/screens/CoinTransactionScreen.qml</file>
         <file>qml/screens/TokenTransactionScreen.qml</file>
         <file>qml/screens/ProgressScreen.qml</file>
+        <file>qml/screens/StakingScreen.qml</file>
         <file>qml/components/AVMEButton.qml</file>
         <file>qml/components/AVMEInput.qml</file>
         <file>qml/components/AVMEPopup.qml</file>
@@ -23,6 +24,7 @@
         <file>qml/components/AVMEAccountSeedList.qml</file>
         <file>img/avme_banner.png</file>
         <file>img/avme_logo.png</file>
+        <file>img/avax_logo.png</file>
         <file>img/warn.png</file>
         <file>img/wait.png</file>
         <file>img/ok.png</file>
