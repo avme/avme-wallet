@@ -289,6 +289,41 @@ class WalletManager {
      * Returns a structure with the transaction's data.
      */
     WalletTxData decodeRawTransaction(std::string rawTxHex);
+
+    /**
+     * Approve a given Account for staking.
+     * Returns true on success, false on failure.
+     */
+    bool approveStaking(std::string account);
+
+    /**
+     * Check if a given Account was approved for staking.
+     * Approval is checked by searching an approval transaction in the
+     * blockchain, and checking if it was successfully made.
+     * Returns true on success, false on failure.
+     */
+    bool isApprovedForStaking(std::string account);
+
+    /**
+     * Stake/unstake a given amount of LP tokens in the pool, respectively.
+     * Returns true on success, false on failure.
+     */
+    bool stake(std::string account, std::string lpAmount);
+    bool unstake(std::string account, std::string lpAmount);
+
+    /**
+     * Harvest available farmed tokens in the pool for the given Account.
+     * Returns true on sucess, false on failure.
+     */
+    bool harvest(std::string account);
+
+    /**
+     * Exit the LP pool (harvest all + unstake all).
+     * This would be the equivalent of calling harvest() then unstake()
+     * with a max amount.
+     * Returns true on success, false on failure.
+     */
+    bool exitPool(std::string account);
 };
 
 #endif // WALLET_H

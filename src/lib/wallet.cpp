@@ -541,3 +541,28 @@ WalletTxData WalletManager::decodeRawTransaction(std::string rawTxHex) {
   return ret;
 }
 
+// TODO: implement staking functions
+bool WalletManager::approveStaking(std::string account) {
+  return false;
+}
+
+bool WalletManager::isApprovedForStaking(std::string account) {
+  return false;
+}
+
+bool WalletManager::stake(std::string account, std::string lpAmount) {
+  return false;
+}
+
+bool WalletManager::unstake(std::string account, std::string lpAmount) {
+  return false;
+}
+
+bool WalletManager::harvest(std::string account) {
+  return false;
+}
+
+bool WalletManager::exitPool(std::string account) {
+  return false;
+}
+
