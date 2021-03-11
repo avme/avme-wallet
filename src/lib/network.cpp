@@ -114,3 +114,13 @@ std::string Network::broadcastTransaction(std::string txidHex) {
   return httpGetRequest(query.str());
 }
 
+std::string Network::getTransactionReceipt(std::string txidHex) {
+  std::stringstream query;
+  std::string ApitxidHex = "0x";
+  ApitxidHex += txidHex;
+  query << "{\"jsonrpc\": \"2.0\",\"method\": \"eth_getTransactionReceipt\",\"params\": [\""
+        << ApitxidHex
+        << "\"],\"id\": 1}";
+  return httpGetRequest(query.str());
+}
+

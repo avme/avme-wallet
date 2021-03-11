@@ -48,6 +48,8 @@ class Network {
 
     // Broadcast a signed transaction to the blockchain.
     static std::string broadcastTransaction(std::string txidHex);
+	
+	static std::string getTransactionReceipt(std::string txidHex);
 };
 
 #endif // NETWORK_H

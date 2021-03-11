@@ -294,8 +294,8 @@ void WalletManager::loadWalletAccounts(bool start) {
     boost::thread t(&WalletManager::reloadAccountsBalancesThread, this);
     t.detach();
   }
-
   ReadWriteWalletVector(true, true, AccountsToLoad);
+
   return;
 }
 
@@ -500,13 +500,19 @@ std::string WalletManager::sendTransaction(std::string txidHex) {
   std::string txidApiRequest = Network::broadcastTransaction(txidHex);
   std::string txid = JSON::getValue(txidApiRequest, "result").get_str();
   std::string txLink = "https://cchain.explorer.avax-test.network/tx/" + txid;
+  
+  
+  WalletTxData TransactionData = WalletManager::decodeRawTransaction(txidHex);
+  TransactionList tl(TransactionData.from);
+  tl.saveTransaction(TransactionData);
+  // Since AVAX Chain is pretty fast, we can ask to the chain if the transaction was already confirmed even after sending it.
+  tl.updateAllTransactions();
   return txLink;
 }
 
 WalletTxData WalletManager::decodeRawTransaction(std::string rawTxHex) {
   TransactionBase transaction = TransactionBase(fromHex(rawTxHex), CheckTransaction::None);
   WalletTxData ret;
-
   ret.hex = transaction.sha3().hex();
   if (transaction.isCreation()) {
     ret.type = "creation";
@@ -537,7 +543,15 @@ WalletTxData WalletManager::decodeRawTransaction(std::string rawTxHex) {
     ret.r = boost::lexical_cast<std::string>(transaction.signature().r);
     ret.s = boost::lexical_cast<std::string>(transaction.signature().s);
   }
-
+	const auto p1 = std::chrono::system_clock::now();
+	
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+	std::stringstream timestream;
+	timestream << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
+	ret.humanDate = timestream.str();
+	ret.confirmed = false;
+	ret.unixDate = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
   return ret;
 }
 
