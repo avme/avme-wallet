@@ -14,6 +14,8 @@
 #include <thread>
 #include <vector>
 #include <mutex>
+#include <ctime>
+#include <iomanip>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/trim_all.hpp>
@@ -39,6 +41,7 @@
 
 #include "network.h"
 #include "json.h"
+#include "transactions.h"
 
 using namespace dev;
 using namespace dev::eth;
@@ -61,23 +64,6 @@ typedef struct WalletAccount {
 } WalletAccount;
 
 // Struct for raw transaction data.
-typedef struct WalletTxData {
-  std::string hex;
-  std::string type;
-  std::string code;
-  std::string to;
-  std::string from;
-  std::string data;
-  std::string creates;
-  std::string value;
-  std::string nonce;
-  std::string gas;
-  std::string price;
-  std::string hash;
-  std::string v;
-  std::string r;
-  std::string s;
-} WalletTxData;
 
 // Mutex for account refresh thread.
 static std::mutex balancesThreadLock;
