@@ -14,7 +14,7 @@ import QtQuick.Controls 2.2
 
 ListView {
   id: walletList
-  property color listHighlightColor: "#7AC1EB"
+  property color listHighlightColor: "#887AC1EB"
   property color listBgColor: "#58A0C9"
   property color listHoverColor: "#7AC1DB"
 
@@ -42,20 +42,61 @@ ListView {
     Text {
       id: headerAccount
       anchors.verticalCenter: parent.verticalCenter
-      width: parent.width / 2
+      width: parent.width / 6
       color: "white"
       padding: 5
       text: "Account"
+      font.pointSize: 10.0
     }
-
     Text {
       id: headerName
       anchors.verticalCenter: parent.verticalCenter
-      width: parent.width / 2
-      x: headerAccount.width
+      width: parent.width / 6
+      x: headerAccount.x + headerAccount.width
       color: "white"
       padding: 5
       text: "Name"
+      font.pointSize: 10.0
+    }
+    Text {
+      id: headerCoinBalance
+      anchors.verticalCenter: parent.verticalCenter
+      width: parent.width / 6
+      x: headerName.x + headerName.width
+      color: "white"
+      padding: 5
+      text: "Coin Balance"
+      font.pointSize: 10.0
+    }
+    Text {
+      id: headerTokenBalance
+      anchors.verticalCenter: parent.verticalCenter
+      width: parent.width / 6
+      x: headerCoinBalance.x + headerCoinBalance.width
+      color: "white"
+      padding: 5
+      text: "Token Balance"
+      font.pointSize: 10.0
+    }
+    Text {
+      id: headerLPFreeBalance
+      anchors.verticalCenter: parent.verticalCenter
+      width: parent.width / 6
+      x: headerTokenBalance.x + headerTokenBalance.width
+      color: "white"
+      padding: 5
+      text: "Free LP Balance"
+      font.pointSize: 10.0
+    }
+    Text {
+      id: headerLPLockedBalance
+      anchors.verticalCenter: parent.verticalCenter
+      width: parent.width / 6
+      x: headerLPFreeBalance.x + headerLPFreeBalance.width
+      color: "white"
+      padding: 5
+      text: "Locked LP Balance"
+      font.pointSize: 10.0
     }
   }
   headerPositioning: ListView.OverlayHeader // Prevent header scrolling along
@@ -77,21 +118,67 @@ ListView {
       Text {
         id: delegateAccount
         anchors.verticalCenter: parent.verticalCenter
-        width: parent.width / 2
+        width: parent.width / 6
         color: "white"
         padding: 5
         elide: Text.ElideRight
         text: itemAccount
+        font.pointSize: 10.0
       }
       Text {
         id: delegateName
         anchors.verticalCenter: parent.verticalCenter
-        width: parent.width / 2
-        x: delegateAccount.width
+        width: parent.width / 6
+        x: delegateAccount.x + delegateAccount.width
         color: "white"
         padding: 5
         elide: Text.ElideRight
         text: itemName
+        font.pointSize: 10.0
+      }
+      Text {
+        id: delegateCoinBalance
+        anchors.verticalCenter: parent.verticalCenter
+        width: parent.width / 6
+        x: delegateName.x + delegateName.width
+        color: "white"
+        padding: 5
+        elide: Text.ElideRight
+        text: itemCoinAmount
+        font.pointSize: 10.0
+      }
+      Text {
+        id: delegateTokenBalance
+        anchors.verticalCenter: parent.verticalCenter
+        width: parent.width / 6
+        x: delegateCoinBalance.x + delegateCoinBalance.width
+        color: "white"
+        padding: 5
+        elide: Text.ElideRight
+        text: itemTokenAmount
+        font.pointSize: 10.0
+      }
+      Text {
+        id: delegateLPFreeBalance
+        anchors.verticalCenter: parent.verticalCenter
+        width: parent.width / 6
+        x: delegateTokenBalance.x + delegateTokenBalance.width
+        color: "white"
+        padding: 5
+        elide: Text.ElideRight
+        text: itemFreeLPAmount
+        font.pointSize: 10.0
+      }
+      Text {
+        id: delegateLPTokenBalance
+        anchors.verticalCenter: parent.verticalCenter
+        width: parent.width / 6
+        x: delegateLPFreeBalance.x + delegateLPFreeBalance.width
+        color: "white"
+        padding: 5
+        elide: Text.ElideRight
+        text: itemLockedLPAmount
+        font.pointSize: 10.0
       }
       MouseArea {
         id: delegateMouseArea

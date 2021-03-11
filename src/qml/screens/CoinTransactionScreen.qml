@@ -175,7 +175,7 @@ Item {
         width: items.width / 8
         height: 60
         text: "Back"
-        onClicked: System.setScreen(content, "qml/screens/AccountsScreen.qml")
+        onClicked: System.setScreen(content, "qml/screens/StatsScreen.qml")
       }
 
       AVMEButton {

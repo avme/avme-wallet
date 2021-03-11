@@ -5,6 +5,7 @@
         <file>qml/screens/NewWalletScreen.qml</file>
         <file>qml/screens/LoadWalletScreen.qml</file>
         <file>qml/screens/AccountsScreen.qml</file>
+        <file>qml/screens/StatsScreen.qml</file>
         <file>qml/screens/CoinTransactionScreen.qml</file>
         <file>qml/screens/TokenTransactionScreen.qml</file>
         <file>qml/screens/ProgressScreen.qml</file>
@@ -22,6 +23,7 @@
         <file>qml/components/AVMEPopupConfirmTx.qml</file>
         <file>qml/components/AVMEWalletList.qml</file>
         <file>qml/components/AVMEAccountSeedList.qml</file>
+        <file>qml/components/AVMETxHistoryList.qml</file>
         <file>img/avme_banner.png</file>
         <file>img/avme_logo.png</file>
         <file>img/avax_logo.png</file>

@@ -149,7 +149,7 @@ Item {
             console.log("Wallet loaded successfully")
             System.storeWalletPass(walletPass)
             System.setFirstLoad(true)
-            System.setScreen(content, "qml/screens/AccountsScreen.qml")
+            System.setScreen(content, "qml/screens/StatsScreen.qml")
           } catch (error) {
             walletFailPopup.open()
           }

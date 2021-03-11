@@ -186,7 +186,7 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       visible: false
       text: "OK"
-      onClicked: System.setScreen(content, "qml/screens/AccountsScreen.qml")
+      onClicked: System.setScreen(content, "qml/screens/StatsScreen.qml")
     }
   }
 }

@@ -217,7 +217,7 @@ Item {
       width: parent.width / 6
       anchors.horizontalCenter: parent.horizontalCenter
       text: "Back to Accounts"
-      onClicked: System.setScreen(content, "qml/screens/AccountsScreen.qml")
+      onClicked: System.setScreen(content, "qml/screens/StatsScreen.qml")
     }
   }
 }
