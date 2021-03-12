@@ -1,12 +1,14 @@
 #include "transactions.h"
 
 void TransactionList::LoadAllTransactions() {
-  json_spirit::mValue txData = storage::readJsonFile(this->address.c_str());
-  this->transactions.clear();
   try {
+    json_spirit::mValue txData = storage::readJsonFile(this->address.c_str());
     json_spirit::mValue TxArray = JSON::objectItem(txData, "transactions");
+    this->transactions.clear();
     for (int i = 0; i < TxArray.get_array().size(); ++i) {
       WalletTxData tmpData;
+      tmpData.txlink = JSON::objectItem(JSON::arrayItem(TxArray, i), "txlink").get_str();
+      tmpData.operation = JSON::objectItem(JSON::arrayItem(TxArray, i), "operation").get_str();
       tmpData.hex = JSON::objectItem(JSON::arrayItem(TxArray, i), "hex").get_str();
       tmpData.type = JSON::objectItem(JSON::arrayItem(TxArray, i), "type").get_str();
       tmpData.code = JSON::objectItem(JSON::arrayItem(TxArray, i), "code").get_str();
@@ -23,20 +25,21 @@ void TransactionList::LoadAllTransactions() {
       tmpData.r = JSON::objectItem(JSON::arrayItem(TxArray, i), "r").get_str();
       tmpData.s = JSON::objectItem(JSON::arrayItem(TxArray, i), "s").get_str();
       tmpData.humanDate = JSON::objectItem(JSON::arrayItem(TxArray, i), "humanDate").get_str();
-      tmpData.confirmed = JSON::objectItem(JSON::arrayItem(TxArray, i), "confirmed").get_bool();
       tmpData.unixDate = JSON::objectItem(JSON::arrayItem(TxArray, i), "unixDate").get_uint64();
+      tmpData.confirmed = JSON::objectItem(JSON::arrayItem(TxArray, i), "confirmed").get_bool();
       this->transactions.push_back(tmpData);
     }
   } catch (std::exception &e) {
     std::cout << "Error " << e.what() << std::endl;
   }
-  return;
 }
 
 json_spirit::mArray TransactionList::LoadAllLocalTransactions() {
   json_spirit::mArray transactionsArray;
   for (WalletTxData savedTxData : this->transactions) {
     json_spirit::mObject savedTransaction;
+    savedTransaction["txlink"] = savedTxData.txlink;
+    savedTransaction["operation"] = savedTxData.operation;
     savedTransaction["hex"] = savedTxData.hex;
     savedTransaction["type"] = savedTxData.type;
     savedTransaction["code"] = savedTxData.code;
@@ -53,8 +56,8 @@ json_spirit::mArray TransactionList::LoadAllLocalTransactions() {
     savedTransaction["r"] = savedTxData.r;
     savedTransaction["s"] = savedTxData.s;
     savedTransaction["humanDate"] = savedTxData.humanDate;
-    savedTransaction["confirmed"] = savedTxData.confirmed;
     savedTransaction["unixDate"] = savedTxData.unixDate;
+    savedTransaction["confirmed"] = savedTxData.confirmed;
     transactionsArray.push_back(savedTransaction);
   }
   return transactionsArray;
@@ -66,6 +69,8 @@ bool TransactionList::saveTransaction(WalletTxData TxData) {
   json_spirit::mArray transactionsArray = LoadAllLocalTransactions();
   json_spirit::mObject transaction;
 
+  transaction["txlink"] = TxData.txlink;
+  transaction["operation"] = TxData.operation;
   transaction["hex"] = TxData.hex;
   transaction["type"] = TxData.type;
   transaction["code"] = TxData.code;
@@ -82,9 +87,8 @@ bool TransactionList::saveTransaction(WalletTxData TxData) {
   transaction["r"] = TxData.r;
   transaction["s"] = TxData.s;
   transaction["humanDate"] = TxData.humanDate;
-  transaction["type"] = TxData.type;
-  transaction["confirmed"] = TxData.confirmed;
   transaction["unixDate"] = TxData.unixDate;
+  transaction["confirmed"] = TxData.confirmed;
   transactionsArray.push_back(transaction);
 
   transactionsRoot["transactions"] = transactionsArray;

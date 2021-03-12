@@ -508,6 +508,8 @@ std::string WalletManager::sendTransaction(std::string txidHex) {
    * already confirmed even immediately after sending it.
    */
   WalletTxData TransactionData = WalletManager::decodeRawTransaction(txidHex);
+  TransactionData.txlink = txLink;
+  TransactionData.operation = (TransactionData.data.empty()) ? "Send AVAX" : "Send AVME"; // TODO: programatically get coin/token
   TransactionList tl(TransactionData.from);
   tl.saveTransaction(TransactionData);
   tl.updateAllTransactions();
@@ -526,7 +528,7 @@ WalletTxData WalletManager::decodeRawTransaction(std::string rawTxHex) {
   } else {
     ret.type = "message";
     ret.to = boost::lexical_cast<std::string>(transaction.to());
-    ret.data = (transaction.data().empty() ? "none" : toHex(transaction.data()));
+    ret.data = (transaction.data().empty() ? "" : toHex(transaction.data()));
   }
   try {
     auto s = transaction.sender();

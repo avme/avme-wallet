@@ -11,6 +11,19 @@ import "qrc:/qml/components"
 Item {
   id: statsScreen
 
+  // TODO: maybe a "reload/refresh transactions" button?
+  function fetchTransactions() {
+    historyModel.clear()
+    var txList = System.listAccountTransactions(System.getTxSenderAccount())
+    if (txList != null) {
+      for (var i = (txList.length - 1); i >= 0; i--) {
+        historyModel.append(JSON.parse(txList[i]))
+      }
+    }
+  }
+
+  Component.onCompleted: fetchTransactions()
+
   // Background icon
   Image {
     id: bgIcon
@@ -74,43 +87,7 @@ Item {
     AVMETxHistoryList {
       id: historyList
       anchors.fill: parent
-      // TODO: put real data here later
-      model: ListModel {
-        id: historyModel
-        ListElement {
-          txlink: "https://etherscan.io/"
-          operation: "Unlock AVAX/AVME"
-          from: "0x1234567890123456789012345678901234567890"
-          to: "0x9876543210987654321098765432109876543210"
-          value: "11111.123456789123456789"
-          gas: "21000"
-          price: "470"
-          datetime: "01/01/1970 00:00:00"
-          confirmed: true
-        }
-        ListElement {
-          txlink: "https://blockchair.com/"
-          operation: "Send AVAX"
-          from: "0x1234567890123456789012345678901234567890"
-          to: "0x9876543210987654321098765432109876543210"
-          value: "99999.987654321987654321"
-          gas: "21000"
-          price: "470"
-          datetime: "02/02/1970 00:00:00"
-          confirmed: false
-        }
-        ListElement {
-          txlink: "https://explorer.avax.network"
-          operation: "Get AVME Rewards"
-          from: "0x1234567890123456789012345678901234567890"
-          to: "0x9876543210987654321098765432109876543210"
-          value: "12345.123456789987654321"
-          gas: "21000"
-          price: "470"
-          datetime: "03/03/1970 00:00:00"
-          confirmed: true
-        }
-      }
+      model: ListModel { id: historyModel }
     }
   }
 
@@ -306,7 +283,7 @@ Item {
         horizontalCenter: parent.horizontalCenter
         margins: 10
       }
-      text: "Transaction Details"
+      text: (historyList.currentItem) ? "Transaction Details" : "No transactions made yet"
     }
 
     Text {
@@ -319,7 +296,8 @@ Item {
       }
       font.pointSize: 14.0
       elide: Text.ElideRight
-      text: "<b>Operation:</b> " + historyList.currentItem.itemOperation + "<br>"
+      text: (historyList.currentItem)
+      ? "<b>Operation:</b> " + historyList.currentItem.itemOperation + "<br>"
       + "<b>From:</b> " + historyList.currentItem.itemFrom + "<br>"
       + "<b>To:</b> " + historyList.currentItem.itemTo + "<br>"
       + "<b>Value:</b> " + historyList.currentItem.itemValue + "<br>"
@@ -327,6 +305,7 @@ Item {
       + "<b>Price:</b> " + historyList.currentItem.itemPrice + "<br>"
       + "<b>Timestamp:</b> " + historyList.currentItem.itemDateTime + "<br>"
       + "<b>Confirmed:</b> " + historyList.currentItem.itemConfirmed
+      : ""
     }
 
     AVMEButton {
@@ -337,6 +316,7 @@ Item {
         right: parent.right
         margins: 10
       }
+      enabled: (historyList.currentItem)
       text: "Open Transaction in Block Explorer"
       onClicked: Qt.openUrlExternally(historyList.currentItem.itemTxLink)
     }

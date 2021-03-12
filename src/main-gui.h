@@ -228,6 +228,31 @@ class System : public QObject {
       return this->wm.accountExists(account.toStdString());
     }
 
+    // List the Account's transactions
+    Q_INVOKABLE QVariantList listAccountTransactions(QString address) {
+      QVariantList ret;
+      TransactionList tl(address.toStdString());
+      for (int i = 0; i < tl.getTransactionListSize(); i++) {
+        WalletTxData tx = tl.getTransactionData(i);
+        std::string obj;
+        obj += "{\"txlink\": \"" + tx.txlink;
+        obj += "\", \"operation\": \"" + tx.operation;
+        obj += "\", \"txdata\": \"" + tx.data;
+        obj += "\", \"from\": \"" + tx.from;
+        obj += "\", \"to\": \"" + tx.to;
+        obj += "\", \"value\": \"" + tx.value;
+        obj += "\", \"gas\": \"" + tx.gas;
+        obj += "\", \"price\": \"" + tx.price;
+        obj += "\", \"datetime\": \"" + tx.humanDate;
+        obj += "\", \"unixtime\": " + std::to_string(tx.unixDate);
+        obj += ", \"confirmed\": " + QVariant(tx.confirmed).toString().toStdString();
+        obj += "}";
+        ret << QString::fromStdString(obj);
+      }
+
+      return ret;
+    }
+
     // Get an Account's private keys
     Q_INVOKABLE QString getPrivateKeys(QString account, QString pass) {
       Secret s = wm.getSecret(account.toStdString(), pass.toStdString());

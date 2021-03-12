@@ -34,7 +34,7 @@ namespace storage {
     boost::filesystem::path finalPath = GetDataDir() / filePath;
     if (!boost::filesystem::exists(finalPath)) {
       json_spirit::mObject errorData;
-      errorData["ERROR"] = "FILE DOES NOT EXISTS";
+      errorData["ERROR"] = "FILE DOES NOT EXIST";
       storageThreadLock.unlock();
       return json_spirit::mValue(errorData);
     }

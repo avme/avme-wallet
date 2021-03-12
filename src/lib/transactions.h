@@ -9,6 +9,8 @@
 // TODO: error handling on everything
 
 typedef struct WalletTxData {
+  std::string txlink;
+  std::string operation;
   std::string hex;
   std::string type;
   std::string code;
@@ -25,8 +27,8 @@ typedef struct WalletTxData {
   std::string r;
   std::string s;
   std::string humanDate;
-  bool confirmed;
   uint64_t unixDate;
+  bool confirmed;
 } WalletTxData;
 
 class TransactionList {
@@ -39,7 +41,7 @@ class TransactionList {
 
   public:
     TransactionList(std::string address) {
-      this->address = address;
+      this->address = address.erase(0, 2); // Remove "0x"
       LoadAllTransactions();
     }
 
