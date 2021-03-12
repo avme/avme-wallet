@@ -63,8 +63,6 @@ typedef struct WalletAccount {
   std::string balanceLPLocked;
 } WalletAccount;
 
-// Struct for raw transaction data.
-
 // Mutex for account refresh thread.
 static std::mutex balancesThreadLock;
 

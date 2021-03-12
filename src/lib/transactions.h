@@ -6,6 +6,8 @@
 
 // Transaction list for a single Account, given the following struct:
 
+// TODO: error handling on everything
+
 typedef struct WalletTxData {
   std::string hex;
   std::string type;
@@ -31,8 +33,10 @@ class TransactionList {
   private:
     std::string address;
     std::vector<WalletTxData> transactions;
-	json_spirit::mArray LoadAllLocalTransactions();
-	
+
+    // Convert the transaction list into an array
+    json_spirit::mArray LoadAllLocalTransactions();
+
   public:
     TransactionList(std::string address) {
       this->address = address;
@@ -44,7 +48,7 @@ class TransactionList {
     size_t getTransactionListSize() { return transactions.size(); }
 
     /**
-     * (Re)Load all transactions for the Account from a JSON file.
+     * (Re)Load all transactions for the Account from a JSON file into the list.
      * All functions should call this one after they're done, so the
      * transaction list remains updated.
      */

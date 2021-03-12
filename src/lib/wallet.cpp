@@ -497,15 +497,19 @@ std::string WalletManager::signTransaction(
 
 // TODO: change the hardcoded link when switching between mainnet and testnet
 std::string WalletManager::sendTransaction(std::string txidHex) {
+  // Send the transaction
   std::string txidApiRequest = Network::broadcastTransaction(txidHex);
   std::string txid = JSON::getValue(txidApiRequest, "result").get_str();
   std::string txLink = "https://cchain.explorer.avax-test.network/tx/" + txid;
-  
-  
+
+  /**
+   * Store the successful transaction locally.
+   * Since the AVAX chain is pretty fast, we can ask if the transaction was
+   * already confirmed even immediately after sending it.
+   */
   WalletTxData TransactionData = WalletManager::decodeRawTransaction(txidHex);
   TransactionList tl(TransactionData.from);
   tl.saveTransaction(TransactionData);
-  // Since AVAX Chain is pretty fast, we can ask to the chain if the transaction was already confirmed even after sending it.
   tl.updateAllTransactions();
   return txLink;
 }
@@ -513,6 +517,8 @@ std::string WalletManager::sendTransaction(std::string txidHex) {
 WalletTxData WalletManager::decodeRawTransaction(std::string rawTxHex) {
   TransactionBase transaction = TransactionBase(fromHex(rawTxHex), CheckTransaction::None);
   WalletTxData ret;
+
+  // Creation, message, sender, receiver and data
   ret.hex = transaction.sha3().hex();
   if (transaction.isCreation()) {
     ret.type = "creation";
@@ -528,9 +534,11 @@ WalletTxData WalletManager::decodeRawTransaction(std::string rawTxHex) {
       ret.creates = boost::lexical_cast<std::string>(toAddress(s, transaction.nonce()));
     }
     ret.from = boost::lexical_cast<std::string>(s);
-  } catch(...) {
+  } catch (...) {
     ret.from = "<unsigned>";
   }
+
+  // Value, nonce, gas limit, gas price, hash and v/r/s signature keys
   ret.value = formatBalance(transaction.value()) + " (" +
     boost::lexical_cast<std::string>(transaction.value()) + " wei)";
   ret.nonce = boost::lexical_cast<std::string>(transaction.nonce());
@@ -543,15 +551,16 @@ WalletTxData WalletManager::decodeRawTransaction(std::string rawTxHex) {
     ret.r = boost::lexical_cast<std::string>(transaction.signature().r);
     ret.s = boost::lexical_cast<std::string>(transaction.signature().s);
   }
-	const auto p1 = std::chrono::system_clock::now();
-	
-    auto t = std::time(nullptr);
-    auto tm = *std::localtime(&t);
-	std::stringstream timestream;
-	timestream << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
-	ret.humanDate = timestream.str();
-	ret.confirmed = false;
-	ret.unixDate = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
+
+  // Timestamps (epoch and human-readable) and confirmed
+  const auto p1 = std::chrono::system_clock::now();
+  auto t = std::time(nullptr);
+  auto tm = *std::localtime(&t);
+  std::stringstream timestream;
+  timestream << std::put_time(&tm, "%d-%m-%Y %H-%M-%S");
+  ret.humanDate = timestream.str();
+  ret.confirmed = false;
+  ret.unixDate = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
   return ret;
 }
 
