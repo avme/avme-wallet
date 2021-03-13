@@ -232,6 +232,7 @@ class System : public QObject {
     Q_INVOKABLE QVariantList listAccountTransactions(QString address) {
       QVariantList ret;
       TransactionList tl(address.toStdString());
+
       for (int i = 0; i < tl.getTransactionListSize(); i++) {
         WalletTxData tx = tl.getTransactionData(i);
         std::string obj;

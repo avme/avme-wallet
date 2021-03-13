@@ -10,6 +10,7 @@
         <file>qml/screens/TokenTransactionScreen.qml</file>
         <file>qml/screens/ProgressScreen.qml</file>
         <file>qml/screens/StakingScreen.qml</file>
+        <file>qml/screens/ExchangeScreen.qml</file>
         <file>qml/components/AVMEButton.qml</file>
         <file>qml/components/AVMEInput.qml</file>
         <file>qml/components/AVMEPopup.qml</file>

@@ -216,7 +216,7 @@ Item {
       id: btnBack
       width: parent.width / 6
       anchors.horizontalCenter: parent.horizontalCenter
-      text: "Back to Accounts"
+      text: "Back"
       onClicked: System.setScreen(content, "qml/screens/StatsScreen.qml")
     }
   }

@@ -11,7 +11,6 @@ import "qrc:/qml/components"
 Item {
   id: statsScreen
 
-  // TODO: maybe a "reload/refresh transactions" button?
   function fetchTransactions() {
     historyModel.clear()
     var txList = System.listAccountTransactions(System.getTxSenderAccount())
@@ -48,25 +47,40 @@ Item {
 
     AVMEButton {
       id: btnChangeAccount
-      width: (parent.width / 4) - parent.spacing
+      width: (parent.width / 6) - parent.spacing
       text: "Change Account"
       onClicked: System.setScreen(content, "qml/screens/AccountsScreen.qml")
     }
+    AVMEButton {
+      id: btnRefreshHistory
+      width: (parent.width / 6) - parent.spacing
+      text: "Refresh History"
+      onClicked: fetchTransactions()
+    }
     Text {
       id: accountText
-      width: (parent.width / 2) - parent.spacing
+      width: (parent.width / 3) - parent.spacing
       horizontalAlignment: Text.AlignHCenter
       text: "Stats for the Account:<br><b>" + System.getTxSenderAccount() + "</b>"
     }
     AVMEButton {
       id: btnCopyAddress
-      width: (parent.width / 4) - parent.spacing
+      width: (parent.width / 6) - parent.spacing
       Timer { id: textTimer; interval: 2000 }
       enabled: (!textTimer.running)
       text: (!textTimer.running) ? "Copy to Clipboard" : "Copied!"
       onClicked: {
         System.copyToClipboard(System.getTxSenderAccount())
         textTimer.start()
+      }
+    }
+    AVMEButton {
+      id: btnViewKey
+      width: (parent.width / 6) - parent.spacing
+      text: "View Private Key"
+      onClicked: {
+        viewPrivKeyPopup.account = System.getTxSenderAccount()
+        viewPrivKeyPopup.open()
       }
     }
   }
@@ -235,30 +249,27 @@ Item {
       }
     }
     AVMEButton {
-      id: btnStaking
+      id: btnExchange
       anchors {
         bottom: parent.bottom
         left: btnSendTokenTx.right
         margins: 10
       }
       width: (parent.width / 4) - anchors.margins
-      text: "Staking"
-      onClicked: System.setScreen(content, "qml/screens/StakingScreen.qml")
+      text: "Exchange"
+      onClicked: System.setScreen(content, "qml/screens/ExchangeScreen.qml")
     }
     AVMEButton {
-      id: btnViewKey
+      id: btnStaking
       anchors {
         bottom: parent.bottom
-        left: btnStaking.right
+        left: btnExchange.right
         right: parent.right
         margins: 10
       }
       width: (parent.width / 4) - anchors.margins
-      text: "View Private Key"
-      onClicked: {
-        viewPrivKeyPopup.account = System.getTxSenderAccount()
-        viewPrivKeyPopup.open()
-      }
+      text: "Staking"
+      onClicked: System.setScreen(content, "qml/screens/StakingScreen.qml")
     }
   }
 
