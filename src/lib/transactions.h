@@ -1,13 +1,11 @@
 #include <iostream>
 #include <vector>
-#include "storage.h"
-#include "network.h"
+
 #include "json.h"
+#include "network.h"
+#include "storage.h"
 
 // Transaction list for a single Account, given the following struct:
-
-// TODO: error handling on everything
-
 typedef struct WalletTxData {
   std::string txlink;
   std::string operation;
@@ -31,6 +29,7 @@ typedef struct WalletTxData {
   bool confirmed;
 } WalletTxData;
 
+// TODO: error handling on everything
 class TransactionList {
   private:
     std::string address;
@@ -41,7 +40,7 @@ class TransactionList {
 
   public:
     TransactionList(std::string address) {
-      this->address = address.erase(0, 2); // Remove "0x"
+      this->address = (address.substr(0, 2) == "0x") ? address.substr(2) : address; // Remove "0x"
       LoadAllTransactions();
     }
 

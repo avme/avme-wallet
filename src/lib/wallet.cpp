@@ -1,5 +1,7 @@
 #include "wallet.h"
 
+// TODO: error handling on everything
+
 u256 WalletManager::MAX_U256_VALUE() {
   return (raiseToPow(2, 256) - 1);
 }
@@ -13,6 +15,10 @@ bool WalletManager::checkWalletPass(std::string pass) {
   bytesSec hash = dev::pbkdf2(pass, passSalt.asBytes(), passIterations);
   return (hash.ref().toString() == passHash.ref().toString());
 }
+
+// =======================================================================
+// WALLET/ACCOUNT FUNCTIONS
+// =======================================================================
 
 bool WalletManager::loadWallet(path walletFile, path secretsPath, std::string pass) {
   KeyManager w(walletFile, secretsPath);
@@ -194,6 +200,10 @@ Secret WalletManager::getSecret(std::string const& address, std::string pass) {
     return Secret();
   }
 }
+
+// =======================================================================
+// TRANSACTION FUNCTIONS
+// =======================================================================
 
 std::string WalletManager::convertWeiToFixedPoint(std::string amount, size_t digits) {
   std::string result;
@@ -417,7 +427,8 @@ std::string WalletManager::buildTxData(std::string txValue, std::string destWall
 
 TransactionSkeleton WalletManager::buildAVAXTransaction(
   std::string srcAddress, std::string destAddress,
-  std::string txValue, std::string txGas, std::string txGasPrice
+  std::string txValue, std::string txGas, std::string txGasPrice,
+  std::string dataHex
 ) {
   TransactionSkeleton txSkel;
   int txNonce;
@@ -438,6 +449,7 @@ TransactionSkeleton WalletManager::buildAVAXTransaction(
   txSkel.creation = false;
   txSkel.to = toAddress(destAddress);
   txSkel.value = u256(txValue);
+  if (!dataHex.empty()) { txSkel.data = fromHex(dataHex); }
   txSkel.nonce = txNonce;
   txSkel.gas = u256(txGas);
   txSkel.gasPrice = u256(txGasPrice);
@@ -445,6 +457,7 @@ TransactionSkeleton WalletManager::buildAVAXTransaction(
   return txSkel;
 }
 
+// TODO: change contract for the real one
 TransactionSkeleton WalletManager::buildAVMETransaction(
   std::string srcAddress, std::string destAddress,
   std::string txValue, std::string txGas, std::string txGasPrice
@@ -566,13 +579,138 @@ WalletTxData WalletManager::decodeRawTransaction(std::string rawTxHex) {
   return ret;
 }
 
-// TODO: implement staking functions
-bool WalletManager::approveStaking(std::string account) {
-  return false;
+// =======================================================================
+// EXCHANGE/STAKING FUNCTIONS
+// =======================================================================
+
+std::string WalletManager::approve(
+  std::string sender, std::string approvee, std::string approver, std::string pass
+) {
+  std::string dataHex = ABI::ERC20Funcs["approve"] + ABI::addressToHex(approvee)
+    + ABI::uintToHex(boost::lexical_cast<std::string>(MAX_U256_VALUE()));
+  TransactionSkeleton txSkel = buildAVAXTransaction(
+    sender, approver, "0", getAutomaticFee(), "100000", dataHex
+  );
+  std::string rawTx = signTransaction(txSkel, pass, sender);
+  std::string txLink = sendTransaction(rawTx);
+  return txLink;
 }
 
-bool WalletManager::isApprovedForStaking(std::string account) {
-  return false;
+bool WalletManager::allowance(
+  std::string receiver, std::string owner, std::string spender
+) {
+  std::string result;
+  std::stringstream query;
+
+  // Query and get the result, returning if empty
+  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
+        << "[{\"to\": \"" << receiver
+        << "\",\"data\": \"" << ABI::ERC20Funcs["allowance"]
+                             << ABI::addressToHex(owner)
+                             << ABI::addressToHex(spender)
+        << "\"},\"latest\"]}";
+  std::string str = Network::httpGetRequest(query.str());
+  result = JSON::getValue(str, "result").get_str();
+  if (result == "0x") { return {}; }
+  result = result.substr(2); // Remove the "0x"
+
+  // Parse the result back into normal values
+  u256 resultValue = boost::lexical_cast<u256>(ABI::parseHex(result, {"uint"})[0]);
+  return (resultValue > 0);
+}
+
+std::string WalletManager::addLiquidityAVAX(
+  std::string txValue, std::string pass,
+  std::string tokenAddress, std::string amountTokenDesired,
+  std::string amountTokenMin, std::string amountAVAXMin,
+  std::string to, std::string deadline
+) {
+  std::string dataHex = ABI::routerFuncs["addLiquidityAVAX"]
+    + ABI::addressToHex(tokenAddress) + ABI::uintToHex(amountTokenDesired)
+    + ABI::uintToHex(amountTokenMin) + ABI::uintToHex(amountAVAXMin)
+    + ABI::addressToHex(to) + ABI::uintToHex(deadline);
+  TransactionSkeleton txSkel = buildAVAXTransaction(
+    to, ABI::routerContract, txValue, getAutomaticFee(), "100000", dataHex
+  );
+  std::string rawTx = signTransaction(txSkel, pass, to);
+  return sendTransaction(rawTx);
+}
+
+std::vector<std::string> WalletManager::removeLiquidityAVAX(
+  std::string tokenAddress, std::string liquidity,
+  std::string amountTokenMin, std::string amountAVAXMin,
+  std::string to, std::string deadline
+) {
+  std::string result;
+  std::stringstream query;
+
+  // Query and get the result, returning if empty
+  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
+        << "[{\"to\": \"" << ABI::routerContract
+        << "\",\"data\": \"" << ABI::routerFuncs["removeLiquidityAVAX"]
+                             << ABI::addressToHex(tokenAddress)
+                             << ABI::uintToHex(liquidity)
+                             << ABI::uintToHex(amountTokenMin)
+                             << ABI::uintToHex(amountAVAXMin)
+                             << ABI::addressToHex(to)
+                             << ABI::uintToHex(deadline)
+        << "\"},\"latest\"]}";
+  std::string str = Network::httpGetRequest(query.str());
+  result = JSON::getValue(str, "result").get_str();
+  if (result == "0x") { return {}; }
+  result = result.substr(2); // Remove the "0x"
+
+  // Parse the result back into normal values
+  return ABI::parseHex(result, {"uint", "uint"});
+}
+
+std::string WalletManager::swapExactAVAXForTokens(
+  std::string txValue, std::string pass,
+  std::string amountOutMin, std::vector<std::string> path,
+  std::string to, std::string deadline
+) {
+  std::string pathStr = "";
+  for (std::string p : path) {
+    pathStr += ABI::addressToHex(p);
+  }
+  std::string dataHex = ABI::routerFuncs["swapExactAVAXForTokens"]
+    + ABI::uintToHex(amountOutMin) + pathStr
+    + ABI::addressToHex(to) + ABI::uintToHex(deadline);
+  TransactionSkeleton txSkel = buildAVAXTransaction(
+    to, ABI::routerContract, txValue, getAutomaticFee(), "100000", dataHex
+  );
+  std::string rawTx = signTransaction(txSkel, pass, to);
+  return sendTransaction(rawTx);
+}
+
+std::vector<std::string> WalletManager::swapExactTokensForAVAX(
+  std::string amountIn, std::string amountOutMin, std::vector<std::string> path,
+  std::string to, std::string deadline
+) {
+  std::string result;
+  std::stringstream query;
+  std::string pathStr = "";
+  for (std::string p : path) {
+    pathStr += ABI::addressToHex(p);
+  }
+
+  // Query and get the result, returning if empty
+  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
+        << "[{\"to\": \"" << ABI::routerContract
+        << "\",\"data\": \"" << ABI::routerFuncs["swapExactTokensForAVAX"]
+                             << ABI::uintToHex(amountIn)
+                             << ABI::uintToHex(amountOutMin)
+                             << pathStr
+                             << ABI::addressToHex(to)
+                             << ABI::uintToHex(deadline)
+        << "\"},\"latest\"]}";
+  std::string str = Network::httpGetRequest(query.str());
+  result = JSON::getValue(str, "result").get_str();
+  if (result == "0x") { return {}; }
+  result = result.substr(2); // Remove the "0x"
+
+  // Parse the result back into normal values
+  return ABI::parseHex(result, {"uint", "uint"});
 }
 
 bool WalletManager::stake(std::string account, std::string lpAmount) {

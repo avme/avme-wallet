@@ -39,16 +39,20 @@
 #include <bip3x/utils.h>
 #include <bip3x/wordlist.h>
 
-#include "network.h"
+#include "abi.h"
 #include "json.h"
+#include "network.h"
 #include "transactions.h"
 
-using namespace dev;
+using namespace dev;  // u256
 using namespace dev::eth;
 using namespace boost::algorithm;
 using namespace boost::filesystem;
 
 class BadArgument: public Exception {};
+
+// Mutex for account refresh thread.
+static std::mutex balancesThreadLock;
 
 // Struct for account data.
 typedef struct WalletAccount {
@@ -63,9 +67,7 @@ typedef struct WalletAccount {
   std::string balanceLPLocked;
 } WalletAccount;
 
-// Mutex for account refresh thread.
-static std::mutex balancesThreadLock;
-
+// Class for wallet management
 class WalletManager {
   private:
     // The proper Wallet.
@@ -88,6 +90,10 @@ class WalletManager {
 
     // Check if the passphrase input matches the stored hash.
     bool checkWalletPass(std::string pass);
+
+    // =======================================================================
+    // WALLET/ACCOUNT FUNCTIONS
+    // =======================================================================
 
     /**
      * Load and authenticate a Wallet from the given paths.
@@ -193,6 +199,10 @@ class WalletManager {
      */
     Secret getSecret(std::string const& address, std::string pass);
 
+    // =======================================================================
+    // TRANSACTION FUNCTIONS
+    // =======================================================================
+
     /**
      * Convert a full Wei amount to a fixed point amount and vice-versa,
      * in the given amount of digits/decimals.
@@ -246,7 +256,8 @@ class WalletManager {
      */
     TransactionSkeleton buildAVAXTransaction(
       std::string srcAddress, std::string destAddress,
-      std::string txValue, std::string txGas, std::string txGasPrice
+      std::string txValue, std::string txGas, std::string txGasPrice,
+      std::string dataHex = ""
     );
     TransactionSkeleton buildAVMETransaction(
       std::string srcAddress, std::string destAddress,
@@ -274,20 +285,75 @@ class WalletManager {
      */
     WalletTxData decodeRawTransaction(std::string rawTxHex);
 
-    /**
-     * Approve a given Account for staking.
-     * Returns true on success, false on failure.
-     */
-    bool approveStaking(std::string account);
+    // =======================================================================
+    // EXCHANGE/STAKING FUNCTIONS
+    // =======================================================================
 
     /**
-     * Check if a given Account was approved for staking.
-     * Approval is checked by searching an approval transaction in the
-     * blockchain, and checking if it was successfully made.
-     * Returns true on success, false on failure.
+     * Give MAX_U256_VALUE spending approval between Accounts.
+     * Returns a link to the transaction in the blockchain.
      */
-    bool isApprovedForStaking(std::string account);
+    std::string approve(
+      std::string sender, std::string approvee, std::string approver, std::string pass
+    );
 
+    /**
+     * Check the allowance between Accounts.
+     * Returns true if allowance is bigger than zero, false otherwise.
+     */
+    bool allowance(
+      std::string receiver, std::string owner, std::string spender
+    );
+
+    /**
+     * Add liquidity to an AVAX<->ERC20 pool.
+     * Amounts are always in Wei, deadline is a UNIX timestamp after which the
+     * operation will be reverted.
+     * Returns a link to the transaction in the blockchain.
+     */
+    std::string addLiquidityAVAX(
+      std::string txValue, std::string pass,
+      std::string tokenAddress, std::string amountTokenDesired,
+      std::string amountTokenMin, std::string amountAVAXMin,
+      std::string to, std::string deadline
+    );
+
+    /**
+     * Remove liquidity from an AVAX<->ERC20 pool.
+     * Amounts are always in Wei, deadline is a UNIX timestamp after which the
+     * operation will be reverted.
+     * Returns a vector with the amounts of retrieved AVAX and tokens.
+     */
+    std::vector<std::string> removeLiquidityAVAX(
+      std::string tokenAddress, std::string liquidity,
+      std::string amountTokenMin, std::string amountAVAXMin,
+      std::string to, std::string deadline
+    );
+
+    /**
+     * Swap an exact AVAX amount for as many ERC20 tokens as possible.
+     * Amounts are always in Wei, deadline is a UNIX timestamp after which the
+     * operation will be reverted.
+     * Returns a link to the transaction in the blockchain.
+     */
+    std::string swapExactAVAXForTokens(
+      std::string txValue, std::string pass,
+      std::string amountOutMin, std::vector<std::string> path,
+      std::string to, std::string deadline
+    );
+
+    /**
+     * Swap an exact ERC20 token amount for as many AVAX as possible.
+     * Amounts are always in Wei, deadline is a UNIX timestamp after which the
+     * operation will be reverted.
+     * Returns a vector with the input token amount and all subsequent token outputs.
+     */
+    std::vector<std::string> swapExactTokensForAVAX(
+      std::string amountIn, std::string amountOutMin, std::vector<std::string> path,
+      std::string to, std::string deadline
+    );
+
+    // TODO: all of the below
     /**
      * Stake/unstake a given amount of LP tokens in the pool, respectively.
      * Returns true on success, false on failure.

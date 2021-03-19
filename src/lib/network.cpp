@@ -4,6 +4,52 @@
 std::string Network::hostName = "api.avax-test.network";
 std::string Network::hostPort = "443";
 
+std::string Network::getAVAXBalance(std::string address) {
+  std::stringstream query;
+  query << "{\"jsonrpc\": \"2.0\",\"method\": \"eth_getBalance\",\"params\": [\""
+        << address
+        << "\",\"latest\"],\"id\": 1}";
+  return httpGetRequest(query.str());
+}
+
+std::string Network::getAVMEBalance(std::string address, std::string contractAddress) {
+  std::stringstream query;
+  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\",\"params\": [{\"to\": \""
+        << contractAddress
+        << "\",\"data\": \"0x70a08231000000000000000000000000"
+        << address
+        << "\"},\"latest\"]}";
+  return httpGetRequest(query.str());
+}
+
+std::string Network::getTxNonce(std::string address) {
+  std::stringstream query;
+  query << "{\"jsonrpc\": \"2.0\",\"method\": \"eth_getTransactionCount\",\"params\": [\""
+        << address
+        << "\",\"latest\"],\"id\": 1}";
+  return httpGetRequest(query.str());
+}
+
+std::string Network::broadcastTransaction(std::string txidHex) {
+  std::stringstream query;
+  std::string ApitxidHex = "0x";
+  ApitxidHex += txidHex;
+  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_sendRawTransaction\",\"params\": [\""
+        << ApitxidHex
+        << "\"]}";
+  return httpGetRequest(query.str());
+}
+
+std::string Network::getTransactionReceipt(std::string txidHex) {
+  std::stringstream query;
+  std::string ApitxidHex = "0x";
+  ApitxidHex += txidHex;
+  query << "{\"jsonrpc\": \"2.0\",\"method\": \"eth_getTransactionReceipt\",\"params\": [\""
+        << ApitxidHex
+        << "\"],\"id\": 1}";
+  return httpGetRequest(query.str());
+}
+
 std::string Network::httpGetRequest(std::string reqBody) {
   std::string result = "";
   using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
@@ -76,51 +122,5 @@ std::string Network::httpGetRequest(std::string reqBody) {
   }
 
   return result;
-}
-
-std::string Network::getAVAXBalance(std::string address) {
-  std::stringstream query;
-  query << "{\"jsonrpc\": \"2.0\",\"method\": \"eth_getBalance\",\"params\": [\""
-        << address
-        << "\",\"latest\"],\"id\": 1}";
-  return httpGetRequest(query.str());
-}
-
-std::string Network::getAVMEBalance(std::string address, std::string contractAddress) {
-  std::stringstream query;
-  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\",\"params\": [{\"to\": \""
-        << contractAddress
-        << "\",\"data\": \"0x70a08231000000000000000000000000"
-        << address
-        << "\"},\"latest\"]}";
-  return httpGetRequest(query.str());
-}
-
-std::string Network::getTxNonce(std::string address) {
-  std::stringstream query;
-  query << "{\"jsonrpc\": \"2.0\",\"method\": \"eth_getTransactionCount\",\"params\": [\""
-        << address
-        << "\",\"latest\"],\"id\": 1}";
-  return httpGetRequest(query.str());
-}
-
-std::string Network::broadcastTransaction(std::string txidHex) {
-  std::stringstream query;
-  std::string ApitxidHex = "0x";
-  ApitxidHex += txidHex;
-  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_sendRawTransaction\",\"params\": [\""
-        << ApitxidHex
-        << "\"]}";
-  return httpGetRequest(query.str());
-}
-
-std::string Network::getTransactionReceipt(std::string txidHex) {
-  std::stringstream query;
-  std::string ApitxidHex = "0x";
-  ApitxidHex += txidHex;
-  query << "{\"jsonrpc\": \"2.0\",\"method\": \"eth_getTransactionReceipt\",\"params\": [\""
-        << ApitxidHex
-        << "\"],\"id\": 1}";
-  return httpGetRequest(query.str());
 }
 
