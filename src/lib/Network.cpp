@@ -1,4 +1,4 @@
-#include "network.h"
+#include "Network.h"
 
 // TODO: find a way to toggle between testnet and mainnet later
 std::string Network::hostName = "api.avax-test.network";
@@ -22,7 +22,12 @@ std::string Network::getAVMEBalance(std::string address, std::string contractAdd
   return httpGetRequest(query.str());
 }
 
-std::string Network::getTxNonce(std::string address) {
+// TODO: change this when more coins/tokens are added
+std::string Network::getAutomaticFee() {
+  return "470"; // AVAX fees are fixed
+}
+
+std::string Network::getNonce(std::string address) {
   std::stringstream query;
   query << "{\"jsonrpc\": \"2.0\",\"method\": \"eth_getTransactionCount\",\"params\": [\""
         << address
@@ -30,7 +35,7 @@ std::string Network::getTxNonce(std::string address) {
   return httpGetRequest(query.str());
 }
 
-std::string Network::broadcastTransaction(std::string txidHex) {
+std::string Network::broadcastTx(std::string txidHex) {
   std::stringstream query;
   std::string ApitxidHex = "0x";
   ApitxidHex += txidHex;
@@ -40,7 +45,7 @@ std::string Network::broadcastTransaction(std::string txidHex) {
   return httpGetRequest(query.str());
 }
 
-std::string Network::getTransactionReceipt(std::string txidHex) {
+std::string Network::getTxReceipt(std::string txidHex) {
   std::stringstream query;
   std::string ApitxidHex = "0x";
   ApitxidHex += txidHex;

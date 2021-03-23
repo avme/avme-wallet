@@ -11,18 +11,15 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 
-#include "json.h"
+#include "JSON.h"
 #include "root_certificates.hpp"
 
 /**
- * Collection of network/API-related functions (e.g. requesting data from
+ * Class for network/API-related functions (e.g. requesting data from
  * a blockchain API online, an RPC endpoint or general HTTP operations).
  * Data is requested from a specified blockchain API host and its port,
  * along with its API key. Those are implementation-defined.
- * Check https://uniswap.org/docs/v2/smart-contracts for info on contracts
- * and functions related to those.
  */
-
 class Network {
   private:
     static std::string hostName;
@@ -38,14 +35,21 @@ class Network {
     static std::string getAVAXBalance(std::string address);
     static std::string getAVMEBalance(std::string address, std::string contractAddress);
 
+    /**
+     * Get the recommended gas price for a transaction.
+     * Returns the gas price in Gwei, which has to be converted to Wei
+     * when building a transaction (1 Gwei = 10^9 Wei).
+     */
+    static std::string getAutomaticFee();
+
     // Get the highest available nonce for an address from the blockchain API.
-    static std::string getTxNonce(std::string address);
+    static std::string getNonce(std::string address);
 
     // Broadcast a signed transaction to the blockchain.
-    static std::string broadcastTransaction(std::string txidHex);
+    static std::string broadcastTx(std::string txidHex);
 
     // Get the transaction receipt from the API to check if it has been confirmed.
-    static std::string getTransactionReceipt(std::string txidHex);
+    static std::string getTxReceipt(std::string txidHex);
 
     /**
      * Send an HTTP GET Request to the blockchain API.
