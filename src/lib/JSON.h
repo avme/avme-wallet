@@ -17,7 +17,7 @@ namespace JSON {
    * Mutex for avoiding two threads trying to simultaneously read/write,
    * even for different files. Better safe than sorry!
    */
-  std::mutex storageThreadLock;
+  static std::mutex storageThreadLock;
 
   // Get object and array item from a JSON element, respectively.
   json_spirit::mValue objectItem(const json_spirit::mValue element, const std::string name);

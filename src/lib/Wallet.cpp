@@ -61,7 +61,7 @@ Account Wallet::importAccount(std::string name, std::string pass, bip3x::HDKey k
   return Account(toUUID(u), name, k.address().hex(), {}); // TODO: get the seed
 }
 
-void Wallet::loadAccounts(bool start) {
+void Wallet::loadAccounts() {
   if (this->km.store().keys().empty()) { return; }
   AddressHash got;
   std::vector<h128> keys = this->km.store().keys();

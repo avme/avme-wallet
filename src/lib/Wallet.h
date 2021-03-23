@@ -47,6 +47,9 @@ class Wallet {
     int passIterations = 100000;
 
   public:
+    // Getter for the Account list.
+    std::vector<Account> getAccounts() { return this->accounts; }
+
     /**
      * Create a new Wallet, which should be loaded manually afterwards.
      * Automatically hashes+salts the passphrase and stores both.
@@ -95,7 +98,7 @@ class Wallet {
      * automatically reload the balances every now and then (which should
      * be true only at first call, all subsequent calls should pass this as false).
      */
-    void loadAccounts(bool start);
+    void loadAccounts();
 
     /**
      * Get an Account from the list using its name or address, respectively.

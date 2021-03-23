@@ -59,13 +59,19 @@ class Pangolin {
      * (TX) Give MAX_U256_VALUE spending approval to the spender Account.
      * Returns the data hex string.
      */
-    std::string approve(std::string spender);
+    static std::string approve(std::string spender);
 
     /**
      * (ABI) Check the allowance between owner and spender Accounts.
      * Returns true if allowance is bigger than zero, false otherwise.
      */
-    bool allowance(std::string receiver, std::string owner, std::string spender);
+    static bool allowance(std::string receiver, std::string owner, std::string spender);
+
+    /**
+     * (TX) Transfer a token amount directly to the given Account.
+     * Returns the data hex string.
+     */
+    static std::string transfer(std::string to, std::string value);
 
     /**
      * (TX) Add liquidity to an AVAX<->ERC20 pool.
@@ -73,7 +79,7 @@ class Pangolin {
      * operation will be reverted.
      * Returns the data hex string.
      */
-    std::string addLiquidityAVAX(
+    static std::string addLiquidityAVAX(
       std::string tokenAddress, std::string amountTokenDesired,
       std::string amountTokenMin, std::string amountAVAXMin,
       std::string to, std::string deadline
@@ -85,7 +91,7 @@ class Pangolin {
      * operation will be reverted.
      * Returns a vector with the amounts of retrieved AVAX and tokens.
      */
-    std::vector<std::string> removeLiquidityAVAX(
+    static std::vector<std::string> removeLiquidityAVAX(
       std::string tokenAddress, std::string liquidity,
       std::string amountTokenMin, std::string amountAVAXMin,
       std::string to, std::string deadline
@@ -97,7 +103,7 @@ class Pangolin {
      * operation will be reverted.
      * Returns the data hex string.
      */
-    std::string swapExactAVAXForTokens(
+    static std::string swapExactAVAXForTokens(
       std::string amountOutMin, std::vector<std::string> path,
       std::string to, std::string deadline
     );
@@ -108,7 +114,7 @@ class Pangolin {
      * operation will be reverted.
      * Returns a vector with the input token amount and all subsequent token outputs.
      */
-    std::vector<std::string> swapExactTokensForAVAX(
+    static std::vector<std::string> swapExactTokensForAVAX(
       std::string amountIn, std::string amountOutMin, std::vector<std::string> path,
       std::string to, std::string deadline
     );

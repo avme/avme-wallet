@@ -32,6 +32,9 @@
 
 using namespace dev::eth; // TransactionBase
 
+// Mutex for Account balance thread.
+static std::mutex balancesThreadLock;
+
 /**
  * Class for a given Account and related functions.
  * e.g. reload balances, show tx history, etc.
@@ -48,7 +51,6 @@ class Account {
     std::string balanceLPLocked;
     std::vector<TxData> history;
     boost::thread balancesThread;
-    static std::mutex balancesThreadLock;
 
     // Constructors
     Account(){}

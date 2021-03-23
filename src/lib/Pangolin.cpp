@@ -16,6 +16,7 @@ std::map<std::string, std::string> Pangolin::pairContracts = {
 std::map<std::string, std::string> Pangolin::ERC20Funcs = {
   {"approve", "0x095ea7b3"},  // approve(address,uint256)
   {"allowance", "0xdd62ed3e"}, // allowance(address,address)
+  {"transfer", "0xa9059cbb"}, // transfer(address,uint256)
 };
 
 std::map<std::string, std::string> Pangolin::pairFuncs = {
@@ -123,6 +124,12 @@ bool Pangolin::allowance(
   // Parse the result back into normal values
   u256 resultValue = boost::lexical_cast<u256>(Pangolin::parseHex(result, {"uint"})[0]);
   return (resultValue > 0);
+}
+
+std::string Pangolin::transfer(std::string to, std::string value) {
+  std::string dataHex = Pangolin::ERC20Funcs["transfer"]
+    + Utils::addressToHex(to) + Utils::uintToHex(value);
+  return dataHex;
 }
 
 std::string Pangolin::addLiquidityAVAX(

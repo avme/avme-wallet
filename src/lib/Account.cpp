@@ -1,7 +1,7 @@
 #include "Account.h"
 
 void Account::reloadBalances() {
-  this->balancesThreadLock.lock();
+  balancesThreadLock.lock();
 
   // Get the balances from the network
   // TODO: change FreeLP and LockedLP addresses to the real ones
@@ -42,7 +42,7 @@ void Account::reloadBalances() {
     LockedLPstr != "" && LockedLPstr.find_first_not_of("0123456789.") == std::string::npos
   );
   if (!AVAXisValid || !AVMEisValid || !FreeLPisValid || !LockedLPisValid) {
-    this->balancesThreadLock.unlock();
+    balancesThreadLock.unlock();
     return;
   }
 
@@ -51,7 +51,7 @@ void Account::reloadBalances() {
   this->balanceAVME = Utils::weiToFixedPoint(AVMEstr, 18);
   this->balanceLPFree = Utils::weiToFixedPoint(FreeLPstr, 18);
   this->balanceLPLocked = Utils::weiToFixedPoint(LockedLPstr, 18);
-  this->balancesThreadLock.unlock();
+  balancesThreadLock.unlock();
   return;
 }
 
