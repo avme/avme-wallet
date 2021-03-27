@@ -204,7 +204,12 @@ class System : public QObject {
 
     Q_INVOKABLE void stopAllBalanceThreads() {
       for (Account &a : w.accounts) {
-        Account::stopBalancesThread(a);
+        a.interruptThread = true;
+      }
+      for (Account &a : w.accounts) {
+        while (!a.threadWasInterrupted) {
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+        }
       }
     }
 

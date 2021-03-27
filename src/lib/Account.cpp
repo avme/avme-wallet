@@ -61,15 +61,19 @@ void Account::balanceThreadHandler(Account &a) {
     Account::reloadBalances(a);
     for (int i = 0; i < 1000; i++) {
       boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
-      if (a.balancesThreadFlag) { return; }
+      if (a.interruptThread) {
+        a.threadWasInterrupted = true;
+        return;
+      }
     }
   }
 }
 
 void Account::startBalancesThread(Account &a) {
-  a.balancesThreadFlag = false;
-  boost::thread balancesThread(&Account::balanceThreadHandler, boost::ref(a));
-  balancesThread.detach();
+  a.interruptThread = false;
+  a.threadWasInterrupted = false;
+  a.balancesThread = boost::thread(&Account::balanceThreadHandler, boost::ref(a));
+  a.balancesThread.detach();
 }
 
 void Account::stopBalancesThread(Account &a) {
