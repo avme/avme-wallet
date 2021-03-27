@@ -7,48 +7,24 @@ import "qrc:/qml/components"
 
 Item {
   id: accountsScreen
-  property bool hasCoin
-  property bool hasToken
 
   Connections {
     target: System
 
-    onRefreshAccountList: {
-      console.log("Loading Accounts...")
-      System.loadWalletAccounts(System.getFirstLoad())
-      if (System.getFirstLoad()) { System.setFirstLoad(false) }
-      accountsList.clear()
-      fetchAccounts()
-      fetchAccountsPopup.close()
-    }
     onAccountCreated: {
       console.log("Account created successfully")
       accountDataPopup.setData(data.accId, data.accName, data.accAddress, data.accSeed)
       createAccountPopup.close()
       accountDataPopup.open()
     }
-    onAccountsGenerated: {
-      importAccountPopup.setAccountListData(data)
-      importAccountPopup.seed = seed
-      generateAccountsPopup.close()
-      importAccountPopup.open()
-    }
     onAccountImported: {
+      importAccountPopup.close()
       if (success) {
-        importSeedAccountPopup.close()
-        fetchAccountsPopup.open()
-        System.refreshAccounts()
+        console.log("Account imported successfully")
+        reloadList()
       } else {
-        importSeedAccountPopup.close()
         importFailPopup.open()
       }
-    }
-  }
-
-  function fetchAccounts() {
-    var accList = System.listAccounts()
-    for (var i = 0; i < accList.length; i++) {
-      accountsList.append(JSON.parse(accList[i]))
     }
   }
 
@@ -60,12 +36,45 @@ Item {
     }
     if (System.getCurrentToken() == "") {
       System.setCurrentToken("AVME")
-      System.setCurrentTokenDecimals(18)
+      System.setCurrentTokenDecimals(18)  // TODO: check if this is correct
     }
-    hasCoin = (System.getCurrentCoin() != "");
-    hasToken = (System.getCurrentToken() != "");
+    reloadList()
+  }
+
+  // Timer for reloading the Account balances on the list
+  Timer {
+    id: listReloadTimer
+    interval: 1000
+    repeat: true
+    onTriggered: fetchBalances()
+  }
+
+  // Helpers for manipulating the Account list
+  function fetchAccounts() {
+    System.stopAllBalanceThreads()
+    accountsList.clear()
+    System.loadAccounts()
+    var accList = System.listAccounts()
+    for (var i = 0; i < accList.length; i++) {
+      var acc = JSON.parse(accList[i])
+      accountsList.append(acc)
+      System.startBalanceThread(acc.account)
+    }
+  }
+
+  function fetchBalances() {
+    var accList = System.listAccounts()
+    for (var i = 0; i < accList.length; i++) {
+      accountsList.set(i, JSON.parse(accList[i]))
+    }
+  }
+
+  function reloadList() {
+    console.log("Reloading list...")
     fetchAccountsPopup.open()
-    System.refreshAccounts()
+    fetchAccounts()
+    listReloadTimer.start()
+    fetchAccountsPopup.close()
   }
 
   // Background icon
@@ -187,6 +196,8 @@ Item {
     doneBtn.onClicked: {
       if (System.checkWalletPass(pass)) {
         try {
+          System.stopAllBalanceThreads()
+          listReloadTimer.stop()
           console.log("Creating new Account...")
           System.createNewAccount(name, pass)
           newAccountPopup.clean()
@@ -208,8 +219,7 @@ Item {
     okBtn.onClicked: {
       accountDataPopup.clean()
       accountDataPopup.close()
-      fetchAccountsPopup.open()
-      System.refreshAccounts()
+      reloadList()
     }
   }
 
@@ -218,11 +228,13 @@ Item {
     id: importSeedPopup
     doneBtn.onClicked: {
       if (System.seedIsValid(seed)) {
-        console.log("Generating Accounts...")
-        System.generateAccountsFromSeed(seed)
-        importSeedPopup.clean()
+        System.stopAllBalanceThreads()
+        listReloadTimer.stop()
         importSeedPopup.close()
-        generateAccountsPopup.open()
+        importAccountPopup.open()
+        console.log("Importing Account...")
+        System.importAccount(seed, name, pass)
+        importSeedPopup.clean()
       } else {
         errorText.visible = true;
         errorTimer.start();
@@ -230,28 +242,10 @@ Item {
     }
   }
 
-  // Popup for selecting an Account from a seed list
-  AVMEPopupImportAccount {
-    id: importAccountPopup
-    doneBtn.onClicked: {
-      var idx = importAccountPopup.curItem.itemIndex
-      var acc = importAccountPopup.curItem.itemAccount
-      if (System.accountExists(acc)) {
-        importAccountPopup.showErrorMsg()
-      } else if (System.checkWalletPass(pass)) {
-        importAccountPopup.close()
-        importSeedAccountPopup.open()
-        System.importAccount(seed, idx, name, pass)
-      } else {
-        importAccountPopup.close()
-      }
-    }
-  }
-
   // Popup for fetching Accounts
   AVMEPopup {
     id: fetchAccountsPopup
-    info: "Loading Accounts...<br>This may take a while."
+    info: "Loading Accounts...<br>Please wait."
   }
 
   // Popup for waiting for a new Account to be created
@@ -260,15 +254,9 @@ Item {
     info: "Creating a new Account..."
   }
 
-  // Popup for generating Accounts from a seed
-  AVMEPopup {
-    id: generateAccountsPopup
-    info: "Generating up to 10 Accounts..."
-  }
-
   // Popup for waiting for a new Account to be imported
   AVMEPopup {
-    id: importSeedAccountPopup
+    id: importAccountPopup
     info: "Importing Account..."
   }
 
@@ -301,6 +289,8 @@ Item {
     yesBtn.onClicked: {
       closeWalletPopup.close()
       console.log("Wallet closed successfully")
+      System.stopAllBalanceThreads()
+      listReloadTimer.stop()
       System.setScreen(content, "qml/screens/StartScreen.qml")
     }
     noBtn.onClicked: closeWalletPopup.close()
@@ -343,12 +333,13 @@ Item {
     yesBtn.onClicked: {
       if (System.checkWalletPass(erasePassInput.text)) {
         if (System.eraseAccount(walletList.currentItem.itemAccount)) {
+          System.stopAllBalanceThreads()
+          listReloadTimer.stop()
           console.log("Account erased successfully")
           erasePopup.close()
           erasePopup.account = ""
           erasePassInput.text = ""
-          fetchAccountsPopup.open()
-          System.refreshAccounts()
+          reloadList()
         } else {
           erasePopup.close()
           erasePopup.account = ""

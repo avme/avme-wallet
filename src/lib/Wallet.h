@@ -41,14 +41,12 @@ using namespace boost::filesystem;
 class Wallet {
   private:
     KeyManager km;  // The "proper" Wallet. Functions interact directly with this object.
-    std::vector<Account> accounts;  // The list of Accounts that belong to this Wallet.
     bytesSec passHash;
     h256 passSalt;
     int passIterations = 100000;
 
   public:
-    // Getter for the Account list.
-    std::vector<Account> getAccounts() { return this->accounts; }
+    std::vector<Account> accounts;  // The list of Accounts that belong to this Wallet.
 
     /**
      * Create a new Wallet, which should be loaded manually afterwards.
@@ -94,15 +92,12 @@ class Wallet {
      * Load the Wallet's Accounts and their coin and token balances.
      * Tokens are loaded from their proper contract address, beside their
      * respective Wallet Accounts.
-     * The "start" bool indicates whether a thread should be initialized to
-     * automatically reload the balances every now and then (which should
-     * be true only at first call, all subsequent calls should pass this as false).
      */
     void loadAccounts();
 
     /**
      * Get an Account from the list using its name or address, respectively.
-     * Returns the initialized Account object, or am "empty" one if not found.
+     * Returns the initialized Account object, or an "empty" one if not found.
      */
     Account getAccountByName(std::string name);
     Account getAccountByAddress(std::string address);

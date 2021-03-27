@@ -20,7 +20,6 @@
         <file>qml/components/AVMEPopupAccountData.qml</file>
         <file>qml/components/AVMEPopupViewPrivKey.qml</file>
         <file>qml/components/AVMEPopupImportSeed.qml</file>
-        <file>qml/components/AVMEPopupImportAccount.qml</file>
         <file>qml/components/AVMEPopupConfirmTx.qml</file>
         <file>qml/components/AVMEWalletList.qml</file>
         <file>qml/components/AVMEAccountSeedList.qml</file>

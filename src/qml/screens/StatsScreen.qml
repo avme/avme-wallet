@@ -4,7 +4,7 @@ import QtQuick.Controls 2.2
 import "qrc:/qml/components"
 
 /**
- * Screen for listing an Account's stats and transaction history
+ * Screen for listing an Account's stats and transaction history,
  * as well as several transaction actions for it
  */
 
@@ -49,7 +49,9 @@ Item {
       id: btnChangeAccount
       width: (parent.width / 6) - parent.spacing
       text: "Change Account"
-      onClicked: System.setScreen(content, "qml/screens/AccountsScreen.qml")
+      onClicked: {
+        System.setScreen(content, "qml/screens/AccountsScreen.qml")
+      }
     }
     AVMEButton {
       id: btnRefreshHistory

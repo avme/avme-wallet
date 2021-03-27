@@ -23,19 +23,20 @@ Q_IMPORT_PLUGIN(QtQuickTemplates2Plugin)
 Q_IMPORT_PLUGIN(QtQuickControls2Plugin)
 Q_IMPORT_PLUGIN(QtLabsPlatformPlugin)
 
-#include "lib/wallet.h"
+#include "lib/Account.h"
+#include "lib/BIP39.h"
+#include "lib/Network.h"
+#include "lib/Pangolin.h"
+#include "lib/Utils.h"
+#include "lib/Wallet.h"
 
 // QObject/wrapper for interfacing between C++ (wallet) and QML (gui)
 class System : public QObject {
   Q_OBJECT
 
   signals:
-    void refreshAccountList();
     void accountCreated(QVariantMap data);
-    void accountsGenerated(QVariantList data, QString seed);
     void accountImported(bool success);
-
-    void walletFirstLoad();
     void txStart(QString pass);
     void txBuilt(bool b);
     void txSigned(bool b);
@@ -43,8 +44,7 @@ class System : public QObject {
     void txRetry();
 
   private:
-    WalletManager wm;
-    bool firstLoad;
+    Wallet w;
     std::string currentCoin;
     int currentCoinDecimals;
     std::string currentToken;
@@ -63,9 +63,6 @@ class System : public QObject {
 
   public:
     // Getters/Setters for private vars
-    Q_INVOKABLE bool getFirstLoad() { return this->firstLoad; }
-    Q_INVOKABLE void setFirstLoad(bool b) { this->firstLoad = b; }
-
     Q_INVOKABLE QString getCurrentCoin() { return QString::fromStdString(this->currentCoin); }
     Q_INVOKABLE void setCurrentCoin(QString coin) { this->currentCoin = coin.toStdString(); }
 
@@ -121,21 +118,16 @@ class System : public QObject {
       QApplication::clipboard()->setText(str);
     }
 
-    // Store the Wallet password
-    Q_INVOKABLE void storeWalletPass(QString pass) {
-      wm.storeWalletPass(pass.toStdString());
-    }
-
     // Check if given passphrase equals the Wallet's
     Q_INVOKABLE bool checkWalletPass(QString pass) {
-      return wm.checkWalletPass(pass.toStdString());
+      return w.auth(pass.toStdString());
     }
 
     // Create a new Wallet
     Q_INVOKABLE bool createNewWallet(
       QString walletFile, QString secretsPath, QString pass
     ) {
-      return this->wm.createNewWallet(
+      return this->w.create(
         #ifdef __MINGW32__
           walletFile.remove("file:///").toStdString(),
           secretsPath.remove("file:///").toStdString(),
@@ -151,7 +143,7 @@ class System : public QObject {
     Q_INVOKABLE bool loadWallet(
         QString walletFile, QString secretsPath, QString pass
         ) {
-      return this->wm.loadWallet(
+      return this->w.load(
         #ifdef __MINGW32__
           walletFile.remove("file:///").toStdString(),
           secretsPath.remove("file:///").toStdString(),
@@ -163,78 +155,91 @@ class System : public QObject {
       );
     }
 
-    // Load the Wallet's accounts
-    Q_INVOKABLE void loadWalletAccounts(bool start) {
-      this->wm.loadWalletAccounts(start);
-    }
-
-    // Reload the Accounts' balances
-    Q_INVOKABLE void reloadAccountsBalances() {
-      this->wm.reloadAccountsBalances();
-    }
-
-    // Refresh Account list
-    Q_INVOKABLE void refreshAccounts() {
-      QtConcurrent::run([=](){ QThread::msleep(10); emit refreshAccountList(); });
+    // Load the Accounts into the Wallet
+    Q_INVOKABLE void loadAccounts() {
+      this->w.loadAccounts();
     }
 
     // List the Wallet's Accounts
     Q_INVOKABLE QVariantList listAccounts() {
       QVariantList ret;
-      std::string delim = " ";
-      std::vector<WalletAccount> walist;
-
-      walist = this->wm.ReadWriteWalletVector(false, false, {});
-      for (WalletAccount wa : walist) {
+      for (Account &a : w.accounts) {
         std::string obj;
-        obj += "{\"account\": \"" + wa.address;
-        obj += "\", \"name\": \"" + wa.name;
-        obj += "\", \"coinAmount\": \"" + wa.balanceAVAX;
-        obj += "\", \"tokenAmount\": \"" + wa.balanceAVME;
-        obj += "\", \"freeLPAmount\": \"" + wa.balanceLPFree;
-        obj += "\", \"lockedLPAmount\": \"" + wa.balanceLPLocked;
+        obj += "{\"account\": \"" + a.address;
+        obj += "\", \"name\": \"" + a.name;
+        obj += "\", \"coinAmount\": \"" + a.balanceAVAX;
+        obj += "\", \"tokenAmount\": \"" + a.balanceAVME;
+        obj += "\", \"freeLPAmount\": \"" + a.balanceLPFree;
+        obj += "\", \"lockedLPAmount\": \"" + a.balanceLPLocked;
         obj += "\"}";
         ret << QString::fromStdString(obj);
       }
-
       return ret;
+    }
+
+    // Start/stop balance threads for one/all Accounts, respectively
+    Q_INVOKABLE void startBalanceThread(QString address) {
+      for (Account &a : w.accounts) {
+        if (a.address == address.toStdString()) {
+          Account::startBalancesThread(a);
+          break;
+        }
+      }
+    }
+
+    Q_INVOKABLE void stopBalanceThread(QString address) {
+      for (Account &a : w.accounts) {
+        if (a.address == address.toStdString()) {
+          Account::stopBalancesThread(a);
+          break;
+        }
+      }
+    }
+
+    Q_INVOKABLE void startAllBalanceThreads() {
+      for (Account &a : w.accounts) {
+        Account::startBalancesThread(a);
+      }
+    }
+
+    Q_INVOKABLE void stopAllBalanceThreads() {
+      for (Account &a : w.accounts) {
+        Account::stopBalancesThread(a);
+      }
     }
 
     // Create a new Account
     Q_INVOKABLE void createNewAccount(QString name, QString pass) {
       QtConcurrent::run([=]() {
-        QVariantMap waObj;
-        QVariantList waSeed;
-        WalletAccount wa;
-        wa = this->wm.createNewAccount(name.toStdString(), pass.toStdString());
-        if (!wa.id.empty()) {
-          waObj.insert("accId", QString::fromStdString(wa.id));
-          waObj.insert("accName", QString::fromStdString(wa.name));
-          waObj.insert("accAddress", QString::fromStdString(wa.address));
-          for (std::string word : wa.seed) { waSeed << QString::fromStdString(word); }
-          waObj.insert("accSeed", waSeed);
+        QVariantMap obj;
+        QVariantList seed;
+        Account a = this->w.createAccount(name.toStdString(), pass.toStdString());
+        if (!a.id.empty()) {
+          obj.insert("accId", QString::fromStdString(a.id));
+          obj.insert("accName", QString::fromStdString(a.name));
+          obj.insert("accAddress", QString::fromStdString(a.address));
+          for (std::string word : a.seed) { seed << QString::fromStdString(word); }
+          obj.insert("accSeed", seed);
         }
-        emit accountCreated(waObj);
+        emit accountCreated(obj);
       });
     }
 
     // Erase an Account
     Q_INVOKABLE bool eraseAccount(QString account) {
-      return this->wm.eraseAccount(account.toStdString());
+      return this->w.eraseAccount(account.toStdString());
     }
 
     // Check if Account exists
     Q_INVOKABLE bool accountExists(QString account) {
-      return this->wm.accountExists(account.toStdString());
+      return this->w.accountExists(account.toStdString());
     }
 
     // List the Account's transactions
     Q_INVOKABLE QVariantList listAccountTransactions(QString address) {
       QVariantList ret;
-      TransactionList tl(address.toStdString());
-
-      for (int i = 0; i < tl.getTransactionListSize(); i++) {
-        WalletTxData tx = tl.getTransactionData(i);
+      Account a = this->w.getAccountByAddress(address.toStdString());
+      for (TxData tx : a.history) {
         std::string obj;
         obj += "{\"txlink\": \"" + tx.txlink;
         obj += "\", \"operation\": \"" + tx.operation;
@@ -250,13 +255,12 @@ class System : public QObject {
         obj += "}";
         ret << QString::fromStdString(obj);
       }
-
       return ret;
     }
 
     // Get an Account's private keys
     Q_INVOKABLE QString getPrivateKeys(QString account, QString pass) {
-      Secret s = wm.getSecret(account.toStdString(), pass.toStdString());
+      Secret s = w.getSecret(account.toStdString(), pass.toStdString());
       std::string key = toHex(s.ref());
       return QString::fromStdString(key);
     }
@@ -268,7 +272,7 @@ class System : public QObject {
       int ct = 0;
 
       while (std::getline(ss, word, ' ')) {
-        if (!wm.wordExists(word)) { return false; }
+        if (!BIP39::wordExists(word)) { return false; }
         ct++;
       }
       if (ct != 12) { return false; }
@@ -276,67 +280,30 @@ class System : public QObject {
       return true;
     }
 
-    // Generate Accounts with a seed
-    Q_INVOKABLE void generateAccountsFromSeed(QString seed) {
-      QtConcurrent::run([=]() {
-        std::stringstream seedss(seed.toStdString());
-        std::string word, derivPath;
-        std::vector<std::string> words, mnemonicPhrase, accountsList;
-        bip3x::Bip39Mnemonic::MnemonicResult encodedMnemonic;
-        bip3x::HDKey rootKey;
-        QVariantList ret;
-
-        derivPath = "m/44'/60'/0'/0/";
-        while (std::getline(seedss, word, ' ')) { words.push_back(word); }
-        for (std::string word : words) { mnemonicPhrase.push_back(word); }
-        encodedMnemonic.words = mnemonicPhrase;
-        rootKey = wm.createBip32RootKey(encodedMnemonic);
-        accountsList = wm.addressListBasedOnRootIndex(rootKey, 0);
-
-        for (auto v : accountsList) {
-          std::stringstream listss(v);
-          std::string item, obj;
-          int ct = 0;
-          while (std::getline(listss, item, ' ')) {
-            switch (ct) {
-              case 0: obj += "{\"index\": \"" + item; break;
-              case 1: obj += "\", \"account\": \"" + item; break;
-              case 2: obj += "\", \"balance\": \"" + item; break;
-            }
-            ct++;
-          }
-          obj += "\"}";
-          ret << QString::fromStdString(obj);
-        }
-
-        emit accountsGenerated(ret, seed);
-      });
-    }
-
     // Import an Account generated by a seed
-    Q_INVOKABLE void importAccount(QString seed, int idx, QString name, QString pass) {
+    Q_INVOKABLE void importAccount(QString seed, QString name, QString pass) {
       QtConcurrent::run([=]() {
         std::stringstream seedss(seed.toStdString());
         std::string word;
         std::vector<std::string> words;
         std::vector<std::string> mnemonicPhrase;
         std::string derivPath = "m/44'/60'/0'/0/";
+        int index = 0;  // TODO: index will change in the future
         while (std::getline(seedss, word, ' ')) { words.push_back(word); }
         for (std::string word : words) { mnemonicPhrase.push_back(word); }
 
         bip3x::Bip39Mnemonic::MnemonicResult encodedMnemonic;
         encodedMnemonic.words = mnemonicPhrase;
-        bip3x::HDKey rootKey = wm.createBip32RootKey(encodedMnemonic);
-        derivPath += QString::number(idx).toStdString();
-        bip3x::HDKey bip32Key = wm.createBip32Key(rootKey, derivPath);
-        WalletAccount data = wm.importAccount(name.toStdString(), pass.toStdString(), bip32Key);
-        emit accountImported(!data.id.empty());
+        derivPath += QString::number(index).toStdString();
+        bip3x::HDKey key = BIP39::createKey(encodedMnemonic, derivPath);
+        Account a = w.importAccount(name.toStdString(), pass.toStdString(), key);
+        emit accountImported(!a.id.empty());
       });
     }
 
     // Get gas price from network
     Q_INVOKABLE QString getAutomaticFee() {
-      return QString::fromStdString(this->wm.getAutomaticFee());
+      return QString::fromStdString(Network::getAutomaticFee());
     }
 
     // Create a RegExp for coin and token transaction amount input, respectively
@@ -360,9 +327,9 @@ class System : public QObject {
     Q_INVOKABLE QString calculateTransactionCost(
       QString amount, QString gasLimit, QString gasPrice
     ) {
-      std::string amountStr = this->wm.convertFixedPointToWei(amount.toStdString(), 18);  // Fixed point, so 10^18 Wei
+      std::string amountStr = Utils::fixedPointToWei(amount.toStdString(), 18);  // Fixed point, so 10^18 Wei
       std::string gasLimitStr = gasLimit.toStdString(); // Already in Wei
-      std::string gasPriceStr = this->wm.convertFixedPointToWei(gasPrice.toStdString(), 9); // Gwei, so 10^9 Wei
+      std::string gasPriceStr = Utils::fixedPointToWei(gasPrice.toStdString(), 9); // Gwei, so 10^9 Wei
       u256 amountU256 = u256(amountStr);
       u256 gasLimitU256 = u256(gasLimitStr);
       u256 gasPriceU256 = u256(gasPriceStr);
@@ -372,7 +339,7 @@ class System : public QObject {
       //std::cout << "Amount: " << amountU256 << std::endl;
       //std::cout << "Gas Limit: " << gasLimitU256 << std::endl;
       //std::cout << "Gas Price: " << gasPriceU256 << std::endl;
-      std::string totalStr = this->wm.convertWeiToFixedPoint(
+      std::string totalStr = Utils::weiToFixedPoint(
         boost::lexical_cast<std::string>(totalU256), 18
       );
       return QString::fromStdString(totalStr);
@@ -382,8 +349,8 @@ class System : public QObject {
     Q_INVOKABLE bool hasInsufficientCoinFunds(QString senderAmount, QString receiverAmount) {
       std::string senderStr, receiverStr;
       u256 senderU256, receiverU256;
-      senderStr = this->wm.convertFixedPointToWei(senderAmount.toStdString(), this->currentCoinDecimals);
-      receiverStr = this->wm.convertFixedPointToWei(receiverAmount.toStdString(), this->currentCoinDecimals);
+      senderStr = Utils::fixedPointToWei(senderAmount.toStdString(), this->currentCoinDecimals);
+      receiverStr = Utils::fixedPointToWei(receiverAmount.toStdString(), this->currentCoinDecimals);
       senderU256 = u256(senderStr);
       receiverU256 = u256(receiverStr);
       return (receiverU256 > senderU256);
@@ -392,8 +359,8 @@ class System : public QObject {
     Q_INVOKABLE bool hasInsufficientTokenFunds(QString senderAmount, QString receiverAmount) {
       std::string senderStr, receiverStr;
       u256 senderU256, receiverU256;
-      senderStr = this->wm.convertFixedPointToWei(senderAmount.toStdString(), this->currentTokenDecimals);
-      receiverStr = this->wm.convertFixedPointToWei(receiverAmount.toStdString(), this->currentTokenDecimals);
+      senderStr = Utils::fixedPointToWei(senderAmount.toStdString(), this->currentTokenDecimals);
+      receiverStr = Utils::fixedPointToWei(receiverAmount.toStdString(), this->currentTokenDecimals);
       senderU256 = u256(senderStr);
       receiverU256 = u256(receiverStr);
       return (receiverU256 > senderU256);
@@ -406,44 +373,38 @@ class System : public QObject {
         // Remember gas price is in Gwei (10^9 Wei) and amount is in fixed point,
         // we have to convert both to Wei.
         TransactionSkeleton txSkel;
+        int decimals = (this->txTokenFlag) ? this->currentTokenDecimals : this->currentCoinDecimals;
+        this->txReceiverTokenAmount = Utils::fixedPointToWei(this->txReceiverTokenAmount, decimals);
+        this->txGasPrice = boost::lexical_cast<std::string>(
+          boost::lexical_cast<u256>(this->txGasPrice) * raiseToPow(10, 9)
+        );
         if (this->txTokenFlag) {  // Token tx
-          this->txReceiverTokenAmount = wm.convertFixedPointToWei(
-            this->txReceiverTokenAmount, this->currentTokenDecimals
-          );
-          this->txGasPrice = boost::lexical_cast<std::string>(
-            boost::lexical_cast<u256>(this->txGasPrice) * raiseToPow(10, 9)
-          );
-          txSkel = wm.buildAVMETransaction(
-            this->txSenderAccount, this->txReceiverAccount, this->txReceiverTokenAmount,
-            this->txGasLimit, this->txGasPrice
+          txSkel = this->w.buildTransaction(
+            this->txSenderAccount, Pangolin::tokenContracts[this->currentToken],
+            "0", this->txGasLimit, this->txGasPrice,
+            Pangolin::transfer(this->txReceiverAccount, this->txReceiverTokenAmount)
           );
         } else {  // Coin tx
-          this->txReceiverCoinAmount = wm.convertFixedPointToWei(
-            this->txReceiverCoinAmount, this->currentCoinDecimals
-          );
-          this->txGasPrice = boost::lexical_cast<std::string>(
-            boost::lexical_cast<u256>(this->txGasPrice) * raiseToPow(10, 9)
-          );
-          txSkel = wm.buildAVAXTransaction(
-            this->txSenderAccount, this->txReceiverAccount, this->txReceiverCoinAmount,
-            this->txGasLimit, this->txGasPrice
+          txSkel = this->w.buildTransaction(
+            this->txSenderAccount, this->txReceiverAccount,
+            this->txReceiverCoinAmount, this->txGasLimit, this->txGasPrice
           );
         }
-        emit txBuilt(txSkel.nonce != wm.MAX_U256_VALUE());
+        emit txBuilt(txSkel.nonce != Utils::MAX_U256_VALUE());
 
         // Part 2: Sign
-        std::string signedTx = wm.signTransaction(txSkel, pass.toStdString(), this->txSenderAccount);
+        std::string signedTx = this->w.signTransaction(txSkel, pass.toStdString());
         emit txSigned(!signedTx.empty());
 
         // Part 3: Send
-        std::string txLink = wm.sendTransaction(signedTx);
+        std::string txLink = this->w.sendTransaction(signedTx);
         if (txLink.empty()) { emit txSent(false, ""); }
         while (txLink.find("Transaction nonce is too low") != std::string::npos ||
             txLink.find("Transaction with the same hash was already imported") != std::string::npos) {
           emit txRetry();
           txSkel.nonce++;
-          signedTx = wm.signTransaction(txSkel, pass.toStdString(), this->txSenderAccount);
-          txLink = wm.sendTransaction(signedTx);
+          signedTx = this->w.signTransaction(txSkel, pass.toStdString());
+          txLink = this->w.sendTransaction(signedTx);
         }
         emit txSent(true, QString::fromStdString(txLink));
       });

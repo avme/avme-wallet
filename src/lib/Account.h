@@ -50,26 +50,35 @@ class Account {
     std::string balanceLPFree;
     std::string balanceLPLocked;
     std::vector<TxData> history;
-    boost::thread balancesThread;
+    std::atomic_bool balancesThreadFlag;
 
-    // Constructors
+    // Constructors (empty, copy and initializer)
     Account(){}
-    Account(const Account&){} // For some reason this prevents errors in Wallet.cpp (???)
+    Account(const Account& acc){
+      this->id = acc.id;
+      this->name = acc.name;
+      this->address = acc.address;
+      this->seed = acc.seed;
+      this->balanceAVAX = acc.balanceAVAX;
+      this->balanceAVME = acc.balanceAVME;
+      this->balanceLPFree = acc.balanceLPFree;
+      this->balanceLPLocked = acc.balanceLPLocked;
+      this->history = acc.history;
+    }
     Account(std::string id, std::string name, std::string address, std::vector<std::string> seed) {
       this->id = id;
       this->name = name;
       this->address = address;
       this->seed = seed;
-      loadTxHistory();
     }
 
-    // Reload the Account's balances.
-    void reloadBalances();
+    // Reload an Account's balances.
+    static void reloadBalances(Account &a);
 
-    // Functions for handling a thread for reloading Account balances.
-    void reloadBalancesThreadHandler();
-    void startBalancesThread();
-    void stopBalancesThread();
+    // Handle a thread for reloading Account balances.
+    static void balanceThreadHandler(Account &a);
+    static void startBalancesThread(Account &a);
+    static void stopBalancesThread(Account &a);
 
     // Convert the transaction history to a JSON array.
     json_spirit::mArray txDataToJSON();

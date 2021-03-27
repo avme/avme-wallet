@@ -65,7 +65,7 @@ void Wallet::loadAccounts() {
   if (this->km.store().keys().empty()) { return; }
   AddressHash got;
   std::vector<h128> keys = this->km.store().keys();
-
+  this->accounts.clear();
   for (auto const& u : keys) {
     if (Address a = this->km.address(u)) {
       got.insert(a);

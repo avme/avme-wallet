@@ -1,24 +1,24 @@
 #include "Account.h"
 
-void Account::reloadBalances() {
-  balancesThreadLock.lock();
-
+void Account::reloadBalances(Account &a) {
   // Get the balances from the network
-  // TODO: change FreeLP and LockedLP addresses to the real ones
-  json_spirit::mValue AVAXBal = JSON::getValue(
-    Network::getAVAXBalance(this->address), "result"
+  // TODO: change addresses to the real ones
+  std::string AVAXjson = Network::getAVAXBalance(a.address);
+  std::string AVMEjson = Network::getAVMEBalance(
+    a.address, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"
   );
-  json_spirit::mValue AVMEBal = JSON::getValue(Network::getAVMEBalance(
-    this->address, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"
-  ), "result");
-  json_spirit::mValue FreeLPBal = JSON::getValue(Network::getAVMEBalance(
-    this->address, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"
-  ), "result");
-  json_spirit::mValue LockedLPBal = JSON::getValue(Network::getAVMEBalance(
-    this->address, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"
-  ), "result");
+  std::string FreeLPjson = Network::getAVMEBalance(
+    a.address, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"
+  );
+  std::string LockedLPjson = Network::getAVMEBalance(
+    a.address, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"
+  );
 
-  // Convert the balances to u256, then to string
+  // Get the balances from the JSON objects, convert to u256, then to string
+  json_spirit::mValue AVAXBal = JSON::getValue(AVAXjson, "result");
+  json_spirit::mValue AVMEBal = JSON::getValue(AVMEjson, "result");
+  json_spirit::mValue FreeLPBal = JSON::getValue(FreeLPjson, "result");
+  json_spirit::mValue LockedLPBal = JSON::getValue(LockedLPjson, "result");
   u256 AVAXu256 = boost::lexical_cast<HexTo<u256>>(AVAXBal.get_str());
   u256 AVMEu256 = boost::lexical_cast<HexTo<u256>>(AVMEBal.get_str());
   u256 FreeLPu256 = boost::lexical_cast<HexTo<u256>>(FreeLPBal.get_str());
@@ -42,34 +42,38 @@ void Account::reloadBalances() {
     LockedLPstr != "" && LockedLPstr.find_first_not_of("0123456789.") == std::string::npos
   );
   if (!AVAXisValid || !AVMEisValid || !FreeLPisValid || !LockedLPisValid) {
-    balancesThreadLock.unlock();
     return;
   }
 
   // Update the balances
-  this->balanceAVAX = Utils::weiToFixedPoint(AVAXstr, 18);
-  this->balanceAVME = Utils::weiToFixedPoint(AVMEstr, 18);
-  this->balanceLPFree = Utils::weiToFixedPoint(FreeLPstr, 18);
-  this->balanceLPLocked = Utils::weiToFixedPoint(LockedLPstr, 18);
+  balancesThreadLock.lock();
+  a.balanceAVAX = Utils::weiToFixedPoint(AVAXstr, 18);
+  a.balanceAVME = Utils::weiToFixedPoint(AVMEstr, 18);
+  a.balanceLPFree = Utils::weiToFixedPoint(FreeLPstr, 18);
+  a.balanceLPLocked = Utils::weiToFixedPoint(LockedLPstr, 18);
   balancesThreadLock.unlock();
   return;
 }
 
-void Account::reloadBalancesThreadHandler() {
+void Account::balanceThreadHandler(Account &a) {
   while (true) {
-    boost::this_thread::sleep_for(boost::chrono::seconds(10));
-    reloadBalances();
+    std::cout << "Ping! " << a.address << std::endl;
+    Account::reloadBalances(a);
+    for (int i = 0; i < 1000; i++) {
+      boost::this_thread::sleep_for(boost::chrono::milliseconds(1));
+      if (a.balancesThreadFlag) { return; }
+    }
   }
-  return;
 }
 
-void Account::startBalancesThread() {
-  this->balancesThread = boost::thread(&Account::reloadBalancesThreadHandler, this);
-  this->balancesThread.detach();
+void Account::startBalancesThread(Account &a) {
+  a.balancesThreadFlag = false;
+  boost::thread balancesThread(&Account::balanceThreadHandler, boost::ref(a));
+  balancesThread.detach();
 }
 
-void Account::stopBalancesThread() {
-  this->balancesThread.boost::thread::~thread();
+void Account::stopBalancesThread(Account &a) {
+  a.balancesThreadFlag = true;
 }
 
 json_spirit::mArray Account::txDataToJSON() {
@@ -102,8 +106,13 @@ json_spirit::mArray Account::txDataToJSON() {
 }
 
 void Account::loadTxHistory() {
+  json_spirit::mValue txData, txArray;
+  std::string address = this->address;
+  if (address.substr(0, 2) == "0x") { address.erase(0, 2); }  // Remove the "0x"
+
+  txData = JSON::readFile(address.c_str());
   try {
-    json_spirit::mValue txData = JSON::readFile(this->address.c_str());
+    txArray = JSON::objectItem(txData, "transactions");
     json_spirit::mValue txArray = JSON::objectItem(txData, "transactions");
     this->history.clear();
     for (int i = 0; i < txArray.get_array().size(); ++i) {
@@ -131,7 +140,8 @@ void Account::loadTxHistory() {
       this->history.push_back(txData);
     }
   } catch (std::exception &e) {
-    std::cout << "Error " << e.what() << std::endl;
+    std::cout << "Couldn't load history for Account " << this->address
+              << ": " << JSON::objectItem(txData, "ERROR").get_str() << std::endl;
   }
 }
 

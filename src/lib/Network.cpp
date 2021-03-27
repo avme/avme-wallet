@@ -14,10 +14,10 @@ std::string Network::getAVAXBalance(std::string address) {
 
 std::string Network::getAVMEBalance(std::string address, std::string contractAddress) {
   std::stringstream query;
+  std::string add = (address.substr(0,2) == "0x") ? address.substr(2) : address;
   query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\",\"params\": [{\"to\": \""
         << contractAddress
-        << "\",\"data\": \"0x70a08231000000000000000000000000"
-        << address
+        << "\",\"data\": \"0x70a08231000000000000000000000000" << add
         << "\"},\"latest\"]}";
   return httpGetRequest(query.str());
 }

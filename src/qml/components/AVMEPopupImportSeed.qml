@@ -2,7 +2,7 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 /**
- * Popup for importing a BIP39 seed. Has to be opened manually.
+ * Popup for importing an Account using a BIP39 seed. Has to be opened manually.
  * Has the following items:
  * - "seed": the 12-word seed input
  * - "doneBtn.onClicked": what to do when confirming the action
@@ -12,6 +12,8 @@ import QtQuick.Controls 2.2
 Popup {
   id: importSeedPopup
   readonly property alias seed: seedInput.text
+  readonly property alias name: nameInput.text
+  readonly property alias pass: passInput.text
   property alias doneBtn: btnDone
 
   function clean() {
@@ -19,9 +21,9 @@ Popup {
   }
 
   width: window.width - 200
-  height: (window.height / 4) + 50
+  height: (window.height / 2) + 50
   x: 100
-  y: (window.height / 2) - 100
+  y: (window.height / 2) - 200
   modal: true
   focus: true
   padding: 0  // Remove white borders
@@ -46,6 +48,35 @@ Popup {
       width: parent.width - 100
       label: "Seed"
       placeholder: "Your 12-word seed"
+    }
+
+    AVMEInput {
+      id: nameInput
+      anchors.horizontalCenter: parent.horizontalCenter
+      width: parent.width / 4
+      label: "Name (optional)"
+      placeholder: "Label for your Account"
+    }
+
+    // Passphrase
+    Text {
+      id: passInfo
+      property alias timer: passInfoTimer
+      anchors.horizontalCenter: parent.horizontalCenter
+      Timer { id: passInfoTimer; interval: 2000 }
+      text: (!passInfoTimer.running)
+      ? "Please authenticate to confirm the action."
+      : "Wrong passphrase, please try again"
+    }
+
+    AVMEInput {
+      id: passInput
+      anchors.horizontalCenter: parent.horizontalCenter
+      width: parent.width / 4
+      echoMode: TextInput.Password
+      passwordCharacter: "*"
+      label: "Passphrase"
+      placeholder: "Your Wallet's passphrase"
     }
 
     Text {

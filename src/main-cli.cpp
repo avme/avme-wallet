@@ -71,7 +71,7 @@ int main() {
 
     // List AVAX Accounts and balances
     if (menuOp == "1") {
-      std::vector<Account> list = w.getAccounts();
+      std::vector<Account> list = w.accounts;
       if (!list.empty()) {
         for (Account a : list) {
           std::cout << a.id << " "
@@ -85,7 +85,7 @@ int main() {
 
     // List AVME Accounts and balances
     } else if (menuOp == "2") {
-      std::vector<Account> list = w.getAccounts();
+      std::vector<Account> list = w.accounts;
       if (!list.empty()) {
         for (Account a : list) {
           std::cout << a.id << " "
@@ -99,7 +99,7 @@ int main() {
 
     // List LP Accounts and balances
     } else if (menuOp == "3") {
-      std::vector<Account> list = w.getAccounts();
+      std::vector<Account> list = w.accounts;
       if (!list.empty()) {
         for (Account a : list) {
           std::cout << a.id << " "

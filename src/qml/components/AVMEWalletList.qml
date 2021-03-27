@@ -144,7 +144,7 @@ ListView {
         color: "white"
         padding: 5
         elide: Text.ElideRight
-        text: itemCoinAmount
+        text: (itemCoinAmount) ? itemCoinAmount : "Loading..."
         font.pointSize: 10.0
       }
       Text {
@@ -155,7 +155,7 @@ ListView {
         color: "white"
         padding: 5
         elide: Text.ElideRight
-        text: itemTokenAmount
+        text: (itemTokenAmount) ? itemTokenAmount : "Loading..."
         font.pointSize: 10.0
       }
       Text {
@@ -166,7 +166,7 @@ ListView {
         color: "white"
         padding: 5
         elide: Text.ElideRight
-        text: itemFreeLPAmount
+        text: (itemFreeLPAmount) ? itemFreeLPAmount : "Loading..."
         font.pointSize: 10.0
       }
       Text {
@@ -177,7 +177,7 @@ ListView {
         color: "white"
         padding: 5
         elide: Text.ElideRight
-        text: itemLockedLPAmount
+        text: (itemLockedLPAmount) ? itemLockedLPAmount : "Loading..."
         font.pointSize: 10.0
       }
       MouseArea {
