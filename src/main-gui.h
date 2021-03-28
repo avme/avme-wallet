@@ -45,6 +45,7 @@ class System : public QObject {
 
   private:
     Wallet w;
+    bool firstLoad;
     std::string currentCoin;
     int currentCoinDecimals;
     std::string currentToken;
@@ -65,6 +66,9 @@ class System : public QObject {
     // Getters/Setters for private vars
     Q_INVOKABLE QString getCurrentCoin() { return QString::fromStdString(this->currentCoin); }
     Q_INVOKABLE void setCurrentCoin(QString coin) { this->currentCoin = coin.toStdString(); }
+
+    Q_INVOKABLE bool getFirstLoad() { return this->firstLoad; }
+    Q_INVOKABLE void setFirstLoad(bool b) { this->firstLoad = b; }
 
     Q_INVOKABLE int getCurrentCoinDecimals() { return this->currentCoinDecimals; }
     Q_INVOKABLE void setCurrentCoinDecimals(int decimals) { this->currentCoinDecimals = decimals; }
@@ -165,6 +169,7 @@ class System : public QObject {
       QVariantList ret;
       for (Account &a : w.accounts) {
         std::string obj;
+        a.balancesThreadLock.lock();
         obj += "{\"account\": \"" + a.address;
         obj += "\", \"name\": \"" + a.name;
         obj += "\", \"coinAmount\": \"" + a.balanceAVAX;
@@ -172,6 +177,7 @@ class System : public QObject {
         obj += "\", \"freeLPAmount\": \"" + a.balanceLPFree;
         obj += "\", \"lockedLPAmount\": \"" + a.balanceLPLocked;
         obj += "\"}";
+        a.balancesThreadLock.unlock();
         ret << QString::fromStdString(obj);
       }
       return ret;
@@ -190,8 +196,10 @@ class System : public QObject {
     Q_INVOKABLE void stopBalanceThread(QString address) {
       for (Account &a : w.accounts) {
         if (a.address == address.toStdString()) {
-          Account::stopBalancesThread(a);
-          break;
+          a.interruptThread = true;
+          while (!a.threadWasInterrupted) {
+              boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+          }
         }
       }
     }
@@ -243,22 +251,43 @@ class System : public QObject {
     // List the Account's transactions
     Q_INVOKABLE QVariantList listAccountTransactions(QString address) {
       QVariantList ret;
-      Account a = this->w.getAccountByAddress(address.toStdString());
-      for (TxData tx : a.history) {
-        std::string obj;
-        obj += "{\"txlink\": \"" + tx.txlink;
-        obj += "\", \"operation\": \"" + tx.operation;
-        obj += "\", \"txdata\": \"" + tx.data;
-        obj += "\", \"from\": \"" + tx.from;
-        obj += "\", \"to\": \"" + tx.to;
-        obj += "\", \"value\": \"" + tx.value;
-        obj += "\", \"gas\": \"" + tx.gas;
-        obj += "\", \"price\": \"" + tx.price;
-        obj += "\", \"datetime\": \"" + tx.humanDate;
-        obj += "\", \"unixtime\": " + std::to_string(tx.unixDate);
-        obj += ", \"confirmed\": " + QVariant(tx.confirmed).toString().toStdString();
-        obj += "}";
-        ret << QString::fromStdString(obj);
+      for (Account &a : w.accounts) {
+        if (a.address == address.toStdString()) {
+          for (TxData tx : a.history) {
+            std::string obj;
+            obj += "{\"txlink\": \"" + tx.txlink;
+            obj += "\", \"operation\": \"" + tx.operation;
+            obj += "\", \"txdata\": \"" + tx.data;
+            obj += "\", \"from\": \"" + tx.from;
+            obj += "\", \"to\": \"" + tx.to;
+            obj += "\", \"value\": \"" + tx.value;
+            obj += "\", \"gas\": \"" + tx.gas;
+            obj += "\", \"price\": \"" + tx.price;
+            obj += "\", \"datetime\": \"" + tx.humanDate;
+            obj += "\", \"unixtime\": " + std::to_string(tx.unixDate);
+            obj += ", \"confirmed\": " + QVariant(tx.confirmed).toString().toStdString();
+            obj += "}";
+            ret << QString::fromStdString(obj);
+          }
+          break;
+        }
+      }
+      return ret;
+    }
+
+    // Get an Account's balances
+    Q_INVOKABLE QVariantMap getAccountBalances(QString address) {
+      QVariantMap ret;
+      for (Account &a : w.accounts) {
+        if (a.address == address.toStdString()) {
+          a.balancesThreadLock.lock();
+          ret.insert("balanceAVAX", QString::fromStdString(a.balanceAVAX));
+          ret.insert("balanceAVME", QString::fromStdString(a.balanceAVME));
+          ret.insert("balanceLPFree", QString::fromStdString(a.balanceLPFree));
+          ret.insert("balanceLPLocked", QString::fromStdString(a.balanceLPLocked));
+          a.balancesThreadLock.unlock();
+          break;
+        }
       }
       return ret;
     }

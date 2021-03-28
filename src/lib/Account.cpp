@@ -46,18 +46,18 @@ void Account::reloadBalances(Account &a) {
   }
 
   // Update the balances
-  balancesThreadLock.lock();
+  a.balancesThreadLock.lock();
   a.balanceAVAX = Utils::weiToFixedPoint(AVAXstr, 18);
   a.balanceAVME = Utils::weiToFixedPoint(AVMEstr, 18);
   a.balanceLPFree = Utils::weiToFixedPoint(FreeLPstr, 18);
   a.balanceLPLocked = Utils::weiToFixedPoint(LockedLPstr, 18);
-  balancesThreadLock.unlock();
+  a.balancesThreadLock.unlock();
   return;
 }
 
 void Account::balanceThreadHandler(Account &a) {
   while (true) {
-    std::cout << "Ping! " << a.address << std::endl;
+    //std::cout << "Ping! " << a.address << std::endl;
     Account::reloadBalances(a);
     for (int i = 0; i < 1000; i++) {
       boost::this_thread::sleep_for(boost::chrono::milliseconds(1));

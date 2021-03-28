@@ -74,10 +74,12 @@ int main() {
       std::vector<Account> list = w.accounts;
       if (!list.empty()) {
         for (Account a : list) {
+          a.balancesThreadLock.lock();
           std::cout << a.id << " "
                     << a.name << " "
                     << a.address << " "
                     << a.balanceAVAX << std::endl;
+          a.balancesThreadLock.unlock();
         }
       } else {
         std::cout << "No Accounts found." << std::endl;
@@ -88,10 +90,12 @@ int main() {
       std::vector<Account> list = w.accounts;
       if (!list.empty()) {
         for (Account a : list) {
+          a.balancesThreadLock.lock();
           std::cout << a.id << " "
                     << a.name << " "
                     << a.address << " "
                     << a.balanceAVME << std::endl;
+          a.balancesThreadLock.unlock();
         }
       } else {
         std::cout << "No Accounts found." << std::endl;
@@ -102,11 +106,13 @@ int main() {
       std::vector<Account> list = w.accounts;
       if (!list.empty()) {
         for (Account a : list) {
+          a.balancesThreadLock.lock();
           std::cout << a.id << " "
                     << a.name << " "
                     << a.address << " "
                     << a.balanceLPFree << " "
                     << a.balanceLPLocked << std::endl;
+          a.balancesThreadLock.unlock();
         }
       } else {
         std::cout << "No Accounts found." << std::endl;

@@ -38,7 +38,10 @@ Item {
       System.setCurrentToken("AVME")
       System.setCurrentTokenDecimals(18)  // TODO: check if this is correct
     }
-    reloadList()
+    if (System.getFirstLoad()) {
+      System.setFirstLoad(false)
+      reloadList()
+    }
   }
 
   // Timer for reloading the Account balances on the list
@@ -46,11 +49,14 @@ Item {
     id: listReloadTimer
     interval: 1000
     repeat: true
-    onTriggered: fetchBalances()
+    onTriggered: reloadBalances()
   }
 
   // Helpers for manipulating the Account list
-  function fetchAccounts() {
+  function reloadList() {
+    console.log("Reloading list...")
+    fetchAccountsPopup.open()
+
     System.stopAllBalanceThreads()
     accountsList.clear()
     System.loadAccounts()
@@ -60,21 +66,16 @@ Item {
       accountsList.append(acc)
       System.startBalanceThread(acc.account)
     }
+
+    listReloadTimer.start()
+    fetchAccountsPopup.close()
   }
 
-  function fetchBalances() {
+  function reloadBalances() {
     var accList = System.listAccounts()
     for (var i = 0; i < accList.length; i++) {
       accountsList.set(i, JSON.parse(accList[i]))
     }
-  }
-
-  function reloadList() {
-    console.log("Reloading list...")
-    fetchAccountsPopup.open()
-    fetchAccounts()
-    listReloadTimer.start()
-    fetchAccountsPopup.close()
   }
 
   // Background icon
@@ -170,10 +171,7 @@ Item {
       text: "Use this Account"
       onClicked: {
         System.setTxSenderAccount(walletList.currentItem.itemAccount)
-        System.setTxSenderCoinAmount(walletList.currentItem.itemCoinAmount)
-        System.setTxSenderTokenAmount(walletList.currentItem.itemTokenAmount)
-        System.setTxSenderLPFreeAmount(walletList.currentItem.itemFreeLPAmount)
-        System.setTxSenderLPLockedAmount(walletList.currentItem.itemLockedLPAmount)
+        listReloadTimer.stop()
         System.setScreen(content, "qml/screens/StatsScreen.qml")
       }
     }
@@ -196,13 +194,13 @@ Item {
     doneBtn.onClicked: {
       if (System.checkWalletPass(pass)) {
         try {
-          System.stopAllBalanceThreads()
-          listReloadTimer.stop()
           console.log("Creating new Account...")
           System.createNewAccount(name, pass)
           newAccountPopup.clean()
           newAccountPopup.close()
           createAccountPopup.open()
+          System.stopAllBalanceThreads()
+          listReloadTimer.stop()
         } catch (error) {
           newAccountPopup.close()
           accountFailPopup.open()

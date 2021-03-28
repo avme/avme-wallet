@@ -11,7 +11,21 @@ import "qrc:/qml/components"
 Item {
   id: statsScreen
 
-  function fetchTransactions() {
+  // Timer for reloading the Account balances
+  Timer {
+    id: listReloadTimer
+    interval: 1000
+    repeat: true
+    onTriggered: reloadBalances()
+  }
+
+  Component.onCompleted: {
+    reloadTransactions()
+    reloadBalances()
+    listReloadTimer.start()
+  }
+
+  function reloadTransactions() {
     historyModel.clear()
     var txList = System.listAccountTransactions(System.getTxSenderAccount())
     if (txList != null) {
@@ -21,7 +35,13 @@ Item {
     }
   }
 
-  Component.onCompleted: fetchTransactions()
+  function reloadBalances() {
+    var obj = System.getAccountBalances(System.getTxSenderAccount())
+    balanceCoinText.text = (obj.balanceAVAX) ? obj.balanceAVAX : "Loading..."
+    balanceTokenText.text = (obj.balanceAVME) ? obj.balanceAVME : "Loading..."
+    balanceLPFreeText.text = (obj.balanceLPFree) ? obj.balanceLPFree : "Loading..."
+    balanceLPLockedText.text = (obj.balanceLPLocked) ? obj.balanceLPLocked : "Loading..."
+  }
 
   // Background icon
   Image {
@@ -50,6 +70,8 @@ Item {
       width: (parent.width / 6) - parent.spacing
       text: "Change Account"
       onClicked: {
+        listReloadTimer.stop()
+        System.setFirstLoad(true)
         System.setScreen(content, "qml/screens/AccountsScreen.qml")
       }
     }
@@ -57,7 +79,7 @@ Item {
       id: btnRefreshHistory
       width: (parent.width / 6) - parent.spacing
       text: "Refresh History"
-      onClicked: fetchTransactions()
+      onClicked: reloadTransactions()
     }
     Text {
       id: accountText
@@ -110,7 +132,7 @@ Item {
   // Account stats and actions (top right)
   Rectangle {
     id: statsRect
-    height: (parent.height * 0.45)
+    height: (parent.height * 0.3)
     anchors {
       top: statsHeaderRow.bottom
       left: listRect.right
@@ -139,7 +161,6 @@ Item {
       }
       font.bold: true
       font.pointSize: 14.0
-      text: System.getTxSenderCoinAmount()
     }
 
     Text {
@@ -162,7 +183,6 @@ Item {
       }
       font.bold: true
       font.pointSize: 14.0
-      text: System.getTxSenderTokenAmount()
     }
 
     Text {
@@ -185,7 +205,6 @@ Item {
       }
       font.bold: true
       font.pointSize: 14.0
-      text: System.getTxSenderLPFreeAmount()
     }
 
     Text {
@@ -208,7 +227,6 @@ Item {
       }
       font.bold: true
       font.pointSize: 14.0
-      text: System.getTxSenderLPLockedAmount()
     }
 
     Text {
@@ -233,6 +251,8 @@ Item {
       text: "Send " + System.getCurrentCoin()
       onClicked: {
         System.setTxTokenFlag(false)
+        listReloadTimer.stop()
+        System.setTxSenderCoinAmount(balanceCoinText.text)
         System.setScreen(content, "qml/screens/CoinTransactionScreen.qml")
       }
     }
@@ -247,6 +267,9 @@ Item {
       text: "Send " + System.getCurrentToken()
       onClicked: {
         System.setTxTokenFlag(true)
+        listReloadTimer.stop()
+        System.setTxSenderCoinAmount(balanceCoinText.text)
+        System.setTxSenderTokenAmount(balanceTokenText.text)
         System.setScreen(content, "qml/screens/TokenTransactionScreen.qml")
       }
     }
@@ -259,7 +282,10 @@ Item {
       }
       width: (parent.width / 4) - anchors.margins
       text: "Exchange"
-      onClicked: System.setScreen(content, "qml/screens/ExchangeScreen.qml")
+      onClicked: {
+        listReloadTimer.stop()
+        System.setScreen(content, "qml/screens/ExchangeScreen.qml")
+      }
     }
     AVMEButton {
       id: btnStaking
@@ -271,14 +297,17 @@ Item {
       }
       width: (parent.width / 4) - anchors.margins
       text: "Staking"
-      onClicked: System.setScreen(content, "qml/screens/StakingScreen.qml")
+      onClicked: {
+        listReloadTimer.stop()
+        System.setScreen(content, "qml/screens/StakingScreen.qml")
+      }
     }
   }
 
   // Transaction details (bottom right)
   Rectangle {
     id: txDetailsRect
-    height: (parent.height * 0.45)
+    height: (parent.height * 0.6)
     anchors {
       top: statsRect.bottom
       left: listRect.right
@@ -307,16 +336,15 @@ Item {
         right: parent.right
         margins: 10
       }
-      font.pointSize: 14.0
       elide: Text.ElideRight
       text: (historyList.currentItem)
-      ? "<b>Operation:</b> " + historyList.currentItem.itemOperation + "<br>"
-      + "<b>From:</b> " + historyList.currentItem.itemFrom + "<br>"
-      + "<b>To:</b> " + historyList.currentItem.itemTo + "<br>"
-      + "<b>Value:</b> " + historyList.currentItem.itemValue + "<br>"
-      + "<b>Gas:</b> " + historyList.currentItem.itemGas + "<br>"
-      + "<b>Price:</b> " + historyList.currentItem.itemPrice + "<br>"
-      + "<b>Timestamp:</b> " + historyList.currentItem.itemDateTime + "<br>"
+      ? "<b>Operation:</b> " + historyList.currentItem.itemOperation + "<br><br>"
+      + "<b>From:</b> " + historyList.currentItem.itemFrom + "<br><br>"
+      + "<b>To:</b> " + historyList.currentItem.itemTo + "<br><br>"
+      + "<b>Value:</b> " + historyList.currentItem.itemValue + "<br><br>"
+      + "<b>Gas:</b> " + historyList.currentItem.itemGas + "<br><br>"
+      + "<b>Price:</b> " + historyList.currentItem.itemPrice + "<br><br>"
+      + "<b>Timestamp:</b> " + historyList.currentItem.itemDateTime + "<br><br>"
       + "<b>Confirmed:</b> " + historyList.currentItem.itemConfirmed
       : ""
     }

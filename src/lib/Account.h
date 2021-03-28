@@ -32,9 +32,6 @@
 
 using namespace dev::eth; // TransactionBase
 
-// Mutex for Account balance thread.
-static std::mutex balancesThreadLock;
-
 /**
  * Class for a given Account and related functions.
  * e.g. reload balances, show tx history, etc.
@@ -51,6 +48,7 @@ class Account {
     std::string balanceLPLocked;
     std::vector<TxData> history;
     std::atomic_bool balancesThreadFlag;
+    std::mutex balancesThreadLock;
 
     // Constructors (empty, copy and initializer)
     Account(){}
@@ -70,6 +68,7 @@ class Account {
       this->name = name;
       this->address = address;
       this->seed = seed;
+      loadTxHistory();
     }
 
     // Reload an Account's balances.
@@ -83,6 +82,7 @@ class Account {
     // Convert the transaction history to a JSON array.
     json_spirit::mArray txDataToJSON();
 
+    // TODO: cleanup later
     boost::thread balancesThread;
     std::atomic_bool threadWasInterrupted;
     std::atomic_bool interruptThread;
