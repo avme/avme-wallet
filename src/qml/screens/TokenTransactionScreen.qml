@@ -236,6 +236,7 @@ Item {
         System.setTxReceiverTokenAmount(amount)
         System.setTxGasLimit(gasLimit)
         System.setTxGasPrice(gasPrice)
+        System.setTxOperation("Send AVME")
         confirmTxPopup.close()
         System.setScreen(content, "qml/screens/ProgressScreen.qml")
         System.txStart(pass)

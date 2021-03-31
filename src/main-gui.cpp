@@ -19,6 +19,7 @@ int main(int argc, char *argv[]) {
   QFont font("Monospace");
   font.setStyleHint(QFont::Monospace);
   QApplication::setFont(font);
+  app.setWindowIcon(QIcon(":/img/avme_logo.png"));
 
   // Load the main screen and start the app
   engine.load(QUrl(QStringLiteral("qrc:/qml/screens/main.qml")));

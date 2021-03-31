@@ -1,7 +1,11 @@
 #ifndef MAIN_CLI_H
 #define MAIN_CLI_H
 
-#include "lib/wallet.h"
+#include "lib/BIP39.h"
+#include "lib/Pangolin.h"
+#include "lib/Network.h"
+#include "lib/Utils.h"
+#include "lib/Wallet.h"
 
 /**
  * Menu prompts for the AVME CLI Wallet, for containerizing logic
@@ -116,16 +120,17 @@ std::string menuCreatePass() {
 }
 
 // Choose which address will be the sender/receiver, respectively
-std::string menuChooseSenderAddress(WalletManager wm) {
+std::string menuChooseSenderAddress(Wallet w) {
   std::string ret;
 
   while (true) {
     std::cout << "From which address do you want to send a transaction?" << std::endl;
     std::getline(std::cin, ret);
-    if (ret.find("0x") == std::string::npos || ret.length() != 42) {
+    if (ret.find("0x") == std::string::npos) { ret.insert(0, "0x"); }  // Add "0x" at the start
+    if (ret.length() != 42) {
       std::cout << "Not a valid address, please check the formatting." << std::endl;
-    } else if (ret != ("0x" + boost::lexical_cast<std::string>(wm.userToAddress(ret)))) {
-      std::cout << "Address not found in Wallet, please try another." << std::endl;
+    } else if (!w.accountExists(ret)) {
+      std::cout << "Address does not exist, please try another." << std::endl;
     } else {
       break;
     }
@@ -140,7 +145,8 @@ std::string menuChooseReceiverAddress() {
   while (true) {
     std::cout << "Which address are you sending a transaction to?" << std::endl;
     std::getline(std::cin, ret);
-    if (ret.find("0x") == std::string::npos || ret.length() != 42) {
+    if (ret.find("0x") == std::string::npos) { ret.insert(0, "0x"); }  // Add "0x" at the start
+    if (ret.length() != 42) {
       std::cout << "Not a valid address, please check the formatting." << std::endl;
     } else {
       break;
@@ -151,13 +157,13 @@ std::string menuChooseReceiverAddress() {
 }
 
 // Choose a coin or token amount to send from a given address
-std::string menuChooseAVAXAmount(std::string address, WalletManager wm) {
+std::string menuChooseAVAXAmount(std::string address) {
   std::string ret;
 
   while (true) {
     std::cout << "How much AVAX do you want to send? (amount in fixed point, e.g. 0.5)" << std::endl;
     std::getline(std::cin, ret);
-    ret = wm.convertFixedPointToWei(ret, 18);
+    ret = Utils::fixedPointToWei(ret, 18);
     if (ret == "") {
       std::cout << "Invalid amount, please check if your input is correct." << std::endl;
     } else if (ret > Network::getAVAXBalance(address)) {
@@ -170,16 +176,16 @@ std::string menuChooseAVAXAmount(std::string address, WalletManager wm) {
   return ret;
 }
 
-std::string menuChooseAVMEAmount(std::string address, WalletManager wm) {
+std::string menuChooseAVMEAmount(std::string address) {
   std::string ret;
 
   while (true) {
     std::cout << "How much AVME do you want to send? (amount in fixed point, e.g. 0.5 - MAXIMUM 18 DECIMALS!)" << std::endl;
     std::getline(std::cin, ret);
-    ret = wm.convertFixedPointToWei(ret, 18);
+    ret = Utils::fixedPointToWei(ret, 18);
     if (ret == "") {
       std::cout << "Invalid amount, please check if your input is correct." << std::endl;
-    } else if (ret > Network::getAVMEBalance(address, "0xa687a9cff994973314c6e2cb313f82d6d78cd232")) {
+    } else if (ret > Network::getAVMEBalance(address, Pangolin::tokenContracts["AVME"])) {
       std::cout << "Insufficient funds, please try again." << std::endl;
     } else {
       break;
@@ -223,19 +229,17 @@ std::string menuSetGasPrice() {
 }
 
 // Choose an Account to erase
-std::string menuChooseAccountErase(WalletManager wm) {
+std::string menuChooseAccountErase(Wallet w) {
   std::string ret;
 
   while (true) {
     std::cout << "Please inform the Account name or address that you want to erase." << std::endl;
     std::getline(std::cin, ret);
-    if (ret.find("0x") == std::string::npos) {
-      ret = "0x" + boost::lexical_cast<std::string>(wm.userToAddress(ret));
-    }
+    if (ret.find("0x") == std::string::npos) { ret.insert(0, "0x"); }  // Add "0x" at the start
     if (ret.length() != 42) {
       std::cout << "Invalid Account, please check the formatting." << std::endl;
-    } else if (!wm.accountExists(ret)) {
-      std::cout << "Account doesn't exist, please try another." << std::endl;
+    } else if (!w.accountExists(ret)) {
+      std::cout << "Account does not exist, please try another." << std::endl;
     } else {
       break;
     }

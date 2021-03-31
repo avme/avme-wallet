@@ -8,7 +8,7 @@ int main() {
   loggingOptions.verbosity = 0; // No WARN messages
   dev::setupLogging(loggingOptions);
 
-  WalletManager wm;
+  Wallet w;
   boost::filesystem::path walletFile, secretsPath;
 
   std::cout << "Hello! Welcome to the AVME CLI wallet." << std::endl;
@@ -22,7 +22,7 @@ int main() {
       std::cout << "Protect your Wallet with a master passphrase (make it strong!)." << std::endl;
       std::string pass = menuCreatePass();
       std::cout << "Creating new Wallet..." << std::endl;
-      if (wm.createNewWallet(walletFile, secretsPath, pass)) {
+      if (w.create(walletFile, secretsPath, pass)) {
         std::cout << "Wallet successfully created!" << std::endl;
         pass = "";
         break;
@@ -42,9 +42,8 @@ int main() {
     std::cout << "Enter your Wallet's passphrase." << std::endl;
     std::getline(std::cin, pass);
     std::cout << "Loading Wallet..." << std::endl;
-    if (wm.loadWallet(walletFile, secretsPath, pass)) {
+    if (w.load(walletFile, secretsPath, pass)) {
       std::cout << "Wallet loaded." << std::endl;
-      wm.storeWalletPass(pass);
       pass = "";
       break;
     } else {
@@ -52,7 +51,7 @@ int main() {
     }
   }
   std::cout << "Loading Wallet Accounts. This may take a while, please wait..." << std::endl;
-  wm.loadWalletAccounts(true);
+  w.loadAccounts();
 
   // Menu loop
   while (true) {
@@ -72,14 +71,15 @@ int main() {
 
     // List AVAX Accounts and balances
     if (menuOp == "1") {
-      std::vector<WalletAccount> AVAXAccounts = wm.ReadWriteWalletVector(false, false, {});
-      if (!AVAXAccounts.empty()) {
-        for (WalletAccount accountData : AVAXAccounts) {
-          std::cout << accountData.id << " "
-            << accountData.privKey << " "
-            << accountData.name << " "
-            << accountData.address << " "
-            << accountData.balanceAVAX << std::endl;
+      std::vector<Account> list = w.accounts;
+      if (!list.empty()) {
+        for (Account a : list) {
+          a.balancesThreadLock.lock();
+          std::cout << a.id << " "
+                    << a.name << " "
+                    << a.address << " "
+                    << a.balanceAVAX << std::endl;
+          a.balancesThreadLock.unlock();
         }
       } else {
         std::cout << "No Accounts found." << std::endl;
@@ -87,14 +87,15 @@ int main() {
 
     // List AVME Accounts and balances
     } else if (menuOp == "2") {
-      std::vector<WalletAccount> AVMEAccounts = wm.ReadWriteWalletVector(false, false, {});
-      if (!AVMEAccounts.empty()) {
-        for (WalletAccount accountData : AVMEAccounts) {
-          std::cout << accountData.id << " "
-            << accountData.privKey << " "
-            << accountData.name << " "
-            << accountData.address << " "
-            << accountData.balanceAVME << std::endl;
+      std::vector<Account> list = w.accounts;
+      if (!list.empty()) {
+        for (Account a : list) {
+          a.balancesThreadLock.lock();
+          std::cout << a.id << " "
+                    << a.name << " "
+                    << a.address << " "
+                    << a.balanceAVME << std::endl;
+          a.balancesThreadLock.unlock();
         }
       } else {
         std::cout << "No Accounts found." << std::endl;
@@ -102,15 +103,16 @@ int main() {
 
     // List LP Accounts and balances
     } else if (menuOp == "3") {
-      std::vector<WalletAccount> LPAccounts = wm.ReadWriteWalletVector(false, false, {});
-      if (!LPAccounts.empty()) {
-        for (WalletAccount accountData : LPAccounts) {
-          std::cout << accountData.id << " "
-            << accountData.privKey << " "
-            << accountData.name << " "
-            << accountData.address << " "
-            << accountData.balanceLPFree << " "
-            << accountData.balanceLPLocked << std::endl;
+      std::vector<Account> list = w.accounts;
+      if (!list.empty()) {
+        for (Account a : list) {
+          a.balancesThreadLock.lock();
+          std::cout << a.id << " "
+                    << a.name << " "
+                    << a.address << " "
+                    << a.balanceLPFree << " "
+                    << a.balanceLPLocked << std::endl;
+          a.balancesThreadLock.unlock();
         }
       } else {
         std::cout << "No Accounts found." << std::endl;
@@ -119,74 +121,80 @@ int main() {
     // Send AVAX/AVME transactions
     } else if (menuOp == "4" || menuOp == "5") {
       TransactionSkeleton txSkel;
-      std::string srcAddress, destAddress, txValue, txGasLimit, txGasPrice,
-        signedTx, transactionLink, feeOp;
+      std::string from, to, value, gasLimit, gasPrice, signedTx, txLink, operation, feeOp;
 
-      srcAddress = menuChooseSenderAddress(wm);
-      destAddress = menuChooseReceiverAddress();
+      from = menuChooseSenderAddress(w);
+      to = menuChooseReceiverAddress();
       if (menuOp == "4") {  // AVAX
-        txValue = menuChooseAVAXAmount(srcAddress, wm);
+        value = menuChooseAVAXAmount(from);
       } else if (menuOp == "5") { // AVME
-        txValue = menuChooseAVMEAmount(srcAddress, wm);
+        value = menuChooseAVMEAmount(from);
       }
       std::cout << "Do you want to set your own fee or use an automatic fee?\n" <<
         "1 - Automatic\n2 - Set my own" << std::endl;
       std::getline(std::cin, feeOp);
       if (feeOp == "1") {
         if (menuOp == "4") {  // AVAX
-          txGasLimit = "21000";
+          gasLimit = "21000";
         } else if (menuOp == "5") { // AVME
-          txGasLimit = "80000";
+          gasLimit = "80000";
         }
-        txGasPrice = wm.getAutomaticFee();
+        gasPrice = Network::getAutomaticFee();
       } else if (feeOp == "2") {
-        txGasLimit = menuSetGasLimit();
-        txGasPrice = menuSetGasPrice();
+        gasLimit = menuSetGasLimit();
+        gasPrice = menuSetGasPrice();
       }
-      txGasPrice = boost::lexical_cast<std::string>(
-        boost::lexical_cast<u256>(txGasPrice) * raiseToPow(10,9)
+      gasPrice = boost::lexical_cast<std::string>(
+        boost::lexical_cast<u256>(gasPrice) * raiseToPow(10,9)
       );
 
       std::string pass;
       while (true) {
         std::cout << "Please authenticate with your Wallet's passphrase to confirm the action." << std::endl;
         std::getline(std::cin, pass);
-        if (wm.checkWalletPass(pass)) { pass = ""; break; }
+        if (w.auth(pass)) break;
         std::cout << "Wrong passphrase, please try again." << std::endl;
       }
 
       std::cout << "Building transaction..." << std::endl;
       if (menuOp == "4") {  // AVAX
-        txSkel = wm.buildAVAXTransaction(srcAddress, destAddress, txValue, txGasLimit, txGasPrice);
+        txSkel = w.buildTransaction(from, to, value, gasLimit, gasPrice);
       } else if (menuOp == "5") { // AVME
-        txSkel = wm.buildAVMETransaction(srcAddress, destAddress, txValue, txGasLimit, txGasPrice);
+        txSkel = w.buildTransaction(from, Pangolin::tokenContracts["AVME"], "0", gasLimit, gasPrice, Pangolin::transfer(to, value));
       }
-      if (txSkel.nonce == wm.MAX_U256_VALUE()) {
+      if (txSkel.nonce == Utils::MAX_U256_VALUE()) {
         std::cout << "Error in transaction building" << std::endl;
         continue;
       }
 
       std::cout << "Signing transaction..." << std::endl;
-      signedTx = wm.signTransaction(txSkel, pass, srcAddress);
+      signedTx = w.signTransaction(txSkel, pass);
       std::cout << "Transaction signed: " << signedTx << std::endl;
 
       std::cout << "Broadcasting transaction..." << std::endl;
-      transactionLink = wm.sendTransaction(signedTx);
-      if (transactionLink == "") {
+      if (menuOp == "4") {  // AVAX
+        operation = "Send AVAX";
+      } else if (menuOp == "5") { // AVME
+        operation = "Send AVME";
+      }
+      txLink = w.sendTransaction(signedTx, operation);
+      if (txLink == "") {
         std::cout << "Transaction failed. Please try again." << std::endl;
         continue;
       }
-      while (transactionLink.find("Transaction nonce is too low") != std::string::npos ||
-          transactionLink.find("Transaction with the same hash was already imported") != std::string::npos) {
+      while (txLink.find("Transaction nonce is too low") != std::string::npos ||
+          txLink.find("Transaction with the same hash was already imported") != std::string::npos) {
         std::cout << "Transaction failed. Either the nonce is too low, or a "
                   << "transaction with the same hash was already imported." << std::endl
                   << "Trying again with a higher nonce..." << std::endl;
         txSkel.nonce++;
-        signedTx = wm.signTransaction(txSkel, pass, srcAddress);
-        transactionLink = wm.sendTransaction(signedTx);
+        signedTx = w.signTransaction(txSkel, pass);
+        txLink = w.sendTransaction(signedTx, operation);
       }
-      std::cout << "Transaction sent! Link: " << transactionLink << std::endl;
-      wm.reloadAccountsBalances();
+      std::cout << "Transaction sent! Link: " << txLink << std::endl;
+      pass = "";
+      std::cout << "Reloading Accounts..." << std::endl;
+      w.loadAccounts();
 
     // Create new account
     } else if (menuOp == "6") {
@@ -198,25 +206,26 @@ int main() {
       while (true) {
         std::cout << "Please authenticate with your Wallet's passphrase to confirm the action." << std::endl;
         std::getline(std::cin, pass);
-        if (wm.checkWalletPass(pass)) { pass = ""; break; }
+        if (w.auth(pass)) break;
         std::cout << "Wrong passphrase, please try again." << std::endl;
       }
 
       // Create the Account
       std::cout << "Creating a new Account..." << std::endl;
-      WalletAccount data = wm.createNewAccount(name, pass);
-      std::cout << "Created key " << data.id << std::endl
-                << "  Name: " << data.name << std::endl
-                << "  Address: " << data.address << std::endl;
+      Account a = w.createAccount(name, pass);
+      std::cout << "Created key " << a.id << std::endl
+                << "  Name: " << a.name << std::endl
+                << "  Address: " << a.address << std::endl;
       std::cout << "This is your seed for this Account. Please write it down:" << std::endl;
-      for (std::string word : data.seed) { std::cout << word << " "; }
+      for (std::string word : a.seed) { std::cout << word << " "; }
       std::cout << "\nOnce you're done, hit ENTER to continue." << std::endl;
       std::string enterStr;
       std::getline(std::cin, enterStr);
       std::cout << "Reloading Wallet..." << std::endl;
-      wm.loadWallet(walletFile, secretsPath, pass);
+      w.load(walletFile, secretsPath, pass);
+      pass = "";
       std::cout << "Reloading Accounts..." << std::endl;
-      wm.loadWalletAccounts(false);
+      w.loadAccounts();
 
     // Import BIP39 seed
     } else if (menuOp == "7") {
@@ -234,7 +243,7 @@ int main() {
         int ct = 0;
         std::stringstream ss(seed);
         while (std::getline(ss, word, ' ')) {
-          if (!wm.wordExists(word)) {
+          if (!BIP39::wordExists(word)) {
             std::cout << "Invalid word: " << word << std::endl;
             seedIsValid = false; break;
           }
@@ -257,31 +266,11 @@ int main() {
         }
       }
 
-      // Get the derivation index
-      std::string index;
-      std::cout << "Please inform the derivation index you want to use, or leave blank for default (0)." << std::endl
-                << "We will display up to 10 derivations starting from yours." << std::endl;
-      std::getline(std::cin, index);
-      if (index == "") { index = "0"; }
-
-      // Generate and list the Accounts
+      // Generate the Account with the given seed
+      std::cout << "Generating Account..." << std::endl;
       bip3x::Bip39Mnemonic::MnemonicResult encodedMnemonic;
       encodedMnemonic.words = mnemonicPhrase;
-      bip3x::HDKey rootKey = wm.createBip32RootKey(encodedMnemonic);
-      std::cout << "Generating Accounts..." << std::endl;
-      std::vector<std::string> accountsList = wm.addressListBasedOnRootIndex(rootKey, boost::lexical_cast<int>(index));
-      for (auto v : accountsList) {
-        std::cout << v << std::endl;
-      }
-
-      // Get the Account that will be imported
-      index = "";
-      std::cout << "Please inform the index number of the Account you want to use." << std::endl;
-      std::cout << "Leave blank for the default (0)." << std::endl;
-      std::getline(std::cin, index);
-      if (index == "") { index = "0"; }
-      derivPath += index;
-      bip3x::HDKey bip32key = wm.createBip32Key(rootKey, derivPath);
+      bip3x::HDKey key = BIP39::createKey(encodedMnemonic, derivPath);
 
       // Add a name to it (or not) and authenticate
       std::string name, pass;
@@ -290,40 +279,42 @@ int main() {
       while (true) {
         std::cout << "Please authenticate with your Wallet's passphrase to confirm the action." << std::endl;
         std::getline(std::cin, pass);
-        if (wm.checkWalletPass(pass)) { pass = ""; break; }
+        if (w.auth(pass)) break;
         std::cout << "Wrong passphrase, please try again." << std::endl;
       }
 
       // Import the Account and reload the Wallet
       std::cout << "Importing Account..." << std::endl;
-      WalletAccount data = wm.importAccount(name, pass, bip32key);
-      std::cout << "Imported key " << data.id << std::endl
-                << "  Name: " << data.name << std::endl
-                << "  Address: " << data.address << std::endl;
+      Account a = w.importAccount(name, pass, key);
+      std::cout << "Imported key " << a.id << std::endl
+                << "  Name: " << a.name << std::endl
+                << "  Address: " << a.address << std::endl;
       std::cout << "Reloading Wallet..." << std::endl;
-      wm.loadWallet(walletFile, secretsPath, pass);
+      w.load(walletFile, secretsPath, pass);
+      pass = "";
       std::cout << "Reloading Accounts..." << std::endl;
-      wm.loadWalletAccounts(false);
+      w.loadAccounts();
 
     // Erase account
     } else if (menuOp == "8") {
-      std::string account = menuChooseAccountErase(wm);
+      std::string account = menuChooseAccountErase(w);
       if (menuConfirmAccountErase()) {
         std::string pass;
         while (true) {
           std::cout << "Please authenticate with your Wallet's passphrase to confirm the action." << std::endl;
           std::getline(std::cin, pass);
-          if (wm.checkWalletPass(pass)) { pass = ""; break; }
+          if (w.auth(pass)) break;
           std::cout << "Wrong passphrase, please try again." << std::endl;
         }
 
         std::cout << "Erasing Account..." << std::endl;
-        if (wm.eraseAccount(account)) {
+        if (w.eraseAccount(account)) {
           std::cout << "Account erased: " << account << std::endl;
           std::cout << "Reloading Wallet..." << std::endl;
-          wm.loadWallet(walletFile, secretsPath, pass);
+          w.load(walletFile, secretsPath, pass);
+          pass = "";
           std::cout << "Reloading Accounts..." << std::endl;
-          wm.loadWalletAccounts(false);
+          w.loadAccounts();
         } else {
           std::cout << "Failed to erase Account " << account << "; Account doesn't exist" << std::endl;
         }
@@ -336,21 +327,26 @@ int main() {
       std::string rawTxHex;
       std::cout << "Please input the raw transaction in Hex." << std::endl;
       std::getline(std::cin, rawTxHex);
-      WalletTxData txData = wm.decodeRawTransaction(rawTxHex);
-      std::cout << "Transaction: " << txData.hex << std::endl
-                << "Type: " << txData.type << std::endl
-                << "Code: " << txData.code << std::endl
-                << "To: " << txData.to << std::endl
-                << "From: " << txData.from << std::endl
-                << "Creates: " << txData.creates << std::endl
-                << "Value: " << txData.value << std::endl
-                << "Nonce: " << txData.nonce << std::endl
-                << "Gas: " << txData.gas << std::endl
-                << "Gas Price: " << txData.price << std::endl
-                << "Hash: " << txData.hash << std::endl
-                << "v: " << txData.v << std::endl
-                << "r: " << txData.r << std::endl
-                << "s: " << txData.s << std::endl;
+      TxData tx = Utils::decodeRawTransaction(rawTxHex);
+      std::cout << "Link: " << tx.txlink << std::endl
+                << "Operation: " << tx.operation << std::endl
+                << "Hex: " << tx.hex << std::endl
+                << "Type: " << tx.type << std::endl
+                << "Code: " << tx.code << std::endl
+                << "To: " << tx.to << std::endl
+                << "From: " << tx.from << std::endl
+                << "Data: " << tx.data << std::endl
+                << "Creates: " << tx.creates << std::endl
+                << "Value: " << tx.value << std::endl
+                << "Nonce: " << tx.nonce << std::endl
+                << "Gas: " << tx.gas << std::endl
+                << "Gas Price: " << tx.price << std::endl
+                << "Hash: " << tx.hash << std::endl
+                << "v: " << tx.v << std::endl
+                << "r: " << tx.r << std::endl
+                << "s: " << tx.s << std::endl
+                << "Date: " << tx.humanDate << " (UNIX timestamp: " << tx.unixDate << ")" << std::endl
+                << "Confirmed: " << tx.confirmed << std::endl;
 
     // Exit
     } else if (menuOp == "0") {

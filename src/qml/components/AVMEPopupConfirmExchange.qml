@@ -2,39 +2,38 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 /**
- * Popup for confirming a coin/token transaction. Has to be opened manually.
+ * Popup for confirming a coin/token exchange. Has to be opened manually.
  * Has the following items:
- * - "amount": the amount that will be sent
- * - "amountLabel" the coin/token label
- * - "sender": the Account that will send a transaction
- * - "receiver": the Account that will receive the transaction
+ * - "fromAmount/toAmount": the coin/token amounts that will be swapped
+ * - "fromLabel/toLabel": the coin/token labels
  * - "gasLimit": self-explanatory
  * - "gasPrice": self-explanatory
  * - "pass": the Wallet password input
  * - "confirmBtn.onClicked": what to do when confirming the action
- * - "setTxData(amount, label, from, to, gasLimit, gasPrice)": set tx data for display
+ * - "setTxData(fromAmount, toAmount, fromLabel, toLabel, gasLimit, gasPrice)":
+ *   set tx data for display
  * - "showErrorMsg()": self-explanatory
  * - "clean()": helper function to clean up inputs/data
  */
 
 Popup {
-  id: confirmTxPopup
-  property string amount
-  property string label
-  property string from
-  property string to
+  id: confirmExchangePopup
+  property string fromAmount
+  property string toAmount
+  property string fromLabel
+  property string toLabel
   property string gasLimit
   property string gasPrice
   property alias pass: passInput.text
   property alias confirmBtn: btnConfirm
 
-  function setTxData(amount, label, from, to, gasLimit, gasPrice) {
-    confirmTxPopup.amount = amount
-    confirmTxPopup.label = label
-    confirmTxPopup.from = from
-    confirmTxPopup.to = to
-    confirmTxPopup.gasLimit = gasLimit
-    confirmTxPopup.gasPrice = gasPrice
+  function setTxData(fromAmount, toAmount, fromLabel, toLabel, gasLimit, gasPrice) {
+    confirmExchangePopup.fromAmount = fromAmount
+    confirmExchangePopup.toAmount = toAmount
+    confirmExchangePopup.fromLabel = fromLabel
+    confirmExchangePopup.toLabel = toLabel
+    confirmExchangePopup.gasLimit = gasLimit
+    confirmExchangePopup.gasPrice = gasPrice
   }
 
   function showErrorMsg() {
@@ -42,7 +41,7 @@ Popup {
   }
 
   function clean() {
-    amount = label = from = to = gasLimit = gasPrice = passInput.text = ""
+    fromAmount = toAmount = fromLabel = toLabel = gasLimit = gasPrice = passInput.text = ""
   }
 
   width: window.width / 2
@@ -67,9 +66,8 @@ Popup {
         topMargin: parent.height / 8
       }
       horizontalAlignment: Text.AlignHCenter
-      text: "You will send <b>" + amount + " " + label
-      + "</b> from the address<br><b>" + from + "</b>"
-      + "<br>to the address<br><b>" + to + "</b>"
+      text: "You will exchange <b>" + fromAmount + " " + fromLabel + "</b>"
+      + "<br>Estimated return: <b>" + toAmount + " " + toLabel + "</b>"
       + "<br>Gas Limit: <b>" + gasLimit + " Wei</b>"
       + "<br>Gas Price: <b>" + gasPrice + " Gwei</b>"
     }
@@ -92,7 +90,7 @@ Popup {
     // Passphrase input
     AVMEInput {
       id: passInput
-      width: items.width / 4
+      width: parent.width / 2
       echoMode: TextInput.Password
       passwordCharacter: "*"
       label: "Passphrase"
@@ -118,8 +116,8 @@ Popup {
         id: btnCancel
         text: "Cancel"
         onClicked: {
-          confirmTxPopup.clean()
-          confirmTxPopup.close()
+          confirmExchangePopup.clean()
+          confirmExchangePopup.close()
         }
       }
       AVMEButton {
