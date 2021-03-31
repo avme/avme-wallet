@@ -130,9 +130,16 @@ add_custom_command(
 )
 
 # Compile the GUI executable
-add_executable(avme-gui
+if("${TOOLCHAIN_PREFIX}" STREQUAL "x86_64-w64-mingw32")
+  add_executable(avme-gui WIN32 
   src/main-gui.h src/main-gui.cpp build/moc_main-gui.cpp build/qml.cpp
-)
+  )
+else()
+  add_executable(avme-gui
+  src/main-gui.h src/main-gui.cpp build/moc_main-gui.cpp build/qml.cpp
+  )
+endif()
+
 target_link_libraries(avme-gui PUBLIC avme-lib ${QT_LIBS})
 
 # TODO: the install part (is this even necessary?)
