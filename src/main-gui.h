@@ -9,6 +9,7 @@
 #include <QtCore/qplugin.h>
 #include <QtGui/QClipboard>
 #include <QtGui/QFont>
+#include <QtGui/QIcon>
 #include <QtCore/QThread>
 #include <QtConcurrent/qtconcurrentrun.h>
 
