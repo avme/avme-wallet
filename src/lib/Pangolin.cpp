@@ -6,11 +6,11 @@ std::string Pangolin::routerContract = "0x2D99ABD9008Dc933ff5c0CD271B88309593aB9
 
 std::map<std::string, std::string> Pangolin::tokenContracts = {
   {"WAVAX", "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"},
-  {"AVME", "0x3b37F754afC9B3626b7d545dB73F4F4fb2D10890"},
+  {"AVME", "0x035fDB5060A79c2a5dd883E77e3F0e4cF5406D13"},
 };
 
 std::map<std::string, std::string> Pangolin::pairContracts = {
-  {"WAVAX-AVME", "0x27C287Bc2550e271aB763AE08Be54919B1BF88A1"},
+  {"WAVAX-AVME", "0x9b9365eB0715775F40ca49f9f05c0c637DD21F38"},
 };
 
 std::map<std::string, std::string> Pangolin::ERC20Funcs = {
@@ -26,8 +26,8 @@ std::map<std::string, std::string> Pangolin::pairFuncs = {
 std::map<std::string, std::string> Pangolin::routerFuncs = {
   {"addLiquidityAVAX", "0xf91b3f72"},  // addLiquidityAVAX(address,uint256,uint256,uint256,address,uint256)
   {"removeLiquidityAVAX", "0x33c6b725"},  // removeLiquidityAVAX(address,uint256,uint256,uint256,address,uint256)
-  {"swapExactAVAXForTokens", "0xee731187"},  // swapExactAVAXForTokens(uint256,address[] calldata,address,uint256)
-  {"swapExactTokensForAVAX", "0xb6da5f42"},  // swapExactTokensForAVAX(uint256,uint256,address[] calldata,address,uint256)
+  {"swapExactAVAXForTokens", "0xa2a1623d"},  // swapExactAVAXForTokens(uint256,address[],address,uint256)
+  {"swapExactTokensForAVAX", "0x676528d1"},  // swapExactTokensForAVAX(uint256,uint256,address[],address,uint256)
 };
 
 std::vector<std::string> Pangolin::parseHex(std::string hexStr, std::vector<std::string> types) {
@@ -59,10 +59,27 @@ std::vector<std::string> Pangolin::parseHex(std::string hexStr, std::vector<std:
   return ret;
 }
 
+std::string Pangolin::getFirstFromPair(std::string tokenNameA, std::string tokenNameB) {
+  if (tokenNameA == "AVAX") { tokenNameA = "WAVAX"; }
+  if (tokenNameB == "AVAX") { tokenNameB = "WAVAX"; }
+  std::string addressA = Pangolin::tokenContracts[tokenNameA];
+  std::string addressB = Pangolin::tokenContracts[tokenNameB];
+  u256 valueA = boost::lexical_cast<HexTo<u256>>(addressA);
+  u256 valueB = boost::lexical_cast<HexTo<u256>>(addressB);
+  return (valueA < valueB) ? tokenNameA : tokenNameB;
+}
+
 std::vector<std::string> Pangolin::getReserves(std::string tokenNameA, std::string tokenNameB) {
   std::string result;
   std::stringstream query;
-  std::string pairName = tokenNameA + "-" + tokenNameB;
+  std::string pairLR, pairRL, pairName;
+  if (tokenNameA == "AVAX") { tokenNameA = "WAVAX"; }
+  if (tokenNameB == "AVAX") { tokenNameB = "WAVAX"; }
+  if (pairContracts.find(tokenNameA + "-" + tokenNameB) != pairContracts.end()) {
+    pairName = tokenNameA + "-" + tokenNameB;
+  } else if (pairContracts.find(tokenNameB + "-" + tokenNameA) != pairContracts.end()) {
+    pairName = tokenNameB + "-" + tokenNameA;
+  }
 
   // Query and get the result, returning if empty
   query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
@@ -103,7 +120,7 @@ std::string Pangolin::approve(std::string spender) {
   return dataHex;
 }
 
-bool Pangolin::allowance(
+std::string Pangolin::allowance(
   std::string receiver, std::string owner, std::string spender
 ) {
   std::string result;
@@ -123,7 +140,8 @@ bool Pangolin::allowance(
 
   // Parse the result back into normal values
   u256 resultValue = boost::lexical_cast<u256>(Pangolin::parseHex(result, {"uint"})[0]);
-  return (resultValue > 0);
+  std::string resultStr = boost::lexical_cast<std::string>(resultValue);
+  return resultStr;
 }
 
 std::string Pangolin::transfer(std::string to, std::string value) {
@@ -144,32 +162,16 @@ std::string Pangolin::addLiquidityAVAX(
   return dataHex;
 }
 
-std::vector<std::string> Pangolin::removeLiquidityAVAX(
+std::string Pangolin::removeLiquidityAVAX(
   std::string tokenAddress, std::string liquidity,
   std::string amountTokenMin, std::string amountAVAXMin,
   std::string to, std::string deadline
 ) {
-  std::string result;
-  std::stringstream query;
-
-  // Query and get the result, returning if empty
-  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << Pangolin::routerContract
-        << "\",\"data\": \"" << Pangolin::routerFuncs["removeLiquidityAVAX"]
-                             << Utils::addressToHex(tokenAddress)
-                             << Utils::uintToHex(liquidity)
-                             << Utils::uintToHex(amountTokenMin)
-                             << Utils::uintToHex(amountAVAXMin)
-                             << Utils::addressToHex(to)
-                             << Utils::uintToHex(deadline)
-        << "\"},\"latest\"]}";
-  std::string str = Network::httpGetRequest(query.str());
-  result = JSON::getValue(str, "result").get_str();
-  if (result == "0x") { return {}; }
-  result = result.substr(2); // Remove the "0x"
-
-  // Parse the result back into normal values
-  return Pangolin::parseHex(result, {"uint", "uint"});
+  std::string dataHex = Pangolin::routerFuncs["removeLiquidityAVAX"]
+    + Utils::addressToHex(tokenAddress) + Utils::uintToHex(liquidity)
+    + Utils::uintToHex(amountTokenMin) + Utils::uintToHex(amountAVAXMin)
+    + Utils::addressToHex(to) + Utils::uintToHex(deadline);
+  return dataHex;
 }
 
 std::string Pangolin::swapExactAVAXForTokens(
@@ -177,42 +179,32 @@ std::string Pangolin::swapExactAVAXForTokens(
   std::string to, std::string deadline
 ) {
   std::string pathStr = "";
+  int pathCt = 0;
   for (std::string p : path) {
     pathStr += Utils::addressToHex(p);
+    pathCt++;
   }
   std::string dataHex = Pangolin::routerFuncs["swapExactAVAXForTokens"]
-    + Utils::uintToHex(amountOutMin) + pathStr
-    + Utils::addressToHex(to) + Utils::uintToHex(deadline);
+    + Utils::uintToHex(amountOutMin) + Utils::uintToHex("128")
+    + Utils::addressToHex(to) + Utils::uintToHex(deadline)
+    + Utils::uintToHex(boost::lexical_cast<std::string>(pathCt)) + pathStr;
   return dataHex;
 }
 
-std::vector<std::string> Pangolin::swapExactTokensForAVAX(
+std::string Pangolin::swapExactTokensForAVAX(
   std::string amountIn, std::string amountOutMin, std::vector<std::string> path,
   std::string to, std::string deadline
 ) {
-  std::string result;
-  std::stringstream query;
   std::string pathStr = "";
+  int pathCt = 0;
   for (std::string p : path) {
     pathStr += Utils::addressToHex(p);
+    pathCt++;
   }
-
-  // Query and get the result, returning if empty
-  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << Pangolin::routerContract
-        << "\",\"data\": \"" << Pangolin::routerFuncs["swapExactTokensForAVAX"]
-                             << Utils::uintToHex(amountIn)
-                             << Utils::uintToHex(amountOutMin)
-                             << pathStr
-                             << Utils::addressToHex(to)
-                             << Utils::uintToHex(deadline)
-        << "\"},\"latest\"]}";
-  std::string str = Network::httpGetRequest(query.str());
-  result = JSON::getValue(str, "result").get_str();
-  if (result == "0x") { return {}; }
-  result = result.substr(2); // Remove the "0x"
-
-  // Parse the result back into normal values
-  return Pangolin::parseHex(result, {"uint", "uint"});
+  std::string dataHex = Pangolin::routerFuncs["swapExactTokensForAVAX"]
+    + Utils::uintToHex(amountIn) + Utils::uintToHex(amountOutMin)
+    + Utils::uintToHex("160") + Utils::addressToHex(to) + Utils::uintToHex(deadline)
+    + Utils::uintToHex(boost::lexical_cast<std::string>(pathCt)) + pathStr;
+  return dataHex;
 }
 

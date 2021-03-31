@@ -166,6 +166,7 @@ TransactionSkeleton Wallet::buildTransaction(
 
   // Building the transaction structure
   txSkel.creation = false;
+  txSkel.from = toAddress(from);
   txSkel.to = toAddress(to);
   txSkel.value = u256(value);
   if (!dataHex.empty()) { txSkel.data = fromHex(dataHex); }
@@ -194,7 +195,7 @@ std::string Wallet::signTransaction(TransactionSkeleton txSkel, std::string pass
 }
 
 // TODO: change the hardcoded link when switching between mainnet and testnet
-std::string Wallet::sendTransaction(std::string txidHex) {
+std::string Wallet::sendTransaction(std::string txidHex, std::string operation) {
   // Send the transaction
   std::string txidApiRequest = Network::broadcastTx(txidHex);
   std::string txid = JSON::getValue(txidApiRequest, "result").get_str();
@@ -207,7 +208,7 @@ std::string Wallet::sendTransaction(std::string txidHex) {
    */
   TxData txData = Utils::decodeRawTransaction(txidHex);
   txData.txlink = txLink;
-  txData.operation = (txData.data.empty()) ? "Send AVAX" : "Send AVME"; // TODO: programatically get coin/token
+  txData.operation = operation;
   Account a = getAccountByAddress(txData.from);
   a.saveTxToHistory(txData);
   a.updateAllTxStatus();

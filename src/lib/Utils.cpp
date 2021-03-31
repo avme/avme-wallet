@@ -70,6 +70,7 @@ std::string Utils::weiToFixedPoint(std::string amount, size_t digits) {
     result.insert(pointToPlace, ".");
   }
 
+  if (result == "") result = "0";
   return result;
 }
 
@@ -112,6 +113,7 @@ std::string Utils::fixedPointToWei(std::string amount, int decimals) {
   while(valuestr[0] == '0')
     valuestr.erase(0,1);
 
+  if (valuestr == "") valuestr = "0";
   return valuestr;
 }
 

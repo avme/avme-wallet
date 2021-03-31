@@ -21,6 +21,8 @@
         <file>qml/components/AVMEPopupViewPrivKey.qml</file>
         <file>qml/components/AVMEPopupImportSeed.qml</file>
         <file>qml/components/AVMEPopupConfirmTx.qml</file>
+        <file>qml/components/AVMEPopupConfirmExchange.qml</file>
+        <file>qml/components/AVMEPopupApproveExchange.qml</file>
         <file>qml/components/AVMEWalletList.qml</file>
         <file>qml/components/AVMEAccountSeedList.qml</file>
         <file>qml/components/AVMETxHistoryList.qml</file>

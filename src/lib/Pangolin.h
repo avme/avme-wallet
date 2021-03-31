@@ -42,6 +42,12 @@ class Pangolin {
     static std::vector<std::string> parseHex(std::string hexStr, std::vector<std::string> types);
 
     /**
+     * (LOCAL) Calculate the first (lower) address from a given token pair.
+     * Returns the name of the token first (lower) token.
+     */
+    static std::string getFirstFromPair(std::string tokenNameA, std::string tokenNameB);
+
+    /**
      * (ABI) Get a coin/token pair's reserves, respectively.
      * Returns a vector with reserves A and B (in Wei), and the UNIX timestamp
      * of the last time the pair was interacted with.
@@ -63,9 +69,9 @@ class Pangolin {
 
     /**
      * (ABI) Check the allowance between owner and spender Accounts.
-     * Returns true if allowance is bigger than zero, false otherwise.
+     * Returns the amount in Wei allowed for spending.
      */
-    static bool allowance(std::string receiver, std::string owner, std::string spender);
+    static std::string allowance(std::string receiver, std::string owner, std::string spender);
 
     /**
      * (TX) Transfer a token amount directly to the given Account.
@@ -86,12 +92,12 @@ class Pangolin {
     );
 
     /**
-     * (ABI) Remove liquidity from an AVAX<->ERC20 pool.
+     * (TX) Remove liquidity from an AVAX<->ERC20 pool.
      * Amounts are always in Wei, deadline is a UNIX timestamp after which the
      * operation will be reverted.
-     * Returns a vector with the amounts of retrieved AVAX and tokens.
+     * Returns the data hex string.
      */
-    static std::vector<std::string> removeLiquidityAVAX(
+    static std::string removeLiquidityAVAX(
       std::string tokenAddress, std::string liquidity,
       std::string amountTokenMin, std::string amountAVAXMin,
       std::string to, std::string deadline
@@ -109,12 +115,12 @@ class Pangolin {
     );
 
     /**
-     * (ABI) Swap an exact ERC20 token amount for as many AVAX as possible.
+     * (TX) Swap an exact ERC20 token amount for as many AVAX as possible.
      * Amounts are always in Wei, deadline is a UNIX timestamp after which the
      * operation will be reverted.
-     * Returns a vector with the input token amount and all subsequent token outputs.
+     * Returns the data hex string.
      */
-    static std::vector<std::string> swapExactTokensForAVAX(
+    static std::string swapExactTokensForAVAX(
       std::string amountIn, std::string amountOutMin, std::vector<std::string> path,
       std::string to, std::string deadline
     );

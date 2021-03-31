@@ -92,14 +92,32 @@ Item {
       color: "black"
       horizontalAlignment: Text.AlignHCenter
       text: {
-        if (System.getTxTokenFlag()) {
-          text = "Sending <b>"
-          + System.getTxReceiverTokenAmount() + " " + System.getCurrentToken()
-          + "</b> to address<br><b>" + System.getTxReceiverAccount() + "</b>..."
-        } else {
-          text = "Sending <b>"
-          + System.getTxReceiverCoinAmount() + " " + System.getCurrentCoin()
-          + "</b> to address<br><b>" + System.getTxReceiverAccount() + "</b>..."
+        switch (System.getTxOperation()) {
+          case "Send AVAX":
+            text = "Sending <b>"
+            + System.getTxReceiverCoinAmount() + " " + System.getCurrentCoin()
+            + "</b> to address<br><b>" + System.getTxReceiverAccount() + "</b>...";
+            break;
+          case "Send AVME":
+            text = "Sending <b>"
+            + System.getTxReceiverTokenAmount() + " " + System.getCurrentToken()
+            + "</b> to address<br><b>" + System.getTxReceiverAccount() + "</b>...";
+            break;
+          case "Approve Exchange":
+            text = "Sending approval for exchange...";
+            break;
+          case "Swap AVAX -> AVME":
+            text = "Swapping <b>"
+            + System.getTxReceiverCoinAmount() + " " + System.getCurrentCoin()
+            + "</b><br>for <b>"
+            + System.getTxReceiverTokenAmount() + " " + System.getCurrentToken() + "</b>...";
+            break;
+          case "Swap AVME -> AVAX":
+            text = "Swapping <b>"
+            + System.getTxReceiverTokenAmount() + " " + System.getCurrentToken()
+            + "</b><br>for <b>"
+            + System.getTxReceiverCoinAmount() + " " + System.getCurrentCoin() + "</b>...";
+            break;
         }
       }
     }

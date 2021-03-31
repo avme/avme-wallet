@@ -24,7 +24,8 @@ std::string Network::getAVMEBalance(std::string address, std::string contractAdd
 
 // TODO: change this when more coins/tokens are added
 std::string Network::getAutomaticFee() {
-  return "470"; // AVAX fees are fixed
+  //return "470"; // AVAX fees are fixed
+  return "225"; // AVAX fees are fixed
 }
 
 std::string Network::getNonce(std::string address) {

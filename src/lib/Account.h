@@ -28,6 +28,7 @@
 
 #include "JSON.h"
 #include "Network.h"
+#include "Pangolin.h"
 #include "Utils.h"
 
 using namespace dev::eth; // TransactionBase
@@ -49,6 +50,9 @@ class Account {
     std::vector<TxData> history;
     std::atomic_bool balancesThreadFlag;
     std::mutex balancesThreadLock;
+    boost::thread balancesThread;
+    std::atomic_bool threadWasInterrupted;
+    std::atomic_bool interruptThread;
 
     // Constructors (empty, copy and initializer)
     Account(){}
@@ -82,10 +86,6 @@ class Account {
     // Convert the transaction history to a JSON array.
     json_spirit::mArray txDataToJSON();
 
-    // TODO: cleanup later
-    boost::thread balancesThread;
-    std::atomic_bool threadWasInterrupted;
-    std::atomic_bool interruptThread;
     /**
      * (Re)Load all transactions for the Account from a JSON file to the history.
      * All functions should call this one after they're done, so the

@@ -2,16 +2,16 @@
 
 void Account::reloadBalances(Account &a) {
   // Get the balances from the network
-  // TODO: change addresses to the real ones
+  // TODO: change LP addresses to the real ones
   std::string AVAXjson = Network::getAVAXBalance(a.address);
   std::string AVMEjson = Network::getAVMEBalance(
-    a.address, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"
+    a.address, Pangolin::tokenContracts["AVME"]
   );
   std::string FreeLPjson = Network::getAVMEBalance(
-    a.address, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"
+    a.address, Pangolin::tokenContracts["AVME"]
   );
   std::string LockedLPjson = Network::getAVMEBalance(
-    a.address, "0xA687A9cff994973314c6e2cb313F82D6d78Cd232"
+    a.address, Pangolin::tokenContracts["AVME"]
   );
 
   // Get the balances from the JSON objects, convert to u256, then to string
@@ -112,7 +112,6 @@ json_spirit::mArray Account::txDataToJSON() {
 void Account::loadTxHistory() {
   json_spirit::mValue txData, txArray;
   std::string address = this->address;
-  if (address.substr(0, 2) == "0x") { address.erase(0, 2); }  // Remove the "0x"
 
   txData = JSON::readFile(address.c_str());
   try {

@@ -185,7 +185,7 @@ std::string menuChooseAVMEAmount(std::string address) {
     ret = Utils::fixedPointToWei(ret, 18);
     if (ret == "") {
       std::cout << "Invalid amount, please check if your input is correct." << std::endl;
-    } else if (ret > Network::getAVMEBalance(address, "0xa687a9cff994973314c6e2cb313f82d6d78cd232")) {  // TODO: change address to the real one
+    } else if (ret > Network::getAVMEBalance(address, Pangolin::tokenContracts["AVME"])) {
       std::cout << "Insufficient funds, please try again." << std::endl;
     } else {
       break;

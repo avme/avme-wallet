@@ -9,6 +9,54 @@ import "qrc:/qml/components"
 Item {
   id: exchangeScreen
   property bool coinToToken: true
+  property string allowance
+  property string lowerToken
+  property string lowerReserves
+  property string higherToken
+  property string higherReserves
+
+  Connections {
+    target: System
+    onReservesUpdated: {
+      lowerToken = lowerName
+      lowerReserves = lowerAmount
+      higherToken = higherName
+      higherReserves = higherAmount
+    }
+  }
+
+  Timer {
+    id: reloadReservesTimer
+    interval: 5000
+    repeat: true
+    onTriggered: {
+      System.updateExchangeReserves(System.getCurrentCoin(), System.getCurrentToken())
+      calculateAmountOut()
+    }
+  }
+
+  function calculateAmountOut() {
+    var amountIn = (coinToToken) ? fromInput.text : toInput.text
+    var amountName = (coinToToken) ? System.getCurrentCoin() : System.getCurrentToken()
+    var amountOut = ""
+    if (amountName == lowerToken) {
+      amountOut = System.calculateExchangeAmount(amountIn, lowerReserves, higherReserves)
+    } else if (amountName == higherToken) {
+      amountOut = System.calculateExchangeAmount(amountIn, higherReserves, lowerReserves)
+    }
+    if (coinToToken) {
+      toInput.text = amountOut
+    } else {
+      fromInput.text = amountOut
+    }
+  }
+
+  Component.onCompleted: {
+    allowance = System.getExchangeAllowance()
+    System.updateExchangeReserves(System.getCurrentCoin(), System.getCurrentToken())
+    reloadReservesTimer.start()
+    console.log("Allowed: " + allowance)
+  }
 
   Text {
     id: info
@@ -67,6 +115,7 @@ Item {
         validator: RegExpValidator { regExp: System.createCoinRegExp() }
         label: "Amount"
         placeholder: "Fixed point amount (e.g. 0.5)"
+        onTextEdited: calculateAmountOut()
       }
 
       AVMEButton {
@@ -76,7 +125,10 @@ Item {
         anchors.margins: 20
         enabled: coinToToken
         text: "Max Amount"
-        onClicked: fromInput.text = System.getTxSenderCoinAmount() // TODO: check if gas price/limit have to be taken into consideration
+        onClicked: {
+          fromInput.text = System.getTxSenderCoinAmount()
+          calculateAmountOut()
+        }
       }
 
       AVMEButton {
@@ -86,7 +138,29 @@ Item {
         anchors.margins: 20
         enabled: (coinToToken && fromInput.text != "")
         text: "Exchange"
-        onClicked: {} // TODO
+        onClicked: {
+          System.setTxGasLimit("180000")
+          System.setTxGasPrice(System.getAutomaticFee())
+          var noCoinFunds = System.hasInsufficientCoinFunds(
+            System.getTxSenderCoinAmount(),
+            System.calculateTransactionCost(
+              fromInput.text, System.getTxGasLimit(), System.getTxGasPrice()
+            )
+          )
+          if (noCoinFunds) {
+            fundsPopup.open()
+          } else {
+            var fromLabel = System.getCurrentCoin()
+            var toLabel = System.getCurrentToken()
+            var toAmount = System.queryExchangeAmount(fromInput.text, fromLabel, toLabel)
+            confirmExchangePopup.setTxData(
+              fromInput.text, toAmount, fromLabel, toLabel,
+              System.getTxGasLimit(), System.getTxGasPrice()
+            )
+            System.setTxTokenFlag(false)
+            confirmExchangePopup.open()
+          }
+        }
       }
     }
   }
@@ -143,6 +217,7 @@ Item {
         validator: RegExpValidator { regExp: System.createTokenRegExp() }
         label: "Amount"
         placeholder: "Fixed point amount (e.g. 0.5)"
+        onTextEdited: calculateAmountOut()
       }
 
       AVMEButton {
@@ -152,7 +227,10 @@ Item {
         anchors.margins: 20
         enabled: !coinToToken
         text: "Max Amount"
-        onClicked: toInput.text = System.getTxSenderTokenAmount() // TODO: check if gas price/limit have to be taken into consideration
+        onClicked: {
+          toInput.text = System.getTxSenderTokenAmount()
+          calculateAmountOut()
+        }
       }
 
       AVMEButton {
@@ -162,7 +240,37 @@ Item {
         anchors.margins: 20
         enabled: (!coinToToken && toInput.text != "")
         text: "Exchange"
-        onClicked: {} // TODO
+        onClicked: {
+          System.setTxGasLimit("180000")
+          System.setTxGasPrice(System.getAutomaticFee())
+          if (System.isExchangeAllowed(toInput.text, allowance)) {
+            var noCoinFunds = System.hasInsufficientCoinFunds(
+              System.getTxSenderCoinAmount(),
+              System.calculateTransactionCost(
+                "0", System.getTxGasLimit(), System.getTxGasPrice()
+              )
+            )
+            var noTokenFunds = System.hasInsufficientTokenFunds(
+              System.getTxSenderTokenAmount(), toInput.text
+            )
+            if (noCoinFunds || noTokenFunds) {
+              fundsPopup.open()
+            } else {
+              var fromLabel = System.getCurrentToken()
+              var toLabel = System.getCurrentCoin()
+              var toAmount = System.queryExchangeAmount(toInput.text, fromLabel, toLabel)
+              confirmExchangePopup.setTxData(
+                toInput.text, toAmount, fromLabel, toLabel,
+                System.getTxGasLimit(), System.getTxGasPrice()
+              )
+              System.setTxTokenFlag(true)
+              confirmExchangePopup.open()
+            }
+          } else {
+            approveExchangePopup.setTxData(System.getTxGasLimit(), System.getTxGasPrice());
+            approveExchangePopup.open()
+          }
+        }
       }
     }
   }
@@ -179,8 +287,8 @@ Item {
     text: "Switch From/To"
     onClicked: {
       coinToToken = !coinToToken
-      if (!coinToToken) fromInput.text = ""
-      if (coinToToken) toInput.text = ""
+      fromInput.text = ""
+      toInput.text = ""
     }
   }
 
@@ -194,6 +302,43 @@ Item {
       margins: 20
     }
     text: "Back"
-    onClicked: System.setScreen(content, "qml/screens/StatsScreen.qml")
+    onClicked: {
+      reloadReservesTimer.stop()
+      System.setScreen(content, "qml/screens/StatsScreen.qml")
+    }
+  }
+
+  // Popup for confirming approval
+  AVMEPopupApproveExchange {
+    id: approveExchangePopup
+    confirmBtn.onClicked: {
+      System.setTxOperation("Approve Exchange")
+      System.setScreen(content, "qml/screens/ProgressScreen.qml")
+      System.txStart(pass)
+    }
+  }
+
+  // Popup for confirming the exchange operation
+  AVMEPopupConfirmExchange {
+    id: confirmExchangePopup
+    confirmBtn.onClicked: {
+      System.setTxReceiverCoinAmount(fromInput.text)
+      System.setTxReceiverTokenAmount(toInput.text)
+      if (System.getTxTokenFlag()) {
+        System.setTxOperation("Swap AVME -> AVAX")
+      } else {
+        System.setTxOperation("Swap AVAX -> AVME")
+      }
+      confirmExchangePopup.close()
+      System.setScreen(content, "qml/screens/ProgressScreen.qml")
+      System.txStart(pass)
+    }
+  }
+
+  // Popup for warning about insufficient funds
+  AVMEPopupInfo {
+    id: fundsPopup
+    icon: "qrc:/img/warn.png"
+    info: "Insufficient funds. Please check your transaction values."
   }
 }

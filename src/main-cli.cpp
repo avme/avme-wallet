@@ -121,7 +121,7 @@ int main() {
     // Send AVAX/AVME transactions
     } else if (menuOp == "4" || menuOp == "5") {
       TransactionSkeleton txSkel;
-      std::string from, to, value, gasLimit, gasPrice, signedTx, txLink, feeOp;
+      std::string from, to, value, gasLimit, gasPrice, signedTx, txLink, operation, feeOp;
 
       from = menuChooseSenderAddress(w);
       to = menuChooseReceiverAddress();
@@ -172,7 +172,12 @@ int main() {
       std::cout << "Transaction signed: " << signedTx << std::endl;
 
       std::cout << "Broadcasting transaction..." << std::endl;
-      txLink = w.sendTransaction(signedTx);
+      if (menuOp == "4") {  // AVAX
+        operation = "Send AVAX";
+      } else if (menuOp == "5") { // AVME
+        operation = "Send AVME";
+      }
+      txLink = w.sendTransaction(signedTx, operation);
       if (txLink == "") {
         std::cout << "Transaction failed. Please try again." << std::endl;
         continue;
@@ -184,7 +189,7 @@ int main() {
                   << "Trying again with a higher nonce..." << std::endl;
         txSkel.nonce++;
         signedTx = w.signTransaction(txSkel, pass);
-        txLink = w.sendTransaction(signedTx);
+        txLink = w.sendTransaction(signedTx, operation);
       }
       std::cout << "Transaction sent! Link: " << txLink << std::endl;
       pass = "";
@@ -262,7 +267,6 @@ int main() {
       }
 
       // Generate the Account with the given seed
-      // TODO: this part might change because we're not using an address list anymore
       std::cout << "Generating Account..." << std::endl;
       bip3x::Bip39Mnemonic::MnemonicResult encodedMnemonic;
       encodedMnemonic.words = mnemonicPhrase;

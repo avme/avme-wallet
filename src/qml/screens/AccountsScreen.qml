@@ -36,7 +36,7 @@ Item {
     }
     if (System.getCurrentToken() == "") {
       System.setCurrentToken("AVME")
-      System.setCurrentTokenDecimals(18)  // TODO: check if this is correct
+      System.setCurrentTokenDecimals(18)
     }
     if (System.getFirstLoad()) {
       System.setFirstLoad(false)

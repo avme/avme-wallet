@@ -25,6 +25,7 @@ Item {
     listReloadTimer.start()
   }
 
+  // Helpers for managing screen data
   function reloadTransactions() {
     historyModel.clear()
     var txList = System.listAccountTransactions(System.getTxSenderAccount())
@@ -41,6 +42,17 @@ Item {
     balanceTokenText.text = (obj.balanceAVME) ? obj.balanceAVME : "Loading..."
     balanceLPFreeText.text = (obj.balanceLPFree) ? obj.balanceLPFree : "Loading..."
     balanceLPLockedText.text = (obj.balanceLPLocked) ? obj.balanceLPLocked : "Loading..."
+    if (obj.balanceAVAX && obj.balanceAVME && obj.balanceLPFree && obj.balanceLPLocked) {
+      btnSendCoinTx.enabled = true
+      btnSendTokenTx.enabled = true
+      btnExchange.enabled = true
+      btnStaking.enabled = true
+    } else {
+      btnSendCoinTx.enabled = false
+      btnSendTokenTx.enabled = false
+      btnExchange.enabled = false
+      btnStaking.enabled = false
+    }
   }
 
   // Background icon
@@ -284,6 +296,8 @@ Item {
       text: "Exchange"
       onClicked: {
         listReloadTimer.stop()
+        System.setTxSenderCoinAmount(balanceCoinText.text)
+        System.setTxSenderTokenAmount(balanceTokenText.text)
         System.setScreen(content, "qml/screens/ExchangeScreen.qml")
       }
     }
