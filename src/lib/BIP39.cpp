@@ -4,8 +4,8 @@ bip3x::Bip39Mnemonic::MnemonicResult BIP39::createNewMnemonic() {
   return bip3x::Bip39Mnemonic::generate();
 }
 
-bip3x::HDKey BIP39::createKey(bip3x::Bip39Mnemonic::MnemonicResult phrase, std::string derivPath) {
-  bip3x::bytes_64 seed = bip3x::HDKeyEncoder::makeBip39Seed(phrase.words);
+bip3x::HDKey BIP39::createKey(std::string phrase, std::string derivPath) {
+  bip3x::bytes_64 seed = bip3x::HDKeyEncoder::makeBip39Seed(phrase);
   bip3x::HDKey rootKey = bip3x::HDKeyEncoder::makeBip32RootKey(seed);
   bip3x::HDKeyEncoder::makeExtendedKey(rootKey, derivPath);
   return rootKey;

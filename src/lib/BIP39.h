@@ -30,7 +30,7 @@ namespace BIP39 {
    * and a derivation path (e.g. "m/44'/60'/0'/0" for Ethereum).
    * Returns the key pair for the Account.
    */
-  bip3x::HDKey createKey(bip3x::Bip39Mnemonic::MnemonicResult phrase, std::string derivPath);
+  bip3x::HDKey createKey(std::string phrase, std::string derivPath);
 
   /**
    * Check if a word exists in the English BIP39 wordlist.
