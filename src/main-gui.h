@@ -340,7 +340,7 @@ class System : public QObject {
         bip3x::Bip39Mnemonic::MnemonicResult encodedMnemonic;
         encodedMnemonic.words = mnemonicPhrase;
         derivPath += QString::number(index).toStdString();
-        bip3x::HDKey key = BIP39::createKey(encodedMnemonic, derivPath);
+        bip3x::HDKey key = BIP39::createKey(encodedMnemonic.raw, derivPath);
         Account a = w.importAccount(name.toStdString(), pass.toStdString(), key);
         emit accountImported(!a.id.empty());
       });

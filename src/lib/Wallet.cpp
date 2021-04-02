@@ -49,7 +49,7 @@ bool Wallet::auth(std::string pass) {
 
 Account Wallet::createAccount(std::string name, std::string pass) {
   bip3x::Bip39Mnemonic::MnemonicResult seed = BIP39::createNewMnemonic();
-  bip3x::HDKey keyPair = BIP39::createKey(seed, "m/44'/60'/0'/0/0");
+  bip3x::HDKey keyPair = BIP39::createKey(seed.raw, "m/44'/60'/0'/0/0");
   KeyPair k(Secret::frombip3x(keyPair.privateKey));
   h128 u = this->km.import(k.secret(), name, pass, "");
   return Account(toUUID(u), name, k.address().hex(), seed.words);
