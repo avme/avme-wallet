@@ -3,14 +3,15 @@
 // TODO: change all addresses to mainnet once deployed
 
 std::string Pangolin::routerContract = "0x2D99ABD9008Dc933ff5c0CD271B88309593aB921";
+std::string Pangolin::stakingContract = "0xF051b6ADa0bF873a52eDBDC92c1245fdC4D3C8f8";
 
 std::map<std::string, std::string> Pangolin::tokenContracts = {
   {"WAVAX", "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"},
-  {"AVME", "0x035fDB5060A79c2a5dd883E77e3F0e4cF5406D13"},
+  {"AVME", "0x522AAA2408dC68142428983BD66e6BAe5406eF65"},
 };
 
 std::map<std::string, std::string> Pangolin::pairContracts = {
-  {"WAVAX-AVME", "0x9b9365eB0715775F40ca49f9f05c0c637DD21F38"},
+  {"WAVAX-AVME", "0x5e81035fd278c5491AADC786BaBD0464d4707b10"},
 };
 
 std::map<std::string, std::string> Pangolin::ERC20Funcs = {
@@ -20,6 +21,7 @@ std::map<std::string, std::string> Pangolin::ERC20Funcs = {
 };
 
 std::map<std::string, std::string> Pangolin::pairFuncs = {
+  {"totalSupply", "0x18160ddd"}, // totalSupply()
   {"getReserves", "0x0902f1ac"},  // getReserves()
 };
 
@@ -67,6 +69,32 @@ std::string Pangolin::getFirstFromPair(std::string tokenNameA, std::string token
   u256 valueA = boost::lexical_cast<HexTo<u256>>(addressA);
   u256 valueB = boost::lexical_cast<HexTo<u256>>(addressB);
   return (valueA < valueB) ? tokenNameA : tokenNameB;
+}
+
+std::string Pangolin::totalSupply(std::string tokenNameA, std::string tokenNameB) {
+  std::string result;
+  std::stringstream query;
+  std::string pairLR, pairRL, pairName;
+  if (tokenNameA == "AVAX") { tokenNameA = "WAVAX"; }
+  if (tokenNameB == "AVAX") { tokenNameB = "WAVAX"; }
+  if (pairContracts.find(tokenNameA + "-" + tokenNameB) != pairContracts.end()) {
+    pairName = tokenNameA + "-" + tokenNameB;
+  } else if (pairContracts.find(tokenNameB + "-" + tokenNameA) != pairContracts.end()) {
+    pairName = tokenNameB + "-" + tokenNameA;
+  }
+
+  // Query and get the result, returning if empty
+  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
+        << "[{\"to\": \"" << pairContracts[pairName]
+        << "\",\"data\": \"" << pairFuncs["totalSupply"]
+        << "\"},\"latest\"]}";
+  std::string str = Network::httpGetRequest(query.str());
+  result = JSON::getValue(str, "result").get_str();
+  if (result == "0x") { return {}; }
+  result = result.substr(2); // Remove the "0x"
+
+  // Parse the result back into normal values
+  return parseHex(result, {"uint"})[0];
 }
 
 std::vector<std::string> Pangolin::getReserves(std::string tokenNameA, std::string tokenNameB) {

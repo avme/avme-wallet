@@ -10,6 +10,7 @@ Item {
   id: exchangeScreen
   property bool coinToToken: true
   property string allowance
+  property string liquidity
   property string lowerToken
   property string lowerReserves
   property string higherToken
@@ -17,26 +18,27 @@ Item {
 
   Connections {
     target: System
-    onReservesUpdated: {
-      lowerToken = lowerName
-      lowerReserves = lowerAmount
-      higherToken = higherName
-      higherReserves = higherAmount
+    onExchangeDataUpdated: {
+      lowerToken = lowerTokenName
+      lowerReserves = lowerTokenReserves
+      higherToken = higherTokenName
+      higherReserves = higherTokenReserves
+      liquidity = totalPoolLiquidity
     }
   }
 
   Timer {
-    id: reloadReservesTimer
+    id: reloadExchangeDataTimer
     interval: 5000
     repeat: true
     onTriggered: {
-      System.updateExchangeReserves(System.getCurrentCoin(), System.getCurrentToken())
-      calculateAmountOut()
+      System.updateExchangeData(System.getCurrentCoin(), System.getCurrentToken())
+      calculateExchangeAmountOut()
     }
   }
 
-  function calculateAmountOut() {
-    var amountIn = (coinToToken) ? fromInput.text : toInput.text
+  function calculateExchangeAmountOut() {
+    var amountIn = swapInput.text
     var amountName = (coinToToken) ? System.getCurrentCoin() : System.getCurrentToken()
     var amountOut = ""
     if (amountName == lowerToken) {
@@ -44,18 +46,14 @@ Item {
     } else if (amountName == higherToken) {
       amountOut = System.calculateExchangeAmount(amountIn, higherReserves, lowerReserves)
     }
-    if (coinToToken) {
-      toInput.text = amountOut
-    } else {
-      fromInput.text = amountOut
-    }
+    swapEstimateInput.text = amountOut
   }
 
   Component.onCompleted: {
     allowance = System.getExchangeAllowance()
-    System.updateExchangeReserves(System.getCurrentCoin(), System.getCurrentToken())
-    reloadReservesTimer.start()
-    console.log("Allowed: " + allowance)
+    System.updateExchangeData(System.getCurrentCoin(), System.getCurrentToken())
+    calculateExchangeAmountOut()
+    reloadExchangeDataTimer.start()
   }
 
   Text {
@@ -66,78 +64,211 @@ Item {
       margins: 20
     }
     horizontalAlignment: Text.AlignHCenter
-    text: "Exchange currencies in the Account<br><b>" + System.getTxSenderAccount() + "</b>"
+    text: "Exchange operations for the Account<br><b>" + System.getTxSenderAccount() + "</b>"
     font.pointSize: 18.0
   }
 
   Rectangle {
-    id: fromRect
-    width: parent.width * 0.3
+    id: walletBalancesRect
+    width: parent.width * 0.45
+    height: parent.height * 0.1
+    anchors {
+      top: info.bottom
+      left: parent.left
+      margins: 20
+    }
+    radius: 5
+    color: "#44F66986"
+
+    Column {
+      id: walletBalancesColumn
+      anchors.centerIn: parent
+      anchors.margins: 10
+
+      Text {
+        id: walletCoinBalance
+        horizontalAlignment: Text.AlignHCenter
+        text: "Total " + System.getCurrentCoin() + " in wallet: <b>"
+        + System.getTxSenderCoinAmount() + "</b>"
+      }
+      Text {
+        id: walletTokenBalance
+        horizontalAlignment: Text.AlignHCenter
+        text: "Total " + System.getCurrentToken() + " in wallet: <b>"
+        + System.getTxSenderTokenAmount() + "</b>"
+      }
+      Text {
+        id: walletLPBalance
+        horizontalAlignment: Text.AlignHCenter
+        text: "Total LP in wallet: <b>"
+        + System.getTxSenderLPFreeAmount() + "</b>"
+      }
+    }
+  }
+
+  Rectangle {
+    id: poolBalancesRect
+    width: parent.width * 0.45
+    height: parent.height * 0.1
+    anchors {
+      top: info.bottom
+      right: parent.right
+      margins: 20
+    }
+    radius: 5
+    color: "#44F66986"
+
+    Column {
+      id: poolBalancesColumn
+      anchors.centerIn: parent
+      anchors.margins: 10
+
+      Text {
+        id: poolCoinBalance
+        horizontalAlignment: Text.AlignHCenter
+        text: "Total " + System.getCurrentCoin() + " in pool: <b>"
+        + System.weiToFixedPoint(
+          ((System.getCurrentCoin() == lowerToken) ? lowerReserves : higherReserves),
+          System.getCurrentCoinDecimals()
+        )
+      }
+
+      Text {
+        id: poolTokenBalance
+        horizontalAlignment: Text.AlignHCenter
+        text: "Total " + System.getCurrentToken() + " in pool: <b>"
+        + System.weiToFixedPoint(
+          ((System.getCurrentToken() == lowerToken) ? lowerReserves : higherReserves),
+          System.getCurrentTokenDecimals()
+        )
+      }
+
+      Text {
+        id: poolLiquidityBalance
+        horizontalAlignment: Text.AlignHCenter
+        text: "Total LP in pool: <b>" + System.weiToFixedPoint(liquidity, 18)
+      }
+    }
+  }
+
+  Rectangle {
+    id: swapRect
+    width: parent.width * 0.45
     height: parent.height * 0.6
     anchors {
-      verticalCenter: parent.verticalCenter
-      horizontalCenter: parent.horizontalCenter
-      horizontalCenterOffset: -(width / 1.5)
+      top: walletBalancesRect.bottom
+      left: parent.left
       margins: 20
     }
     color: "#44F66986"
     radius: 5
 
     Column {
-      id: fromItems
+      id: swapItems
       anchors.fill: parent
-      spacing: 20
+      spacing: 30
       anchors.topMargin: 20
 
-      Image {
-        id: fromLogo
-        width: 128
-        height: 128
+      Text {
+        id: swapTitle
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.margins: 20
-        source: "qrc:/img/avax_logo.png"
+        font.pointSize: 14.0
+        text: "Swap"
       }
 
-      Text {
-        id: fromTotalAmount
-        height: 60
+      Row {
+        id: swapLogos
+        height: 64
         anchors.horizontalCenter: parent.horizontalCenter
-        horizontalAlignment: Text.AlignHCenter
-        text: "Total " + System.getCurrentCoin() + ":<br><b>" + System.getTxSenderCoinAmount() + "</b>"
+        anchors.margins: 20
+
+        Image {
+          id: fromLogo
+          width: 64
+          height: 64
+          anchors.margins: 20
+          source: (coinToToken) ? "qrc:/img/avax_logo.png" : "qrc:/img/avme_logo.png"
+        }
+
+        Text {
+          id: swapOrder
+          font.pointSize: 42.0
+          text: " -> "
+        }
+
+        Image {
+          id: toLogo
+          width: 64
+          height: 64
+          anchors.margins: 20
+          source: (!coinToToken) ? "qrc:/img/avax_logo.png" : "qrc:/img/avme_logo.png"
+        }
       }
 
       AVMEInput {
-        id: fromInput
-        width: parent.width * 0.8
+        id: swapInput
+        width: parent.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.margins: 20
-        enabled: coinToToken
-        validator: RegExpValidator { regExp: System.createCoinRegExp() }
-        label: "Amount"
+        validator: RegExpValidator {
+          regExp: (coinToToken) ? System.createCoinRegExp() : System.createTokenRegExp()
+        }
+        label: (coinToToken)
+        ? "Amount of " + System.getCurrentCoin() + " to swap"
+        : "Amount of " + System.getCurrentToken() + " to swap"
         placeholder: "Fixed point amount (e.g. 0.5)"
-        onTextEdited: calculateAmountOut()
+        onTextEdited: calculateExchangeAmountOut()
       }
 
-      AVMEButton {
-        id: fromAllBtn
-        width: parent.width * 0.8
+      AVMEInput {
+        id: swapEstimateInput
+        width: parent.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.margins: 20
-        enabled: coinToToken
-        text: "Max Amount"
-        onClicked: {
-          fromInput.text = System.getTxSenderCoinAmount()
-          calculateAmountOut()
+        readOnly: true
+        validator: RegExpValidator {
+          regExp: (!coinToToken) ? System.createCoinRegExp() : System.createTokenRegExp()
+        }
+        label: (!coinToToken)
+        ? "Estimated return in " + System.getCurrentCoin()
+        : "Estimated return in " + System.getCurrentToken()
+      }
+
+      Row {
+        id: swapBtnRow
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: 20
+
+        AVMEButton {
+          id: swapSwitchBtn
+          width: swapRect.width * 0.4
+          text: "Switch Order"
+          onClicked: {
+            coinToToken = !coinToToken
+            swapInput.text = ""
+            swapEstimateInput.text = ""
+            calculateExchangeAmountOut()
+          }
+        }
+
+        AVMEButton {
+          id: swapAllBtn
+          width: swapRect.width * 0.4
+          text: "Max Amount"
+          onClicked: {
+            swapInput.text = (coinToToken)  // TODO: include fees in calculation
+              ? System.getTxSenderCoinAmount() : System.getTxSenderTokenAmount()
+            calculateExchangeAmountOut()
+          }
         }
       }
 
       AVMEButton {
-        id: fromExchangeBtn
-        width: parent.width * 0.8
+        id: swapBtn
+        width: swapRect.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.margins: 20
-        enabled: (coinToToken && fromInput.text != "")
-        text: "Exchange"
+        enabled: (swapInput.text != "")
+        text: "Make Swap"
         onClicked: {
           System.setTxGasLimit("180000")
           System.setTxGasPrice(System.getAutomaticFee())
@@ -165,130 +296,105 @@ Item {
     }
   }
 
-  Text {
-    id: switchText
-    anchors.centerIn: parent
-    font.pointSize: 60.0
-    text: (coinToToken) ? ">" : "<"
-  }
-
   Rectangle {
-    id: toRect
-    width: parent.width * 0.3
+    id: liquidityRect
+    width: parent.width * 0.45
     height: parent.height * 0.6
     anchors {
-      verticalCenter: parent.verticalCenter
-      horizontalCenter: parent.horizontalCenter
-      horizontalCenterOffset: width / 1.5
+      top: poolBalancesRect.bottom
+      right: parent.right
       margins: 20
     }
     color: "#44F66986"
     radius: 5
 
     Column {
-      id: toItems
+      id: liquidityItems
       anchors.fill: parent
-      spacing: 20
+      spacing: 30
       anchors.topMargin: 20
 
-      Image {
-        id: toLogo
-        width: 128
-        height: 128
+      Text {
+        id: liquidityTitle
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.margins: 20
-        source: "qrc:/img/avme_logo.png"
+        font.pointSize: 14.0
+        text: "Liquidity"
       }
 
-      Text {
-        id: toTotalAmount
-        height: 60
+      Image {
+        id: liquidityLogo
+        width: 64
+        height: 64
         anchors.horizontalCenter: parent.horizontalCenter
-        horizontalAlignment: Text.AlignHCenter
-        text: "Total " + System.getCurrentToken() + ":<br><b>" + System.getTxSenderTokenAmount() + "</b>"
+        anchors.margins: 20
+        source: "qrc:/img/pangolin.png"
       }
 
       AVMEInput {
-        id: toInput
-        width: parent.width * 0.8
+        id: liquidityCoinInput
+        width: parent.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.margins: 20
-        enabled: !coinToToken
-        validator: RegExpValidator { regExp: System.createTokenRegExp() }
-        label: "Amount"
+        validator: RegExpValidator { regExp: System.createCoinRegExp() }
+        label: "Amount of " + System.getCurrentCoin()
         placeholder: "Fixed point amount (e.g. 0.5)"
-        onTextEdited: calculateAmountOut()
       }
 
-      AVMEButton {
-        id: toAllBtn
-        width: parent.width * 0.8
+      AVMEInput {
+        id: liquidityTokenInput
+        width: parent.width * 0.9
+        anchors.horizontalCenter: parent.horizontalCenter
+        validator: RegExpValidator { regExp: System.createTokenRegExp() }
+        label: "Amount of " + System.getCurrentToken()
+        placeholder: "Fixed point amount (e.g. 0.5)"
+      }
+
+      Row {
+        id: liquidityAmountBtnRow
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.margins: 20
-        enabled: !coinToToken
-        text: "Max Amount"
-        onClicked: {
-          toInput.text = System.getTxSenderTokenAmount()
-          calculateAmountOut()
+        spacing: 20
+
+        AVMEButton {
+          id: liquidityMaxCoinBtn
+          width: liquidityRect.width * 0.4
+          text: "Max " + System.getCurrentCoin() + " Amount"
+          onClicked: {
+            liquidityCoinInput.text = System.getTxSenderCoinAmount()  // TODO: include fees in calculation
+          }
         }
-      }
 
-      AVMEButton {
-        id: toExchangeBtn
-        width: parent.width * 0.8
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.margins: 20
-        enabled: (!coinToToken && toInput.text != "")
-        text: "Exchange"
-        onClicked: {
-          System.setTxGasLimit("180000")
-          System.setTxGasPrice(System.getAutomaticFee())
-          if (System.isExchangeAllowed(toInput.text, allowance)) {
-            var noCoinFunds = System.hasInsufficientCoinFunds(
-              System.getTxSenderCoinAmount(),
-              System.calculateTransactionCost(
-                "0", System.getTxGasLimit(), System.getTxGasPrice()
-              )
-            )
-            var noTokenFunds = System.hasInsufficientTokenFunds(
-              System.getTxSenderTokenAmount(), toInput.text
-            )
-            if (noCoinFunds || noTokenFunds) {
-              fundsPopup.open()
-            } else {
-              var fromLabel = System.getCurrentToken()
-              var toLabel = System.getCurrentCoin()
-              var toAmount = System.queryExchangeAmount(toInput.text, fromLabel, toLabel)
-              confirmExchangePopup.setTxData(
-                toInput.text, toAmount, fromLabel, toLabel,
-                System.getTxGasLimit(), System.getTxGasPrice()
-              )
-              System.setTxTokenFlag(true)
-              confirmExchangePopup.open()
-            }
-          } else {
-            approveExchangePopup.setTxData(System.getTxGasLimit(), System.getTxGasPrice());
-            approveExchangePopup.open()
+        AVMEButton {
+          id: liquidityMaxTokenBtn
+          width: liquidityRect.width * 0.4
+          text: "Max " + System.getCurrentToken() + " Amount"
+          onClicked: {
+            liquidityTokenInput.text = System.getTxSenderTokenAmount()
           }
         }
       }
-    }
-  }
 
-  AVMEButton {
-    id: btnSwitch
-    width: parent.width / 6
-    anchors {
-      bottom: parent.bottom
-      horizontalCenter: parent.horizontalCenter
-      horizontalCenterOffset: -(width / 1.5)
-      margins: 20
-    }
-    text: "Switch From/To"
-    onClicked: {
-      coinToToken = !coinToToken
-      fromInput.text = ""
-      toInput.text = ""
+      Row {
+        id: liquidityBtnRow
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.margins: 20
+        spacing: 20
+
+        AVMEButton {
+          id: liquidityAddBtn
+          width: liquidityRect.width * 0.4
+          enabled: (liquidityCoinInput.text != "" && liquidityTokenInput.text != "")
+          text: "Add to Pool"
+          onClicked: {} // TODO
+        }
+
+        AVMEButton {
+          id: liquidityRemoveBtn
+          width: liquidityRect.width * 0.4
+          enabled: (liquidityCoinInput.text != "" && liquidityTokenInput.text != "")
+          text: "Remove from Pool"
+          onClicked: {} // TODO
+        }
+      }
     }
   }
 
@@ -298,12 +404,11 @@ Item {
     anchors {
       bottom: parent.bottom
       horizontalCenter: parent.horizontalCenter
-      horizontalCenterOffset: width / 1.5
       margins: 20
     }
     text: "Back"
     onClicked: {
-      reloadReservesTimer.stop()
+      reloadExchangeDataTimer.stop()
       System.setScreen(content, "qml/screens/StatsScreen.qml")
     }
   }

@@ -24,8 +24,10 @@
  */
 class Pangolin {
   public:
-    // Pangolin's router contract. See https://github.com/pangolindex/exchange-contracts
+    // Pangolin's router and staking contracts.
+    // See https://github.com/pangolindex/exchange-contracts
     static std::string routerContract;
+    static std::string stakingContract;
 
     // Arrays for the supported token/pair contracts and IDs for ABI functions.
     static std::map<std::string, std::string> tokenContracts;
@@ -46,6 +48,12 @@ class Pangolin {
      * Returns the name of the token first (lower) token.
      */
     static std::string getFirstFromPair(std::string tokenNameA, std::string tokenNameB);
+
+    /**
+     * (ABI) Get the total supply of liquidity tokens in a coin/token pair.
+     * Returns the total supply in Wei.
+     */
+    static std::string totalSupply(std::string tokenNameA, std::string tokenNameB);
 
     /**
      * (ABI) Get a coin/token pair's reserves, respectively.

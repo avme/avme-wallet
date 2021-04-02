@@ -43,8 +43,10 @@ class System : public QObject {
     void txSigned(bool b);
     void txSent(bool b, QString linkUrl);
     void txRetry();
-    void reservesUpdated(
-      QString lowerName, QString lowerAmount, QString higherName, QString higherAmount
+    void exchangeDataUpdated(
+      QString lowerTokenName, QString lowerTokenReserves,
+      QString higherTokenName, QString higherTokenReserves,
+      QString totalPoolLiquidity
     );
 
   private:
@@ -362,6 +364,19 @@ class System : public QObject {
       return rx;
     }
 
+    // Convert fixed point to Wei and vice-versa
+    Q_INVOKABLE QString fixedPointToWei(QString amount, int decimals) {
+      return QString::fromStdString(
+        Utils::fixedPointToWei(amount.toStdString(), decimals)
+      );
+    }
+
+    Q_INVOKABLE QString weiToFixedPoint(QString amount, int digits) {
+      return QString::fromStdString(
+        Utils::weiToFixedPoint(amount.toStdString(), digits)
+      );
+    }
+
     /**
      * Calculate the total cost of a transaction.
      * Calculation is done with values converted to Wei, while the result
@@ -523,8 +538,8 @@ class System : public QObject {
       return ((allowedU256 > 0) && (allowedU256 >= amountU256));
     }
 
-    // Update reserves for the exchange screen
-    Q_INVOKABLE void updateExchangeReserves(QString tokenNameA, QString tokenNameB) {
+    // Update reserves and liquidity supply for the exchange screen
+    Q_INVOKABLE void updateExchangeData(QString tokenNameA, QString tokenNameB) {
       QtConcurrent::run([=](){
         QVariantMap ret;
         std::string strA = tokenNameA.toStdString();
@@ -533,16 +548,19 @@ class System : public QObject {
         if (strB == "AVAX") { strB = "WAVAX"; }
 
         std::vector<std::string> reserves = Pangolin::getReserves(strA, strB);
+        std::string liquidity = Pangolin::totalSupply(strA, strB);
         std::string first = Pangolin::getFirstFromPair(strA, strB);
         if (strA == first) {
-          emit reservesUpdated(
+          emit exchangeDataUpdated(
             tokenNameA, QString::fromStdString(reserves[0]),
-            tokenNameB, QString::fromStdString(reserves[1])
+            tokenNameB, QString::fromStdString(reserves[1]),
+            QString::fromStdString(liquidity)
           );
         } else if (strB == first) {
-          emit reservesUpdated(
+          emit exchangeDataUpdated(
             tokenNameA, QString::fromStdString(reserves[1]),
-            tokenNameB, QString::fromStdString(reserves[0])
+            tokenNameB, QString::fromStdString(reserves[0]),
+            QString::fromStdString(liquidity)
           );
         }
       });

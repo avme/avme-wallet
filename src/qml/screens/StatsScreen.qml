@@ -298,6 +298,7 @@ Item {
         listReloadTimer.stop()
         System.setTxSenderCoinAmount(balanceCoinText.text)
         System.setTxSenderTokenAmount(balanceTokenText.text)
+        System.setTxSenderLPFreeAmount(balanceLPFreeText.text)
         System.setScreen(content, "qml/screens/ExchangeScreen.qml")
       }
     }
@@ -313,6 +314,8 @@ Item {
       text: "Staking"
       onClicked: {
         listReloadTimer.stop()
+        System.setTxSenderLPFreeAmount(balanceLPFreeText.text)
+        System.setTxSenderLPLockedAmount(balanceLPLockedText.text)
         System.setScreen(content, "qml/screens/StakingScreen.qml")
       }
     }
