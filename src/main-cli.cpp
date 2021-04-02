@@ -270,7 +270,7 @@ int main() {
       std::cout << "Generating Account..." << std::endl;
       bip3x::Bip39Mnemonic::MnemonicResult encodedMnemonic;
       encodedMnemonic.words = mnemonicPhrase;
-      bip3x::HDKey key = BIP39::createKey(encodedMnemonic, derivPath);
+      bip3x::HDKey key = BIP39::createKey(encodedMnemonic.raw, derivPath);
 
       // Add a name to it (or not) and authenticate
       std::string name, pass;
