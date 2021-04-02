@@ -84,9 +84,10 @@ json_spirit::mValue JSON::readFile(boost::filesystem::path filePath) {
     std::ifstream jsonFile(finalPath.c_str());
     json_spirit::read_stream(jsonFile, returnData);
   } catch (std::exception &e) {
-    returnData["ERROR"] = e.what();
+    json_spirit::mObject errorData;
+    errorData["ERROR"] = e.what();
 	storageThreadLock.unlock();
-	return json_spirit::mValue(returnData);
+	return json_spirit::mValue(errorData);
   }
 
   storageThreadLock.unlock();
