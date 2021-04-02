@@ -283,7 +283,7 @@ public:
    * This is only useful for library developers.
    * @param b True for debug or false otherwise.
    */
-  void debug(bool b=true) {m_debug=b;}
+  void debug(bool b=false) {m_debug=b;}
   /**
    * Is debug mode set?
    * @returns The current debug mode.
