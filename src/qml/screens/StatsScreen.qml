@@ -46,11 +46,13 @@ Item {
       btnSendCoinTx.enabled = true
       btnSendTokenTx.enabled = true
       btnExchange.enabled = true
+      btnLiquidity.enabled = true
       btnStaking.enabled = true
     } else {
       btnSendCoinTx.enabled = false
       btnSendTokenTx.enabled = false
       btnExchange.enabled = false
+      btnLiquidity.enabled = false
       btnStaking.enabled = false
     }
   }
@@ -252,71 +254,78 @@ Item {
       text: "LP (Locked)"
     }
 
-    AVMEButton {
-      id: btnSendCoinTx
+    Row {
+      id: txBtns
       anchors {
+        top: balanceLPLockedText.bottom
         bottom: parent.bottom
-        left: parent.left
+        horizontalCenter: parent.horizontalCenter
         margins: 10
       }
-      width: (parent.width / 4) - anchors.margins
-      text: "Send " + System.getCurrentCoin()
-      onClicked: {
-        System.setTxTokenFlag(false)
-        listReloadTimer.stop()
-        System.setTxSenderCoinAmount(balanceCoinText.text)
-        System.setScreen(content, "qml/screens/CoinTransactionScreen.qml")
+      spacing: 20
+
+      AVMEButton {
+        id: btnSendCoinTx
+        width: (statsRect.width / 6)
+        text: "Send " + System.getCurrentCoin()
+        onClicked: {
+          System.setTxTokenFlag(false)
+          listReloadTimer.stop()
+          System.setTxSenderCoinAmount(balanceCoinText.text)
+          System.setScreen(content, "qml/screens/CoinTransactionScreen.qml")
+        }
       }
-    }
-    AVMEButton {
-      id: btnSendTokenTx
-      anchors {
-        bottom: parent.bottom
-        left: btnSendCoinTx.right
-        margins: 10
+
+      AVMEButton {
+        id: btnSendTokenTx
+        width: (statsRect.width / 6)
+        text: "Send " + System.getCurrentToken()
+        onClicked: {
+          System.setTxTokenFlag(true)
+          listReloadTimer.stop()
+          System.setTxSenderCoinAmount(balanceCoinText.text)
+          System.setTxSenderTokenAmount(balanceTokenText.text)
+          System.setScreen(content, "qml/screens/TokenTransactionScreen.qml")
+        }
       }
-      width: (parent.width / 4) - anchors.margins
-      text: "Send " + System.getCurrentToken()
-      onClicked: {
-        System.setTxTokenFlag(true)
-        listReloadTimer.stop()
-        System.setTxSenderCoinAmount(balanceCoinText.text)
-        System.setTxSenderTokenAmount(balanceTokenText.text)
-        System.setScreen(content, "qml/screens/TokenTransactionScreen.qml")
+
+      AVMEButton {
+        id: btnExchange
+        width: (statsRect.width / 6)
+        text: "Exchange"
+        onClicked: {
+          listReloadTimer.stop()
+          System.setTxSenderCoinAmount(balanceCoinText.text)
+          System.setTxSenderTokenAmount(balanceTokenText.text)
+          System.setTxSenderLPFreeAmount(balanceLPFreeText.text)
+          System.setScreen(content, "qml/screens/ExchangeScreen.qml")
+        }
       }
-    }
-    AVMEButton {
-      id: btnExchange
-      anchors {
-        bottom: parent.bottom
-        left: btnSendTokenTx.right
-        margins: 10
+
+      AVMEButton {
+        id: btnLiquidity
+        width: (statsRect.width / 6)
+        text: "Liquidity"
+        onClicked: {
+          // TODO
+          listReloadTimer.stop()
+          System.setTxSenderCoinAmount(balanceCoinText.text)
+          System.setTxSenderTokenAmount(balanceTokenText.text)
+          System.setTxSenderLPFreeAmount(balanceLPFreeText.text)
+          System.setScreen(content, "qml/screens/LiquidityScreen.qml")
+        }
       }
-      width: (parent.width / 4) - anchors.margins
-      text: "Exchange"
-      onClicked: {
-        listReloadTimer.stop()
-        System.setTxSenderCoinAmount(balanceCoinText.text)
-        System.setTxSenderTokenAmount(balanceTokenText.text)
-        System.setTxSenderLPFreeAmount(balanceLPFreeText.text)
-        System.setScreen(content, "qml/screens/ExchangeScreen.qml")
-      }
-    }
-    AVMEButton {
-      id: btnStaking
-      anchors {
-        bottom: parent.bottom
-        left: btnExchange.right
-        right: parent.right
-        margins: 10
-      }
-      width: (parent.width / 4) - anchors.margins
-      text: "Staking"
-      onClicked: {
-        listReloadTimer.stop()
-        System.setTxSenderLPFreeAmount(balanceLPFreeText.text)
-        System.setTxSenderLPLockedAmount(balanceLPLockedText.text)
-        System.setScreen(content, "qml/screens/StakingScreen.qml")
+
+      AVMEButton {
+        id: btnStaking
+        width: (statsRect.width / 6)
+        text: "Staking"
+        onClicked: {
+          listReloadTimer.stop()
+          System.setTxSenderLPFreeAmount(balanceLPFreeText.text)
+          System.setTxSenderLPLockedAmount(balanceLPLockedText.text)
+          System.setScreen(content, "qml/screens/StakingScreen.qml")
+        }
       }
     }
   }
