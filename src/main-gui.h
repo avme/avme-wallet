@@ -531,6 +531,8 @@ class System : public QObject {
 
     // Check if approval needs to be refreshed
     Q_INVOKABLE bool isExchangeAllowed(QString amount, QString allowed) {
+      if (amount.isEmpty()) { amount = QString("0"); }
+      if (allowed.isEmpty()) { allowed = QString("0"); }
       u256 amountU256 = boost::lexical_cast<u256>(
         Utils::fixedPointToWei(amount.toStdString(), 18)
       );

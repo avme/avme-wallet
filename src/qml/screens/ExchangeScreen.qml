@@ -182,7 +182,7 @@ Item {
         width: swapRect.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: (swapInput.text != "")
-        text: "Make Swap"
+        text: (System.isExchangeAllowed(swapInput.text, allowance)) ? "Make Swap" : "Approve"
         onClicked: {
           System.setTxGasLimit("180000")
           System.setTxGasPrice(System.getAutomaticFee())
