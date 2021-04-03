@@ -15,31 +15,40 @@ Item {
   property string lowerReserves
   property string higherToken
   property string higherReserves
+  property string userLowerReserves
+  property string userHigherReserves
+  property string userLPSharePercentage
 
   Connections {
     target: System
-    onExchangeDataUpdated: {
+    onLiquidityDataUpdated: {
       lowerToken = lowerTokenName
       lowerReserves = lowerTokenReserves
       higherToken = higherTokenName
       higherReserves = higherTokenReserves
-      liquidity = totalPoolLiquidity
+      liquidity = totalLiquidity
+      var userShares = System.calculatePoolShares(
+        lowerReserves, higherReserves, liquidity
+      )
+      userLowerReserves = userShares.lower
+      userHigherReserves = userShares.higher
+      userLPSharePercentage = userShares.liquidity
     }
   }
 
   Timer {
-    id: reloadExchangeDataTimer
+    id: reloadLiquidityDataTimer
     interval: 5000
     repeat: true
     onTriggered: {
-      System.updateExchangeData(System.getCurrentCoin(), System.getCurrentToken())
+      System.updateLiquidityData(System.getCurrentCoin(), System.getCurrentToken())
     }
   }
 
   Component.onCompleted: {
     allowance = System.getExchangeAllowance()
-    System.updateExchangeData(System.getCurrentCoin(), System.getCurrentToken())
-    reloadExchangeDataTimer.start()
+    System.updateLiquidityData(System.getCurrentCoin(), System.getCurrentToken())
+    reloadLiquidityDataTimer.start()
   }
 
   Text {
@@ -83,12 +92,6 @@ Item {
         text: "Total " + System.getCurrentToken() + " in wallet: <b>"
         + System.getTxSenderTokenAmount() + "</b>"
       }
-      Text {
-        id: walletLPBalance
-        horizontalAlignment: Text.AlignHCenter
-        text: "Total LP in wallet: <b>"
-        + System.getTxSenderLPFreeAmount() + "</b>"
-      }
     }
   }
 
@@ -112,9 +115,9 @@ Item {
       Text {
         id: poolCoinBalance
         horizontalAlignment: Text.AlignHCenter
-        text: "Total " + System.getCurrentCoin() + " in pool: <b>"
+        text: "Pooled " + System.getCurrentCoin() + ": <b>"
         + System.weiToFixedPoint(
-          ((System.getCurrentCoin() == lowerToken) ? lowerReserves : higherReserves),
+          ((System.getCurrentCoin() == lowerToken) ? userLowerReserves : userHigherReserves), 
           System.getCurrentCoinDecimals()
         )
       }
@@ -122,9 +125,9 @@ Item {
       Text {
         id: poolTokenBalance
         horizontalAlignment: Text.AlignHCenter
-        text: "Total " + System.getCurrentToken() + " in pool: <b>"
+        text: "Pooled " + System.getCurrentToken() + ": <b>"
         + System.weiToFixedPoint(
-          ((System.getCurrentToken() == lowerToken) ? lowerReserves : higherReserves),
+          ((System.getCurrentToken() == lowerToken) ? userLowerReserves : userHigherReserves), 
           System.getCurrentTokenDecimals()
         )
       }
@@ -132,7 +135,8 @@ Item {
       Text {
         id: poolLiquidityBalance
         horizontalAlignment: Text.AlignHCenter
-        text: "Total LP in pool: <b>" + System.weiToFixedPoint(liquidity, 18)
+        text: "Pool share (LP): <b>" + System.getTxSenderLPFreeAmount()
+        + " (" + userLPSharePercentage + "%)"
       }
     }
   }
@@ -355,7 +359,7 @@ Item {
     }
     text: "Back"
     onClicked: {
-      reloadExchangeDataTimer.stop()
+      reloadLiquidityDataTimer.stop()
       System.setScreen(content, "qml/screens/StatsScreen.qml")
     }
   }

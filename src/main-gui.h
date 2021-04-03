@@ -45,8 +45,12 @@ class System : public QObject {
     void txRetry();
     void exchangeDataUpdated(
       QString lowerTokenName, QString lowerTokenReserves,
+      QString higherTokenName, QString higherTokenReserves
+    );
+    void liquidityDataUpdated(
+      QString lowerTokenName, QString lowerTokenReserves,
       QString higherTokenName, QString higherTokenReserves,
-      QString totalPoolLiquidity
+      QString totalLiquidity
     );
 
   private:
@@ -540,8 +544,33 @@ class System : public QObject {
       return ((allowedU256 > 0) && (allowedU256 >= amountU256));
     }
 
-    // Update reserves and liquidity supply for the exchange screen
+    // Update reserves for the exchange screen
     Q_INVOKABLE void updateExchangeData(QString tokenNameA, QString tokenNameB) {
+      QtConcurrent::run([=](){
+        QVariantMap ret;
+        std::string strA = tokenNameA.toStdString();
+        std::string strB = tokenNameB.toStdString();
+        if (strA == "AVAX") { strA = "WAVAX"; }
+        if (strB == "AVAX") { strB = "WAVAX"; }
+
+        std::vector<std::string> reserves = Pangolin::getReserves(strA, strB);
+        std::string first = Pangolin::getFirstFromPair(strA, strB);
+        if (strA == first) {
+          emit exchangeDataUpdated(
+            tokenNameA, QString::fromStdString(reserves[0]),
+            tokenNameB, QString::fromStdString(reserves[1])
+          );
+        } else if (strB == first) {
+          emit exchangeDataUpdated(
+            tokenNameA, QString::fromStdString(reserves[1]),
+            tokenNameB, QString::fromStdString(reserves[0])
+          );
+        }
+      });
+    }
+
+    // Update reserves and liquidity supply for the exchange screen
+    Q_INVOKABLE void updateLiquidityData(QString tokenNameA, QString tokenNameB) {
       QtConcurrent::run([=](){
         QVariantMap ret;
         std::string strA = tokenNameA.toStdString();
@@ -553,13 +582,13 @@ class System : public QObject {
         std::string liquidity = Pangolin::totalSupply(strA, strB);
         std::string first = Pangolin::getFirstFromPair(strA, strB);
         if (strA == first) {
-          emit exchangeDataUpdated(
+          emit liquidityDataUpdated(
             tokenNameA, QString::fromStdString(reserves[0]),
             tokenNameB, QString::fromStdString(reserves[1]),
             QString::fromStdString(liquidity)
           );
         } else if (strB == first) {
-          emit exchangeDataUpdated(
+          emit liquidityDataUpdated(
             tokenNameA, QString::fromStdString(reserves[1]),
             tokenNameB, QString::fromStdString(reserves[0]),
             QString::fromStdString(liquidity)
@@ -601,6 +630,34 @@ class System : public QObject {
       }
       output = Utils::weiToFixedPoint(output, 18);
       return QString::fromStdString(output);
+    }
+
+    // Calculate the Account's share in AVAX/AVME/LP in the pool, respectively
+    Q_INVOKABLE QVariantMap calculatePoolShares(
+      QString lowerReserves, QString higherReserves, QString totalLiquidity
+    ) {
+      QVariantMap ret;
+      u256 lowerReservesU256 = boost::lexical_cast<u256>(lowerReserves.toStdString());
+      u256 higherReservesU256 = boost::lexical_cast<u256>(higherReserves.toStdString());
+      u256 totalLiquidityU256 = boost::lexical_cast<u256>(totalLiquidity.toStdString());
+      u256 userLiquidityU256 = boost::lexical_cast<u256>(
+        Utils::fixedPointToWei(this->txSenderLPFreeAmount, 18)
+      );
+
+      bigfloat userLPPercentage = (
+        bigfloat(userLiquidityU256) / bigfloat(totalLiquidityU256)
+      );
+      u256 userLowerReservesU256 = u256(bigfloat(lowerReservesU256) * userLPPercentage);
+      u256 userHigherReservesU256 = u256(bigfloat(higherReservesU256) * userLPPercentage);
+
+      std::string lower = boost::lexical_cast<std::string>(userLowerReservesU256);
+      std::string higher = boost::lexical_cast<std::string>(userHigherReservesU256);
+      std::string liquidity = boost::lexical_cast<std::string>(userLPPercentage * 100);
+
+      ret.insert("lower", QString::fromStdString(lower));
+      ret.insert("higher", QString::fromStdString(higher));
+      ret.insert("liquidity", QString::fromStdString(liquidity));
+      return ret;
     }
 };
 
