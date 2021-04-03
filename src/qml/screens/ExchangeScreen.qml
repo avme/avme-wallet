@@ -256,11 +256,13 @@ Item {
   AVMEPopupConfirmExchange {
     id: confirmExchangePopup
     confirmBtn.onClicked: {
-      System.setTxReceiverCoinAmount(fromInput.text)
-      System.setTxReceiverTokenAmount(toInput.text)
       if (System.getTxTokenFlag()) {
+        System.setTxReceiverTokenAmount(swapInput.text)
+        System.setTxReceiverCoinAmount(swapEstimateInput.text)
         System.setTxOperation("Swap AVME -> AVAX")
       } else {
+        System.setTxReceiverCoinAmount(swapInput.text)
+        System.setTxReceiverTokenAmount(swapEstimateInput.text)
         System.setTxOperation("Swap AVAX -> AVME")
       }
       confirmExchangePopup.close()
