@@ -57,7 +57,7 @@ namespace
   // Formated dump of a general type.
   // ================================================================
   template<typename T> void vdump(const string& fn,
-                                  uint ln,
+                                  unsigned int ln,
                                   const string& prefix,
                                   const T& d)
   {
@@ -69,7 +69,7 @@ namespace
   // types so that I can report the length.
   // ================================================================
   template<> void vdump<string>(const string& fn,
-                      uint ln,
+                      unsigned int ln,
                       const string& prefix,
                       const string& d)
   {
@@ -84,12 +84,12 @@ namespace
   // Dump for fixed sized types like m_salt and m_key.
   // ================================================================
   template<typename T> void tdump(const string& fn,
-                                  uint ln,
+                                  unsigned int ln,
                                   const string& prefix,
                                   const T& d)
   {
     cout << fn << ":" << ln << ": " << prefix << "\t";
-    for(uint i=0;i<sizeof(T);++i) {
+    for(unsigned int i=0;i<sizeof(T);++i) {
 #if 0
       // Prettified output.
       // I turned it off so that the format would match openssl.
@@ -109,7 +109,8 @@ namespace
         cout << ", ";
       }
 #endif
-      cout << setw(2) << setfill('0') << hex << right << uint(d[i]) << dec << setfill(' ');
+      unsigned int to_print(d[i]);
+      cout << setw(2) << setfill('0') << hex << right << to_print << dec << setfill(' ');
     }
     cout << " (" << sizeof(T) << ")" << endl;
   }
@@ -118,13 +119,13 @@ namespace
   // Binary data dump.
   // ================================================================
   void bdump(const string& fn,
-             uint ln,
+             unsigned int ln,
              const string& prefix,
              unsigned char* a,
              unsigned int len)
   {
     cout << fn << ":" << ln << ": " << prefix;
-    for(uint i=0;i<len;++i) {
+    for(unsigned int i=0;i<len;++i) {
       if ((i%16)==0) {
         if (i) {
           cout << endl;
@@ -137,7 +138,8 @@ namespace
       else if (i) {
         cout << ", ";
       }
-      cout << setw(2) << hex << right << uint(a[i]) << dec;
+      unsigned int to_print(a[i]);
+      cout << setw(2) << hex << right << to_print << dec;
     }
     cout << " (" << len << ")" << endl;
   }
@@ -160,7 +162,7 @@ Cipher::Cipher()
 // ================================================================
 Cipher::Cipher(const std::string& cipher,
 	       const std::string& digest,
-	       uint count,
+	       unsigned int count,
 	       bool embed)
   : m_cipher(cipher),
     m_digest(digest),
@@ -189,7 +191,7 @@ string Cipher::encrypt(const string& plaintext,
   init(pass);
   kv1_t  x     = encode_cipher(plaintext);
   uchar* ct    = x.first;
-  uint   ctlen = x.second;
+  unsigned int   ctlen = x.second;
   DBG_BDUMP(ct, ctlen);
 
   string ret = encode_base64(ct, ctlen);
@@ -223,7 +225,7 @@ string Cipher::decrypt(const string& mimetext,
   kv1_t  x     = decode_base64(mimetext);
   uchar* ct    = x.first;
   uchar* ctbeg = ct;
-  uint   ctlen = x.second;
+  unsigned int   ctlen = x.second;
   DBG_BDUMP(ct, ctlen);
 
   if (strncmp((const char*)ct, SALTED_PREFIX, 8) == 0) {
@@ -259,7 +261,7 @@ void Cipher::decrypt_file(const string& ifn,
 // encode_base64
 // ================================================================
 string Cipher::encode_base64(uchar* ciphertext,
-			     uint   ciphertext_len) const
+			     unsigned int   ciphertext_len) const
 {
   DBG_FCT("encode_base64");
   BIO* b64 = BIO_new(BIO_f_base64());
@@ -273,7 +275,7 @@ string Cipher::encode_base64(uchar* ciphertext,
   }
   BUF_MEM *bptr=0;
   BIO_get_mem_ptr(b64, &bptr);
-  uint len=bptr->length;
+  unsigned int len=bptr->length;
   char* mimetext = new char[len+1];
   memcpy(mimetext, bptr->data, bptr->length-1);
   mimetext[bptr->length-1]=0;
@@ -322,9 +324,9 @@ Cipher::kv1_t Cipher::decode_base64(const string& mimetext) const
 Cipher::kv1_t Cipher::encode_cipher(const string& plaintext) const
 {
   DBG_FCT("encode_cipher");
-  uint SZ = plaintext.size() + AES_BLOCK_SIZE + 20;  // leave some padding
+  unsigned int SZ = plaintext.size() + AES_BLOCK_SIZE + 20;  // leave some padding
   uchar* ciphertext = new uchar[SZ];
-  bzero(ciphertext, SZ);
+  memset((ciphertext), '\0', (SZ));
   uchar* pbeg = ciphertext;
 
   // This requires some explanation.
@@ -332,7 +334,7 @@ Cipher::kv1_t Cipher::encode_cipher(const string& plaintext) const
   // 16 characters worth of information that describe the salt.
   // I found this in the openssl source code but I couldn't
   // find any associated documentation.
-  uint off = 0;
+  unsigned int off = 0;
   if (m_embed) {
     memcpy(&ciphertext[0], SALTED_PREFIX, 8);
     memcpy(&ciphertext[8], m_salt, 8);
@@ -354,7 +356,7 @@ Cipher::kv1_t Cipher::encode_cipher(const string& plaintext) const
   // It would be straightforward to chunk it but that
   // add unecesary complexity at this point.
   uchar* pt_buf = (uchar*)plaintext.c_str();
-  uint   pt_len = plaintext.size();
+  unsigned int   pt_len = plaintext.size();
   if (1 != EVP_EncryptUpdate(ctx, ciphertext, &ciphertext_len, pt_buf, pt_len)) {
     EVP_CIPHER_CTX_free(ctx);
     throw runtime_error("EVP_EncryptUpdate() failed");
@@ -376,16 +378,16 @@ Cipher::kv1_t Cipher::encode_cipher(const string& plaintext) const
 // decode_cipher
 // ================================================================
 string Cipher::decode_cipher(uchar* ciphertext,
-			     uint   ciphertext_len) const
+			     unsigned int   ciphertext_len) const
 {
   DBG_FCT("decode_cipher");
-  const uint SZ = ciphertext_len+20;
+  const unsigned int SZ = ciphertext_len+20;
   uchar* plaintext = new uchar[SZ];
   int plaintext_len = 0;
   const EVP_CIPHER* cipher = EVP_aes_256_cbc();
   EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
 
-  bzero(plaintext, SZ);
+  memset((plaintext), '\0', (SZ));
   EVP_CIPHER_CTX_init(ctx);
 
   if (1 != EVP_DecryptInit_ex(ctx, cipher, NULL, m_key, m_iv)) {
@@ -421,7 +423,7 @@ void Cipher::set_salt(const string& salt)
   DBG_FCT("set_salt");
   if (salt.length() == 0) {
     // Choose a random salt.
-    for(uint i=0;i<sizeof(m_salt);++i) {
+    for(unsigned int i=0;i<sizeof(m_salt);++i) {
       m_salt[i] = rand() % 256;
     }
   }
@@ -454,8 +456,8 @@ void Cipher::init(const string& pass)
   }
 
   // Create the key and IV values from the passkey.
-  bzero(m_key, sizeof(m_key));
-  bzero(m_iv, sizeof(m_iv));
+  memset((m_key), '\0', (sizeof(m_key)));
+  memset((m_iv), '\0', (sizeof(m_iv)));
   OpenSSL_add_all_algorithms();
   const EVP_CIPHER* cipher = EVP_get_cipherbyname(m_cipher.c_str());
   const EVP_MD*     digest = EVP_get_digestbyname(m_digest.c_str());
