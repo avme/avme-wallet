@@ -129,6 +129,7 @@ Item {
         width: parent.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.margins: 20
+        enabled: (allowance != "")
         validator: RegExpValidator {
           regExp: (coinToToken) ? System.createCoinRegExp() : System.createTokenRegExp()
         }
@@ -144,6 +145,7 @@ Item {
         width: parent.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.margins: 20
+        enabled: (allowance != "")
         readOnly: true
         validator: RegExpValidator {
           regExp: (!coinToToken) ? System.createCoinRegExp() : System.createTokenRegExp()
@@ -158,6 +160,7 @@ Item {
         width: swapRect.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
         text: "Switch Order"
+        enabled: (allowance != "")
         onClicked: {
           coinToToken = !coinToToken
           swapInput.text = ""
@@ -171,6 +174,7 @@ Item {
         width: swapRect.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
         text: "Max Amount"
+        enabled: (allowance != "")
         onClicked: {
           swapInput.text = (coinToToken)  // TODO: include fees in calculation
             ? System.getTxSenderCoinAmount() : System.getTxSenderTokenAmount()

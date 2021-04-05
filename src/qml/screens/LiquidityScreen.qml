@@ -162,6 +162,7 @@ Item {
         id: liquidityCoinInput
         width: parent.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
+        enabled: (addAllowance != "")
         validator: RegExpValidator { regExp: System.createCoinRegExp() }
         label: "Amount of " + System.getCurrentCoin() + " to add"
         placeholder: "Fixed point amount (e.g. 0.5)"
@@ -172,6 +173,7 @@ Item {
         id: liquidityTokenInput
         width: parent.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
+        enabled: (addAllowance != "")
         validator: RegExpValidator { regExp: System.createTokenRegExp() }
         label: "Amount of " + System.getCurrentToken() + " to add"
         placeholder: "Fixed point amount (e.g. 0.5)"
@@ -188,8 +190,10 @@ Item {
           id: liquidityMaxCoinBtn
           width: removeLiquidityRect.width * 0.4
           text: "Max " + System.getCurrentCoin() + " Amount"
+          enabled: (addAllowance != "")
           onClicked: {
             liquidityCoinInput.text = System.getTxSenderCoinAmount()  // TODO: include fees in calculation
+            calculateAddLiquidityAmount(true)
           }
         }
 
@@ -197,8 +201,10 @@ Item {
           id: liquidityMaxTokenBtn
           width: removeLiquidityRect.width * 0.4
           text: "Max " + System.getCurrentToken() + " Amount"
+          enabled: (addAllowance != "")
           onClicked: {
             liquidityTokenInput.text = System.getTxSenderTokenAmount()
+            calculateAddLiquidityAmount(false)
           }
         }
       }
@@ -341,7 +347,7 @@ Item {
         width: parent.width * 0.8
         anchors.left: parent.left
         anchors.margins: 20
-        enabled: (lowerReserves != "" && higherReserves != "" && liquidity != "")
+        enabled: (removeAllowance != "" && lowerReserves != "" && higherReserves != "" && liquidity != "")
         onMoved: {
           var estimates = System.calculateRemoveLiquidityAmount(
             userLowerReserves, userHigherReserves, value
@@ -368,7 +374,7 @@ Item {
 
         AVMEButton {
           id: sliderBtn25
-          enabled: (lowerReserves != "" && higherReserves != "" && liquidity != "")
+          enabled: (removeAllowance != "" && lowerReserves != "" && higherReserves != "" && liquidity != "")
           width: removeLiquidityRect.width * 0.2
           text: "25%"
           onClicked: { liquidityLPSlider.value = 25; liquidityLPSlider.moved(); }
@@ -376,7 +382,7 @@ Item {
 
         AVMEButton {
           id: sliderBtn50
-          enabled: (lowerReserves != "" && higherReserves != "" && liquidity != "")
+          enabled: (removeAllowance != "" && lowerReserves != "" && higherReserves != "" && liquidity != "")
           width: removeLiquidityRect.width * 0.2
           text: "50%"
           onClicked: { liquidityLPSlider.value = 50; liquidityLPSlider.moved(); }
@@ -384,7 +390,7 @@ Item {
 
         AVMEButton {
           id: sliderBtn75
-          enabled: (lowerReserves != "" && higherReserves != "" && liquidity != "")
+          enabled: (removeAllowance != "" && lowerReserves != "" && higherReserves != "" && liquidity != "")
           width: removeLiquidityRect.width * 0.2
           text: "75%"
           onClicked: { liquidityLPSlider.value = 75; liquidityLPSlider.moved(); }
@@ -392,7 +398,7 @@ Item {
 
         AVMEButton {
           id: sliderBtn100
-          enabled: (lowerReserves != "" && higherReserves != "" && liquidity != "")
+          enabled: (removeAllowance != "" && lowerReserves != "" && higherReserves != "" && liquidity != "")
           width: removeLiquidityRect.width * 0.2
           text: "100%"
           onClicked: { liquidityLPSlider.value = 100; liquidityLPSlider.moved(); }
