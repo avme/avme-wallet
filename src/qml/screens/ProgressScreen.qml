@@ -104,7 +104,10 @@ Item {
             + "</b> to address<br><b>" + System.getTxReceiverAccount() + "</b>...";
             break;
           case "Approve Exchange":
-            text = "Sending approval for exchange...";
+            text = "Sending approval for exchange/adding liquidity...";
+            break;
+          case "Approve Liquidity":
+            text = "Sending approval for removing liquidity...";
             break;
           case "Swap AVAX -> AVME":
             text = "Swapping <b>"
@@ -117,6 +120,20 @@ Item {
             + System.getTxReceiverTokenAmount() + " " + System.getCurrentToken()
             + "</b><br>for <b>"
             + System.getTxReceiverCoinAmount() + " " + System.getCurrentCoin() + "</b>...";
+            break;
+          case "Add Liquidity":
+            text = "Adding <b>"
+            + System.getTxReceiverCoinAmount() + " " + System.getCurrentCoin()
+            + "</b><br>and <b>"
+            + System.getTxReceiverTokenAmount() + " " + System.getCurrentToken()
+            + "</b><br>to the pool..."
+            break;
+          case "Remove Liquidity":
+            text = "Removing <b>"
+            + System.getTxReceiverCoinAmount() + " " + System.getCurrentCoin()
+            + "</b><br>and <b>"
+            + System.getTxReceiverTokenAmount() + " " + System.getCurrentToken()
+            + "</b><br>from the pool..."
             break;
         }
       }

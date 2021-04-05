@@ -182,11 +182,11 @@ Item {
         width: swapRect.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: (swapInput.text != "")
-        text: (System.isExchangeAllowed(swapInput.text, allowance)) ? "Make Swap" : "Approve"
+        text: (System.isApproved(swapInput.text, allowance)) ? "Make Swap" : "Approve"
         onClicked: {
           System.setTxGasLimit("180000")
           System.setTxGasPrice(System.getAutomaticFee())
-          if (!System.isExchangeAllowed(swapInput.text, allowance)) {
+          if (!System.isApproved(swapInput.text, allowance)) {
             approveExchangePopup.setTxData(System.getTxGasLimit(), System.getTxGasPrice())
             approveExchangePopup.open()
             return
@@ -243,12 +243,16 @@ Item {
   }
 
   // Popup for confirming approval
-  AVMEPopupApproveExchange {
+  AVMEPopupApprove {
     id: approveExchangePopup
     confirmBtn.onClicked: {
-      System.setTxOperation("Approve Exchange")
-      System.setScreen(content, "qml/screens/ProgressScreen.qml")
-      System.txStart(pass)
+      if (System.checkWalletPass(pass)) {
+        System.setTxOperation("Approve Exchange")
+        System.setScreen(content, "qml/screens/ProgressScreen.qml")
+        System.txStart(pass)
+      } else {
+        approveExchangePopup.showErrorMsg()
+      }
     }
   }
 
@@ -256,18 +260,22 @@ Item {
   AVMEPopupConfirmExchange {
     id: confirmExchangePopup
     confirmBtn.onClicked: {
-      if (System.getTxTokenFlag()) {
-        System.setTxReceiverTokenAmount(swapInput.text)
-        System.setTxReceiverCoinAmount(swapEstimateInput.text)
-        System.setTxOperation("Swap AVME -> AVAX")
+      if (System.checkWalletPass(pass)) {
+        if (System.getTxTokenFlag()) {
+          System.setTxReceiverTokenAmount(swapInput.text)
+          System.setTxReceiverCoinAmount(swapEstimateInput.text)
+          System.setTxOperation("Swap AVME -> AVAX")
+        } else {
+          System.setTxReceiverCoinAmount(swapInput.text)
+          System.setTxReceiverTokenAmount(swapEstimateInput.text)
+          System.setTxOperation("Swap AVAX -> AVME")
+        }
+        confirmExchangePopup.close()
+        System.setScreen(content, "qml/screens/ProgressScreen.qml")
+        System.txStart(pass)
       } else {
-        System.setTxReceiverCoinAmount(swapInput.text)
-        System.setTxReceiverTokenAmount(swapEstimateInput.text)
-        System.setTxOperation("Swap AVAX -> AVME")
+        confirmExchangePopup.showErrorMsg()
       }
-      confirmExchangePopup.close()
-      System.setScreen(content, "qml/screens/ProgressScreen.qml")
-      System.txStart(pass)
     }
   }
 

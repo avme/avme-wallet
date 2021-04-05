@@ -2,16 +2,15 @@
 
 void Account::reloadBalances(Account &a) {
   // Get the balances from the network
-  // TODO: change LP addresses to the real ones
   std::string AVAXjson = Network::getAVAXBalance(a.address);
   std::string AVMEjson = Network::getAVMEBalance(
     a.address, Pangolin::tokenContracts["AVME"]
   );
   std::string FreeLPjson = Network::getAVMEBalance(
-    a.address, Pangolin::tokenContracts["AVME"]
+    a.address, Pangolin::pairContracts["WAVAX-AVME"]
   );
   std::string LockedLPjson = Network::getAVMEBalance(
-    a.address, Pangolin::tokenContracts["AVME"]
+    a.address, Pangolin::stakingContract
   );
 
   // Get the balances from the JSON objects, convert to u256, then to string

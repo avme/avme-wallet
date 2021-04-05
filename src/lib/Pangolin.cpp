@@ -61,6 +61,20 @@ std::vector<std::string> Pangolin::parseHex(std::string hexStr, std::vector<std:
   return ret;
 }
 
+std::string Pangolin::getPair(std::string tokenNameA, std::string tokenNameB) {
+  std::string pairName;
+  if (tokenNameA == "AVAX") { tokenNameA = "WAVAX"; }
+  if (tokenNameB == "AVAX") { tokenNameB = "WAVAX"; }
+  if (pairContracts.find(tokenNameA + "-" + tokenNameB) != pairContracts.end()) {
+    pairName = tokenNameA + "-" + tokenNameB;
+  } else if (pairContracts.find(tokenNameB + "-" + tokenNameA) != pairContracts.end()) {
+    pairName = tokenNameB + "-" + tokenNameA;
+  } else {
+    pairName = "";  // Not found
+  }
+  return (!pairName.empty()) ? pairContracts[pairName] : "";
+}
+
 std::string Pangolin::getFirstFromPair(std::string tokenNameA, std::string tokenNameB) {
   if (tokenNameA == "AVAX") { tokenNameA = "WAVAX"; }
   if (tokenNameB == "AVAX") { tokenNameB = "WAVAX"; }
@@ -74,18 +88,10 @@ std::string Pangolin::getFirstFromPair(std::string tokenNameA, std::string token
 std::string Pangolin::totalSupply(std::string tokenNameA, std::string tokenNameB) {
   std::string result;
   std::stringstream query;
-  std::string pairLR, pairRL, pairName;
-  if (tokenNameA == "AVAX") { tokenNameA = "WAVAX"; }
-  if (tokenNameB == "AVAX") { tokenNameB = "WAVAX"; }
-  if (pairContracts.find(tokenNameA + "-" + tokenNameB) != pairContracts.end()) {
-    pairName = tokenNameA + "-" + tokenNameB;
-  } else if (pairContracts.find(tokenNameB + "-" + tokenNameA) != pairContracts.end()) {
-    pairName = tokenNameB + "-" + tokenNameA;
-  }
 
   // Query and get the result, returning if empty
   query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << pairContracts[pairName]
+        << "[{\"to\": \"" << Pangolin::getPair(tokenNameA, tokenNameB)
         << "\",\"data\": \"" << pairFuncs["totalSupply"]
         << "\"},\"latest\"]}";
   std::string str = Network::httpGetRequest(query.str());
@@ -100,18 +106,10 @@ std::string Pangolin::totalSupply(std::string tokenNameA, std::string tokenNameB
 std::vector<std::string> Pangolin::getReserves(std::string tokenNameA, std::string tokenNameB) {
   std::string result;
   std::stringstream query;
-  std::string pairLR, pairRL, pairName;
-  if (tokenNameA == "AVAX") { tokenNameA = "WAVAX"; }
-  if (tokenNameB == "AVAX") { tokenNameB = "WAVAX"; }
-  if (pairContracts.find(tokenNameA + "-" + tokenNameB) != pairContracts.end()) {
-    pairName = tokenNameA + "-" + tokenNameB;
-  } else if (pairContracts.find(tokenNameB + "-" + tokenNameA) != pairContracts.end()) {
-    pairName = tokenNameB + "-" + tokenNameA;
-  }
 
   // Query and get the result, returning if empty
   query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << pairContracts[pairName]
+        << "[{\"to\": \"" << Pangolin::getPair(tokenNameA, tokenNameB)
         << "\",\"data\": \"" << pairFuncs["getReserves"]
         << "\"},\"latest\"]}";
   std::string str = Network::httpGetRequest(query.str());
@@ -123,7 +121,9 @@ std::vector<std::string> Pangolin::getReserves(std::string tokenNameA, std::stri
   return parseHex(result, {"uint", "uint", "uint"});
 }
 
-std::string Pangolin::calcAmountOut(std::string amountIn, std::string reserveIn, std::string reserveOut) {
+std::string Pangolin::calcExchangeAmountOut(
+  std::string amountIn, std::string reserveIn, std::string reserveOut
+) {
   u256 amountInU256 = boost::lexical_cast<u256>(amountIn);
   u256 reserveInU256 = boost::lexical_cast<u256>(reserveIn);
   u256 reserveOutU256 = boost::lexical_cast<u256>(reserveOut);
@@ -138,6 +138,22 @@ std::string Pangolin::calcAmountOut(std::string amountIn, std::string reserveIn,
   if ((denominator / 1000) != reserveInU256) { return ""; }  // Mul overflow
   if ((denominator + amountInWithFee) < denominator) { return ""; }  // Add overflow
   denominator += amountInWithFee;
+
+  return boost::lexical_cast<std::string>(numerator / denominator);
+}
+
+std::string Pangolin::calcLiquidityAmountOut(
+  std::string amountIn, std::string reserveIn, std::string reserveOut
+) {
+  u256 amountInU256 = boost::lexical_cast<u256>(amountIn);
+  u256 reserveInU256 = boost::lexical_cast<u256>(reserveIn);
+  u256 reserveOutU256 = boost::lexical_cast<u256>(reserveOut);
+
+  u256 numerator = amountInU256 * 1000 * reserveOutU256;
+  if ((numerator / reserveOutU256 / 1000) != amountInU256) { return ""; }  // Mul overflow
+
+  u256 denominator = reserveInU256 * 1000;
+  if ((denominator / 1000) != reserveInU256) { return ""; }  // Mul overflow
 
   return boost::lexical_cast<std::string>(numerator / denominator);
 }

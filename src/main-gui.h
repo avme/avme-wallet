@@ -69,6 +69,7 @@ class System : public QObject {
     std::string txReceiverAccount;
     std::string txReceiverCoinAmount;
     std::string txReceiverTokenAmount;
+    std::string txReceiverLPAmount;
     std::string txGasLimit;
     std::string txGasPrice;
     std::string txOperation;
@@ -116,6 +117,9 @@ class System : public QObject {
 
     Q_INVOKABLE QString getTxReceiverTokenAmount() { return QString::fromStdString(this->txReceiverTokenAmount); }
     Q_INVOKABLE void setTxReceiverTokenAmount(QString amount) { this->txReceiverTokenAmount = amount.toStdString(); }
+
+    Q_INVOKABLE QString getTxReceiverLPAmount() { return QString::fromStdString(this->txReceiverLPAmount); }
+    Q_INVOKABLE void setTxReceiverLPAmount(QString amount) { this->txReceiverLPAmount = amount.toStdString(); }
 
     Q_INVOKABLE QString getTxGasLimit() { return QString::fromStdString(this->txGasLimit); }
     Q_INVOKABLE void setTxGasLimit(QString limit) { this->txGasLimit = limit.toStdString(); }
@@ -466,9 +470,15 @@ class System : public QObject {
             "0", this->txGasLimit, this->txGasPrice,
             Pangolin::approve(Pangolin::routerContract)
           );
+        } else if (this->txOperation == "Approve Liquidity") {
+          txSkel = this->w.buildTransaction(
+            this->txSenderAccount, Pangolin::getPair(this->currentCoin, this->currentToken),
+            "0", this->txGasLimit, this->txGasPrice,
+            Pangolin::approve(Pangolin::routerContract)
+          );
         } else if (this->txOperation == "Swap AVAX -> AVME") {
           u256 amountOutMin = boost::lexical_cast<u256>(this->txReceiverTokenAmount);
-          amountOutMin -= (amountOutMin / 1000); // 1%
+          amountOutMin -= (amountOutMin / 1000); // 0.1%
           dataHex = Pangolin::swapExactAVAXForTokens(
             // amountOutMin, path, to, deadline
             boost::lexical_cast<std::string>(amountOutMin),
@@ -486,12 +496,56 @@ class System : public QObject {
           );
         } else if (this->txOperation == "Swap AVME -> AVAX") {
           u256 amountOutMin = boost::lexical_cast<u256>(this->txReceiverCoinAmount);
-          amountOutMin -= (amountOutMin / 1000); // 1%
+          amountOutMin -= (amountOutMin / 1000); // 0.1%
           dataHex = Pangolin::swapExactTokensForAVAX(
             // amountIn, amountOutMin, path, to, deadline
             this->txReceiverTokenAmount,
             boost::lexical_cast<std::string>(amountOutMin),
             { Pangolin::tokenContracts["AVME"], Pangolin::tokenContracts["WAVAX"] },
+            this->txSenderAccount,
+            boost::lexical_cast<std::string>(
+              std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()
+              ).count() + 300000 // + 5 minutes (300 seconds), in milliseconds
+            )
+          );
+          txSkel = this->w.buildTransaction(
+            this->txSenderAccount, Pangolin::routerContract,
+            "0", this->txGasLimit, this->txGasPrice, dataHex
+          );
+        } else if (this->txOperation == "Add Liquidity") {
+          u256 amountAVAXMin = boost::lexical_cast<u256>(this->txReceiverCoinAmount);
+          u256 amountTokenMin = boost::lexical_cast<u256>(this->txReceiverTokenAmount);
+          amountAVAXMin -= (amountAVAXMin / 200); // 0.5%
+          amountTokenMin -= (amountTokenMin / 200); // 0.5%
+          dataHex = Pangolin::addLiquidityAVAX(
+            // tokenAddress, amountTokenDesired, amountTokenMin, amountAVAXMin, to, deadline
+            Pangolin::tokenContracts[this->currentToken],
+            this->txReceiverTokenAmount,
+            boost::lexical_cast<std::string>(amountTokenMin),
+            boost::lexical_cast<std::string>(amountAVAXMin),
+            this->txSenderAccount,
+            boost::lexical_cast<std::string>(
+              std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::system_clock::now().time_since_epoch()
+              ).count() + 300000 // + 5 minutes (300 seconds), in milliseconds
+            )
+          );
+          txSkel = this->w.buildTransaction(
+            this->txSenderAccount, Pangolin::routerContract,
+            this->txReceiverCoinAmount, this->txGasLimit, this->txGasPrice, dataHex
+          );
+        } else if (this->txOperation == "Remove Liquidity") {
+          u256 amountAVAXMin = boost::lexical_cast<u256>(this->txReceiverCoinAmount);
+          u256 amountTokenMin = boost::lexical_cast<u256>(this->txReceiverTokenAmount);
+          amountAVAXMin -= (amountAVAXMin / 200); // 0.5%
+          amountTokenMin -= (amountTokenMin / 200); // 0.5%
+          dataHex = Pangolin::removeLiquidityAVAX(
+            // tokenAddress, liquidity, amountTokenMin, amountAVAXMin, to, deadline
+            Pangolin::tokenContracts[this->currentToken],
+            this->txReceiverLPAmount,
+            boost::lexical_cast<std::string>(amountTokenMin),
+            boost::lexical_cast<std::string>(amountAVAXMin),
             this->txSenderAccount,
             boost::lexical_cast<std::string>(
               std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -524,7 +578,7 @@ class System : public QObject {
       });
     }
 
-    // Get approval amount for the exchange screen
+    // Get approval amount for the exchange screen and adding liquidity to pool
     Q_INVOKABLE QString getExchangeAllowance() {
       std::string allowance = Pangolin::allowance(
         Pangolin::tokenContracts[this->currentToken],
@@ -533,8 +587,17 @@ class System : public QObject {
       return QString::fromStdString(allowance);
     }
 
+    // Get approval amount for removing liquidity from pool
+    Q_INVOKABLE QString getLiquidityAllowance() {
+      std::string allowance = Pangolin::allowance(
+        Pangolin::getPair(this->currentCoin, this->currentToken),
+        this->txSenderAccount, Pangolin::routerContract
+      );
+      return QString::fromStdString(allowance);
+    }
+
     // Check if approval needs to be refreshed
-    Q_INVOKABLE bool isExchangeAllowed(QString amount, QString allowed) {
+    Q_INVOKABLE bool isApproved(QString amount, QString allowed) {
       if (amount.isEmpty()) { amount = QString("0"); }
       if (allowed.isEmpty()) { allowed = QString("0"); }
       u256 amountU256 = boost::lexical_cast<u256>(
@@ -602,11 +665,56 @@ class System : public QObject {
       QString amountIn, QString reservesIn, QString reservesOut
     ) {
       std::string amountInWei = Utils::fixedPointToWei(amountIn.toStdString(), 18);
-      std::string amountOut = Pangolin::calcAmountOut(
+      std::string amountOut = Pangolin::calcExchangeAmountOut(
         amountInWei, reservesIn.toStdString(), reservesOut.toStdString()
       );
       amountOut = Utils::weiToFixedPoint(amountOut, 18);
       return QString::fromStdString(amountOut);
+    }
+
+    /**
+     * Calculate the estimated amounts of AVAX/AVME when adding/removing
+     * liquidity from the pool, respectively
+     */
+    Q_INVOKABLE QString calculateAddLiquidityAmount(
+      QString amountIn, QString reservesIn, QString reservesOut
+    ) {
+      std::string amountInWei = Utils::fixedPointToWei(amountIn.toStdString(), 18);
+      std::string amountOut = Pangolin::calcLiquidityAmountOut(
+        amountInWei, reservesIn.toStdString(), reservesOut.toStdString()
+      );
+      amountOut = Utils::weiToFixedPoint(amountOut, 18);
+      return QString::fromStdString(amountOut);
+    }
+
+    Q_INVOKABLE QVariantMap calculateRemoveLiquidityAmount(
+      QString lowerReserves, QString higherReserves, QString percentage
+    ) {
+      QVariantMap ret;
+      if (lowerReserves.isEmpty()) { lowerReserves = QString("0"); }
+      if (higherReserves.isEmpty()) { higherReserves = QString("0"); }
+
+      u256 lowerReservesU256 = boost::lexical_cast<u256>(lowerReserves.toStdString());
+      u256 higherReservesU256 = boost::lexical_cast<u256>(higherReserves.toStdString());
+      u256 userLPWei = boost::lexical_cast<u256>(
+        Utils::fixedPointToWei(this->txSenderLPFreeAmount, 18)
+      );
+      bigfloat pc = bigfloat(boost::lexical_cast<double>(percentage.toStdString()) / 100);
+
+      u256 userLowerReservesU256 = u256(bigfloat(lowerReservesU256) * bigfloat(pc));
+      u256 userHigherReservesU256 = u256(bigfloat(higherReservesU256) * bigfloat(pc));
+      u256 userLPReservesU256 = u256(bigfloat(userLPWei) * bigfloat(pc));
+
+      std::string lower = boost::lexical_cast<std::string>(userLowerReservesU256);
+      std::string higher = boost::lexical_cast<std::string>(userHigherReservesU256);
+      std::string lp = Utils::weiToFixedPoint(
+        boost::lexical_cast<std::string>(userLPReservesU256), 18
+      );
+
+      ret.insert("lower", QString::fromStdString(lower));
+      ret.insert("higher", QString::fromStdString(higher));
+      ret.insert("lp", QString::fromStdString(lp));
+      return ret;
     }
 
     // Estimate the amount of coin/token that will be exchanged
@@ -624,9 +732,9 @@ class System : public QObject {
       std::string input = Utils::fixedPointToWei(amountStr, 18);
       std::string output;
       if (fromStr == first) {
-        output = Pangolin::calcAmountOut(input, reserves[0], reserves[1]);
+        output = Pangolin::calcExchangeAmountOut(input, reserves[0], reserves[1]);
       } else if (toStr == first) {
-        output = Pangolin::calcAmountOut(input, reserves[1], reserves[0]);
+        output = Pangolin::calcExchangeAmountOut(input, reserves[1], reserves[0]);
       }
       output = Utils::weiToFixedPoint(output, 18);
       return QString::fromStdString(output);

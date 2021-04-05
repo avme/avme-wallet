@@ -2,27 +2,38 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 /**
- * Popup for approving token exchange. Has to be opened manually.
+ * Popup for removing liquidity from a coin/token pool. Has to be opened manually.
  * Has the following items:
+ * - "coinAmount / coinLabel": the coin amount and name
+ * - "tokenAmount / tokenLabel": the token amount and name
  * - "gasLimit": self-explanatory
  * - "gasPrice": self-explanatory
  * - "pass": the Wallet password input
  * - "confirmBtn.onClicked": what to do when confirming the action
- * - "setTxData(gasLimit, gasPrice)": set tx data for display
+ * - "setTxData(coinAmount, coinLabel, tokenAmount, tokenLabel, gasLimit, gasPrice)":
+ *    set tx data for display
  * - "showErrorMsg()": self-explanatory
  * - "clean()": helper function to clean up inputs/data
  */
 
 Popup {
-  id: approveExchangePopup
+  id: confirmRemoveLPPopup
+  property string coinAmount
+  property string coinLabel
+  property string tokenAmount
+  property string tokenLabel
   property string gasLimit
   property string gasPrice
   property alias pass: passInput.text
   property alias confirmBtn: btnConfirm
 
-  function setTxData(gasLimit, gasPrice) {
-    approveExchangePopup.gasLimit = gasLimit
-    approveExchangePopup.gasPrice = gasPrice
+  function setTxData(coinAmount, coinLabel, tokenAmount, tokenLabel, gasLimit, gasPrice) {
+    confirmRemoveLPPopup.coinAmount = coinAmount
+    confirmRemoveLPPopup.coinLabel = coinLabel
+    confirmRemoveLPPopup.tokenAmount = tokenAmount
+    confirmRemoveLPPopup.tokenLabel = tokenLabel
+    confirmRemoveLPPopup.gasLimit = gasLimit
+    confirmRemoveLPPopup.gasPrice = gasPrice
   }
 
   function showErrorMsg() {
@@ -30,7 +41,7 @@ Popup {
   }
 
   function clean() {
-    gasLimit = gasPrice = passInput.text = ""
+    coinAmount = coinLabel = tokenAmount = tokenLabel = gasLimit = gasPrice = passInput.text = ""
   }
 
   width: window.width / 2
@@ -55,8 +66,9 @@ Popup {
         topMargin: parent.height / 8
       }
       horizontalAlignment: Text.AlignHCenter
-      text: "In order to exchange the desired token," + "<br>"
-      + "you must first give approval from this Account."
+      text: "You will remove from the liquidity pool:"
+      + "<br><b>" + coinAmount + " " + coinLabel + "</b>"
+      + "<br><b>" + tokenAmount + " " + tokenLabel + "</b>"
       + "<br>Gas Limit: <b>" + gasLimit + " Wei</b>"
       + "<br>Gas Price: <b>" + gasPrice + " Gwei</b>"
     }
@@ -72,7 +84,7 @@ Popup {
       horizontalAlignment: Text.AlignHCenter
       Timer { id: passTextTimer; interval: 2000 }
       text: (!passTextTimer.running)
-      ? "Please authenticate to confirm the approval."
+      ? "Please authenticate to confirm the transaction."
       : "Wrong passphrase, please try again"
     }
 
@@ -105,8 +117,8 @@ Popup {
         id: btnCancel
         text: "Cancel"
         onClicked: {
-          approveExchangePopup.clean()
-          approveExchangePopup.close()
+          confirmRemoveLPPopup.clean()
+          confirmRemoveLPPopup.close()
         }
       }
       AVMEButton {

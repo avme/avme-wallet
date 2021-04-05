@@ -44,6 +44,12 @@ class Pangolin {
     static std::vector<std::string> parseHex(std::string hexStr, std::vector<std::string> types);
 
     /**
+     * (LOCAL) Get the address for a given pair.
+     * Returns the address, or empty if no pair is found.
+     */
+    static std::string getPair(std::string tokenNameA, std::string tokenNameB);
+
+    /**
      * (LOCAL) Calculate the first (lower) address from a given token pair.
      * Returns the name of the token first (lower) token.
      */
@@ -63,11 +69,16 @@ class Pangolin {
     static std::vector<std::string> getReserves(std::string tokenNameA, std::string tokenNameB);
 
     /**
-     * (LOCAL) Calculate the maximum output from a given asset.
+     * (LOCAL) Calculate the maximum output for exchange and liquidity screens, respectively.
      * Amount and reserves are always in Wei.
      * Returns the output in Wei, or empty if there's an under/overflow.
      */
-    static std::string calcAmountOut(std::string amountIn, std::string reserveIn, std::string reserveOut);
+    static std::string calcExchangeAmountOut(
+      std::string amountIn, std::string reserveIn, std::string reserveOut
+    );
+    static std::string calcLiquidityAmountOut(
+      std::string amountIn, std::string reserveIn, std::string reserveOut
+    );
 
     /**
      * (TX) Give MAX_U256_VALUE spending approval to the spender Account.

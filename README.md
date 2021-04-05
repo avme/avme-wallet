@@ -32,6 +32,6 @@ cmake ..
 make HOST=x86_64-w64-mingw32 -C ../depends -j$(nproc)
 cmake -DCMAKE_TOOLCHAIN_FILE=cmake/x86_64-w64-mingw32.cmake ..
 
-cmake --build .
+cmake --build . -- -j$(nproc)
 ```
 

@@ -8,16 +8,19 @@ import "qrc:/qml/components"
 
 Item {
   id: exchangeScreen
-  property bool coinToToken: true
-  property string allowance
-  property string liquidity
+  property string addAllowance
+  property string removeAllowance
   property string lowerToken
   property string lowerReserves
   property string higherToken
   property string higherReserves
+  property string liquidity
   property string userLowerReserves
   property string userHigherReserves
   property string userLPSharePercentage
+  property string removeLowerEstimate
+  property string removeHigherEstimate
+  property string removeLPEstimate
 
   Connections {
     target: System
@@ -45,8 +48,25 @@ Item {
     }
   }
 
+  function calculateAddLiquidityAmount(isCoinToToken) {
+    var amountIn = (isCoinToToken) ? liquidityCoinInput.text : liquidityTokenInput.text
+    var amountName = (isCoinToToken) ? System.getCurrentCoin() : System.getCurrentToken()
+    var amountOut = ""
+    if (amountName == lowerToken) {
+      amountOut = System.calculateAddLiquidityAmount(amountIn, lowerReserves, higherReserves)
+    } else if (amountName == higherToken) {
+      amountOut = System.calculateAddLiquidityAmount(amountIn, higherReserves, lowerReserves)
+    }
+    if (isCoinToToken) {
+      liquidityTokenInput.text = amountOut
+    } else {
+      liquidityCoinInput.text = amountOut
+    }
+  }
+
   Component.onCompleted: {
-    allowance = System.getExchangeAllowance()
+    addAllowance = System.getExchangeAllowance()
+    removeAllowance = System.getLiquidityAllowance()
     System.updateLiquidityData(System.getCurrentCoin(), System.getCurrentToken())
     reloadLiquidityDataTimer.start()
   }
@@ -64,89 +84,11 @@ Item {
   }
 
   Rectangle {
-    id: walletBalancesRect
-    width: parent.width * 0.45
-    height: parent.height * 0.1
-    anchors {
-      top: info.bottom
-      left: parent.left
-      margins: 20
-    }
-    radius: 5
-    color: "#44F66986"
-
-    Column {
-      id: walletBalancesColumn
-      anchors.centerIn: parent
-      anchors.margins: 10
-
-      Text {
-        id: walletCoinBalance
-        horizontalAlignment: Text.AlignHCenter
-        text: "Total " + System.getCurrentCoin() + " in wallet: <b>"
-        + System.getTxSenderCoinAmount() + "</b>"
-      }
-      Text {
-        id: walletTokenBalance
-        horizontalAlignment: Text.AlignHCenter
-        text: "Total " + System.getCurrentToken() + " in wallet: <b>"
-        + System.getTxSenderTokenAmount() + "</b>"
-      }
-    }
-  }
-
-  Rectangle {
-    id: poolBalancesRect
-    width: parent.width * 0.45
-    height: parent.height * 0.1
-    anchors {
-      top: info.bottom
-      right: parent.right
-      margins: 20
-    }
-    radius: 5
-    color: "#44F66986"
-
-    Column {
-      id: poolBalancesColumn
-      anchors.centerIn: parent
-      anchors.margins: 10
-
-      Text {
-        id: poolCoinBalance
-        horizontalAlignment: Text.AlignHCenter
-        text: "Pooled " + System.getCurrentCoin() + ": <b>"
-        + System.weiToFixedPoint(
-          ((System.getCurrentCoin() == lowerToken) ? userLowerReserves : userHigherReserves), 
-          System.getCurrentCoinDecimals()
-        )
-      }
-
-      Text {
-        id: poolTokenBalance
-        horizontalAlignment: Text.AlignHCenter
-        text: "Pooled " + System.getCurrentToken() + ": <b>"
-        + System.weiToFixedPoint(
-          ((System.getCurrentToken() == lowerToken) ? userLowerReserves : userHigherReserves), 
-          System.getCurrentTokenDecimals()
-        )
-      }
-
-      Text {
-        id: poolLiquidityBalance
-        horizontalAlignment: Text.AlignHCenter
-        text: "Pool share (LP): <b>" + System.getTxSenderLPFreeAmount()
-        + " (" + userLPSharePercentage + "%)"
-      }
-    }
-  }
-
-  Rectangle {
     id: addLiquidityRect
     width: parent.width * 0.45
-    height: parent.height * 0.6
+    height: parent.height * 0.75
     anchors {
-      top: walletBalancesRect.bottom
+      top: info.bottom
       left: parent.left
       margins: 20
     }
@@ -203,13 +145,24 @@ Item {
         }
       }
 
+      Text {
+        id: walletBalances
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        text: "Total " + System.getCurrentCoin() + " in wallet: <b>"
+        + System.getTxSenderCoinAmount() + "</b><br>"
+        + "Total " + System.getCurrentToken() + " in wallet: <b>"
+        + System.getTxSenderTokenAmount() + "</b>"
+      }
+
       AVMEInput {
         id: liquidityCoinInput
         width: parent.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
         validator: RegExpValidator { regExp: System.createCoinRegExp() }
-        label: "Amount of " + System.getCurrentCoin()
+        label: "Amount of " + System.getCurrentCoin() + " to add"
         placeholder: "Fixed point amount (e.g. 0.5)"
+        onTextEdited: calculateAddLiquidityAmount(true)
       }
 
       AVMEInput {
@@ -217,8 +170,9 @@ Item {
         width: parent.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
         validator: RegExpValidator { regExp: System.createTokenRegExp() }
-        label: "Amount of " + System.getCurrentToken()
+        label: "Amount of " + System.getCurrentToken() + " to add"
         placeholder: "Fixed point amount (e.g. 0.5)"
+        onTextEdited: calculateAddLiquidityAmount(false)
       }
 
       Row {
@@ -251,8 +205,38 @@ Item {
         width: removeLiquidityRect.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: (liquidityCoinInput.text != "" && liquidityTokenInput.text != "")
-        text: "Add Liquidity to Pool"
-        onClicked: {} // TODO: this, also check if both values are non-zero
+        text: (System.isApproved(liquidityTokenInput.text, addAllowance))
+        ? "Add Liquidity to Pool" : "Approve"
+        onClicked: {
+          System.setTxGasLimit("250000")
+          System.setTxGasPrice(System.getAutomaticFee())
+          if (!System.isApproved(liquidityTokenInput.text, addAllowance)) {
+            approveExchangePopup.setTxData(System.getTxGasLimit(), System.getTxGasPrice())
+            approveExchangePopup.open()
+            return
+          }
+
+          var noCoinFunds = System.hasInsufficientCoinFunds(
+            System.getTxSenderCoinAmount(),
+            System.calculateTransactionCost(
+              liquidityCoinInput.text, System.getTxGasLimit(), System.getTxGasPrice()
+            )
+          )
+          var noTokenFunds = System.hasInsufficientTokenFunds(
+            System.getTxSenderTokenAmount(), liquidityTokenInput.text
+          )
+
+          if (noCoinFunds || noTokenFunds) {
+            fundsPopup.open()
+          } else {
+            confirmAddLPPopup.setTxData(
+              liquidityCoinInput.text, System.getCurrentCoin(),
+              liquidityTokenInput.text, System.getCurrentToken(),
+              System.getTxGasLimit(), System.getTxGasPrice()
+            )
+            confirmAddLPPopup.open()
+          }
+        }
       }
     }
   }
@@ -260,9 +244,9 @@ Item {
   Rectangle {
     id: removeLiquidityRect
     width: parent.width * 0.45
-    height: parent.height * 0.6
+    height: parent.height * 0.75
     anchors {
-      top: poolBalancesRect.bottom
+      top: info.bottom
       right: parent.right
       margins: 20
     }
@@ -319,32 +303,149 @@ Item {
         }
       }
 
-      AVMEInput {
-        id: liquidityLPInput
-        width: parent.width * 0.9
+      Text {
+        id: poolBalances
         anchors.horizontalCenter: parent.horizontalCenter
-        validator: RegExpValidator { regExp: System.createCoinRegExp() }  // TODO: fixed regexp
-        label: "Amount of LP to remove"
-        placeholder: "Fixed point amount (e.g. 0.5)"
+        horizontalAlignment: Text.AlignHCenter
+        text: "Pooled " + System.getCurrentCoin() + ": <b>"
+        + System.weiToFixedPoint(
+          ((System.getCurrentCoin() == lowerToken) ? userLowerReserves : userHigherReserves),
+          System.getCurrentCoinDecimals()
+        ) + "</b><br>"
+        + "Pooled " + System.getCurrentToken() + ": <b>"
+        + System.weiToFixedPoint(
+          ((System.getCurrentToken() == lowerToken) ? userLowerReserves : userHigherReserves),
+          System.getCurrentTokenDecimals()
+        ) + "</b><br>"
+        + "Pool share (LP): <b>" + userLPSharePercentage + "% ("
+        + System.getTxSenderLPFreeAmount() + ")</b>"
       }
 
-      AVMEButton {
-        id: liquidityMaxLPBtn
-        width: parent.width * 0.9
-        anchors.horizontalCenter: parent.horizontalCenter
-        text: "Max LP Amount"
-        onClicked: {
-          liquidityLPInput.text = System.getTxSenderLPFreeAmount()  // TODO: include fees in calculation
+      Slider {
+        id: liquidityLPSlider
+        from: 0
+        value: 0
+        to: 100
+        stepSize: 1
+        snapMode: Slider.SnapAlways
+        width: parent.width * 0.8
+        anchors.left: parent.left
+        anchors.margins: 20
+        enabled: (lowerReserves != "" && higherReserves != "" && liquidity != "")
+        onMoved: {
+          var estimates = System.calculateRemoveLiquidityAmount(
+            userLowerReserves, userHigherReserves, value
+          )
+          removeLowerEstimate = estimates.lower
+          removeHigherEstimate = estimates.higher
+          removeLPEstimate = estimates.lp
         }
+        Text {
+          id: sliderText
+          anchors.left: parent.right
+          anchors.leftMargin: 10
+          anchors.verticalCenter: parent.verticalCenter
+          font.pointSize: 18.0
+          text: parent.value + "%"
+        }
+      }
+
+      // TODO: "advanced" mode (manual input instead of a slider)
+      Row {
+        id: sliderBtnRow
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: 20
+
+        AVMEButton {
+          id: sliderBtn25
+          enabled: (lowerReserves != "" && higherReserves != "" && liquidity != "")
+          width: removeLiquidityRect.width * 0.2
+          text: "25%"
+          onClicked: { liquidityLPSlider.value = 25; liquidityLPSlider.moved(); }
+        }
+
+        AVMEButton {
+          id: sliderBtn50
+          enabled: (lowerReserves != "" && higherReserves != "" && liquidity != "")
+          width: removeLiquidityRect.width * 0.2
+          text: "50%"
+          onClicked: { liquidityLPSlider.value = 50; liquidityLPSlider.moved(); }
+        }
+
+        AVMEButton {
+          id: sliderBtn75
+          enabled: (lowerReserves != "" && higherReserves != "" && liquidity != "")
+          width: removeLiquidityRect.width * 0.2
+          text: "75%"
+          onClicked: { liquidityLPSlider.value = 75; liquidityLPSlider.moved(); }
+        }
+
+        AVMEButton {
+          id: sliderBtn100
+          enabled: (lowerReserves != "" && higherReserves != "" && liquidity != "")
+          width: removeLiquidityRect.width * 0.2
+          text: "100%"
+          onClicked: { liquidityLPSlider.value = 100; liquidityLPSlider.moved(); }
+        }
+      }
+
+      Text {
+        id: removeEstimateBalances
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        text: "Estimated " + System.getCurrentCoin() + " return: <b>"
+        + System.weiToFixedPoint(
+          ((System.getCurrentCoin() == lowerToken) ? removeLowerEstimate : removeHigherEstimate),
+          System.getCurrentCoinDecimals()
+        ) + "</b><br>"
+        + "Estimated " + System.getCurrentToken() + " return: <b>"
+        + System.weiToFixedPoint(
+          ((System.getCurrentToken() == lowerToken) ? removeLowerEstimate : removeHigherEstimate),
+          System.getCurrentTokenDecimals()
+        ) + "</b><br>"
+        + "Share cost (LP): <b>" + ((removeLPEstimate) ? removeLPEstimate : "0")
       }
 
       AVMEButton {
         id: liquidityRemoveBtn
         width: parent.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (liquidityLPInput.text != "")
-        text: "Remove Liquidity from Pool"
-        onClicked: {} // TODO: this, also check if both values are non-zero
+        enabled: (liquidityLPSlider.value > 0)
+        text: (System.isApproved(System.getTxSenderLPFreeAmount(), removeAllowance))
+        ? "Remove Liquidity from Pool" : "Approve"
+        onClicked: {
+          System.setTxGasLimit("250000")
+          System.setTxGasPrice(System.getAutomaticFee())
+          if (!System.isApproved(liquidityTokenInput.text, removeAllowance)) {
+            approveLiquidityPopup.setTxData(System.getTxGasLimit(), System.getTxGasPrice())
+            approveLiquidityPopup.open()
+            return
+          }
+
+          var noCoinFunds = System.hasInsufficientCoinFunds(
+            System.getTxSenderCoinAmount(),
+            System.calculateTransactionCost(
+              "0", System.getTxGasLimit(), System.getTxGasPrice()
+            )
+          )
+
+          if (noCoinFunds) {
+            fundsPopup.open()
+          } else {
+            confirmRemoveLPPopup.setTxData(
+              System.weiToFixedPoint(
+                ((System.getCurrentCoin() == lowerToken) ? removeLowerEstimate : removeHigherEstimate),
+                System.getCurrentCoinDecimals()
+              ), System.getCurrentCoin(),
+              System.weiToFixedPoint(
+                ((System.getCurrentToken() == lowerToken) ? removeLowerEstimate : removeHigherEstimate),
+                System.getCurrentTokenDecimals()
+              ), System.getCurrentToken(),
+              System.getTxGasLimit(), System.getTxGasPrice()
+            )
+            confirmRemoveLPPopup.open()
+          }
+        }
       }
     }
   }
@@ -364,32 +465,68 @@ Item {
     }
   }
 
-  // Popup for confirming approval
-  // TODO: change this
-  AVMEPopupApproveExchange {
+  // Popups for confirming approval to add (same as exchange) and remove liquidity
+  AVMEPopupApprove {
     id: approveExchangePopup
     confirmBtn.onClicked: {
-      System.setTxOperation("Approve Exchange")
-      System.setScreen(content, "qml/screens/ProgressScreen.qml")
-      System.txStart(pass)
+      if (System.checkWalletPass(pass)) {
+        System.setTxOperation("Approve Exchange")
+        System.setScreen(content, "qml/screens/ProgressScreen.qml")
+        System.txStart(pass)
+      } else {
+        approveExchangePopup.showErrorMsg()
+      }
     }
   }
 
-  // Popup for confirming the exchange operation
-  // TODO: change this
-  AVMEPopupConfirmExchange {
-    id: confirmExchangePopup
+  AVMEPopupApprove {
+    id: approveLiquidityPopup
     confirmBtn.onClicked: {
-      System.setTxReceiverCoinAmount(fromInput.text)
-      System.setTxReceiverTokenAmount(toInput.text)
-      if (System.getTxTokenFlag()) {
-        System.setTxOperation("Swap AVME -> AVAX")
+      if (System.checkWalletPass(pass)) {
+        System.setTxOperation("Approve Liquidity")
+        System.setScreen(content, "qml/screens/ProgressScreen.qml")
+        System.txStart(pass)
       } else {
-        System.setTxOperation("Swap AVAX -> AVME")
+        approveLiquidityPopup.showErrorMsg()
       }
-      confirmExchangePopup.close()
-      System.setScreen(content, "qml/screens/ProgressScreen.qml")
-      System.txStart(pass)
+    }
+  }
+
+  // Popups for confirming addition/removal of funds to/from the pool
+  AVMEPopupConfirmAddLP {
+    id: confirmAddLPPopup
+    confirmBtn.onClicked: {
+      if (System.checkWalletPass(pass)) {
+        System.setTxReceiverCoinAmount(liquidityCoinInput.text)
+        System.setTxReceiverTokenAmount(liquidityTokenInput.text)
+        System.setTxOperation("Add Liquidity")
+        System.setScreen(content, "qml/screens/ProgressScreen.qml")
+        System.txStart(pass)
+      } else {
+        confirmAddLPPopup.showErrorMsg()
+      }
+    }
+  }
+
+  AVMEPopupConfirmRemoveLP {
+    id: confirmRemoveLPPopup
+    confirmBtn.onClicked: {
+      if (System.checkWalletPass(pass)) {
+        System.setTxReceiverCoinAmount(System.weiToFixedPoint(
+          ((System.getCurrentCoin() == lowerToken) ? removeLowerEstimate : removeHigherEstimate),
+          System.getCurrentCoinDecimals()
+        ))
+        System.setTxReceiverTokenAmount(System.weiToFixedPoint(
+          ((System.getCurrentToken() == lowerToken) ? removeLowerEstimate : removeHigherEstimate),
+          System.getCurrentTokenDecimals()
+        ))
+        System.setTxReceiverLPAmount(System.fixedPointToWei(removeLPEstimate, 18))
+        System.setTxOperation("Remove Liquidity")
+        System.setScreen(content, "qml/screens/ProgressScreen.qml")
+        System.txStart(pass)
+      } else {
+        confirmRemoveLPPopup.showErrorMsg()
+      }
     }
   }
 
