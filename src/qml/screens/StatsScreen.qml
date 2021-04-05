@@ -307,7 +307,6 @@ Item {
         width: (statsRect.width / 6)
         text: "Liquidity"
         onClicked: {
-          // TODO
           listReloadTimer.stop()
           System.setTxSenderCoinAmount(balanceCoinText.text)
           System.setTxSenderTokenAmount(balanceTokenText.text)

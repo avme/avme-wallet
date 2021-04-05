@@ -16,10 +16,10 @@ ListView {
   highlight: Rectangle { color: listHighlightColor; radius: 5 }
   implicitWidth: 500
   implicitHeight: 500
-  highlightMoveDuration: 100
-  highlightMoveVelocity: 1000
-  highlightResizeDuration: 100
-  highlightResizeVelocity: 1000
+  highlightMoveDuration: 0
+  highlightMoveVelocity: 100000
+  highlightResizeDuration: 0
+  highlightResizeVelocity: 100000
   focus: true
   clip: true
   boundsBehavior: Flickable.StopAtBounds
