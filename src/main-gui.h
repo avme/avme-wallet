@@ -43,6 +43,7 @@ class System : public QObject {
     void txSigned(bool b);
     void txSent(bool b, QString linkUrl);
     void txRetry();
+    void allowancesUpdated(QString exchangeAllowance, QString liquidityAllowance);
     void exchangeDataUpdated(
       QString lowerTokenName, QString lowerTokenReserves,
       QString higherTokenName, QString higherTokenReserves
@@ -578,22 +579,22 @@ class System : public QObject {
       });
     }
 
-    // Get approval amount for the exchange screen and adding liquidity to pool
-    Q_INVOKABLE QString getExchangeAllowance() {
-      std::string allowance = Pangolin::allowance(
-        Pangolin::tokenContracts[this->currentToken],
-        this->txSenderAccount, Pangolin::routerContract
-      );
-      return QString::fromStdString(allowance);
-    }
-
-    // Get approval amount for removing liquidity from pool
-    Q_INVOKABLE QString getLiquidityAllowance() {
-      std::string allowance = Pangolin::allowance(
-        Pangolin::getPair(this->currentCoin, this->currentToken),
-        this->txSenderAccount, Pangolin::routerContract
-      );
-      return QString::fromStdString(allowance);
+    // Get approval amount for the exchange and liquidity screens
+    Q_INVOKABLE void getAllowances() {
+      QtConcurrent::run([=](){
+        std::string exchangeAllowance = Pangolin::allowance(
+          Pangolin::tokenContracts[this->currentToken],
+          this->txSenderAccount, Pangolin::routerContract
+        );
+        std::string liquidityAllowance = Pangolin::allowance(
+          Pangolin::getPair(this->currentCoin, this->currentToken),
+          this->txSenderAccount, Pangolin::routerContract
+        );
+        emit allowancesUpdated(
+          QString::fromStdString(exchangeAllowance),
+          QString::fromStdString(liquidityAllowance)
+        );
+      });
     }
 
     // Check if approval needs to be refreshed

@@ -23,6 +23,7 @@ Item {
       higherToken = higherTokenName
       higherReserves = higherTokenReserves
     }
+    onAllowancesUpdated: allowance = exchangeAllowance
   }
 
   Timer {
@@ -48,7 +49,7 @@ Item {
   }
 
   Component.onCompleted: {
-    allowance = System.getExchangeAllowance()
+    System.getAllowances()
     System.updateExchangeData(System.getCurrentCoin(), System.getCurrentToken())
     calculateExchangeAmountOut()
     reloadExchangeDataTimer.start()
@@ -181,8 +182,16 @@ Item {
         id: swapBtn
         width: swapRect.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (swapInput.text != "")
-        text: (System.isApproved(swapInput.text, allowance)) ? "Make Swap" : "Approve"
+        enabled: (allowance != "" && swapInput.text != "")
+        text: {
+          if (allowance == "") {
+            text: "Checking approval..."
+          } else if (System.isApproved(swapInput.text, allowance)) {
+            text: "Make Swap"
+          } else {
+            text: "Approve"
+          }
+        }
         onClicked: {
           System.setTxGasLimit("180000")
           System.setTxGasPrice(System.getAutomaticFee())

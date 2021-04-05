@@ -37,6 +37,10 @@ Item {
       userHigherReserves = userShares.higher
       userLPSharePercentage = userShares.liquidity
     }
+    onAllowancesUpdated: {
+      addAllowance = exchangeAllowance
+      removeAllowance = liquidityAllowance
+    }
   }
 
   Timer {
@@ -65,8 +69,7 @@ Item {
   }
 
   Component.onCompleted: {
-    addAllowance = System.getExchangeAllowance()
-    removeAllowance = System.getLiquidityAllowance()
+    System.getAllowances()
     System.updateLiquidityData(System.getCurrentCoin(), System.getCurrentToken())
     reloadLiquidityDataTimer.start()
   }
@@ -204,9 +207,16 @@ Item {
         id: liquidityAddBtn
         width: removeLiquidityRect.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (liquidityCoinInput.text != "" && liquidityTokenInput.text != "")
-        text: (System.isApproved(liquidityTokenInput.text, addAllowance))
-        ? "Add Liquidity to Pool" : "Approve"
+        enabled: (addAllowance != "" && liquidityCoinInput.text != "" && liquidityTokenInput.text != "")
+        text: {
+          if (addAllowance === "") {
+            text: "Checking approval..."
+          } else if (System.isApproved(liquidityTokenInput.text, addAllowance)) {
+            text: "Add Liquidity to Pool"
+          } else {
+            text: "Approve"
+          }
+        }
         onClicked: {
           System.setTxGasLimit("250000")
           System.setTxGasPrice(System.getAutomaticFee())
@@ -410,9 +420,16 @@ Item {
         id: liquidityRemoveBtn
         width: parent.width * 0.9
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (liquidityLPSlider.value > 0)
-        text: (System.isApproved(System.getTxSenderLPFreeAmount(), removeAllowance))
-        ? "Remove Liquidity from Pool" : "Approve"
+        enabled: (removeAllowance != "" && liquidityLPSlider.value > 0)
+        text: {
+          if (removeAllowance == "") {
+            text: "Checking approval..."
+          } else if (System.isApproved(System.getTxSenderLPFreeAmount(), removeAllowance)) {
+            text: "Remove Liquidity from Pool"
+          } else {
+            text: "Approve"
+          }
+        }
         onClicked: {
           System.setTxGasLimit("250000")
           System.setTxGasPrice(System.getAutomaticFee())
