@@ -6,6 +6,14 @@
 
 #include <json_spirit/JsonSpiritHeaders.h>
 
+#ifdef __MINGW32__
+#include <winsock2.h> // Windows.h asked for winsock2 to be included.
+#include <windows.h>
+#include <io.h>
+#include <shellapi.h>
+#include <shlobj.h>
+#endif
+
 #include "Utils.h"
 
 /**
@@ -33,6 +41,10 @@ namespace JSON {
   json_spirit::mValue getValue(std::string jsonStr, std::string value, std::string delim = "");
 
   // Handle the transaction history storage directory.
+  
+  #ifdef __MINGW32__
+  boost::filesystem::path GetSpecialFolderPath(int nFolder, bool fCreate = true);
+  #endif
   boost::filesystem::path getDefaultDataDir();
   boost::filesystem::path getDataDir();
 

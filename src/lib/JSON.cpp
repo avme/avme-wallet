@@ -44,11 +44,23 @@ json_spirit::mValue JSON::getValue(
   return ret;
 }
 
+#ifdef __MINGW32__
+boost::filesystem::path JSON::GetSpecialFolderPath(int nFolder, bool fCreate)
+{
+    WCHAR pszPath[MAX_PATH] = L"";
+    if(SHGetSpecialFolderPathW(nullptr, pszPath, nFolder, fCreate))
+    {
+        return boost::filesystem::path(pszPath);
+    }
+    return boost::filesystem::path("");
+}
+#endif
+
 boost::filesystem::path JSON::getDefaultDataDir() {
   namespace fs = boost::filesystem;
   #ifdef __MINGW32__
     // Windows: C:\Users\Username\AppData\Roaming\AVME
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "AVME";
+    return JSON::GetSpecialFolderPath(CSIDL_APPDATA) / "AVME";
   #else
     // Unix: ~/.avme
     fs::path pathRet;

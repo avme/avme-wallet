@@ -1,9 +1,9 @@
 #ifndef MAIN_CLI_H
 #define MAIN_CLI_H
 
+#include "lib/Network.h"
 #include "lib/BIP39.h"
 #include "lib/Pangolin.h"
-#include "lib/Network.h"
 #include "lib/Utils.h"
 #include "lib/Wallet.h"
 
