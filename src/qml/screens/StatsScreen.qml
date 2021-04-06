@@ -321,6 +321,7 @@ Item {
         text: "Staking"
         onClicked: {
           listReloadTimer.stop()
+          System.setTxSenderCoinAmount(balanceCoinText.text)
           System.setTxSenderLPFreeAmount(balanceLPFreeText.text)
           System.setTxSenderLPLockedAmount(balanceLPLockedText.text)
           System.setScreen(content, "qml/screens/StakingScreen.qml")

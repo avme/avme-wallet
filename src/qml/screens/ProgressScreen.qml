@@ -109,6 +109,9 @@ Item {
           case "Approve Liquidity":
             text = "Sending approval for removing liquidity...";
             break;
+          case "Approve Staking":
+            text = "Sending approval for staking...";
+            break;
           case "Swap AVAX -> AVME":
             text = "Swapping <b>"
             + System.getTxReceiverCoinAmount() + " " + System.getCurrentCoin()
@@ -126,14 +129,29 @@ Item {
             + System.getTxReceiverCoinAmount() + " " + System.getCurrentCoin()
             + "</b><br>and <b>"
             + System.getTxReceiverTokenAmount() + " " + System.getCurrentToken()
-            + "</b><br>to the pool..."
+            + "</b><br>to the pool...";
             break;
           case "Remove Liquidity":
             text = "Removing <b>"
             + System.getTxReceiverCoinAmount() + " " + System.getCurrentCoin()
             + "</b><br>and <b>"
             + System.getTxReceiverTokenAmount() + " " + System.getCurrentToken()
-            + "</b><br>from the pool..."
+            + "</b><br>from the pool...";
+            break;
+          case "Stake LP":
+            text = "Staking <b>" + System.getTxReceiverLPAmount() + " LP</b>...";
+            break;
+          case "Unstake LP":
+            text = "Withdrawing <b>" + System.getTxReceiverLPAmount() + " LP</b>...";
+            break;
+          case "Harvest AVME":
+            text = "Requesting reward funds of <br><b>"
+            + System.getTxReceiverTokenAmount() + " " + System.getCurrentToken() + "</b>...";
+            break;
+          case "Exit Staking":
+            text = "Requesting reward funds of <br><b>"
+            + System.getTxReceiverTokenAmount() + " " + System.getCurrentToken()
+            + "</b><br>and withdrawing <b>" + System.getTxReceiverLPAmount() + " LP</b>...";
             break;
         }
       }
