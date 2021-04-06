@@ -46,7 +46,7 @@ json_spirit::mValue JSON::getValue(
 
 boost::filesystem::path JSON::getDefaultDataDir() {
   namespace fs = boost::filesystem;
-  #ifdef WIN32
+  #ifdef __MINGW32__
     // Windows: C:\Users\Username\AppData\Roaming\AVME
     return GetSpecialFolderPath(CSIDL_APPDATA) / "AVME";
   #else
