@@ -71,6 +71,11 @@ class Wallet {
     );
 
     /**
+     * Clean Wallet data.
+     */
+    void close();
+
+    /**
      * Check if the passphrase input matches the stored hash.
      * Returns true on success, false on failure.
      */

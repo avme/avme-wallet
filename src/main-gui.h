@@ -4,6 +4,7 @@
 #include <QtWidgets/QApplication>
 #include <QtQml/QQmlContext>
 #include <QtQml/QQmlApplicationEngine>
+#include <QtCore/QFile>
 #include <QtCore/QString>
 #include <QtCore/QVariant>
 #include <QtCore/qplugin.h>
@@ -145,41 +146,47 @@ class System : public QObject {
       QApplication::clipboard()->setText(str);
     }
 
+    // Remove the "file://" prefix from a folder path
+    Q_INVOKABLE QString cleanPath(QString path) {
+      #ifdef __MINGW32__
+        return path.remove("file:///");
+      #else
+        return path.remove("file://");
+      #endif
+    }
+
+    // Check if a Wallet exists in a given folder
+    Q_INVOKABLE bool checkFolderForWallet(QString folder) {
+      QString walletFile = QString(folder + "/wallet/c-avax/wallet.info");
+      QString secretsFolder = QString(folder + "/wallet/c-avax/accounts/secrets");
+      return (QFile::exists(walletFile) && QFile::exists(secretsFolder));
+    }
+
     // Check if given passphrase equals the Wallet's
     Q_INVOKABLE bool checkWalletPass(QString pass) {
       return w.auth(pass.toStdString());
     }
 
     // Create a new Wallet
-    Q_INVOKABLE bool createNewWallet(
-      QString walletFile, QString secretsPath, QString pass
-    ) {
-      return this->w.create(
-        #ifdef __MINGW32__
-          walletFile.remove("file:///").toStdString(),
-          secretsPath.remove("file:///").toStdString(),
-        #else
-          walletFile.remove("file://").toStdString(),
-          secretsPath.remove("file://").toStdString(),
-        #endif
-        pass.toStdString()
-      );
+    // TODO: seed phrase
+    Q_INVOKABLE bool createWallet(QString folder, QString pass) {
+      std::string walletFile = folder.toStdString() + "/wallet/c-avax/wallet.info";
+      std::string secretsFolder = folder.toStdString() + "/wallet/c-avax/accounts/secrets";
+      return this->w.create(walletFile, secretsFolder, pass.toStdString());
     }
 
     // Load a Wallet
-    Q_INVOKABLE bool loadWallet(
-        QString walletFile, QString secretsPath, QString pass
-        ) {
-      return this->w.load(
-        #ifdef __MINGW32__
-          walletFile.remove("file:///").toStdString(),
-          secretsPath.remove("file:///").toStdString(),
-        #else
-          walletFile.remove("file://").toStdString(),
-          secretsPath.remove("file://").toStdString(),
-        #endif
-        pass.toStdString()
-      );
+    Q_INVOKABLE bool loadWallet(QString folder, QString pass) {
+      std::string walletFile = folder.toStdString() + "/wallet/c-avax/wallet.info";
+      std::string secretsFolder = folder.toStdString() + "/wallet/c-avax/accounts/secrets";
+      return this->w.load(walletFile, secretsFolder, pass.toStdString());
+    }
+
+    // TODO: import Wallet
+
+    // Close the Wallet
+    Q_INVOKABLE void closeWallet() {
+      this->w.close();
     }
 
     // Load the Accounts into the Wallet

@@ -2,8 +2,6 @@
     <qresource prefix="/">
         <file>qml/screens/main.qml</file>
         <file>qml/screens/StartScreen.qml</file>
-        <file>qml/screens/NewWalletScreen.qml</file>
-        <file>qml/screens/LoadWalletScreen.qml</file>
         <file>qml/screens/AccountsScreen.qml</file>
         <file>qml/screens/StatsScreen.qml</file>
         <file>qml/screens/CoinTransactionScreen.qml</file>

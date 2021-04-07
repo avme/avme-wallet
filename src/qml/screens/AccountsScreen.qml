@@ -289,6 +289,7 @@ Item {
       console.log("Wallet closed successfully")
       System.stopAllBalanceThreads()
       listReloadTimer.stop()
+      System.closeWallet()
       System.setScreen(content, "qml/screens/StartScreen.qml")
     }
     noBtn.onClicked: closeWalletPopup.close()

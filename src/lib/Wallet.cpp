@@ -42,6 +42,13 @@ bool Wallet::load(
   }
 }
 
+void Wallet::close() {
+  this->accounts.clear();
+  this->passHash = bytesSec();
+  this->passSalt = h256();
+  this->km = KeyManager();
+}
+
 bool Wallet::auth(std::string pass) {
   bytesSec hash = dev::pbkdf2(pass, passSalt.asBytes(), passIterations);
   return (hash.ref().toString() == passHash.ref().toString());

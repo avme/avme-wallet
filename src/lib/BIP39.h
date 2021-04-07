@@ -25,7 +25,6 @@
  * Namespace for BIP39-related functions (mnemonics, wordlists, etc.).
  */
 namespace BIP39 {
-	
   /**
    * Generate a new random mnemonic phrase.
    * Returns the mnemonic phrase.
@@ -38,26 +37,30 @@ namespace BIP39 {
    * Returns the key pair for the Account.
    */
   bip3x::HDKey createKey(std::string phrase, std::string derivPath);
-  
-  
-  /**
-   * Save an mnemonic phrase to an json file in the default path.
-   * This should be called only when creating an new wallet, a.k.a first time running the wallet
-   * for the purpose of avoiding overwritting an already saved mnemonic.
-   */
-  std::pair<bool,std::string> saveEncryptedMnemonic(bip3x::Bip39Mnemonic::MnemonicResult &mnemonic, std::string &password);
-  
-  /**
-   * Load an already saved mnemonic from an json file on the default path.
-   */
-   
-  std::pair<bool,std::string>  loadEncryptedMnemonic(bip3x::Bip39Mnemonic::MnemonicResult &mnemonic, std::string &password);
 
   /**
    * Check if a word exists in the English BIP39 wordlist.
    * Returns true on success, false on failure.
    */
   bool wordExists(std::string word);
+
+  /**
+   * Save a mnemonic phrase to a JSON file in the default path.
+   * This should be called only when creating a new wallet,
+   * to avoid the risk of overwritting an already saved mnemonic.
+   * Returns a bool/string pair (write success and potential error message).
+   */
+  std::pair<bool,std::string> saveEncryptedMnemonic(
+    bip3x::Bip39Mnemonic::MnemonicResult &mnemonic, std::string &password
+  );
+
+  /**
+   * Load an already saved mnemonic from a JSON file in the default path.
+   * Returns a bool/string pair (read success and potential error message).
+   */
+  std::pair<bool,std::string> loadEncryptedMnemonic(
+    bip3x::Bip39Mnemonic::MnemonicResult &mnemonic, std::string &password
+  );
 };
 
 #endif // BIP39_H
