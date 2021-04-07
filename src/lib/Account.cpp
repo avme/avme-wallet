@@ -110,9 +110,10 @@ json_spirit::mArray Account::txDataToJSON() {
 
 void Account::loadTxHistory() {
   json_spirit::mValue txData, txArray;
-  std::string address = this->address;
+  boost::filesystem::path txFilePath = Utils::walletFolderPath.string()
+    + "/wallet/c-avax/accounts/transactions/" + this->address.c_str();
 
-  txData = JSON::readFile(address.c_str());
+  txData = JSON::readFile(txFilePath);
   try {
     txArray = JSON::objectItem(txData, "transactions");
     json_spirit::mValue txArray = JSON::objectItem(txData, "transactions");
@@ -152,6 +153,8 @@ bool Account::saveTxToHistory(TxData TxData) {
   json_spirit::mObject transactionsRoot;
   json_spirit::mArray transactionsArray = txDataToJSON();
   json_spirit::mObject transaction;
+  boost::filesystem::path txFilePath = Utils::walletFolderPath.string()
+    + "/wallet/c-avax/accounts/transactions/" + this->address.c_str();
 
   transaction["txlink"] = TxData.txlink;
   transaction["operation"] = TxData.operation;
@@ -176,7 +179,7 @@ bool Account::saveTxToHistory(TxData TxData) {
   transactionsArray.push_back(transaction);
 
   transactionsRoot["transactions"] = transactionsArray;
-  json_spirit::mValue success = JSON::writeFile(transactionsRoot, this->address.c_str());
+  json_spirit::mValue success = JSON::writeFile(transactionsRoot, txFilePath);
 
   try {
     std::string error = success.get_obj().at("ERROR").get_str();
@@ -190,6 +193,8 @@ bool Account::saveTxToHistory(TxData TxData) {
 }
 
 bool Account::updateAllTxStatus() {
+  boost::filesystem::path txFilePath = Utils::walletFolderPath.string()
+    + "/wallet/c-avax/accounts/transactions/" + this->address.c_str();
   loadTxHistory();
   try {
     for (TxData &txData : this->history) {
@@ -209,7 +214,7 @@ bool Account::updateAllTxStatus() {
   json_spirit::mObject transactionsRoot;
   json_spirit::mArray transactionsArray = txDataToJSON();
   transactionsRoot["transactions"] = transactionsArray;
-  json_spirit::mValue success = JSON::writeFile(transactionsRoot, this->address.c_str());
+  json_spirit::mValue success = JSON::writeFile(transactionsRoot, txFilePath);
 
   try {
     std::string error = success.get_obj().at("ERROR").get_str();

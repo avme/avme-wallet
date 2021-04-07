@@ -31,14 +31,15 @@ std::string menuCheckWallet() {
   return ret;
 }
 
-// Load a Wallet file
-std::string menuLoadWalletFile() {
+// Load a Wallet folder
+std::string menuLoadWalletFolder() {
   std::string ret;
 
   while (true) {
-    std::cout << "Please inform the full path of your Wallet file." << std::endl;
+    std::cout << "Please inform the full path of your Wallet folder." << std::endl;
     std::getline(std::cin, ret);
-    if (boost::filesystem::exists(ret)) {
+    if (boost::filesystem::exists(ret + "/wallet/c-avax/wallet.info") &&
+        boost::filesystem::exists(ret + "/wallet/c-avax/accounts/secrets")) {
       break;
     } else {
       std::cout << ret << " not found, please check if it exists or try another path." << std::endl;
@@ -48,53 +49,18 @@ std::string menuLoadWalletFile() {
   return ret;
 }
 
-// Load a secrets path
-std::string menuLoadWalletSecrets() {
+// Create a new Wallet folder
+std::string menuCreateWalletFolder() {
   std::string ret;
 
   while (true) {
-    std::cout << "Please inform the full path of your Wallet secrets folder." << std::endl;
-    std::getline(std::cin, ret);
-    if (boost::filesystem::exists(ret)) {
-      break;
-    } else {
-      std::cout << ret << " not found, please check if it exists or try another path." << std::endl;
-    }
-  }
-
-  return ret;
-}
-
-// Create a new Wallet file
-std::string menuCreateWalletFile() {
-  std::string ret;
-
-  while (true) {
-    std::cout << "Please inform the full path of your Wallet file, or leave blank for default." << std::endl;
+    std::cout << "Please inform the full path of your Wallet folder, or leave blank for default." << std::endl;
     std::cout << "Default is " << KeyManager::defaultPath() << std::endl;
     std::getline(std::cin, ret);
     if (ret.empty()) { ret = KeyManager::defaultPath().string(); }
-    if (boost::filesystem::exists(ret)) {
-      std::cout << ret << " already exists, please try another path" << std::endl;
-    } else {
-      break;
-    }
-  }
-
-  return ret;
-}
-
-// Create a new Wallet secrets path
-std::string menuCreateWalletSecrets() {
-  std::string ret;
-
-  while (true) {
-    std::cout << "Please inform the full path of your Wallet secrets folder, or leave blank for default." << std::endl;
-    std::cout << "Default is " << SecretStore::defaultPath() << std::endl;
-    std::getline(std::cin, ret);
-    if (ret.empty()) { ret = SecretStore::defaultPath().string(); }
-    if (boost::filesystem::exists(ret)) {
-      std::cout << ret << " already exists, please try another path" << std::endl;
+    if (boost::filesystem::exists(ret + "/wallet/c-avax/wallet.info") &&
+        boost::filesystem::exists(ret + "/wallet/c-avax/accounts/secrets")) {
+      std::cout << "Wallet already exists here, please try another path" << std::endl;
     } else {
       break;
     }

@@ -53,22 +53,14 @@ class Wallet {
      * Automatically hashes+salts the passphrase and stores both.
      * Returns true on success, false on failure.
      */
-    bool create(
-      boost::filesystem::path walletFile,
-      boost::filesystem::path secretsPath,
-      std::string pass
-    );
+    bool create(boost::filesystem::path folder, std::string pass);
 
     /**
      * Load and authenticate a Wallet from the given paths.
      * Automatically hashes+salts the passphrase and stores both.
      * Returns true on success, false on failure.
      */
-    bool load(
-      boost::filesystem::path walletFile,
-      boost::filesystem::path secretsPath,
-      std::string pass
-    );
+    bool load(boost::filesystem::path folder, std::string pass);
 
     /**
      * Clean Wallet data.

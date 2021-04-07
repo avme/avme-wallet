@@ -109,13 +109,17 @@ Item {
           if (!walletExists && seedInput.text == "") {
             if (!System.createWallet(folderInput.text, passInput.text)) {
               throw "Error on Wallet creation. Please check"
-              + "<br>the folder path, passphrase and/or seed.";
+              + "<br>the folder path and/or passphrase.";
             }
             console.log("Wallet created successfully, now loading it...")
           } else if (!walletExists && seedInput.text != "") {
-            ; // TODO
-            throw "Error on Wallet importing. Please check"
-            + "<br>the folder path, passphrase and/or seed.";
+            if (!System.seedIsValid(seedInput.text)) {
+              throw "Error on Wallet importing. Seed is invalid,"
+              + "<br>please check the spelling and/or formatting."
+            } else if (!System.importWallet(seedInput.text, folderInput.text, passInput.text)) {
+              throw "Error on Wallet importing. Please check"
+              + "<br>the folder path and/or passphrase.";
+            }
             console.log("Wallet imported successfully, now loading it...")
           }
           if (!System.loadWallet(folderInput.text, passInput.text)) {

@@ -19,10 +19,10 @@ bool BIP39::wordExists(std::string word) {
 }
 
 std::pair<bool,std::string> BIP39::saveEncryptedMnemonic(
-bip3x::Bip39Mnemonic::MnemonicResult &mnemonic, std::string &password
+  bip3x::Bip39Mnemonic::MnemonicResult &mnemonic, std::string &password
 ) {
   std::pair <bool,std::string> result;
-  boost::filesystem::path seedPath = "seed.json";
+  boost::filesystem::path seedPath = Utils::walletFolderPath.string() + "/wallet/c-avax/seed.json";
 
   // Initialize the seed json and cipher, then create the salt
   json_spirit::mObject seedJson;
@@ -49,7 +49,7 @@ bip3x::Bip39Mnemonic::MnemonicResult &mnemonic, std::string &password
   // Add information to JSON object and write it in a file
   seedJson["seed"] = encryptedPhrase;
   seedJson["salt"] = salt;
-  json_spirit::mValue success = JSON::writeFile(seedJson, "seed.json");
+  json_spirit::mValue success = JSON::writeFile(seedJson, seedPath);
   try {
     std::string error = success.get_obj().at("ERROR").get_str();
     result.first = false;
@@ -69,10 +69,11 @@ std::pair<bool,std::string> BIP39::loadEncryptedMnemonic(
   bip3x::Bip39Mnemonic::MnemonicResult &mnemonic, std::string &password
 ) {
   std::pair <bool,std::string> result;
+  boost::filesystem::path seedPath = Utils::walletFolderPath.string() + "/wallet/c-avax/seed.json";
 
   // Initialize the cipher, read the JSON file and check for errors
   Cipher cipher("aes-256-cbc", "sha256");
-  json_spirit::mValue seedJson = JSON::readFile("seed.json");
+  json_spirit::mValue seedJson = JSON::readFile(seedPath);
   try {
     std::string error = seedJson.get_obj().at("ERROR").get_str();
     result.first = false;

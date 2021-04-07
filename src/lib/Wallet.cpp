@@ -1,23 +1,21 @@
 #include "Wallet.h"
 
-bool Wallet::create(
-  boost::filesystem::path walletFile,
-  boost::filesystem::path secretsPath,
-  std::string pass
-) {
-  // Create the paths if they don't exist yet.
-  // Remember walletFile points to a *file*, and secretsPath points to a *dir*.
+bool Wallet::create(boost::filesystem::path folder, std::string pass) {
+  // Create the paths if they don't exist yet
+  boost::filesystem::path walletFile = folder.string() + "/wallet/c-avax/wallet.info";
+  boost::filesystem::path secretsFolder = folder.string() + "/wallet/c-avax/accounts/secrets";
   if (!exists(walletFile.parent_path())) {
     create_directories(walletFile.parent_path());
   }
-  if (!exists(secretsPath)) {
-    create_directories(secretsPath);
+  if (!exists(secretsFolder)) {
+    create_directories(secretsFolder);
   }
 
   // Initialize a new Wallet, hash+salt the passphrase and store both
-  KeyManager w(walletFile, secretsPath);
+  KeyManager w(walletFile, secretsFolder);
   try {
     w.create(pass);
+    Utils::walletFolderPath = folder;
     return true;
   } catch (Exception const& _e) {
     std::cerr << "Unable to create wallet" << std::endl << boost::diagnostic_information(_e);
@@ -25,17 +23,16 @@ bool Wallet::create(
   }
 }
 
-bool Wallet::load(
-  boost::filesystem::path walletFile,
-  boost::filesystem::path secretsPath,
-  std::string pass
-) {
+bool Wallet::load(boost::filesystem::path folder, std::string pass) {
   // Load the Wallet, hash+salt the passphrase and store both
-  KeyManager w(walletFile, secretsPath);
+  boost::filesystem::path walletFile = folder.string() + "/wallet/c-avax/wallet.info";
+  boost::filesystem::path secretsFolder = folder.string() + "/wallet/c-avax/accounts/secrets";
+  KeyManager w(walletFile, secretsFolder);
   if (w.load(pass)) {
     this->km = w;
     this->passSalt = h256::random();
     this->passHash = dev::pbkdf2(pass, this->passSalt.asBytes(), this->passIterations);
+    Utils::walletFolderPath = folder;
     return true;
   } else {
     return false;
@@ -47,6 +44,7 @@ void Wallet::close() {
   this->passHash = bytesSec();
   this->passSalt = h256();
   this->km = KeyManager();
+  Utils::walletFolderPath = "";
 }
 
 bool Wallet::auth(std::string pass) {

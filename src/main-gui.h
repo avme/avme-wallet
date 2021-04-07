@@ -167,24 +167,30 @@ class System : public QObject {
       return w.auth(pass.toStdString());
     }
 
-    // Create a new Wallet
-    // TODO: seed phrase
+    // Create, import, load and close a Wallet, respectively
     Q_INVOKABLE bool createWallet(QString folder, QString pass) {
-      std::string walletFile = folder.toStdString() + "/wallet/c-avax/wallet.info";
-      std::string secretsFolder = folder.toStdString() + "/wallet/c-avax/accounts/secrets";
-      return this->w.create(walletFile, secretsFolder, pass.toStdString());
+      std::string passStr = pass.toStdString();
+      bool createSuccess = this->w.create(folder.toStdString(), passStr);
+      bip3x::Bip39Mnemonic::MnemonicResult mnemonic = BIP39::createNewMnemonic();
+      std::pair<bool,std::string> seedSuccess = BIP39::saveEncryptedMnemonic(mnemonic, passStr);
+      return (createSuccess && seedSuccess.first);
     }
 
-    // Load a Wallet
+    Q_INVOKABLE bool importWallet(QString seed, QString folder, QString pass) {
+      std::string passStr = pass.toStdString();
+      bool createSuccess = this->w.create(folder.toStdString(), passStr);
+      bip3x::Bip39Mnemonic::MnemonicResult mnemonic;
+      mnemonic.raw = seed.toStdString();
+      std::pair<bool,std::string> seedSuccess = BIP39::saveEncryptedMnemonic(mnemonic, passStr);
+      return (createSuccess && seedSuccess.first);
+    }
+
     Q_INVOKABLE bool loadWallet(QString folder, QString pass) {
-      std::string walletFile = folder.toStdString() + "/wallet/c-avax/wallet.info";
-      std::string secretsFolder = folder.toStdString() + "/wallet/c-avax/accounts/secrets";
-      return this->w.load(walletFile, secretsFolder, pass.toStdString());
+      std::string passStr = pass.toStdString();
+      bool loadSuccess = this->w.load(folder.toStdString(), passStr);
+      return loadSuccess;
     }
 
-    // TODO: import Wallet
-
-    // Close the Wallet
     Q_INVOKABLE void closeWallet() {
       this->w.close();
     }
