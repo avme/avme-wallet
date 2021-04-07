@@ -93,7 +93,7 @@ Item {
       id: btn
       anchors.horizontalCenter: parent.horizontalCenter
       width: parent.width / 4
-      enabled: (folderInput.text != "")
+      enabled: (folderInput.text != "" && passInput.text != "")
       height: 60
       text: {
         if (walletExists) {
