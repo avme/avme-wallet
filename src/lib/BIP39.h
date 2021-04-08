@@ -19,6 +19,7 @@
 
 #include "Cipher.h"
 #include "JSON.h"
+#include "Network.h"
 #include "Utils.h"
 
 /**
@@ -43,6 +44,12 @@ namespace BIP39 {
    * Returns true on success, false on failure.
    */
   bool wordExists(std::string word);
+
+  /**
+   * Generate an Account list based on a given seed and a starting index.
+   * Returns a vetor with the Accounts, their indices and balances.
+   */
+  std::vector<std::string> generateAccountsFromSeed(std::string seed, int64_t start);
 
   /**
    * Save a mnemonic phrase to a JSON file in the default path.

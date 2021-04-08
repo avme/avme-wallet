@@ -52,30 +52,33 @@ bool Wallet::auth(std::string pass) {
   return (hash.ref().toString() == passHash.ref().toString());
 }
 
-Account Wallet::createAccount(std::string name, std::string pass) {
-  bip3x::Bip39Mnemonic::MnemonicResult seed = BIP39::createNewMnemonic();
-  bip3x::HDKey keyPair = BIP39::createKey(seed.raw, "m/44'/60'/0'/0/0");
+Account Wallet::createAccount(
+  std::string &seed, int64_t index, std::string name, std::string &pass
+) {
+  bip3x::Bip39Mnemonic::MnemonicResult mnemonic;
+  if (!seed.empty()) { // Using a foreign seed
+    mnemonic.raw = seed;
+  } else {  // Using the Wallet's own seed
+    std::pair<bool,std::string> seedSuccess = BIP39::loadEncryptedMnemonic(mnemonic, pass);
+    if (!seedSuccess.first) { return Account(); }
+  }
+  std::string indexStr = boost::lexical_cast<std::string>(index);
+  bip3x::HDKey keyPair = BIP39::createKey(mnemonic.raw, "m/44'/60'/0'/0/" + indexStr);
   KeyPair k(Secret::frombip3x(keyPair.privateKey));
   h128 u = this->km.import(k.secret(), name, pass, "");
-  return Account(toUUID(u), name, k.address().hex(), seed.words);
-}
-
-Account Wallet::importAccount(std::string name, std::string pass, bip3x::HDKey keyPair) {
-  KeyPair k(Secret::frombip3x(keyPair.privateKey));
-  h128 u = this->km.import(k.secret(), name, pass, "");
-  return Account(toUUID(u), name, k.address().hex(), {}); // TODO: get the seed
+  return Account(toUUID(u), name, k.address().hex());
 }
 
 void Wallet::loadAccounts() {
+  this->accounts.clear();
   if (this->km.store().keys().empty()) { return; }
   AddressHash got;
   std::vector<h128> keys = this->km.store().keys();
-  this->accounts.clear();
   for (auto const& u : keys) {
     if (Address a = this->km.address(u)) {
       got.insert(a);
       Account acc(toUUID(u), this->km.accountName(a),
-        "0x" + boost::lexical_cast<std::string>(a), {});  // TODO: get the seed
+        "0x" + boost::lexical_cast<std::string>(a));
       this->accounts.push_back(acc);
     }
   }

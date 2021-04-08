@@ -18,6 +18,34 @@ bool BIP39::wordExists(std::string word) {
   return (idx != 0);
 }
 
+std::vector<std::string> BIP39::generateAccountsFromSeed(std::string seed, int64_t index) {
+  std::vector<std::string> ret;
+
+  for (int64_t i = 0; i < 10; ++i, ++index) {
+    std::string toPushBack;
+
+    // Get the index and address
+    std::string derivPath = "m/44'/60'/0'/0/" + boost::lexical_cast<std::string>(index);
+    bip3x::HDKey rootKey = BIP39::createKey(seed, derivPath);
+    KeyPair k(Secret::frombip3x(rootKey.privateKey));
+    toPushBack += boost::lexical_cast<std::string>(index) + " " + "0x" + k.address().hex();
+
+    // Get the balance
+    json_spirit::mValue jsonBal = JSON::getValue(Network::getAVAXBalance("0x" + k.address().hex()), "result");
+    u256 AVAXbalance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
+    std::string balanceStr = boost::lexical_cast<std::string>(AVAXbalance);
+
+    // Don't write to vector if an error occurs while reading the JSON
+    if (balanceStr == "" || balanceStr.find_first_not_of("0123456789.") != std::string::npos) {
+      return {};
+    }
+    toPushBack += " " + Utils::weiToFixedPoint(balanceStr, 18);
+    ret.push_back(toPushBack);
+  }
+
+  return ret;
+}
+
 std::pair<bool,std::string> BIP39::saveEncryptedMnemonic(
   bip3x::Bip39Mnemonic::MnemonicResult &mnemonic, std::string &password
 ) {

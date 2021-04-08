@@ -13,18 +13,13 @@ Item {
 
     onAccountCreated: {
       console.log("Account created successfully")
-      accountDataPopup.setData(data.accId, data.accName, data.accAddress, data.accSeed)
       createAccountPopup.close()
-      accountDataPopup.open()
+      reloadList()
     }
-    onAccountImported: {
-      importAccountPopup.close()
-      if (success) {
-        console.log("Account imported successfully")
-        reloadList()
-      } else {
-        importFailPopup.open()
-      }
+    onAccountCreationFailed: {
+      console.log("Failed to create Account")
+      createAccountPopup.close()
+      accountFailPopup.open()
     }
   }
 
@@ -56,8 +51,8 @@ Item {
   function reloadList() {
     console.log("Reloading list...")
     fetchAccountsPopup.open()
-
     System.stopAllBalanceThreads()
+    listReloadTimer.stop()
     accountsList.clear()
     System.loadAccounts()
     var accList = System.listAccounts()
@@ -66,7 +61,6 @@ Item {
       accountsList.append(acc)
       System.startBalanceThread(acc.account)
     }
-
     listReloadTimer.start()
     fetchAccountsPopup.close()
   }
@@ -111,16 +105,21 @@ Item {
       }
     }
     AVMEButton {
-      id: btnNewAccount
+      id: btnUseAccount
       width: (parent.width / 3) - parent.spacing
-      text: "Create New Account"
-      onClicked: newAccountPopup.open()
+      enabled: (walletList.currentItem)
+      text: "Use this Account"
+      onClicked: {
+        System.setTxSenderAccount(walletList.currentItem.itemAccount)
+        listReloadTimer.stop()
+        System.setScreen(content, "qml/screens/StatsScreen.qml")
+      }
     }
     AVMEButton {
-      id: btnImportSeed
+      id: btnNewAccount
       width: (parent.width / 3) - parent.spacing
-      text: "Import Account Seed"
-      onClicked: importSeedPopup.open()
+      text: "Create/Import Account"
+      onClicked: chooseAccountPopup.open()
     }
   }
 
@@ -165,17 +164,6 @@ Item {
       onClicked: closeWalletPopup.open()
     }
     AVMEButton {
-      id: btnUseAccount
-      width: (parent.width / 3) - parent.spacing
-      enabled: (walletList.currentItem)
-      text: "Use this Account"
-      onClicked: {
-        System.setTxSenderAccount(walletList.currentItem.itemAccount)
-        listReloadTimer.stop()
-        System.setScreen(content, "qml/screens/StatsScreen.qml")
-      }
-    }
-    AVMEButton {
       id: btnCopyAddress
       width: (parent.width / 3) - parent.spacing
       Timer { id: textTimer; interval: 2000 }
@@ -186,56 +174,47 @@ Item {
         textTimer.start()
       }
     }
+    AVMEButton {
+      id: btnViewSeed
+      width: (parent.width / 3) - parent.spacing
+      text: "View Wallet Seed"
+      onClicked: viewSeedPopup.open()
+    }
   }
 
-  // Popup for creating a new Account
-  AVMEPopupNewAccount {
-    id: newAccountPopup
-    doneBtn.onClicked: {
-      if (System.checkWalletPass(pass)) {
+  // Popup for choosing an Account from a generated list
+  AVMEPopupChooseAccount {
+    id: chooseAccountPopup
+    chooseBtn.onClicked: {
+      if (System.accountExists(item.itemAccount)) {
+        addressTimer.start()
+      } else if (!System.checkWalletPass(pass)) {
+        infoTimer.start()
+      } else {
         try {
-          console.log("Creating new Account...")
-          System.createNewAccount(name, pass)
-          newAccountPopup.clean()
-          newAccountPopup.close()
-          createAccountPopup.open()
           System.stopAllBalanceThreads()
           listReloadTimer.stop()
+          chooseAccountPopup.close()
+          console.log(((foreignSeed != "") ? "Importing" : "Creating") + " Account...")
+          System.createAccount(foreignSeed, index, name, pass)
+          chooseAccountPopup.clean()
+          createAccountPopup.open()
         } catch (error) {
-          newAccountPopup.close()
+          chooseAccountPopup.close()
           accountFailPopup.open()
         }
-      } else {
-        passInfo.timer.start()
       }
     }
   }
 
-  // Popup for viewing a new Account's data and seed
-  AVMEPopupAccountData {
-    id: accountDataPopup
-    okBtn.onClicked: {
-      accountDataPopup.clean()
-      accountDataPopup.close()
-      reloadList()
-    }
-  }
-
-  // Popup for importing an Account seed
-  AVMEPopupImportSeed {
-    id: importSeedPopup
-    doneBtn.onClicked: {
-      if (System.seedIsValid(seed)) {
-        System.stopAllBalanceThreads()
-        listReloadTimer.stop()
-        importSeedPopup.close()
-        importAccountPopup.open()
-        console.log("Importing Account...")
-        System.importAccount(seed, name, pass)
-        importSeedPopup.clean()
+  // Popup for viewing the Wallet's seed
+  AVMEPopupViewSeed {
+    id: viewSeedPopup
+    showBtn.onClicked: {
+      if (System.checkWalletPass(pass)) {
+        viewSeedPopup.showSeed()
       } else {
-        errorText.visible = true;
-        errorTimer.start();
+        viewSeedPopup.showErrorMsg()
       }
     }
   }
@@ -249,27 +228,14 @@ Item {
   // Popup for waiting for a new Account to be created
   AVMEPopup {
     id: createAccountPopup
-    info: "Creating a new Account..."
-  }
-
-  // Popup for waiting for a new Account to be imported
-  AVMEPopup {
-    id: importAccountPopup
-    info: "Importing Account..."
+    info: "Creating/Importing Account..."
   }
 
   // Info popup for if the Account creation fails
   AVMEPopupInfo {
     id: accountFailPopup
     icon: "qrc:/img/warn.png"
-    info: "Error on Account creation. Please try again."
-  }
-
-  // Info popup for if the Account import fails
-  AVMEPopupInfo {
-    id: importFailPopup
-    icon: "qrc:/img/warn.png"
-    info: "Error on importing Account. Please try again."
+    info: "Error on Account creation/importing. Please try again."
   }
 
   // Info popup for if the Account erasure fails

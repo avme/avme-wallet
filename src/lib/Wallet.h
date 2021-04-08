@@ -74,16 +74,12 @@ class Wallet {
     bool auth(std::string pass);
 
     /**
-     * Create a new Account in the given Wallet and encrypt it.
-     * Returns a struct with the Account's data.
+     * Create/import an Account in the Wallet, based on a given seed and index.
+     * Returns a struct with the Account's data, or an empty struct on failure.
      */
-    Account createAccount(std::string name, std::string pass);
-
-    /**
-     * Import an Account from a given BIP39 key pair.
-     * Returns a struct with the Account's data.
-     */
-    Account importAccount(std::string name, std::string pass, bip3x::HDKey keyPair);
+    Account createAccount(
+      std::string &seed, int64_t index, std::string name, std::string &pass
+    );
 
     /**
      * Load the Wallet's Accounts and their coin and token balances.
