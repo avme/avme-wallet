@@ -1,5 +1,7 @@
 #include "Utils.h"
 
+boost::filesystem::path Utils::walletFolderPath;
+
 u256 Utils::MAX_U256_VALUE() {
   return (raiseToPow(2, 256) - 1);
 }

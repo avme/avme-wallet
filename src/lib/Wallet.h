@@ -53,22 +53,19 @@ class Wallet {
      * Automatically hashes+salts the passphrase and stores both.
      * Returns true on success, false on failure.
      */
-    bool create(
-      boost::filesystem::path walletFile,
-      boost::filesystem::path secretsPath,
-      std::string pass
-    );
+    bool create(boost::filesystem::path folder, std::string pass);
 
     /**
      * Load and authenticate a Wallet from the given paths.
      * Automatically hashes+salts the passphrase and stores both.
      * Returns true on success, false on failure.
      */
-    bool load(
-      boost::filesystem::path walletFile,
-      boost::filesystem::path secretsPath,
-      std::string pass
-    );
+    bool load(boost::filesystem::path folder, std::string pass);
+
+    /**
+     * Clean Wallet data.
+     */
+    void close();
 
     /**
      * Check if the passphrase input matches the stored hash.
@@ -77,16 +74,12 @@ class Wallet {
     bool auth(std::string pass);
 
     /**
-     * Create a new Account in the given Wallet and encrypt it.
-     * Returns a struct with the Account's data.
+     * Create/import an Account in the Wallet, based on a given seed and index.
+     * Returns a struct with the Account's data, or an empty struct on failure.
      */
-    Account createAccount(std::string name, std::string pass);
-
-    /**
-     * Import an Account from a given BIP39 key pair.
-     * Returns a struct with the Account's data.
-     */
-    Account importAccount(std::string name, std::string pass, bip3x::HDKey keyPair);
+    Account createAccount(
+      std::string &seed, int64_t index, std::string name, std::string &pass
+    );
 
     /**
      * Load the Wallet's Accounts and their coin and token balances.

@@ -1,23 +1,21 @@
 #include "Wallet.h"
 
-bool Wallet::create(
-  boost::filesystem::path walletFile,
-  boost::filesystem::path secretsPath,
-  std::string pass
-) {
-  // Create the paths if they don't exist yet.
-  // Remember walletFile points to a *file*, and secretsPath points to a *dir*.
+bool Wallet::create(boost::filesystem::path folder, std::string pass) {
+  // Create the paths if they don't exist yet
+  boost::filesystem::path walletFile = folder.string() + "/wallet/c-avax/wallet.info";
+  boost::filesystem::path secretsFolder = folder.string() + "/wallet/c-avax/accounts/secrets";
   if (!exists(walletFile.parent_path())) {
     create_directories(walletFile.parent_path());
   }
-  if (!exists(secretsPath)) {
-    create_directories(secretsPath);
+  if (!exists(secretsFolder)) {
+    create_directories(secretsFolder);
   }
 
   // Initialize a new Wallet, hash+salt the passphrase and store both
-  KeyManager w(walletFile, secretsPath);
+  KeyManager w(walletFile, secretsFolder);
   try {
     w.create(pass);
+    Utils::walletFolderPath = folder;
     return true;
   } catch (Exception const& _e) {
     std::cerr << "Unable to create wallet" << std::endl << boost::diagnostic_information(_e);
@@ -25,21 +23,28 @@ bool Wallet::create(
   }
 }
 
-bool Wallet::load(
-  boost::filesystem::path walletFile,
-  boost::filesystem::path secretsPath,
-  std::string pass
-) {
+bool Wallet::load(boost::filesystem::path folder, std::string pass) {
   // Load the Wallet, hash+salt the passphrase and store both
-  KeyManager w(walletFile, secretsPath);
+  boost::filesystem::path walletFile = folder.string() + "/wallet/c-avax/wallet.info";
+  boost::filesystem::path secretsFolder = folder.string() + "/wallet/c-avax/accounts/secrets";
+  KeyManager w(walletFile, secretsFolder);
   if (w.load(pass)) {
     this->km = w;
     this->passSalt = h256::random();
     this->passHash = dev::pbkdf2(pass, this->passSalt.asBytes(), this->passIterations);
+    Utils::walletFolderPath = folder;
     return true;
   } else {
     return false;
   }
+}
+
+void Wallet::close() {
+  this->accounts.clear();
+  this->passHash = bytesSec();
+  this->passSalt = h256();
+  this->km = KeyManager();
+  Utils::walletFolderPath = "";
 }
 
 bool Wallet::auth(std::string pass) {
@@ -47,30 +52,33 @@ bool Wallet::auth(std::string pass) {
   return (hash.ref().toString() == passHash.ref().toString());
 }
 
-Account Wallet::createAccount(std::string name, std::string pass) {
-  bip3x::Bip39Mnemonic::MnemonicResult seed = BIP39::createNewMnemonic();
-  bip3x::HDKey keyPair = BIP39::createKey(seed.raw, "m/44'/60'/0'/0/0");
+Account Wallet::createAccount(
+  std::string &seed, int64_t index, std::string name, std::string &pass
+) {
+  bip3x::Bip39Mnemonic::MnemonicResult mnemonic;
+  if (!seed.empty()) { // Using a foreign seed
+    mnemonic.raw = seed;
+  } else {  // Using the Wallet's own seed
+    std::pair<bool,std::string> seedSuccess = BIP39::loadEncryptedMnemonic(mnemonic, pass);
+    if (!seedSuccess.first) { return Account(); }
+  }
+  std::string indexStr = boost::lexical_cast<std::string>(index);
+  bip3x::HDKey keyPair = BIP39::createKey(mnemonic.raw, "m/44'/60'/0'/0/" + indexStr);
   KeyPair k(Secret::frombip3x(keyPair.privateKey));
   h128 u = this->km.import(k.secret(), name, pass, "");
-  return Account(toUUID(u), name, k.address().hex(), seed.words);
-}
-
-Account Wallet::importAccount(std::string name, std::string pass, bip3x::HDKey keyPair) {
-  KeyPair k(Secret::frombip3x(keyPair.privateKey));
-  h128 u = this->km.import(k.secret(), name, pass, "");
-  return Account(toUUID(u), name, k.address().hex(), {}); // TODO: get the seed
+  return Account(toUUID(u), name, k.address().hex());
 }
 
 void Wallet::loadAccounts() {
+  this->accounts.clear();
   if (this->km.store().keys().empty()) { return; }
   AddressHash got;
   std::vector<h128> keys = this->km.store().keys();
-  this->accounts.clear();
   for (auto const& u : keys) {
     if (Address a = this->km.address(u)) {
       got.insert(a);
       Account acc(toUUID(u), this->km.accountName(a),
-        "0x" + boost::lexical_cast<std::string>(a), {});  // TODO: get the seed
+        "0x" + boost::lexical_cast<std::string>(a));
       this->accounts.push_back(acc);
     }
   }

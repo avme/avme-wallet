@@ -42,7 +42,6 @@ class Account {
     std::string id;
     std::string name;
     std::string address;
-    std::vector<std::string> seed;
     std::string balanceAVAX;
     std::string balanceAVME;
     std::string balanceLPFree;
@@ -60,18 +59,16 @@ class Account {
       this->id = acc.id;
       this->name = acc.name;
       this->address = acc.address;
-      this->seed = acc.seed;
       this->balanceAVAX = acc.balanceAVAX;
       this->balanceAVME = acc.balanceAVME;
       this->balanceLPFree = acc.balanceLPFree;
       this->balanceLPLocked = acc.balanceLPLocked;
       this->history = acc.history;
     }
-    Account(std::string id, std::string name, std::string address, std::vector<std::string> seed) {
+    Account(std::string id, std::string name, std::string address) {
       this->id = id;
       this->name = name;
       this->address = address;
-      this->seed = seed;
       loadTxHistory();
     }
 

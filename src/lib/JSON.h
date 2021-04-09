@@ -41,7 +41,7 @@ namespace JSON {
   json_spirit::mValue getValue(std::string jsonStr, std::string value, std::string delim = "");
 
   // Handle the transaction history storage directory.
-  
+
   #ifdef __MINGW32__
   boost::filesystem::path GetSpecialFolderPath(int nFolder, bool fCreate = true);
   #endif

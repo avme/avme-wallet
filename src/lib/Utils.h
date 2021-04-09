@@ -59,8 +59,8 @@ typedef struct TxData {
  * Namespace for general utility functions.
  */
 namespace Utils {
-  // Maximum 256-bit unsigned int value (for error handling).
-  u256 MAX_U256_VALUE();
+  extern boost::filesystem::path walletFolderPath; // The top folder in which the Wallet resides.
+  u256 MAX_U256_VALUE();  // Maximum 256-bit unsigned int value (for error handling).
 
   /**
    * Decode a raw transaction in Hex.

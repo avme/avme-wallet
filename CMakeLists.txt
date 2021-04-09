@@ -102,12 +102,12 @@ target_link_libraries(avme-lib PUBLIC
 
 # Compile the CLI executable (for testing)
 # TODO: have a macro somewhere that makes this optional
-add_executable(avme-cli src/main-cli.h src/main-cli.cpp)
-if (DEPENDS_PREFIX EQUAL "x86_64-w64-mingw32")
-  target_link_libraries(avme-cli PUBLIC avme-lib -static)
-else()
-  target_link_libraries(avme-cli PUBLIC avme-lib)
-endif()
+#add_executable(avme-cli src/main-cli.h src/main-cli.cpp)
+#if (DEPENDS_PREFIX EQUAL "x86_64-w64-mingw32")
+#  target_link_libraries(avme-cli PUBLIC avme-lib -static)
+#else()
+#  target_link_libraries(avme-cli PUBLIC avme-lib)
+#endif()
 
 # Compile Qt-specific stuff to embed into GUI executable.
 # First command is a dummy output to force whatever depends on it to always be rebuilt. Adapted from https://stackoverflow.com/a/32062884
@@ -131,12 +131,12 @@ add_custom_command(
 
 # Compile the GUI executable
 if("${TOOLCHAIN_PREFIX}" STREQUAL "x86_64-w64-mingw32")
-  add_executable(avme-gui WIN32 
-  src/main-gui.h src/main-gui.cpp build/moc_main-gui.cpp build/qml.cpp
+  add_executable(avme-gui WIN32
+    src/main-gui.h src/main-gui.cpp build/moc_main-gui.cpp build/qml.cpp
   )
 else()
   add_executable(avme-gui
-  src/main-gui.h src/main-gui.cpp build/moc_main-gui.cpp build/qml.cpp
+    src/main-gui.h src/main-gui.cpp build/moc_main-gui.cpp build/qml.cpp
   )
 endif()
 

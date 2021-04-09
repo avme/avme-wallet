@@ -84,22 +84,21 @@ json_spirit::mValue JSON::readFile(boost::filesystem::path filePath) {
   json_spirit::mValue returnData;
   storageThreadLock.lock();
 
-  boost::filesystem::path finalPath = getDataDir() / filePath;
-  if (!boost::filesystem::exists(finalPath)) {
+  if (!boost::filesystem::exists(filePath)) {
     json_spirit::mObject errorData;
     errorData["ERROR"] = "FILE DOES NOT EXIST";
     storageThreadLock.unlock();
     return json_spirit::mValue(errorData);
   }
-  
+
   try {
-    std::ifstream jsonFile(finalPath.c_str());
+    std::ifstream jsonFile(filePath.c_str());
     json_spirit::read_stream(jsonFile, returnData);
   } catch (std::exception &e) {
     json_spirit::mObject errorData;
     errorData["ERROR"] = e.what();
-	storageThreadLock.unlock();
-	return json_spirit::mValue(errorData);
+    storageThreadLock.unlock();
+    return json_spirit::mValue(errorData);
   }
 
   storageThreadLock.unlock();
@@ -110,9 +109,8 @@ json_spirit::mValue JSON::writeFile(json_spirit::mObject jsonObject, boost::file
   json_spirit::mObject returnData;
   storageThreadLock.lock();
 
-  boost::filesystem::path finalPath = getDataDir() / filePath;
   try {
-    std::ofstream os(finalPath.c_str());
+    std::ofstream os(filePath.c_str());
     json_spirit::write_stream(json_spirit::mValue(jsonObject), os, true);
     os.close();
   } catch (std::exception &e) {

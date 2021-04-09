@@ -9,7 +9,7 @@ int main() {
   dev::setupLogging(loggingOptions);
 
   Wallet w;
-  boost::filesystem::path walletFile, secretsPath;
+  boost::filesystem::path walletFolder;
 
   std::cout << "Hello! Welcome to the AVME CLI wallet." << std::endl;
 
@@ -17,12 +17,11 @@ int main() {
   while (true) {
     std::string menuOp = menuCheckWallet();
     if (menuOp == "1") { // Create a new wallet
-      walletFile = menuCreateWalletFile();
-      secretsPath = menuCreateWalletSecrets();
+      walletFolder = menuCreateWalletFolder();
       std::cout << "Protect your Wallet with a master passphrase (make it strong!)." << std::endl;
       std::string pass = menuCreatePass();
       std::cout << "Creating new Wallet..." << std::endl;
-      if (w.create(walletFile, secretsPath, pass)) {
+      if (w.create(walletFolder, pass)) {
         std::cout << "Wallet successfully created!" << std::endl;
         pass = "";
         break;
@@ -30,8 +29,7 @@ int main() {
         std::cout << "Failed to create Wallet, please try again." << std::endl;
       }
     } else if (menuOp == "2") { // Load an existing wallet
-      walletFile = menuLoadWalletFile();
-      secretsPath = menuLoadWalletSecrets();
+      walletFolder = menuLoadWalletFolder();
       break;
     }
   }
@@ -42,7 +40,7 @@ int main() {
     std::cout << "Enter your Wallet's passphrase." << std::endl;
     std::getline(std::cin, pass);
     std::cout << "Loading Wallet..." << std::endl;
-    if (w.load(walletFile, secretsPath, pass)) {
+    if (w.load(walletFolder, pass)) {
       std::cout << "Wallet loaded." << std::endl;
       pass = "";
       break;
@@ -222,7 +220,7 @@ int main() {
       std::string enterStr;
       std::getline(std::cin, enterStr);
       std::cout << "Reloading Wallet..." << std::endl;
-      w.load(walletFile, secretsPath, pass);
+      w.load(walletFolder, pass);
       pass = "";
       std::cout << "Reloading Accounts..." << std::endl;
       w.loadAccounts();
@@ -290,7 +288,7 @@ int main() {
                 << "  Name: " << a.name << std::endl
                 << "  Address: " << a.address << std::endl;
       std::cout << "Reloading Wallet..." << std::endl;
-      w.load(walletFile, secretsPath, pass);
+      w.load(walletFolder, pass);
       pass = "";
       std::cout << "Reloading Accounts..." << std::endl;
       w.loadAccounts();
@@ -311,7 +309,7 @@ int main() {
         if (w.eraseAccount(account)) {
           std::cout << "Account erased: " << account << std::endl;
           std::cout << "Reloading Wallet..." << std::endl;
-          w.load(walletFile, secretsPath, pass);
+          w.load(walletFolder, pass);
           pass = "";
           std::cout << "Reloading Accounts..." << std::endl;
           w.loadAccounts();

@@ -4,6 +4,7 @@
 #include <QtWidgets/QApplication>
 #include <QtQml/QQmlContext>
 #include <QtQml/QQmlApplicationEngine>
+#include <QtCore/QFile>
 #include <QtCore/QString>
 #include <QtCore/QVariant>
 #include <QtCore/qplugin.h>
@@ -37,8 +38,9 @@ class System : public QObject {
   Q_OBJECT
 
   signals:
+    void accountsGenerated(QVariantList accounts);
     void accountCreated(QVariantMap data);
-    void accountImported(bool success);
+    void accountCreationFailed();
     void txStart(QString pass);
     void txBuilt(bool b);
     void txSigned(bool b);
@@ -145,41 +147,61 @@ class System : public QObject {
       QApplication::clipboard()->setText(str);
     }
 
+    // Remove the "file://" prefix from a folder path
+    Q_INVOKABLE QString cleanPath(QString path) {
+      #ifdef __MINGW32__
+        return path.remove("file:///");
+      #else
+        return path.remove("file://");
+      #endif
+    }
+
+    // Check if a Wallet exists in a given folder
+    Q_INVOKABLE bool checkFolderForWallet(QString folder) {
+      QString walletFile = QString(folder + "/wallet/c-avax/wallet.info");
+      QString secretsFolder = QString(folder + "/wallet/c-avax/accounts/secrets");
+      return (QFile::exists(walletFile) && QFile::exists(secretsFolder));
+    }
+
     // Check if given passphrase equals the Wallet's
     Q_INVOKABLE bool checkWalletPass(QString pass) {
       return w.auth(pass.toStdString());
     }
 
-    // Create a new Wallet
-    Q_INVOKABLE bool createNewWallet(
-      QString walletFile, QString secretsPath, QString pass
-    ) {
-      return this->w.create(
-        #ifdef __MINGW32__
-          walletFile.remove("file:///").toStdString(),
-          secretsPath.remove("file:///").toStdString(),
-        #else
-          walletFile.remove("file://").toStdString(),
-          secretsPath.remove("file://").toStdString(),
-        #endif
-        pass.toStdString()
-      );
+    // Create, import, load and close a Wallet, respectively
+    Q_INVOKABLE bool createWallet(QString folder, QString pass) {
+      std::string passStr = pass.toStdString();
+      bool createSuccess = this->w.create(folder.toStdString(), passStr);
+      bip3x::Bip39Mnemonic::MnemonicResult mnemonic = BIP39::createNewMnemonic();
+      std::pair<bool,std::string> seedSuccess = BIP39::saveEncryptedMnemonic(mnemonic, passStr);
+      return (createSuccess && seedSuccess.first);
     }
 
-    // Load a Wallet
-    Q_INVOKABLE bool loadWallet(
-        QString walletFile, QString secretsPath, QString pass
-        ) {
-      return this->w.load(
-        #ifdef __MINGW32__
-          walletFile.remove("file:///").toStdString(),
-          secretsPath.remove("file:///").toStdString(),
-        #else
-          walletFile.remove("file://").toStdString(),
-          secretsPath.remove("file://").toStdString(),
-        #endif
-        pass.toStdString()
-      );
+    Q_INVOKABLE bool importWallet(QString seed, QString folder, QString pass) {
+      std::string passStr = pass.toStdString();
+      bool createSuccess = this->w.create(folder.toStdString(), passStr);
+      bip3x::Bip39Mnemonic::MnemonicResult mnemonic;
+      mnemonic.raw = seed.toStdString();
+      std::pair<bool,std::string> seedSuccess = BIP39::saveEncryptedMnemonic(mnemonic, passStr);
+      return (createSuccess && seedSuccess.first);
+    }
+
+    Q_INVOKABLE bool loadWallet(QString folder, QString pass) {
+      std::string passStr = pass.toStdString();
+      bool loadSuccess = this->w.load(folder.toStdString(), passStr);
+      return loadSuccess;
+    }
+
+    Q_INVOKABLE void closeWallet() {
+      this->w.close();
+    }
+
+    // Get the seed for the Wallet
+    Q_INVOKABLE QString getWalletSeed(QString pass) {
+      std::string passStr = pass.toStdString();
+      bip3x::Bip39Mnemonic::MnemonicResult mnemonic;
+      std::pair<bool,std::string> seedSuccess = BIP39::loadEncryptedMnemonic(mnemonic, passStr);
+      return (seedSuccess.first) ? QString::fromStdString(mnemonic.raw) : "";
     }
 
     // Load the Accounts into the Wallet
@@ -244,20 +266,46 @@ class System : public QObject {
       }
     }
 
+    // Generate an Account list from a given seed, starting from a given index
+    Q_INVOKABLE void generateAccounts(QString seed, int idx) {
+      QtConcurrent::run([=](){
+        QVariantList ret;
+        std::vector<std::string> list = BIP39::generateAccountsFromSeed(seed.toStdString(), idx);
+        for (std::string s : list) {
+          std::stringstream listss(s);
+          std::string item, obj;
+          int ct = 0;
+          while (std::getline(listss, item, ' ')) {
+            switch (ct) {
+              case 0: obj += "{\"idx\": \"" + item; break;
+              case 1: obj += "\", \"account\": \"" + item; break;
+              case 2: obj += "\", \"balance\": \"" + item; break;
+            }
+            ct++;
+          }
+          obj += "\"}";
+          ret << QString::fromStdString(obj);
+        }
+        emit accountsGenerated(ret);
+      });
+    }
+
     // Create a new Account
-    Q_INVOKABLE void createNewAccount(QString name, QString pass) {
+    Q_INVOKABLE void createAccount(QString seed, int index, QString name, QString pass) {
       QtConcurrent::run([=](){
         QVariantMap obj;
-        QVariantList seed;
-        Account a = this->w.createAccount(name.toStdString(), pass.toStdString());
+        std::string seedStr = seed.toStdString();
+        std::string nameStr = name.toStdString();
+        std::string passStr = pass.toStdString();
+        Account a = this->w.createAccount(seedStr, index, nameStr, passStr);
         if (!a.id.empty()) {
           obj.insert("accId", QString::fromStdString(a.id));
           obj.insert("accName", QString::fromStdString(a.name));
           obj.insert("accAddress", QString::fromStdString(a.address));
-          for (std::string word : a.seed) { seed << QString::fromStdString(word); }
-          obj.insert("accSeed", seed);
+          emit accountCreated(obj);
+        } else {
+          emit accountCreationFailed();
         }
-        emit accountCreated(obj);
       });
     }
 
@@ -336,27 +384,6 @@ class System : public QObject {
       if (ct != 12) { return false; }
 
       return true;
-    }
-
-    // Import an Account generated by a seed
-    Q_INVOKABLE void importAccount(QString seed, QString name, QString pass) {
-      QtConcurrent::run([=](){
-        std::stringstream seedss(seed.toStdString());
-        std::string word;
-        std::vector<std::string> words;
-        std::vector<std::string> mnemonicPhrase;
-        std::string derivPath = "m/44'/60'/0'/0/";
-        int index = 0;  // TODO: index will change in the future
-        while (std::getline(seedss, word, ' ')) { words.push_back(word); }
-        for (std::string word : words) { mnemonicPhrase.push_back(word); }
-
-        bip3x::Bip39Mnemonic::MnemonicResult encodedMnemonic;
-        encodedMnemonic.words = mnemonicPhrase;
-        derivPath += QString::number(index).toStdString();
-        bip3x::HDKey key = BIP39::createKey(encodedMnemonic.raw, derivPath);
-        Account a = w.importAccount(name.toStdString(), pass.toStdString(), key);
-        emit accountImported(!a.id.empty());
-      });
     }
 
     // Get gas price from network
