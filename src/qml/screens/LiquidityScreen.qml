@@ -10,6 +10,8 @@ Item {
   id: exchangeScreen
   property string addAllowance
   property string removeAllowance
+  property string coinBalance
+  property string tokenBalance
   property string lowerToken
   property string lowerReserves
   property string higherToken
@@ -44,12 +46,25 @@ Item {
   }
 
   Timer {
+    id: reloadBalancesTimer
+    interval: 1000
+    repeat: true
+    onTriggered: reloadBalances()
+  }
+
+  Timer {
     id: reloadLiquidityDataTimer
     interval: 5000
     repeat: true
     onTriggered: {
       System.updateLiquidityData(System.getCurrentCoin(), System.getCurrentToken())
     }
+  }
+
+  function reloadBalances() {
+    var obj = System.getAccountBalances(System.getTxSenderAccount())
+    coinBalance = (obj.balanceAVAX) ? obj.balanceAVAX : "Loading..."
+    tokenBalance = (obj.balanceAVME) ? obj.balanceAVME : "Loading..."
   }
 
   function calculateAddLiquidityAmount(isCoinToToken) {
@@ -70,8 +85,10 @@ Item {
 
   Component.onCompleted: {
     System.getAllowances()
+    reloadBalances()
     System.updateLiquidityData(System.getCurrentCoin(), System.getCurrentToken())
     reloadLiquidityDataTimer.start()
+    reloadBalancesTimer.start()
   }
 
   Text {
@@ -153,9 +170,9 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
         text: "Total " + System.getCurrentCoin() + " in wallet: <b>"
-        + System.getTxSenderCoinAmount() + "</b><br>"
+        + coinBalance + "</b><br>"
         + "Total " + System.getCurrentToken() + " in wallet: <b>"
-        + System.getTxSenderTokenAmount() + "</b>"
+        + tokenBalance + "</b>"
       }
 
       AVMEInput {
@@ -483,6 +500,7 @@ Item {
     }
     text: "Back"
     onClicked: {
+      reloadBalancesTimer.stop()
       reloadLiquidityDataTimer.stop()
       System.setScreen(content, "qml/screens/StatsScreen.qml")
     }
@@ -493,6 +511,8 @@ Item {
     id: approveExchangePopup
     confirmBtn.onClicked: {
       if (System.checkWalletPass(pass)) {
+        reloadBalancesTimer.stop()
+        reloadLiquidityDataTimer.stop()
         System.setTxOperation("Approve Exchange")
         System.setScreen(content, "qml/screens/ProgressScreen.qml")
         System.txStart(pass)
@@ -506,6 +526,8 @@ Item {
     id: approveLiquidityPopup
     confirmBtn.onClicked: {
       if (System.checkWalletPass(pass)) {
+        reloadBalancesTimer.stop()
+        reloadLiquidityDataTimer.stop()
         System.setTxOperation("Approve Liquidity")
         System.setScreen(content, "qml/screens/ProgressScreen.qml")
         System.txStart(pass)
@@ -520,6 +542,8 @@ Item {
     id: confirmAddLPPopup
     confirmBtn.onClicked: {
       if (System.checkWalletPass(pass)) {
+        reloadBalancesTimer.stop()
+        reloadLiquidityDataTimer.stop()
         System.setTxReceiverCoinAmount(liquidityCoinInput.text)
         System.setTxReceiverTokenAmount(liquidityTokenInput.text)
         System.setTxOperation("Add Liquidity")
@@ -535,6 +559,8 @@ Item {
     id: confirmRemoveLPPopup
     confirmBtn.onClicked: {
       if (System.checkWalletPass(pass)) {
+        reloadBalancesTimer.stop()
+        reloadLiquidityDataTimer.stop()
         System.setTxReceiverCoinAmount(System.weiToFixedPoint(
           ((System.getCurrentCoin() == lowerToken) ? removeLowerEstimate : removeHigherEstimate),
           System.getCurrentCoinDecimals()
