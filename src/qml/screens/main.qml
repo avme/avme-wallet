@@ -8,6 +8,8 @@ import "qrc:/qml/components"
 
 ApplicationWindow {
   id: window
+  property alias menu: sideMenu
+
   title: "AVME Wallet"
   width: 1280
   height: 720
@@ -24,11 +26,15 @@ ApplicationWindow {
     color: "#252935"
   }
 
+  AVMESideMenu {
+    id: sideMenu
+    visible: false
+  }
+
   // Dynamic screen loader (used in setScreen(id, screenpath))
   Loader {
     id: content
     anchors.fill: parent
-    width: parent.width
     source: "qrc:/qml/screens/StartScreen.qml"
   }
 }

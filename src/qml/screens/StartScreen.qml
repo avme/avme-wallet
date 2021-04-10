@@ -129,7 +129,7 @@ Item {
           }
           console.log("Wallet loaded successfully")
           System.setFirstLoad(true)
-          System.setScreen(content, "qml/screens/newOverviewPage.qml")
+          System.setScreen(content, "qml/screens/OverviewScreen.qml")
         } catch (error) {
           walletFailPopup.info = error
           walletFailPopup.open()

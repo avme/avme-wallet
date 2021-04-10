@@ -11,7 +11,7 @@
         <file>qml/screens/LiquidityScreen.qml</file>
         <file>qml/screens/StakingScreen.qml</file>
 
-        <file>qml/screens/newOverviewPage.qml</file>
+        <file>qml/screens/OverviewScreen.qml</file>
 
         <file>qml/components/AVMEButton.qml</file>
         <file>qml/components/AVMEInput.qml</file>
@@ -36,6 +36,7 @@
 
         <file>qml/components/AVMESideMenu.qml</file>
         <file>qml/components/AVMESideMenuItem.qml</file>
+        <file>qml/components/AVMEPanel.qml</file>
 
         <file>img/avme_banner.png</file>
         <file>img/avme_logo.png</file>
