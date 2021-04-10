@@ -18,8 +18,8 @@
 #include <bip3x/wordlist.h>
 
 #include "Cipher.h"
-#include "JSON.h"
 #include "Network.h"
+#include "JSON.h"
 #include "Utils.h"
 
 /**

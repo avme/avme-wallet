@@ -26,8 +26,8 @@ Q_IMPORT_PLUGIN(QtQuickControls2Plugin)
 Q_IMPORT_PLUGIN(QtLabsPlatformPlugin)
 
 #include "lib/Account.h"
-#include "lib/BIP39.h"
 #include "lib/Network.h"
+#include "lib/BIP39.h"
 #include "lib/Pangolin.h"
 #include "lib/Staking.h"
 #include "lib/Utils.h"
