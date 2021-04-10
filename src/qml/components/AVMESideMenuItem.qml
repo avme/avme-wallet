@@ -9,6 +9,7 @@ Rectangle {
   id: sideMenuItem
   property alias icon: itemIcon.source
   property alias label: itemLabel.text
+  property bool isSelected
   signal changeActiveItem()
 
   implicitWidth: 70

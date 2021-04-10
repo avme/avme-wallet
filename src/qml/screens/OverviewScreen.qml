@@ -80,7 +80,7 @@ Item {
 
       Row {
         id: accountCoinBalanceRow
-        width: parent.width * 0.9
+        width: parent.width * 0.95
         anchors.horizontalCenter: parent.horizontalCenter
         height: 50
         spacing: 20
@@ -96,16 +96,22 @@ Item {
 
         Text {
           id: accountCoinBalance
-          width: parent.width * 0.4
+          width: parent.width * 0.5
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
           text: "54321.123456789123456789"
           elide: Text.ElideRight
         }
 
+        Rectangle {
+          width: 2
+          height: parent.height
+          color: "#4E525D"
+        }
+
         Text {
           id: accountCoinPrice
-          width: parent.width * 0.4
+          width: parent.width * 0.3
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
           text: "$999999999.99"
@@ -115,7 +121,7 @@ Item {
 
       Row {
         id: accountTokenBalanceRow
-        width: parent.width * 0.9
+        width: parent.width * 0.95
         anchors.horizontalCenter: parent.horizontalCenter
         height: 50
         spacing: 20
@@ -131,16 +137,22 @@ Item {
 
         Text {
           id: accountTokenBalance
-          width: parent.width * 0.4
+          width: parent.width * 0.5
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
           text: "987654321.123456789123456789"
           elide: Text.ElideRight
         }
 
+        Rectangle {
+          width: 2
+          height: parent.height
+          color: "#4E525D"
+        }
+
         Text {
           id: accountTokenPrice
-          width: parent.width * 0.4
+          width: parent.width * 0.3
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
           text: "$99999.99"
@@ -171,7 +183,7 @@ Item {
 
       Row {
         id: walletCoinBalanceRow
-        width: parent.width * 0.9
+        width: parent.width * 0.95
         anchors.horizontalCenter: parent.horizontalCenter
         height: 50
         spacing: 20
@@ -187,16 +199,22 @@ Item {
 
         Text {
           id: walletCoinBalance
-          width: parent.width * 0.4
+          width: parent.width * 0.5
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
           text: "54321.123456789123456789"
           elide: Text.ElideRight
         }
 
+        Rectangle {
+          width: 2
+          height: parent.height
+          color: "#4E525D"
+        }
+
         Text {
           id: walletCoinPrice
-          width: parent.width * 0.4
+          width: parent.width * 0.3
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
           text: "$999999999.99"
@@ -206,7 +224,7 @@ Item {
 
       Row {
         id: walletTokenBalanceRow
-        width: parent.width * 0.9
+        width: parent.width * 0.95
         anchors.horizontalCenter: parent.horizontalCenter
         height: 50
         spacing: 20
@@ -222,16 +240,22 @@ Item {
 
         Text {
           id: walletTokenBalance
-          width: parent.width * 0.4
+          width: parent.width * 0.5
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
           text: "987654321.123456789123456789"
           elide: Text.ElideRight
         }
 
+        Rectangle {
+          width: 2
+          height: parent.height
+          color: "#4E525D"
+        }
+
         Text {
           id: walletTokenPrice
-          width: parent.width * 0.4
+          width: parent.width * 0.3
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
           text: "$99999.99"

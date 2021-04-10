@@ -55,7 +55,7 @@ Drawer {
 
     AVMESideMenuItem {
       id: itemOverview
-      icon: "qrc:/img/icons/grid.png"
+      icon: (itemSelection.y == y) ? "qrc:/img/icons/gridSelect.png" : "qrc:/img/icons/grid.png"
       label: "Overview"
       onChangeActiveItem: itemSelection.y = y
     }
@@ -69,7 +69,7 @@ Drawer {
 
     AVMESideMenuItem {
       id: itemSend
-      icon: "qrc:/img/icons/coin.png"
+      icon: (itemSelection.y == y) ? "qrc:/img/icons/coinSelect.png" : "qrc:/img/icons/coin.png"
       label: "Send/<br>Receive"
       onChangeActiveItem: itemSelection.y = y
     }
@@ -83,7 +83,7 @@ Drawer {
 
     AVMESideMenuItem {
       id: itemExchange
-      icon: "qrc:/img/icons/directions.png"
+      icon: (itemSelection.y == y) ? "qrc:/img/icons/directionsSelect.png" : "qrc:/img/icons/directions.png"
       label: "Exchange"
       onChangeActiveItem: itemSelection.y = y
     }
@@ -97,7 +97,7 @@ Drawer {
 
     AVMESideMenuItem {
       id: itemLiquidity
-      icon: "qrc:/img/icons/upload.png"
+      icon: (itemSelection.y == y) ? "qrc:/img/icons/uploadSelect.png" : "qrc:/img/icons/upload.png"
       label: "Liquidity"
       onChangeActiveItem: itemSelection.y = y
     }
@@ -111,7 +111,7 @@ Drawer {
 
     AVMESideMenuItem {
       id: itemStaking
-      icon: "qrc:/img/icons/credit-card.png"
+      icon: (itemSelection.y == y) ? "qrc:/img/icons/credit-cardSelect.png" : "qrc:/img/icons/credit-card.png"
       label: "Staking"
       onChangeActiveItem: itemSelection.y = y
     }
