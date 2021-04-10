@@ -1,6 +1,8 @@
 import QtQuick 2.0
 
 Item {
+    width: 1094
+    height: 768
     Rectangle {
         id: mainRectangle
         x: 0
@@ -16,6 +18,16 @@ Item {
             width: 95
             height: 768
             color: "#1c2029"
+
+            Loader {
+                id: menu
+                x: 0
+                y: 0
+                width: 95
+                height: 768
+                source: "newMenu.qml"
+            }
+
         }
 
         Rectangle {
@@ -209,13 +221,15 @@ Item {
 
             Text {
                 id: balanceTitle
-                x: 164
-                y: 66
-                width: 80
+                y: 67
                 height: 20
                 color: "#ffffff"
                 text: qsTr("BALANCE
 ")
+                anchors.right: parent.right
+                anchors.rightMargin: 157
+                anchors.left: parent.left
+                anchors.leftMargin: 164
                 font.pixelSize: 12
                 font.family: "Tahoma"
             }
@@ -252,7 +266,7 @@ Item {
         Rectangle {
             id: totalWalletRectangle
             x: 557
-            y: 38
+            y: 93
             width: 516
             height: 284
             color: "#2d3542"
@@ -261,7 +275,7 @@ Item {
             border.width: 3
             smooth: true
             Rectangle {
-                id: cornerRectangle1
+                id: totalWalletCorner
                 x: 0
                 y: 38
                 width: 516
@@ -272,14 +286,15 @@ Item {
             Rectangle {
                 id: titleRectangle1
                 x: 0
-                y: 1
                 width: 516
                 height: 59
                 color: "#1d212a"
                 radius: 10
+                anchors.top: parent.top
+                anchors.topMargin: 0
                 border.width: 0
                 Text {
-                    id: element1
+                    id: textRectangle1
                     x: 13
                     y: 8
                     width: 271
@@ -291,49 +306,90 @@ Item {
                 }
             }
 
+            Item {
+                id: walletChart
+                width: 200
+                height: 200
+                anchors.left: parent.left
+                anchors.leftMargin: 13
+                anchors.top: parent.top
+                anchors.topMargin: 71
+            }
             ListView {
-                id: totalWalletList
-                x: 58
-                y: 78
-                width: 281
-                height: 160
-                layoutDirection: Qt.LeftToRight
-                orientation: ListView.Vertical
-                spacing : 35
+                id: listView
+                x: 219
+                y: 72
+                width: 284
+                height: 80
+                rotation: 0
+                anchors.top: parent.top
+                anchors.right: parent.right
                 model: ListModel {
                     ListElement {
-                        name: "Grey"
-                        colorCode: "grey"
+                        name: "AVAX"
+                        rectangleColor: "#2d3542"
+                        ballColor : "#e14a69"
                     }
 
                     ListElement {
-                        name: "Red"
-                        colorCode: "red"
+                        name: "AVME"
+                        rectangleColor: "#343b4b"
+                        ballColor : "#762f8d"
                     }
                 }
+                anchors.rightMargin: 13
+                anchors.topMargin: 112
                 delegate: Item {
-                    x: 5
-                    width: 80
+                    width: parent.width
                     height: 40
                     Row {
                         id: row1
                         spacing: 10
                         Rectangle {
-                            width: 40
+                            id: rectangle
+                            width: listView.width
                             height: 40
-                            color: colorCode
-                        }
+                            color: rectangleColor
+                            Rectangle {
+                                width: 30
+                                height: 30
+                                radius: 15
+                                border.width: 0
+                                color : ballColor
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.left: parent.left
+                                anchors.leftMargin : 10
 
-                        Text {
-                            text: name
-                            font.bold: true
-                            anchors.verticalCenter: parent.verticalCenter
+                            }
+
+                            Text {
+                                color: "#ffffff"
+                                height: 40
+                                text: name
+                                anchors.left: parent.left
+                                anchors.leftMargin: 50
+                                verticalAlignment: Text.AlignVCenter
+                                font.family: "Tahoma"
+                                font.pixelSize: 25
+                            }
+
+                            Text {
+                                color: "#ffffff"
+                                height: 40
+                                text: "123$"
+                                horizontalAlignment: Text.AlignRight
+                                anchors.right: parent.right
+                                anchors.rightMargin: 50
+                                verticalAlignment: Text.AlignVCenter
+                                font.family: "Tahoma"
+                                font.pixelSize: 25
+                            }
                         }
                     }
                 }
             }
-        }
 
+        }
         Rectangle {
             id: stakingRectangle
             x: 132
@@ -393,12 +449,12 @@ Item {
                 Text {
                     id: getRewardText
                     y: 0
-                    width: 170
+                    width: 173
                     height: 27
                     color: "#ffffff"
                     text: qsTr("GET REWARD")
                     anchors.left: parent.left
-                    anchors.leftMargin: 3
+                    anchors.leftMargin: 0
                     lineHeight: 1.2
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 0
@@ -451,7 +507,7 @@ Item {
             }
 
             Rectangle {
-                id: getRewardRectangle1
+                id: stakingInfoRectangle
                 x: -9
                 y: 7
                 color: "#772e88"
@@ -464,7 +520,7 @@ Item {
                 anchors.leftMargin: 212
                 anchors.topMargin: 257
                 Text {
-                    id: getRewardText1
+                    id: stakeInfoText
                     x: 0
                     y: 0
                     width: 173
@@ -482,7 +538,7 @@ Item {
             }
 
             Text {
-                id: element
+                id: avmeRewardTitle
                 x: 50
                 color: "#ffffff"
                 text: qsTr("AVME REWARD")
@@ -493,7 +549,7 @@ Item {
             }
 
             Text {
-                id: element4
+                id: walletReward
                 x: 86
                 color: "#ffffff"
                 text: qsTr("0")
@@ -504,7 +560,7 @@ Item {
             }
 
             Text {
-                id: element5
+                id: rewardTableTitle
                 x: 253
                 y: 117
                 color: "#ffffff"
@@ -513,7 +569,7 @@ Item {
                 font.pixelSize: 14
             }
             ListView {
-                id: listView
+                id: rewardTable
                 x: 212
                 width: 173
                 height: 100
@@ -580,7 +636,7 @@ Item {
             }
 
             Rectangle {
-                id: rectangle
+                id: rewardTableDivisor
                 x: 212
                 width: 173
                 height: 1
@@ -591,9 +647,9 @@ Item {
         }
 
         Rectangle {
-            id: balanceRectangle3
+            id: marketDataRectangle
             x: 557
-            y: 363
+            y: 400
             width: 516
             height: 349
             color: "#2d3542"
@@ -620,7 +676,7 @@ Item {
                 radius: 10
                 border.width: 0
                 Text {
-                    id: element3
+                    id: marketDataTitleText
                     x: 13
                     y: 8
                     width: 188
@@ -630,6 +686,102 @@ Item {
                     font.pixelSize: 32
                     font.family: "Tahoma"
                 }
+            }
+
+            Item {
+                id: marketDataItem
+                anchors.top: parent.top
+                anchors.topMargin: 73
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 13
+                anchors.right: parent.right
+                anchors.rightMargin: 13
+                anchors.left: parent.left
+                anchors.leftMargin: 13
+            }
+        }
+
+        Rectangle {
+            id: walletDivisor
+            x: 123
+            width: 963
+            height: 1
+            color: "#4e525d"
+            anchors.top: parent.top
+            anchors.topMargin: 58
+        }
+
+        Text {
+            id: address
+            x: 132
+            color: "#ffffff"
+            text: qsTr("ADDRESS: 0x...")
+            verticalAlignment: Text.AlignVCenter
+            font.family: "Tahoma"
+            anchors.top: parent.top
+            anchors.topMargin: 16
+            font.pixelSize: 20
+        }
+
+        Rectangle {
+            id: refreshRectangle
+            x: 899
+            y: 16
+            width: 144
+            height: 24
+            color: "#252935"
+
+            Image {
+                id: refreshIcon
+                x: 72
+                y: 0
+                width: 27
+                height: 24
+                source: "../../img/icons/refresh.png"
+                fillMode: Image.PreserveAspectFit
+            }
+
+            Text {
+                id: refreshText
+                x: 0
+                y: 0
+                width: 100
+                height: 24
+                color: "#ffffff"
+                text: qsTr("Refresh")
+                verticalAlignment: Text.AlignVCenter
+                font.pixelSize: 20
+            }
+        }
+
+        Rectangle {
+            id: manageWalletRectangle
+            x: 700
+            y: 16
+            width: 176
+            height: 24
+            color: "#252935"
+
+            Text {
+                id: manageWalletText
+                x: 0
+                y: 0
+                width: 143
+                height: 24
+                color: "#ffffff"
+                text: qsTr("Manage Wallets")
+                verticalAlignment: Text.AlignVCenter
+                font.pixelSize: 20
+            }
+
+            Image {
+                id: manageWalletIcon
+                x: 149
+                y: 0
+                width: 27
+                height: 24
+                source: "../../img/icons/inboxes.png"
+                fillMode: Image.PreserveAspectFit
             }
         }
     }
@@ -780,14 +932,24 @@ Item {
 
 
 
-/*##^## Designer {
-    D{i:0;autoSize:true;height:696;width:1092}D{i:6;anchors_x:13}D{i:8;anchors_height:50;anchors_x:8;anchors_y:6}
-D{i:9;anchors_x:64}D{i:11;anchors_height:20;anchors_y:21}D{i:7;anchors_width:369;anchors_x:19}
-D{i:13;anchors_height:50;anchors_x:8;anchors_y:3}D{i:14;anchors_x:64}D{i:16;anchors_height:20;anchors_width:80;anchors_x:261;anchors_y:21}
-D{i:12;anchors_width:369;anchors_x:19}D{i:19;anchors_x:83}D{i:23;anchors_height:44;anchors_width:284;anchors_x:0;anchors_y:8}
-D{i:35;anchors_height:44;anchors_width:284;anchors_x:13;anchors_y:8}D{i:37;anchors_x:0}
-D{i:36;anchors_height:32;anchors_x:8;anchors_y:241}D{i:39;anchors_x:15}D{i:38;anchors_y:58}
-D{i:41;anchors_height:32;anchors_width:170;anchors_x:8;anchors_y:241}D{i:43;anchors_y:114}
-D{i:44;anchors_y:144}D{i:62;anchors_height:44;anchors_width:284;anchors_x:0;anchors_y:8}
-}
- ##^##*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
