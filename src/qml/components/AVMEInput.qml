@@ -13,16 +13,17 @@ TextField {
   property string label
   property string placeholder
   property color inputColor: "#449CE3FD"
+  property color inputLabelColor: "#FFFFFF"
   property color inputDisabledColor: "#44888888"
   property color inputSelectionColor: "#9CE3FD"
   property color inputLineColor: "#7AC1DB"
   property color inputLineDisabledColor: "#888888"
-  property color inputPlaceholderColor: "#88000000"
+  property color inputPlaceholderColor: "#44FFFFFF"
 
   implicitWidth: 320
   implicitHeight: 40
   selectByMouse: true
-  color: "black"
+  color: "#FFFFFF"
   selectionColor: inputSelectionColor
   background: Rectangle {
     width: parent.width
@@ -44,6 +45,7 @@ TextField {
   // Label above the input field
   Text {
     id: labelText
+    color: inputLabelColor
     anchors.bottom: input.top
     anchors.left: input.left
     anchors.bottomMargin: 5

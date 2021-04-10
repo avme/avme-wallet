@@ -10,6 +10,9 @@
         <file>qml/screens/ExchangeScreen.qml</file>
         <file>qml/screens/LiquidityScreen.qml</file>
         <file>qml/screens/StakingScreen.qml</file>
+
+        <file>qml/screens/newOverviewPage.qml</file>
+
         <file>qml/components/AVMEButton.qml</file>
         <file>qml/components/AVMEInput.qml</file>
         <file>qml/components/AVMEPopup.qml</file>
@@ -30,6 +33,10 @@
         <file>qml/components/AVMEWalletList.qml</file>
         <file>qml/components/AVMEAccountSeedList.qml</file>
         <file>qml/components/AVMETxHistoryList.qml</file>
+
+        <file>qml/components/AVMESideMenu.qml</file>
+        <file>qml/components/AVMESideMenuItem.qml</file>
+
         <file>img/avme_banner.png</file>
         <file>img/avme_logo.png</file>
         <file>img/avax_logo.png</file>
@@ -38,5 +45,28 @@
         <file>img/ok.png</file>
         <file>img/no.png</file>
         <file>img/pangolin.png</file>
+
+        <file>img/icons/cog.png</file>
+        <file>img/icons/cogSelect.png</file>
+        <file>img/icons/coin.png</file>
+        <file>img/icons/coinSelect.png</file>
+        <file>img/icons/credit-card.png</file>
+        <file>img/icons/credit-cardSelect.png</file>
+        <file>img/icons/directions.png</file>
+        <file>img/icons/directionsSelect.png</file>
+        <file>img/icons/grid.png</file>
+        <file>img/icons/gridSelect.png</file>
+        <file>img/icons/inboxes.png</file>
+        <file>img/icons/inboxesSelect.png</file>
+        <file>img/icons/info.png</file>
+        <file>img/icons/infoSelect.png</file>
+        <file>img/icons/log-out.png</file>
+        <file>img/icons/log-outSelect.png</file>
+        <file>img/icons/microchip.png</file>
+        <file>img/icons/microchipSelect.png</file>
+        <file>img/icons/refresh.png</file>
+        <file>img/icons/refreshSelect.png</file>
+        <file>img/icons/upload.png</file>
+        <file>img/icons/uploadSelect.png</file>
     </qresource>
 </RCC>

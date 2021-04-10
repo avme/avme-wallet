@@ -28,6 +28,7 @@ Item {
     // Welcome text
     Text {
       id: welcomeText
+      color: "#FFFFFF"
       font.pointSize: 18.0
       font.bold: true
       anchors.horizontalCenter: parent.horizontalCenter
@@ -128,7 +129,7 @@ Item {
           }
           console.log("Wallet loaded successfully")
           System.setFirstLoad(true)
-          System.setScreen(content, "qml/screens/AccountsScreen.qml")
+          System.setScreen(content, "qml/screens/newOverviewPage.qml")
         } catch (error) {
           walletFailPopup.info = error
           walletFailPopup.open()

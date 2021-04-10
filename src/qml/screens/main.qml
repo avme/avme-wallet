@@ -21,10 +21,7 @@ ApplicationWindow {
   Rectangle {
     id: bg
     anchors.fill: parent
-    gradient: Gradient {
-      GradientStop { position: 0; color: "#782D8B" }
-      GradientStop { position: 1; color: "#AB5FBE" }
-    }
+    color: "#252935"
   }
 
   // Dynamic screen loader (used in setScreen(id, screenpath))
