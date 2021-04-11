@@ -15,7 +15,7 @@ TextField {
   property color inputColor: "#449CE3FD"
   property color inputLabelColor: "#FFFFFF"
   property color inputDisabledColor: "#44888888"
-  property color inputSelectionColor: "#9CE3FD"
+  property color inputSelectionColor: "#58A0B9"
   property color inputLineColor: "#7AC1DB"
   property color inputLineDisabledColor: "#888888"
   property color inputPlaceholderColor: "#88FFFFFF"

@@ -8,41 +8,85 @@ import "qrc:/qml/components"
 Item {
   id: overviewScreen
 
+  // Timer for reloading the Account balances
+  Timer {
+    id: listReloadTimer
+    interval: 1000
+    repeat: true
+    onTriggered: reloadBalances()
+  }
+
+  Component.onCompleted: {
+    reloadBalances()
+    listReloadTimer.start()
+  }
+
+  function reloadBalances() {
+    var obj = System.getAccountBalances(System.getTxSenderAccount())
+    accountCoinBalance.text = (obj.balanceAVAX) ? obj.balanceAVAX : "Loading..."
+    accountTokenBalance.text = (obj.balanceAVME) ? obj.balanceAVME : "Loading..."
+    stakingLockedBalance.text = (obj.balanceLPLocked) ? obj.balanceLPLocked : "Loading..."
+  }
+
   Rectangle {
     id: accountHeaderRow
-    x: window.menu.width + 10
-    width: (parent.width * 0.9) + 20
+    anchors {
+      top: parent.top
+      left: parent.left
+      right: parent.right
+      margins: 10
+    }
     height: 50
     color: "#1D212A"
     radius: 10
-    anchors.top: parent.top
-    anchors.topMargin: 10
 
     Text {
       id: addressText
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.left: parent.left
-      anchors.leftMargin: 10
+      anchors {
+        verticalCenter: parent.verticalCenter
+        left: parent.left
+        leftMargin: 10
+      }
       color: "#FFFFFF"
-      text: "Account: 0x1234567890123456789012345678901234567890"
-      font.pointSize: 18.0
+      text: System.getTxSenderAccount()
+      font.pointSize: 16.0
     }
 
     AVMEButton {
-      id: btnChangeAccount
-      width: parent.width * 0.1
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.right: btnCopyToClipboard.left
-      anchors.rightMargin: 10
-      text: "Change"
+      id: btnViewPrivKey
+      width: parent.width * 0.15
+      anchors {
+        verticalCenter: parent.verticalCenter
+        right: btnViewSeed.left
+        rightMargin: 10
+      }
+      text: "View Private Key"
+      onClicked: {
+        viewPrivKeyPopup.account = System.getTxSenderAccount()
+        viewPrivKeyPopup.open()
+      }
+    }
+
+    AVMEButton {
+      id: btnViewSeed
+      width: parent.width * 0.15
+      anchors {
+        verticalCenter: parent.verticalCenter
+        right: btnCopyToClipboard.left
+        rightMargin: 10
+      }
+      text: "View Wallet Seed"
+      onClicked: viewSeedPopup.open()
     }
 
     AVMEButton {
       id: btnCopyToClipboard
       width: parent.width * 0.2
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.right: parent.right
-      anchors.rightMargin: 10
+      anchors {
+        verticalCenter: parent.verticalCenter
+        right: parent.right
+        rightMargin: 10
+      }
       enabled: (!btnChangeAccountTimer.running)
       text: (enabled) ? "Copy to Clipboard" : "Copied!"
       Timer { id: btnChangeAccountTimer; interval: 2000 }
@@ -55,9 +99,11 @@ Item {
 
   AVMEPanel {
     id: accountBalancesPanel
-    x: window.menu.width + 10
-    anchors.top: accountHeaderRow.bottom
-    anchors.topMargin: 20
+    anchors {
+      top: accountHeaderRow.bottom
+      left: parent.left
+      margins: 10
+    }
     width: parent.width * 0.3
     height: 200
     title: "Account Balances"
@@ -93,7 +139,6 @@ Item {
           width: parent.width * 0.3
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
-          text: "54321.123456789123456789"
           elide: Text.ElideRight
         }
 
@@ -134,7 +179,6 @@ Item {
           width: parent.width * 0.3
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
-          text: "987654321.123456789123456789"
           elide: Text.ElideRight
         }
 
@@ -158,10 +202,12 @@ Item {
 
   AVMEPanel {
     id: walletBalancesPanel
-    x: accountBalancesPanel.x + accountBalancesPanel.width + 20
-    anchors.top: accountHeaderRow.bottom
-    anchors.topMargin: 20
-    width: parent.width * 0.6
+    anchors {
+      top: accountHeaderRow.bottom
+      left: accountBalancesPanel.right
+      right: parent.right
+      margins: 10
+    }
     height: 200
     title: "Total Wallet Balances"
 
@@ -261,9 +307,11 @@ Item {
 
   AVMEPanel {
     id: stakingPanel
-    x: window.menu.width + 10
-    anchors.top: accountBalancesPanel.bottom
-    anchors.topMargin: 20
+    anchors {
+      top: accountBalancesPanel.bottom
+      left: parent.left
+      margins: 10
+    }
     width: parent.width * 0.45
     height: 400
     title: "Staking Statistics"
@@ -272,28 +320,33 @@ Item {
       id: stakingLockedRect
       width: parent.width * 0.9
       height: 50
-      anchors.horizontalCenter: parent.horizontalCenter
-      anchors.top: parent.header.bottom
-      anchors.margins: 10
+      anchors {
+        horizontalCenter: parent.horizontalCenter
+        top: parent.header.bottom
+        margins: 10
+      }
       color: "#3E4653"
       radius: 10
 
       Text {
         id: stakingLockedBalance
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.left
-        anchors.leftMargin: 10
+        anchors {
+          verticalCenter: parent.verticalCenter
+          left: parent.left
+          leftMargin: 10
+        }
         width: parent.width * 0.75
         color: "#FFFFFF"
-        text: "34373827243243235.893729889472394325"
         elide: Text.ElideRight
       }
 
       Text {
         id: stakingLockedText
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.right: parent.right
-        anchors.rightMargin: 10
+        anchors {
+          verticalCenter: parent.verticalCenter
+          right: parent.right
+          rightMargin: 10
+        }
         color: "#FFFFFF"
         text: "Locked LP"
       }
@@ -301,9 +354,11 @@ Item {
 
     Text {
       id: rewardCurrentTitle
-      anchors.top: stakingLockedRect.bottom
-      anchors.horizontalCenter: parent.horizontalCenter
-      anchors.topMargin: 10
+      anchors {
+        top: stakingLockedRect.bottom
+        horizontalCenter: parent.horizontalCenter
+        topMargin: 10
+      }
       color: "#FFFFFF"
       text: "Current AVME Reward"
     }
@@ -311,8 +366,10 @@ Item {
     Text {
       id: rewardAmount
       width: parent.width * 0.9
-      anchors.top: rewardCurrentTitle.bottom
-      anchors.horizontalCenter: parent.horizontalCenter
+      anchors {
+        top: rewardCurrentTitle.bottom
+        horizontalCenter: parent.horizontalCenter
+      }
       color: "#FFFFFF"
       font.pointSize: 18.0
       text: "6329897479843233.887376387564877632"
@@ -321,9 +378,11 @@ Item {
 
     Text {
       id: rewardFutureTitle
-      anchors.top: rewardAmount.bottom
-      anchors.horizontalCenter: parent.horizontalCenter
-      anchors.topMargin: 20
+      anchors {
+        top: rewardAmount.bottom
+        horizontalCenter: parent.horizontalCenter
+        topMargin: 20
+      }
       color: "#FFFFFF"
       text: "Future Rewards"
     }
@@ -406,9 +465,11 @@ Item {
 
     Row {
       id: stakingBtnRow
-      anchors.horizontalCenter: parent.horizontalCenter
-      anchors.bottom: parent.bottom
-      anchors.margins: 10
+      anchors {
+        horizontalCenter: parent.horizontalCenter
+        bottom: parent.bottom
+        margins: 10
+      }
       spacing: 20
 
       AVMEButton {
@@ -426,11 +487,37 @@ Item {
 
   AVMEPanel {
     id: marketDataPanel
-    x: stakingPanel.x + stakingPanel.width + 20
-    anchors.top: walletBalancesPanel.bottom
-    anchors.topMargin: 20
-    width: parent.width * 0.45
+    anchors {
+      top: walletBalancesPanel.bottom
+      left: stakingPanel.right
+      right: parent.right
+      margins: 10
+    }
     height: 400
     title: "Market Data"
+  }
+
+  // Popup for viewing the Account's private key
+  AVMEPopupViewPrivKey {
+    id: viewPrivKeyPopup
+    showBtn.onClicked: {
+      if (System.checkWalletPass(pass)) {
+        viewPrivKeyPopup.showPrivKey()
+      } else {
+        viewPrivKeyPopup.showErrorMsg()
+      }
+    }
+  }
+
+  // Popup for viewing the Wallet's seed
+  AVMEPopupViewSeed {
+    id: viewSeedPopup
+    showBtn.onClicked: {
+      if (System.checkWalletPass(pass)) {
+        viewSeedPopup.showSeed()
+      } else {
+        viewSeedPopup.showErrorMsg()
+      }
+    }
   }
 }

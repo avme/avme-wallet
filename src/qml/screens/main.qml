@@ -40,7 +40,7 @@ ApplicationWindow {
   Loader {
     id: content
     anchors {
-      left: sideMenu.left
+      left: sideMenu.right
       right: parent.right
       top: parent.top
       bottom: parent.bottom

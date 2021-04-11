@@ -143,8 +143,10 @@ void Account::loadTxHistory() {
       this->history.push_back(txData);
     }
   } catch (std::exception &e) {
-    std::cout << "Couldn't load history for Account " << this->address
-              << ": " << JSON::objectItem(txData, "ERROR").get_str() << std::endl;
+    ;
+    // Uncomment to see output
+    //std::cout << "Couldn't load history for Account " << this->address
+    //          << ": " << JSON::objectItem(txData, "ERROR").get_str() << std::endl;
   }
 }
 

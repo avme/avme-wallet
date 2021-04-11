@@ -30,6 +30,7 @@ Popup {
   property alias item: chooseAccountList.currentItem
   property alias name: nameInput.text
   property alias pass: passInput.text
+  property color popupBgColor: "#1C2029"
 
   Connections {
     target: System
@@ -59,14 +60,15 @@ Popup {
     nameInput.text = passInput.text = seedInput.text = foreignSeed = ""
   }
 
-  width: window.width * 0.9
-  height: window.height
-  x: (window.width * 0.1) / 2
+  width: parent.width * 0.9
+  height: parent.height * 0.9
+  x: (parent.width * 0.1) / 2
+  y: (parent.height * 0.1) / 2
   modal: true
   focus: true
   padding: 0  // Remove white borders
   closePolicy: Popup.NoAutoClose
-  background: Rectangle { anchors.fill: parent; color: "#9A4FAD" }
+  background: Rectangle { anchors.fill: parent; color: popupBgColor; radius: 10 }
 
   Column {
     id: items
@@ -78,6 +80,7 @@ Popup {
       id: infoLabel
       anchors.horizontalCenter: parent.horizontalCenter
       horizontalAlignment: Text.AlignHCenter
+      color: "#FFFFFF"
       text: {
         if (infoPassTimer.running) {
           text: "Wrong password, please try again"
@@ -101,7 +104,7 @@ Popup {
     Rectangle {
       id: listRect
       width: (items.width * 0.9)
-      height: (items.height * 0.6)
+      height: (items.height * 0.55)
       anchors.horizontalCenter: parent.horizontalCenter
       radius: 5
       color: "#4458A0C9"

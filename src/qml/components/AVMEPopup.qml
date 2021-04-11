@@ -10,24 +10,22 @@ import QtQuick.Controls 2.2
 Popup {
   id: popup
   property string info
-  property color popupBgColor: "#9A4FAD"
+  property color popupBgColor: "#1C2029"
 
   width: window.width / 4
   height: window.height / 8
   x: (window.width / 2) - (width / 2)
   y: (window.height / 2) - (height / 2)
+  background: Rectangle { anchors.fill: parent; color: popupBgColor; radius: 10 }
   modal: true
   focus: true
   padding: 0  // Remove white borders
   closePolicy: Popup.NoAutoClose
 
-  Rectangle {
-    anchors.fill: parent
-    color: popupBgColor
-    Text {
-      anchors.centerIn: parent
-      horizontalAlignment: Text.AlignHCenter
-      text: info
-    }
+  Text {
+    anchors.centerIn: parent
+    horizontalAlignment: Text.AlignHCenter
+    color: "#FFFFFF"
+    text: info
   }
 }

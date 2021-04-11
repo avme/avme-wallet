@@ -24,18 +24,11 @@ Item {
   }
 
   Component.onCompleted: {
-    // Always default to AVAX & AVME on first load
-    if (System.getCurrentCoin() == "") {
-      System.setCurrentCoin("AVAX")
-      System.setCurrentCoinDecimals(18)
-    }
-    if (System.getCurrentToken() == "") {
-      System.setCurrentToken("AVME")
-      System.setCurrentTokenDecimals(18)
-    }
     if (System.getFirstLoad()) {
       System.setFirstLoad(false)
       reloadList()
+    } else {
+      fetchAccounts()
     }
   }
 
@@ -53,16 +46,20 @@ Item {
     fetchAccountsPopup.open()
     System.stopAllBalanceThreads()
     listReloadTimer.stop()
-    accountsList.clear()
     System.loadAccounts()
-    var accList = System.listAccounts()
-    for (var i = 0; i < accList.length; i++) {
-      var acc = JSON.parse(accList[i])
-      accountsList.append(acc)
-      System.startBalanceThread(acc.account)
-    }
+    fetchAccounts()
+    System.startAllBalanceThreads()
     listReloadTimer.start()
     fetchAccountsPopup.close()
+  }
+
+  function fetchAccounts() {
+    console.log("Fetching Accounts...")
+    accountsList.clear()
+    var accList = System.listAccounts()
+    for (var i = 0; i < accList.length; i++) {
+      accountsList.append(JSON.parse(accList[i]))
+    }
   }
 
   function reloadBalances() {
@@ -77,57 +74,18 @@ Item {
     id: bgIcon
     width: 256
     height: 256
+    antialiasing: true
+    smooth: true
     anchors.centerIn: parent
     fillMode: Image.PreserveAspectFit
     source: "qrc:/img/avme_logo.png"
-  }
-
-  // Top buttons (Account management)
-  Row {
-    id: btnTopRow
-    spacing: 10
-    anchors {
-      top: parent.top
-      left: parent.left
-      right: parent.right
-      topMargin: 10
-      leftMargin: 10
-    }
-
-    AVMEButton {
-      id: btnEraseAccount
-      width: (parent.width / 3) - parent.spacing
-      enabled: (walletList.currentItem)
-      text: "Erase Account"
-      onClicked: {
-        erasePopup.account = walletList.currentItem.itemAccount
-        erasePopup.open()
-      }
-    }
-    AVMEButton {
-      id: btnUseAccount
-      width: (parent.width / 3) - parent.spacing
-      enabled: (walletList.currentItem)
-      text: "Use this Account"
-      onClicked: {
-        System.setTxSenderAccount(walletList.currentItem.itemAccount)
-        listReloadTimer.stop()
-        System.setScreen(content, "qml/screens/StatsScreen.qml")
-      }
-    }
-    AVMEButton {
-      id: btnNewAccount
-      width: (parent.width / 3) - parent.spacing
-      text: "Create/Import Account"
-      onClicked: chooseAccountPopup.open()
-    }
   }
 
   // Account list
   Rectangle {
     id: listRect
     anchors {
-      top: btnTopRow.bottom
+      top: parent.top
       bottom: btnBottomRow.top
       left: parent.left
       right: parent.right
@@ -136,7 +94,6 @@ Item {
     radius: 5
     color: "#4458A0C9"
 
-    // TODO: add fiat pricing here too when the time comes
     AVMEWalletList {
       id: walletList
       width: listRect.width
@@ -145,7 +102,7 @@ Item {
     }
   }
 
-  // Bottom buttons (actions)
+  // Action buttons
   Row {
     id: btnBottomRow
     spacing: 10
@@ -158,27 +115,34 @@ Item {
     }
 
     AVMEButton {
-      id: btnCloseWallet
+      id: btnNewAccount
       width: (parent.width / 3) - parent.spacing
-      text: "Close Wallet"
-      onClicked: closeWalletPopup.open()
+      text: "Create/Import a new Account"
+      onClicked: chooseAccountPopup.open()
     }
+
     AVMEButton {
-      id: btnCopyAddress
+      id: btnUseAccount
       width: (parent.width / 3) - parent.spacing
-      Timer { id: textTimer; interval: 2000 }
-      enabled: (walletList.currentItem && !textTimer.running)
-      text: (!textTimer.running) ? "Copy Address to Clipboard" : "Copied!"
+      enabled: (walletList.currentItem)
+      text: "Use this Account"
       onClicked: {
-        System.copyToClipboard(walletList.currentItem.itemAccount)
-        textTimer.start()
+        System.setTxSenderAccount(walletList.currentItem.itemAccount)
+        listReloadTimer.stop()
+        System.accountChosen();
+        System.setScreen(content, "qml/screens/OverviewScreen.qml")
       }
     }
+
     AVMEButton {
-      id: btnViewSeed
+      id: btnEraseAccount
       width: (parent.width / 3) - parent.spacing
-      text: "View Wallet Seed"
-      onClicked: viewSeedPopup.open()
+      enabled: (walletList.currentItem)
+      text: "Erase this Account"
+      onClicked: {
+        erasePopup.account = walletList.currentItem.itemAccount
+        erasePopup.open()
+      }
     }
   }
 
@@ -203,18 +167,6 @@ Item {
           chooseAccountPopup.close()
           accountFailPopup.open()
         }
-      }
-    }
-  }
-
-  // Popup for viewing the Wallet's seed
-  AVMEPopupViewSeed {
-    id: viewSeedPopup
-    showBtn.onClicked: {
-      if (System.checkWalletPass(pass)) {
-        viewSeedPopup.showSeed()
-      } else {
-        viewSeedPopup.showErrorMsg()
       }
     }
   }
@@ -245,22 +197,6 @@ Item {
     info: "Error on erasing Account. Please try again."
   }
 
-  // Yes/No popup for confirming Wallet closure
-  AVMEPopupYesNo {
-    id: closeWalletPopup
-    icon: "qrc:/img/warn.png"
-    info: "Are you sure you want to close this Wallet?"
-    yesBtn.onClicked: {
-      closeWalletPopup.close()
-      console.log("Wallet closed successfully")
-      System.stopAllBalanceThreads()
-      listReloadTimer.stop()
-      System.closeWallet()
-      System.setScreen(content, "qml/screens/StartScreen.qml")
-    }
-    noBtn.onClicked: closeWalletPopup.close()
-  }
-
   // Yes/No popup for confirming Account erasure
   AVMEPopupYesNo {
     id: erasePopup
@@ -278,6 +214,7 @@ Item {
       anchors.horizontalCenter: parent.horizontalCenter
       anchors.bottomMargin: (parent.height / 2) + 50
       Timer { id: erasePassInfoTimer; interval: 2000 }
+      color: "#FFFFFF"
       text: (!erasePassInfoTimer.running)
       ? "Please authenticate to confirm the action."
       : "Wrong passphrase, please try again"

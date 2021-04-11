@@ -138,10 +138,8 @@ Item {
             System.setCurrentTokenDecimals(18)
           }
           System.setFirstLoad(true)
-          System.loadAccounts()
-          System.startAllBalanceThreads()
           System.walletLoaded()
-          System.setScreen(content, "qml/screens/OverviewScreen.qml")
+          System.setScreen(content, "qml/screens/AccountsScreen.qml")
         } catch (error) {
           walletFailPopup.info = error
           walletFailPopup.open()
@@ -228,10 +226,8 @@ Item {
             System.setCurrentTokenDecimals(18)
           }
           System.setFirstLoad(true)
-          System.loadAccounts()
-          System.startAllBalanceThreads()
           System.walletLoaded()
-          System.setScreen(content, "qml/screens/OverviewScreen.qml")
+          System.setScreen(content, "qml/screens/AccountsScreen.qml")
         } catch (error) {
           walletFailPopup.info = error
           walletFailPopup.open()

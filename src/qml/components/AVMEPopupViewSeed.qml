@@ -2,19 +2,15 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 /**
- * Popup for viewing the Wallet's seed. Has to be opened manually.
- * Has the following items:
- * - "pass" (readonly): the Wallet password input
- * - "showBtn.onClicked": what to do when confirming the action
- * - "showSeed()": self-explanatory
- * - "showErrorMsg()": self-explanatory
- * - "clean()": helper function to clean up inputs/data
+ * Popup for viewing the Wallet's seed.
  */
-
 Popup {
   id: viewSeedPopup
   readonly property alias pass: passInput.text
   property alias showBtn: btnShow
+  property color popupBgColor: "#1C2029"
+  property color popupSeedBgColor: "#2D3542"
+  property color popupSelectionColor: "#58A0B9"
 
   function showSeed() {
     if (seedText.timer.running) { seedText.timer.stop() }
@@ -31,15 +27,15 @@ Popup {
     seedText.text = ""
   }
 
-  width: (window.width * 0.85)
-  height: (window.height * 0.6)
-  x: (window.width * 0.15) / 2
-  y: (window.height * 0.4) / 2
+  width: (parent.width * 0.9)
+  height: (parent.height * 0.6)
+  x: (parent.width * 0.1) / 2
+  y: (parent.height * 0.4) / 2
   modal: true
   focus: true
   padding: 0  // Remove white borders
   closePolicy: Popup.NoAutoClose
-  background: Rectangle { anchors.fill: parent; color: "#9A4FAD" }
+  background: Rectangle { anchors.fill: parent; color: popupBgColor; radius: 10 }
 
   Column {
     anchors.fill: parent
@@ -50,6 +46,7 @@ Popup {
       id: warningText
       anchors.horizontalCenter: parent.horizontalCenter
       horizontalAlignment: Text.AlignHCenter
+      color: "#FFFFFF"
       text: "Please authenticate to view the seed for this Wallet.<br>"
       + "<br><br><b>YOU ARE FULLY RESPONSIBLE FOR GUARDING YOUR SEED."
       + "<br>KEEP IT AWAY FROM PRYING EYES AND DO NOT SHARE IT WITH ANYONE."
@@ -77,12 +74,13 @@ Popup {
       verticalAlignment: Text.AlignVCenter
       readOnly: true
       selectByMouse: true
-      selectionColor: "#9CE3FD"
-      color: "black"
+      selectionColor: popupSelectionColor
+      color: "#FFFFFF"
       background: Rectangle {
         width: parent.width
         height: parent.height
-        color: "#782D8B"
+        color: popupSeedBgColor
+        radius: 10
       }
       Timer { id: seedTextTimer; interval: 2000; onTriggered: seedText.text = "" }
     }

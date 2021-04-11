@@ -39,6 +39,7 @@ class System : public QObject {
 
   signals:
     void walletLoaded();
+    void accountChosen();
     void accountsGenerated(QVariantList accounts);
     void accountCreated(QVariantMap data);
     void accountCreationFailed();

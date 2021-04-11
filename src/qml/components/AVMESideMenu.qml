@@ -14,6 +14,15 @@ Rectangle {
   Connections {
     target: System
     onWalletLoaded: {
+      itemAccounts.enabled = true
+      itemOverview.enabled = false
+      itemSend.enabled = false
+      itemExchange.enabled = false
+      itemLiquidity.enabled = false
+      itemStaking.enabled = false
+      itemSelection.y = itemAccounts.y
+    }
+    onAccountChosen: {
       itemOverview.enabled = true
       itemSend.enabled = true
       itemExchange.enabled = true
@@ -39,6 +48,7 @@ Rectangle {
     spacing: 5
 
     Component.onCompleted: {
+      itemAccounts.enabled = false
       itemOverview.enabled = false
       itemSend.enabled = false
       itemExchange.enabled = false
@@ -69,6 +79,23 @@ Rectangle {
       area.onClicked: {
         itemSelection.y = y
         System.setScreen(content, "qml/screens/StartScreen.qml")
+      }
+    }
+
+    Rectangle {
+      anchors.horizontalCenter: parent.horizontalCenter
+      width: (parent.width - 10)
+      height: 1
+      color: "#4E525D"
+    }
+
+    AVMESideMenuItem {
+      id: itemAccounts
+      icon: (itemSelection.y == y) ? "qrc:/img/icons/microchipSelect.png" : "qrc:/img/icons/microchip.png"
+      label: "Accounts"
+      area.onClicked: {
+        itemSelection.y = y
+        System.setScreen(content, "qml/screens/AccountsScreen.qml")
       }
     }
 
