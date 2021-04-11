@@ -87,7 +87,6 @@ Rectangle {
         itemSelection.y = y
         System.setScreen(content, "qml/screens/OverviewScreen.qml")
       }
-      enabled: false
     }
 
     Rectangle {
@@ -104,7 +103,6 @@ Rectangle {
       area.onClicked: {
         itemSelection.y = y
       }
-      enabled: false
     }
 
     Rectangle {
@@ -121,7 +119,6 @@ Rectangle {
       area.onClicked: {
         itemSelection.y = y
       }
-      enabled: false
     }
 
     Rectangle {
@@ -138,7 +135,6 @@ Rectangle {
       area.onClicked: {
         itemSelection.y = y
       }
-      enabled: false
     }
 
     Rectangle {
@@ -155,7 +151,6 @@ Rectangle {
       area.onClicked: {
         itemSelection.y = y
       }
-      enabled: false
     }
 
     Rectangle {
