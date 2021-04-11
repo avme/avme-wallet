@@ -9,8 +9,7 @@ Rectangle {
   id: sideMenuItem
   property alias icon: itemIcon.source
   property alias label: itemLabel.text
-  property bool isSelected
-  signal changeActiveItem()
+  property alias area: itemMouseArea
 
   implicitWidth: 70
   implicitHeight: 70
@@ -46,10 +45,6 @@ Rectangle {
     hoverEnabled: true
     onEntered: parent.color = "#3E424B"
     onExited: parent.color = "#1C2029"
-    onClicked: {
-      parent.color = "#1C2029"
-      changeActiveItem()
-    }
   }
 }
 

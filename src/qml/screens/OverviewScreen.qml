@@ -8,12 +8,6 @@ import "qrc:/qml/components"
 Item {
   id: overviewScreen
 
-  Component.onCompleted: {
-    if (!window.menu.visible) {
-      window.menu.visible = true
-    }
-  }
-
   Rectangle {
     id: accountHeaderRow
     x: window.menu.width + 10
@@ -64,7 +58,7 @@ Item {
     x: window.menu.width + 10
     anchors.top: accountHeaderRow.bottom
     anchors.topMargin: 20
-    width: parent.width * 0.45
+    width: parent.width * 0.3
     height: 200
     title: "Account Balances"
 
@@ -96,7 +90,7 @@ Item {
 
         Text {
           id: accountCoinBalance
-          width: parent.width * 0.5
+          width: parent.width * 0.3
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
           text: "54321.123456789123456789"
@@ -137,7 +131,7 @@ Item {
 
         Text {
           id: accountTokenBalance
-          width: parent.width * 0.5
+          width: parent.width * 0.3
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
           text: "987654321.123456789123456789"
@@ -167,7 +161,7 @@ Item {
     x: accountBalancesPanel.x + accountBalancesPanel.width + 20
     anchors.top: accountHeaderRow.bottom
     anchors.topMargin: 20
-    width: parent.width * 0.45
+    width: parent.width * 0.6
     height: 200
     title: "Total Wallet Balances"
 
@@ -199,7 +193,7 @@ Item {
 
         Text {
           id: walletCoinBalance
-          width: parent.width * 0.5
+          width: parent.width * 0.3
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
           text: "54321.123456789123456789"
@@ -240,7 +234,7 @@ Item {
 
         Text {
           id: walletTokenBalance
-          width: parent.width * 0.5
+          width: parent.width * 0.3
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
           text: "987654321.123456789123456789"

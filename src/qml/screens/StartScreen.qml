@@ -128,7 +128,19 @@ Item {
             + "<br>the folder path and/or passphrase.";
           }
           console.log("Wallet loaded successfully")
+          // Always default to AVAX & AVME on first load
+          if (System.getCurrentCoin() == "") {
+            System.setCurrentCoin("AVAX")
+            System.setCurrentCoinDecimals(18)
+          }
+          if (System.getCurrentToken() == "") {
+            System.setCurrentToken("AVME")
+            System.setCurrentTokenDecimals(18)
+          }
           System.setFirstLoad(true)
+          System.loadAccounts()
+          System.startAllBalanceThreads()
+          window.menu.visible = true
           System.setScreen(content, "qml/screens/OverviewScreen.qml")
         } catch (error) {
           walletFailPopup.info = error

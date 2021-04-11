@@ -57,7 +57,9 @@ Drawer {
       id: itemOverview
       icon: (itemSelection.y == y) ? "qrc:/img/icons/gridSelect.png" : "qrc:/img/icons/grid.png"
       label: "Overview"
-      onChangeActiveItem: itemSelection.y = y
+      area.onClicked: {
+        itemSelection.y = y
+      }
     }
 
     Rectangle {
@@ -71,7 +73,9 @@ Drawer {
       id: itemSend
       icon: (itemSelection.y == y) ? "qrc:/img/icons/coinSelect.png" : "qrc:/img/icons/coin.png"
       label: "Send/<br>Receive"
-      onChangeActiveItem: itemSelection.y = y
+      area.onClicked: {
+        itemSelection.y = y
+      }
     }
 
     Rectangle {
@@ -85,7 +89,9 @@ Drawer {
       id: itemExchange
       icon: (itemSelection.y == y) ? "qrc:/img/icons/directionsSelect.png" : "qrc:/img/icons/directions.png"
       label: "Exchange"
-      onChangeActiveItem: itemSelection.y = y
+      area.onClicked: {
+        itemSelection.y = y
+      }
     }
 
     Rectangle {
@@ -99,7 +105,9 @@ Drawer {
       id: itemLiquidity
       icon: (itemSelection.y == y) ? "qrc:/img/icons/uploadSelect.png" : "qrc:/img/icons/upload.png"
       label: "Liquidity"
-      onChangeActiveItem: itemSelection.y = y
+      area.onClicked: {
+        itemSelection.y = y
+      }
     }
 
     Rectangle {
@@ -113,7 +121,25 @@ Drawer {
       id: itemStaking
       icon: (itemSelection.y == y) ? "qrc:/img/icons/credit-cardSelect.png" : "qrc:/img/icons/credit-card.png"
       label: "Staking"
-      onChangeActiveItem: itemSelection.y = y
+      area.onClicked: {
+        itemSelection.y = y
+      }
+    }
+
+    Rectangle {
+      anchors.horizontalCenter: parent.horizontalCenter
+      width: (parent.width - 10)
+      height: 1
+      color: "#4E525D"
+    }
+
+    AVMESideMenuItem {
+      id: itemAbout
+      icon: (itemSelection.y == y) ? "qrc:/img/icons/infoSelect.png" : "qrc:/img/icons/info.png"
+      label: "About"
+      area.onClicked: {
+        itemSelection.y = y
+      }
     }
 
     Rectangle {
@@ -127,6 +153,25 @@ Drawer {
       id: itemClose
       icon: "qrc:/img/icons/log-out.png"
       label: "Close<br>Wallet"
+      area.onClicked: {
+        closeWalletPopup.open()
+      }
     }
+  }
+
+  // Yes/No popup for confirming Wallet closure
+  AVMEPopupYesNo {
+    id: closeWalletPopup
+    icon: "qrc:/img/warn.png"
+    info: "Are you sure you want to close this Wallet?"
+    yesBtn.onClicked: {
+      closeWalletPopup.close()
+      System.stopAllBalanceThreads()
+      System.closeWallet()
+      console.log("Wallet closed successfully")
+      window.menu.visible = false
+      System.setScreen(content, "qml/screens/StartScreen.qml")
+    }
+    noBtn.onClicked: closeWalletPopup.close()
   }
 }
