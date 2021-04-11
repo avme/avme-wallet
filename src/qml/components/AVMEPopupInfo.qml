@@ -12,13 +12,13 @@ Popup {
   id: infoPopup
   property string icon
   property string info
-  property color popupBgColor: "#9A4FAD"
+  property color popupBgColor: "#1C2029"
 
   width: window.width / 2
   height: window.height / 4
   x: (window.width / 2) - (width / 2)
   y: (window.height / 2) - (height / 2)
-  background: Rectangle { anchors.fill: parent; color: popupBgColor }
+  background: Rectangle { anchors.fill: parent; color: popupBgColor; radius: 10 }
   modal: true
   focus: true
   padding: 0  // Remove white borders
@@ -45,6 +45,7 @@ Popup {
       id: label
       anchors.verticalCenter: png.verticalCenter
       horizontalAlignment: Text.AlignHCenter
+      color: "#FFFFFF"
       text: info
     }
   }

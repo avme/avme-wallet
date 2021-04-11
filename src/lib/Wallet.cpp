@@ -47,6 +47,10 @@ void Wallet::close() {
   Utils::walletFolderPath = "";
 }
 
+bool Wallet::isLoaded() {
+  return this->km.exists();
+}
+
 bool Wallet::auth(std::string pass) {
   bytesSec hash = dev::pbkdf2(pass, passSalt.asBytes(), passIterations);
   return (hash.ref().toString() == passHash.ref().toString());

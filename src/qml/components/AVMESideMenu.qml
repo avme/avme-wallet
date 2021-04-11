@@ -5,22 +5,22 @@ import "qrc:/qml/components"
 
 // Side panel that acts as a "global menu"
 
-Drawer {
+Rectangle {
   id: sideMenu
+  implicitWidth: 80
+  implicitHeight: parent.height
+  color: "#1C2029"
 
-  width: 80
-  height: parent.height
-  dragMargin: 0
-  edge: Qt.LeftEdge
-  position: 1.0
-  interactive: false
-  visible: true
-  modal: false
-
-  background: Rectangle {
-    id: bg
-    anchors.fill: parent
-    color: "#1C2029"
+  Connections {
+    target: System
+    onWalletLoaded: {
+      itemOverview.enabled = true
+      itemSend.enabled = true
+      itemExchange.enabled = true
+      itemLiquidity.enabled = true
+      itemStaking.enabled = true
+      itemSelection.y = itemOverview.y
+    }
   }
 
   Rectangle {
@@ -38,6 +38,15 @@ Drawer {
     anchors.fill: parent
     spacing: 5
 
+    Component.onCompleted: {
+      itemOverview.enabled = false
+      itemSend.enabled = false
+      itemExchange.enabled = false
+      itemLiquidity.enabled = false
+      itemStaking.enabled = false
+      itemSelection.y = itemWallet.y
+    }
+
     Image {
       id: logo
       height: 60
@@ -54,12 +63,31 @@ Drawer {
     }
 
     AVMESideMenuItem {
+      id: itemWallet
+      icon: (itemSelection.y == y) ? "qrc:/img/icons/inboxesSelect.png" : "qrc:/img/icons/inboxes.png"
+      label: "Wallet"
+      area.onClicked: {
+        itemSelection.y = y
+        System.setScreen(content, "qml/screens/StartScreen.qml")
+      }
+    }
+
+    Rectangle {
+      anchors.horizontalCenter: parent.horizontalCenter
+      width: (parent.width - 10)
+      height: 1
+      color: "#4E525D"
+    }
+
+    AVMESideMenuItem {
       id: itemOverview
       icon: (itemSelection.y == y) ? "qrc:/img/icons/gridSelect.png" : "qrc:/img/icons/grid.png"
       label: "Overview"
       area.onClicked: {
         itemSelection.y = y
+        System.setScreen(content, "qml/screens/OverviewScreen.qml")
       }
+      enabled: false
     }
 
     Rectangle {
@@ -76,6 +104,7 @@ Drawer {
       area.onClicked: {
         itemSelection.y = y
       }
+      enabled: false
     }
 
     Rectangle {
@@ -92,6 +121,7 @@ Drawer {
       area.onClicked: {
         itemSelection.y = y
       }
+      enabled: false
     }
 
     Rectangle {
@@ -108,6 +138,7 @@ Drawer {
       area.onClicked: {
         itemSelection.y = y
       }
+      enabled: false
     }
 
     Rectangle {
@@ -124,6 +155,7 @@ Drawer {
       area.onClicked: {
         itemSelection.y = y
       }
+      enabled: false
     }
 
     Rectangle {
@@ -139,22 +171,6 @@ Drawer {
       label: "About"
       area.onClicked: {
         itemSelection.y = y
-      }
-    }
-
-    Rectangle {
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: (parent.width - 10)
-      height: 1
-      color: "#4E525D"
-    }
-
-    AVMESideMenuItem {
-      id: itemClose
-      icon: "qrc:/img/icons/log-out.png"
-      label: "Close<br>Wallet"
-      area.onClicked: {
-        closeWalletPopup.open()
       }
     }
   }

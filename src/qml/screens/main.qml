@@ -28,13 +28,23 @@ ApplicationWindow {
 
   AVMESideMenu {
     id: sideMenu
-    visible: false
+    width: 80
+    anchors {
+      left: parent.left
+      top: parent.top
+      bottom: parent.bottom
+    }
   }
 
   // Dynamic screen loader (used in setScreen(id, screenpath))
   Loader {
     id: content
-    anchors.fill: parent
+    anchors {
+      left: sideMenu.left
+      right: parent.right
+      top: parent.top
+      bottom: parent.bottom
+    }
     source: "qrc:/qml/screens/StartScreen.qml"
   }
 }

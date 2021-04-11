@@ -46,5 +46,12 @@ Rectangle {
     onEntered: parent.color = "#3E424B"
     onExited: parent.color = "#1C2029"
   }
+
+  Rectangle {
+    id: disabledRect
+    anchors.fill: parent
+    color: "#1C2029"
+    visible: !enabled
+  }
 }
 

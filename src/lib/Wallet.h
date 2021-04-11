@@ -68,6 +68,12 @@ class Wallet {
     void close();
 
     /**
+     * Check if the Wallet is properly loaded.
+     * Returns true on success, false on failure.
+     */
+    bool isLoaded();
+
+    /**
      * Check if the passphrase input matches the stored hash.
      * Returns true on success, false on failure.
      */

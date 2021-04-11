@@ -18,7 +18,7 @@ TextField {
   property color inputSelectionColor: "#9CE3FD"
   property color inputLineColor: "#7AC1DB"
   property color inputLineDisabledColor: "#888888"
-  property color inputPlaceholderColor: "#44FFFFFF"
+  property color inputPlaceholderColor: "#88FFFFFF"
 
   implicitWidth: 320
   implicitHeight: 40

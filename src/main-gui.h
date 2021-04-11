@@ -38,6 +38,7 @@ class System : public QObject {
   Q_OBJECT
 
   signals:
+    void walletLoaded();
     void accountsGenerated(QVariantList accounts);
     void accountCreated(QVariantMap data);
     void accountCreationFailed();
@@ -194,6 +195,11 @@ class System : public QObject {
 
     Q_INVOKABLE void closeWallet() {
       this->w.close();
+    }
+
+    // Check if a Wallet is loaded
+    Q_INVOKABLE bool isWalletLoaded() {
+      return this->w.isLoaded();
     }
 
     // Get the seed for the Wallet
