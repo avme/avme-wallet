@@ -371,6 +371,49 @@ class System : public QObject {
       return ret;
     }
 
+    // Get the sum of all Accounts' balances in the Wallet
+    Q_INVOKABLE QVariantMap getAllAccountBalances() {
+      QVariantMap ret;
+      u256 totalAVAX = 0, totalAVME = 0, totalLPFree = 0, totalLPLocked = 0;
+      std::string totalAVAXStr = "", totalAVMEStr = "", totalLPFreeStr = "", totalLPLockedStr = "";
+
+      for (Account &a : w.accounts) {
+        a.balancesThreadLock.lock();
+        totalAVAX += boost::lexical_cast<u256>(
+          Utils::fixedPointToWei(a.balanceAVAX, this->currentCoinDecimals)
+        );
+        totalAVME += boost::lexical_cast<u256>(
+          Utils::fixedPointToWei(a.balanceAVME, this->currentTokenDecimals)
+        );
+        totalLPFree += boost::lexical_cast<u256>(
+          Utils::fixedPointToWei(a.balanceLPFree, 18)
+        );
+        totalLPLocked += boost::lexical_cast<u256>(
+          Utils::fixedPointToWei(a.balanceLPLocked, 18)
+        );
+        a.balancesThreadLock.unlock();
+      }
+
+      totalAVAXStr = Utils::weiToFixedPoint(
+        boost::lexical_cast<std::string>(totalAVAX), this->currentCoinDecimals
+      );
+      totalAVMEStr = Utils::weiToFixedPoint(
+        boost::lexical_cast<std::string>(totalAVME), this->currentTokenDecimals
+      );
+      totalLPFreeStr = Utils::weiToFixedPoint(
+        boost::lexical_cast<std::string>(totalLPFree), 18
+      );
+      totalLPLockedStr = Utils::weiToFixedPoint(
+        boost::lexical_cast<std::string>(totalLPLocked), 18
+      );
+
+      ret.insert("balanceAVAX", QString::fromStdString(totalAVAXStr));
+      ret.insert("balanceAVME", QString::fromStdString(totalAVMEStr));
+      ret.insert("balanceLPFree", QString::fromStdString(totalLPFreeStr));
+      ret.insert("balanceLPLocked", QString::fromStdString(totalLPLockedStr));
+      return ret;
+    }
+
     // Get an Account's private keys
     Q_INVOKABLE QString getPrivateKeys(QString account, QString pass) {
       Secret s = w.getSecret(account.toStdString(), pass.toStdString());

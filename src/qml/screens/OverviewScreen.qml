@@ -22,10 +22,13 @@ Item {
   }
 
   function reloadBalances() {
-    var obj = System.getAccountBalances(System.getTxSenderAccount())
-    accountCoinBalance.text = (obj.balanceAVAX) ? obj.balanceAVAX : "Loading..."
-    accountTokenBalance.text = (obj.balanceAVME) ? obj.balanceAVME : "Loading..."
-    stakingLockedBalance.text = (obj.balanceLPLocked) ? obj.balanceLPLocked : "Loading..."
+    var acc = System.getAccountBalances(System.getTxSenderAccount())
+    var wal = System.getAllAccountBalances()
+    accountCoinBalance.text = (acc.balanceAVAX) ? acc.balanceAVAX : "Loading..."
+    accountTokenBalance.text = (acc.balanceAVME) ? acc.balanceAVME : "Loading..."
+    stakingLockedBalance.text = (acc.balanceLPLocked) ? acc.balanceLPLocked : "Loading..."
+    walletCoinBalance.text = (wal.balanceAVAX) ? wal.balanceAVAX : "Loading..."
+    walletTokenBalance.text = (wal.balanceAVME) ? wal.balanceAVME : "Loading..."
   }
 
   Rectangle {
