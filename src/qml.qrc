@@ -13,6 +13,8 @@
         <file>qml/screens/LiquidityScreen.qml</file>
         <file>qml/screens/StakingScreen.qml</file>
 
+        <file>qml/screens/newTransactionScreen.qml</file>
+
         <file>qml/components/AVMEButton.qml</file>
         <file>qml/components/AVMEInput.qml</file>
         <file>qml/components/AVMESideMenu.qml</file>
@@ -40,6 +42,7 @@
 
         <file>img/avme_banner.png</file>
         <file>img/avme_logo.png</file>
+        <file>img/avme_logo_hd.png</file>
         <file>img/avax_logo.png</file>
         <file>img/warn.png</file>
         <file>img/wait.png</file>
@@ -47,6 +50,8 @@
         <file>img/no.png</file>
         <file>img/pangolin.png</file>
 
+        <file>img/icons/create.png</file>
+        <file>img/icons/save.png</file>
         <file>img/icons/cog.png</file>
         <file>img/icons/cogSelect.png</file>
         <file>img/icons/coin.png</file>
@@ -69,5 +74,9 @@
         <file>img/icons/refreshSelect.png</file>
         <file>img/icons/upload.png</file>
         <file>img/icons/uploadSelect.png</file>
+
+        <file>fonts/RobotoMono-Bold.ttf</file>
+        <file>fonts/RobotoMono-Italic.ttf</file>
+        <file>fonts/RobotoMono-Regular.ttf</file>
     </qresource>
 </RCC>

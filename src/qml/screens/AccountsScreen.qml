@@ -72,13 +72,29 @@ Item {
   // Background icon
   Image {
     id: bgIcon
-    width: 256
-    height: 256
+    width: 500
+    height: 500
+    opacity: 0.5
     antialiasing: true
     smooth: true
     anchors.centerIn: parent
     fillMode: Image.PreserveAspectFit
-    source: "qrc:/img/avme_logo.png"
+    source: "qrc:/img/avme_logo_hd.png"
+  }
+
+  // Text if there's no Accounts in the Wallet
+  Text {
+    id: noAccountsText
+    anchors {
+      top: parent.top
+      topMargin: 60
+      horizontalCenter: parent.horizontalCenter
+    }
+    horizontalAlignment: Text.AlignHCenter
+    color: "#FFFFFF"
+    font.pointSize: 18.0
+    text: "No Accounts found.<br>You can create or import one using the button below."
+    visible: (accountsList.count == 0)
   }
 
   // Account list
@@ -91,6 +107,7 @@ Item {
       right: parent.right
       margins: 10
     }
+    visible: (accountsList.count != 0)
     radius: 5
     color: "#4458A0C9"
 

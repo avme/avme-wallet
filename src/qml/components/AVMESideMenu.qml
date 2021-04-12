@@ -13,21 +13,8 @@ Rectangle {
 
   Connections {
     target: System
-    onWalletLoaded: {
-      itemAccounts.enabled = true
-      itemOverview.enabled = false
-      itemSend.enabled = false
-      itemExchange.enabled = false
-      itemLiquidity.enabled = false
-      itemStaking.enabled = false
-      itemSelection.y = itemAccounts.y
-    }
+    onWalletLoaded: {}
     onAccountChosen: {
-      itemOverview.enabled = true
-      itemSend.enabled = true
-      itemExchange.enabled = true
-      itemLiquidity.enabled = true
-      itemStaking.enabled = true
       itemSelection.y = itemOverview.y
     }
   }
@@ -47,56 +34,12 @@ Rectangle {
     anchors.fill: parent
     spacing: 5
 
-    Component.onCompleted: {
-      itemAccounts.enabled = false
-      itemOverview.enabled = false
-      itemSend.enabled = false
-      itemExchange.enabled = false
-      itemLiquidity.enabled = false
-      itemStaking.enabled = false
-      itemSelection.y = itemWallet.y
-    }
-
     Image {
       id: logo
       height: 60
       anchors.horizontalCenter: parent.horizontalCenter
       source: "qrc:/img/avme_logo.png"
       fillMode: Image.PreserveAspectFit
-    }
-
-    Rectangle {
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: (parent.width - 10)
-      height: 1
-      color: "#4E525D"
-    }
-
-    AVMESideMenuItem {
-      id: itemWallet
-      icon: (itemSelection.y == y) ? "qrc:/img/icons/inboxesSelect.png" : "qrc:/img/icons/inboxes.png"
-      label: "Wallet"
-      area.onClicked: {
-        itemSelection.y = y
-        System.setScreen(content, "qml/screens/StartScreen.qml")
-      }
-    }
-
-    Rectangle {
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: (parent.width - 10)
-      height: 1
-      color: "#4E525D"
-    }
-
-    AVMESideMenuItem {
-      id: itemAccounts
-      icon: (itemSelection.y == y) ? "qrc:/img/icons/microchipSelect.png" : "qrc:/img/icons/microchip.png"
-      label: "Accounts"
-      area.onClicked: {
-        itemSelection.y = y
-        System.setScreen(content, "qml/screens/AccountsScreen.qml")
-      }
     }
 
     Rectangle {

@@ -10,6 +10,7 @@
 #include <QtCore/qplugin.h>
 #include <QtGui/QClipboard>
 #include <QtGui/QFont>
+#include <QtGui/QFontDatabase>
 #include <QtGui/QIcon>
 #include <QtCore/QThread>
 #include <QtConcurrent/qtconcurrentrun.h>
@@ -38,6 +39,7 @@ class System : public QObject {
   Q_OBJECT
 
   signals:
+    void hideMenu();
     void walletLoaded();
     void accountChosen();
     void accountsGenerated(QVariantList accounts);

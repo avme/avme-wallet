@@ -8,7 +8,7 @@ import "qrc:/qml/components"
 
 ApplicationWindow {
   id: window
-  property alias menu: sideMenu
+  property bool menuToggle: false
 
   title: "AVME Wallet"
   width: 1280
@@ -18,6 +18,29 @@ ApplicationWindow {
   maximumWidth: width
   maximumHeight: height
   visible: true
+
+  Connections {
+    target: System
+    onAccountChosen: menuToggle = true
+    onHideMenu: menuToggle = false
+  }
+
+  // States for menu visibility and loader anchoring
+  StateGroup {
+    id: menuStates
+    states: [
+      State {
+        name: "menuHide"; when: !menuToggle
+        PropertyChanges { target: sideMenu; visible: false }
+        AnchorChanges { target: content; anchors.left: parent.left }
+      },
+      State {
+        name: "menuShow"; when: menuToggle
+        PropertyChanges { target: sideMenu; visible: true }
+        AnchorChanges { target: content; anchors.left: sideMenu.right }
+      }
+    ]
+  }
 
   // Background
   Rectangle {
@@ -40,7 +63,6 @@ ApplicationWindow {
   Loader {
     id: content
     anchors {
-      left: sideMenu.right
       right: parent.right
       top: parent.top
       bottom: parent.bottom

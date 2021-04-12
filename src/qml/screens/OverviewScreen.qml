@@ -56,6 +56,38 @@ Item {
     }
 
     AVMEButton {
+      id: btnChangeWallet
+      width: parent.width * 0.15
+      anchors {
+        verticalCenter: parent.verticalCenter
+        right: btnChangeAccount.left
+        rightMargin: 10
+      }
+      text: "Change Wallet"
+      onClicked: {
+        System.hideMenu()
+        System.setScreen(content, "qml/screens/StartScreen.qml")
+      }
+    }
+
+    AVMEButton {
+      id: btnChangeAccount
+      width: parent.width * 0.15
+      anchors {
+        verticalCenter: parent.verticalCenter
+        right: btnCopyToClipboard.left
+        rightMargin: 10
+      }
+      text: "Change Account"
+      onClicked: {
+        System.hideMenu()
+        System.setScreen(content, "qml/screens/AccountsScreen.qml")
+      }
+    }
+
+    /*
+    // TODO: move those somewhere else
+    AVMEButton {
       id: btnViewPrivKey
       width: parent.width * 0.15
       anchors {
@@ -81,6 +113,7 @@ Item {
       text: "View Wallet Seed"
       onClicked: viewSeedPopup.open()
     }
+    */
 
     AVMEButton {
       id: btnCopyToClipboard
@@ -316,7 +349,7 @@ Item {
       margins: 10
     }
     width: parent.width * 0.45
-    height: 400
+    height: 420
     title: "Staking Statistics"
 
     Rectangle {
@@ -496,7 +529,7 @@ Item {
       right: parent.right
       margins: 10
     }
-    height: 400
+    height: 420
     title: "Market Data"
   }
 

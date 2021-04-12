@@ -14,9 +14,12 @@ int main(int argc, char *argv[]) {
   System sys;
   engine.rootContext()->setContextProperty("System", &sys);
 
-  // Force a monospaced font for the app
+  // Set the app's text font and icon
+  QFontDatabase::addApplicationFont(":/fonts/RobotoMono-Bold.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/RobotoMono-Italic.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/RobotoMono-Regular.ttf");
   QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-  QFont font("Monospace");
+  QFont font("Roboto Mono");
   font.setStyleHint(QFont::Monospace);
   QApplication::setFont(font);
   app.setWindowIcon(QIcon(":/img/avme_logo.png"));
