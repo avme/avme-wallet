@@ -86,11 +86,12 @@ Item {
                 id: element
                 color: "#ffffff"
                 text: qsTr("AVME Wallet")
+                anchors.left: parent.left
+                anchors.leftMargin: 160
+                anchors.verticalCenterOffset: 0
                 font.family: "Tahoma"
                 horizontalAlignment: Text.AlignLeft
                 verticalAlignment: Text.AlignTop
-                anchors.right: parent.right
-                anchors.rightMargin: -30
                 anchors.verticalCenter: parent.verticalCenter
                 font.pixelSize: 60
             }
@@ -103,8 +104,10 @@ Item {
 
 
 
+
+
 /*##^## Designer {
-    D{i:0;autoSize:true;height:720;width:1200}D{i:5;anchors_x:0;anchors_y:-263}D{i:7;anchors_x:0;anchors_y:"-263"}
-D{i:3;anchors_height:400;anchors_width:200;anchors_x:456;anchors_y:109}
+    D{i:0;autoSize:true;height:720;width:1200}D{i:5;anchors_x:0;anchors_y:"-263"}D{i:7;anchors_x:0;anchors_y:"-263"}
+D{i:9;anchors_x:182}D{i:3;anchors_height:400;anchors_width:200;anchors_x:456;anchors_y:109}
 }
  ##^##*/
