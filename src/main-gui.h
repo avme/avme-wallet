@@ -469,6 +469,23 @@ class System : public QObject {
       );
     }
 
+    // Calculate the real amount of a max AVAX transaction (minus gas costs)
+    Q_INVOKABLE QString getRealMaxAVAXAmount(QString gasLimit, QString gasPrice) {
+      std::string gasLimitStr = gasLimit.toStdString(); // Already in Wei
+      std::string gasPriceStr = Utils::fixedPointToWei(gasPrice.toStdString(), 9); // Gwei, so 10^9 Wei
+      u256 gasLimitU256 = u256(gasLimitStr);
+      u256 gasPriceU256 = u256(gasPriceStr);
+
+      QVariantMap acc = getAccountBalances(QString::fromStdString(this->txSenderAccount));
+      std::string balanceStr = acc["balanceAVAX"].toString().toStdString();
+      u256 totalU256 = u256(Utils::fixedPointToWei(balanceStr, this->currentCoinDecimals));
+      totalU256 -= (gasLimitU256 + gasPriceU256);
+      std::string totalStr = Utils::weiToFixedPoint(
+        boost::lexical_cast<std::string>(totalU256), 18
+      );
+      return QString::fromStdString(totalStr);
+    }
+
     /**
      * Calculate the total cost of a transaction.
      * Calculation is done with values converted to Wei, while the result

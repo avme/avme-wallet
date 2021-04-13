@@ -7,16 +7,10 @@ import "qrc:/qml/components"
 
 Item {
   id: transactionScreen
+  property string txOperationStr
   property string txTotalCoinStr
   property string txTotalTokenStr
   property string txTotalLPStr
-  property string txOperationStr
-  property string txReceiverAccountStr
-  property string txAmountCoinStr
-  property string txAmountTokenStr
-  property string txAmountLPStr
-  property string txGasLimitStr
-  property string txGasPriceStr
 
   function updateTxCost() {
     txTotalCoinStr = System.calculateTransactionCost(
@@ -28,6 +22,63 @@ Item {
     txTotalLPStr = System.calculateTransactionCost(
       txAmountLPInput.text, "0", "0"
     )
+  }
+
+  function changeOperation(op) {
+    // Clean all inputs first, then set the gas limit and enable only the required inputs
+    txToInput.text = txAmountCoinInput.text = txAmountTokenInput.text = txAmountLPInput.text = ""
+    txOperationStr = op
+    txToInput.visible = (op == "Send AVAX" || op == "Send AVME")
+    autoLimitCheck.checked = autoGasCheck.checked = true
+    if (op == "Send AVAX" || op == "Send AVME") {
+      txGasLimitInput.text = "21000"
+    } else if (op == "Swap AVAX -> AVME" || op == "Swap AVME -> AVAX") {
+      txGasLimitInput.text = "180000"
+    } else {
+      txGasLimitInput.text = "250000"
+    }
+    txGasPriceInput.text = System.getAutomaticFee()
+    updateTxCost()
+    switch (op) {
+      // AVAX only
+      case "Send AVAX":
+      case "Swap AVAX -> AVME":
+        txAmountCoinInput.visible = true
+        txAmountTokenInput.visible = false
+        txAmountLPInput.visible = false
+        break;
+      // AVME only
+      case "Send AVME":
+      case "Swap AVME -> AVAX":
+        txAmountCoinInput.visible = false
+        txAmountTokenInput.visible = true
+        txAmountLPInput.visible = false
+        break;
+      // AVAX + AVME
+      case "Add Liquidity":
+        txAmountCoinInput.visible = true
+        txAmountTokenInput.visible = true
+        txAmountLPInput.visible = false
+        break;
+      // LP only
+      case "Remove Liquidity":
+      case "Stake LP":
+      case "Unstake LP":
+        txAmountCoinInput.visible = false
+        txAmountTokenInput.visible = false
+        txAmountLPInput.visible = true
+        break;
+      // Nothing
+      case "Approve Exchange":
+      case "Approve Liquidity":
+      case "Approve Staking":
+      case "Harvest AVME":
+      case "Exit Staking":
+        txAmountCoinInput.visible = false
+        txAmountTokenInput.visible = false
+        txAmountLPInput.visible = false
+        break;
+    }
   }
 
   Component.onCompleted: {
@@ -79,8 +130,8 @@ Item {
             "Add Liquidity", "Remove Liquidity",
             "Stake LP", "Unstake LP", "Harvest AVME", "Exit Staking"
           ]
-          onActivated: txOperationStr = txOperationSelector.currentText
-          Component.onCompleted: txOperationStr = txOperationSelector.currentText
+          onActivated: changeOperation(txOperationSelector.currentText)
+          Component.onCompleted: changeOperation(txOperationSelector.currentText)
         }
       }
 
@@ -115,20 +166,15 @@ Item {
         validator: RegExpValidator { regExp: /0x[0-9a-fA-F]{40}/ }
         label: "To"
         placeholder: "Receiver address - e.g. 0x123456789ABCDEF..."
-        onTextEdited: txReceiverAccountStr = txToInput.text
       }
 
-      // TODO: clean+disable depending on operation
       AVMEInput {
         id: txAmountCoinInput
         width: (txDetailsColumn.width * 0.8)
         validator: RegExpValidator { regExp: System.createCoinRegExp() }
         label: System.getCurrentCoin() + " Amount"
         placeholder: "Fixed point amount (e.g. 0.5)"
-        onTextEdited: {
-          txAmountCoinStr = txAmountCoinInput.text
-          updateTxCost()
-        }
+        onTextEdited: updateTxCost()
 
         AVMEButton {
           id: btnAmountCoinMax
@@ -139,26 +185,21 @@ Item {
           }
           text: "Max"
           onClicked: {
-            // TODO: take gas limit and price into consideration
-            var acc = System.getAccountBalances(System.getTxSenderAccount())
-            txAmountCoinInput.text = acc.balanceAVAX
-            txAmountCoinStr = txAmountCoinInput.text
+            txAmountCoinInput.text = System.getRealMaxAVAXAmount(
+              txGasLimitInput.text, txGasPriceInput.text
+            )
             updateTxCost()
           }
         }
       }
 
-      // TODO: clean+disable depending on operation
       AVMEInput {
         id: txAmountTokenInput
         width: (txDetailsColumn.width * 0.8)
         validator: RegExpValidator { regExp: System.createTokenRegExp() }
         label: System.getCurrentToken() + " Amount"
         placeholder: "Fixed point amount (e.g. 0.5)"
-        onTextEdited: {
-          txAmountTokenStr = txAmountTokenInput.text
-          updateTxCost()
-        }
+        onTextEdited: updateTxCost()
 
         AVMEButton {
           id: btnAmountTokenMax
@@ -169,26 +210,20 @@ Item {
           }
           text: "Max"
           onClicked: {
-            // TODO: take gas limit and price into consideration
             var acc = System.getAccountBalances(System.getTxSenderAccount())
             txAmountTokenInput.text = acc.balanceAVME
-            txAmountTokenStr = txAmountTokenInput.text
             updateTxCost()
           }
         }
       }
 
-      // TODO: clean+disable depending on operation
       AVMEInput {
         id: txAmountLPInput
         width: (txDetailsColumn.width * 0.8)
-        validator: RegExpValidator { regExp: System.createCoinRegExp() }  // TODO: make this right later
+        validator: RegExpValidator { regExp: /[0-9]{1,}(?:\.[0-9]{1,18})?/ }
         label: "LP Amount"
         placeholder: "Fixed point amount (e.g. 0.5)"
-        onTextEdited: {
-          txAmountLPStr = txAmountLPInput.text
-          updateTxCost()
-        }
+        onTextEdited: updateTxCost()
 
         AVMEButton {
           id: btnAmountLPMax
@@ -199,10 +234,10 @@ Item {
           }
           text: "Max"
           onClicked: {
-            // TODO: take gas limit, price and locked LP into consideration
+            // "Stake LP" = free LP, "Remove Liquidity" and "Unstake LP" = locked LP
             var acc = System.getAccountBalances(System.getTxSenderAccount())
-            txAmountLPInput.text = acc.balanceLPFree
-            txAmountLPStr = txAmountLPInput.text
+            txAmountLPInput.text = (txOperationStr == "Stake LP")
+              ? acc.balanceLPFree : acc.balanceLPLocked
             updateTxCost()
           }
         }
@@ -217,13 +252,8 @@ Item {
           width: (txDetailsColumn.width * 0.5)
           validator: RegExpValidator { regExp: /[0-9]+/ }
           label: "Gas Limit (in Wei)"
-          text: "21000" // TODO: change according to operation
           enabled: !autoLimitCheck.checked
-          onTextEdited: {
-            txGasLimitStr = txGasLimitInput.text
-            updateTxCost()
-          }
-          Component.onCompleted: txGasLimitStr = txGasLimitInput.text
+          onTextEdited: updateTxCost()
         }
 
         CheckBox {
@@ -250,7 +280,6 @@ Item {
               prev = txGasLimitInput.text
               txGasLimitInput.text = ""
             }
-            txGasLimitStr = txGasLimitInput.text
             updateTxCost()
           }
         }
@@ -266,11 +295,7 @@ Item {
           validator: RegExpValidator { regExp: /[0-9]+/ }
           enabled: !autoGasCheck.checked
           label: "Gas Price (in Gwei)"
-          onTextEdited: {
-            txGasPriceStr = txGasPriceInput.text
-            updateTxCost()
-          }
-          Component.onCompleted: txGasPriceStr = txGasPriceInput.text
+          onTextEdited: updateTxCost()
         }
 
         CheckBox {
@@ -297,7 +322,6 @@ Item {
               prev = txGasPriceInput.text
               txGasPriceInput.text = ""
             }
-            txGasPriceStr = txGasPriceInput.text
             updateTxCost()
           }
         }
@@ -358,7 +382,7 @@ Item {
           switch (txOperationStr) {
             case "Send AVAX":
             case "Send AVME":
-              text: "to the address<br><b>" + txReceiverAccountStr + "</b>"
+              text: "to the address<br><b>" + txToInput.text + "</b>"
               break;
             case "Approve Exchange":
               text: "(give approval to Pangolin to use your Account's"
@@ -403,33 +427,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         width: parent.width
         color: "#FFFFFF"
-        text: {
-          switch (txOperationStr) {
-            case "Send AVAX":
-            case "Send AVME":
-              text: "Costs for the transaction:"
-              break;
-            case "Approve Exchange":
-            case "Approve Liquidity":
-            case "Approve Staking":
-              text: "Costs for the approval:"
-              break;
-            case "Swap AVAX -> AVME":
-            case "Swap AVME -> AVAX":
-            case "Add Liquidity":
-            case "Remove Liquidity":
-              text: "Expecting to pay/receive:";
-              break;
-            case "Stake LP":
-              text: "Expecting to pay:";
-              break;
-            case "Unstake LP":
-            case "Harvest AVME":
-            case "Exit Staking":
-              text: "Expecting to receive:";
-              break;
-          }
-        }
+        text: "Amounts for the transaction:"
       }
 
       Text {
@@ -443,18 +441,18 @@ Item {
           switch (txOperationStr) {
             case "Send AVAX":
             case "Swap AVAX -> AVME":
-              text: txAmountCoinStr + " " + System.getCurrentCoin()
-              + "<br>Gas Limit: " + System.weiToFixedPoint(txGasLimitStr, 18)
+              text: txAmountCoinInput.text + " " + System.getCurrentCoin()
+              + "<br>Gas Limit: " + System.weiToFixedPoint(txGasLimitInput.text, 18)
               + " " + System.getCurrentCoin()
-              + "<br>Gas Price: " + System.weiToFixedPoint(txGasPriceStr, 9)
+              + "<br>Gas Price: " + System.weiToFixedPoint(txGasPriceInput.text, 9)
               + " " + System.getCurrentCoin();
               break;
             case "Send AVME":
             case "Swap AVME -> AVAX":
-              text: txAmountTokenStr + " " + System.getCurrentToken()
-              + "<br>Gas Limit: " + System.weiToFixedPoint(txGasLimitStr, 18)
+              text: txAmountTokenInput.text + " " + System.getCurrentToken()
+              + "<br>Gas Limit: " + System.weiToFixedPoint(txGasLimitInput.text, 18)
               + " " + System.getCurrentCoin()
-              + "<br>Gas Price: " + System.weiToFixedPoint(txGasPriceStr, 9)
+              + "<br>Gas Price: " + System.weiToFixedPoint(txGasPriceInput.text, 9)
               + " " + System.getCurrentCoin();
               break;
             case "Approve Exchange":
@@ -462,26 +460,26 @@ Item {
             case "Approve Staking":
             case "Harvest AVME":
             case "Exit Staking":
-              text: "Gas Limit: " + System.weiToFixedPoint(txGasLimitStr, 18)
+              text: "Gas Limit: " + System.weiToFixedPoint(txGasLimitInput.text, 18)
               + " " + System.getCurrentCoin()
-              + "<br>Gas Price: " + System.weiToFixedPoint(txGasPriceStr, 9)
+              + "<br>Gas Price: " + System.weiToFixedPoint(txGasPriceInput.text, 9)
               + " " + System.getCurrentCoin();
               break;
             case "Add Liquidity":
-              text: txAmountCoinStr + " " + System.getCurrentCoin()
-              + "<br>" + txAmountTokenStr + " " + System.getCurrentToken()
-              + "<br>Gas Limit: " + System.weiToFixedPoint(txGasLimitStr, 18)
+              text: txAmountCoinInput.text + " " + System.getCurrentCoin()
+              + "<br>" + txAmountTokenInput.text + " " + System.getCurrentToken()
+              + "<br>Gas Limit: " + System.weiToFixedPoint(txGasLimitInput.text, 18)
               + " " + System.getCurrentCoin()
-              + "<br>Gas Price: " + System.weiToFixedPoint(txGasPriceStr, 9)
+              + "<br>Gas Price: " + System.weiToFixedPoint(txGasPriceInput.text, 9)
               + " " + System.getCurrentCoin();
               break;
             case "Remove Liquidity":
             case "Stake LP":
             case "Unstake LP":
-              text: txAmountLPStr + " LP"
-              + "<br>Gas Limit: " + System.weiToFixedPoint(txGasLimitStr, 18)
+              text: txAmountLPInput.text + " LP"
+              + "<br>Gas Limit: " + System.weiToFixedPoint(txGasLimitInput.text, 18)
               + " " + System.getCurrentCoin()
-              + "<br>Gas Price: " + System.weiToFixedPoint(txGasPriceStr, 9)
+              + "<br>Gas Price: " + System.weiToFixedPoint(txGasPriceInput.text, 9)
               + " " + System.getCurrentCoin();
               break;
           }
@@ -494,7 +492,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         width: parent.width
         color: "#FFFFFF"
-        text: "Total costs to make the transaction:"
+        text: "Total cost to make the transaction:"
       }
 
       Text {
