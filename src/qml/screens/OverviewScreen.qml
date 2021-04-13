@@ -123,12 +123,12 @@ Item {
         right: parent.right
         rightMargin: 10
       }
-      enabled: (!btnChangeAccountTimer.running)
+      enabled: (!btnClipboardTimer.running)
       text: (enabled) ? "Copy to Clipboard" : "Copied!"
-      Timer { id: btnChangeAccountTimer; interval: 2000 }
+      Timer { id: btnClipboardTimer; interval: 2000 }
       onClicked: {
         System.copyToClipboard(System.getTxSenderAccount())
-        btnChangeAccountTimer.start()
+        btnClipboardTimer.start()
       }
     }
   }

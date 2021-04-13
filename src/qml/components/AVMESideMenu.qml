@@ -72,6 +72,7 @@ Rectangle {
       label: "Send/<br>Receive"
       area.onClicked: {
         itemSelection.y = y
+        System.setScreen(content, "qml/screens/TransactionScreen.qml")
       }
     }
 

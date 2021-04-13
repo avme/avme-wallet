@@ -5,15 +5,15 @@
         <file>qml/screens/AccountsScreen.qml</file>
         <file>qml/screens/OverviewScreen.qml</file>
 
-        <file>qml/screens/StatsScreen.qml</file>
-        <file>qml/screens/CoinTransactionScreen.qml</file>
-        <file>qml/screens/TokenTransactionScreen.qml</file>
+        <file>qml/screens/TransactionScreen.qml</file>
         <file>qml/screens/ProgressScreen.qml</file>
         <file>qml/screens/ExchangeScreen.qml</file>
         <file>qml/screens/LiquidityScreen.qml</file>
         <file>qml/screens/StakingScreen.qml</file>
 
-        <file>qml/screens/newTransactionScreen.qml</file>
+        <file>qml/screens/CoinTransactionScreen.qml</file>
+        <file>qml/screens/TokenTransactionScreen.qml</file>
+        <file>qml/screens/StatsScreen.qml</file>
 
         <file>qml/components/AVMEButton.qml</file>
         <file>qml/components/AVMEInput.qml</file>
