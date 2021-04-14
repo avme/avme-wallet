@@ -45,6 +45,7 @@ class System : public QObject {
     void accountsGenerated(QVariantList accounts);
     void accountCreated(QVariantMap data);
     void accountCreationFailed();
+    void operationOverride(QString op, QString amountCoin, QString amountToken, QString amountLP);
     void txStart(QString pass);
     void txBuilt(bool b);
     void txSigned(bool b);

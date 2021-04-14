@@ -4,7 +4,6 @@ import QtQuick.Controls 2.2
 import "qrc:/qml/components"
 
 // Screen for showing an overview for the Wallet, Account, etc.
-
 Item {
   id: overviewScreen
 
@@ -533,6 +532,8 @@ Item {
     title: "Market Data"
   }
 
+  /**
+  // TODO: move those somewhere else
   // Popup for viewing the Account's private key
   AVMEPopupViewPrivKey {
     id: viewPrivKeyPopup
@@ -556,4 +557,5 @@ Item {
       }
     }
   }
+  */
 }

@@ -5,7 +5,6 @@ import Qt.labs.platform 1.0
 import "qrc:/qml/components"
 
 // Screen for staking tokens with a given Account
-
 Item {
   id: stakingScreen
   property bool isStaking: true
@@ -76,7 +75,6 @@ Item {
         id: btnSwitchOrder
         width: parent.width * 0.5
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (allowance != "")
         text: "Switch to " + ((isStaking) ? "Unstake" : "Stake")
         onClicked: {
           isStaking = !isStaking
@@ -115,6 +113,7 @@ Item {
         AVMEButton {
           id: btnMaxAmount
           width: (stakingDetailsColumn.width * 0.5) - parent.spacing
+          enabled: (allowance != "")
           text: "Max Amount"
           onClicked: {
             var acc = System.getAccountBalances(System.getTxSenderAccount())
@@ -125,7 +124,10 @@ Item {
         AVMEButton {
           id: btnStake
           width: (stakingDetailsColumn.width * 0.5) - parent.spacing
-          enabled: (allowance != "" && stakeInput.acceptableInput)
+          enabled: allowance != "" && (
+            !System.isApproved(System.getTxSenderLPFreeAmount(), allowance) ||
+            stakeInput.acceptableInput
+          )
           text: {
             if (allowance == "") {
               text: "Checking approval..."
@@ -137,39 +139,16 @@ Item {
               text: "Approve"
             }
           }
-          /*
-          // TODO
           onClicked: {
-            System.setTxGasLimit("250000")
-            System.setTxGasPrice(System.getAutomaticFee())
-            var lpAmount = (isStaking)
-              ? System.getTxSenderLPFreeAmount() : System.getTxSenderLPLockedAmount()
-            if (!System.isApproved(lpAmount, allowance)) {
-              approveStakePopup.setTxData(System.getTxGasLimit(), System.getTxGasPrice())
-              approveStakePopup.open()
-              return
-            }
-
-            var noCoinFunds = System.hasInsufficientCoinFunds(
-              System.getTxSenderCoinAmount(),
-              System.calculateTransactionCost(
-                "0", System.getTxGasLimit(), System.getTxGasPrice()
-              )
-            )
-            var noLPFunds = System.hasInsufficientTokenFunds(
-              lpAmount, stakeInput.text
-            )
-
-            if (noCoinFunds || noLPFunds) {
-              fundsPopup.open()
+            System.setScreen(content, "qml/screens/TransactionScreen.qml")
+            if (!System.isApproved(System.getTxSenderLPFreeAmount(), allowance)) {
+              System.operationOverride("Approve Staking", "", "", "")
+            } else if (isStaking) {
+              System.operationOverride("Stake LP", "", "", stakeInput.text)
             } else {
-              confirmStakePopup.setTxData(
-                isStaking, stakeInput.text, System.getTxGasLimit(), System.getTxGasPrice()
-              )
-              confirmStakePopup.open()
+              System.operationOverride("Unstake LP", "", "", stakeInput.text)
             }
           }
-          */
         }
       }
     }
@@ -229,32 +208,13 @@ Item {
         width: (parent.width * 0.75)
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: (reward != "") // TODO: reward > 0 && locked LP > 0
-        text: "Harvest " + System.getCurrentToken() + " & Unstake LP"
-        /*
-        // TODO
+        text: (reward != "")
+        ? "Harvest " + System.getCurrentToken() + " & Unstake LP"
+        : "Querying reward..."
         onClicked: {
-          isExiting = true
-          System.setTxGasLimit("250000")
-          System.setTxGasPrice(System.getAutomaticFee())
-
-          var noCoinFunds = System.hasInsufficientCoinFunds(
-            System.getTxSenderCoinAmount(),
-            System.calculateTransactionCost(
-              "0", System.getTxGasLimit(), System.getTxGasPrice()
-            )
-          )
-
-          if (noCoinFunds) {
-            fundsPopup.open()
-          } else {
-            confirmHarvestPopup.setTxData(
-              isExiting, reward, System.getCurrentToken(), System.getTxSenderLPLockedAmount(),
-              System.getTxGasLimit(), System.getTxGasPrice()
-            )
-            confirmHarvestPopup.open()
-          }
+          System.setScreen(content, "qml/screens/TransactionScreen.qml")
+          System.operationOverride("Exit Staking", "", "", "")
         }
-        */
       }
 
       AVMEButton {
@@ -262,32 +222,13 @@ Item {
         width: (parent.width * 0.75)
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: (reward != "") // TODO: reward > 0
-        text: "Harvest " + System.getCurrentToken()
-        /*
-        // TODO
+        text: (reward != "")
+        ? "Harvest " + System.getCurrentToken()
+        : "Querying reward..."
         onClicked: {
-          isExiting = false
-          System.setTxGasLimit("250000")
-          System.setTxGasPrice(System.getAutomaticFee())
-
-          var noCoinFunds = System.hasInsufficientCoinFunds(
-            System.getTxSenderCoinAmount(),
-            System.calculateTransactionCost(
-              "0", System.getTxGasLimit(), System.getTxGasPrice()
-            )
-          )
-
-          if (noCoinFunds) {
-            fundsPopup.open()
-          } else {
-            confirmHarvestPopup.setTxData(
-              isExiting, reward, System.getCurrentToken(), "0",
-              System.getTxGasLimit(), System.getTxGasPrice()
-            )
-            confirmHarvestPopup.open()
-          }
+          System.setScreen(content, "qml/screens/TransactionScreen.qml")
+          System.operationOverride("Harvest AVME", "", "", "")
         }
-        */
       }
     }
   }

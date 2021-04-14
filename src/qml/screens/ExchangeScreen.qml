@@ -5,7 +5,6 @@ import Qt.labs.platform 1.0
 import "qrc:/qml/components"
 
 // Screen for exchanging coins/tokens in a given Account
-
 Item {
   id: exchangeScreen
   property bool coinToToken: true
@@ -195,20 +194,6 @@ Item {
         }
       }
 
-      // TODO: show the total Account balances
-      /*
-      Text {
-        id: walletBalances
-        anchors.horizontalCenter: parent.horizontalCenter
-        horizontalAlignment: Text.AlignHCenter
-        color: "#FFFFFF"
-        text: "Total " + System.getCurrentCoin() + " in wallet: <b>"
-        + System.getTxSenderCoinAmount() + "</b><br>"
-        + "Total " + System.getCurrentToken() + " in wallet: <b>"
-        + System.getTxSenderTokenAmount() + "</b>"
-      }
-      */
-
       AVMEInput {
         id: swapInput
         width: (parent.width * 0.8)
@@ -258,7 +243,9 @@ Item {
         id: swapBtn
         width: (parent.width * 0.5)
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (allowance != "" && swapInput.acceptableInput)
+        enabled: allowance != "" && (
+          !System.isApproved(swapInput.text, allowance) || swapInput.acceptableInput
+        )
         text: {
           if (allowance == "") {
             text: "Checking approval..."
@@ -268,49 +255,16 @@ Item {
             text: "Approve"
           }
         }
-        // TODO
-        /*
         onClicked: {
-          System.setTxGasLimit("180000")
-          System.setTxGasPrice(System.getAutomaticFee())
+          System.setScreen(content, "qml/screens/TransactionScreen.qml")
           if (!System.isApproved(swapInput.text, allowance)) {
-            approveExchangePopup.setTxData(System.getTxGasLimit(), System.getTxGasPrice())
-            approveExchangePopup.open()
-            return
-          }
-
-          if (coinToToken) {
-            var noCoinFunds = System.hasInsufficientCoinFunds(
-              System.getTxSenderCoinAmount(),
-              System.calculateTransactionCost(
-                swapInput.text, System.getTxGasLimit(), System.getTxGasPrice()
-              )
-            )
-            if (noCoinFunds) { fundsPopup.open(); return; }
+            System.operationOverride("Approve Exchange", "", "", "")
+          } else if (coinToToken) {
+            System.operationOverride("Swap AVAX -> AVME", swapInput.text, "", "")
           } else {
-            var noCoinFunds = System.hasInsufficientCoinFunds(
-              System.getTxSenderCoinAmount(),
-              System.calculateTransactionCost(
-                "0", System.getTxGasLimit(), System.getTxGasPrice()
-              )
-            )
-            var noTokenFunds = System.hasInsufficientTokenFunds(
-              System.getTxSenderTokenAmount(), swapInput.text
-            )
-            if (noCoinFunds || noTokenFunds) { fundsPopup.open(); return; }
+            System.operationOverride("Swap AVME -> AVAX", "", swapInput.text, "")
           }
-
-          var fromLabel = (coinToToken) ? System.getCurrentCoin() : System.getCurrentToken()
-          var toLabel = (!coinToToken) ? System.getCurrentCoin() : System.getCurrentToken()
-          var toAmount = System.queryExchangeAmount(swapInput.text, fromLabel, toLabel)
-          confirmExchangePopup.setTxData(
-            swapInput.text, toAmount, fromLabel, toLabel,
-            System.getTxGasLimit(), System.getTxGasPrice()
-          )
-          System.setTxTokenFlag(!coinToToken)
-          confirmExchangePopup.open()
         }
-        */
       }
     }
   }
@@ -560,13 +514,15 @@ Item {
         id: liquidityBtn
         width: (parent.width * 0.5)
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (
-          addAllowance != ""
-          && liquidityCoinInput.acceptableInput
-          && liquidityTokenInput.acceptableInput
-        )
+        enabled: (addToPool && addAllowance != "" && (
+          !System.isApproved(liquidityTokenInput.text, addAllowance) || 
+          (liquidityCoinInput.acceptableInput && liquidityTokenInput.acceptableInput)
+        )) || (!addToPool && removeAllowance != "" && (
+          !System.isApproved(liquidityTokenInput.text, removeAllowance) ||
+          liquidityLPSlider.value > 0
+        ))
         text: {
-          if (addAllowance === "") {
+          if (addAllowance == "" || removeAllowance == "") {
             text: "Checking approval..."
           } else if (addToPool && System.isApproved(liquidityTokenInput.text, addAllowance)) {
             text: "Add to the pool"
@@ -576,39 +532,22 @@ Item {
             text: "Approve"
           }
         }
-        // TODO
-        /*
         onClicked: {
-          System.setTxGasLimit("250000")
-          System.setTxGasPrice(System.getAutomaticFee())
-          if (!System.isApproved(liquidityTokenInput.text, addAllowance)) {
-            approveExchangePopup.setTxData(System.getTxGasLimit(), System.getTxGasPrice())
-            approveExchangePopup.open()
-            return
-          }
-
-          var noCoinFunds = System.hasInsufficientCoinFunds(
-            System.getTxSenderCoinAmount(),
-            System.calculateTransactionCost(
-              liquidityCoinInput.text, System.getTxGasLimit(), System.getTxGasPrice()
-            )
-          )
-          var noTokenFunds = System.hasInsufficientTokenFunds(
-            System.getTxSenderTokenAmount(), liquidityTokenInput.text
-          )
-
-          if (noCoinFunds || noTokenFunds) {
-            fundsPopup.open()
+          System.setScreen(content, "qml/screens/TransactionScreen.qml")
+          if (addToPool) {
+            if (!System.isApproved(liquidityTokenInput.text, addAllowance)) {
+              System.operationOverride("Approve Exchange", "", "", "")
+            } else {
+              System.operationOverride("Add Liquidity", liquidityCoinInput.text, liquidityTokenInput.text, "")
+            }
           } else {
-            confirmAddLPPopup.setTxData(
-              liquidityCoinInput.text, System.getCurrentCoin(),
-              liquidityTokenInput.text, System.getCurrentToken(),
-              System.getTxGasLimit(), System.getTxGasPrice()
-            )
-            confirmAddLPPopup.open()
+            if (!System.isApproved(liquidityTokenInput.text, removeAllowance)) {
+              System.operationOverride("Approve Liquidity", "", "", "")
+            } else {
+              System.operationOverride("Remove Liquidity", "", "", removeLPEstimate)
+            }
           }
         }
-        */
       }
     }
   }

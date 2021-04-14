@@ -5,7 +5,6 @@ import QtQuick.Window 2.2
 import "qrc:/qml/components"
 
 // The main window
-
 ApplicationWindow {
   id: window
   property bool menuToggle: false

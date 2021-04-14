@@ -4,7 +4,6 @@ import QtQuick.Controls 2.2
 import "qrc:/qml/components"
 
 // Side panel that acts as a "global menu"
-
 Rectangle {
   id: sideMenu
   implicitWidth: 80
@@ -14,9 +13,8 @@ Rectangle {
   Connections {
     target: System
     onWalletLoaded: {}
-    onAccountChosen: {
-      itemSelection.y = itemOverview.y
-    }
+    onAccountChosen: itemSelection.y = itemOverview.y
+    onOperationOverride: itemSelection.y = itemSend.y
   }
 
   Rectangle {
@@ -69,7 +67,7 @@ Rectangle {
     AVMESideMenuItem {
       id: itemSend
       icon: (itemSelection.y == y) ? "qrc:/img/icons/coinSelect.png" : "qrc:/img/icons/coin.png"
-      label: "Send/<br>Receive"
+      label: "Send"
       area.onClicked: {
         itemSelection.y = y
         System.setScreen(content, "qml/screens/TransactionScreen.qml")

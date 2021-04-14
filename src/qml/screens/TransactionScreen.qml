@@ -3,14 +3,36 @@ import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
 
-// Screen for sending/receiving transactions.
-
+/**
+ * Screen for sending/receiving transactions. Supported operations are:
+ * "Send AVAX", "Send AVME",
+ * "Approve Exchange", "Approve Liquidity", "Approve Staking",
+ * "Swap AVAX -> AVME", "Swap AVME -> AVAX",
+ * "Add Liquidity", "Remove Liquidity",
+ * "Stake LP", "Unstake LP", "Harvest AVME", "Exit Staking"
+ */
 Item {
   id: transactionScreen
   property string txOperationStr
   property string txTotalCoinStr
   property string txTotalTokenStr
   property string txTotalLPStr
+
+  Connections {
+    target: System
+    onOperationOverride: {
+      changeOperation(op)
+      txAmountCoinInput.text = amountCoin
+      txAmountTokenInput.text = amountToken
+      txAmountLPInput.text = amountLP
+      txAmountCoinInput.enabled = false
+      txAmountTokenInput.enabled = false
+      txAmountLPInput.enabled = false
+      autoLimitCheck.visible = false
+      autoGasCheck.visible = false
+      updateTxCost()
+    }
+  }
 
   function updateTxCost() {
     txTotalCoinStr = System.calculateTransactionCost(
@@ -83,11 +105,11 @@ Item {
 
   Component.onCompleted: {
     txGasPriceInput.text = System.getAutomaticFee()
+    changeOperation("Send AVAX")
     updateTxCost()
   }
 
   // Panel for the transaction inputs
-  // TODO: show the total Account balances at the end
   AVMEPanel {
     id: txDetailsPanel
     width: (parent.width * 0.45)
@@ -113,26 +135,29 @@ Item {
       Text {
         id: txOperation
         verticalAlignment: Text.AlignVCenter
-        width: (txDetailsColumn.width * 0.2)
+        width: (parent.width * 0.6)
         color: "#FFFFFF"
-        text: "Operation:"
+        text: "Operation: <b>" + txOperationStr + "</b>"
 
-        ComboBox {
-          id: txOperationSelector
-          width: (txDetailsColumn.width * 0.4)
+        AVMEButton {
+          id: btnChangeOp
+          width: (txDetailsColumn.width * 0.4) - anchors.leftMargin
           anchors {
             left: parent.right
+            leftMargin: 10
             verticalCenter: parent.verticalCenter
           }
-          model: [
-            "Send AVAX", "Send AVME",
-            "Approve Exchange", "Approve Liquidity", "Approve Staking",
-            "Swap AVAX -> AVME", "Swap AVME -> AVAX",
-            "Add Liquidity", "Remove Liquidity",
-            "Stake LP", "Unstake LP", "Harvest AVME", "Exit Staking"
-          ]
-          onActivated: changeOperation(txOperationSelector.currentText)
-          Component.onCompleted: changeOperation(txOperationSelector.currentText)
+          visible: (txOperationStr == "Send AVAX" || txOperationStr == "Send AVME")
+          text: (txOperationStr == "Send AVAX")
+          ? "Switch to " + System.getCurrentToken()
+          : "Switch to " + System.getCurrentCoin()
+          onClicked: {
+            if (txOperationStr == "Send AVAX") {
+              changeOperation("Send AVME")
+            } else if (txOperationStr == "Send AVME") {
+              changeOperation("Send AVAX")
+            }
+          }
         }
       }
 
@@ -371,7 +396,7 @@ Item {
               break;
             case "Approve Exchange":
               text: "(give approval to Pangolin to use your Account's"
-              + "<br>currencies for exchanging/swapping between each other)";
+              + "<br>currencies for swapping between each other)";
               break;
             case "Approve Liquidity":
               text: "(give approval to Pangolin to use your Account's"
@@ -379,7 +404,7 @@ Item {
               break;
             case "Approve Staking":
               text: "(give approval to the staking contract to use your"
-              + "<br>Account's currencies for staking and harvesting rewards)";
+              + "<br>Account's currencies for staking/harvesting rewards)";
               break;
             case "Swap AVAX -> AVME":
             case "Swap AVME -> AVAX":
