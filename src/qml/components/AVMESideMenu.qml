@@ -106,6 +106,7 @@ Rectangle {
       label: "Staking"
       area.onClicked: {
         itemSelection.y = y
+        System.setScreen(content, "qml/screens/StakingScreen.qml")
       }
     }
 

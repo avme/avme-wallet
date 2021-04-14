@@ -15,22 +15,15 @@ Item {
 
   Connections {
     target: System
-
-    onAllowancesUpdated: {
-      allowance = stakingAllowance
-    }
-    onRewardUpdated: {
-      reward = poolReward
-    }
+    onAllowancesUpdated: allowance = stakingAllowance
+    onRewardUpdated: reward = poolReward
   }
 
   Timer {
     id: reloadRewardTimer
     interval: 1000
     repeat: true
-    onTriggered: {
-      System.getPoolReward()
-    }
+    onTriggered: System.getPoolReward()
   }
 
   Component.onCompleted: {
@@ -38,40 +31,35 @@ Item {
     reloadRewardTimer.start()
   }
 
-  Text {
-    id: info
+  // Panel for staking/unstaking LP
+  AVMEPanel {
+    id: stakingPanel
+    width: (parent.width * 0.45)
+    height: (parent.height * 0.85)
     anchors {
-      top: parent.top
-      horizontalCenter: parent.horizontalCenter
-      margins: 20
-    }
-    horizontalAlignment: Text.AlignHCenter
-    text: "Staking details for the Account<br><b>" + System.getTxSenderAccount() + "</b>"
-    font.pointSize: 18.0
-  }
-
-  Rectangle {
-    id: stakeRect
-    width: parent.width * 0.45
-    height: parent.height * 0.5
-    anchors {
-      verticalCenter: parent.verticalCenter
       left: parent.left
-      margins: 20
+      verticalCenter: parent.verticalCenter
+      margins: 40
     }
-    color: "#44F66986"
-    radius: 5
+    title: "Staking Details"
 
     Column {
-      id: stakeItems
-      anchors.fill: parent
+      id: stakingDetailsColumn
+      anchors {
+        top: parent.header.bottom
+        bottom: parent.bottom
+        left: parent.left
+        right: parent.right
+        margins: 20
+      }
       spacing: 30
-      anchors.topMargin: 20
 
       Text {
         id: stakeTitle
         anchors.horizontalCenter: parent.horizontalCenter
-        font.pointSize: 14.0
+        color: "#FFFFFF"
+        font.bold: true
+        font.pointSize: 18.0
         text: (isStaking) ? "Stake LP" : "Unstake LP"
       }
 
@@ -84,19 +72,36 @@ Item {
         source: "qrc:/img/pangolin.png"
       }
 
+      AVMEButton {
+        id: btnSwitchOrder
+        width: parent.width * 0.5
+        anchors.horizontalCenter: parent.horizontalCenter
+        enabled: (allowance != "")
+        text: "Switch to " + ((isStaking) ? "Unstake" : "Stake")
+        onClicked: {
+          isStaking = !isStaking
+          stakeInput.text = ""
+        }
+      }
+
       Text {
-        id: stakeBalances
+        id: stakeBalance
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
-        text: (isStaking)
-        ? "Free (unstaked) LP: <b>" + System.getTxSenderLPFreeAmount() + "</b>"
-        : "Locked (staked) LP: <b>" + System.getTxSenderLPLockedAmount() + "</b>"
+        color: "#FFFFFF"
+        font.pointSize: 14.0
+        text: {
+          var acc = System.getAccountBalances(System.getTxSenderAccount())
+          text: (isStaking)
+          ? "Free (unstaked) LP:<br><b>" + acc.balanceLPFree + "</b>"
+          : "Locked (staked) LP:<br><b>" + acc.balanceLPLocked + "</b>"
+        }
       }
 
       AVMEInput {
         id: stakeInput
+        width: parent.width * 0.75
         anchors.horizontalCenter: parent.horizontalCenter
-        width: parent.width * 0.9
         enabled: (allowance != "")
         validator: RegExpValidator { regExp: /[0-9]{1,}(?:\.[0-9]{1,18})?/ }
         label: "Amount of LP to " + ((isStaking) ? "stake" : "unstake")
@@ -104,37 +109,26 @@ Item {
       }
 
       Row {
-        id: stakeBtnRow
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: 10
 
         AVMEButton {
           id: btnMaxAmount
-          width: stakeRect.width * 0.25
-          enabled: (allowance != "")
+          width: (stakingDetailsColumn.width * 0.5) - parent.spacing
           text: "Max Amount"
-          onClicked: stakeInput.text = (isStaking)
-          ? System.getTxSenderLPFreeAmount()
-          : System.getTxSenderLPLockedAmount()
-        }
-
-        AVMEButton {
-          id: btnSwitchOrder
-          width: stakeRect.width * 0.35
-          enabled: (allowance != "")
-          text: "Switch to " + ((isStaking) ? "Unstake" : "Stake")
           onClicked: {
-            isStaking = !isStaking
-            stakeInput.text = ""
+            var acc = System.getAccountBalances(System.getTxSenderAccount())
+            stakeInput.text = (isStaking) ? acc.balanceLPFree : acc.balanceLPLocked
           }
         }
 
         AVMEButton {
           id: btnStake
-          width: stakeRect.width * 0.25
+          width: (stakingDetailsColumn.width * 0.5) - parent.spacing
+          enabled: (allowance != "" && stakeInput.acceptableInput)
           text: {
             if (allowance == "") {
-              text: "Approval..."
+              text: "Checking approval..."
             } else if (isStaking && System.isApproved(System.getTxSenderLPFreeAmount(), allowance)) {
               text: "Stake"
             } else if (!isStaking && System.isApproved(System.getTxSenderLPLockedAmount(), allowance)) {
@@ -143,7 +137,8 @@ Item {
               text: "Approve"
             }
           }
-          enabled: (allowance != "" && stakeInput.text != "")
+          /*
+          // TODO
           onClicked: {
             System.setTxGasLimit("250000")
             System.setTxGasPrice(System.getAutomaticFee())
@@ -174,33 +169,41 @@ Item {
               confirmStakePopup.open()
             }
           }
+          */
         }
       }
     }
   }
 
-  Rectangle {
-    id: harvestRect
-    width: parent.width * 0.45
-    height: parent.height * 0.5
+  // Panel for harvesting/exiting
+  AVMEPanel {
+    id: harvestPanel
+    width: (parent.width * 0.45)
+    height: (parent.height * 0.85)
     anchors {
-      verticalCenter: parent.verticalCenter
       right: parent.right
-      margins: 20
+      verticalCenter: parent.verticalCenter
+      margins: 40
     }
-    color: "#44F66986"
-    radius: 5
+    title: "Harvesting Details"
 
     Column {
-      id: harvestItems
-      anchors.fill: parent
+      id: harvestDetailsColumn
+      anchors {
+        top: parent.header.bottom
+        bottom: parent.bottom
+        left: parent.left
+        right: parent.right
+        margins: 20
+      }
       spacing: 30
-      anchors.topMargin: 20
 
       Text {
         id: harvestTitle
         anchors.horizontalCenter: parent.horizontalCenter
-        font.pointSize: 14.0
+        color: "#FFFFFF"
+        font.bold: true
+        font.pointSize: 18.0
         text: "Harvest AVME"
       }
 
@@ -213,18 +216,22 @@ Item {
       }
 
       Text {
-        id: unharvestedAmount
+        id: rewardAmount
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
-        text: "Unharvested " + System.getCurrentToken() + ": <b>" + reward + "</b>"
+        color: "#FFFFFF"
+        font.pointSize: 14.0
+        text: "Unharvested " + System.getCurrentToken() + ":<br><b>" + reward + "</b>"
       }
 
       AVMEButton {
         id: btnExitStake
-        width: parent.width * 0.9
-        enabled: (reward != "") // TODO: reward > 0 && locked LP > 0
+        width: (parent.width * 0.75)
         anchors.horizontalCenter: parent.horizontalCenter
-        text: "Harvest All " + System.getCurrentToken() + " & Unstake All LP"
+        enabled: (reward != "") // TODO: reward > 0 && locked LP > 0
+        text: "Harvest " + System.getCurrentToken() + " & Unstake LP"
+        /*
+        // TODO
         onClicked: {
           isExiting = true
           System.setTxGasLimit("250000")
@@ -247,14 +254,17 @@ Item {
             confirmHarvestPopup.open()
           }
         }
+        */
       }
 
       AVMEButton {
         id: btnHarvest
-        width: parent.width * 0.9
-        enabled: (reward != "") // TODO: reward > 0
+        width: (parent.width * 0.75)
         anchors.horizontalCenter: parent.horizontalCenter
-        text: "Harvest All " + System.getCurrentToken()
+        enabled: (reward != "") // TODO: reward > 0
+        text: "Harvest " + System.getCurrentToken()
+        /*
+        // TODO
         onClicked: {
           isExiting = false
           System.setTxGasLimit("250000")
@@ -277,25 +287,13 @@ Item {
             confirmHarvestPopup.open()
           }
         }
+        */
       }
     }
   }
 
-  AVMEButton {
-    id: btnBack
-    width: parent.width / 6
-    anchors {
-      bottom: parent.bottom
-      horizontalCenter: parent.horizontalCenter
-      margins: 20
-    }
-    text: "Back"
-    onClicked: {
-      reloadRewardTimer.stop()
-      System.setScreen(content, "qml/screens/StatsScreen.qml")
-    }
-  }
-
+  /*
+  // TODO: remove those
   // Popup for confirming approval to stake
   AVMEPopupApprove {
     id: approveStakePopup
@@ -348,4 +346,5 @@ Item {
     icon: "qrc:/img/warn.png"
     info: "Insufficient funds. Please check your transaction values."
   }
+  */
 }

@@ -69,19 +69,6 @@ Item {
     }
   }
 
-  // Background icon
-  Image {
-    id: bgIcon
-    width: 500
-    height: 500
-    opacity: 0.5
-    antialiasing: true
-    smooth: true
-    anchors.centerIn: parent
-    fillMode: Image.PreserveAspectFit
-    source: "qrc:/img/avme_logo_hd.png"
-  }
-
   // Text if there's no Accounts in the Wallet
   Text {
     id: noAccountsText

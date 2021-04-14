@@ -17,6 +17,7 @@ Item {
   property string lowerReserves
   property string higherToken
   property string higherReserves
+  property string swapEstimate
   property string liquidity
   property string userLowerReserves
   property string userHigherReserves
@@ -82,7 +83,7 @@ Item {
     } else if (amountName == higherToken) {
       amountOut = System.calculateExchangeAmount(amountIn, higherReserves, lowerReserves)
     }
-    swapEstimate.text = amountOut
+    swapEstimate = amountOut
   }
 
   function calculateAddLiquidityAmount(isCoinToToken) {
@@ -114,12 +115,12 @@ Item {
   // TODO: calculate price impact and other missing stuff from Pangolin
   AVMEPanel {
     id: exchangePanel
-    width: (parent.width * 0.5)
+    width: (parent.width * 0.45)
+    height: (parent.height * 0.85)
     anchors {
       left: parent.left
-      top: parent.top
-      bottom: parent.bottom
-      margins: 10
+      verticalCenter: parent.verticalCenter
+      margins: 40
     }
     title: "Exchange Details"
 
@@ -189,7 +190,7 @@ Item {
         onClicked: {
           coinToToken = !coinToToken
           swapInput.text = ""
-          swapEstimate.text = ""
+          swapEstimate = ""
           calculateExchangeAmountOut()
         }
       }
@@ -241,31 +242,23 @@ Item {
       }
 
       Text {
-        id: swapEstimateHeader
-        anchors.horizontalCenter: parent.horizontalCenter
-        horizontalAlignment: Text.AlignHCenter
-        color: "#FFFFFF"
-        text: "Estimated return in " + (
-          (!coinToToken) ? System.getCurrentCoin() : System.getCurrentToken()
-        ) + ": "
-      }
-
-      Text {
-        id: swapEstimate
+        id: swapEstimateText
         width: parent.width
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
         color: "#FFFFFF"
-        font.bold: true
         font.pointSize: 14.0
+        text: "Estimated return in " + (
+          (!coinToToken) ? System.getCurrentCoin() : System.getCurrentToken()
+        ) + ":<br><b>" + swapEstimate + "</b>"
       }
 
       AVMEButton {
         id: swapBtn
         width: (parent.width * 0.5)
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (allowance != "" && swapInput.text != "")
+        enabled: (allowance != "" && swapInput.acceptableInput)
         text: {
           if (allowance == "") {
             text: "Checking approval..."
@@ -325,12 +318,12 @@ Item {
   // Panel for the liquidity operations
   AVMEPanel {
     id: liquidityPanel
-    width: (parent.width * 0.5)
+    width: (parent.width * 0.45)
+    height: (parent.height * 0.85)
     anchors {
       right: parent.right
-      top: parent.top
-      bottom: parent.bottom
-      margins: 10
+      verticalCenter: parent.verticalCenter
+      margins: 40
     }
     title: "Liquidity Pool Details"
 
@@ -545,38 +538,33 @@ Item {
       }
 
       Text {
-        id: removeEstimateHeader
-        visible: (!addToPool)
-        anchors.horizontalCenter: parent.horizontalCenter
-        horizontalAlignment: Text.AlignHCenter
-        color: "#FFFFFF"
-        text: "<b>" + ((removeLPEstimate) ? removeLPEstimate : "0")
-        + " LP</b><br>Estimated returns:"
-      }
-
-      Text {
         id: removeEstimate
         visible: (!addToPool)
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
-        font.bold: true
         font.pointSize: 14.0
-        text: System.weiToFixedPoint(
+        text: "Estimated returns:"
+        + "<br><b>" + ((removeLPEstimate) ? removeLPEstimate : "0") + " LP"
+        + "<br>" + System.weiToFixedPoint(
           ((System.getCurrentCoin() == lowerToken) ? removeLowerEstimate : removeHigherEstimate),
           System.getCurrentCoinDecimals()
-        ) + " " + System.getCurrentCoin() + "<br>"
-        + System.weiToFixedPoint(
+        ) + " " + System.getCurrentCoin()
+        + "<br>" + System.weiToFixedPoint(
           ((System.getCurrentToken() == lowerToken) ? removeLowerEstimate : removeHigherEstimate),
           System.getCurrentTokenDecimals()
-        ) + " " + System.getCurrentToken()
+        ) + " " + System.getCurrentToken() + "</b>"
       }
 
       AVMEButton {
         id: liquidityBtn
         width: (parent.width * 0.5)
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (addAllowance != "" && liquidityCoinInput.text != "" && liquidityTokenInput.text != "")
+        enabled: (
+          addAllowance != ""
+          && liquidityCoinInput.acceptableInput
+          && liquidityTokenInput.acceptableInput
+        )
         text: {
           if (addAllowance === "") {
             text: "Checking approval..."
@@ -648,11 +636,11 @@ Item {
       if (System.checkWalletPass(pass)) {
         if (System.getTxTokenFlag()) {
           System.setTxReceiverTokenAmount(swapInput.text)
-          System.setTxReceiverCoinAmount(swapEstimate.text)
+          System.setTxReceiverCoinAmount(swapEstimate)
           System.setTxOperation("Swap AVME -> AVAX")
         } else {
           System.setTxReceiverCoinAmount(swapInput.text)
-          System.setTxReceiverTokenAmount(swapEstimate.text)
+          System.setTxReceiverTokenAmount(swapEstimate)
           System.setTxOperation("Swap AVAX -> AVME")
         }
         confirmExchangePopup.close()

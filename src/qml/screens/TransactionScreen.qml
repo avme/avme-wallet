@@ -90,12 +90,12 @@ Item {
   // TODO: show the total Account balances at the end
   AVMEPanel {
     id: txDetailsPanel
-    width: (parent.width * 0.5)
+    width: (parent.width * 0.45)
+    height: (parent.height * 0.85)
     anchors {
       left: parent.left
-      top: parent.top
-      bottom: parent.bottom
-      margins: 10
+      verticalCenter: parent.verticalCenter
+      margins: 40
     }
     title: "Transaction Details"
 
@@ -139,26 +139,10 @@ Item {
       AVMEInput {
         id: txFromInput
         anchors.left: parent.left
-        width: (txDetailsColumn.width * 0.8)
+        width: parent.width
         readOnly: true
         label: "From"
         text: System.getTxSenderAccount()
-
-        AVMEButton {
-          id: btnCopyToClipboard
-          width: (txDetailsColumn.width * 0.2) - anchors.leftMargin
-          anchors {
-            left: parent.right
-            leftMargin: 10
-          }
-          enabled: (!btnClipboardTimer.running)
-          text: (enabled) ? "Copy" : "Copied!"
-          Timer { id: btnClipboardTimer; interval: 2000 }
-          onClicked: {
-            System.copyToClipboard(System.getTxSenderAccount())
-            btnClipboardTimer.start()
-          }
-        }
       }
 
       AVMEInput {
@@ -171,7 +155,7 @@ Item {
 
       AVMEInput {
         id: txAmountCoinInput
-        width: (txDetailsColumn.width * 0.8)
+        width: (parent.width * 0.8)
         validator: RegExpValidator { regExp: System.createCoinRegExp() }
         label: System.getCurrentCoin() + " Amount"
         placeholder: "Fixed point amount (e.g. 0.5)"
@@ -196,7 +180,7 @@ Item {
 
       AVMEInput {
         id: txAmountTokenInput
-        width: (txDetailsColumn.width * 0.8)
+        width: (parent.width * 0.8)
         validator: RegExpValidator { regExp: System.createTokenRegExp() }
         label: System.getCurrentToken() + " Amount"
         placeholder: "Fixed point amount (e.g. 0.5)"
@@ -220,7 +204,7 @@ Item {
 
       AVMEInput {
         id: txAmountLPInput
-        width: (txDetailsColumn.width * 0.8)
+        width: (parent.width * 0.8)
         validator: RegExpValidator { regExp: /[0-9]{1,}(?:\.[0-9]{1,18})?/ }
         label: "LP Amount"
         placeholder: "Fixed point amount (e.g. 0.5)"
@@ -333,12 +317,12 @@ Item {
   // Panel for the summary and auth
   AVMEPanel {
     id: txSummaryPanel
-    width: (parent.width * 0.5)
+    width: (parent.width * 0.45)
+    height: (parent.height * 0.85)
     anchors {
       right: parent.right
-      top: parent.top
-      bottom: parent.bottom
-      margins: 10
+      verticalCenter: parent.verticalCenter
+      margins: 40
     }
     title: "Transaction Summary"
 
@@ -552,6 +536,7 @@ Item {
         id: btnMakeTx
         width: (txDetailsColumn.width * 0.5)
         anchors.horizontalCenter: parent.horizontalCenter
+        enabled: (txPassInput.text != "")
         text: "Make Transaction"
         onClicked: {} // TODO
       }

@@ -5,9 +5,7 @@
         <file>qml/screens/AccountsScreen.qml</file>
         <file>qml/screens/OverviewScreen.qml</file>
         <file>qml/screens/TransactionScreen.qml</file>
-
         <file>qml/screens/ExchangeScreen.qml</file>
-        <file>qml/screens/LiquidityScreen.qml</file>
         <file>qml/screens/StakingScreen.qml</file>
 
         <file>qml/screens/CoinTransactionScreen.qml</file>
