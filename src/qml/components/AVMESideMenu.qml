@@ -65,6 +65,23 @@ Rectangle {
     }
 
     AVMESideMenuItem {
+      id: itemHistory
+      icon: (itemSelection.y == y) ? "qrc:/img/icons/inboxesSelect.png" : "qrc:/img/icons/inboxes.png"
+      label: "History"
+      area.onClicked: {
+        itemSelection.y = y
+        System.setScreen(content, "qml/screens/HistoryScreen.qml")
+      }
+    }
+
+    Rectangle {
+      anchors.horizontalCenter: parent.horizontalCenter
+      width: (parent.width - 10)
+      height: 1
+      color: "#4E525D"
+    }
+
+    AVMESideMenuItem {
       id: itemSend
       icon: (itemSelection.y == y) ? "qrc:/img/icons/coinSelect.png" : "qrc:/img/icons/coin.png"
       label: "Send"
@@ -125,6 +142,8 @@ Rectangle {
     }
   }
 
+  /*
+  // TODO: remove this
   // Yes/No popup for confirming Wallet closure
   AVMEPopupYesNo {
     id: closeWalletPopup
@@ -140,4 +159,5 @@ Rectangle {
     }
     noBtn.onClicked: closeWalletPopup.close()
   }
+  */
 }
