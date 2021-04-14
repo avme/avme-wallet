@@ -87,6 +87,7 @@ Item {
   }
 
   // Panel for the transaction inputs
+  // TODO: show the total Account balances at the end
   AVMEPanel {
     id: txDetailsPanel
     width: (parent.width * 0.5)

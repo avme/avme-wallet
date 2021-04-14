@@ -86,25 +86,10 @@ Rectangle {
     AVMESideMenuItem {
       id: itemExchange
       icon: (itemSelection.y == y) ? "qrc:/img/icons/directionsSelect.png" : "qrc:/img/icons/directions.png"
-      label: "Exchange"
+      label: "Exchange/<br>Liquidity"
       area.onClicked: {
         itemSelection.y = y
-      }
-    }
-
-    Rectangle {
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: (parent.width - 10)
-      height: 1
-      color: "#4E525D"
-    }
-
-    AVMESideMenuItem {
-      id: itemLiquidity
-      icon: (itemSelection.y == y) ? "qrc:/img/icons/uploadSelect.png" : "qrc:/img/icons/upload.png"
-      label: "Liquidity"
-      area.onClicked: {
-        itemSelection.y = y
+        System.setScreen(content, "qml/screens/ExchangeScreen.qml")
       }
     }
 
