@@ -388,6 +388,7 @@ Item {
           text: "Max"
           enabled: (addAllowance != "")
           onClicked: {
+            // TODO: take max token into consideration
             liquidityCoinInput.text = System.getRealMaxAVAXAmount(
               "250000", System.getAutomaticFee()
             )  // TODO: see if gas limit has to be hardcoded
@@ -416,6 +417,7 @@ Item {
           text: "Max"
           enabled: (addAllowance != "")
           onClicked: {
+            // TODO: take max coin into consideration
             var acc = System.getAccountBalances(System.getTxSenderAccount())
             liquidityTokenInput.text = acc.balanceAVME
             calculateAddLiquidityAmount(false)
@@ -448,7 +450,7 @@ Item {
           anchors.left: parent.right
           anchors.leftMargin: 10
           anchors.verticalCenter: parent.verticalCenter
-          color: "#FFFFFF"
+          color: (parent.enabled) ? "#FFFFFF" : "#444444"
           font.pointSize: 18.0
           text: parent.value + "%"
         }
@@ -518,7 +520,7 @@ Item {
         width: (parent.width * 0.5)
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: (addToPool && addAllowance != "" && (
-          !System.isApproved(liquidityTokenInput.text, addAllowance) || 
+          !System.isApproved(liquidityTokenInput.text, addAllowance) ||
           (liquidityCoinInput.acceptableInput && liquidityTokenInput.acceptableInput)
         )) || (!addToPool && removeAllowance != "" && (
           !System.isApproved(liquidityTokenInput.text, removeAllowance) ||
@@ -554,51 +556,4 @@ Item {
       }
     }
   }
-
-  /*
-  // TODO: remove those
-  // Popup for confirming approval
-  AVMEPopupApprove {
-    id: approveExchangePopup
-    confirmBtn.onClicked: {
-      if (System.checkWalletPass(pass)) {
-        System.setTxOperation("Approve Exchange")
-        System.setScreen(content, "qml/screens/ProgressScreen.qml")
-        System.txStart(pass)
-      } else {
-        approveExchangePopup.showErrorMsg()
-      }
-    }
-  }
-
-  // Popup for confirming the exchange operation
-  AVMEPopupConfirmExchange {
-    id: confirmExchangePopup
-    confirmBtn.onClicked: {
-      if (System.checkWalletPass(pass)) {
-        if (System.getTxTokenFlag()) {
-          System.setTxReceiverTokenAmount(swapInput.text)
-          System.setTxReceiverCoinAmount(swapEstimate)
-          System.setTxOperation("Swap AVME -> AVAX")
-        } else {
-          System.setTxReceiverCoinAmount(swapInput.text)
-          System.setTxReceiverTokenAmount(swapEstimate)
-          System.setTxOperation("Swap AVAX -> AVME")
-        }
-        confirmExchangePopup.close()
-        System.setScreen(content, "qml/screens/ProgressScreen.qml")
-        System.txStart(pass)
-      } else {
-        confirmExchangePopup.showErrorMsg()
-      }
-    }
-  }
-
-  // Popup for warning about insufficient funds
-  AVMEPopupInfo {
-    id: fundsPopup
-    icon: "qrc:/img/warn.png"
-    info: "Insufficient funds. Please check your transaction values."
-  }
-  */
 }

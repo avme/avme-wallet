@@ -144,23 +144,4 @@ Rectangle {
       }
     }
   }
-
-  /*
-  // TODO: remove this
-  // Yes/No popup for confirming Wallet closure
-  AVMEPopupYesNo {
-    id: closeWalletPopup
-    icon: "qrc:/img/warn.png"
-    info: "Are you sure you want to close this Wallet?"
-    yesBtn.onClicked: {
-      closeWalletPopup.close()
-      System.stopAllBalanceThreads()
-      System.closeWallet()
-      console.log("Wallet closed successfully")
-      window.menu.visible = false
-      System.setScreen(content, "qml/screens/StartScreen.qml")
-    }
-    noBtn.onClicked: closeWalletPopup.close()
-  }
-  */
 }

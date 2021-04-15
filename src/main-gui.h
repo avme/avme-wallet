@@ -49,7 +49,11 @@ class System : public QObject {
     void accountCreated(QVariantMap data);
     void accountCreationFailed();
     void operationOverride(QString op, QString amountCoin, QString amountToken, QString amountLP);
-    void txStart(QString pass);
+    void txStart(
+      QString operation, QString to,
+      QString coinAmount, QString tokenAmount, QString lpAmount,
+      QString gasLimit, QString gasPrice, QString pass
+    );
     void txBuilt(bool b);
     void txSigned(bool b);
     void txSent(bool b, QString linkUrl);
@@ -77,17 +81,17 @@ class System : public QObject {
     int currentTokenDecimals;
     bool txTokenFlag;
     std::string txSenderAccount;
-    std::string txSenderCoinAmount;
-    std::string txSenderTokenAmount;
-    std::string txSenderLPFreeAmount;
-    std::string txSenderLPLockedAmount;
-    std::string txReceiverAccount;
-    std::string txReceiverCoinAmount;
-    std::string txReceiverTokenAmount;
-    std::string txReceiverLPAmount;
-    std::string txGasLimit;
-    std::string txGasPrice;
-    std::string txOperation;
+    //std::string txSenderCoinAmount;
+    //std::string txSenderTokenAmount;
+    //std::string txSenderLPFreeAmount;
+    //std::string txSenderLPLockedAmount;
+    //std::string txReceiverAccount;
+    //std::string txReceiverCoinAmount;
+    //std::string txReceiverTokenAmount;
+    //std::string txReceiverLPAmount;
+    //std::string txGasLimit;
+    //std::string txGasPrice;
+    //std::string txOperation;
 
   public:
     // Getters/Setters for private vars
@@ -111,39 +115,6 @@ class System : public QObject {
 
     Q_INVOKABLE QString getTxSenderAccount() { return QString::fromStdString(this->txSenderAccount); }
     Q_INVOKABLE void setTxSenderAccount(QString account) { this->txSenderAccount = account.toStdString(); }
-
-    Q_INVOKABLE QString getTxSenderCoinAmount() { return QString::fromStdString(this->txSenderCoinAmount); }
-    Q_INVOKABLE void setTxSenderCoinAmount(QString amount) { this->txSenderCoinAmount = amount.toStdString(); }
-
-    Q_INVOKABLE QString getTxSenderTokenAmount() { return QString::fromStdString(this->txSenderTokenAmount); }
-    Q_INVOKABLE void setTxSenderTokenAmount(QString amount) { this->txSenderTokenAmount = amount.toStdString(); }
-
-    Q_INVOKABLE QString getTxSenderLPFreeAmount() { return QString::fromStdString(this->txSenderLPFreeAmount); }
-    Q_INVOKABLE void setTxSenderLPFreeAmount(QString amount) { this->txSenderLPFreeAmount = amount.toStdString(); }
-
-    Q_INVOKABLE QString getTxSenderLPLockedAmount() { return QString::fromStdString(this->txSenderLPLockedAmount); }
-    Q_INVOKABLE void setTxSenderLPLockedAmount(QString amount) { this->txSenderLPLockedAmount = amount.toStdString(); }
-
-    Q_INVOKABLE QString getTxReceiverAccount() { return QString::fromStdString(this->txReceiverAccount); }
-    Q_INVOKABLE void setTxReceiverAccount(QString account) { this->txReceiverAccount = account.toStdString(); }
-
-    Q_INVOKABLE QString getTxReceiverCoinAmount() { return QString::fromStdString(this->txReceiverCoinAmount); }
-    Q_INVOKABLE void setTxReceiverCoinAmount(QString amount) { this->txReceiverCoinAmount = amount.toStdString(); }
-
-    Q_INVOKABLE QString getTxReceiverTokenAmount() { return QString::fromStdString(this->txReceiverTokenAmount); }
-    Q_INVOKABLE void setTxReceiverTokenAmount(QString amount) { this->txReceiverTokenAmount = amount.toStdString(); }
-
-    Q_INVOKABLE QString getTxReceiverLPAmount() { return QString::fromStdString(this->txReceiverLPAmount); }
-    Q_INVOKABLE void setTxReceiverLPAmount(QString amount) { this->txReceiverLPAmount = amount.toStdString(); }
-
-    Q_INVOKABLE QString getTxGasLimit() { return QString::fromStdString(this->txGasLimit); }
-    Q_INVOKABLE void setTxGasLimit(QString limit) { this->txGasLimit = limit.toStdString(); }
-
-    Q_INVOKABLE QString getTxGasPrice() { return QString::fromStdString(this->txGasPrice); }
-    Q_INVOKABLE void setTxGasPrice(QString price) { this->txGasPrice = price.toStdString(); }
-
-    Q_INVOKABLE QString getTxOperation() { return QString::fromStdString(this->txOperation); }
-    Q_INVOKABLE void setTxOperation(QString op) { this->txOperation = op.toStdString(); }
 
     // Change the current loaded screen
     Q_INVOKABLE void setScreen(QObject* loader, QString qmlFile) {
@@ -516,82 +487,82 @@ class System : public QObject {
       return QString::fromStdString(totalStr);
     }
 
-    // Check for insufficient funds in coin and token transactions, respectively
-    Q_INVOKABLE bool hasInsufficientCoinFunds(QString senderAmount, QString receiverAmount) {
+    /**
+     * Check for insufficient funds in a transaction.
+     * Types are "Coin", "Token" and "LP", respectively.
+     */
+    Q_INVOKABLE bool hasInsufficientFunds(
+      QString type, QString senderAmount, QString receiverAmount
+    ) {
       std::string senderStr, receiverStr;
       u256 senderU256, receiverU256;
-      senderStr = Utils::fixedPointToWei(senderAmount.toStdString(), this->currentCoinDecimals);
-      receiverStr = Utils::fixedPointToWei(receiverAmount.toStdString(), this->currentCoinDecimals);
+      int decimals;
+      if (type == "Coin") decimals = this->currentCoinDecimals;
+      else if (type == "Token") decimals = this->currentTokenDecimals;
+      else if (type == "LP") decimals = 18;
+      senderStr = Utils::fixedPointToWei(senderAmount.toStdString(), decimals);
+      receiverStr = Utils::fixedPointToWei(receiverAmount.toStdString(), decimals);
       senderU256 = u256(senderStr);
       receiverU256 = u256(receiverStr);
       return (receiverU256 > senderU256);
     }
 
-    Q_INVOKABLE bool hasInsufficientTokenFunds(QString senderAmount, QString receiverAmount) {
-      std::string senderStr, receiverStr;
-      u256 senderU256, receiverU256;
-      senderStr = Utils::fixedPointToWei(senderAmount.toStdString(), this->currentTokenDecimals);
-      receiverStr = Utils::fixedPointToWei(receiverAmount.toStdString(), this->currentTokenDecimals);
-      senderU256 = u256(senderStr);
-      receiverU256 = u256(receiverStr);
-      return (receiverU256 > senderU256);
-    }
-
-    // Make a coin or token transaction with the collected data
-    Q_INVOKABLE void makeTransaction(QString pass) {
+    // Make a transaction with the collected data
+    Q_INVOKABLE void makeTransaction(
+      QString operation, QString to,
+      QString coinAmount, QString tokenAmount, QString lpAmount,
+      QString gasLimit, QString gasPrice, QString pass
+    ) {
       QtConcurrent::run([=](){
+        // Convert everything to std::string for easier handling
+        std::string operationStr = operation.toStdString();
+        std::string toStr = to.toStdString();
+        std::string coinAmountStr = coinAmount.toStdString();
+        std::string tokenAmountStr = tokenAmount.toStdString();
+        std::string lpAmountStr = lpAmount.toStdString();
+        std::string gasLimitStr = gasLimit.toStdString();
+        std::string gasPriceStr = gasPrice.toStdString();
+        std::string passStr = pass.toStdString();
+
         // Convert the values required for a transaction to their Wei formats.
         // Gas price is in Gwei (10^9 Wei) and amounts are in fixed point.
         // Gas limit is already in Wei so we skip that.
-        this->txReceiverCoinAmount = Utils::fixedPointToWei(
-          this->txReceiverCoinAmount, this->currentCoinDecimals
-        );
-        this->txReceiverTokenAmount = Utils::fixedPointToWei(
-          this->txReceiverTokenAmount, this->currentTokenDecimals
-        );
-        this->txReceiverLPAmount = Utils::fixedPointToWei(
-          this->txReceiverLPAmount, 18
-        );
-        this->txGasPrice = boost::lexical_cast<std::string>(
-          boost::lexical_cast<u256>(this->txGasPrice) * raiseToPow(10, 9)
+        coinAmountStr = Utils::fixedPointToWei(coinAmountStr, this->currentCoinDecimals);
+        tokenAmountStr = Utils::fixedPointToWei(tokenAmountStr, this->currentTokenDecimals);
+        lpAmountStr = Utils::fixedPointToWei(lpAmountStr, 18);
+        gasPriceStr = boost::lexical_cast<std::string>(
+          boost::lexical_cast<u256>(gasPriceStr) * raiseToPow(10, 9)
         );
 
         // Build the transaction and data hex according to the operation
         std::string dataHex;
         TransactionSkeleton txSkel;
-        if (this->txOperation == "Send AVAX") {
+        if (operationStr == "Send AVAX") {
           txSkel = this->w.buildTransaction(
-            this->txSenderAccount, this->txReceiverAccount,
-            this->txReceiverCoinAmount, this->txGasLimit, this->txGasPrice
+            this->txSenderAccount, toStr, coinAmountStr, gasLimitStr, gasPriceStr
           );
-        } else if (this->txOperation == "Send AVME") {
-          dataHex = Pangolin::transfer(
-            this->txReceiverAccount, this->txReceiverTokenAmount
-          );
+        } else if (operationStr == "Send AVME") {
           txSkel = this->w.buildTransaction(
             this->txSenderAccount, Pangolin::tokenContracts[this->currentToken],
-            "0", this->txGasLimit, this->txGasPrice, dataHex
+            "0", gasLimitStr, gasPriceStr, Pangolin::transfer(toStr, tokenAmountStr)
           );
-        } else if (this->txOperation == "Approve Exchange") {
+        } else if (operationStr == "Approve Exchange") {
           txSkel = this->w.buildTransaction(
             this->txSenderAccount, Pangolin::tokenContracts["AVME"],
-            "0", this->txGasLimit, this->txGasPrice,
-            Pangolin::approve(Pangolin::routerContract)
+            "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::routerContract)
           );
-        } else if (this->txOperation == "Approve Liquidity") {
+        } else if (operationStr == "Approve Liquidity") {
           txSkel = this->w.buildTransaction(
             this->txSenderAccount, Pangolin::getPair(this->currentCoin, this->currentToken),
-            "0", this->txGasLimit, this->txGasPrice,
-            Pangolin::approve(Pangolin::routerContract)
+            "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::routerContract)
           );
-        } else if (this->txOperation == "Approve Staking") {
+        } else if (operationStr == "Approve Staking") {
           txSkel = this->w.buildTransaction(
             this->txSenderAccount, Pangolin::getPair(this->currentCoin, this->currentToken),
-            "0", this->txGasLimit, this->txGasPrice,
-            Pangolin::approve(Pangolin::stakingContract)
+            "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::stakingContract)
           );
-        } else if (this->txOperation == "Swap AVAX -> AVME") {
-          u256 amountOutMin = boost::lexical_cast<u256>(this->txReceiverTokenAmount);
+        } else if (operationStr == "Swap AVAX -> AVME") {
+          u256 amountOutMin = boost::lexical_cast<u256>(tokenAmountStr);
           amountOutMin -= (amountOutMin / 1000); // 0.1%
           dataHex = Pangolin::swapExactAVAXForTokens(
             // amountOutMin, path, to, deadline
@@ -606,14 +577,14 @@ class System : public QObject {
           );
           txSkel = this->w.buildTransaction(
             this->txSenderAccount, Pangolin::routerContract,
-            this->txReceiverCoinAmount, this->txGasLimit, this->txGasPrice, dataHex
+            coinAmountStr, gasLimitStr, gasPriceStr, dataHex
           );
-        } else if (this->txOperation == "Swap AVME -> AVAX") {
-          u256 amountOutMin = boost::lexical_cast<u256>(this->txReceiverCoinAmount);
+        } else if (operationStr == "Swap AVME -> AVAX") {
+          u256 amountOutMin = boost::lexical_cast<u256>(coinAmountStr);
           amountOutMin -= (amountOutMin / 1000); // 0.1%
           dataHex = Pangolin::swapExactTokensForAVAX(
             // amountIn, amountOutMin, path, to, deadline
-            this->txReceiverTokenAmount,
+            tokenAmountStr,
             boost::lexical_cast<std::string>(amountOutMin),
             { Pangolin::tokenContracts["AVME"], Pangolin::tokenContracts["WAVAX"] },
             this->txSenderAccount,
@@ -625,17 +596,17 @@ class System : public QObject {
           );
           txSkel = this->w.buildTransaction(
             this->txSenderAccount, Pangolin::routerContract,
-            "0", this->txGasLimit, this->txGasPrice, dataHex
+            "0", gasLimitStr, gasPriceStr, dataHex
           );
-        } else if (this->txOperation == "Add Liquidity") {
-          u256 amountAVAXMin = boost::lexical_cast<u256>(this->txReceiverCoinAmount);
-          u256 amountTokenMin = boost::lexical_cast<u256>(this->txReceiverTokenAmount);
+        } else if (operationStr == "Add Liquidity") {
+          u256 amountAVAXMin = boost::lexical_cast<u256>(coinAmountStr);
+          u256 amountTokenMin = boost::lexical_cast<u256>(tokenAmountStr);
           amountAVAXMin -= (amountAVAXMin / 200); // 0.5%
           amountTokenMin -= (amountTokenMin / 200); // 0.5%
           dataHex = Pangolin::addLiquidityAVAX(
             // tokenAddress, amountTokenDesired, amountTokenMin, amountAVAXMin, to, deadline
             Pangolin::tokenContracts[this->currentToken],
-            this->txReceiverTokenAmount,
+            tokenAmountStr,
             boost::lexical_cast<std::string>(amountTokenMin),
             boost::lexical_cast<std::string>(amountAVAXMin),
             this->txSenderAccount,
@@ -647,17 +618,17 @@ class System : public QObject {
           );
           txSkel = this->w.buildTransaction(
             this->txSenderAccount, Pangolin::routerContract,
-            this->txReceiverCoinAmount, this->txGasLimit, this->txGasPrice, dataHex
+            coinAmountStr, gasLimitStr, gasPriceStr, dataHex
           );
-        } else if (this->txOperation == "Remove Liquidity") {
-          u256 amountAVAXMin = boost::lexical_cast<u256>(this->txReceiverCoinAmount);
-          u256 amountTokenMin = boost::lexical_cast<u256>(this->txReceiverTokenAmount);
+        } else if (operationStr == "Remove Liquidity") {
+          u256 amountAVAXMin = boost::lexical_cast<u256>(coinAmountStr);
+          u256 amountTokenMin = boost::lexical_cast<u256>(tokenAmountStr);
           amountAVAXMin -= (amountAVAXMin / 200); // 0.5%
           amountTokenMin -= (amountTokenMin / 200); // 0.5%
           dataHex = Pangolin::removeLiquidityAVAX(
             // tokenAddress, liquidity, amountTokenMin, amountAVAXMin, to, deadline
             Pangolin::tokenContracts[this->currentToken],
-            this->txReceiverLPAmount,
+            lpAmountStr,
             boost::lexical_cast<std::string>(amountTokenMin),
             boost::lexical_cast<std::string>(amountAVAXMin),
             this->txSenderAccount,
@@ -669,48 +640,46 @@ class System : public QObject {
           );
           txSkel = this->w.buildTransaction(
             this->txSenderAccount, Pangolin::routerContract,
-            "0", this->txGasLimit, this->txGasPrice, dataHex
+            "0", gasLimitStr, gasPriceStr, dataHex
           );
-        } else if (this->txOperation == "Stake LP") {
-          dataHex = Staking::stake(this->txReceiverLPAmount);
+        } else if (operationStr == "Stake LP") {
           txSkel = this->w.buildTransaction(
             this->txSenderAccount, Pangolin::stakingContract,
-            "0", this->txGasLimit, this->txGasPrice, dataHex
+            "0", gasLimitStr, gasPriceStr, Staking::stake(lpAmountStr)
           );
-        } else if (this->txOperation == "Unstake LP") {
-          dataHex = Staking::withdraw(this->txReceiverLPAmount);
+        } else if (operationStr == "Unstake LP") {
           txSkel = this->w.buildTransaction(
             this->txSenderAccount, Pangolin::stakingContract,
-            "0", this->txGasLimit, this->txGasPrice, dataHex
+            "0", gasLimitStr, gasPriceStr, Staking::withdraw(lpAmountStr)
           );
-        } else if (this->txOperation == "Harvest AVME") {
-          dataHex = Staking::getReward();
+        } else if (operationStr == "Harvest AVME") {
           txSkel = this->w.buildTransaction(
             this->txSenderAccount, Pangolin::stakingContract,
-            "0", this->txGasLimit, this->txGasPrice, dataHex
+            "0", gasLimitStr, gasPriceStr, Staking::getReward()
           );
-        } else if (this->txOperation == "Exit Staking") {
-          dataHex = Staking::exit();
+        } else if (operationStr == "Exit Staking") {
           txSkel = this->w.buildTransaction(
             this->txSenderAccount, Pangolin::stakingContract,
-            "0", this->txGasLimit, this->txGasPrice, dataHex
+            "0", gasLimitStr, gasPriceStr, Staking::exit()
           );
         }
         emit txBuilt(txSkel.nonce != Utils::MAX_U256_VALUE());
 
         // Sign the transaction
-        std::string signedTx = this->w.signTransaction(txSkel, pass.toStdString());
+        std::string signedTx = this->w.signTransaction(txSkel, passStr);
         emit txSigned(!signedTx.empty());
 
         // Send the transaction
-        std::string txLink = this->w.sendTransaction(signedTx, this->txOperation);
+        std::string txLink = this->w.sendTransaction(signedTx, operationStr);
         if (txLink.empty()) { emit txSent(false, ""); }
-        while (txLink.find("Transaction nonce is too low") != std::string::npos ||
-            txLink.find("Transaction with the same hash was already imported") != std::string::npos) {
+        while (
+          txLink.find("Transaction nonce is too low") != std::string::npos ||
+          txLink.find("Transaction with the same hash was already imported") != std::string::npos
+        ) {
           emit txRetry();
           txSkel.nonce++;
-          signedTx = this->w.signTransaction(txSkel, pass.toStdString());
-          txLink = this->w.sendTransaction(signedTx, this->txOperation);
+          signedTx = this->w.signTransaction(txSkel, passStr);
+          txLink = this->w.sendTransaction(signedTx, operationStr);
         }
         emit txSent(true, QString::fromStdString(txLink));
       });
@@ -834,13 +803,14 @@ class System : public QObject {
       QString lowerReserves, QString higherReserves, QString percentage
     ) {
       QVariantMap ret;
+      QVariantMap acc = getAccountBalances(QString::fromStdString(this->txSenderAccount));
       if (lowerReserves.isEmpty()) { lowerReserves = QString("0"); }
       if (higherReserves.isEmpty()) { higherReserves = QString("0"); }
 
       u256 lowerReservesU256 = boost::lexical_cast<u256>(lowerReserves.toStdString());
       u256 higherReservesU256 = boost::lexical_cast<u256>(higherReserves.toStdString());
       u256 userLPWei = boost::lexical_cast<u256>(
-        Utils::fixedPointToWei(this->txSenderLPFreeAmount, 18)
+        Utils::fixedPointToWei(acc.value("balanceLPFree").toString().toStdString(), 18)
       );
       bigfloat pc = bigfloat(boost::lexical_cast<double>(percentage.toStdString()) / 100);
 
@@ -888,11 +858,12 @@ class System : public QObject {
       QString lowerReserves, QString higherReserves, QString totalLiquidity
     ) {
       QVariantMap ret;
+      QVariantMap acc = getAccountBalances(QString::fromStdString(this->txSenderAccount));
       u256 lowerReservesU256 = boost::lexical_cast<u256>(lowerReserves.toStdString());
       u256 higherReservesU256 = boost::lexical_cast<u256>(higherReserves.toStdString());
       u256 totalLiquidityU256 = boost::lexical_cast<u256>(totalLiquidity.toStdString());
       u256 userLiquidityU256 = boost::lexical_cast<u256>(
-        Utils::fixedPointToWei(this->txSenderLPFreeAmount, 18)
+        Utils::fixedPointToWei(acc.value("balanceLPFree").toString().toStdString(), 18)
       );
 
       bigfloat userLPPercentage = (

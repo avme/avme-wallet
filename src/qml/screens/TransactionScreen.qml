@@ -49,6 +49,43 @@ Item {
     )
   }
 
+  function checkTransactionFunds() {
+    var acc = System.getAccountBalances(System.getTxSenderAccount())
+    var isFreeLP = (txOperationStr == "Remove Liquidity" || txOperationStr == "Stake LP")
+    var hasCoinFunds = !System.hasInsufficientFunds(
+      "Coin", acc.balanceAVAX, System.calculateTransactionCost(
+        txAmountCoinInput.text, txGasLimitInput.text, txGasPriceInput.text
+      )
+    )
+    var hasTokenFunds = !System.hasInsufficientFunds(
+      "Token", acc.balanceAVME, txAmountTokenInput.text
+    )
+    var hasLPFunds = !System.hasInsufficientFunds(
+      "LP", ((isFreeLP) ? acc.balanceLPFree : acc.balanceLPLocked), txAmountLPInput.text
+    )
+    switch (txOperationStr) {
+      case "Send AVAX":
+      case "Swap AVAX -> AVME":
+      case "Approve Exchange":
+      case "Approve Liquidity":
+      case "Approve Staking":
+      case "Harvest AVME":
+      case "Exit Staking":
+        return (hasCoinFunds);
+        break;
+      case "Send AVME":
+      case "Swap AVME -> AVAX":
+      case "Add Liquidity":
+        return (hasCoinFunds && hasTokenFunds);
+        break;
+      case "Remove Liquidity":
+      case "Stake LP":
+      case "Unstake LP":
+        return (hasCoinFunds && hasLPFunds);
+        break;
+    }
+  }
+
   function changeOperation(op) {
     // Clean all inputs first, then set the gas limit and enable only the required inputs
     txToInput.text = txAmountCoinInput.text = txAmountTokenInput.text = txAmountLPInput.text = ""
@@ -548,7 +585,17 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         width: parent.width
         color: "#FFFFFF"
-        text: "Enter your passphrase to confirm the transaction."
+        text: {
+          if (txPassTimer.running) {
+            text: "Wrong passphrase, please try again."
+          } else if (txPassFundsTimer.running) {
+            text: "Insufficient funds, please check your inputs."
+          } else {
+            text: "Enter your passphrase to confirm the transaction."
+          }
+        }
+        Timer { id: txPassTimer; interval: 2000; }
+        Timer { id: txPassFundsTimer; interval: 2000; }
       }
 
       AVMEInput {
@@ -566,8 +613,28 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: (txPassInput.text != "")
         text: "Make Transaction"
-        onClicked: {} // TODO
+        onClicked: {
+          if (!System.checkWalletPass(txPassInput.text)) {
+            txPassTimer.start()
+            txPassFundsTimer.stop()
+          } else if (!checkTransactionFunds()) {
+            txPassTimer.stop()
+            txPassFundsTimer.start()
+          } else {
+            txProgressPopup.open()
+            System.txStart(
+              txOperationStr, txToInput.text,
+              txAmountCoinInput.text, txAmountTokenInput.text, txAmountLPInput.text,
+              txGasLimitInput.text, txGasPriceInput.text, txPassInput.text
+            )
+          }
+        }
       }
     }
+  }
+
+  // Popup for transaction progress
+  AVMEPopupTxProgress {
+    id: txProgressPopup
   }
 }

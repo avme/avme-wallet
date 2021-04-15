@@ -127,24 +127,28 @@ Item {
         AVMEButton {
           id: btnStake
           width: (stakingDetailsColumn.width * 0.5) - parent.spacing
-          enabled: allowance != "" && (
-            !System.isApproved(System.getTxSenderLPFreeAmount(), allowance) ||
-            stakeInput.acceptableInput
-          )
+          enabled: {
+            var acc = System.getAccountBalances(System.getTxSenderAccount())
+            enabled: allowance != "" && (
+              !System.isApproved(acc.balanceLPFree, allowance) || stakeInput.acceptableInput
+            )
+          }
           text: {
+            var acc = System.getAccountBalances(System.getTxSenderAccount())
             if (allowance == "") {
               text: "Checking approval..."
-            } else if (isStaking && System.isApproved(System.getTxSenderLPFreeAmount(), allowance)) {
+            } else if (isStaking && System.isApproved(acc.balanceLPFree, allowance)) {
               text: "Stake"
-            } else if (!isStaking && System.isApproved(System.getTxSenderLPLockedAmount(), allowance)) {
+            } else if (!isStaking && System.isApproved(acc.balanceLPLocked, allowance)) {
               text: "Unstake"
             } else {
               text: "Approve"
             }
           }
           onClicked: {
+            var acc = System.getAccountBalances(System.getTxSenderAccount())
             System.setScreen(content, "qml/screens/TransactionScreen.qml")
-            if (!System.isApproved(System.getTxSenderLPFreeAmount(), allowance)) {
+            if (!System.isApproved(acc.balanceLPFree, allowance)) {
               System.operationOverride("Approve Staking", "", "", "")
             } else if (isStaking) {
               System.operationOverride("Stake LP", "", "", stakeInput.text)
@@ -235,60 +239,4 @@ Item {
       }
     }
   }
-
-  /*
-  // TODO: remove those
-  // Popup for confirming approval to stake
-  AVMEPopupApprove {
-    id: approveStakePopup
-    confirmBtn.onClicked: {
-      if (System.checkWalletPass(pass)) {
-        reloadRewardTimer.stop()
-        System.setTxOperation("Approve Staking")
-        System.setScreen(content, "qml/screens/ProgressScreen.qml")
-        System.txStart(pass)
-      } else {
-        approveExchangePopup.showErrorMsg()
-      }
-    }
-  }
-
-  // Popup for confirming LP (un)staking
-  AVMEPopupConfirmStake {
-    id: confirmStakePopup
-    confirmBtn.onClicked: {
-      if (System.checkWalletPass(pass)) {
-        System.setTxReceiverLPAmount(stakeInput.text)
-        System.setTxOperation((isStaking) ? "Stake LP" : "Unstake LP")
-        System.setScreen(content, "qml/screens/ProgressScreen.qml")
-        System.txStart(pass)
-      } else {
-        confirmStakePopup.showErrorMsg()
-      }
-    }
-  }
-
-  // Popup for confirming harvest
-  AVMEPopupConfirmHarvest {
-    id: confirmHarvestPopup
-    confirmBtn.onClicked: {
-      if (System.checkWalletPass(pass)) {
-        System.setTxReceiverTokenAmount(reward)
-        if (isExiting) { System.setTxReceiverLPAmount(System.getTxSenderLPLockedAmount()) }
-        System.setTxOperation((isExiting) ? "Exit Staking" : "Harvest AVME")
-        System.setScreen(content, "qml/screens/ProgressScreen.qml")
-        System.txStart(pass)
-      } else {
-        confirmHarvestPopup.showErrorMsg()
-      }
-    }
-  }
-
-  // Popup for warning about insufficient funds
-  AVMEPopupInfo {
-    id: fundsPopup
-    icon: "qrc:/img/warn.png"
-    info: "Insufficient funds. Please check your transaction values."
-  }
-  */
 }
