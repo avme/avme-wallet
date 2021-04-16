@@ -16,15 +16,20 @@ void Account::reloadBalances(Account &a) {
     a.address, Pangolin::stakingContract
   );
 
-  // Get the balances from the JSON objects, convert to u256, then to string
-  json_spirit::mValue AVAXBal = JSON::getValue(AVAXjson, "result");
-  json_spirit::mValue AVMEBal = JSON::getValue(AVMEjson, "result");
-  json_spirit::mValue FreeLPBal = JSON::getValue(FreeLPjson, "result");
-  json_spirit::mValue LockedLPBal = JSON::getValue(LockedLPjson, "result");
-  u256 AVAXu256 = boost::lexical_cast<HexTo<u256>>(AVAXBal.get_str());
-  u256 AVMEu256 = boost::lexical_cast<HexTo<u256>>(AVMEBal.get_str());
-  u256 FreeLPu256 = boost::lexical_cast<HexTo<u256>>(FreeLPBal.get_str());
-  u256 LockedLPu256 = boost::lexical_cast<HexTo<u256>>(LockedLPBal.get_str());
+  // Get the balances from the JSON objects, check if they're all here
+  std::string AVAXBal = JSON::getString(AVAXjson, "result");
+  std::string AVMEBal = JSON::getString(AVMEjson, "result");
+  std::string FreeLPBal = JSON::getString(FreeLPjson, "result");
+  std::string LockedLPBal = JSON::getString(LockedLPjson, "result");
+  if (AVAXBal == "" || AVMEBal == "" || FreeLPBal == "" || LockedLPBal == "") {
+    return;
+  }
+
+  // Convert the balances from hex to u256, then to string
+  u256 AVAXu256 = boost::lexical_cast<HexTo<u256>>(AVAXBal);
+  u256 AVMEu256 = boost::lexical_cast<HexTo<u256>>(AVMEBal);
+  u256 FreeLPu256 = boost::lexical_cast<HexTo<u256>>(FreeLPBal);
+  u256 LockedLPu256 = boost::lexical_cast<HexTo<u256>>(LockedLPBal);
   std::string AVAXstr = boost::lexical_cast<std::string>(AVAXu256);
   std::string AVMEstr = boost::lexical_cast<std::string>(AVMEu256);
   std::string FreeLPstr = boost::lexical_cast<std::string>(FreeLPu256);

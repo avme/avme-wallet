@@ -47,6 +47,15 @@ json_spirit::mValue JSON::getValue(
   return ret;
 }
 
+std::string JSON::getString(std::string jsonStr, std::string value, std::string delim) {
+  json_spirit::mValue val = getValue(jsonStr, value, delim);
+  try {
+    return val.get_str();
+  } catch (std::exception &e) {
+    return "";
+  }
+}
+
 #ifdef __MINGW32__
 boost::filesystem::path JSON::GetSpecialFolderPath(int nFolder, bool fCreate)
 {

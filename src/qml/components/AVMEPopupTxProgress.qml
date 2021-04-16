@@ -156,12 +156,10 @@ Popup {
           text: "Sending approval for staking...";
           break;
         case "Swap AVAX -> AVME":
-          text: "Swapping <b>" + coinAmountStr + " " + System.getCurrentCoin() + "</b>"
-          + "<br>for <b>" + tokenAmountStr + " " + System.getCurrentToken() + "</b>...";
+          text: "Swapping <b>" + coinAmountStr + " " + System.getCurrentCoin() + "</b>..."
           break;
         case "Swap AVME -> AVAX":
-          text: "Swapping <b>" + tokenAmountStr + " " + System.getCurrentToken() + "</b>"
-          + "<br>for <b>" + coinAmountStr + " " + System.getCurrentCoin() + "</b>...";
+          text: "Swapping <b>" + tokenAmountStr + " " + System.getCurrentToken() + "</b>..."
           break;
         case "Add Liquidity":
           text: "Adding <b>" + coinAmountStr + " " + System.getCurrentCoin() + "</b>"

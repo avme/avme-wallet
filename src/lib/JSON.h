@@ -43,8 +43,15 @@ namespace JSON {
    */
   json_spirit::mValue getValue(std::string jsonStr, std::string value, std::string delim = "");
 
-  // Handle the transaction history storage directory.
+  /**
+   * Get a string value from a JSON element.
+   * Specify a delimiter to search nested values, e.g. "foo/bar" searches
+   * for "bar" inside of "foo".
+   * Returns the value as a string, or an empty string on failure.
+   */
+  std::string getString(std::string jsonStr, std::string value, std::string delim = "");
 
+  // Handle the transaction history storage directory.
   #ifdef __MINGW32__
   boost::filesystem::path GetSpecialFolderPath(int nFolder, bool fCreate = true);
   #endif

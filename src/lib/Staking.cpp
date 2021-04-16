@@ -22,8 +22,8 @@ std::string Staking::balanceOf(std::string address) {
                              << Utils::addressToHex(address)
         << "\"},\"latest\"]}";
   std::string str = Network::httpGetRequest(query.str());
-  result = JSON::getValue(str, "result").get_str();
-  if (result == "0x") { return {}; }
+  result = JSON::getString(str, "result");
+  if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
 
   // Parse the result back into normal values
@@ -41,8 +41,8 @@ std::string Staking::earned(std::string address) {
                              << Utils::addressToHex(address)
         << "\"},\"latest\"]}";
   std::string str = Network::httpGetRequest(query.str());
-  result = JSON::getValue(str, "result").get_str();
-  if (result == "0x") { return {}; }
+  result = JSON::getString(str, "result");
+  if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
 
   // Parse the result back into normal values

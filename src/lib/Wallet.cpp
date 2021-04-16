@@ -168,7 +168,7 @@ TransactionSkeleton Wallet::buildTransaction(
   int txNonce;
 
   std::string nonceApiRequest = Network::getNonce(from);
-  std::string txNonceStr = JSON::getValue(nonceApiRequest, "result").get_str();
+  std::string txNonceStr = JSON::getString(nonceApiRequest, "result");
   // Check if nonce is valid (not an error message)
   if (txNonceStr == "") {
     txSkel.nonce = Utils::MAX_U256_VALUE();
@@ -213,7 +213,8 @@ std::string Wallet::signTransaction(TransactionSkeleton txSkel, std::string pass
 std::string Wallet::sendTransaction(std::string txidHex, std::string operation) {
   // Send the transaction
   std::string txidApiRequest = Network::broadcastTx(txidHex);
-  std::string txid = JSON::getValue(txidApiRequest, "result").get_str();
+  std::string txid = JSON::getString(txidApiRequest, "result");
+  if (txid == "") { return ""; }
   std::string txLink = "https://cchain.explorer.avax-test.network/tx/" + txid;
 
   /**
