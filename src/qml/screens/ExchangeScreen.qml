@@ -88,19 +88,64 @@ Item {
     swapEstimate = amountOut
   }
 
-  function calculateAddLiquidityAmount(isCoinToToken) {
-    var amountIn = (isCoinToToken) ? liquidityCoinInput.text : liquidityTokenInput.text
-    var amountName = (isCoinToToken) ? System.getCurrentCoin() : System.getCurrentToken()
-    var amountOut = ""
+  // For manual input
+  function calculateAddLiquidityAmount(fromCoin) {
+    // TODO: see if gas limit has to be hardcoded
+    var amountIn = (fromCoin) ? liquidityCoinInput.text : liquidityTokenInput.text
+    var amountName = (fromCoin) ? System.getCurrentCoin() : System.getCurrentToken()
+    var maxAmountAVAX = System.getRealMaxAVAXAmount("250000", System.getAutomaticFee())
+    var maxAmountAVME = System.getAccountBalances(System.getTxSenderAccount()).balanceAVME
+    var amountOut, coinAmount, tokenAmount
+
+    // Set the values accordingly
     if (amountName == lowerToken) {
       amountOut = System.calculateAddLiquidityAmount(amountIn, lowerReserves, higherReserves)
     } else if (amountName == higherToken) {
       amountOut = System.calculateAddLiquidityAmount(amountIn, higherReserves, lowerReserves)
     }
-    if (isCoinToToken) {
+    if (fromCoin) {
       liquidityTokenInput.text = amountOut
     } else {
       liquidityCoinInput.text = amountOut
+    }
+  }
+
+  // For the Max Amounts button
+  function calculateMaxAddLiquidityAmount() {
+    // TODO: see if gas limit has to be hardcoded
+    var maxAmountAVAX = System.getRealMaxAVAXAmount("250000", System.getAutomaticFee())
+    var maxAmountAVME = System.getAccountBalances(System.getTxSenderAccount()).balanceAVME
+    var coinAmount, tokenAmount
+
+    // Get the expected amounts for maxed values
+    if (lowerToken == System.getCurrentCoin()) {
+      tokenAmount = System.calculateAddLiquidityAmount(maxAmountAVAX, lowerReserves, higherReserves)
+      coinAmount = System.calculateAddLiquidityAmount(maxAmountAVME, higherReserves, lowerReserves)
+    } else if (lowerToken == System.getCurrentToken()) {
+      coinAmount = System.calculateAddLiquidityAmount(maxAmountAVME, lowerReserves, higherReserves)
+      tokenAmount = System.calculateAddLiquidityAmount(maxAmountAVAX, higherReserves, lowerReserves)
+    }
+
+    // Limit the max amount to the lowest the user has.
+    // If coinAmount is higher than the user's AVAX balance,
+    // then the AVAX user balance is limiting. Same with tokenAmount and AVME.
+    if (coinAmount > maxAmountAVAX) {
+      maxAmountAVME = tokenAmount
+    } else {
+      maxAmountAVAX = coinAmount
+    }
+
+    // Set the values accordingly
+    if (lowerToken == System.getCurrentCoin()) {
+      liquidityCoinInput.text = maxAmountAVAX
+      liquidityTokenInput.text = System.calculateAddLiquidityAmount(
+        maxAmountAVAX, lowerReserves, higherReserves
+      )
+    } else if (lowerToken == System.getCurrentToken()) {
+      liquidityTokenInput.text = maxAmountAVME
+      liquidityCoinInput.text = System.calculateAddLiquidityAmount(
+        maxAmountAVME, lowerReserves, higherReserves
+      )
     }
   }
 
@@ -372,59 +417,34 @@ Item {
 
       AVMEInput {
         id: liquidityCoinInput
-        width: (parent.width * 0.8)
+        width: parent.width
         enabled: (addAllowance != "")
         visible: (addToPool)
         validator: RegExpValidator { regExp: System.createCoinRegExp() }
         label: "Amount of " + System.getCurrentCoin() + " to add"
         placeholder: "Fixed point amount (e.g. 0.5)"
         onTextEdited: calculateAddLiquidityAmount(true)
-
-        AVMEButton {
-          id: liquidityMaxCoinBtn
-          width: (liquidityDetailsColumn.width * 0.2) - anchors.leftMargin
-          anchors {
-            left: parent.right
-            leftMargin: 10
-          }
-          text: "Max"
-          enabled: (addAllowance != "")
-          onClicked: {
-            // TODO: take max token into consideration
-            liquidityCoinInput.text = System.getRealMaxAVAXAmount(
-              "250000", System.getAutomaticFee()
-            )  // TODO: see if gas limit has to be hardcoded
-            calculateAddLiquidityAmount(true)
-          }
-        }
       }
 
       AVMEInput {
         id: liquidityTokenInput
-        width: (parent.width * 0.8)
+        width: parent.width
         enabled: (addAllowance != "")
         visible: (addToPool)
         validator: RegExpValidator { regExp: System.createTokenRegExp() }
         label: "Amount of " + System.getCurrentToken() + " to add"
         placeholder: "Fixed point amount (e.g. 0.5)"
         onTextEdited: calculateAddLiquidityAmount(false)
+      }
 
-        AVMEButton {
-          id: liquidityMaxTokenBtn
-          width: (liquidityDetailsColumn.width * 0.2) - anchors.leftMargin
-          anchors {
-            left: parent.right
-            leftMargin: 10
-          }
-          text: "Max"
-          enabled: (addAllowance != "")
-          onClicked: {
-            // TODO: take max coin into consideration
-            var acc = System.getAccountBalances(System.getTxSenderAccount())
-            liquidityTokenInput.text = acc.balanceAVME
-            calculateAddLiquidityAmount(false)
-          }
-        }
+      AVMEButton {
+        id: liquidityMaxAddBtn
+        width: (parent.width * 0.5)
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: "Max Amounts"
+        enabled: (addAllowance != "")
+        visible: (addToPool)
+        onClicked: calculateMaxAddLiquidityAmount()
       }
 
       Slider {
