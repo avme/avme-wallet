@@ -10,6 +10,11 @@ import "qrc:/qml/components"
 Item {
   id: overviewScreen
 
+  Connections {
+    target: System
+    onRewardUpdated: stakingPanel.reward = poolReward
+  }
+
   // Timer for reloading the Account balances
   Timer {
     id: listReloadTimer
@@ -26,6 +31,7 @@ Item {
   function reloadBalances() {
     var acc = System.getAccountBalances(System.getTxSenderAccount())
     var wal = System.getAllAccountBalances()
+    System.getPoolReward()
     accountCoinBalance.text = (acc.balanceAVAX) ? acc.balanceAVAX : "Loading..."
     accountTokenBalance.text = (acc.balanceAVME) ? acc.balanceAVME : "Loading..."
     stakingLockedBalance.text = (acc.balanceLPLocked) ? acc.balanceLPLocked : "Loading..."
@@ -37,16 +43,17 @@ Item {
     id: accountHeader
   }
 
+  // TODO: fiat balances and chart
   AVMEPanel {
-    id: accountBalancesPanel
+    id: balancesPanel
+    width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
       top: accountHeader.bottom
       left: parent.left
+      bottom: parent.bottom
       margins: 10
     }
-    width: parent.width * 0.3
-    height: 200
-    title: "Account Balances"
+    title: "Balances"
 
     Column {
       anchors {
@@ -58,11 +65,20 @@ Item {
       }
       spacing: 20
 
+      Text {
+        id: accountText
+        width: parent.width * 0.95
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        color: "#FFFFFF"
+        text: "This Account"
+      }
+
       Row {
         id: accountCoinBalanceRow
         width: parent.width * 0.95
         anchors.horizontalCenter: parent.horizontalCenter
-        height: 50
+        height: 40
         spacing: 20
 
         Image {
@@ -76,7 +92,7 @@ Item {
 
         Text {
           id: accountCoinBalance
-          width: parent.width * 0.3
+          width: parent.width * 0.5
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
           elide: Text.ElideRight
@@ -102,7 +118,7 @@ Item {
         id: accountTokenBalanceRow
         width: parent.width * 0.95
         anchors.horizontalCenter: parent.horizontalCenter
-        height: 50
+        height: 40
         spacing: 20
 
         Image {
@@ -116,7 +132,7 @@ Item {
 
         Text {
           id: accountTokenBalance
-          width: parent.width * 0.3
+          width: parent.width * 0.5
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
           elide: Text.ElideRight
@@ -137,35 +153,21 @@ Item {
           elide: Text.ElideRight
         }
       }
-    }
-  }
 
-  AVMEPanel {
-    id: walletBalancesPanel
-    anchors {
-      top: accountHeader.bottom
-      left: accountBalancesPanel.right
-      right: parent.right
-      margins: 10
-    }
-    height: 200
-    title: "Total Wallet Balances"
-
-    Column {
-      anchors {
-        top: parent.header.bottom
-        bottom: parent.bottom
-        left: parent.left
-        right: parent.right
-        topMargin: 20
+      Text {
+        id: walletText
+        width: parent.width * 0.95
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        color: "#FFFFFF"
+        text: "Total from Wallet"
       }
-      spacing: 20
 
       Row {
         id: walletCoinBalanceRow
         width: parent.width * 0.95
         anchors.horizontalCenter: parent.horizontalCenter
-        height: 50
+        height: 40
         spacing: 20
 
         Image {
@@ -179,10 +181,9 @@ Item {
 
         Text {
           id: walletCoinBalance
-          width: parent.width * 0.3
+          width: parent.width * 0.5
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
-          text: "54321.123456789123456789"
           elide: Text.ElideRight
         }
 
@@ -206,7 +207,7 @@ Item {
         id: walletTokenBalanceRow
         width: parent.width * 0.95
         anchors.horizontalCenter: parent.horizontalCenter
-        height: 50
+        height: 40
         spacing: 20
 
         Image {
@@ -220,10 +221,9 @@ Item {
 
         Text {
           id: walletTokenBalance
-          width: parent.width * 0.3
+          width: parent.width * 0.5
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
-          text: "987654321.123456789123456789"
           elide: Text.ElideRight
         }
 
@@ -245,21 +245,23 @@ Item {
     }
   }
 
+  // TODO: future statistics
   AVMEPanel {
     id: stakingPanel
+    property string reward
+    width: (parent.width * 0.5) - (anchors.margins * 2)
+    height: (parent.height * 0.45) - anchors.margins
     anchors {
-      top: accountBalancesPanel.bottom
-      left: parent.left
+      top: accountHeader.bottom
+      right: parent.right
       margins: 10
     }
-    width: parent.width * 0.45
-    height: 420
     title: "Staking Statistics"
 
     Rectangle {
       id: stakingLockedRect
       width: parent.width * 0.9
-      height: 50
+      height: 40
       anchors {
         horizontalCenter: parent.horizontalCenter
         top: parent.header.bottom
@@ -310,10 +312,12 @@ Item {
         top: rewardCurrentTitle.bottom
         horizontalCenter: parent.horizontalCenter
       }
-      color: "#FFFFFF"
+      font.bold: true
       font.pointSize: 18.0
-      text: "6329897479843233.887376387564877632"
+      color: "#FFFFFF"
+      text: (parent.reward) ? parent.reward : "Loading..."
       elide: Text.ElideRight
+      horizontalAlignment: Text.AlignHCenter
     }
 
     Text {
@@ -321,7 +325,7 @@ Item {
       anchors {
         top: rewardAmount.bottom
         horizontalCenter: parent.horizontalCenter
-        topMargin: 20
+        topMargin: 10
       }
       color: "#FFFFFF"
       text: "Future Rewards"
@@ -332,10 +336,9 @@ Item {
       width: parent.width * 0.9
       anchors {
         top: rewardFutureTitle.bottom
-        bottom: stakingBtnRow.top
+        bottom: parent.bottom
         horizontalCenter: parent.horizontalCenter
       }
-      spacing: 10
 
       Text {
         anchors.left: parent.left
@@ -402,38 +405,17 @@ Item {
         }
       }
     }
-
-    Row {
-      id: stakingBtnRow
-      anchors {
-        horizontalCenter: parent.horizontalCenter
-        bottom: parent.bottom
-        margins: 10
-      }
-      spacing: 20
-
-      AVMEButton {
-        id: btnGetReward
-        width: stakingPanel.width * 0.4
-        text: "Get Reward"
-      }
-      AVMEButton {
-        id: btnStakingInfo
-        width: stakingPanel.width * 0.4
-        text: "Staking Info"
-      }
-    }
   }
 
   AVMEPanel {
     id: marketDataPanel
+    width: (parent.width * 0.5) - (anchors.margins * 2)
+    height: (parent.height * 0.45) - anchors.margins
     anchors {
-      top: walletBalancesPanel.bottom
-      left: stakingPanel.right
+      top: stakingPanel.bottom
       right: parent.right
       margins: 10
     }
-    height: 420
     title: "Market Data"
   }
 }
