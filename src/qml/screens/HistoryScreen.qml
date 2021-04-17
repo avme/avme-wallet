@@ -29,38 +29,24 @@ Item {
     }
   }
 
-  Rectangle {
-    id: accountHeaderRow
+  AVMEAccountHeader {
+    id: accountHeader
+  }
+
+  // Transaction list
+  Row {
+    id: listBtnRow
+    width: (parent.width * 0.35) + anchors.margins
     anchors {
-      top: parent.top
+      top: accountHeader.bottom
       left: parent.left
-      right: parent.right
       margins: 10
     }
-    height: 50
-    color: "#1D212A"
-    radius: 10
-
-    Text {
-      id: addressText
-      anchors {
-        verticalCenter: parent.verticalCenter
-        left: parent.left
-        leftMargin: 10
-      }
-      color: "#FFFFFF"
-      text: System.getTxSenderAccount()
-      font.pointSize: 16.0
-    }
+    spacing: 10
 
     AVMEButton {
       id: btnSort
-      width: (parent.width * 0.2)
-      anchors {
-        verticalCenter: parent.verticalCenter
-        right: btnRefresh.left
-        rightMargin: 10
-      }
+      width: (parent.width * 0.7) - parent.spacing
       text: (sortByNew) ? "Sorted by Newer" : "Sorted by Older"
       onClicked: {
         sortByNew = !sortByNew
@@ -70,23 +56,17 @@ Item {
 
     AVMEButton {
       id: btnRefresh
-      width: (parent.width * 0.1)
-      anchors {
-        verticalCenter: parent.verticalCenter
-        right: parent.right
-        rightMargin: 10
-      }
+      width: parent.width * 0.3
       text: "Refresh"
       onClicked: reloadTransactions()
     }
   }
 
-  // Transaction list
   Rectangle {
     id: listRect
     width: (parent.width * 0.35) + anchors.margins
     anchors {
-      top: accountHeaderRow.bottom
+      top: listBtnRow.bottom
       bottom: parent.bottom
       left: parent.left
       margins: 10
@@ -106,7 +86,7 @@ Item {
     id: historyPanel
     width: (parent.width * 0.6) + anchors.margins
     anchors {
-      top: accountHeaderRow.bottom
+      top: accountHeader.bottom
       bottom: parent.bottom
       right: parent.right
       margins: 10

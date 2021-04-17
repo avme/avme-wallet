@@ -306,6 +306,7 @@ Popup {
     onClicked: Qt.openUrlExternally(linkUrl)
   }
 
+  // TODO: retry button
   AVMEButton {
     id: btnClose
     anchors {
@@ -317,6 +318,8 @@ Popup {
     onClicked: {
       txProgressPopup.clean()
       txProgressPopup.close()
+      System.accountChosen() // TODO: rename this to something like "goToOverview"
+      System.setScreen(content, "qml/screens/OverviewScreen.qml")
     }
   }
 }

@@ -33,112 +33,14 @@ Item {
     walletTokenBalance.text = (wal.balanceAVME) ? wal.balanceAVME : "Loading..."
   }
 
-  Rectangle {
-    id: accountHeaderRow
-    anchors {
-      top: parent.top
-      left: parent.left
-      right: parent.right
-      margins: 10
-    }
-    height: 50
-    color: "#1D212A"
-    radius: 10
-
-    Text {
-      id: addressText
-      anchors {
-        verticalCenter: parent.verticalCenter
-        left: parent.left
-        leftMargin: 10
-      }
-      color: "#FFFFFF"
-      text: System.getTxSenderAccount()
-      font.pointSize: 16.0
-    }
-
-    AVMEButton {
-      id: btnChangeWallet
-      width: parent.width * 0.15
-      anchors {
-        verticalCenter: parent.verticalCenter
-        right: btnChangeAccount.left
-        rightMargin: 10
-      }
-      text: "Change Wallet"
-      onClicked: {
-        System.hideMenu()
-        System.setScreen(content, "qml/screens/StartScreen.qml")
-      }
-    }
-
-    AVMEButton {
-      id: btnChangeAccount
-      width: parent.width * 0.15
-      anchors {
-        verticalCenter: parent.verticalCenter
-        right: btnCopyToClipboard.left
-        rightMargin: 10
-      }
-      text: "Change Account"
-      onClicked: {
-        System.hideMenu()
-        System.setScreen(content, "qml/screens/AccountsScreen.qml")
-      }
-    }
-
-    /*
-    // TODO: move those somewhere else
-    AVMEButton {
-      id: btnViewPrivKey
-      width: parent.width * 0.15
-      anchors {
-        verticalCenter: parent.verticalCenter
-        right: btnViewSeed.left
-        rightMargin: 10
-      }
-      text: "View Private Key"
-      onClicked: {
-        viewPrivKeyPopup.account = System.getTxSenderAccount()
-        viewPrivKeyPopup.open()
-      }
-    }
-
-    AVMEButton {
-      id: btnViewSeed
-      width: parent.width * 0.15
-      anchors {
-        verticalCenter: parent.verticalCenter
-        right: btnCopyToClipboard.left
-        rightMargin: 10
-      }
-      text: "View Wallet Seed"
-      onClicked: viewSeedPopup.open()
-    }
-    */
-
-    AVMEButton {
-      id: btnCopyToClipboard
-      width: parent.width * 0.2
-      anchors {
-        verticalCenter: parent.verticalCenter
-        right: parent.right
-        rightMargin: 10
-      }
-      enabled: (!btnClipboardTimer.running)
-      text: (enabled) ? "Copy to Clipboard" : "Copied!"
-      Timer { id: btnClipboardTimer; interval: 2000 }
-      onClicked: {
-        System.copyToClipboard(System.getTxSenderAccount())
-        btnClipboardTimer.start()
-      }
-    }
+  AVMEAccountHeader {
+    id: accountHeader
   }
 
   AVMEPanel {
     id: accountBalancesPanel
     anchors {
-      top: accountHeaderRow.bottom
+      top: accountHeader.bottom
       left: parent.left
       margins: 10
     }
@@ -241,7 +143,7 @@ Item {
   AVMEPanel {
     id: walletBalancesPanel
     anchors {
-      top: accountHeaderRow.bottom
+      top: accountHeader.bottom
       left: accountBalancesPanel.right
       right: parent.right
       margins: 10
@@ -534,31 +436,4 @@ Item {
     height: 420
     title: "Market Data"
   }
-
-  /**
-  // TODO: move those somewhere else
-  // Popup for viewing the Account's private key
-  AVMEPopupViewPrivKey {
-    id: viewPrivKeyPopup
-    showBtn.onClicked: {
-      if (System.checkWalletPass(pass)) {
-        viewPrivKeyPopup.showPrivKey()
-      } else {
-        viewPrivKeyPopup.showErrorMsg()
-      }
-    }
-  }
-
-  // Popup for viewing the Wallet's seed
-  AVMEPopupViewSeed {
-    id: viewSeedPopup
-    showBtn.onClicked: {
-      if (System.checkWalletPass(pass)) {
-        viewSeedPopup.showSeed()
-      } else {
-        viewSeedPopup.showErrorMsg()
-      }
-    }
-  }
-  */
 }

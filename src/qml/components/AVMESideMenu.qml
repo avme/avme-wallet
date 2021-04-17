@@ -136,6 +136,23 @@ Rectangle {
     }
 
     AVMESideMenuItem {
+      id: itemSettings
+      icon: (itemSelection.y == y) ? "qrc:/img/icons/cogSelect.png" : "qrc:/img/icons/cog.png"
+      label: "Settings"
+      area.onClicked: {
+        itemSelection.y = y
+        System.setScreen(content, "qml/screens/SettingsScreen.qml")
+      }
+    }
+
+    Rectangle {
+      anchors.horizontalCenter: parent.horizontalCenter
+      width: (parent.width - 10)
+      height: 1
+      color: "#4E525D"
+    }
+
+    AVMESideMenuItem {
       id: itemAbout
       icon: (itemSelection.y == y) ? "qrc:/img/icons/infoSelect.png" : "qrc:/img/icons/info.png"
       label: "About"

@@ -113,16 +113,20 @@ Item {
     reloadLiquidityDataTimer.start()
   }
 
+  AVMEAccountHeader {
+    id: accountHeader
+  }
+
   // Panel for the exchange operations
   // TODO: calculate price impact and other missing stuff from Pangolin
   AVMEPanel {
     id: exchangePanel
-    width: (parent.width * 0.45)
-    height: (parent.height * 0.85)
+    width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
+      top: accountHeader.bottom
       left: parent.left
-      verticalCenter: parent.verticalCenter
-      margins: 40
+      bottom: parent.bottom
+      margins: 10
     }
     title: "Exchange Details"
 
@@ -275,12 +279,12 @@ Item {
   // Panel for the liquidity operations
   AVMEPanel {
     id: liquidityPanel
-    width: (parent.width * 0.45)
-    height: (parent.height * 0.85)
+    width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
+      top: accountHeader.bottom
       right: parent.right
-      verticalCenter: parent.verticalCenter
-      margins: 40
+      bottom: parent.bottom
+      margins: 10
     }
     title: "Liquidity Pool Details"
 
@@ -362,10 +366,8 @@ Item {
         id: liquiditySwitchBtn
         width: parent.width * 0.5
         anchors.horizontalCenter: parent.horizontalCenter
-        text: "Switch Order"
-        onClicked: {
-          addToPool = !addToPool
-        }
+        text: (addToPool) ? "Switch to Remove" : "Switch to Add"
+        onClicked: addToPool = !addToPool
       }
 
       AVMEInput {

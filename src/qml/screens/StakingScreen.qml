@@ -33,15 +33,19 @@ Item {
     reloadRewardTimer.start()
   }
 
+  AVMEAccountHeader {
+    id: accountHeader
+  }
+
   // Panel for staking/unstaking LP
   AVMEPanel {
     id: stakingPanel
-    width: (parent.width * 0.45)
-    height: (parent.height * 0.85)
+    width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
+      top: accountHeader.bottom
       left: parent.left
-      verticalCenter: parent.verticalCenter
-      margins: 40
+      bottom: parent.bottom
+      margins: 10
     }
     title: "Staking Details"
 
@@ -164,12 +168,12 @@ Item {
   // Panel for harvesting/exiting
   AVMEPanel {
     id: harvestPanel
-    width: (parent.width * 0.45)
-    height: (parent.height * 0.85)
+    width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
+      top: accountHeader.bottom
       right: parent.right
-      verticalCenter: parent.verticalCenter
-      margins: 40
+      bottom: parent.bottom
+      margins: 10
     }
     title: "Harvesting Details"
 
