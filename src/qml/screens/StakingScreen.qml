@@ -218,7 +218,13 @@ Item {
         id: btnExitStake
         width: (parent.width * 0.75)
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (reward != "") // TODO: reward > 0 && locked LP > 0
+        enabled: {
+          var acc = System.getAccountBalances(System.getTxSenderAccount())
+          enabled: (
+            reward != "" && !System.balanceIsZero(reward, System.getCurrentTokenDecimals()) &&
+            !System.balanceIsZero(acc.balanceLPLocked, 18)
+          )
+        }
         text: (reward != "")
         ? "Harvest " + System.getCurrentToken() + " & Unstake LP"
         : "Querying reward..."
@@ -232,7 +238,7 @@ Item {
         id: btnHarvest
         width: (parent.width * 0.75)
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (reward != "") // TODO: reward > 0
+        enabled: (reward != "" && !System.balanceIsZero(reward, System.getCurrentTokenDecimals()))
         text: (reward != "")
         ? "Harvest " + System.getCurrentToken()
         : "Querying reward..."

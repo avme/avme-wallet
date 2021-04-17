@@ -772,6 +772,12 @@ class System : public QObject {
       });
     }
 
+    // Check if a balance is zero
+    Q_INVOKABLE bool balanceIsZero(QString amount, int decimals) {
+      u256 amountU256 = u256(Utils::fixedPointToWei(amount.toStdString(), decimals));
+      return (amountU256 == 0);
+    }
+
     // Calculate the estimated amount for a coin/token exchange
     Q_INVOKABLE QString calculateExchangeAmount(
       QString amountIn, QString reservesIn, QString reservesOut
