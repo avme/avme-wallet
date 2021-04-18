@@ -589,17 +589,10 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         width: parent.width
         color: "#FFFFFF"
-        text: {
-          if (txPassTimer.running) {
-            text: "Wrong passphrase, please try again."
-          } else if (txPassFundsTimer.running) {
-            text: "Insufficient funds, please check your inputs."
-          } else {
-            text: "Enter your passphrase to confirm the transaction."
-          }
-        }
+        text: (!txPassTimer.running)
+        ? "Enter your passphrase to confirm the transaction."
+        : "Wrong passphrase, please try again."
         Timer { id: txPassTimer; interval: 2000; }
-        Timer { id: txPassFundsTimer; interval: 2000; }
       }
 
       AVMEInput {
@@ -622,8 +615,7 @@ Item {
             txPassTimer.start()
             txPassFundsTimer.stop()
           } else if (!checkTransactionFunds()) {
-            txPassTimer.stop()
-            txPassFundsTimer.start()
+            fundsPopup.open()
           } else {
             txProgressPopup.open()
             System.txStart(
@@ -635,6 +627,13 @@ Item {
         }
       }
     }
+  }
+
+  // Popup for insufficient funds
+  AVMEPopupInfo {
+    id: fundsPopup
+    icon: "qrc:/img/warn.png"
+    info: "Insufficient funds. Please check your inputs."
   }
 
   // Popup for transaction progress

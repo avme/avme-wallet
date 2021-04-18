@@ -79,19 +79,8 @@ class System : public QObject {
     int currentCoinDecimals;
     std::string currentToken;
     int currentTokenDecimals;
-    bool txTokenFlag;
-    std::string txSenderAccount;
-    //std::string txSenderCoinAmount;
-    //std::string txSenderTokenAmount;
-    //std::string txSenderLPFreeAmount;
-    //std::string txSenderLPLockedAmount;
-    //std::string txReceiverAccount;
-    //std::string txReceiverCoinAmount;
-    //std::string txReceiverTokenAmount;
-    //std::string txReceiverLPAmount;
-    //std::string txGasLimit;
-    //std::string txGasPrice;
-    //std::string txOperation;
+    bool txTokenFlag; // TODO: remove this
+    std::string txSenderAccount;  // TODO: rename this to something like "currentAccount"
 
   public:
     // Getters/Setters for private vars

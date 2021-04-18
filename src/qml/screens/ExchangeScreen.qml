@@ -308,13 +308,25 @@ Item {
           }
         }
         onClicked: {
-          System.setScreen(content, "qml/screens/TransactionScreen.qml")
           if (!System.isApproved(swapInput.text, allowance)) {
+            System.setScreen(content, "qml/screens/TransactionScreen.qml")
             System.operationOverride("Approve Exchange", "", "", "")
           } else if (coinToToken) {
-            System.operationOverride("Swap AVAX -> AVME", swapInput.text, "", "")
+            // TODO: see if gas limit has to be hardcoded
+            if (swapInput.text > System.getRealMaxAVAXAmount("180000", System.getAutomaticFee())) {
+              fundsPopup.open()
+            } else {
+              System.setScreen(content, "qml/screens/TransactionScreen.qml")
+              System.operationOverride("Swap AVAX -> AVME", swapInput.text, "", "")
+            }
           } else {
-            System.operationOverride("Swap AVME -> AVAX", "", swapInput.text, "")
+            var acc = System.getAccountBalances(System.getTxSenderAccount())
+            if (swapInput.text > acc.balanceAVME) {
+              fundsPopup.open()
+            } else {
+              System.setScreen(content, "qml/screens/TransactionScreen.qml")
+              System.operationOverride("Swap AVME -> AVAX", "", swapInput.text, "")
+            }
           }
         }
       }
@@ -560,22 +572,39 @@ Item {
           }
         }
         onClicked: {
-          System.setScreen(content, "qml/screens/TransactionScreen.qml")
+          // TODO: see if gas limit has to be hardcoded
+          var acc = System.getAccountBalances(System.getTxSenderAccount())
           if (addToPool) {
             if (!System.isApproved(liquidityTokenInput.text, addAllowance)) {
+              System.setScreen(content, "qml/screens/TransactionScreen.qml")
               System.operationOverride("Approve Exchange", "", "", "")
+            } else if (
+              liquidityCoinInput.text > System.getRealMaxAVAXAmount("250000", System.getAutomaticFee()) ||
+              liquidityTokenInput.text > acc.balanceAVME
+            ) {
+              fundsPopup.open()
             } else {
+              System.setScreen(content, "qml/screens/TransactionScreen.qml")
               System.operationOverride("Add Liquidity", liquidityCoinInput.text, liquidityTokenInput.text, "")
             }
           } else {
-            if (!System.isApproved(liquidityTokenInput.text, removeAllowance)) {
+            if (!System.isApproved(removeLPEstimate, removeAllowance)) {
+              System.setScreen(content, "qml/screens/TransactionScreen.qml")
               System.operationOverride("Approve Liquidity", "", "", "")
             } else {
+              System.setScreen(content, "qml/screens/TransactionScreen.qml")
               System.operationOverride("Remove Liquidity", "", "", removeLPEstimate)
             }
           }
         }
       }
     }
+  }
+
+  // Popup for insufficient funds
+  AVMEPopupInfo {
+    id: fundsPopup
+    icon: "qrc:/img/warn.png"
+    info: "Insufficient funds. Please check your inputs."
   }
 }

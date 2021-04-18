@@ -151,13 +151,23 @@ Item {
           }
           onClicked: {
             var acc = System.getAccountBalances(System.getTxSenderAccount())
-            System.setScreen(content, "qml/screens/TransactionScreen.qml")
             if (!System.isApproved(acc.balanceLPFree, allowance)) {
+              System.setScreen(content, "qml/screens/TransactionScreen.qml")
               System.operationOverride("Approve Staking", "", "", "")
             } else if (isStaking) {
-              System.operationOverride("Stake LP", "", "", stakeInput.text)
+              if (stakeInput.text > acc.balanceLPFree) {
+                fundsPopup.open()
+              } else {
+                System.setScreen(content, "qml/screens/TransactionScreen.qml")
+                System.operationOverride("Stake LP", "", "", stakeInput.text)
+              }
             } else {
-              System.operationOverride("Unstake LP", "", "", stakeInput.text)
+              if (stakeInput.text > acc.balanceLPLocked) {
+                fundsPopup.open()
+              } else {
+                System.setScreen(content, "qml/screens/TransactionScreen.qml")
+                System.operationOverride("Unstake LP", "", "", stakeInput.text)
+              }
             }
           }
         }
@@ -248,5 +258,12 @@ Item {
         }
       }
     }
+  }
+
+  // Popup for insufficient funds
+  AVMEPopupInfo {
+    id: fundsPopup
+    icon: "qrc:/img/warn.png"
+    info: "Insufficient funds. Please check your inputs."
   }
 }
