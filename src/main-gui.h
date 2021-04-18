@@ -28,6 +28,7 @@ Q_IMPORT_PLUGIN(QtQuick2WindowPlugin)
 Q_IMPORT_PLUGIN(QtQuickTemplates2Plugin)
 Q_IMPORT_PLUGIN(QtQuickControls2Plugin)
 Q_IMPORT_PLUGIN(QtLabsPlatformPlugin)
+Q_IMPORT_PLUGIN(QtChartsQml2Plugin)
 
 #include "lib/Account.h"
 #include "lib/Network.h"
@@ -321,6 +322,7 @@ class System : public QObject {
     }
 
     // Get an Account's balances
+    // TODO: use this->txSenderAccount
     Q_INVOKABLE QVariantMap getAccountBalances(QString address) {
       QVariantMap ret;
       for (Account &a : w.accounts) {
