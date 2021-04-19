@@ -6,9 +6,7 @@ import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
 
-/**
- * Popup for showing the progress of a transaction. Has to be opened manually.
- */
+// Popup for showing the progress of a transaction. Has to be opened manually.
 Popup {
   id: txProgressPopup
   property string opStr
@@ -306,7 +304,6 @@ Popup {
     onClicked: Qt.openUrlExternally(linkUrl)
   }
 
-  // TODO: retry button
   AVMEButton {
     id: btnClose
     anchors {
@@ -318,7 +315,7 @@ Popup {
     onClicked: {
       txProgressPopup.clean()
       txProgressPopup.close()
-      System.accountChosen() // TODO: rename this to something like "goToOverview"
+      System.goToOverview()
       System.setScreen(content, "qml/screens/OverviewScreen.qml")
     }
   }

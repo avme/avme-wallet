@@ -11,7 +11,6 @@ import QtQuick.Controls 2.2
  * - "account": the Account's actual address
  * - "balance": the Account's balance in <coin-name>
  */
-
 ListView {
   id: accountSeedList
   property color listHighlightColor: "#887AC1EB"

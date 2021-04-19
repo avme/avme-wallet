@@ -90,11 +90,10 @@ Item {
 
   // For manual input
   function calculateAddLiquidityAmount(fromCoin) {
-    // TODO: see if gas limit has to be hardcoded
     var amountIn = (fromCoin) ? liquidityCoinInput.text : liquidityTokenInput.text
     var amountName = (fromCoin) ? System.getCurrentCoin() : System.getCurrentToken()
     var maxAmountAVAX = System.getRealMaxAVAXAmount("250000", System.getAutomaticFee())
-    var maxAmountAVME = System.getAccountBalances(System.getTxSenderAccount()).balanceAVME
+    var maxAmountAVME = System.getAccountBalances(System.getCurrentAccount()).balanceAVME
     var amountOut, coinAmount, tokenAmount
 
     // Set the values accordingly
@@ -112,9 +111,8 @@ Item {
 
   // For the Max Amounts button
   function calculateMaxAddLiquidityAmount() {
-    // TODO: see if gas limit has to be hardcoded
     var maxAmountAVAX = System.getRealMaxAVAXAmount("250000", System.getAutomaticFee())
-    var maxAmountAVME = System.getAccountBalances(System.getTxSenderAccount()).balanceAVME
+    var maxAmountAVME = System.getAccountBalances(System.getCurrentAccount()).balanceAVME
     var coinAmount, tokenAmount
 
     // Get the expected amounts for maxed values
@@ -269,8 +267,8 @@ Item {
           text: "Max"
           enabled: (allowance != "")
           onClicked: {
-            var acc = System.getAccountBalances(System.getTxSenderAccount())
-            swapInput.text = (coinToToken)  // TODO: see if gas limit has to be hardcoded
+            var acc = System.getAccountBalances(System.getCurrentAccount())
+            swapInput.text = (coinToToken)
               ? System.getRealMaxAVAXAmount("180000", System.getAutomaticFee())
               : acc.balanceAVME
             calculateExchangeAmountOut()
@@ -312,7 +310,6 @@ Item {
             System.setScreen(content, "qml/screens/TransactionScreen.qml")
             System.operationOverride("Approve Exchange", "", "", "")
           } else if (coinToToken) {
-            // TODO: see if gas limit has to be hardcoded
             if (swapInput.text > System.getRealMaxAVAXAmount("180000", System.getAutomaticFee())) {
               fundsPopup.open()
             } else {
@@ -320,7 +317,7 @@ Item {
               System.operationOverride("Swap AVAX -> AVME", swapInput.text, "", "")
             }
           } else {
-            var acc = System.getAccountBalances(System.getTxSenderAccount())
+            var acc = System.getAccountBalances(System.getCurrentAccount())
             if (swapInput.text > acc.balanceAVME) {
               fundsPopup.open()
             } else {
@@ -572,8 +569,7 @@ Item {
           }
         }
         onClicked: {
-          // TODO: see if gas limit has to be hardcoded
-          var acc = System.getAccountBalances(System.getTxSenderAccount())
+          var acc = System.getAccountBalances(System.getCurrentAccount())
           if (addToPool) {
             if (!System.isApproved(liquidityTokenInput.text, addAllowance)) {
               System.setScreen(content, "qml/screens/TransactionScreen.qml")

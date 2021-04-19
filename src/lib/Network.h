@@ -35,7 +35,6 @@ class Network {
      * Get coin/token balances from a given address in the blockchain API.
      * For a list of addresses, make one call per address in the list.
      */
-    // TODO: rename to getCoinBalance and getTokenBalance
     static std::string getAVAXBalance(std::string address);
     static std::string getAVMEBalance(std::string address, std::string contractAddress);
 

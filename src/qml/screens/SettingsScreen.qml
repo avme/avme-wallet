@@ -51,7 +51,7 @@ Item {
           }
           text: "View Private Key"
           onClicked: {
-            viewPrivKeyPopup.account = System.getTxSenderAccount()
+            viewPrivKeyPopup.account = System.getCurrentAccount()
             viewPrivKeyPopup.open()
           }
         }

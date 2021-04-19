@@ -5,7 +5,6 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 // Stylized button with AVME's color set.
-
 Button {
   id: btn
   property color btnColor: "#782D8B"

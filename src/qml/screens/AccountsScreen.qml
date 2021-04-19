@@ -134,9 +134,9 @@ Item {
       enabled: (walletList.currentItem)
       text: "Use this Account"
       onClicked: {
-        System.setTxSenderAccount(walletList.currentItem.itemAccount)
+        System.setCurrentAccount(walletList.currentItem.itemAccount)
         listReloadTimer.stop()
-        System.accountChosen();
+        System.goToOverview();
         System.setScreen(content, "qml/screens/OverviewScreen.qml")
       }
     }

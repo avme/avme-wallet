@@ -30,7 +30,7 @@ Item {
   }
 
   function reloadBalances() {
-    var acc = System.getAccountBalances(System.getTxSenderAccount())
+    var acc = System.getAccountBalances(System.getCurrentAccount())
     var wal = System.getAllAccountBalances()
     System.getPoolReward()
     accountCoinBalance.text = (acc.balanceAVAX) ? acc.balanceAVAX : "Loading..."

@@ -50,7 +50,7 @@ Item {
   }
 
   function checkTransactionFunds() {
-    var acc = System.getAccountBalances(System.getTxSenderAccount())
+    var acc = System.getAccountBalances(System.getCurrentAccount())
     var isFreeLP = (txOperationStr == "Remove Liquidity" || txOperationStr == "Stake LP")
     var hasCoinFunds = !System.hasInsufficientFunds(
       "Coin", acc.balanceAVAX, System.calculateTransactionCost(
@@ -211,7 +211,7 @@ Item {
         width: parent.width
         readOnly: true
         label: "From"
-        text: System.getTxSenderAccount()
+        text: System.getCurrentAccount()
       }
 
       AVMEInput {
@@ -264,7 +264,7 @@ Item {
           }
           text: "Max"
           onClicked: {
-            var acc = System.getAccountBalances(System.getTxSenderAccount())
+            var acc = System.getAccountBalances(System.getCurrentAccount())
             txAmountTokenInput.text = acc.balanceAVME
             updateTxCost()
           }
@@ -289,7 +289,7 @@ Item {
           text: "Max"
           onClicked: {
             // "Stake LP" = free LP, "Remove Liquidity" and "Unstake LP" = locked LP
-            var acc = System.getAccountBalances(System.getTxSenderAccount())
+            var acc = System.getAccountBalances(System.getCurrentAccount())
             txAmountLPInput.text = (txOperationStr == "Stake LP")
               ? acc.balanceLPFree : acc.balanceLPLocked
             updateTxCost()

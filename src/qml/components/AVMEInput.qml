@@ -10,7 +10,6 @@ import QtQuick.Controls 2.2
  * "label": the text shown above the input field
  * "placeholder": the placeholder text shown in the input field
  */
-
 TextField {
   id: input
   property string label

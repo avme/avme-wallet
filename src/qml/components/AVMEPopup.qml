@@ -9,7 +9,6 @@ import QtQuick.Controls 2.2
  * Requires the following items:
  * - "info": the text that will be shown
  */
-
 Popup {
   id: popup
   property string info

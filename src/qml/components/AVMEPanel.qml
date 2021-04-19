@@ -7,7 +7,6 @@ import QtQuick.Controls 2.2
 import "qrc:/qml/components"
 
 // Panel template for basic info/data/etc.
-
 Rectangle {
   id: panel
   property alias title: titleLabel.text

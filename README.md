@@ -35,3 +35,4 @@ cmake -DCMAKE_TOOLCHAIN_FILE=cmake/x86_64-w64-mingw32.cmake ..
 cmake --build . -- -j$(nproc)
 ```
 
+***FOR DEVELOPERS ONLY:*** add `-DBUILD_CLI` to the cmake command to build a CLI executable for testing/debugging features.

@@ -4,9 +4,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
-/**
- * Popup for viewing the Wallet's seed.
- */
+// Popup for viewing the Wallet's seed.
 Popup {
   id: viewSeedPopup
   readonly property alias pass: passInput.text

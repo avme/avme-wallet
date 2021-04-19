@@ -16,7 +16,7 @@ Rectangle {
   Connections {
     target: System
     onWalletLoaded: {}
-    onAccountChosen: itemSelection.y = itemOverview.y
+    onGoToOverview: itemSelection.y = itemOverview.y
     onOperationOverride: itemSelection.y = itemSend.y
   }
 

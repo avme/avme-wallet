@@ -4,9 +4,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
-/**
- * Popup for viewing an Account's private key.
- */
+// Popup for viewing an Account's private key. Has to be opened manually.
 Popup {
   id: viewPrivKeyPopup
   property string account

@@ -27,7 +27,7 @@ Rectangle {
       leftMargin: 10
     }
     color: "#FFFFFF"
-    text: (!addressTimer.running) ? System.getTxSenderAccount() : "Copied to clipboard!"
+    text: (!addressTimer.running) ? System.getCurrentAccount() : "Copied to clipboard!"
     font.pointSize: 16.0
     Timer { id: addressTimer; interval: 2000 }
 
@@ -47,7 +47,7 @@ Rectangle {
         onExited: parent.color = "#1D212A"
         onClicked: {
           parent.color = "#1D212A"
-          System.copyToClipboard(System.getTxSenderAccount())
+          System.copyToClipboard(System.getCurrentAccount())
           addressTimer.start()
         }
       }
@@ -83,23 +83,4 @@ Rectangle {
       System.setScreen(content, "qml/screens/StartScreen.qml")
     }
   }
-
-  /*
-  AVMEButton {
-    id: btnCopyToClipboard
-    width: parent.width * 0.2
-    anchors {
-      verticalCenter: parent.verticalCenter
-      right: parent.right
-      rightMargin: 10
-    }
-    enabled: (!btnClipboardTimer.running)
-    text: (enabled) ? "Copy to Clipboard" : "Copied!"
-    Timer { id: btnClipboardTimer; interval: 2000 }
-    onClicked: {
-      System.copyToClipboard(System.getTxSenderAccount())
-      btnClipboardTimer.start()
-    }
-  }
-  */
 }

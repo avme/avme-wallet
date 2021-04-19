@@ -96,7 +96,7 @@ Item {
         color: "#FFFFFF"
         font.pointSize: 14.0
         text: {
-          var acc = System.getAccountBalances(System.getTxSenderAccount())
+          var acc = System.getAccountBalances(System.getCurrentAccount())
           text: (isStaking)
           ? "Free (unstaked) LP:<br><b>" + acc.balanceLPFree + "</b>"
           : "Locked (staked) LP:<br><b>" + acc.balanceLPLocked + "</b>"
@@ -123,7 +123,7 @@ Item {
           enabled: (allowance != "")
           text: "Max Amount"
           onClicked: {
-            var acc = System.getAccountBalances(System.getTxSenderAccount())
+            var acc = System.getAccountBalances(System.getCurrentAccount())
             stakeInput.text = (isStaking) ? acc.balanceLPFree : acc.balanceLPLocked
           }
         }
@@ -132,13 +132,13 @@ Item {
           id: btnStake
           width: (stakingDetailsColumn.width * 0.5) - parent.spacing
           enabled: {
-            var acc = System.getAccountBalances(System.getTxSenderAccount())
+            var acc = System.getAccountBalances(System.getCurrentAccount())
             enabled: allowance != "" && (
               !System.isApproved(acc.balanceLPFree, allowance) || stakeInput.acceptableInput
             )
           }
           text: {
-            var acc = System.getAccountBalances(System.getTxSenderAccount())
+            var acc = System.getAccountBalances(System.getCurrentAccount())
             if (allowance == "") {
               text: "Checking approval..."
             } else if (isStaking && System.isApproved(acc.balanceLPFree, allowance)) {
@@ -150,7 +150,7 @@ Item {
             }
           }
           onClicked: {
-            var acc = System.getAccountBalances(System.getTxSenderAccount())
+            var acc = System.getAccountBalances(System.getCurrentAccount())
             if (!System.isApproved(acc.balanceLPFree, allowance)) {
               System.setScreen(content, "qml/screens/TransactionScreen.qml")
               System.operationOverride("Approve Staking", "", "", "")
@@ -229,7 +229,7 @@ Item {
         width: (parent.width * 0.75)
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: {
-          var acc = System.getAccountBalances(System.getTxSenderAccount())
+          var acc = System.getAccountBalances(System.getCurrentAccount())
           enabled: (
             reward != "" && !System.balanceIsZero(reward, System.getCurrentTokenDecimals()) &&
             !System.balanceIsZero(acc.balanceLPLocked, 18)

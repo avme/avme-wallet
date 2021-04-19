@@ -12,7 +12,6 @@ import QtQuick.Controls 2.2
  * "yesBtn.onClicked": what to do when the "Yes" button is clicked
  * "noBtn.onClicked": what to do when the "No" button is clicked
  */
-
 Popup {
   id: yesnoPopup
   property string icon

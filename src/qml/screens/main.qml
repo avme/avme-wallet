@@ -23,7 +23,7 @@ ApplicationWindow {
 
   Connections {
     target: System
-    onAccountChosen: menuToggle = true
+    onGoToOverview: menuToggle = true
     onHideMenu: menuToggle = false
   }
 

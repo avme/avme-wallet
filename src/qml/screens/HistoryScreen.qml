@@ -15,7 +15,7 @@ Item {
 
   function reloadTransactions() {
     historyModel.clear()
-    var txList = System.listAccountTransactions(System.getTxSenderAccount())
+    var txList = System.listAccountTransactions(System.getCurrentAccount())
     if (txList != null) {
       if (sortByNew) {
         for (var i = (txList.length - 1); i >= 0; i--) {

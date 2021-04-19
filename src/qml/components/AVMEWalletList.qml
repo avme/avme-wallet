@@ -14,7 +14,6 @@ import QtQuick.Controls 2.2
  * - "freeLPAmount": the account's free amount in <liquidity-token>
  * - "lockedLPAmount": the account's locked amount in <liquidity-token>
  */
-
 ListView {
   id: walletList
   property color listHighlightColor: "#887AC1EB"

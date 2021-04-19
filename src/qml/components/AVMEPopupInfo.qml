@@ -10,7 +10,6 @@ import QtQuick.Controls 2.2
  * "icon": the image that will be shown
  * "info": the text that will be shown
  */
-
 Popup {
   id: infoPopup
   property string icon

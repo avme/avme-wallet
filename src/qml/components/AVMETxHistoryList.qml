@@ -6,10 +6,9 @@ import QtQuick.Controls 2.2
 
 /**
  * Custom list for an Account's transaction history.
- * Requires a ListModel with the items from the WalletTxData struct.
- * See transactions.h for more info.
+ * Requires a ListModel with the items from the TxData struct.
+ * See src/lib/Utils.h for more info.
  */
-
 ListView {
   id: historyList
   property color listHighlightColor: "#887AC1EB"

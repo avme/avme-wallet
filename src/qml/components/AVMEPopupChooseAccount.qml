@@ -19,7 +19,6 @@ import "qrc:/qml/components"
  * - "refreshList()": start the process of generating more Accounts
  * - "clean()": helper function to clean up inputs/data
  */
-
 Popup {
   id: chooseAccountPopup
   property int startingIndex: -1

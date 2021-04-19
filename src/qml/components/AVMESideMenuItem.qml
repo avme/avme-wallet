@@ -7,7 +7,6 @@ import QtQuick.Controls 2.2
 import "qrc:/qml/components"
 
 // Individual item for the side menu
-
 Rectangle {
   id: sideMenuItem
   property alias icon: itemIcon.source
