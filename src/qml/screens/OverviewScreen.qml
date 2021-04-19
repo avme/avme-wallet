@@ -3,6 +3,7 @@
    file LICENSE or http://www.opensource.org/licenses/mit-license.php. */
 import QtQuick 2.9
 import QtQuick.Controls 2.2
+import QtCharts 2.2
 
 import "qrc:/qml/components"
 
@@ -43,7 +44,7 @@ Item {
     id: accountHeader
   }
 
-  // TODO: fiat balances and chart
+  // TODO: fiat balances and chart percentages
   AVMEPanel {
     id: balancesPanel
     width: (parent.width * 0.5) - (anchors.margins * 2)
@@ -63,7 +64,7 @@ Item {
         right: parent.right
         topMargin: 20
       }
-      spacing: 20
+      spacing: 10
 
       Text {
         id: accountText
@@ -74,83 +75,141 @@ Item {
         text: "This Account"
       }
 
-      Row {
-        id: accountCoinBalanceRow
-        width: parent.width * 0.95
-        anchors.horizontalCenter: parent.horizontalCenter
-        height: 40
-        spacing: 20
+      ChartView {
+        id: accountChart
+        property color coinColor: "#782D8B"
+        property color tokenColor: "#368097"
+        width: parent.width
+        height: (parent.height * 0.3)
+        backgroundColor: "transparent"
+        antialiasing: true
+        legend.visible: false
+        margins { right: 0; bottom: 0; left: 0; top: 0 }
 
-        Image {
-          id: accountCoinLogo
-          height: parent.height
-          antialiasing: true
-          smooth: true
-          source: "qrc:/img/avax_logo.png"
-          fillMode: Image.PreserveAspectFit
+        PieSeries {
+          id: accountPie
+          size: 0.8
+          holeSize: 0.6
+          horizontalPosition: 0.125
+          PieSlice {
+            label: "AVAX"; color: accountChart.coinColor; borderColor: "transparent"; value: 54.5
+          }
+          PieSlice {
+            label: "AVME"; color: accountChart.tokenColor; borderColor: "transparent"; value: 45.5
+          }
         }
 
-        Text {
-          id: accountCoinBalance
-          width: parent.width * 0.5
-          anchors.verticalCenter: parent.verticalCenter
-          color: "#FFFFFF"
-          elide: Text.ElideRight
-        }
+        Column {
+          width: (parent.width * 0.7)
+          anchors {
+            top: parent.top
+            right: parent.right
+            bottom: parent.bottom
+            margins: 20
+          }
+          spacing: 10
 
-        Rectangle {
-          width: 2
-          height: parent.height
-          color: "#4E525D"
-        }
+          Rectangle {
+            id: accountCoinRect
+            width: parent.width
+            anchors.horizontalCenter: parent.horizontalCenter
+            height: 60
+            radius: 10
+            color: accountChart.coinColor
 
-        Text {
-          id: accountCoinPrice
-          width: parent.width * 0.3
-          anchors.verticalCenter: parent.verticalCenter
-          color: "#FFFFFF"
-          text: "$999999999.99"
-          elide: Text.ElideRight
-        }
-      }
+            Image {
+              id: accountCoinLogo
+              height: parent.height
+              anchors {
+                top: parent.top
+                left: parent.left
+                bottom: parent.bottom
+                margins: 10
+              }
+              antialiasing: true
+              smooth: true
+              source: "qrc:/img/avax_logo.png"
+              fillMode: Image.PreserveAspectFit
+            }
 
-      Row {
-        id: accountTokenBalanceRow
-        width: parent.width * 0.95
-        anchors.horizontalCenter: parent.horizontalCenter
-        height: 40
-        spacing: 20
+            Text {
+              id: accountCoinBalance
+              width: parent.width * 0.8
+              anchors {
+                verticalCenter: parent.verticalCenter
+                verticalCenterOffset: -10
+                left: accountCoinLogo.right
+                leftMargin: 10
+              }
+              color: "#FFFFFF"
+              elide: Text.ElideRight
+            }
 
-        Image {
-          id: accountTokenLogo
-          height: parent.height
-          antialiasing: true
-          smooth: true
-          source: "qrc:/img/avme_logo.png"
-          fillMode: Image.PreserveAspectFit
-        }
+            Text {
+              id: accountCoinPrice
+              width: parent.width * 0.8
+              anchors {
+                verticalCenter: parent.verticalCenter
+                verticalCenterOffset: 10
+                left: accountCoinLogo.right
+                leftMargin: 10
+              }
+              color: "#FFFFFF"
+              text: "$999999999.99"
+              elide: Text.ElideRight
+            }
+          }
 
-        Text {
-          id: accountTokenBalance
-          width: parent.width * 0.5
-          anchors.verticalCenter: parent.verticalCenter
-          color: "#FFFFFF"
-          elide: Text.ElideRight
-        }
+          Rectangle {
+            id: accountTokenRect
+            width: parent.width
+            anchors.horizontalCenter: parent.horizontalCenter
+            height: 60
+            radius: 10
+            color: accountChart.tokenColor
 
-        Rectangle {
-          width: 2
-          height: parent.height
-          color: "#4E525D"
-        }
+            Image {
+              id: accountTokenLogo
+              height: parent.height
+              anchors {
+                top: parent.top
+                left: parent.left
+                bottom: parent.bottom
+                margins: 10
+              }
+              antialiasing: true
+              smooth: true
+              source: "qrc:/img/avme_logo.png"
+              fillMode: Image.PreserveAspectFit
+            }
 
-        Text {
-          id: accountTokenPrice
-          width: parent.width * 0.3
-          anchors.verticalCenter: parent.verticalCenter
-          color: "#FFFFFF"
-          text: "$99999.99"
-          elide: Text.ElideRight
+            Text {
+              id: accountTokenBalance
+              width: parent.width * 0.8
+              anchors {
+                verticalCenter: parent.verticalCenter
+                verticalCenterOffset: -10
+                left: accountTokenLogo.right
+                leftMargin: 10
+              }
+              color: "#FFFFFF"
+              elide: Text.ElideRight
+            }
+
+            Text {
+              id: accountTokenPrice
+              width: parent.width * 0.8
+              anchors {
+                verticalCenter: parent.verticalCenter
+                verticalCenterOffset: 10
+                left: accountTokenLogo.right
+                leftMargin: 10
+              }
+              color: "#FFFFFF"
+              text: "$99999.99"
+              elide: Text.ElideRight
+            }
+          }
         }
       }
 
@@ -163,83 +222,141 @@ Item {
         text: "Total from Wallet"
       }
 
-      Row {
-        id: walletCoinBalanceRow
-        width: parent.width * 0.95
-        anchors.horizontalCenter: parent.horizontalCenter
-        height: 40
-        spacing: 20
+      ChartView {
+        id: walletChart
+        property color coinColor: "#782D8B"
+        property color tokenColor: "#368097"
+        width: parent.width
+        height: (parent.height * 0.3)
+        backgroundColor: "transparent"
+        antialiasing: true
+        legend.visible: false
+        margins { right: 0; bottom: 0; left: 0; top: 0 }
 
-        Image {
-          id: walletCoinLogo
-          height: parent.height
-          antialiasing: true
-          smooth: true
-          source: "qrc:/img/avax_logo.png"
-          fillMode: Image.PreserveAspectFit
+        PieSeries {
+          id: walletPie
+          size: 0.8
+          holeSize: 0.6
+          horizontalPosition: 0.125
+          PieSlice {
+            label: "AVAX"; color: walletChart.coinColor; borderColor: "transparent"; value: 38.9
+          }
+          PieSlice {
+            label: "AVME"; color: walletChart.tokenColor; borderColor: "transparent"; value: 62.1
+          }
         }
 
-        Text {
-          id: walletCoinBalance
-          width: parent.width * 0.5
-          anchors.verticalCenter: parent.verticalCenter
-          color: "#FFFFFF"
-          elide: Text.ElideRight
-        }
+        Column {
+          width: (parent.width * 0.7)
+          anchors {
+            top: parent.top
+            right: parent.right
+            bottom: parent.bottom
+            margins: 20
+          }
+          spacing: 10
 
-        Rectangle {
-          width: 2
-          height: parent.height
-          color: "#4E525D"
-        }
+          Rectangle {
+            id: walletCoinRect
+            width: parent.width
+            anchors.horizontalCenter: parent.horizontalCenter
+            height: 60
+            radius: 10
+            color: walletChart.coinColor
 
-        Text {
-          id: walletCoinPrice
-          width: parent.width * 0.3
-          anchors.verticalCenter: parent.verticalCenter
-          color: "#FFFFFF"
-          text: "$999999999.99"
-          elide: Text.ElideRight
-        }
-      }
+            Image {
+              id: walletCoinLogo
+              height: parent.height
+              anchors {
+                top: parent.top
+                left: parent.left
+                bottom: parent.bottom
+                margins: 10
+              }
+              antialiasing: true
+              smooth: true
+              source: "qrc:/img/avax_logo.png"
+              fillMode: Image.PreserveAspectFit
+            }
 
-      Row {
-        id: walletTokenBalanceRow
-        width: parent.width * 0.95
-        anchors.horizontalCenter: parent.horizontalCenter
-        height: 40
-        spacing: 20
+            Text {
+              id: walletCoinBalance
+              width: parent.width * 0.8
+              anchors {
+                verticalCenter: parent.verticalCenter
+                verticalCenterOffset: -10
+                left: walletCoinLogo.right
+                leftMargin: 10
+              }
+              color: "#FFFFFF"
+              elide: Text.ElideRight
+            }
 
-        Image {
-          id: walletTokenLogo
-          height: parent.height
-          antialiasing: true
-          smooth: true
-          source: "qrc:/img/avme_logo.png"
-          fillMode: Image.PreserveAspectFit
-        }
+            Text {
+              id: walletCoinPrice
+              width: parent.width * 0.8
+              anchors {
+                verticalCenter: parent.verticalCenter
+                verticalCenterOffset: 10
+                left: walletCoinLogo.right
+                leftMargin: 10
+              }
+              color: "#FFFFFF"
+              text: "$999999999.99"
+              elide: Text.ElideRight
+            }
+          }
 
-        Text {
-          id: walletTokenBalance
-          width: parent.width * 0.5
-          anchors.verticalCenter: parent.verticalCenter
-          color: "#FFFFFF"
-          elide: Text.ElideRight
-        }
+          Rectangle {
+            id: walletTokenRect
+            width: parent.width
+            anchors.horizontalCenter: parent.horizontalCenter
+            height: 60
+            radius: 10
+            color: walletChart.tokenColor
 
-        Rectangle {
-          width: 2
-          height: parent.height
-          color: "#4E525D"
-        }
+            Image {
+              id: walletTokenLogo
+              height: parent.height
+              anchors {
+                top: parent.top
+                left: parent.left
+                bottom: parent.bottom
+                margins: 10
+              }
+              antialiasing: true
+              smooth: true
+              source: "qrc:/img/avme_logo.png"
+              fillMode: Image.PreserveAspectFit
+            }
 
-        Text {
-          id: walletTokenPrice
-          width: parent.width * 0.3
-          anchors.verticalCenter: parent.verticalCenter
-          color: "#FFFFFF"
-          text: "$99999.99"
-          elide: Text.ElideRight
+            Text {
+              id: walletTokenBalance
+              width: parent.width * 0.8
+              anchors {
+                verticalCenter: parent.verticalCenter
+                verticalCenterOffset: -10
+                left: walletTokenLogo.right
+                leftMargin: 10
+              }
+              color: "#FFFFFF"
+              elide: Text.ElideRight
+            }
+
+            Text {
+              id: walletTokenPrice
+              width: parent.width * 0.8
+              anchors {
+                verticalCenter: parent.verticalCenter
+                verticalCenterOffset: 10
+                left: walletTokenLogo.right
+                leftMargin: 10
+              }
+              color: "#FFFFFF"
+              text: "$99999.99"
+              elide: Text.ElideRight
+            }
+          }
         }
       }
     }
