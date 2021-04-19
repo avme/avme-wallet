@@ -82,6 +82,7 @@ ListView {
       readonly property string itemDateTime: datetime
       readonly property string itemUnixTime: unixtime
       readonly property bool itemConfirmed: confirmed
+      readonly property bool itemInvalid: invalid
       width: parent.width
       height: 30
 

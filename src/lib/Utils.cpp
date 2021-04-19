@@ -56,6 +56,7 @@ TxData Utils::decodeRawTransaction(std::string rawTxHex) {
   ret.humanDate = timestream.str();
   ret.confirmed = false;
   ret.unixDate = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
+  ret.invalid = false;
   return ret;
 }
 

@@ -318,6 +318,7 @@ class System : public QObject {
             obj += "\", \"datetime\": \"" + tx.humanDate;
             obj += "\", \"unixtime\": " + std::to_string(tx.unixDate);
             obj += ", \"confirmed\": " + QVariant(tx.confirmed).toString().toStdString();
+            obj += ", \"invalid\": " + QVariant(tx.invalid).toString().toStdString();
             obj += "}";
             ret << QString::fromStdString(obj);
           }
@@ -325,6 +326,16 @@ class System : public QObject {
         }
       }
       return ret;
+    }
+
+    // Update all transactions for a given Account
+    Q_INVOKABLE void updateAllTxStatus(QString address) {
+      for (Account &a : w.accounts) {
+        if (a.address == address.toStdString()) {
+          a.updateAllTxStatus();
+          break;
+        }
+      }
     }
 
     // Get an Account's balances

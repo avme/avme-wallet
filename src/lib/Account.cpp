@@ -111,6 +111,7 @@ json_spirit::mArray Account::txDataToJSON() {
     savedTransaction["humanDate"] = savedTxData.humanDate;
     savedTransaction["unixDate"] = savedTxData.unixDate;
     savedTransaction["confirmed"] = savedTxData.confirmed;
+    savedTransaction["invalid"] = savedTxData.invalid;
     transactionsArray.push_back(savedTransaction);
   }
   return transactionsArray;
@@ -148,6 +149,7 @@ void Account::loadTxHistory() {
       txData.humanDate = JSON::objectItem(JSON::arrayItem(txArray, i), "humanDate").get_str();
       txData.unixDate = JSON::objectItem(JSON::arrayItem(txArray, i), "unixDate").get_uint64();
       txData.confirmed = JSON::objectItem(JSON::arrayItem(txArray, i), "confirmed").get_bool();
+      txData.invalid = JSON::objectItem(JSON::arrayItem(txArray, i), "invalid").get_bool();
       this->history.push_back(txData);
     }
   } catch (std::exception &e) {
@@ -186,6 +188,7 @@ bool Account::saveTxToHistory(TxData TxData) {
   transaction["humanDate"] = TxData.humanDate;
   transaction["unixDate"] = TxData.unixDate;
   transaction["confirmed"] = TxData.confirmed;
+  transaction["invalid"] = TxData.invalid;
   transactionsArray.push_back(transaction);
 
   transactionsRoot["transactions"] = transactionsArray;
@@ -208,14 +211,20 @@ bool Account::updateAllTxStatus() {
   loadTxHistory();
   try {
     for (TxData &txData : this->history) {
-      if (!txData.confirmed) {
-        json_spirit::mValue request;
-        std::string jsonRequest = Network::getTxReceipt(txData.hex);
-        json_spirit::read_string(jsonRequest,request);
-        json_spirit::mValue result = JSON::objectItem(request, "result");
-        json_spirit::mValue jsStatus = JSON::objectItem(result, "status");
-        std::string status = jsStatus.get_str();
-        if (status == "0x1") txData.confirmed = true;
+      if (!txData.invalid && !txData.confirmed) {
+        const auto p1 = std::chrono::system_clock::now();
+        uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
+        if (txData.unixDate + 60 < now) { // Tx is considered invalid after 60 seconds without confirmation
+          txData.invalid = true;
+        } else {
+          json_spirit::mValue request;
+          std::string jsonRequest = Network::getTxReceipt(txData.hex);
+          json_spirit::read_string(jsonRequest,request);
+          json_spirit::mValue result = JSON::objectItem(request, "result");
+          json_spirit::mValue jsStatus = JSON::objectItem(result, "status");
+          std::string status = jsStatus.get_str();
+          if (status == "0x1") txData.confirmed = true;
+        }
       }
     }
   } catch (std::exception &e) {

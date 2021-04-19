@@ -15,6 +15,7 @@ Item {
 
   function reloadTransactions() {
     historyModel.clear()
+    System.updateAllTxStatus(System.getCurrentAccount())
     var txList = System.listAccountTransactions(System.getCurrentAccount())
     if (txList != null) {
       if (sortByNew) {
@@ -136,7 +137,8 @@ Item {
         + "<b>Gas:</b> " + historyList.currentItem.itemGas + "<br><br>"
         + "<b>Price:</b> " + historyList.currentItem.itemPrice + "<br><br>"
         + "<b>Timestamp:</b> " + historyList.currentItem.itemDateTime + "<br><br>"
-        + "<b>Confirmed:</b> " + historyList.currentItem.itemConfirmed
+        + "<b>Confirmed:</b> " + historyList.currentItem.itemConfirmed + "<br><br>"
+        + "<b>Invalid:</b> " + historyList.currentItem.itemInvalid
         : ""
       }
     }

@@ -56,6 +56,7 @@ typedef struct TxData {
   std::string humanDate;
   uint64_t unixDate;
   bool confirmed;
+  bool invalid;
 } TxData;
 
 /**
