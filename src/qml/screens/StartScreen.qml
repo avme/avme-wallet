@@ -9,8 +9,6 @@ import "qrc:/qml/components"
 
 // Starting screen (for managing Wallets)
 
-// TODO: automatic scanning for default path Wallet
-
 Item {
   id: startScreen
   property bool isCreate
@@ -113,7 +111,7 @@ Item {
   Rectangle {
     id: createRect
     width: parent.width * 0.4
-    height: 350
+    height: 420
     visible: isCreate
     anchors {
       top: logo.bottom
@@ -138,14 +136,18 @@ Item {
 
         AVMEInput {
           id: createFolderInput
+          property string path
           width: (createItems.width * 0.9) - (createFolderDialogBtn.width + parent.spacing)
+          enabled: (!defaultCheck.checked)
           readOnly: true
           label: "Wallet folder"
           placeholder: "Your Wallet's top folder"
+          text: (defaultCheck.checked) ? System.getDefaultWalletPath() : path
         }
         AVMEButton {
           id: createFolderDialogBtn
           width: 40
+          enabled: (!defaultCheck.checked)
           height: createFolderInput.height
           text: "..."
           onClicked: createFolderDialog.visible = true
@@ -154,7 +156,7 @@ Item {
           id: createFolderDialog
           title: "Choose your Wallet folder"
           onAccepted: {
-            createFolderInput.text = System.cleanPath(createFolderDialog.folder)
+            createFolderInput.path = System.cleanPath(createFolderDialog.folder)
             createWalletExists = System.checkFolderForWallet(createFolderInput.text)
           }
         }
@@ -169,6 +171,28 @@ Item {
         passwordCharacter: "*"
         label: "Passphrase"
         placeholder: "Your Wallet's passphrase"
+      }
+
+      // Default path checkbox
+      CheckBox {
+        id: defaultCheck
+        checked: true
+        enabled: true
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: "Use default path"
+        contentItem: Text {
+          text: parent.text
+          font: parent.font
+          color: parent.checked ? "#FFFFFF" : "#888888"
+          verticalAlignment: Text.AlignVCenter
+          leftPadding: parent.indicator.width + parent.spacing
+        }
+        Component.onCompleted: {
+          createWalletExists = System.checkFolderForWallet(createFolderInput.text)
+        }
+        onClicked: {
+          createWalletExists = System.checkFolderForWallet(createFolderInput.text)
+        }
       }
 
       // Optional seed (Import)
@@ -267,7 +291,7 @@ Item {
   Rectangle {
     id: loadRect
     width: parent.width * 0.4
-    height: 225
+    height: 230
     visible: isLoad
     anchors {
       top: logo.bottom
@@ -296,6 +320,14 @@ Item {
           readOnly: true
           label: "Wallet folder"
           placeholder: "Your Wallet's top folder"
+          Component.onCompleted: {
+            var path = System.getDefaultWalletPath()
+            var exists = System.checkFolderForWallet(path)
+            if (exists) {
+              loadFolderInput.text = path
+              loadWalletExists = exists
+            }
+          }
         }
         AVMEButton {
           id: loadFolderDialogBtn

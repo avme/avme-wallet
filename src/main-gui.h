@@ -117,6 +117,11 @@ class System : public QObject {
       QApplication::clipboard()->setText(str);
     }
 
+    // Get the default path for a Wallet
+    Q_INVOKABLE QString getDefaultWalletPath() {
+      return QString::fromStdString(JSON::getDataDir().string());
+    }
+
     // Remove the "file://" prefix from a folder path
     Q_INVOKABLE QString cleanPath(QString path) {
       #ifdef __MINGW32__
