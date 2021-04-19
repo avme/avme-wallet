@@ -102,6 +102,11 @@ class System : public QObject {
     Q_INVOKABLE QString getCurrentAccount() { return QString::fromStdString(this->currentAccount); }
     Q_INVOKABLE void setCurrentAccount(QString account) { this->currentAccount = account.toStdString(); }
 
+    // Open the "About Qt" window
+    Q_INVOKABLE void openQtAbout() {
+      QApplication::aboutQt();
+    }
+
     // Change the current loaded screen
     Q_INVOKABLE void setScreen(QObject* loader, QString qmlFile) {
       loader->setProperty("source", "qrc:/" + qmlFile);

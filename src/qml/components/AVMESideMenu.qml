@@ -154,11 +154,14 @@ Rectangle {
 
     AVMESideMenuItem {
       id: itemAbout
-      icon: (itemSelection.y == y) ? "qrc:/img/icons/infoSelect.png" : "qrc:/img/icons/info.png"
+      icon: "qrc:/img/icons/info.png"
       label: "About"
-      area.onClicked: {
-        itemSelection.y = y
-      }
+      area.onClicked: aboutPopup.open()
     }
+  }
+
+  // Popup for the About option
+  AVMEPopupAbout {
+    id: aboutPopup
   }
 }
