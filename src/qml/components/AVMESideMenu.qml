@@ -15,9 +15,13 @@ Rectangle {
 
   Connections {
     target: System
-    onWalletLoaded: {}
     onGoToOverview: itemSelection.y = itemOverview.y
-    onOperationOverride: itemSelection.y = itemSend.y
+  }
+
+  function changeScreen(name) {
+    content.active = false
+    System.setScreen(content, "qml/screens/" + name + "Screen.qml")
+    content.active = true
   }
 
   Rectangle {
@@ -56,7 +60,7 @@ Rectangle {
       label: "Overview"
       area.onClicked: {
         itemSelection.y = y
-        System.setScreen(content, "qml/screens/OverviewScreen.qml")
+        changeScreen("Overview")
       }
     }
 
@@ -73,7 +77,7 @@ Rectangle {
       label: "History"
       area.onClicked: {
         itemSelection.y = y
-        System.setScreen(content, "qml/screens/HistoryScreen.qml")
+        changeScreen("History")
       }
     }
 
@@ -90,7 +94,7 @@ Rectangle {
       label: "Send"
       area.onClicked: {
         itemSelection.y = y
-        System.setScreen(content, "qml/screens/TransactionScreen.qml")
+        changeScreen("Transaction")
       }
     }
 
@@ -107,7 +111,7 @@ Rectangle {
       label: "Exchange/<br>Liquidity"
       area.onClicked: {
         itemSelection.y = y
-        System.setScreen(content, "qml/screens/ExchangeScreen.qml")
+        changeScreen("Exchange")
       }
     }
 
@@ -124,7 +128,7 @@ Rectangle {
       label: "Staking"
       area.onClicked: {
         itemSelection.y = y
-        System.setScreen(content, "qml/screens/StakingScreen.qml")
+        changeScreen("Staking")
       }
     }
 
@@ -141,7 +145,7 @@ Rectangle {
       label: "Settings"
       area.onClicked: {
         itemSelection.y = y
-        System.setScreen(content, "qml/screens/SettingsScreen.qml")
+        changeScreen("Settings")
       }
     }
 

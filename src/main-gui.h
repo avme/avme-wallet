@@ -44,7 +44,6 @@ class System : public QObject {
 
   signals:
     void hideMenu();
-    void walletLoaded();
     void goToOverview();
     void accountsGenerated(QVariantList accounts);
     void accountCreated(QVariantMap data);

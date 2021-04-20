@@ -275,7 +275,6 @@ Item {
                 System.setCurrentTokenDecimals(18)
               }
               System.setFirstLoad(true)
-              System.walletLoaded()
               System.setScreen(content, "qml/screens/AccountsScreen.qml")
             } catch (error) {
               walletFailPopup.info = error
@@ -396,7 +395,6 @@ Item {
                 System.setCurrentTokenDecimals(18)
               }
               System.setFirstLoad(true)
-              System.walletLoaded()
               System.setScreen(content, "qml/screens/AccountsScreen.qml")
             } catch (error) {
               walletFailPopup.info = error
