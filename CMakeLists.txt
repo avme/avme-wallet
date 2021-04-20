@@ -133,8 +133,10 @@ add_custom_command(
 
 # Compile the GUI executable
 if("${TOOLCHAIN_PREFIX}" STREQUAL "x86_64-w64-mingw32")
+  set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_SOURCE_DIR}/src/winico.rc")
   add_executable(avme-gui WIN32
     src/main-gui.h src/main-gui.cpp build/moc_main-gui.cpp build/qml.cpp
+    ${APP_ICON_RESOURCE_WINDOWS}
   )
 else()
   add_executable(avme-gui
