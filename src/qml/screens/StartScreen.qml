@@ -265,6 +265,8 @@ Item {
                 + "<br>the folder path and/or passphrase.";
               }
               console.log("Wallet loaded successfully")
+              // Create the first Account (seed index 0) automatically
+              System.createAccount(System.getWalletSeed(createPassInput.text), 0, "", createPassInput.text)
               // Always default to AVAX & AVME on first load
               if (System.getCurrentCoin() == "") {
                 System.setCurrentCoin("AVAX")
@@ -277,7 +279,7 @@ Item {
               System.setFirstLoad(true)
               System.setScreen(content, "qml/screens/AccountsScreen.qml")
             } catch (error) {
-              walletFailPopup.info = error
+              walletFailPopup.info = error.toString()
               walletFailPopup.open()
             }
           }
@@ -397,7 +399,7 @@ Item {
               System.setFirstLoad(true)
               System.setScreen(content, "qml/screens/AccountsScreen.qml")
             } catch (error) {
-              walletFailPopup.info = error
+              walletFailPopup.info = error.toString()
               walletFailPopup.open()
             }
           }
