@@ -7,7 +7,7 @@ $(package)_dependencies=freetype expat
 $(package)_patches=remove_char_width_usage.patch gperf_header_regen.patch
 
 define $(package)_set_vars
-  $(package)_config_opts=--disable-docs --disable-static --disable-libxml2 --disable-iconv
+  $(package)_config_opts=--disable-docs --enable-static --disable-libxml2 --disable-iconv
   $(package)_config_opts += --disable-dependency-tracking --enable-option-checking
 endef
 
