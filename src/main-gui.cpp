@@ -12,6 +12,7 @@ int main(int argc, char *argv[]) {
   dev::setupLogging(loggingOptions);
 
   // Create the application and register our custom class into it
+  QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QApplication app(argc, argv);
   QQmlApplicationEngine engine;
   System sys;
@@ -21,7 +22,6 @@ int main(int argc, char *argv[]) {
   QFontDatabase::addApplicationFont(":/fonts/RobotoMono-Bold.ttf");
   QFontDatabase::addApplicationFont(":/fonts/RobotoMono-Italic.ttf");
   QFontDatabase::addApplicationFont(":/fonts/RobotoMono-Regular.ttf");
-  QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QFont font("Roboto Mono");
   font.setStyleHint(QFont::Monospace);
   QApplication::setFont(font);

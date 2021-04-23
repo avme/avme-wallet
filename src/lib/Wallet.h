@@ -28,8 +28,8 @@
 #include <libethcore/TransactionBase.h>
 
 #include "Account.h"
+#include "API.h"
 #include "BIP39.h"
-#include "Network.h"
 #include "Utils.h"
 
 using namespace dev;  // u256

@@ -34,8 +34,8 @@ std::vector<std::string> BIP39::generateAccountsFromSeed(std::string seed, int64
     toPushBack += boost::lexical_cast<std::string>(index) + " " + "0x" + k.address().hex();
 
     // Get the balance
-    std::string jsonBal = JSON::getString(Network::getAVAXBalance("0x" + k.address().hex()), "result");
-    u256 AVAXbalance = boost::lexical_cast<HexTo<u256>>(jsonBal);
+    std::string bal = API::getAVAXBalance("0x" + k.address().hex());
+    u256 AVAXbalance = boost::lexical_cast<HexTo<u256>>(bal);
     std::string balanceStr = boost::lexical_cast<std::string>(AVAXbalance);
 
     // Don't write to vector if an error occurs while reading the JSON

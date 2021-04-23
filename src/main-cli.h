@@ -4,7 +4,7 @@
 #ifndef MAIN_CLI_H
 #define MAIN_CLI_H
 
-#include "lib/Network.h"
+#include "lib/API.h"
 #include "lib/BIP39.h"
 #include "lib/Pangolin.h"
 #include "lib/Utils.h"
@@ -135,7 +135,7 @@ std::string menuChooseAVAXAmount(std::string address) {
     ret = Utils::fixedPointToWei(ret, 18);
     if (ret == "") {
       std::cout << "Invalid amount, please check if your input is correct." << std::endl;
-    } else if (ret > Network::getAVAXBalance(address)) {
+    } else if (ret > API::getAVAXBalance(address)) {
       std::cout << "Insufficient funds, please try again." << std::endl;
     } else {
       break;
@@ -154,7 +154,7 @@ std::string menuChooseAVMEAmount(std::string address) {
     ret = Utils::fixedPointToWei(ret, 18);
     if (ret == "") {
       std::cout << "Invalid amount, please check if your input is correct." << std::endl;
-    } else if (ret > Network::getAVMEBalance(address, Pangolin::tokenContracts["AVME"])) {
+    } else if (ret > API::getAVMEBalance(address, Pangolin::tokenContracts["AVME"])) {
       std::cout << "Insufficient funds, please try again." << std::endl;
     } else {
       break;

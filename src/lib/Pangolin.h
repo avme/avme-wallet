@@ -12,7 +12,7 @@
 
 #include <libdevcore/CommonIO.h>
 
-#include "Network.h"
+#include "API.h"
 #include "Utils.h"
 
 /**

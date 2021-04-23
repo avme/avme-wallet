@@ -21,7 +21,7 @@ std::string Staking::balanceOf(std::string address) {
         << "\",\"data\": \"" << Pangolin::ERC20Funcs["balanceOf"]
                              << Utils::addressToHex(address)
         << "\"},\"latest\"]}";
-  std::string str = Network::httpGetRequest(query.str());
+  std::string str = API::httpGetRequest(query.str());
   result = JSON::getString(str, "result");
   if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
@@ -40,7 +40,7 @@ std::string Staking::earned(std::string address) {
         << "\",\"data\": \"" << Staking::funcs["earned"]
                              << Utils::addressToHex(address)
         << "\"},\"latest\"]}";
-  std::string str = Network::httpGetRequest(query.str());
+  std::string str = API::httpGetRequest(query.str());
   result = JSON::getString(str, "result");
   if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"

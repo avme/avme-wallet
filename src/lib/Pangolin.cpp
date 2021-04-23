@@ -98,7 +98,7 @@ std::string Pangolin::totalSupply(std::string tokenNameA, std::string tokenNameB
         << "[{\"to\": \"" << Pangolin::getPair(tokenNameA, tokenNameB)
         << "\",\"data\": \"" << pairFuncs["totalSupply"]
         << "\"},\"latest\"]}";
-  std::string str = Network::httpGetRequest(query.str());
+  std::string str = API::httpGetRequest(query.str());
   result = JSON::getString(str, "result");
   if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
@@ -116,7 +116,7 @@ std::vector<std::string> Pangolin::getReserves(std::string tokenNameA, std::stri
         << "[{\"to\": \"" << Pangolin::getPair(tokenNameA, tokenNameB)
         << "\",\"data\": \"" << pairFuncs["getReserves"]
         << "\"},\"latest\"]}";
-  std::string str = Network::httpGetRequest(query.str());
+  std::string str = API::httpGetRequest(query.str());
   result = JSON::getString(str, "result");
   if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
@@ -181,7 +181,7 @@ std::string Pangolin::allowance(
                              << Utils::addressToHex(owner)
                              << Utils::addressToHex(spender)
         << "\"},\"latest\"]}";
-  std::string str = Network::httpGetRequest(query.str());
+  std::string str = API::httpGetRequest(query.str());
   result = JSON::getString(str, "result");
   if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"

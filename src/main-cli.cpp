@@ -140,7 +140,7 @@ int main() {
         } else if (menuOp == "5") { // AVME
           gasLimit = "80000";
         }
-        gasPrice = Network::getAutomaticFee();
+        gasPrice = API::getAutomaticFee();
       } else if (feeOp == "2") {
         gasLimit = menuSetGasLimit();
         gasPrice = menuSetGasPrice();

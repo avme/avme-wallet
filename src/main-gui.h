@@ -31,8 +31,9 @@ Q_IMPORT_PLUGIN(QtLabsPlatformPlugin)
 Q_IMPORT_PLUGIN(QtChartsQml2Plugin)
 
 #include "lib/Account.h"
-#include "lib/Network.h"
+#include "lib/API.h"
 #include "lib/BIP39.h"
+#include "lib/Graph.h"
 #include "lib/Pangolin.h"
 #include "lib/Staking.h"
 #include "lib/Utils.h"
@@ -48,6 +49,8 @@ class System : public QObject {
     void accountsGenerated(QVariantList accounts);
     void accountCreated(QVariantMap data);
     void accountCreationFailed();
+    void accountBalancesUpdated(QVariantMap data);
+    void walletBalancesUpdated(QVariantMap data);
     void operationOverride(QString op, QString amountCoin, QString amountToken, QString amountLP);
     void txStart(
       QString operation, QString to,
@@ -338,63 +341,128 @@ class System : public QObject {
     }
 
     // Get an Account's balances
-    Q_INVOKABLE QVariantMap getAccountBalances(QString address) {
-      QVariantMap ret;
-      for (Account &a : w.accounts) {
-        if (a.address == address.toStdString()) {
-          a.balancesThreadLock.lock();
-          ret.insert("balanceAVAX", QString::fromStdString(a.balanceAVAX));
-          ret.insert("balanceAVME", QString::fromStdString(a.balanceAVME));
-          ret.insert("balanceLPFree", QString::fromStdString(a.balanceLPFree));
-          ret.insert("balanceLPLocked", QString::fromStdString(a.balanceLPLocked));
-          a.balancesThreadLock.unlock();
-          break;
+    Q_INVOKABLE void getAccountBalances(QString address) {
+      QtConcurrent::run([=](){
+        QVariantMap ret;
+        for (Account &a : w.accounts) {
+          if (a.address == address.toStdString()) {
+            // Whole balances
+            std::string balanceAVAXStr, balanceAVMEStr, balanceLPFreeStr, balanceLPLockedStr;
+            a.balancesThreadLock.lock();
+            balanceAVAXStr = a.balanceAVAX;
+            balanceAVMEStr = a.balanceAVME;
+            balanceLPFreeStr = a.balanceLPFree;
+            balanceLPLockedStr = a.balanceLPLocked;
+            a.balancesThreadLock.unlock();
+
+            // Fiat balances
+            std::string AVAXUnitPrice = Graph::getAVAXPriceUSD();
+            std::string AVMEUnitPrice = Graph::getAVMEPriceUSD(AVAXUnitPrice);
+            bigfloat AVAXPriceFloat =
+              boost::lexical_cast<double>(balanceAVAXStr) * boost::lexical_cast<double>(AVAXUnitPrice);
+            bigfloat AVMEPriceFloat =
+              boost::lexical_cast<double>(balanceAVMEStr) * boost::lexical_cast<double>(AVMEUnitPrice);
+            std::string AVAXPrice = boost::lexical_cast<std::string>(AVAXPriceFloat);
+            std::string AVMEPrice = boost::lexical_cast<std::string>(AVMEPriceFloat);
+
+            // Fiat percentages (for the chart)
+            bigfloat totalUSD =
+              boost::lexical_cast<double>(AVAXPrice) + boost::lexical_cast<double>(AVMEPrice);
+            bigfloat AVAXPercentageFloat =
+              (boost::lexical_cast<double>(AVAXPrice) / totalUSD) * 100;
+            bigfloat AVMEPercentageFloat =
+              (boost::lexical_cast<double>(AVMEPrice) / totalUSD) * 100;
+            std::string AVAXPercentage = boost::lexical_cast<std::string>(AVAXPercentageFloat);
+            std::string AVMEPercentage = boost::lexical_cast<std::string>(AVMEPercentageFloat);
+            AVAXPercentage = AVAXPercentage.substr(0, AVAXPercentage.find(".") + 3);
+            AVMEPercentage = AVMEPercentage.substr(0, AVMEPercentage.find(".") + 3);
+
+            // Pack up and send back to GUI
+            ret.insert("balanceAVAX", QString::fromStdString(balanceAVAXStr));
+            ret.insert("balanceAVME", QString::fromStdString(balanceAVMEStr));
+            ret.insert("balanceLPFree", QString::fromStdString(balanceLPFreeStr));
+            ret.insert("balanceLPLocked", QString::fromStdString(balanceLPLockedStr));
+            ret.insert("balanceAVAXUSD", QString::fromStdString(AVAXPrice));
+            ret.insert("balanceAVMEUSD", QString::fromStdString(AVMEPrice));
+            ret.insert("percentageAVAXUSD", QString::fromStdString(AVAXPercentage));
+            ret.insert("percentageAVMEUSD", QString::fromStdString(AVMEPercentage));
+            break;
+          }
         }
-      }
-      return ret;
+        emit accountBalancesUpdated(ret);
+      });
     }
 
     // Get the sum of all Accounts' balances in the Wallet
-    Q_INVOKABLE QVariantMap getAllAccountBalances() {
-      QVariantMap ret;
-      u256 totalAVAX = 0, totalAVME = 0, totalLPFree = 0, totalLPLocked = 0;
-      std::string totalAVAXStr = "", totalAVMEStr = "", totalLPFreeStr = "", totalLPLockedStr = "";
+    Q_INVOKABLE void getAllAccountBalances() {
+      QtConcurrent::run([=](){
+        QVariantMap ret;
+        u256 totalAVAX = 0, totalAVME = 0, totalLPFree = 0, totalLPLocked = 0;
+        std::string totalAVAXStr = "", totalAVMEStr = "", totalLPFreeStr = "", totalLPLockedStr = "";
 
-      for (Account &a : w.accounts) {
-        a.balancesThreadLock.lock();
-        totalAVAX += boost::lexical_cast<u256>(
-          Utils::fixedPointToWei(a.balanceAVAX, this->currentCoinDecimals)
+        // Whole balances
+        for (Account &a : w.accounts) {
+          a.balancesThreadLock.lock();
+          totalAVAX += boost::lexical_cast<u256>(
+            Utils::fixedPointToWei(a.balanceAVAX, this->currentCoinDecimals)
+          );
+          totalAVME += boost::lexical_cast<u256>(
+            Utils::fixedPointToWei(a.balanceAVME, this->currentTokenDecimals)
+          );
+          totalLPFree += boost::lexical_cast<u256>(
+            Utils::fixedPointToWei(a.balanceLPFree, 18)
+          );
+          totalLPLocked += boost::lexical_cast<u256>(
+            Utils::fixedPointToWei(a.balanceLPLocked, 18)
+          );
+          a.balancesThreadLock.unlock();
+        }
+        totalAVAXStr = Utils::weiToFixedPoint(
+          boost::lexical_cast<std::string>(totalAVAX), this->currentCoinDecimals
         );
-        totalAVME += boost::lexical_cast<u256>(
-          Utils::fixedPointToWei(a.balanceAVME, this->currentTokenDecimals)
+        totalAVMEStr = Utils::weiToFixedPoint(
+          boost::lexical_cast<std::string>(totalAVME), this->currentTokenDecimals
         );
-        totalLPFree += boost::lexical_cast<u256>(
-          Utils::fixedPointToWei(a.balanceLPFree, 18)
+        totalLPFreeStr = Utils::weiToFixedPoint(
+          boost::lexical_cast<std::string>(totalLPFree), 18
         );
-        totalLPLocked += boost::lexical_cast<u256>(
-          Utils::fixedPointToWei(a.balanceLPLocked, 18)
+        totalLPLockedStr = Utils::weiToFixedPoint(
+          boost::lexical_cast<std::string>(totalLPLocked), 18
         );
-        a.balancesThreadLock.unlock();
-      }
 
-      totalAVAXStr = Utils::weiToFixedPoint(
-        boost::lexical_cast<std::string>(totalAVAX), this->currentCoinDecimals
-      );
-      totalAVMEStr = Utils::weiToFixedPoint(
-        boost::lexical_cast<std::string>(totalAVME), this->currentTokenDecimals
-      );
-      totalLPFreeStr = Utils::weiToFixedPoint(
-        boost::lexical_cast<std::string>(totalLPFree), 18
-      );
-      totalLPLockedStr = Utils::weiToFixedPoint(
-        boost::lexical_cast<std::string>(totalLPLocked), 18
-      );
+        // Fiat balances
+        std::string AVAXUnitPrice = Graph::getAVAXPriceUSD();
+        std::string AVMEUnitPrice = Graph::getAVMEPriceUSD(AVAXUnitPrice);
+        bigfloat AVAXPriceFloat =
+          boost::lexical_cast<double>(totalAVAXStr) * boost::lexical_cast<double>(AVAXUnitPrice);
+        bigfloat AVMEPriceFloat =
+          boost::lexical_cast<double>(totalAVMEStr) * boost::lexical_cast<double>(AVMEUnitPrice);
+        std::string AVAXPrice = boost::lexical_cast<std::string>(AVAXPriceFloat);
+        std::string AVMEPrice = boost::lexical_cast<std::string>(AVMEPriceFloat);
 
-      ret.insert("balanceAVAX", QString::fromStdString(totalAVAXStr));
-      ret.insert("balanceAVME", QString::fromStdString(totalAVMEStr));
-      ret.insert("balanceLPFree", QString::fromStdString(totalLPFreeStr));
-      ret.insert("balanceLPLocked", QString::fromStdString(totalLPLockedStr));
-      return ret;
+        // Fiat percentages (for the chart)
+        bigfloat totalUSD =
+          boost::lexical_cast<double>(AVAXPrice) + boost::lexical_cast<double>(AVMEPrice);
+        bigfloat AVAXPercentageFloat =
+          (boost::lexical_cast<double>(AVAXPrice) / totalUSD) * 100;
+        bigfloat AVMEPercentageFloat =
+          (boost::lexical_cast<double>(AVMEPrice) / totalUSD) * 100;
+        std::string AVAXPercentage = boost::lexical_cast<std::string>(AVAXPercentageFloat);
+        std::string AVMEPercentage = boost::lexical_cast<std::string>(AVMEPercentageFloat);
+        AVAXPercentage = AVAXPercentage.substr(0, AVAXPercentage.find(".") + 3);
+        AVMEPercentage = AVMEPercentage.substr(0, AVMEPercentage.find(".") + 3);
+
+        // Pack up and send back to GUI
+        ret.insert("balanceAVAX", QString::fromStdString(totalAVAXStr));
+        ret.insert("balanceAVME", QString::fromStdString(totalAVMEStr));
+        ret.insert("balanceLPFree", QString::fromStdString(totalLPFreeStr));
+        ret.insert("balanceLPLocked", QString::fromStdString(totalLPLockedStr));
+        ret.insert("balanceAVAXUSD", QString::fromStdString(AVAXPrice));
+        ret.insert("balanceAVMEUSD", QString::fromStdString(AVMEPrice));
+        ret.insert("percentageAVAXUSD", QString::fromStdString(AVAXPercentage));
+        ret.insert("percentageAVMEUSD", QString::fromStdString(AVMEPercentage));
+        emit walletBalancesUpdated(ret);
+      });
     }
 
     // Get an Account's private keys
@@ -421,7 +489,7 @@ class System : public QObject {
 
     // Get gas price from network
     Q_INVOKABLE QString getAutomaticFee() {
-      return QString::fromStdString(Network::getAutomaticFee());
+      return QString::fromStdString(API::getAutomaticFee());
     }
 
     // Create a RegExp for coin and token transaction amount input, respectively
@@ -457,9 +525,15 @@ class System : public QObject {
       u256 gasLimitU256 = u256(gasLimitStr);
       u256 gasPriceU256 = u256(gasPriceStr);
 
-      QVariantMap acc = getAccountBalances(QString::fromStdString(this->currentAccount));
-      std::string balanceStr = acc["balanceAVAX"].toString().toStdString();
-      u256 totalU256 = u256(Utils::fixedPointToWei(balanceStr, this->currentCoinDecimals));
+      std::string balanceAVAXStr;
+      for (Account &a : w.accounts) {
+        if (a.address == this->currentAccount) {
+          a.balancesThreadLock.lock();
+          balanceAVAXStr = a.balanceAVAX;
+          a.balancesThreadLock.unlock();
+        }
+      }
+      u256 totalU256 = u256(Utils::fixedPointToWei(balanceAVAXStr, this->currentCoinDecimals));
       totalU256 -= (gasLimitU256 + gasPriceU256);
       std::string totalStr = Utils::weiToFixedPoint(
         boost::lexical_cast<std::string>(totalU256), 18
@@ -815,14 +889,21 @@ class System : public QObject {
       QString lowerReserves, QString higherReserves, QString percentage
     ) {
       QVariantMap ret;
-      QVariantMap acc = getAccountBalances(QString::fromStdString(this->currentAccount));
+      std::string balanceLPFreeStr;
+      for (Account &a : w.accounts) {
+        if (a.address == this->currentAccount) {
+          a.balancesThreadLock.lock();
+          balanceLPFreeStr = a.balanceLPFree;
+          a.balancesThreadLock.unlock();
+        }
+      }
       if (lowerReserves.isEmpty()) { lowerReserves = QString("0"); }
       if (higherReserves.isEmpty()) { higherReserves = QString("0"); }
 
       u256 lowerReservesU256 = boost::lexical_cast<u256>(lowerReserves.toStdString());
       u256 higherReservesU256 = boost::lexical_cast<u256>(higherReserves.toStdString());
       u256 userLPWei = boost::lexical_cast<u256>(
-        Utils::fixedPointToWei(acc.value("balanceLPFree").toString().toStdString(), 18)
+        Utils::fixedPointToWei(balanceLPFreeStr, 18)
       );
       bigfloat pc = bigfloat(boost::lexical_cast<double>(percentage.toStdString()) / 100);
 
@@ -870,12 +951,19 @@ class System : public QObject {
       QString lowerReserves, QString higherReserves, QString totalLiquidity
     ) {
       QVariantMap ret;
-      QVariantMap acc = getAccountBalances(QString::fromStdString(this->currentAccount));
+      std::string balanceLPFreeStr;
+      for (Account &a : w.accounts) {
+        if (a.address == this->currentAccount) {
+          a.balancesThreadLock.lock();
+          balanceLPFreeStr = a.balanceLPFree;
+          a.balancesThreadLock.unlock();
+        }
+      }
       u256 lowerReservesU256 = boost::lexical_cast<u256>(lowerReserves.toStdString());
       u256 higherReservesU256 = boost::lexical_cast<u256>(higherReserves.toStdString());
       u256 totalLiquidityU256 = boost::lexical_cast<u256>(totalLiquidity.toStdString());
       u256 userLiquidityU256 = boost::lexical_cast<u256>(
-        Utils::fixedPointToWei(acc.value("balanceLPFree").toString().toStdString(), 18)
+        Utils::fixedPointToWei(balanceLPFreeStr, 18)
       );
 
       bigfloat userLPPercentage = (

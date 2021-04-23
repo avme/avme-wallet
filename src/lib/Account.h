@@ -29,8 +29,8 @@
 #include <libethcore/KeyManager.h>
 #include <libethcore/TransactionBase.h>
 
+#include "API.h"
 #include "JSON.h"
-#include "Network.h"
 #include "Pangolin.h"
 #include "Utils.h"
 

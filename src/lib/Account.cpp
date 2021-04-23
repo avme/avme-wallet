@@ -4,23 +4,17 @@
 #include "Account.h"
 
 void Account::reloadBalances(Account &a) {
-  // Get the balances from the network
-  std::string AVAXjson = Network::getAVAXBalance(a.address);
-  std::string AVMEjson = Network::getAVMEBalance(
+  // Get the balances from the network, check if they're all here
+  std::string AVAXBal = API::getAVAXBalance(a.address);
+  std::string AVMEBal = API::getAVMEBalance(
     a.address, Pangolin::tokenContracts["AVME"]
   );
-  std::string FreeLPjson = Network::getAVMEBalance(
+  std::string FreeLPBal = API::getAVMEBalance(
     a.address, Pangolin::pairContracts["WAVAX-AVME"]
   );
-  std::string LockedLPjson = Network::getAVMEBalance(
+  std::string LockedLPBal = API::getAVMEBalance(
     a.address, Pangolin::stakingContract
   );
-
-  // Get the balances from the JSON objects, check if they're all here
-  std::string AVAXBal = JSON::getString(AVAXjson, "result");
-  std::string AVMEBal = JSON::getString(AVMEjson, "result");
-  std::string FreeLPBal = JSON::getString(FreeLPjson, "result");
-  std::string LockedLPBal = JSON::getString(LockedLPjson, "result");
   if (AVAXBal == "" || AVMEBal == "" || FreeLPBal == "" || LockedLPBal == "") {
     return;
   }
@@ -217,12 +211,7 @@ bool Account::updateAllTxStatus() {
         if (txData.unixDate + 60 < now) { // Tx is considered invalid after 60 seconds without confirmation
           txData.invalid = true;
         } else {
-          json_spirit::mValue request;
-          std::string jsonRequest = Network::getTxReceipt(txData.hex);
-          json_spirit::read_string(jsonRequest,request);
-          json_spirit::mValue result = JSON::objectItem(request, "result");
-          json_spirit::mValue jsStatus = JSON::objectItem(result, "status");
-          std::string status = jsStatus.get_str();
+          std::string status = API::getTxStatus(txData.hex);
           if (status == "0x1") txData.confirmed = true;
         }
       }

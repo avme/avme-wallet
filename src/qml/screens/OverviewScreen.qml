@@ -14,6 +14,23 @@ Item {
   Connections {
     target: System
     onRewardUpdated: stakingPanel.reward = poolReward
+    onAccountBalancesUpdated: {
+      accountCoinBalance.text = data.balanceAVAX
+      accountTokenBalance.text = data.balanceAVME
+      accountCoinPrice.text = "$" + data.balanceAVAXUSD
+      accountTokenPrice.text = "$" + data.balanceAVMEUSD
+      accountSliceAVAX.value = data.percentageAVAXUSD
+      accountSliceAVME.value = data.percentageAVMEUSD
+      stakingLockedBalance.text = data.balanceLPLocked
+    }
+    onWalletBalancesUpdated: {
+      walletCoinBalance.text = data.balanceAVAX
+      walletTokenBalance.text = data.balanceAVME
+      walletCoinPrice.text = "$" + data.balanceAVAXUSD
+      walletTokenPrice.text = "$" + data.balanceAVMEUSD
+      walletSliceAVAX.value = data.percentageAVAXUSD
+      walletSliceAVME.value = data.percentageAVMEUSD
+    }
   }
 
   // Timer for reloading the Account balances
@@ -27,24 +44,23 @@ Item {
   Component.onCompleted: {
     reloadBalances()
     listReloadTimer.start()
+    accountCoinBalance.text = accountCoinPrice.text = "Loading..."
+    accountTokenBalance.text = accountTokenPrice.text = "Loading..."
+    walletCoinBalance.text = walletCoinPrice.text = "Loading..."
+    walletTokenBalance.text = walletTokenPrice.text = "Loading..."
+    stakingLockedBalance.text = "Loading..."
   }
 
   function reloadBalances() {
-    var acc = System.getAccountBalances(System.getCurrentAccount())
-    var wal = System.getAllAccountBalances()
+    System.getAccountBalances(System.getCurrentAccount())
+    System.getAllAccountBalances()
     System.getPoolReward()
-    accountCoinBalance.text = (acc.balanceAVAX) ? acc.balanceAVAX : "Loading..."
-    accountTokenBalance.text = (acc.balanceAVME) ? acc.balanceAVME : "Loading..."
-    stakingLockedBalance.text = (acc.balanceLPLocked) ? acc.balanceLPLocked : "Loading..."
-    walletCoinBalance.text = (wal.balanceAVAX) ? wal.balanceAVAX : "Loading..."
-    walletTokenBalance.text = (wal.balanceAVME) ? wal.balanceAVME : "Loading..."
   }
 
   AVMEAccountHeader {
     id: accountHeader
   }
 
-  // TODO: fiat balances and chart percentages
   AVMEPanel {
     id: balancesPanel
     width: (parent.width * 0.5) - (anchors.margins * 2)
@@ -68,7 +84,6 @@ Item {
 
       Text {
         id: accountText
-        width: parent.width * 0.95
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
@@ -86,16 +101,50 @@ Item {
         legend.visible: false
         margins { right: 0; bottom: 0; left: 0; top: 0 }
 
+        Rectangle {
+          anchors {
+            top: parent.top
+            left: parent.left
+            bottom: parent.bottom
+          }
+          width: (parent.width * 0.275)
+          color: "transparent"
+
+          Text {
+            id: accountSliceAVAXText
+            anchors {
+              centerIn: parent
+              verticalCenterOffset: -10
+            }
+            font.bold: true
+            font.pointSize: 14.0
+            color: accountChart.coinColor
+            text: accountSliceAVAX.value + "%"
+          }
+
+          Text {
+            id: accountSliceAVMEText
+            anchors {
+              centerIn: parent
+              verticalCenterOffset: 10
+            }
+            font.bold: true
+            font.pointSize: 14.0
+            color: accountChart.tokenColor
+            text: accountSliceAVME.value + "%"
+          }
+        }
+
         PieSeries {
           id: accountPie
           size: 0.8
-          holeSize: 0.6
+          holeSize: 0.65
           horizontalPosition: 0.125
           PieSlice {
-            label: "AVAX"; color: accountChart.coinColor; borderColor: "transparent"; value: 54.5
+            id: accountSliceAVAX; color: accountChart.coinColor; borderColor: "transparent"
           }
           PieSlice {
-            label: "AVME"; color: accountChart.tokenColor; borderColor: "transparent"; value: 45.5
+            id: accountSliceAVME; color: accountChart.tokenColor; borderColor: "transparent"
           }
         }
 
@@ -155,7 +204,6 @@ Item {
                 leftMargin: 10
               }
               color: "#FFFFFF"
-              text: "$999999999.99"
               elide: Text.ElideRight
             }
           }
@@ -206,7 +254,6 @@ Item {
                 leftMargin: 10
               }
               color: "#FFFFFF"
-              text: "$99999.99"
               elide: Text.ElideRight
             }
           }
@@ -215,7 +262,6 @@ Item {
 
       Text {
         id: walletText
-        width: parent.width * 0.95
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
@@ -233,16 +279,50 @@ Item {
         legend.visible: false
         margins { right: 0; bottom: 0; left: 0; top: 0 }
 
+        Rectangle {
+          anchors {
+            top: parent.top
+            left: parent.left
+            bottom: parent.bottom
+          }
+          width: (parent.width * 0.275)
+          color: "transparent"
+
+          Text {
+            id: walletSliceAVAXText
+            anchors {
+              centerIn: parent
+              verticalCenterOffset: -10
+            }
+            font.bold: true
+            font.pointSize: 14.0
+            color: walletChart.coinColor
+            text: walletSliceAVAX.value + "%"
+          }
+
+          Text {
+            id: walletSliceAVMEText
+            anchors {
+              centerIn: parent
+              verticalCenterOffset: 10
+            }
+            font.bold: true
+            font.pointSize: 14.0
+            color: walletChart.tokenColor
+            text: walletSliceAVME.value + "%"
+          }
+        }
+
         PieSeries {
           id: walletPie
           size: 0.8
-          holeSize: 0.6
+          holeSize: 0.65
           horizontalPosition: 0.125
           PieSlice {
-            label: "AVAX"; color: walletChart.coinColor; borderColor: "transparent"; value: 38.9
+            id: walletSliceAVAX; color: walletChart.coinColor; borderColor: "transparent"
           }
           PieSlice {
-            label: "AVME"; color: walletChart.tokenColor; borderColor: "transparent"; value: 62.1
+            id: walletSliceAVME; color: walletChart.tokenColor; borderColor: "transparent"
           }
         }
 
@@ -302,7 +382,6 @@ Item {
                 leftMargin: 10
               }
               color: "#FFFFFF"
-              text: "$999999999.99"
               elide: Text.ElideRight
             }
           }
@@ -353,7 +432,6 @@ Item {
                 leftMargin: 10
               }
               color: "#FFFFFF"
-              text: "$99999.99"
               elide: Text.ElideRight
             }
           }

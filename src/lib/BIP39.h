@@ -20,8 +20,8 @@
 #include <bip3x/utils.h>
 #include <bip3x/wordlist.h>
 
+#include "API.h"
 #include "Cipher.h"
-#include "Network.h"
 #include "JSON.h"
 #include "Utils.h"
 
