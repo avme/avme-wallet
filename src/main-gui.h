@@ -383,12 +383,14 @@ class System : public QObject {
             std::string AVMEPrice = boost::lexical_cast<std::string>(AVMEPriceFloat);
 
             // Fiat percentages (for the chart)
-            bigfloat totalUSD =
-              boost::lexical_cast<double>(AVAXPrice) + boost::lexical_cast<double>(AVMEPrice);
-            bigfloat AVAXPercentageFloat =
-              (boost::lexical_cast<double>(AVAXPrice) / totalUSD) * 100;
-            bigfloat AVMEPercentageFloat =
-              (boost::lexical_cast<double>(AVMEPrice) / totalUSD) * 100;
+            bigfloat totalUSD, AVAXPercentageFloat, AVMEPercentageFloat;
+            totalUSD = boost::lexical_cast<double>(AVAXPrice) + boost::lexical_cast<double>(AVMEPrice);
+            if (totalUSD == 0) {
+              AVAXPercentageFloat = AVMEPercentageFloat = 0;
+            } else {
+              AVAXPercentageFloat = (boost::lexical_cast<double>(AVAXPrice) / totalUSD) * 100;
+              AVMEPercentageFloat = (boost::lexical_cast<double>(AVMEPrice) / totalUSD) * 100;
+            }
 
             // Round the percentages to two decimals
             std::stringstream AVAXss, AVMEss;
@@ -461,12 +463,14 @@ class System : public QObject {
         std::string AVMEPrice = boost::lexical_cast<std::string>(AVMEPriceFloat);
 
         // Fiat percentages (for the chart)
-        bigfloat totalUSD =
-          boost::lexical_cast<double>(AVAXPrice) + boost::lexical_cast<double>(AVMEPrice);
-        bigfloat AVAXPercentageFloat =
-          (boost::lexical_cast<double>(AVAXPrice) / totalUSD) * 100;
-        bigfloat AVMEPercentageFloat =
-          (boost::lexical_cast<double>(AVMEPrice) / totalUSD) * 100;
+        bigfloat totalUSD, AVAXPercentageFloat, AVMEPercentageFloat;
+        totalUSD = boost::lexical_cast<double>(AVAXPrice) + boost::lexical_cast<double>(AVMEPrice);
+        if (totalUSD == 0) {
+          AVAXPercentageFloat = AVMEPercentageFloat = 0;
+        } else {
+          AVAXPercentageFloat = (boost::lexical_cast<double>(AVAXPrice) / totalUSD) * 100;
+          AVMEPercentageFloat = (boost::lexical_cast<double>(AVMEPrice) / totalUSD) * 100;
+        }
 
         // Round the percentages to two decimals
         std::stringstream AVAXss, AVMEss;
