@@ -7,12 +7,10 @@ bool Wallet::create(boost::filesystem::path folder, std::string pass) {
   // Create the paths if they don't exist yet
   boost::filesystem::path walletFile = folder.string() + "/wallet/c-avax/wallet.info";
   boost::filesystem::path secretsFolder = folder.string() + "/wallet/c-avax/accounts/secrets";
-  if (!exists(walletFile.parent_path())) {
-    create_directories(walletFile.parent_path());
-  }
-  if (!exists(secretsFolder)) {
-    create_directories(secretsFolder);
-  }
+  boost::filesystem::path historyFolder = folder.string() + "/wallet/c-avax/accounts/transactions";
+  if (!exists(walletFile.parent_path())) { create_directories(walletFile.parent_path()); }
+  if (!exists(secretsFolder)) { create_directories(secretsFolder); }
+  if (!exists(historyFolder)) { create_directories(historyFolder); }
 
   // Initialize a new Wallet, hash+salt the passphrase and store both
   KeyManager w(walletFile, secretsFolder);

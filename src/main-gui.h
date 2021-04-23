@@ -341,7 +341,30 @@ class System : public QObject {
     }
 
     // Get an Account's balances
-    Q_INVOKABLE void getAccountBalances(QString address) {
+    Q_INVOKABLE QVariantMap getAccountBalances(QString address) {
+      QVariantMap ret;
+      for (Account &a : w.accounts) {
+        if (a.address == address.toStdString()) {
+          std::string balanceAVAXStr, balanceAVMEStr, balanceLPFreeStr, balanceLPLockedStr;
+          a.balancesThreadLock.lock();
+          balanceAVAXStr = a.balanceAVAX;
+          balanceAVMEStr = a.balanceAVME;
+          balanceLPFreeStr = a.balanceLPFree;
+          balanceLPLockedStr = a.balanceLPLocked;
+          a.balancesThreadLock.unlock();
+
+          ret.insert("balanceAVAX", QString::fromStdString(balanceAVAXStr));
+          ret.insert("balanceAVME", QString::fromStdString(balanceAVMEStr));
+          ret.insert("balanceLPFree", QString::fromStdString(balanceLPFreeStr));
+          ret.insert("balanceLPLocked", QString::fromStdString(balanceLPLockedStr));
+          break;
+        }
+      }
+      return ret;
+    }
+
+    // Same thing as above but for the Overview screen
+    Q_INVOKABLE void getAccountBalancesOverview(QString address) {
       QtConcurrent::run([=](){
         QVariantMap ret;
         for (Account &a : w.accounts) {
@@ -372,10 +395,13 @@ class System : public QObject {
               (boost::lexical_cast<double>(AVAXPrice) / totalUSD) * 100;
             bigfloat AVMEPercentageFloat =
               (boost::lexical_cast<double>(AVMEPrice) / totalUSD) * 100;
-            std::string AVAXPercentage = boost::lexical_cast<std::string>(AVAXPercentageFloat);
-            std::string AVMEPercentage = boost::lexical_cast<std::string>(AVMEPercentageFloat);
-            AVAXPercentage = AVAXPercentage.substr(0, AVAXPercentage.find(".") + 3);
-            AVMEPercentage = AVMEPercentage.substr(0, AVMEPercentage.find(".") + 3);
+
+            // Round the percentages to two decimals
+            std::stringstream AVAXss, AVMEss;
+            AVAXss << std::setprecision(2) << std::fixed << AVAXPercentageFloat << std::endl;
+            AVMEss << std::setprecision(2) << std::fixed << AVMEPercentageFloat << std::endl;
+            std::string AVAXPercentage = AVAXss.str();
+            std::string AVMEPercentage = AVMEss.str();
 
             // Pack up and send back to GUI
             ret.insert("balanceAVAX", QString::fromStdString(balanceAVAXStr));
@@ -393,8 +419,8 @@ class System : public QObject {
       });
     }
 
-    // Get the sum of all Accounts' balances in the Wallet
-    Q_INVOKABLE void getAllAccountBalances() {
+    // Get the sum of all Accounts' balances in the Wallet for the Overview
+    Q_INVOKABLE void getAllAccountBalancesOverview() {
       QtConcurrent::run([=](){
         QVariantMap ret;
         u256 totalAVAX = 0, totalAVME = 0, totalLPFree = 0, totalLPLocked = 0;
@@ -447,10 +473,13 @@ class System : public QObject {
           (boost::lexical_cast<double>(AVAXPrice) / totalUSD) * 100;
         bigfloat AVMEPercentageFloat =
           (boost::lexical_cast<double>(AVMEPrice) / totalUSD) * 100;
-        std::string AVAXPercentage = boost::lexical_cast<std::string>(AVAXPercentageFloat);
-        std::string AVMEPercentage = boost::lexical_cast<std::string>(AVMEPercentageFloat);
-        AVAXPercentage = AVAXPercentage.substr(0, AVAXPercentage.find(".") + 3);
-        AVMEPercentage = AVMEPercentage.substr(0, AVMEPercentage.find(".") + 3);
+
+        // Round the percentages to two decimals
+        std::stringstream AVAXss, AVMEss;
+        AVAXss << std::setprecision(2) << std::fixed << AVAXPercentageFloat << std::endl;
+        AVMEss << std::setprecision(2) << std::fixed << AVMEPercentageFloat << std::endl;
+        std::string AVAXPercentage = AVAXss.str();
+        std::string AVMEPercentage = AVMEss.str();
 
         // Pack up and send back to GUI
         ret.insert("balanceAVAX", QString::fromStdString(totalAVAXStr));

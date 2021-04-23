@@ -52,8 +52,8 @@ Item {
   }
 
   function reloadBalances() {
-    System.getAccountBalances(System.getCurrentAccount())
-    System.getAllAccountBalances()
+    System.getAccountBalancesOverview(System.getCurrentAccount())
+    System.getAllAccountBalancesOverview()
     System.getPoolReward()
   }
 
