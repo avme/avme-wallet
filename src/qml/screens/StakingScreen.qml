@@ -155,14 +155,14 @@ Item {
               System.setScreen(content, "qml/screens/TransactionScreen.qml")
               System.operationOverride("Approve Staking", "", "", "")
             } else if (isStaking) {
-              if (stakeInput.text > acc.balanceLPFree) {
+              if (System.hasInsufficientFunds("LP", acc.balanceLPFree, stakeInput.text)) {
                 fundsPopup.open()
               } else {
                 System.setScreen(content, "qml/screens/TransactionScreen.qml")
                 System.operationOverride("Stake LP", "", "", stakeInput.text)
               }
             } else {
-              if (stakeInput.text > acc.balanceLPLocked) {
+              if (System.hasInsufficientFunds("LP", acc.balanceLPLocked, stakeInput.text)) {
                 fundsPopup.open()
               } else {
                 System.setScreen(content, "qml/screens/TransactionScreen.qml")

@@ -310,7 +310,9 @@ Item {
             System.setScreen(content, "qml/screens/TransactionScreen.qml")
             System.operationOverride("Approve Exchange", "", "", "")
           } else if (coinToToken) {
-            if (swapInput.text > System.getRealMaxAVAXAmount("180000", System.getAutomaticFee())) {
+            if (System.hasInsufficientFunds(
+              "Coin", System.getRealMaxAVAXAmount("180000", System.getAutomaticFee()), swapInput.text
+            )) {
               fundsPopup.open()
             } else {
               System.setScreen(content, "qml/screens/TransactionScreen.qml")
@@ -318,7 +320,7 @@ Item {
             }
           } else {
             var acc = System.getAccountBalances(System.getCurrentAccount())
-            if (swapInput.text > acc.balanceAVME) {
+            if (System.hasInsufficientFunds("Token", acc.balanceAVME, swapInput.text)) {
               fundsPopup.open()
             } else {
               System.setScreen(content, "qml/screens/TransactionScreen.qml")
@@ -575,8 +577,10 @@ Item {
               System.setScreen(content, "qml/screens/TransactionScreen.qml")
               System.operationOverride("Approve Exchange", "", "", "")
             } else if (
-              liquidityCoinInput.text > System.getRealMaxAVAXAmount("250000", System.getAutomaticFee()) ||
-              liquidityTokenInput.text > acc.balanceAVME
+              System.hasInsufficientFunds(
+                "Coin", System.getRealMaxAVAXAmount("250000", System.getAutomaticFee()),
+                liquidityCoinInput.text
+              ) || System.hasInsufficientFunds("Token", acc.balanceAVME, liquidityCoinInput.text)
             ) {
               fundsPopup.open()
             } else {
