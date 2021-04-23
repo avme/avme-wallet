@@ -561,7 +561,7 @@ class System : public QObject {
         }
       }
       u256 totalU256 = u256(Utils::fixedPointToWei(balanceAVAXStr, this->currentCoinDecimals));
-      totalU256 -= (gasLimitU256 + gasPriceU256);
+      totalU256 -= (gasLimitU256 * gasPriceU256);
       std::string totalStr = Utils::weiToFixedPoint(
         boost::lexical_cast<std::string>(totalU256), 18
       );
@@ -582,7 +582,7 @@ class System : public QObject {
       u256 amountU256 = u256(amountStr);
       u256 gasLimitU256 = u256(gasLimitStr);
       u256 gasPriceU256 = u256(gasPriceStr);
-      u256 totalU256 = amountU256 + gasLimitU256 + gasPriceU256;
+      u256 totalU256 = amountU256 + (gasLimitU256 * gasPriceU256);
       // Uncomment to see the values in Wei
       //std::cout << "Total: " << totalU256 << std::endl;
       //std::cout << "Amount: " << amountU256 << std::endl;
