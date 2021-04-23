@@ -11,23 +11,36 @@ Item {
   id: historyScreen
   property bool sortByNew: true
 
+  Connections {
+    target: System
+    onHistoryLoaded: {
+      if (data != null) {
+        if (sortByNew) {
+          for (var i = (data.length - 1); i >= 0; i--) {
+            historyModel.append(JSON.parse(data[i]))
+          }
+        } else {
+          for (var i = 0; i < data.length; i++) {
+            historyModel.append(JSON.parse(data[i]))
+          }
+        }
+      }
+      if (historyList.count == 0) {
+        infoText.text = "No transactions made yet.<br>Once you make one, it'll appear here."
+      } else {
+        infoText.text = ""
+        infoText.visible = false
+      }
+    }
+  }
+
   Component.onCompleted: reloadTransactions()
 
   function reloadTransactions() {
     historyModel.clear()
-    System.updateAllTxStatus(System.getCurrentAccount())
-    var txList = System.listAccountTransactions(System.getCurrentAccount())
-    if (txList != null) {
-      if (sortByNew) {
-        for (var i = (txList.length - 1); i >= 0; i--) {
-          historyModel.append(JSON.parse(txList[i]))
-        }
-      } else {
-        for (var i = 0; i < txList.length; i++) {
-          historyModel.append(JSON.parse(txList[i]))
-        }
-      }
-    }
+    infoText.text = "Loading transactions..."
+    infoText.visible = true
+    System.listAccountTransactions(System.getCurrentAccount())
   }
 
   AVMEAccountHeader {
@@ -105,15 +118,13 @@ Item {
       }
       spacing: 20
 
-      // Text if there's no transactions made with the Account
       Text {
-        id: noTxText
+        id: infoText
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.pointSize: 18.0
-        text: "No transactions made yet.<br>Once you make one, it'll appear here."
-        visible: (historyList.count == 0)
+        visible: false
       }
 
       AVMEButton {

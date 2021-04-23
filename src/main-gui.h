@@ -51,6 +51,7 @@ class System : public QObject {
     void accountCreationFailed();
     void accountBalancesUpdated(QVariantMap data);
     void walletBalancesUpdated(QVariantMap data);
+    void historyLoaded(QVariantList data);
     void operationOverride(QString op, QString amountCoin, QString amountToken, QString amountLP);
     void txStart(
       QString operation, QString to,
@@ -301,43 +302,36 @@ class System : public QObject {
       return this->w.accountExists(account.toStdString());
     }
 
-    // List the Account's transactions
-    Q_INVOKABLE QVariantList listAccountTransactions(QString address) {
-      QVariantList ret;
-      for (Account &a : w.accounts) {
-        if (a.address == address.toStdString()) {
-          a.loadTxHistory();
-          for (TxData tx : a.history) {
-            std::string obj;
-            obj += "{\"txlink\": \"" + tx.txlink;
-            obj += "\", \"operation\": \"" + tx.operation;
-            obj += "\", \"txdata\": \"" + tx.data;
-            obj += "\", \"from\": \"" + tx.from;
-            obj += "\", \"to\": \"" + tx.to;
-            obj += "\", \"value\": \"" + tx.value;
-            obj += "\", \"gas\": \"" + tx.gas;
-            obj += "\", \"price\": \"" + tx.price;
-            obj += "\", \"datetime\": \"" + tx.humanDate;
-            obj += "\", \"unixtime\": " + std::to_string(tx.unixDate);
-            obj += ", \"confirmed\": " + QVariant(tx.confirmed).toString().toStdString();
-            obj += ", \"invalid\": " + QVariant(tx.invalid).toString().toStdString();
-            obj += "}";
-            ret << QString::fromStdString(obj);
+    // List the Account's transactions, updating their statuses on the spot if required
+    Q_INVOKABLE void listAccountTransactions(QString address) {
+      QtConcurrent::run([=](){
+        QVariantList ret;
+        for (Account &a : w.accounts) {
+          if (a.address == address.toStdString()) {
+            a.updateAllTxStatus();
+            a.loadTxHistory();
+            for (TxData tx : a.history) {
+              std::string obj;
+              obj += "{\"txlink\": \"" + tx.txlink;
+              obj += "\", \"operation\": \"" + tx.operation;
+              obj += "\", \"txdata\": \"" + tx.data;
+              obj += "\", \"from\": \"" + tx.from;
+              obj += "\", \"to\": \"" + tx.to;
+              obj += "\", \"value\": \"" + tx.value;
+              obj += "\", \"gas\": \"" + tx.gas;
+              obj += "\", \"price\": \"" + tx.price;
+              obj += "\", \"datetime\": \"" + tx.humanDate;
+              obj += "\", \"unixtime\": " + std::to_string(tx.unixDate);
+              obj += ", \"confirmed\": " + QVariant(tx.confirmed).toString().toStdString();
+              obj += ", \"invalid\": " + QVariant(tx.invalid).toString().toStdString();
+              obj += "}";
+              ret << QString::fromStdString(obj);
+            }
+            break;
           }
-          break;
         }
-      }
-      return ret;
-    }
-
-    // Update all transactions for a given Account
-    Q_INVOKABLE void updateAllTxStatus(QString address) {
-      for (Account &a : w.accounts) {
-        if (a.address == address.toStdString()) {
-          a.updateAllTxStatus();
-          break;
-        }
-      }
+        emit historyLoaded(ret);
+      });
     }
 
     // Get an Account's balances
