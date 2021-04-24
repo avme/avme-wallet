@@ -951,7 +951,10 @@ class System : public QObject {
       return (amountU256 == 0);
     }
 
-    // Calculate the estimated amount for a coin/token exchange
+    /**
+     * Calculate the estimated output amount and price impact for a
+     * coin/token exchange, respectively
+     */
     Q_INVOKABLE QString calculateExchangeAmount(
       QString amountIn, QString reservesIn, QString reservesOut
     ) {
@@ -961,6 +964,31 @@ class System : public QObject {
       );
       amountOut = Utils::weiToFixedPoint(amountOut, 18);
       return QString::fromStdString(amountOut);
+    }
+
+    Q_INVOKABLE double calculateExchangePriceImpact(
+      QString tokenAmount, QString tokenInput, int tokenDecimals
+    ) {
+      // Convert amoounts to bigfloat and Wei for calculation
+      bigfloat tokenAmountFloat = bigfloat(tokenAmount.toStdString());
+      bigfloat tokenInputFloat = bigfloat(Utils::fixedPointToWei(
+        tokenInput.toStdString(), tokenDecimals
+      ));
+
+      /**
+       * Price impact is calculated as follows:
+       * A = tokenAmount, B = tokenInput
+       * Price impact = (1 - (A / (A + B))) * 100
+       */
+      bigfloat priceImpactFloat = (
+        1 - tokenAmountFloat / (tokenAmountFloat + tokenInputFloat)
+      ) * 100;
+
+      // Round the percentage to two decimals and return it
+      std::stringstream priceImpactss;
+      priceImpactss << std::setprecision(2) << std::fixed << priceImpactFloat;
+      double priceImpact = boost::lexical_cast<double>(priceImpactss.str());
+      return priceImpact;
     }
 
     /**

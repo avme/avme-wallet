@@ -20,6 +20,7 @@ Item {
   property string higherToken
   property string higherReserves
   property string swapEstimate
+  property double swapImpact
   property string liquidity
   property string userLowerReserves
   property string userHigherReserves
@@ -166,7 +167,6 @@ Item {
   }
 
   // Panel for the exchange operations
-  // TODO: calculate price impact and other missing stuff from Pangolin
   AVMEPanel {
     id: exchangePanel
     width: (parent.width * 0.5) - (anchors.margins * 2)
@@ -245,6 +245,7 @@ Item {
           coinToToken = !coinToToken
           swapInput.text = ""
           swapEstimate = ""
+          swapImpact = 0
           calculateExchangeAmountOut()
         }
       }
@@ -260,7 +261,20 @@ Item {
           (coinToToken) ? System.getCurrentCoin() : System.getCurrentToken()
         ) + " to swap"
         placeholder: "Fixed point amount (e.g. 0.5)"
-        onTextEdited: calculateExchangeAmountOut()
+        onTextEdited: {
+          calculateExchangeAmountOut()
+          if (coinToToken) {
+            swapImpact = System.calculateExchangePriceImpact(
+              ((System.getCurrentCoin() == lowerToken) ? lowerReserves : higherReserves),
+              swapInput.text, System.getCurrentCoinDecimals()
+            )
+          } else {
+            swapImpact = System.calculateExchangePriceImpact(
+              ((System.getCurrentToken() == lowerToken) ? lowerReserves : higherReserves),
+              swapInput.text, System.getCurrentTokenDecimals()
+            )
+          }
+        }
 
         AVMEButton {
           id: swapAllBtn
@@ -277,6 +291,17 @@ Item {
               ? System.getRealMaxAVAXAmount("180000", System.getAutomaticFee())
               : acc.balanceAVME
             calculateExchangeAmountOut()
+            if (coinToToken) {
+              swapImpact = System.calculateExchangePriceImpact(
+                ((System.getCurrentCoin() == lowerToken) ? lowerReserves : higherReserves),
+                swapInput.text, System.getCurrentCoinDecimals()
+              )
+            } else {
+              swapImpact = System.calculateExchangePriceImpact(
+                ((System.getCurrentToken() == lowerToken) ? lowerReserves : higherReserves),
+                swapInput.text, System.getCurrentTokenDecimals()
+              )
+            }
           }
         }
       }
@@ -294,18 +319,41 @@ Item {
         ) + ":<br><b>" + swapEstimate + "</b>"
       }
 
+      Text {
+        id: swapImpactText
+        width: parent.width
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        elide: Text.ElideRight
+        color: {
+          if (swapImpact == 0.0) {  // 0% -> white
+            color: "#FFFFFF"
+          } else if (swapImpact > 0.0 && swapImpact <= 5.0) {  // 0.01-5% -> green
+            color: "#44FF44"
+          } else if (swapImpact > 5.0 && swapImpact <= 7.5) {  // 5.01-7.5% -> yellow
+            color: "#FFFF44"
+          } else if (swapImpact > 7.5 && swapImpact <= 10.0) { // 7.51%-10.0% -> orange
+            color: "#FF8844"
+          } else if (swapImpact > 10.0) {  // 10.1+% -> red
+            color: "#FF4444"
+          }
+        }
+        font.pointSize: 14.0
+        text: "Price impact: <b>" + swapImpact + "%</b>"
+      }
+
       AVMEButton {
         id: swapBtn
         width: (parent.width * 0.5)
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: allowance != "" && (
           !System.isApproved(swapInput.text, allowance) || swapInput.acceptableInput
-        )
+        ) && swapImpact <= 10.0
         text: {
           if (allowance == "") {
             text: "Checking approval..."
           } else if (System.isApproved(swapInput.text, allowance)) {
-            text: "Make Swap"
+            text: (swapImpact <= 10.0) ? "Make Swap" : "Price impact too high"
           } else {
             text: "Approve"
           }
