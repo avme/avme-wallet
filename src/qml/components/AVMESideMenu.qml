@@ -15,7 +15,7 @@ Rectangle {
 
   Connections {
     target: System
-    onGoToOverview: itemSelection.y = itemOverview.y
+    function onGoToOverview() { itemSelection.y = itemOverview.y }
   }
 
   function changeScreen(name) {

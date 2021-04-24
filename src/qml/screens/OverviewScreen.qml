@@ -13,7 +13,7 @@ Item {
 
   Connections {
     target: System
-    onAccountBalancesUpdated: {
+    function onAccountBalancesUpdated(data) {
       accountCoinBalance.text = data.balanceAVAX
       accountTokenBalance.text = data.balanceAVME
       accountCoinPrice.text = "$" + data.balanceAVAXUSD
@@ -22,7 +22,7 @@ Item {
       accountSliceAVME.value = data.percentageAVMEUSD
       stakingLockedBalance.text = data.balanceLPLocked
     }
-    onWalletBalancesUpdated: {
+    function onWalletBalancesUpdated(data) {
       walletCoinBalance.text = data.balanceAVAX
       walletTokenBalance.text = data.balanceAVME
       walletCoinPrice.text = "$" + data.balanceAVAXUSD
@@ -30,8 +30,8 @@ Item {
       walletSliceAVAX.value = data.percentageAVAXUSD
       walletSliceAVME.value = data.percentageAVMEUSD
     }
-    onRewardUpdated: stakingPanel.reward = poolReward
-    onRoiCalculated: stakingPanel.roi = ROI
+    function onRewardUpdated(poolReward) { stakingPanel.reward = poolReward }
+    function onRoiCalculated(ROI) { stakingPanel.roi = ROI }
   }
 
   // Timer for reloading the Account balances

@@ -30,19 +30,24 @@ Item {
 
   Connections {
     target: System
-
-    onAllowancesUpdated: {
+    function onAllowancesUpdated(
+      exchangeAllowance, liquidityAllowance, stakingAllowance
+    ) {
       allowance = exchangeAllowance
       addAllowance = exchangeAllowance
       removeAllowance = liquidityAllowance
     }
-    onExchangeDataUpdated: {
+    function onExchangeDataUpdated(
+      lowerTokenName, lowerTokenReserves, higherTokenName, higherTokenReserves
+    ) {
       lowerToken = lowerTokenName
       lowerReserves = lowerTokenReserves
       higherToken = higherTokenName
       higherReserves = higherTokenReserves
     }
-    onLiquidityDataUpdated: {
+    function onLiquidityDataUpdated(
+      lowerTokenName, lowerTokenReserves, higherTokenName, higherTokenReserves, totalLiquidity
+    ) {
       lowerToken = lowerTokenName
       lowerReserves = lowerTokenReserves
       higherToken = higherTokenName

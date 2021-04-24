@@ -13,13 +13,12 @@ Item {
 
   Connections {
     target: System
-
-    onAccountCreated: {
+    function onAccountCreated(data) {
       console.log("Account created successfully")
       createAccountPopup.close()
       reloadList()
     }
-    onAccountCreationFailed: {
+    function onAccountCreationFailed() {
       console.log("Failed to create Account")
       createAccountPopup.close()
       accountFailPopup.open()

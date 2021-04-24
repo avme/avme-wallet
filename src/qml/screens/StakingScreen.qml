@@ -17,8 +17,12 @@ Item {
 
   Connections {
     target: System
-    onAllowancesUpdated: allowance = stakingAllowance
-    onRewardUpdated: reward = poolReward
+    function onAllowancesUpdated(
+      exchangeAllowance, liquidityAllowance, stakingAllowance
+    ) {
+      allowance = stakingAllowance
+    }
+    function onRewardUpdated(poolReward) { reward = poolReward }
   }
 
   Timer {

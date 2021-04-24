@@ -23,7 +23,7 @@ Item {
 
   Connections {
     target: System
-    onOperationOverride: {
+    function onOperationOverride(op, amountCoin, amountToken, amountLP) {
       changeOperation(op)
       txAmountCoinInput.text = amountCoin
       txAmountTokenInput.text = amountToken

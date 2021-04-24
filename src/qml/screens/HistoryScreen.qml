@@ -13,7 +13,7 @@ Item {
 
   Connections {
     target: System
-    onHistoryLoaded: {
+    function onHistoryLoaded(data) {
       if (data != null) {
         if (sortByNew) {
           for (var i = (data.length - 1); i >= 0; i--) {

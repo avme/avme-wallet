@@ -36,8 +36,7 @@ Popup {
 
   Connections {
     target: System
-
-    onAccountsGenerated: {
+    function onAccountsGenerated(accounts) {
       for (var i = 0; i < accounts.length; i++) {
         accountList.append(JSON.parse(accounts[i]))
       }

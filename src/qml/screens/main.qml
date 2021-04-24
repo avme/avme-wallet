@@ -23,8 +23,8 @@ ApplicationWindow {
 
   Connections {
     target: System
-    onGoToOverview: menuToggle = true
-    onHideMenu: menuToggle = false
+    function onHideMenu() { menuToggle = false }
+    function onGoToOverview() { menuToggle = true }
   }
 
   // States for menu visibility and loader anchoring

@@ -20,7 +20,9 @@ Popup {
 
   Connections {
     target: System
-    onTxStart: {
+    function onTxStart(
+      operation, to, coinAmount, tokenAmount, lpAmount, gasLimit, gasPrice, pass
+    ) {
       // Uncomment to see the data passed to the popup
       //console.log(operation)
       //console.log(to)
@@ -41,7 +43,7 @@ Popup {
         operation, to, coinAmount, tokenAmount, lpAmount, gasLimit, gasPrice, pass
       )
     }
-    onTxBuilt: {
+    function onTxBuilt(b) {
       buildPngRotate.stop()
       buildPng.rotation = 0
       if (b) {
@@ -57,7 +59,7 @@ Popup {
         btnClose.visible = true
       }
     }
-    onTxSigned: {
+    function onTxSigned(b) {
       signPngRotate.stop()
       signPng.rotation = 0
       if (b) {
@@ -73,7 +75,7 @@ Popup {
         btnClose.visible = true
       }
     }
-    onTxSent: {
+    function onTxSent(b, linkUrl) {
       sendPngRotate.stop()
       sendPng.rotation = 0
       if (b) {
@@ -91,7 +93,7 @@ Popup {
       }
       btnClose.visible = true
     }
-    onTxRetry: {
+    function onTxRetry() {
       sendText.text = "Transaction nonce is too low, or a transaction with"
       + "<br>the same hash was already imported. Retrying..."
     }
