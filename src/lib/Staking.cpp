@@ -4,12 +4,69 @@
 #include "Staking.h"
 
 std::map<std::string, std::string> Staking::funcs = {
+  {"totalSupply", "0x18160ddd"}, // totalSupply()
+  {"getRewardForDuration", "0x1c1f78eb"}, // getRewardForDuration()
+  {"rewardsDuration", "0x386a9525"}, // rewardsDuration()
   {"earned", "0x008cc262"}, // earned(address)
   {"stake", "0xa694fc3a"}, // stake(uint256)
   {"withdraw", "0x2e1a7d4d"}, // withdraw(uint256)
   {"getReward", "0x3d18b912"}, // getReward()
   {"exit", "0xe9fad8ee"}, // exit()
 };
+
+std::string Staking::totalSupply() {
+  std::string result;
+  std::stringstream query;
+
+  // Query and get the result, returning if empty
+  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
+        << "[{\"to\": \"" << Pangolin::stakingContract
+        << "\",\"data\": \"" << Staking::funcs["totalSupply"]
+        << "\"},\"latest\"]}";
+  std::string str = API::httpGetRequest(query.str());
+  result = JSON::getString(str, "result");
+  if (result == "0x" || result == "") { return {}; }
+  result = result.substr(2); // Remove the "0x"
+
+  // Parse the result back into normal values
+  return Pangolin::parseHex(result, {"uint"})[0];
+}
+
+std::string Staking::getRewardForDuration() {
+  std::string result;
+  std::stringstream query;
+
+  // Query and get the result, returning if empty
+  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
+        << "[{\"to\": \"" << Pangolin::stakingContract
+        << "\",\"data\": \"" << Staking::funcs["getRewardForDuration"]
+        << "\"},\"latest\"]}";
+  std::string str = API::httpGetRequest(query.str());
+  result = JSON::getString(str, "result");
+  if (result == "0x" || result == "") { return {}; }
+  result = result.substr(2); // Remove the "0x"
+
+  // Parse the result back into normal values
+  return Pangolin::parseHex(result, {"uint"})[0];
+}
+
+std::string Staking::rewardsDuration() {
+  std::string result;
+  std::stringstream query;
+
+  // Query and get the result, returning if empty
+  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
+        << "[{\"to\": \"" << Pangolin::stakingContract
+        << "\",\"data\": \"" << Staking::funcs["rewardsDuration"]
+        << "\"},\"latest\"]}";
+  std::string str = API::httpGetRequest(query.str());
+  result = JSON::getString(str, "result");
+  if (result == "0x" || result == "") { return {}; }
+  result = result.substr(2); // Remove the "0x"
+
+  // Parse the result back into normal values
+  return Pangolin::parseHex(result, {"uint"})[0];
+}
 
 std::string Staking::balanceOf(std::string address) {
   std::string result;

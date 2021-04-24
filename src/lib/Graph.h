@@ -37,6 +37,7 @@ class Graph {
      */
     static std::string httpGetRequest(std::string reqBody);
 
+    // Get the price in fiat (USD) for 1 AVAX and 1 AVME, respectively.
     // TODO: move hardcoded addresses to Pangolin.cpp when changing to mainnet
     // Those are all mainnet addresses:
     // WAVAX-USDT Pair: 0x9ee0a4e21bd333a6bb2ab298194320b8daa26516

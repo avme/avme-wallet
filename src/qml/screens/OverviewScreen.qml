@@ -13,7 +13,6 @@ Item {
 
   Connections {
     target: System
-    onRewardUpdated: stakingPanel.reward = poolReward
     onAccountBalancesUpdated: {
       accountCoinBalance.text = data.balanceAVAX
       accountTokenBalance.text = data.balanceAVME
@@ -31,6 +30,8 @@ Item {
       walletSliceAVAX.value = data.percentageAVAXUSD
       walletSliceAVME.value = data.percentageAVMEUSD
     }
+    onRewardUpdated: stakingPanel.reward = poolReward
+    onRoiCalculated: stakingPanel.roi = ROI
   }
 
   // Timer for reloading the Account balances
@@ -41,9 +42,19 @@ Item {
     onTriggered: reloadBalances()
   }
 
+  // Timer for reloading the staking ROI
+  Timer {
+    id: listROITimer
+    interval: 5000
+    repeat: true
+    onTriggered: System.calculateRewardCurrentROI()
+  }
+
   Component.onCompleted: {
     reloadBalances()
+    System.calculateRewardCurrentROI()
     listReloadTimer.start()
+    listROITimer.start()
     accountCoinBalance.text = accountCoinPrice.text = "Loading..."
     accountTokenBalance.text = accountTokenPrice.text = "Loading..."
     walletCoinBalance.text = walletCoinPrice.text = "Loading..."
@@ -440,12 +451,12 @@ Item {
     }
   }
 
-  // TODO: future statistics
   AVMEPanel {
     id: stakingPanel
     property string reward
+    property string roi
     width: (parent.width * 0.5) - (anchors.margins * 2)
-    height: (parent.height * 0.45) - anchors.margins
+    height: (parent.height * 0.35) - anchors.margins
     anchors {
       top: accountHeader.bottom
       right: parent.right
@@ -516,96 +527,36 @@ Item {
     }
 
     Text {
-      id: rewardFutureTitle
+      id: roiTitle
       anchors {
         top: rewardAmount.bottom
         horizontalCenter: parent.horizontalCenter
         topMargin: 10
       }
       color: "#FFFFFF"
-      text: "Future Rewards"
+      text: "Current ROI"
     }
 
-    Column {
-      id: rewardFutureTable
+    Text {
+      id: roiPercentage
       width: parent.width * 0.9
       anchors {
-        top: rewardFutureTitle.bottom
-        bottom: parent.bottom
+        top: roiTitle.bottom
         horizontalCenter: parent.horizontalCenter
       }
-
-      Text {
-        anchors.left: parent.left
-        width: parent.width
-        color: "#FFFFFF"
-        text: "30 days"
-        elide: Text.ElideRight
-        Text {
-          anchors.right: parent.right
-          color: "#FFFFFF"
-          text: "...%"
-        }
-      }
-
-      Text {
-        anchors.left: parent.left
-        width: parent.width
-        color: "#FFFFFF"
-        text: "60 days"
-        elide: Text.ElideRight
-        Text {
-          anchors.right: parent.right
-          color: "#FFFFFF"
-          text: "...%"
-        }
-      }
-
-      Text {
-        anchors.left: parent.left
-        width: parent.width
-        color: "#FFFFFF"
-        text: "90 days"
-        elide: Text.ElideRight
-        Text {
-          anchors.right: parent.right
-          color: "#FFFFFF"
-          text: "...%"
-        }
-      }
-
-      Text {
-        anchors.left: parent.left
-        width: parent.width
-        color: "#FFFFFF"
-        text: "180 days"
-        elide: Text.ElideRight
-        Text {
-          anchors.right: parent.right
-          color: "#FFFFFF"
-          text: "...%"
-        }
-      }
-
-      Text {
-        anchors.left: parent.left
-        width: parent.width
-        color: "#FFFFFF"
-        text: "360 days"
-        elide: Text.ElideRight
-        Text {
-          anchors.right: parent.right
-          color: "#FFFFFF"
-          text: "...%"
-        }
-      }
+      font.bold: true
+      font.pointSize: 18.0
+      color: "#FFFFFF"
+      text: (parent.roi) ? parent.roi + "%" : "Loading..."
+      elide: Text.ElideRight
+      horizontalAlignment: Text.AlignHCenter
     }
   }
 
   AVMEPanel {
     id: marketDataPanel
     width: (parent.width * 0.5) - (anchors.margins * 2)
-    height: (parent.height * 0.45) - anchors.margins
+    height: (parent.height * 0.55) - anchors.margins
     anchors {
       top: stakingPanel.bottom
       right: parent.right

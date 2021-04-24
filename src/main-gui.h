@@ -52,6 +52,7 @@ class System : public QObject {
     void accountBalancesUpdated(QVariantMap data);
     void walletBalancesUpdated(QVariantMap data);
     void historyLoaded(QVariantList data);
+    void roiCalculated(QString ROI);
     void operationOverride(QString op, QString amountCoin, QString amountToken, QString amountLP);
     void txStart(
       QString operation, QString to,
@@ -489,6 +490,71 @@ class System : public QObject {
         ret.insert("percentageAVAXUSD", QString::fromStdString(AVAXPercentage));
         ret.insert("percentageAVMEUSD", QString::fromStdString(AVMEPercentage));
         emit walletBalancesUpdated(ret);
+      });
+    }
+
+    // Get the current ROI for the staking reward
+    Q_INVOKABLE void calculateRewardCurrentROI() {
+      QtConcurrent::run([=](){
+        // Get the prices in USD for both AVAX and AVME
+        std::string AVAXPrice = Graph::getAVAXPriceUSD();
+        std::string AVMEPrice = Graph::getAVMEPriceUSD(AVAXPrice);
+        bigfloat AVAXUnitPrice = boost::lexical_cast<double>(AVAXPrice);
+        bigfloat AVMEUnitPrice = boost::lexical_cast<double>(AVMEPrice);
+
+        // From 1 AVAX, calculate the optimal amount of AVME that would go to the pool
+        std::vector<std::string> reserves = Pangolin::getReserves("WAVAX", "AVME");
+        std::string first = Pangolin::getFirstFromPair("WAVAX", "AVME");
+        bigfloat AVAXreserves = ("WAVAX" == first)
+          ? boost::lexical_cast<bigfloat>(u256(reserves[0]))
+          : boost::lexical_cast<bigfloat>(u256(reserves[1]));
+        bigfloat AVMEreserves = ("AVME" == first)
+          ? boost::lexical_cast<bigfloat>(u256(reserves[0]))
+          : boost::lexical_cast<bigfloat>(u256(reserves[1]));
+        bigfloat AVAXamount = bigfloat(Utils::fixedPointToWei("1", this->currentCoinDecimals));
+        // Amount and reserves are converted back to a non-scientific notation number
+        bigfloat AVMEamount = bigfloat(Pangolin::calcLiquidityAmountOut(
+          boost::lexical_cast<std::string>(u256(AVAXamount)),
+          boost::lexical_cast<std::string>(u256(AVAXreserves)),
+          boost::lexical_cast<std::string>(u256(AVMEreserves))
+        ));
+
+        // Use both values in Wei amounts to calculate the amount of LP that would be received
+        bigfloat LPsupply = bigfloat(Utils::weiToFixedPoint(Staking::totalSupply(), 18));
+        bigfloat LPamount = std::min(
+          (AVAXamount * bigfloat(Utils::fixedPointToWei(
+            boost::lexical_cast<std::string>(LPsupply), 18)
+          )) / AVAXreserves,
+          (AVMEamount * bigfloat(Utils::fixedPointToWei(
+            boost::lexical_cast<std::string>(LPsupply), 18)
+          )) / AVMEreserves
+        );
+        // Amount is converted back to a non-scientific notation number
+        LPamount = bigfloat(Utils::weiToFixedPoint(
+          boost::lexical_cast<std::string>(u256(LPamount)), 18)
+        );
+
+        // Get the reward value and duration from the staking contract
+        bigfloat reward = bigfloat(Staking::getRewardForDuration());
+        bigfloat duration = bigfloat(Staking::rewardsDuration()) / 86400;
+        bigfloat rewardPerDuration = reward / duration; // 86400 seconds = 1 day
+        rewardPerDuration = bigfloat(Utils::weiToFixedPoint(
+          boost::lexical_cast<std::string>(u256(rewardPerDuration)), 18)
+        );
+
+        /**
+         * Calculate the ROI, based on the following formula:
+         * A = AVAXUnitPrice, B = AVMEUnitPrice, C = LPamount, D = rewardPerDuration, E = LPsupply
+         * ROI = ((((C / E) * D) * 365) * B) / (A * 2) * 100
+         */
+        bigfloat ROI = (
+          ((((LPamount / LPsupply) * rewardPerDuration) * 365) * AVMEUnitPrice) / (AVAXUnitPrice * 2)
+        ) * 100;
+
+        // Round the percentage to two decimals and return it
+        std::stringstream ROIss;
+        ROIss << std::setprecision(2) << std::fixed << ROI;
+        emit roiCalculated(QString::fromStdString(ROIss.str()));
       });
     }
 
