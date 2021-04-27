@@ -35,7 +35,7 @@ namespace JSON {
   json_spirit::mValue arrayItem(const json_spirit::mValue element, size_t index);
 
   /**
-   * Get a specific value from a JSON element.
+   * Get a generic value from a JSON element.
    * Specify a delimiter to search nested values, e.g. "foo/bar" searches
    * for "bar" inside of "foo".
    * Returns the value in JSON format (which should call json_spirit's
@@ -44,12 +44,17 @@ namespace JSON {
   json_spirit::mValue getValue(std::string jsonStr, std::string value, std::string delim = "");
 
   /**
-   * Get a string value from a JSON element.
+   * Get a specific value from a JSON element.
    * Specify a delimiter to search nested values, e.g. "foo/bar" searches
    * for "bar" inside of "foo".
-   * Returns the value as a string, or an empty string on failure.
+   * Returns are as follows:
+   * - getString(): value as a string, or an empty string on failure
+   * - getArray(): value as a vector of JSON objects, or an empty vector on failure
    */
   std::string getString(std::string jsonStr, std::string value, std::string delim = "");
+  std::vector<std::map<std::string, std::string>> getObjectArray(
+    std::string jsonStr, std::string value, std::string delim = ""
+  );
 
   // Handle the transaction history storage directory.
   #ifdef __MINGW32__

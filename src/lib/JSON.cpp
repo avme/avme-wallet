@@ -56,15 +56,48 @@ std::string JSON::getString(std::string jsonStr, std::string value, std::string 
   }
 }
 
-#ifdef __MINGW32__
-boost::filesystem::path JSON::GetSpecialFolderPath(int nFolder, bool fCreate)
-{
-    WCHAR pszPath[MAX_PATH] = L"";
-    if(SHGetSpecialFolderPathW(nullptr, pszPath, nFolder, fCreate))
-    {
-        return boost::filesystem::path(pszPath);
+std::vector<std::map<std::string, std::string>> JSON::getObjectArray(
+  std::string jsonStr, std::string value, std::string delim
+) {
+  json_spirit::mValue val = getValue(jsonStr, value, delim);
+  std::vector<std::map<std::string, std::string>> ret;
+  try {
+    json_spirit::mArray arr = val.get_array();
+    for (int i = 0; i < arr.size(); i++) {
+      json_spirit::mObject obj = arr[i].get_obj();
+      std::map<std::string, std::string> pairs;
+      for (auto a : obj) {
+        std::string key = a.first;
+        std::string value;
+        switch (a.second.type()) {
+          case json_spirit::str_type:
+            value = a.second.get_str();
+            break;
+          case json_spirit::int_type:
+            value = boost::lexical_cast<std::string>(a.second.get_int());
+            break;
+          default:
+            throw std::runtime_error("Error: json_spirit type not supported");
+            break;
+        }
+        pairs.insert(std::pair<std::string, std::string>(key, value));
+      }
+      ret.push_back(pairs);
     }
-    return boost::filesystem::path("");
+    return ret;
+  } catch (std::exception &e) {
+    std::cout << e.what() << std::endl;
+    return {};
+  }
+}
+
+#ifdef __MINGW32__
+boost::filesystem::path JSON::GetSpecialFolderPath(int nFolder, bool fCreate) {
+  WCHAR pszPath[MAX_PATH] = L"";
+  if (SHGetSpecialFolderPathW(nullptr, pszPath, nFolder, fCreate)) {
+    return boost::filesystem::path(pszPath);
+  }
+  return boost::filesystem::path("");
 }
 #endif
 

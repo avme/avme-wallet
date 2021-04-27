@@ -20,6 +20,7 @@ Item {
       accountTokenPrice.text = "$" + data.balanceAVMEUSD
       accountSliceAVAX.value = data.percentageAVAXUSD
       accountSliceAVME.value = data.percentageAVMEUSD
+      stakingFreeBalance.text = data.balanceLPFree
       stakingLockedBalance.text = data.balanceLPLocked
     }
     function onWalletBalancesUpdated(data) {
@@ -30,8 +31,24 @@ Item {
       walletSliceAVAX.value = data.percentageAVAXUSD
       walletSliceAVME.value = data.percentageAVMEUSD
     }
-    function onRewardUpdated(poolReward) { stakingPanel.reward = poolReward }
-    function onRoiCalculated(ROI) { stakingPanel.roi = ROI }
+    function onRewardUpdated(poolReward) { rewardAmount.reward = poolReward }
+    function onRoiCalculated(ROI) { roiPercentage.roi = ROI }
+    function onMarketDataUpdated(currentAVAXPrice, currentAVMEPrice, AVMEHistory) {
+      currentAVAXAmount.amount = currentAVAXPrice
+      currentAVMEAmount.amount = currentAVMEPrice
+      var minY = -1
+      var maxY = -1
+      marketLine.maxX = AVMEHistory.length
+      for (var i = 0, j = AVMEHistory.length - 1; i < AVMEHistory.length, j >= 0; i++, j--) {
+        var obj = JSON.parse(AVMEHistory[i])
+        minY = (minY == -1 || obj.priceUSD < minY) ? obj.priceUSD : minY
+        maxY = (maxY == -1 || obj.priceUSD > maxY) ? obj.priceUSD : maxY
+        marketLine.append(j, obj.priceUSD)
+      }
+      marketLine.minY = (minY - 1 > 0) ? minY - 1 : 0
+      marketLine.maxY = maxY + (maxY * 0.2)
+      marketChart.visible = true
+    }
   }
 
   // Timer for reloading the Account balances
@@ -59,7 +76,9 @@ Item {
     accountTokenBalance.text = accountTokenPrice.text = "Loading..."
     walletCoinBalance.text = walletCoinPrice.text = "Loading..."
     walletTokenBalance.text = walletTokenPrice.text = "Loading..."
+    stakingFreeBalance.text = "Loading..."
     stakingLockedBalance.text = "Loading..."
+    System.getMarketData(30)
   }
 
   function reloadBalances() {
@@ -81,7 +100,7 @@ Item {
       bottom: parent.bottom
       margins: 10
     }
-    title: "Balances"
+    title: "Balances & Staking Statistics"
 
     Column {
       anchors {
@@ -89,9 +108,9 @@ Item {
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        topMargin: 20
+        topMargin: 10
       }
-      spacing: 10
+      spacing: 5
 
       Text {
         id: accountText
@@ -448,120 +467,269 @@ Item {
           }
         }
       }
-    }
-  }
 
-  AVMEPanel {
-    id: stakingPanel
-    property string reward
-    property string roi
-    width: (parent.width * 0.5) - (anchors.margins * 2)
-    height: (parent.height * 0.35) - anchors.margins
-    anchors {
-      top: accountHeader.bottom
-      right: parent.right
-      margins: 10
-    }
-    title: "Staking Statistics"
-
-    Rectangle {
-      id: stakingLockedRect
-      width: parent.width * 0.9
-      height: 40
-      anchors {
-        horizontalCenter: parent.horizontalCenter
-        top: parent.header.bottom
-        margins: 10
-      }
-      color: "#3E4653"
-      radius: 10
-
-      Text {
-        id: stakingLockedBalance
+      Rectangle {
+        id: stakingBalancesRect
+        width: parent.width * 0.9
+        height: 60
         anchors {
-          verticalCenter: parent.verticalCenter
-          left: parent.left
-          leftMargin: 10
+          horizontalCenter: parent.horizontalCenter
+          margins: 20
         }
-        width: parent.width * 0.75
-        color: "#FFFFFF"
-        elide: Text.ElideRight
+        color: "#3E4653"
+        radius: 10
+
+        Text {
+          id: stakingFreeBalance
+          anchors {
+            verticalCenter: parent.verticalCenter
+            verticalCenterOffset: -10
+            left: parent.left
+            leftMargin: 10
+          }
+          width: parent.width * 0.75
+          color: "#FFFFFF"
+          elide: Text.ElideRight
+        }
+
+        Text {
+          id: stakingFreeText
+          anchors {
+            verticalCenter: parent.verticalCenter
+            verticalCenterOffset: -10
+            right: parent.right
+            rightMargin: 10
+          }
+          color: "#FFFFFF"
+          text: "Free LP"
+        }
+
+        Text {
+          id: stakingLockedBalance
+          anchors {
+            verticalCenter: parent.verticalCenter
+            verticalCenterOffset: 10
+            left: parent.left
+            leftMargin: 10
+          }
+          width: parent.width * 0.75
+          color: "#FFFFFF"
+          elide: Text.ElideRight
+        }
+
+        Text {
+          id: stakingLockedText
+          anchors {
+            verticalCenter: parent.verticalCenter
+            verticalCenterOffset: 10
+            right: parent.right
+            rightMargin: 10
+          }
+          color: "#FFFFFF"
+          text: "Locked LP"
+        }
       }
 
-      Text {
-        id: stakingLockedText
+      Rectangle {
+        id: stakingRewardsRect
+        width: parent.width * 0.9
+        height: 60
         anchors {
-          verticalCenter: parent.verticalCenter
-          right: parent.right
-          rightMargin: 10
+          horizontalCenter: parent.horizontalCenter
+          margins: 20
         }
-        color: "#FFFFFF"
-        text: "Locked LP"
-      }
-    }
+        color: "#3E4653"
+        radius: 10
 
-    Text {
-      id: rewardCurrentTitle
-      anchors {
-        top: stakingLockedRect.bottom
-        horizontalCenter: parent.horizontalCenter
-        topMargin: 10
-      }
-      color: "#FFFFFF"
-      text: "Current AVME Reward"
-    }
+        Text {
+          id: rewardAmount
+          property string reward
+          anchors {
+            verticalCenter: parent.verticalCenter
+            verticalCenterOffset: -10
+            left: parent.left
+            leftMargin: 10
+          }
+          color: "#FFFFFF"
+          text: (reward) ? reward : "Loading..."
+          elide: Text.ElideRight
+          horizontalAlignment: Text.AlignHCenter
+        }
 
-    Text {
-      id: rewardAmount
-      width: parent.width * 0.9
-      anchors {
-        top: rewardCurrentTitle.bottom
-        horizontalCenter: parent.horizontalCenter
-      }
-      font.bold: true
-      font.pointSize: 18.0
-      color: "#FFFFFF"
-      text: (parent.reward) ? parent.reward : "Loading..."
-      elide: Text.ElideRight
-      horizontalAlignment: Text.AlignHCenter
-    }
+        Text {
+          id: rewardTitle
+          anchors {
+            verticalCenter: parent.verticalCenter
+            verticalCenterOffset: -10
+            right: parent.right
+            rightMargin: 10
+          }
+          color: "#FFFFFF"
+          text: "Current AVME Reward"
+        }
 
-    Text {
-      id: roiTitle
-      anchors {
-        top: rewardAmount.bottom
-        horizontalCenter: parent.horizontalCenter
-        topMargin: 10
-      }
-      color: "#FFFFFF"
-      text: "Current ROI"
-    }
+        Text {
+          id: roiPercentage
+          property string roi
+          anchors {
+            verticalCenter: parent.verticalCenter
+            verticalCenterOffset: 10
+            left: parent.left
+            leftMargin: 10
+          }
+          color: "#FFFFFF"
+          text: (roi) ? roi + "%" : "Loading..."
+          elide: Text.ElideRight
+          horizontalAlignment: Text.AlignHCenter
+        }
 
-    Text {
-      id: roiPercentage
-      width: parent.width * 0.9
-      anchors {
-        top: roiTitle.bottom
-        horizontalCenter: parent.horizontalCenter
+        Text {
+          id: roiTitle
+          anchors {
+            verticalCenter: parent.verticalCenter
+            verticalCenterOffset: 10
+            right: parent.right
+            rightMargin: 10
+          }
+          color: "#FFFFFF"
+          text: "Current ROI"
+        }
       }
-      font.bold: true
-      font.pointSize: 18.0
-      color: "#FFFFFF"
-      text: (parent.roi) ? parent.roi + "%" : "Loading..."
-      elide: Text.ElideRight
-      horizontalAlignment: Text.AlignHCenter
     }
   }
 
   AVMEPanel {
     id: marketDataPanel
     width: (parent.width * 0.5) - (anchors.margins * 2)
-    height: (parent.height * 0.55) - anchors.margins
     anchors {
-      top: stakingPanel.bottom
+      top: accountHeader.bottom
       right: parent.right
+      bottom: parent.bottom
       margins: 10
     }
     title: "Market Data"
+
+    Rectangle {
+      id: marketPricesRect
+      width: parent.width * 0.9
+      height: 60
+      anchors {
+        top: parent.header.bottom
+        horizontalCenter: parent.horizontalCenter
+        margins: 20
+      }
+      color: "#3E4653"
+      radius: 10
+
+      Text {
+        id: currentAVAXAmount
+        property string amount
+        anchors {
+          verticalCenter: parent.verticalCenter
+          verticalCenterOffset: -10
+          left: parent.left
+          leftMargin: 10
+        }
+        color: "#FFFFFF"
+        text: (amount) ? amount : "Loading..."
+        elide: Text.ElideRight
+        horizontalAlignment: Text.AlignHCenter
+      }
+
+      Text {
+        id: currentAVAXTitle
+        anchors {
+          verticalCenter: parent.verticalCenter
+          verticalCenterOffset: -10
+          right: parent.right
+          rightMargin: 10
+        }
+        color: "#FFFFFF"
+        text: "Current AVAX Price (USD)"
+      }
+
+      Text {
+        id: currentAVMEAmount
+        property string amount
+        anchors {
+          verticalCenter: parent.verticalCenter
+          verticalCenterOffset: 10
+          left: parent.left
+          leftMargin: 10
+        }
+        color: "#FFFFFF"
+        text: (amount) ? amount : "Loading..."
+        elide: Text.ElideRight
+        horizontalAlignment: Text.AlignHCenter
+      }
+
+      Text {
+        id: currentAVMETitle
+        anchors {
+          verticalCenter: parent.verticalCenter
+          verticalCenterOffset: 10
+          right: parent.right
+          rightMargin: 10
+        }
+        color: "#FFFFFF"
+        text: "Current AVME Price (USD)"
+      }
+    }
+
+    Text {
+      id: chartLoadingText
+      anchors {
+        top: marketPricesRect.bottom
+        horizontalCenter: parent.horizontalCenter
+        margins: 10
+      }
+      visible: (!marketChart.visible)
+      font.pointSize: 14.0
+      color: "#FFFFFF"
+      text: "Loading historical prices..."
+    }
+
+    ChartView {
+      id: marketChart
+      anchors {
+        top: marketPricesRect.bottom
+        bottom: parent.bottom
+        left: parent.left
+        right: parent.right
+        margins: 10
+      }
+      visible: false
+      title: "<b>Historical AVME Prices (last 30 days)</b>"
+      titleColor: "#FFFFFF"
+      backgroundColor: "#881D212A"
+      antialiasing: true
+      legend {
+        color: "#FFFFFF"
+        labelColor: "#FFFFFF"
+        alignment: Qt.AlignBottom
+      }
+      margins { right: 0; bottom: 0; left: 0; top: 0 }
+
+      LineSeries {
+        id: marketLine
+        property double minX: 0.0
+        property double maxX: 0.0
+        property double minY: 0.0
+        property double maxY: 0.0
+        name: "<b>AVME Price (USD)</b>"
+        color: "#368097"
+        width: 3.0
+        axisX: ValueAxis {
+          labelsColor: "transparent"
+          min: marketLine.minX
+          max: marketLine.maxX
+        }
+        axisY: ValueAxis {
+          labelsColor: "#FFFFFF"
+          min: marketLine.minY
+          max: marketLine.maxY
+        }
+      }
+    }
   }
 }

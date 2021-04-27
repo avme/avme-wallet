@@ -53,6 +53,9 @@ class System : public QObject {
     void walletBalancesUpdated(QVariantMap data);
     void historyLoaded(QVariantList data);
     void roiCalculated(QString ROI);
+    void marketDataUpdated(
+      QString currentAVAXPrice, QString currentAVMEPrice, QVariantList AVMEHistory
+    );
     void operationOverride(QString op, QString amountCoin, QString amountToken, QString amountLP);
     void txStart(
       QString operation, QString to,
@@ -555,6 +558,43 @@ class System : public QObject {
         std::stringstream ROIss;
         ROIss << std::setprecision(2) << std::fixed << ROI;
         emit roiCalculated(QString::fromStdString(ROIss.str()));
+      });
+    }
+
+    // Get data for the market chart, from most to least recent in a given amount of days
+    Q_INVOKABLE void getMarketData(int days) {
+      QtConcurrent::run([=](){
+        std::string AVAXUnitPrice, AVMEUnitPrice;
+        std::vector<std::map<std::string, std::string>> graphList;
+        QVariantList graphRet;
+
+        // Get the current AVAX price in fiat (USD) and round it to two decimals
+        AVAXUnitPrice = Graph::getAVAXPriceUSD();
+        AVMEUnitPrice = Graph::getAVMEPriceUSD(AVAXUnitPrice);
+        std::stringstream AVAXss;
+        AVAXss << std::setprecision(2) << std::fixed << bigfloat(AVAXUnitPrice);
+        AVAXUnitPrice = AVAXss.str();
+
+        // Get the historical AVME prices in fiat (USD)
+        graphList = Graph::getAVMEPriceHistory(days);
+        for (std::map<std::string, std::string> map : graphList) {
+          std::string obj;
+          const std::time_t p1 = boost::lexical_cast<time_t>(map["date"]);
+          auto tm = *std::localtime(&p1);
+          std::stringstream timestream;
+          timestream << std::put_time(&tm, "%d/%m/%y");
+
+          obj += "{\"unixdate\": " + map["date"];
+          obj += ", \"date\": \"" + timestream.str();
+          obj += "\", \"priceUSD\": " + map["priceUSD"];
+          obj += "}";
+          graphRet << QString::fromStdString(obj);
+        }
+        emit marketDataUpdated(
+          QString::fromStdString(AVAXUnitPrice),
+          QString::fromStdString(AVMEUnitPrice),
+          graphRet
+        );
       });
     }
 

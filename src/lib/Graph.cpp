@@ -110,3 +110,23 @@ std::string Graph::getAVMEPriceUSD(std::string AVAXUnitPriceUSD) {
   return AVMEPriceUSD;
 }
 
+std::vector<std::map<std::string, std::string>> Graph::getAVMEPriceHistory(int days) {
+  std::string AVAXUnitPriceUSD = getAVAXPriceUSD();
+  bigfloat AVAXPriceFloat = bigfloat(AVAXUnitPriceUSD);
+  std::stringstream query;
+  query << "{\"query\": \"{"
+        << "tokenDayDatas(first: " << days << ", orderBy: date, orderDirection: desc, where: {"
+        << "token: \\\"0x1ecd47ff4d9598f89721a2866bfeb99505a413ed\\\""
+        << "} ) { date priceUSD } }\"}";
+  std::string resp = httpGetRequest(query.str());
+  std::vector<std::map<std::string, std::string>> arr = JSON::getObjectArray(
+    resp, "data/tokenDayDatas", "/"
+  );
+  for (std::map<std::string, std::string> &pair : arr) {
+    pair["priceUSD"] = boost::lexical_cast<std::string>(
+      boost::lexical_cast<double>(pair["priceUSD"]) * AVAXPriceFloat
+    );
+  }
+  return arr;
+}
+
