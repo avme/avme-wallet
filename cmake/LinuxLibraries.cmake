@@ -1,6 +1,6 @@
 # TODO: revise library order, it's very messy
 SET(QT_LIBS "")
-LIST(APPEND QT_LIBS "-ldl")
+LIST(APPEND QT_LIBS "-ldl -ldouble-conversion")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Network.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Gui.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Qml.a")
