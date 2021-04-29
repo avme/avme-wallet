@@ -16,6 +16,7 @@
 #include <QtGui/QFontDatabase>
 #include <QtGui/QIcon>
 #include <QtCore/QThread>
+#include <QtCore/QDateTime>
 #include <QtConcurrent/qtconcurrentrun.h>
 
 #ifdef __MINGW32__
@@ -580,13 +581,10 @@ class System : public QObject {
         for (std::map<std::string, std::string> map : graphList) {
           std::string obj;
           const std::time_t p1 = boost::lexical_cast<time_t>(map["date"]);
-          auto tm = *std::localtime(&p1);
-          std::stringstream timestream;
-          timestream << std::put_time(&tm, "%d/%m/%y");
-
+          QDateTime timestamp;
+          timestamp.setTime_t(p1);
           obj += "{\"unixdate\": " + map["date"];
-          obj += ", \"date\": \"" + timestream.str();
-          obj += "\", \"priceUSD\": " + map["priceUSD"];
+          obj += ", \"priceUSD\": " + map["priceUSD"];
           obj += "}";
           graphRet << QString::fromStdString(obj);
         }
