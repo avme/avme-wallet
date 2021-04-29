@@ -19,7 +19,7 @@ bool Wallet::create(boost::filesystem::path folder, std::string pass) {
     Utils::walletFolderPath = folder;
     return true;
   } catch (Exception const& _e) {
-    std::cerr << "Unable to create wallet" << std::endl << boost::diagnostic_information(_e);
+	Utils::logToDebug(std::string("Unable to create wallet: ") + boost::diagnostic_information(_e));
     return false;
   }
 }
@@ -198,7 +198,7 @@ std::string Wallet::signTransaction(TransactionSkeleton txSkel, std::string pass
     t.sign(s);
     txHexBuffer << toHex(t.rlp());
   } catch (Exception& ex) {
-    std::cerr << "Invalid transaction: " << ex.what() << std::endl;
+	Utils::logToDebug(std::string("Invalid Transaction: ") + ex.what());
     return "";
   }
 

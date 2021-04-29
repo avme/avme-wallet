@@ -147,7 +147,7 @@ void Account::loadTxHistory() {
       this->history.push_back(txData);
     }
   } catch (std::exception &e) {
-    ;
+    Utils::logToDebug(std::string("Couldn't load history for account ") + this->address + " : " + JSON::objectItem(txData, "ERROR").get_str());
     // Uncomment to see output
     //std::cout << "Couldn't load history for Account " << this->address
     //          << ": " << JSON::objectItem(txData, "ERROR").get_str() << std::endl;
@@ -188,9 +188,11 @@ bool Account::saveTxToHistory(TxData TxData) {
   transactionsRoot["transactions"] = transactionsArray;
   json_spirit::mValue success = JSON::writeFile(transactionsRoot, txFilePath);
 
+  // Try/Catch are "inverted"
+  // Error happens when trying to find the error.
+  // If there is no "error" on the JSON, it will throw, meaning that it was successfull
   try {
-    std::string error = success.get_obj().at("ERROR").get_str();
-    std::cout << "Error happened when writing JSON file" << error << std::endl;
+	Utils::logToDebug("Error happened when writing JSON file: " + success.get_obj().at("ERROR").get_str());
   } catch (std::exception &e) {
     loadTxHistory();
     return true;
@@ -208,7 +210,7 @@ bool Account::updateAllTxStatus() {
       if (!txData.invalid && !txData.confirmed) {
         const auto p1 = std::chrono::system_clock::now();
         uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
-        if (txData.unixDate + 60 < now) { // Tx is considered invalid after 60 seconds without confirmation
+        if (txData.unixDate + 60 < now) { // Tx is cfered invalid after 60 seconds without confirmation
           txData.invalid = true;
         } else {
           std::string status = API::getTxStatus(txData.hex);
@@ -217,7 +219,7 @@ bool Account::updateAllTxStatus() {
       }
     }
   } catch (std::exception &e) {
-    std::cout << "Error: " << e.what();
+	Utils::logToDebug(std::string("Error when updating AllTxStatus: ") + e.what());
   }
   json_spirit::mObject transactionsRoot;
   json_spirit::mArray transactionsArray = txDataToJSON();
@@ -226,7 +228,7 @@ bool Account::updateAllTxStatus() {
 
   try {
     std::string error = success.get_obj().at("ERROR").get_str();
-    std::cout << "Error happened when writing JSON file" << error << std::endl;
+	Utils::logToDebug(std::string("Error happened when writing JSON file: ") + error);
   } catch (std::exception &e) {
     loadTxHistory();
     return true;

@@ -10,6 +10,8 @@
 #include <boost/chrono.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <openssl/rand.h>
+
 #include <libdevcore/CommonIO.h>
 #include <libdevcore/FileSystem.h>
 #include <libdevcore/LoggingProgramOptions.h>
@@ -71,6 +73,19 @@ namespace Utils {
    * Returns a struct with the transaction's data.
    */
   TxData decodeRawTransaction(std::string rawTxHex);
+  
+  
+  /**
+	* Write information to debug file for further debugging
+	*/
+  extern std::mutex debugFileLock;
+  void logToDebug(std::string debug);
+  
+  
+  /**
+	* Create an random 16 bytes HEX for usage in identification.
+	*/
+  std::string randomHexBytes();
 
   /**
    * Convert a full Wei amount to a fixed point amount and vice-versa,

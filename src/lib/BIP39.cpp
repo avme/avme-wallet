@@ -74,6 +74,7 @@ std::pair<bool,std::string> BIP39::saveEncryptedMnemonic(
     result.first = false;
     result.second = "Error when encrypting: ";
     result.second += e.what();
+	Utils::logToDebug(result.second);
     return result;
   }
 
@@ -85,6 +86,7 @@ std::pair<bool,std::string> BIP39::saveEncryptedMnemonic(
     std::string error = success.get_obj().at("ERROR").get_str();
     result.first = false;
     result.second = "Error happened when writing JSON file: " + error;
+	Utils::logToDebug(result.second);
     return result;
   } catch (std::exception &e) {
     result.first = true;
@@ -93,6 +95,7 @@ std::pair<bool,std::string> BIP39::saveEncryptedMnemonic(
   }
   result.first = false;
   result.second = "Unknown Error";
+  Utils::logToDebug(result.second);
   return result;
 }
 
@@ -109,6 +112,7 @@ std::pair<bool,std::string> BIP39::loadEncryptedMnemonic(
     std::string error = seedJson.get_obj().at("ERROR").get_str();
     result.first = false;
     result.second = "Error happened when reading JSON file: " + error;
+	Utils::logToDebug(result.second);
     return result;
   } catch (std::exception &e) {
     ;
@@ -126,6 +130,7 @@ std::pair<bool,std::string> BIP39::loadEncryptedMnemonic(
     result.first = false;
     result.second = "Error happened when reading JSON to string: ";
     result.second += e.what();
+	Utils::logToDebug(result.second);
     return result;
   }
 
@@ -136,6 +141,7 @@ std::pair<bool,std::string> BIP39::loadEncryptedMnemonic(
     result.first = true;
     result.second = "Error happened when decrypting, perhaps wrong password? ";
     result.second += e.what();
+	Utils::logToDebug(result.second);
     return result;
   }
   result.first = true;

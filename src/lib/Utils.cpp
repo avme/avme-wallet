@@ -60,6 +60,37 @@ TxData Utils::decodeRawTransaction(std::string rawTxHex) {
   return ret;
 }
 
+std::mutex Utils::debugFileLock;
+
+void Utils::logToDebug(std::string debug) {
+	boost::filesystem::path debugFilePath = walletFolderPath / "debug.log";
+	debugFileLock.lock();
+	// Timestamps (epoch and human-readable) and confirmed
+	const auto p1 = std::chrono::system_clock::now();
+	auto t = std::time(nullptr);
+	auto tm = *std::localtime(&t);
+	std::stringstream timestream;
+	timestream << std::put_time(&tm, "[%d-%m-%Y %H-%M-%S] ");
+	std::string toWrite = timestream.str();
+	toWrite += debug;
+	
+	std::ofstream debugFile (debugFilePath.c_str(), std::ios::out | std::ios::app);
+	debugFile << toWrite << std::endl;
+	debugFile.close();
+	
+	
+	debugFileLock.unlock();
+	return;
+}
+
+std::string Utils::randomHexBytes() {
+	unsigned char saltBytes[32];
+	RAND_bytes(saltBytes, sizeof(saltBytes));
+	return toHex(
+		dev::sha3(std::string((char*)saltBytes, sizeof(saltBytes)), false)
+	).substr(0,16);
+}
+
 std::string Utils::weiToFixedPoint(std::string amount, size_t digits) {
   std::string result;
 
