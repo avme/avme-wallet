@@ -26,8 +26,8 @@ json_spirit::mValue JSON::getValue(
    * to the last value (which is the one we want).
    * For non-nested values (w/o delim), simply get the value directly.
    */
-  if (json_spirit::read_string(jsonStr, ret)) {
-    try {
+  try {
+    if (json_spirit::read_string(jsonStr, ret)) {
       if (!delim.empty()) {
         size_t pos = 0;
         while ((pos = value.find(delim)) != std::string::npos) {
@@ -36,12 +36,12 @@ json_spirit::mValue JSON::getValue(
         }
       }
       ret = objectItem(ret, value);
-    } catch (std::exception &e) {
-      std::cout << "Error when reading json for \"" << value << "\": " << e.what() << std::endl;
-      std::cout << "Message: " << objectItem(objectItem(ret, "error"), "message").get_str() << std::endl;
+    } else {
+      std::cout << "Error reading json, check value: " << jsonStr << std::endl;
     }
-  } else {
-    std::cout << "Error reading json, check value: " << jsonStr << std::endl;
+  } catch (std::exception &e) {
+    std::cout << "Error when reading json for \"" << value << "\": " << e.what() << std::endl;
+    std::cout << "Message: " << objectItem(objectItem(ret, "error"), "message").get_str() << std::endl;
   }
 
   return ret;

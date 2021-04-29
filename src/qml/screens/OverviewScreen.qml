@@ -22,6 +22,7 @@ Item {
       accountSliceAVME.value = data.percentageAVMEUSD
       stakingFreeBalance.text = data.balanceLPFree
       stakingLockedBalance.text = data.balanceLPLocked
+      accountBalancesReloadTimer.start()
     }
     function onWalletBalancesUpdated(data) {
       walletCoinBalance.text = data.balanceAVAX
@@ -30,20 +31,30 @@ Item {
       walletTokenPrice.text = "$" + data.balanceAVMEUSD
       walletSliceAVAX.value = data.percentageAVAXUSD
       walletSliceAVME.value = data.percentageAVMEUSD
+      walletBalancesReloadTimer.start()
     }
-    function onRewardUpdated(poolReward) { rewardAmount.reward = poolReward }
-    function onRoiCalculated(ROI) { roiPercentage.roi = ROI }
+    function onRewardUpdated(poolReward) {
+      rewardAmount.reward = poolReward
+      rewardReloadTimer.start()
+    }
+    function onRoiCalculated(ROI) {
+      roiPercentage.roi = ROI
+      roiTimer.start()
+    }
     function onMarketDataUpdated(currentAVAXPrice, currentAVMEPrice, AVMEHistory) {
       currentAVAXAmount.amount = currentAVAXPrice
       currentAVMEAmount.amount = currentAVMEPrice
       var minY = -1
       var maxY = -1
-      marketLine.maxX = AVMEHistory.length
-      for (var i = 0, j = AVMEHistory.length - 1; i < AVMEHistory.length, j >= 0; i++, j--) {
+      marketLine.countX = (AVMEHistory.length / 2)
+      for (var i = 0; i < AVMEHistory.length; i++) {
         var obj = JSON.parse(AVMEHistory[i])
+        var timedate = new Date(obj.unixdate * 1000)
+        if (i == 0) { marketLine.maxX = timedate }
+        if (i == AVMEHistory.length - 1) { marketLine.minX = timedate }
         minY = (minY == -1 || obj.priceUSD < minY) ? obj.priceUSD : minY
         maxY = (maxY == -1 || obj.priceUSD > maxY) ? obj.priceUSD : maxY
-        marketLine.append(j, obj.priceUSD)
+        marketLine.append(timedate, obj.priceUSD)
       }
       marketLine.minY = (minY - 1 > 0) ? minY - 1 : 0
       marketLine.maxY = maxY + (maxY * 0.2)
@@ -53,38 +64,48 @@ Item {
 
   // Timer for reloading the Account balances
   Timer {
-    id: listReloadTimer
-    interval: 1000
-    repeat: true
-    onTriggered: reloadBalances()
+    id: accountBalancesReloadTimer
+    interval: 2500
+    repeat: false
+    onTriggered: System.getAccountBalancesOverview(System.getCurrentAccount())
+  }
+
+  // Timer for reloading the Wallet balaces
+  Timer {
+    id: walletBalancesReloadTimer
+    interval: 2500
+    repeat: false
+    onTriggered: System.getAllAccountBalancesOverview()
+  }
+
+  // Timer for reloading the current AVME reward
+  Timer {
+    id: rewardReloadTimer
+    interval: 2500
+    repeat: false
+    onTriggered: System.getPoolReward()
   }
 
   // Timer for reloading the staking ROI
   Timer {
-    id: listROITimer
-    interval: 5000
-    repeat: true
+    id: roiTimer
+    interval: 2500
+    repeat: false
     onTriggered: System.calculateRewardCurrentROI()
   }
 
   Component.onCompleted: {
-    reloadBalances()
-    System.calculateRewardCurrentROI()
-    listReloadTimer.start()
-    listROITimer.start()
     accountCoinBalance.text = accountCoinPrice.text = "Loading..."
     accountTokenBalance.text = accountTokenPrice.text = "Loading..."
     walletCoinBalance.text = walletCoinPrice.text = "Loading..."
     walletTokenBalance.text = walletTokenPrice.text = "Loading..."
     stakingFreeBalance.text = "Loading..."
     stakingLockedBalance.text = "Loading..."
-    System.getMarketData(30)
-  }
-
-  function reloadBalances() {
     System.getAccountBalancesOverview(System.getCurrentAccount())
     System.getAllAccountBalancesOverview()
     System.getPoolReward()
+    System.calculateRewardCurrentROI()
+    System.getMarketData(30)
   }
 
   AVMEAccountHeader {
@@ -699,7 +720,7 @@ Item {
         margins: 10
       }
       visible: false
-      title: "<b>Historical AVME Prices (last 30 days)</b>"
+      title: "<b>Historical AVME Prices</b>"
       titleColor: "#FFFFFF"
       backgroundColor: "#881D212A"
       antialiasing: true
@@ -710,24 +731,27 @@ Item {
       }
       margins { right: 0; bottom: 0; left: 0; top: 0 }
 
-      LineSeries {
+      SplineSeries {
         id: marketLine
-        property double minX: 0.0
-        property double maxX: 0.0
-        property double minY: 0.0
-        property double maxY: 0.0
+        property int countX: 0
+        property alias minX: marketAxisX.min
+        property alias maxX: marketAxisX.max
+        property alias minY: marketAxisY.min
+        property alias maxY: marketAxisY.max
         name: "<b>AVME Price (USD)</b>"
         color: "#368097"
         width: 3.0
-        axisX: ValueAxis {
-          labelsColor: "transparent"
-          min: marketLine.minX
-          max: marketLine.maxX
+        axisX: DateTimeAxis {
+          id: marketAxisX
+          labelsColor: "#FFFFFF"
+          gridLineColor: "#22FFFFFF"
+          tickCount: marketLine.countX
+          format: "dd/MM"
         }
         axisY: ValueAxis {
+          id: marketAxisY
           labelsColor: "#FFFFFF"
-          min: marketLine.minY
-          max: marketLine.maxY
+          gridLineColor: "#22FFFFFF"
         }
       }
     }
