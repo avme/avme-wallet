@@ -34,8 +34,7 @@ TxData Utils::decodeRawTransaction(std::string rawTxHex) {
   }
 
   // Value, nonce, gas limit, gas price, hash and v/r/s signature keys
-  ret.value = formatBalance(transaction.value()) + " (" +
-    boost::lexical_cast<std::string>(transaction.value()) + " wei)";
+  ret.value = weiToFixedPoint(boost::lexical_cast<std::string>(transaction.value()), 18) + " AVAX";
   ret.nonce = boost::lexical_cast<std::string>(transaction.nonce());
   ret.gas = boost::lexical_cast<std::string>(transaction.gas());
   ret.price = formatBalance(transaction.gasPrice()) + " (" +
