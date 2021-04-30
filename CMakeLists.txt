@@ -24,7 +24,7 @@ HunterGate(
 
 # Project data
 project(avme_wallet)
-set(PROJECT_VERSION 0.0.1)  # TODO: up to 1.0.0 near release
+set(PROJECT_VERSION 1.0.0)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
