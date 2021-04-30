@@ -90,7 +90,7 @@ Rectangle {
 
     AVMESideMenuItem {
       id: itemSend
-      icon: (itemSelection.y == y) ? "qrc:/img/icons/coinSelect.png" : "qrc:/img/icons/coin.png"
+      icon: (itemSelection.y == y) ? "qrc:/img/icons/directionsSelect.png" : "qrc:/img/icons/directions.png"
       label: "Send"
       area.onClicked: {
         itemSelection.y = y
@@ -107,7 +107,7 @@ Rectangle {
 
     AVMESideMenuItem {
       id: itemExchange
-      icon: (itemSelection.y == y) ? "qrc:/img/icons/directionsSelect.png" : "qrc:/img/icons/directions.png"
+      icon: (itemSelection.y == y) ? "qrc:/img/icons/credit-cardSelect.png" : "qrc:/img/icons/credit-card.png"
       label: "Exchange/<br>Liquidity"
       area.onClicked: {
         itemSelection.y = y
@@ -124,7 +124,7 @@ Rectangle {
 
     AVMESideMenuItem {
       id: itemStaking
-      icon: (itemSelection.y == y) ? "qrc:/img/icons/credit-cardSelect.png" : "qrc:/img/icons/credit-card.png"
+      icon: (itemSelection.y == y) ? "qrc:/img/icons/coinSelect.png" : "qrc:/img/icons/coin.png"
       label: "Staking"
       area.onClicked: {
         itemSelection.y = y
