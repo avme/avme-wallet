@@ -135,10 +135,11 @@ Item {
     // then the AVAX user balance is limiting. Same with tokenAmount and AVME.
     if (coinAmount > maxAmountAVAX) {
       maxAmountAVME = tokenAmount
-    } else {
-      maxAmountAVAX = coinAmount
     }
-
+	
+	if (tokenAmount > maxAmountAVME) {
+	  maxAmountAVAX = coinAmount
+	}
     // Set the values accordingly
     if (lowerToken == System.getCurrentCoin()) {
       liquidityCoinInput.text = maxAmountAVAX
