@@ -16,6 +16,33 @@ Item {
   property bool createWalletExists
   property bool loadWalletExists
 
+  Connections {
+    target: System
+    function onAccountCreated(obj) {
+      // Always default to AVAX & AVME on first load
+      if (System.getCurrentCoin() == "") {
+        System.setCurrentCoin("AVAX")
+        System.setCurrentCoinDecimals(18)
+      }
+      if (System.getCurrentToken() == "") {
+        System.setCurrentToken("AVME")
+        System.setCurrentTokenDecimals(18)
+      }
+      System.setCurrentAccount(obj.accAddress)
+      System.setFirstLoad(true)
+      System.loadAccounts()
+      System.startAllBalanceThreads()
+      while (!System.accountHasBalances(obj.accAddress)) {} // This is ugly but hey it works
+      walletNewPopup.close()
+      System.goToOverview();
+      System.setScreen(content, "qml/screens/OverviewScreen.qml")
+    }
+    function onAccountCreationFailed() {
+      walletFailPopup.info = error.toString()
+      walletFailPopup.open()
+    }
+  }
+
   // Background logo image
   Image {
     id: logoBg
@@ -265,19 +292,12 @@ Item {
                 + "<br>the folder path and/or passphrase.";
               }
               console.log("Wallet loaded successfully")
-              // Create the first Account (seed index 0) automatically
-              System.createAccount(System.getWalletSeed(createPassInput.text), 0, "", createPassInput.text)
-              // Always default to AVAX & AVME on first load
-              if (System.getCurrentCoin() == "") {
-                System.setCurrentCoin("AVAX")
-                System.setCurrentCoinDecimals(18)
-              }
-              if (System.getCurrentToken() == "") {
-                System.setCurrentToken("AVME")
-                System.setCurrentTokenDecimals(18)
-              }
-              System.setFirstLoad(true)
-              System.setScreen(content, "qml/screens/AccountsScreen.qml")
+              viewSeedPopup.pass.text = createPassInput.text
+              viewSeedPopup.pass.enabled = false
+              viewSeedPopup.showBtn.enabled = false
+              viewSeedPopup.newWalletPass = createPassInput.text
+              viewSeedPopup.showSeed()
+              viewSeedPopup.open()
             } catch (error) {
               walletFailPopup.info = error.toString()
               walletFailPopup.open()
@@ -412,5 +432,24 @@ Item {
   AVMEPopupInfo {
     id: walletFailPopup
     icon: "qrc:/img/warn.png"
+  }
+
+  // Popup for viewing the Wallet's seed
+  AVMEPopupViewSeed {
+    id: viewSeedPopup
+    closeBtn.onClicked: {
+      pass.enabled = true
+      System.createAccount(newWalletSeed, 0, "", newWalletPass)
+      viewSeedPopup.clean()
+      viewSeedPopup.close()
+      walletNewPopup.open()
+    }
+  }
+
+  // Popup for waiting while the first Account is created for a new Wallet
+  AVMEPopup {
+    id: walletNewPopup
+    property string pass
+    info: "Creating an Account<br>for the new Wallet..."
   }
 }

@@ -216,27 +216,7 @@ class System : public QObject {
       return ret;
     }
 
-    // Start/stop balance threads for one/all Accounts, respectively
-    Q_INVOKABLE void startBalanceThread(QString address) {
-      for (Account &a : w.accounts) {
-        if (a.address == address.toStdString()) {
-          Account::startBalancesThread(a);
-          break;
-        }
-      }
-    }
-
-    Q_INVOKABLE void stopBalanceThread(QString address) {
-      for (Account &a : w.accounts) {
-        if (a.address == address.toStdString()) {
-          a.interruptThread = true;
-          while (!a.threadWasInterrupted) {
-              boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
-          }
-        }
-      }
-    }
-
+    // Start/stop balance threads for all Accounts in the Wallet, respectively
     Q_INVOKABLE void startAllBalanceThreads() {
       for (Account &a : w.accounts) {
         Account::startBalancesThread(a);
@@ -252,6 +232,23 @@ class System : public QObject {
             boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
         }
       }
+    }
+
+    // Check if an Account has loaded the balances
+    Q_INVOKABLE bool accountHasBalances(QString address) {
+      bool hasBalances = false;
+      for (Account &a : w.accounts) {
+        if (a.address == address.toStdString()) {
+          a.balancesThreadLock.lock();
+          hasBalances = (
+            a.balanceAVAX != "" && a.balanceAVME != "" &&
+            a.balanceLPFree != "" && a.balanceLPLocked != ""
+          );
+          a.balancesThreadLock.unlock();
+          break;
+        }
+      }
+      return hasBalances;
     }
 
     // Generate an Account list from a given seed, starting from a given index
@@ -289,7 +286,7 @@ class System : public QObject {
         if (!a.id.empty()) {
           obj.insert("accId", QString::fromStdString(a.id));
           obj.insert("accName", QString::fromStdString(a.name));
-          obj.insert("accAddress", QString::fromStdString(a.address));
+          obj.insert("accAddress", "0x" + QString::fromStdString(a.address));
           emit accountCreated(obj);
         } else {
           emit accountCreationFailed();

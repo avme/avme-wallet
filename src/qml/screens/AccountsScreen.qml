@@ -14,12 +14,10 @@ Item {
   Connections {
     target: System
     function onAccountCreated(data) {
-      console.log("Account created successfully")
       createAccountPopup.close()
       reloadList()
     }
     function onAccountCreationFailed() {
-      console.log("Failed to create Account")
       createAccountPopup.close()
       accountFailPopup.open()
     }
@@ -165,7 +163,6 @@ Item {
           System.stopAllBalanceThreads()
           listReloadTimer.stop()
           chooseAccountPopup.close()
-          console.log(((foreignSeed != "") ? "Importing" : "Creating") + " Account...")
           System.createAccount(foreignSeed, index, name, pass)
           chooseAccountPopup.clean()
           createAccountPopup.open()
@@ -243,7 +240,6 @@ Item {
         if (System.eraseAccount(walletList.currentItem.itemAccount)) {
           System.stopAllBalanceThreads()
           listReloadTimer.stop()
-          console.log("Account erased successfully")
           erasePopup.close()
           erasePopup.account = ""
           erasePassInput.text = ""

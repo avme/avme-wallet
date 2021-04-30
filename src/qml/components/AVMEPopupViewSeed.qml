@@ -7,8 +7,12 @@ import QtQuick.Controls 2.2
 // Popup for viewing the Wallet's seed.
 Popup {
   id: viewSeedPopup
-  readonly property alias pass: passInput.text
+  property string newWalletPass
+  property string newWalletSeed
+  property alias pass: passInput
+  property alias seed: seedText
   property alias showBtn: btnShow
+  property alias closeBtn: btnClose
   property color popupBgColor: "#1C2029"
   property color popupSeedBgColor: "#2D3542"
   property color popupSelectionColor: "#58A0B9"
@@ -16,6 +20,7 @@ Popup {
   function showSeed() {
     if (seedText.timer.running) { seedText.timer.stop() }
     seedText.text = System.getWalletSeed(passInput.text)
+    newWalletSeed = seedText.text
   }
 
   function showErrorMsg() {
