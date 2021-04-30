@@ -1,3 +1,6 @@
+// Copyright (c) 2020-2021 AVME Developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #ifndef STAKING_H
 #define STAKING_H
 
@@ -19,7 +22,25 @@ class Staking {
     static std::map<std::string, std::string> funcs;
 
     /**
-     * (ABI) Check the LP and reward balances for a given Account.
+     * (ABI) Get the total LP supply in the staking contract.
+     * Returns the amount in Wei.
+     */
+    static std::string totalSupply();
+
+    /**
+     * (ABI) Get the total reward amount for the duration of the staking contract.
+     * Returns the amount in Wei.
+     */
+    static std::string getRewardForDuration();
+
+    /**
+     * (ABI) Get the duration of the staking reward in the staking contract.
+     * Returns the duration in seconds.
+     */
+    static std::string rewardsDuration();
+
+    /**
+     * (ABI) Get the LP and reward balances for a given Account.
      * Returns the amounts in Wei.
      */
     static std::string balanceOf(std::string address);

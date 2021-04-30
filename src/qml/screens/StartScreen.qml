@@ -1,137 +1,408 @@
+/* Copyright (c) 2020-2021 AVME Developers
+   Distributed under the MIT/X11 software license, see the accompanying
+   file LICENSE or http://www.opensource.org/licenses/mit-license.php. */
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 import Qt.labs.platform 1.0
 
 import "qrc:/qml/components"
 
-// Initial screen (for creating/loading a Wallet)
+// Starting screen (for managing Wallets)
 
 Item {
   id: startScreen
-  property bool walletExists
+  property bool isCreate
+  property bool isLoad
+  property bool createWalletExists
+  property bool loadWalletExists
 
-  Column {
-    id: items
-    anchors.fill: parent
-    spacing: 40
-    topPadding: 40
-
-    // Logo
-    Image {
-      id: logo
-      height: 120
-      anchors.horizontalCenter: parent.horizontalCenter
-      fillMode: Image.PreserveAspectFit
-      source: "qrc:/img/avme_banner.png"
+  // Background logo image
+  Image {
+    id: logoBg
+    anchors {
+      horizontalCenter: parent.horizontalCenter
+      horizontalCenterOffset: 400
     }
+    width: 1000
+    height: 1000
+    opacity: 0.15
+    antialiasing: true
+    smooth: true
+    fillMode: Image.PreserveAspectFit
+    source: "qrc:/img/avme_logo_hd.png"
+  }
 
-    // Welcome text
+  // Header (logo + text)
+  Image {
+    id: logo
+    width: 150
+    height: 150
+    anchors {
+      top: parent.top
+      left: parent.left
+      topMargin: 50
+      leftMargin: 50
+    }
+    antialiasing: true
+    smooth: true
+    source: "qrc:/img/avme_logo_hd.png"
+    fillMode: Image.PreserveAspectFit
+
     Text {
-      id: welcomeText
-      font.pointSize: 18.0
+      anchors {
+        verticalCenter: parent.verticalCenter
+        left: parent.right
+        leftMargin: 20
+      }
       font.bold: true
-      anchors.horizontalCenter: parent.horizontalCenter
-      horizontalAlignment: Text.AlignHCenter
-      text: "Welcome to the AVME Wallet"
+      color: "#FFFFFF"
+      font.pointSize: 32.0
+      text: {
+        if (isCreate) {
+          text: "Create/Import Wallet"
+        } else if (isLoad) {
+          text: "Load Wallet"
+        } else {
+          text: "Welcome to the AVME Wallet"
+        }
+      }
+    }
+  }
+
+  // Starting rectangle
+  Rectangle {
+    id: startRect
+    width: parent.width * 0.4
+    height: 150
+    visible: (!isCreate && !isLoad)
+    anchors {
+      top: logo.bottom
+      left: parent.left
+      topMargin: 50
+      leftMargin: 50
+    }
+    color: "#2D3542"
+    radius: 10
+
+    AVMEButton {
+      id: btnStartCreate
+      width: parent.width * 0.9
+      anchors {
+        centerIn: parent
+        verticalCenterOffset: -30
+      }
+      text: "Create/Import Wallet"
+      onClicked: isCreate = true
     }
 
-    // Wallet folder
-    Row {
-      id: folderRow
-      anchors.horizontalCenter: parent.horizontalCenter
-      spacing: 10
+    AVMEButton {
+      id: btnStartLoad
+      width: parent.width * 0.9
+      anchors {
+        centerIn: parent
+        verticalCenterOffset: 30
+      }
+      text: "Load Wallet"
+      onClicked: isLoad = true
+    }
+  }
+
+  // Create/Import rectangle
+  Rectangle {
+    id: createRect
+    width: parent.width * 0.4
+    height: 420
+    visible: isCreate
+    anchors {
+      top: logo.bottom
+      left: parent.left
+      topMargin: 50
+      leftMargin: 50
+    }
+    color: "#2D3542"
+    radius: 10
+
+    Column {
+      id: createItems
+      anchors.fill: parent
+      spacing: 30
+      topPadding: 30
+
+      // Create Wallet folder
+      Row {
+        id: createFolderRow
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: 10
+
+        AVMEInput {
+          id: createFolderInput
+          property string path
+          width: (createItems.width * 0.9) - (createFolderDialogBtn.width + parent.spacing)
+          enabled: (!defaultCheck.checked)
+          readOnly: true
+          label: "Wallet folder"
+          placeholder: "Your Wallet's top folder"
+          text: (defaultCheck.checked) ? System.getDefaultWalletPath() : path
+        }
+        AVMEButton {
+          id: createFolderDialogBtn
+          width: 40
+          enabled: (!defaultCheck.checked)
+          height: createFolderInput.height
+          text: "..."
+          onClicked: createFolderDialog.visible = true
+        }
+        FolderDialog {
+          id: createFolderDialog
+          title: "Choose your Wallet folder"
+          onAccepted: {
+            createFolderInput.path = System.cleanPath(createFolderDialog.folder)
+            createWalletExists = System.checkFolderForWallet(createFolderInput.text)
+          }
+        }
+      }
+
+      // Passphrase
+      AVMEInput {
+        id: createPassInput
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: (createItems.width * 0.9)
+        echoMode: TextInput.Password
+        passwordCharacter: "*"
+        label: "Passphrase"
+        placeholder: "Your Wallet's passphrase"
+      }
+
+      // Default path checkbox
+      CheckBox {
+        id: defaultCheck
+        checked: true
+        enabled: true
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: "Use default path"
+        contentItem: Text {
+          text: parent.text
+          font: parent.font
+          color: parent.checked ? "#FFFFFF" : "#888888"
+          verticalAlignment: Text.AlignVCenter
+          leftPadding: parent.indicator.width + parent.spacing
+        }
+        Component.onCompleted: {
+          createWalletExists = System.checkFolderForWallet(createFolderInput.text)
+        }
+        onClicked: {
+          createWalletExists = System.checkFolderForWallet(createFolderInput.text)
+        }
+      }
+
+      // Optional seed (Import)
+      Text {
+        id: createSeedText
+        color: "#FFFFFF"
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        text: "Importing an existing Wallet?"
+      }
 
       AVMEInput {
-        id: folderInput
-        width: (items.width / 2) - (folderDialogBtn.width + parent.spacing)
-        readOnly: true
-        label: "Wallet folder"
-        placeholder: "Your Wallet's top folder"
+        id: createSeedInput
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: (createItems.width * 0.9)
+        label: "(Optional) Seed"
+        placeholder: "Your 12-word seed phrase"
       }
-      AVMEButton {
-        id: folderDialogBtn
-        width: 40
-        height: folderInput.height
-        text: "..."
-        onClicked: folderDialog.visible = true
-      }
-      FolderDialog {
-        id: folderDialog
-        title: "Choose your Wallet folder"
-        onAccepted: {
-          folderInput.text = System.cleanPath(folderDialog.folder)
-          walletExists = System.checkFolderForWallet(folderInput.text)
-          if (walletExists) { seedInput.text = "" }
+
+      // Buttons for Create/Import Wallet
+      Row {
+        id: btnCreateRow
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: 20
+
+        AVMEButton {
+          id: btnCreateBack
+          width: (createItems.width * 0.4)
+          text: "Back"
+          onClicked: isCreate = false
+        }
+
+        AVMEButton {
+          id: btnCreate
+          width: (createItems.width * 0.4)
+          enabled: (createFolderInput.text != "" && createPassInput.text != "" && !createWalletExists)
+          text: {
+            if (createWalletExists) {
+              text: "Wallet exists"
+            } else if (!createWalletExists && createSeedInput.text == "") {
+              text: "Create Wallet"
+            } else if (!createWalletExists && createSeedInput.text != "") {
+              text: "Import Wallet"
+            }
+          }
+          onClicked: {
+            try {
+              if (!createWalletExists && createSeedInput.text == "") {
+                if (!System.createWallet(createFolderInput.text, createPassInput.text)) {
+                  throw "Error on Wallet creation. Please check"
+                  + "<br>the folder path and/or passphrase.";
+                }
+                console.log("Wallet created successfully, now loading it...")
+              } else if (!createWalletExists && createSeedInput.text != "") {
+                if (!System.seedIsValid(createSeedInput.text)) {
+                  throw "Error on Wallet importing. Seed is invalid,"
+                  + "<br>please check the spelling and/or formatting."
+                } else if (!System.importWallet(createSeedInput.text, createFolderInput.text, createPassInput.text)) {
+                  throw "Error on Wallet importing. Please check"
+                  + "<br>the folder path and/or passphrase.";
+                }
+                console.log("Wallet imported successfully, now loading it...")
+              }
+              if (System.isWalletLoaded()) {
+                System.stopAllBalanceThreads()
+                System.closeWallet()
+              }
+              if (!System.loadWallet(createFolderInput.text, createPassInput.text)) {
+                throw "Error on Wallet loading. Please check"
+                + "<br>the folder path and/or passphrase.";
+              }
+              console.log("Wallet loaded successfully")
+              // Create the first Account (seed index 0) automatically
+              System.createAccount(System.getWalletSeed(createPassInput.text), 0, "", createPassInput.text)
+              // Always default to AVAX & AVME on first load
+              if (System.getCurrentCoin() == "") {
+                System.setCurrentCoin("AVAX")
+                System.setCurrentCoinDecimals(18)
+              }
+              if (System.getCurrentToken() == "") {
+                System.setCurrentToken("AVME")
+                System.setCurrentTokenDecimals(18)
+              }
+              System.setFirstLoad(true)
+              System.setScreen(content, "qml/screens/AccountsScreen.qml")
+            } catch (error) {
+              walletFailPopup.info = error.toString()
+              walletFailPopup.open()
+            }
+          }
         }
       }
     }
+  }
 
-    // Passphrase
-    AVMEInput {
-      id: passInput
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: items.width / 2
-      echoMode: TextInput.Password
-      passwordCharacter: "*"
-      label: "Passphrase"
-      placeholder: "Your Wallet's passphrase"
+  // Load rectangle
+  Rectangle {
+    id: loadRect
+    width: parent.width * 0.4
+    height: 230
+    visible: isLoad
+    anchors {
+      top: logo.bottom
+      left: parent.left
+      topMargin: 50
+      leftMargin: 50
     }
+    color: "#2D3542"
+    radius: 10
 
-    // Optional seed
-    AVMEInput {
-      id: seedInput
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: items.width / 2
-      visible: (folderInput.text != "" && !walletExists)
-      enabled: visible
-      label: "(Optional) Seed"
-      placeholder: "Restoring an existing Wallet? Enter your 12-word seed here"
-    }
+    Column {
+      id: loadItems
+      anchors.fill: parent
+      spacing: 30
+      topPadding: 30
 
-    // Button
-    AVMEButton {
-      id: btn
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: parent.width / 4
-      enabled: (folderInput.text != "" && passInput.text != "")
-      height: 60
-      text: {
-        if (walletExists) {
-          text: "Open Wallet"
-        } else if (!walletExists && seedInput.text == "") {
-          text: "Create Wallet"
-        } else if (!walletExists && seedInput.text != "") {
-          text: "Import Wallet"
+      // Load Wallet folder
+      Row {
+        id: loadFolderRow
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: 10
+
+        AVMEInput {
+          id: loadFolderInput
+          width: (loadItems.width * 0.9) - (loadFolderDialogBtn.width + parent.spacing)
+          readOnly: true
+          label: "Wallet folder"
+          placeholder: "Your Wallet's top folder"
+          Component.onCompleted: {
+            var path = System.getDefaultWalletPath()
+            var exists = System.checkFolderForWallet(path)
+            if (exists) {
+              loadFolderInput.text = path
+              loadWalletExists = exists
+            }
+          }
+        }
+        AVMEButton {
+          id: loadFolderDialogBtn
+          width: 40
+          height: loadFolderInput.height
+          text: "..."
+          onClicked: loadFolderDialog.visible = true
+        }
+        FolderDialog {
+          id: loadFolderDialog
+          title: "Choose your Wallet folder"
+          onAccepted: {
+            loadFolderInput.text = System.cleanPath(loadFolderDialog.folder)
+            loadWalletExists = System.checkFolderForWallet(loadFolderInput.text)
+          }
         }
       }
-      onClicked: {
-        try {
-          if (!walletExists && seedInput.text == "") {
-            if (!System.createWallet(folderInput.text, passInput.text)) {
-              throw "Error on Wallet creation. Please check"
-              + "<br>the folder path and/or passphrase.";
+
+      // Passphrase
+      AVMEInput {
+        id: loadPassInput
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: (loadItems.width * 0.9)
+        echoMode: TextInput.Password
+        passwordCharacter: "*"
+        label: "Passphrase"
+        placeholder: "Your Wallet's passphrase"
+      }
+
+      // Buttons for Load Wallet
+      Row {
+        id: btnLoadRow
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: 20
+
+        AVMEButton {
+          id: btnLoadBack
+          width: (loadItems.width * 0.4)
+          text: "Back"
+          onClicked: isLoad = false
+        }
+
+        AVMEButton {
+          id: btnLoad
+          width: (loadItems.width * 0.4)
+          enabled: (loadFolderInput.text != "" && loadPassInput.text != "" && loadWalletExists)
+          text: (loadWalletExists) ? "Load Wallet" : "No Wallet found"
+          onClicked: {
+            try {
+              if (System.isWalletLoaded()) {
+                System.stopAllBalanceThreads()
+                System.closeWallet()
+              }
+              if (!System.loadWallet(loadFolderInput.text, loadPassInput.text)) {
+                throw "Error on Wallet loading. Please check"
+                + "<br>the folder path and/or passphrase.";
+              }
+              console.log("Wallet loaded successfully")
+              // Always default to AVAX & AVME on first load
+              if (System.getCurrentCoin() == "") {
+                System.setCurrentCoin("AVAX")
+                System.setCurrentCoinDecimals(18)
+              }
+              if (System.getCurrentToken() == "") {
+                System.setCurrentToken("AVME")
+                System.setCurrentTokenDecimals(18)
+              }
+              System.setFirstLoad(true)
+              System.setScreen(content, "qml/screens/AccountsScreen.qml")
+            } catch (error) {
+              walletFailPopup.info = error.toString()
+              walletFailPopup.open()
             }
-            console.log("Wallet created successfully, now loading it...")
-          } else if (!walletExists && seedInput.text != "") {
-            if (!System.seedIsValid(seedInput.text)) {
-              throw "Error on Wallet importing. Seed is invalid,"
-              + "<br>please check the spelling and/or formatting."
-            } else if (!System.importWallet(seedInput.text, folderInput.text, passInput.text)) {
-              throw "Error on Wallet importing. Please check"
-              + "<br>the folder path and/or passphrase.";
-            }
-            console.log("Wallet imported successfully, now loading it...")
           }
-          if (!System.loadWallet(folderInput.text, passInput.text)) {
-            throw "Error on Wallet loading. Please check"
-            + "<br>the folder path and/or passphrase.";
-          }
-          console.log("Wallet loaded successfully")
-          System.setFirstLoad(true)
-          System.setScreen(content, "qml/screens/AccountsScreen.qml")
-        } catch (error) {
-          walletFailPopup.info = error
-          walletFailPopup.open()
         }
       }
     }

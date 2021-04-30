@@ -13,7 +13,7 @@ Official wallet for the AVME Project.
 
 Example steps for APT-based distros:
 * `sudo apt-get build-dep qt5-default`
-* `sudo apt-get install build-essential mingw-w64 make automake autotools-dev cmake curl g++-multilib libtool binutils-gold bsdmainutils pkg-config python3 patch libxcb-xinerama0-dev`
+* `sudo apt-get install bison build-essential mingw-w64 make automake autotools-dev cmake curl g++-multilib libtool binutils-gold bsdmainutils pkg-config python3 patch libxcb-xinerama0-dev`
 
 ### Instructions
 
@@ -35,3 +35,4 @@ cmake -DCMAKE_TOOLCHAIN_FILE=cmake/x86_64-w64-mingw32.cmake ..
 cmake --build . -- -j$(nproc)
 ```
 
+***FOR DEVELOPERS ONLY:*** add `-DBUILD_CLI` to the cmake command to build a CLI executable for testing/debugging features.

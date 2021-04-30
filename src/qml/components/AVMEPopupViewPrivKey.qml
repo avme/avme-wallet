@@ -1,22 +1,18 @@
+/* Copyright (c) 2020-2021 AVME Developers
+   Distributed under the MIT/X11 software license, see the accompanying
+   file LICENSE or http://www.opensource.org/licenses/mit-license.php. */
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
-/**
- * Popup for viewing an Account's private key. Has to be opened manually.
- * Has the following items:
- * - "account": the Account bound to the private key
- * - "pass" (readonly): the Wallet password input
- * - "showBtn.onClicked": what to do when confirming the action
- * - "showPrivKey()": self-explanatory
- * - "showErrorMsg()": self-explanatory
- * - "clean()": helper function to clean up inputs/data
- */
-
+// Popup for viewing an Account's private key. Has to be opened manually.
 Popup {
   id: viewPrivKeyPopup
   property string account
   readonly property alias pass: keyPassInput.text
   property alias showBtn: btnShow
+  property color popupBgColor: "#1C2029"
+  property color popupKeyBgColor: "#2D3542"
+  property color popupSelectionColor: "#58A0B9"
 
   function showPrivKey() {
     if (keyText.timer.running) { keyText.timer.stop() }
@@ -34,15 +30,15 @@ Popup {
     keyText.text = ""
   }
 
-  width: (window.width / 2) + 200
-  height: (window.height / 2) + 50
-  x: (width / 2) - 200
-  y: (height / 2) - 50
+  width: (parent.width * 0.9)
+  height: (parent.height * 0.6)
+  x: (parent.width * 0.1) / 2
+  y: (parent.height * 0.4) / 2
   modal: true
   focus: true
   padding: 0  // Remove white borders
   closePolicy: Popup.NoAutoClose
-  background: Rectangle { anchors.fill: parent; color: "#9A4FAD" }
+  background: Rectangle { anchors.fill: parent; color: popupBgColor; radius: 10 }
 
   Column {
     anchors.fill: parent
@@ -53,6 +49,7 @@ Popup {
       id: warningText
       anchors.horizontalCenter: parent.horizontalCenter
       horizontalAlignment: Text.AlignHCenter
+      color: "#FFFFFF"
       text: "Please authenticate to view the private key for the Account:<br>"
       + "<b>" + account + "</b>"
       + "<br><br><b>YOU ARE FULLY RESPONSIBLE FOR GUARDING YOUR PRIVATE KEYS."
@@ -81,12 +78,12 @@ Popup {
       verticalAlignment: Text.AlignVCenter
       readOnly: true
       selectByMouse: true
-      selectionColor: "#9CE3FD"
-      color: "black"
+      selectionColor: popupSelectionColor
+      color: "#FFFFFF"
       background: Rectangle {
         width: parent.width
         height: parent.height
-        color: "#782D8B"
+        color: popupKeyBgColor
       }
       Timer { id: keyTextTimer; interval: 2000; onTriggered: keyText.text = "" }
     }

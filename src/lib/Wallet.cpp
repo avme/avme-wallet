@@ -1,15 +1,16 @@
+// Copyright (c) 2020-2021 AVME Developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "Wallet.h"
 
 bool Wallet::create(boost::filesystem::path folder, std::string pass) {
   // Create the paths if they don't exist yet
   boost::filesystem::path walletFile = folder.string() + "/wallet/c-avax/wallet.info";
   boost::filesystem::path secretsFolder = folder.string() + "/wallet/c-avax/accounts/secrets";
-  if (!exists(walletFile.parent_path())) {
-    create_directories(walletFile.parent_path());
-  }
-  if (!exists(secretsFolder)) {
-    create_directories(secretsFolder);
-  }
+  boost::filesystem::path historyFolder = folder.string() + "/wallet/c-avax/accounts/transactions";
+  if (!exists(walletFile.parent_path())) { create_directories(walletFile.parent_path()); }
+  if (!exists(secretsFolder)) { create_directories(secretsFolder); }
+  if (!exists(historyFolder)) { create_directories(historyFolder); }
 
   // Initialize a new Wallet, hash+salt the passphrase and store both
   KeyManager w(walletFile, secretsFolder);
@@ -18,7 +19,7 @@ bool Wallet::create(boost::filesystem::path folder, std::string pass) {
     Utils::walletFolderPath = folder;
     return true;
   } catch (Exception const& _e) {
-    std::cerr << "Unable to create wallet" << std::endl << boost::diagnostic_information(_e);
+	Utils::logToDebug(std::string("Unable to create wallet: ") + boost::diagnostic_information(_e));
     return false;
   }
 }
@@ -45,6 +46,10 @@ void Wallet::close() {
   this->passSalt = h256();
   this->km = KeyManager();
   Utils::walletFolderPath = "";
+}
+
+bool Wallet::isLoaded() {
+  return this->km.exists();
 }
 
 bool Wallet::auth(std::string pass) {
@@ -160,14 +165,12 @@ TransactionSkeleton Wallet::buildTransaction(
   TransactionSkeleton txSkel;
   int txNonce;
 
-  std::string nonceApiRequest = Network::getNonce(from);
-  std::string txNonceStr = JSON::getValue(nonceApiRequest, "result").get_str();
   // Check if nonce is valid (not an error message)
+  std::string txNonceStr = API::getNonce(from);
   if (txNonceStr == "") {
     txSkel.nonce = Utils::MAX_U256_VALUE();
     return txSkel;
   }
-
   std::stringstream nonceStrm;
   nonceStrm << std::hex << txNonceStr;
   nonceStrm >> txNonce;
@@ -195,7 +198,7 @@ std::string Wallet::signTransaction(TransactionSkeleton txSkel, std::string pass
     t.sign(s);
     txHexBuffer << toHex(t.rlp());
   } catch (Exception& ex) {
-    std::cerr << "Invalid transaction: " << ex.what() << std::endl;
+	Utils::logToDebug(std::string("Invalid Transaction: ") + ex.what());
     return "";
   }
 
@@ -205,8 +208,8 @@ std::string Wallet::signTransaction(TransactionSkeleton txSkel, std::string pass
 // TODO: change the hardcoded link when switching between mainnet and testnet
 std::string Wallet::sendTransaction(std::string txidHex, std::string operation) {
   // Send the transaction
-  std::string txidApiRequest = Network::broadcastTx(txidHex);
-  std::string txid = JSON::getValue(txidApiRequest, "result").get_str();
+  std::string txid = API::broadcastTx(txidHex);
+  if (txid == "") { return ""; }
   std::string txLink = "https://cchain.explorer.avax-test.network/tx/" + txid;
 
   /**

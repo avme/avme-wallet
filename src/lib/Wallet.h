@@ -1,3 +1,6 @@
+// Copyright (c) 2020-2021 AVME Developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #ifndef WALLET_H
 #define WALLET_H
 
@@ -25,8 +28,8 @@
 #include <libethcore/TransactionBase.h>
 
 #include "Account.h"
+#include "API.h"
 #include "BIP39.h"
-#include "Network.h"
 #include "Utils.h"
 
 using namespace dev;  // u256
@@ -66,6 +69,12 @@ class Wallet {
      * Clean Wallet data.
      */
     void close();
+
+    /**
+     * Check if the Wallet is properly loaded.
+     * Returns true on success, false on failure.
+     */
+    bool isLoaded();
 
     /**
      * Check if the passphrase input matches the stored hash.
@@ -143,7 +152,7 @@ class Wallet {
 
     /**
      * Send a signed transaction for broadcast and store it in history if successful.
-     * Returns a link to the transaction in the blockchain.
+     * Returns a link to the transaction in the blockchain, or an empty string on failure.
      */
     std::string sendTransaction(std::string txidHex, std::string operation);
 };

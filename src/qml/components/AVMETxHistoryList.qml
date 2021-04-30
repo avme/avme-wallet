@@ -1,12 +1,14 @@
+/* Copyright (c) 2020-2021 AVME Developers
+   Distributed under the MIT/X11 software license, see the accompanying
+   file LICENSE or http://www.opensource.org/licenses/mit-license.php. */
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 /**
  * Custom list for an Account's transaction history.
- * Requires a ListModel with the items from the WalletTxData struct.
- * See transactions.h for more info.
+ * Requires a ListModel with the items from the TxData struct.
+ * See src/lib/Utils.h for more info.
  */
-
 ListView {
   id: historyList
   property color listHighlightColor: "#887AC1EB"
@@ -80,6 +82,7 @@ ListView {
       readonly property string itemDateTime: datetime
       readonly property string itemUnixTime: unixtime
       readonly property bool itemConfirmed: confirmed
+      readonly property bool itemInvalid: invalid
       width: parent.width
       height: 30
 

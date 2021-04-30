@@ -1,3 +1,6 @@
+// Copyright (c) 2020-2021 AVME Developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "BIP39.h"
 
 bip3x::Bip39Mnemonic::MnemonicResult BIP39::createNewMnemonic() {
@@ -31,8 +34,8 @@ std::vector<std::string> BIP39::generateAccountsFromSeed(std::string seed, int64
     toPushBack += boost::lexical_cast<std::string>(index) + " " + "0x" + k.address().hex();
 
     // Get the balance
-    json_spirit::mValue jsonBal = JSON::getValue(Network::getAVAXBalance("0x" + k.address().hex()), "result");
-    u256 AVAXbalance = boost::lexical_cast<HexTo<u256>>(jsonBal.get_str());
+    std::string bal = API::getAVAXBalance("0x" + k.address().hex());
+    u256 AVAXbalance = boost::lexical_cast<HexTo<u256>>(bal);
     std::string balanceStr = boost::lexical_cast<std::string>(AVAXbalance);
 
     // Don't write to vector if an error occurs while reading the JSON
@@ -71,6 +74,7 @@ std::pair<bool,std::string> BIP39::saveEncryptedMnemonic(
     result.first = false;
     result.second = "Error when encrypting: ";
     result.second += e.what();
+	Utils::logToDebug(result.second);
     return result;
   }
 
@@ -82,6 +86,7 @@ std::pair<bool,std::string> BIP39::saveEncryptedMnemonic(
     std::string error = success.get_obj().at("ERROR").get_str();
     result.first = false;
     result.second = "Error happened when writing JSON file: " + error;
+	Utils::logToDebug(result.second);
     return result;
   } catch (std::exception &e) {
     result.first = true;
@@ -90,6 +95,7 @@ std::pair<bool,std::string> BIP39::saveEncryptedMnemonic(
   }
   result.first = false;
   result.second = "Unknown Error";
+  Utils::logToDebug(result.second);
   return result;
 }
 
@@ -106,6 +112,7 @@ std::pair<bool,std::string> BIP39::loadEncryptedMnemonic(
     std::string error = seedJson.get_obj().at("ERROR").get_str();
     result.first = false;
     result.second = "Error happened when reading JSON file: " + error;
+	Utils::logToDebug(result.second);
     return result;
   } catch (std::exception &e) {
     ;
@@ -123,6 +130,7 @@ std::pair<bool,std::string> BIP39::loadEncryptedMnemonic(
     result.first = false;
     result.second = "Error happened when reading JSON to string: ";
     result.second += e.what();
+	Utils::logToDebug(result.second);
     return result;
   }
 
@@ -133,6 +141,7 @@ std::pair<bool,std::string> BIP39::loadEncryptedMnemonic(
     result.first = true;
     result.second = "Error happened when decrypting, perhaps wrong password? ";
     result.second += e.what();
+	Utils::logToDebug(result.second);
     return result;
   }
   result.first = true;

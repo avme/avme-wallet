@@ -1,3 +1,6 @@
+/* Copyright (c) 2020-2021 AVME Developers
+   Distributed under the MIT/X11 software license, see the accompanying
+   file LICENSE or http://www.opensource.org/licenses/mit-license.php. */
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
@@ -9,20 +12,19 @@ import QtQuick.Controls 2.2
  * "yesBtn.onClicked": what to do when the "Yes" button is clicked
  * "noBtn.onClicked": what to do when the "No" button is clicked
  */
-
 Popup {
   id: yesnoPopup
   property string icon
   property string info
   property alias yesBtn: yes
   property alias noBtn: no
-  property color popupBgColor: "#9A4FAD"
+  property color popupBgColor: "#1C2029"
 
   width: window.width / 2
   height: window.height / 4
   x: (window.width / 2) - (width / 2)
   y: (window.height / 2) - (height / 2)
-  background: Rectangle { anchors.fill: parent; color: popupBgColor }
+  background: Rectangle { anchors.fill: parent; color: popupBgColor; radius: 10 }
   modal: true
   focus: true
   padding: 0  // Remove white borders
@@ -42,6 +44,8 @@ Popup {
       height: 50
       anchors.verticalCenter: parent.verticalCenter
       fillMode: Image.PreserveAspectFit
+      antialiasing: true
+      smooth: true
       source: icon
     }
 
@@ -49,6 +53,7 @@ Popup {
       id: label
       anchors.verticalCenter: png.verticalCenter
       horizontalAlignment: Text.AlignHCenter
+      color: "#FFFFFF"
       text: info
     }
   }

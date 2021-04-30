@@ -1,3 +1,6 @@
+/* Copyright (c) 2020-2021 AVME Developers
+   Distributed under the MIT/X11 software license, see the accompanying
+   file LICENSE or http://www.opensource.org/licenses/mit-license.php. */
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
@@ -7,22 +10,22 @@ import QtQuick.Controls 2.2
  * "label": the text shown above the input field
  * "placeholder": the placeholder text shown in the input field
  */
-
 TextField {
   id: input
   property string label
   property string placeholder
   property color inputColor: "#449CE3FD"
+  property color inputLabelColor: "#FFFFFF"
   property color inputDisabledColor: "#44888888"
-  property color inputSelectionColor: "#9CE3FD"
+  property color inputSelectionColor: "#58A0B9"
   property color inputLineColor: "#7AC1DB"
   property color inputLineDisabledColor: "#888888"
-  property color inputPlaceholderColor: "#88000000"
+  property color inputPlaceholderColor: "#88FFFFFF"
 
   implicitWidth: 320
   implicitHeight: 40
   selectByMouse: true
-  color: "black"
+  color: "#FFFFFF"
   selectionColor: inputSelectionColor
   background: Rectangle {
     width: parent.width
@@ -44,6 +47,7 @@ TextField {
   // Label above the input field
   Text {
     id: labelText
+    color: inputLabelColor
     anchors.bottom: input.top
     anchors.left: input.left
     anchors.bottomMargin: 5

@@ -1,3 +1,6 @@
+// Copyright (c) 2020-2021 AVME Developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "main-cli.h"
 
 // Implementation of AVME Wallet as a CLI program.
@@ -137,7 +140,7 @@ int main() {
         } else if (menuOp == "5") { // AVME
           gasLimit = "80000";
         }
-        gasPrice = Network::getAutomaticFee();
+        gasPrice = API::getAutomaticFee();
       } else if (feeOp == "2") {
         gasLimit = menuSetGasLimit();
         gasPrice = menuSetGasPrice();

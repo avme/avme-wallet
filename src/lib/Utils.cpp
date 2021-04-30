@@ -1,3 +1,6 @@
+// Copyright (c) 2020-2021 AVME Developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "Utils.h"
 
 boost::filesystem::path Utils::walletFolderPath;
@@ -31,8 +34,7 @@ TxData Utils::decodeRawTransaction(std::string rawTxHex) {
   }
 
   // Value, nonce, gas limit, gas price, hash and v/r/s signature keys
-  ret.value = formatBalance(transaction.value()) + " (" +
-    boost::lexical_cast<std::string>(transaction.value()) + " wei)";
+  ret.value = weiToFixedPoint(boost::lexical_cast<std::string>(transaction.value()), 18) + " AVAX";
   ret.nonce = boost::lexical_cast<std::string>(transaction.nonce());
   ret.gas = boost::lexical_cast<std::string>(transaction.gas());
   ret.price = formatBalance(transaction.gasPrice()) + " (" +
@@ -53,7 +55,39 @@ TxData Utils::decodeRawTransaction(std::string rawTxHex) {
   ret.humanDate = timestream.str();
   ret.confirmed = false;
   ret.unixDate = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
+  ret.invalid = false;
   return ret;
+}
+
+std::mutex Utils::debugFileLock;
+
+void Utils::logToDebug(std::string debug) {
+	boost::filesystem::path debugFilePath = walletFolderPath / "debug.log";
+	debugFileLock.lock();
+	// Timestamps (epoch and human-readable) and confirmed
+	const auto p1 = std::chrono::system_clock::now();
+	auto t = std::time(nullptr);
+	auto tm = *std::localtime(&t);
+	std::stringstream timestream;
+	timestream << std::put_time(&tm, "[%d-%m-%Y %H-%M-%S] ");
+	std::string toWrite = timestream.str();
+	toWrite += debug;
+	
+	std::ofstream debugFile (debugFilePath.c_str(), std::ios::out | std::ios::app);
+	debugFile << toWrite << std::endl;
+	debugFile.close();
+	
+	
+	debugFileLock.unlock();
+	return;
+}
+
+std::string Utils::randomHexBytes() {
+	unsigned char saltBytes[32];
+	RAND_bytes(saltBytes, sizeof(saltBytes));
+	return toHex(
+		dev::sha3(std::string((char*)saltBytes, sizeof(saltBytes)), false)
+	).substr(0,16);
 }
 
 std::string Utils::weiToFixedPoint(std::string amount, size_t digits) {

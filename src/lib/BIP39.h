@@ -1,3 +1,6 @@
+// Copyright (c) 2020-2021 AVME Developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #ifndef BIP39_H
 #define BIP39_H
 
@@ -17,8 +20,8 @@
 #include <bip3x/utils.h>
 #include <bip3x/wordlist.h>
 
+#include "API.h"
 #include "Cipher.h"
-#include "Network.h"
 #include "JSON.h"
 #include "Utils.h"
 

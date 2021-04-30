@@ -1,3 +1,6 @@
+// Copyright (c) 2020-2021 AVME Developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "Pangolin.h"
 
 // TODO: change all addresses to mainnet once deployed
@@ -95,9 +98,9 @@ std::string Pangolin::totalSupply(std::string tokenNameA, std::string tokenNameB
         << "[{\"to\": \"" << Pangolin::getPair(tokenNameA, tokenNameB)
         << "\",\"data\": \"" << pairFuncs["totalSupply"]
         << "\"},\"latest\"]}";
-  std::string str = Network::httpGetRequest(query.str());
-  result = JSON::getValue(str, "result").get_str();
-  if (result == "0x") { return {}; }
+  std::string str = API::httpGetRequest(query.str());
+  result = JSON::getString(str, "result");
+  if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
 
   // Parse the result back into normal values
@@ -113,9 +116,9 @@ std::vector<std::string> Pangolin::getReserves(std::string tokenNameA, std::stri
         << "[{\"to\": \"" << Pangolin::getPair(tokenNameA, tokenNameB)
         << "\",\"data\": \"" << pairFuncs["getReserves"]
         << "\"},\"latest\"]}";
-  std::string str = Network::httpGetRequest(query.str());
-  result = JSON::getValue(str, "result").get_str();
-  if (result == "0x") { return {}; }
+  std::string str = API::httpGetRequest(query.str());
+  result = JSON::getString(str, "result");
+  if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
 
   // Parse the result back into normal values
@@ -178,9 +181,9 @@ std::string Pangolin::allowance(
                              << Utils::addressToHex(owner)
                              << Utils::addressToHex(spender)
         << "\"},\"latest\"]}";
-  std::string str = Network::httpGetRequest(query.str());
-  result = JSON::getValue(str, "result").get_str();
-  if (result == "0x") { return {}; }
+  std::string str = API::httpGetRequest(query.str());
+  result = JSON::getString(str, "result");
+  if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
 
   // Parse the result back into normal values

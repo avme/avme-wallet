@@ -1,27 +1,29 @@
+// Copyright (c) 2020-2021 AVME Developers
+// Distributed under the MIT/X11 software license, see the accompanying
+// file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "Account.h"
 
 void Account::reloadBalances(Account &a) {
-  // Get the balances from the network
-  std::string AVAXjson = Network::getAVAXBalance(a.address);
-  std::string AVMEjson = Network::getAVMEBalance(
+  // Get the balances from the network, check if they're all here
+  std::string AVAXBal = API::getAVAXBalance(a.address);
+  std::string AVMEBal = API::getAVMEBalance(
     a.address, Pangolin::tokenContracts["AVME"]
   );
-  std::string FreeLPjson = Network::getAVMEBalance(
+  std::string FreeLPBal = API::getAVMEBalance(
     a.address, Pangolin::pairContracts["WAVAX-AVME"]
   );
-  std::string LockedLPjson = Network::getAVMEBalance(
+  std::string LockedLPBal = API::getAVMEBalance(
     a.address, Pangolin::stakingContract
   );
+  if (AVAXBal == "" || AVMEBal == "" || FreeLPBal == "" || LockedLPBal == "") {
+    return;
+  }
 
-  // Get the balances from the JSON objects, convert to u256, then to string
-  json_spirit::mValue AVAXBal = JSON::getValue(AVAXjson, "result");
-  json_spirit::mValue AVMEBal = JSON::getValue(AVMEjson, "result");
-  json_spirit::mValue FreeLPBal = JSON::getValue(FreeLPjson, "result");
-  json_spirit::mValue LockedLPBal = JSON::getValue(LockedLPjson, "result");
-  u256 AVAXu256 = boost::lexical_cast<HexTo<u256>>(AVAXBal.get_str());
-  u256 AVMEu256 = boost::lexical_cast<HexTo<u256>>(AVMEBal.get_str());
-  u256 FreeLPu256 = boost::lexical_cast<HexTo<u256>>(FreeLPBal.get_str());
-  u256 LockedLPu256 = boost::lexical_cast<HexTo<u256>>(LockedLPBal.get_str());
+  // Convert the balances from hex to u256, then to string
+  u256 AVAXu256 = boost::lexical_cast<HexTo<u256>>(AVAXBal);
+  u256 AVMEu256 = boost::lexical_cast<HexTo<u256>>(AVMEBal);
+  u256 FreeLPu256 = boost::lexical_cast<HexTo<u256>>(FreeLPBal);
+  u256 LockedLPu256 = boost::lexical_cast<HexTo<u256>>(LockedLPBal);
   std::string AVAXstr = boost::lexical_cast<std::string>(AVAXu256);
   std::string AVMEstr = boost::lexical_cast<std::string>(AVMEu256);
   std::string FreeLPstr = boost::lexical_cast<std::string>(FreeLPu256);
@@ -103,6 +105,7 @@ json_spirit::mArray Account::txDataToJSON() {
     savedTransaction["humanDate"] = savedTxData.humanDate;
     savedTransaction["unixDate"] = savedTxData.unixDate;
     savedTransaction["confirmed"] = savedTxData.confirmed;
+    savedTransaction["invalid"] = savedTxData.invalid;
     transactionsArray.push_back(savedTransaction);
   }
   return transactionsArray;
@@ -140,11 +143,14 @@ void Account::loadTxHistory() {
       txData.humanDate = JSON::objectItem(JSON::arrayItem(txArray, i), "humanDate").get_str();
       txData.unixDate = JSON::objectItem(JSON::arrayItem(txArray, i), "unixDate").get_uint64();
       txData.confirmed = JSON::objectItem(JSON::arrayItem(txArray, i), "confirmed").get_bool();
+      txData.invalid = JSON::objectItem(JSON::arrayItem(txArray, i), "invalid").get_bool();
       this->history.push_back(txData);
     }
   } catch (std::exception &e) {
-    std::cout << "Couldn't load history for Account " << this->address
-              << ": " << JSON::objectItem(txData, "ERROR").get_str() << std::endl;
+    Utils::logToDebug(std::string("Couldn't load history for account ") + this->address + " : " + JSON::objectItem(txData, "ERROR").get_str());
+    // Uncomment to see output
+    //std::cout << "Couldn't load history for Account " << this->address
+    //          << ": " << JSON::objectItem(txData, "ERROR").get_str() << std::endl;
   }
 }
 
@@ -176,14 +182,17 @@ bool Account::saveTxToHistory(TxData TxData) {
   transaction["humanDate"] = TxData.humanDate;
   transaction["unixDate"] = TxData.unixDate;
   transaction["confirmed"] = TxData.confirmed;
+  transaction["invalid"] = TxData.invalid;
   transactionsArray.push_back(transaction);
 
   transactionsRoot["transactions"] = transactionsArray;
   json_spirit::mValue success = JSON::writeFile(transactionsRoot, txFilePath);
 
+  // Try/Catch are "inverted"
+  // Error happens when trying to find the error.
+  // If there is no "error" on the JSON, it will throw, meaning that it was successfull
   try {
-    std::string error = success.get_obj().at("ERROR").get_str();
-    std::cout << "Error happened when writing JSON file" << error << std::endl;
+	Utils::logToDebug("Error happened when writing JSON file: " + success.get_obj().at("ERROR").get_str());
   } catch (std::exception &e) {
     loadTxHistory();
     return true;
@@ -198,18 +207,19 @@ bool Account::updateAllTxStatus() {
   loadTxHistory();
   try {
     for (TxData &txData : this->history) {
-      if (!txData.confirmed) {
-        json_spirit::mValue request;
-        std::string jsonRequest = Network::getTxReceipt(txData.hex);
-        json_spirit::read_string(jsonRequest,request);
-        json_spirit::mValue result = JSON::objectItem(request, "result");
-        json_spirit::mValue jsStatus = JSON::objectItem(result, "status");
-        std::string status = jsStatus.get_str();
-        if (status == "0x1") txData.confirmed = true;
+      if (!txData.invalid && !txData.confirmed) {
+        const auto p1 = std::chrono::system_clock::now();
+        uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
+        if (txData.unixDate + 60 < now) { // Tx is cfered invalid after 60 seconds without confirmation
+          txData.invalid = true;
+        } else {
+          std::string status = API::getTxStatus(txData.hex);
+          if (status == "0x1") txData.confirmed = true;
+        }
       }
     }
   } catch (std::exception &e) {
-    std::cout << "Error: " << e.what();
+	Utils::logToDebug(std::string("Error when updating AllTxStatus: ") + e.what());
   }
   json_spirit::mObject transactionsRoot;
   json_spirit::mArray transactionsArray = txDataToJSON();
@@ -218,7 +228,7 @@ bool Account::updateAllTxStatus() {
 
   try {
     std::string error = success.get_obj().at("ERROR").get_str();
-    std::cout << "Error happened when writing JSON file" << error << std::endl;
+	Utils::logToDebug(std::string("Error happened when writing JSON file: ") + error);
   } catch (std::exception &e) {
     loadTxHistory();
     return true;

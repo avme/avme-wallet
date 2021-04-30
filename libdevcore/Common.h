@@ -113,7 +113,7 @@ using u160s = std::vector<u160>;
 using u256Set = std::set<u256>;
 using u160Set = std::set<u160>;
 
-using bigfloat = boost::multiprecision::number<boost::multiprecision::cpp_dec_float<18>>;
+using bigfloat = boost::multiprecision::number<boost::multiprecision::cpp_dec_float<256>>;
 
 u256 raiseToPow(u256 x, u256 power);
 
