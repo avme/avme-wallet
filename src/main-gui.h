@@ -742,7 +742,10 @@ class System : public QObject {
         // Gas price is in Gwei (10^9 Wei) and amounts are in fixed point.
         // Gas limit is already in Wei so we skip that.
         coinAmountStr = Utils::fixedPointToWei(coinAmountStr, this->currentCoinDecimals);
+		std::cout << "tokenAmountStr " << tokenAmountStr << std::endl;
+		std::cout << "currentTokenDecimals: " << this->currentTokenDecimals MM std::endl;
         tokenAmountStr = Utils::fixedPointToWei(tokenAmountStr, this->currentTokenDecimals);
+		std::cout << "tokenAmountStr: " << tokenAmountStr << std::endl;
         lpAmountStr = Utils::fixedPointToWei(lpAmountStr, 18);
         gasPriceStr = boost::lexical_cast<std::string>(
           boost::lexical_cast<u256>(gasPriceStr) * raiseToPow(10, 9)
@@ -777,7 +780,7 @@ class System : public QObject {
           );
         } else if (operationStr == "Swap AVAX -> AVME") {
           u256 amountOutMin = boost::lexical_cast<u256>(tokenAmountStr);
-          amountOutMin -= (amountOutMin / 1000); // 0.1%
+          amountOutMin -= (amountOutMin / 200); // 0.5% Slippage
           dataHex = Pangolin::swapExactAVAXForTokens(
             // amountOutMin, path, to, deadline
             boost::lexical_cast<std::string>(amountOutMin),
@@ -795,7 +798,7 @@ class System : public QObject {
           );
         } else if (operationStr == "Swap AVME -> AVAX") {
           u256 amountOutMin = boost::lexical_cast<u256>(coinAmountStr);
-          amountOutMin -= (amountOutMin / 1000); // 0.1%
+          amountOutMin -= (amountOutMin / 200); // 0.5% Slippage
           dataHex = Pangolin::swapExactTokensForAVAX(
             // amountIn, amountOutMin, path, to, deadline
             tokenAmountStr,
