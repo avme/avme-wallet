@@ -133,11 +133,11 @@ Item {
     // Limit the max amount to the lowest the user has.
     // If coinAmount is higher than the user's AVAX balance,
     // then the AVAX user balance is limiting. Same with tokenAmount and AVME.
-    if (coinAmount > maxAmountAVAX) {
+    if (System.firstHigherThanSecond(coinAmount, maxAmountAVAX)) {
       maxAmountAVME = tokenAmount
     }
 	
-	if (tokenAmount > maxAmountAVME) {
+	if (System.firstHigherThanSecond(tokenAmount, maxAmountAVME)) {
 	  maxAmountAVAX = coinAmount
 	}
     // Set the values accordingly

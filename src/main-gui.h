@@ -1147,6 +1147,15 @@ class System : public QObject {
         emit rewardUpdated(QString::fromStdString(poolReward));
       });
     }
+	Q_INVOKABLE bool firstHigherThanSecond(QString first, QString second) {
+		bigfloat firstFloat = boost::lexical_cast<bigfloat>(first.toStdString());
+		bigfloat secondFloat = boost::lexical_cast<bigfloat>(second.toStdString());
+		
+		if (firstFloat > secondFloat)
+			return true;
+		return false;
+		
+	}
 };
 
 #endif // MAIN_GUI_H
