@@ -113,9 +113,20 @@ std::string Graph::getAVMEPriceUSD(std::string AVAXUnitPriceUSD) {
   return AVMEPriceUSD;
 }
 
+std::vector<std::map<std::string, std::string>> Graph::getUSDTPriceHistory(int days) {
+  std::stringstream query;
+  query << "{\"query\": \"{"
+        << "tokenDayDatas(first: " << days << ", orderBy: date, orderDirection: desc, where: {"
+        << "token: \\\"0xde3a24028580884448a5397872046a019649b084\\\""
+        << "} ) { date priceUSD } }\"}";
+  std::string resp = httpGetRequest(query.str());
+  std::vector<std::map<std::string, std::string>> arr = JSON::getObjectArray(
+    resp, "data/tokenDayDatas", "/"
+  );
+  return arr;
+}
+
 std::vector<std::map<std::string, std::string>> Graph::getAVMEPriceHistory(int days) {
-  std::string AVAXUnitPriceUSD = getAVAXPriceUSD();
-  bigfloat AVAXPriceFloat = bigfloat(AVAXUnitPriceUSD);
   std::stringstream query;
   query << "{\"query\": \"{"
         << "tokenDayDatas(first: " << days << ", orderBy: date, orderDirection: desc, where: {"
@@ -125,11 +136,6 @@ std::vector<std::map<std::string, std::string>> Graph::getAVMEPriceHistory(int d
   std::vector<std::map<std::string, std::string>> arr = JSON::getObjectArray(
     resp, "data/tokenDayDatas", "/"
   );
-  for (std::map<std::string, std::string> &pair : arr) {
-    pair["priceUSD"] = boost::lexical_cast<std::string>(
-      boost::lexical_cast<double>(pair["priceUSD"]) * AVAXPriceFloat
-    );
-  }
   return arr;
 }
 

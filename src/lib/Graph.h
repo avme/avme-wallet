@@ -41,6 +41,7 @@ class Graph {
     // Those are all mainnet addresses:
     // WAVAX-USDT Pair: 0x9ee0a4e21bd333a6bb2ab298194320b8daa26516
     // WAVAX: 0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7
+    // USDT: 0xde3a24028580884448a5397872046a019649b084
     // AVME: 0x1ecd47ff4d9598f89721a2866bfeb99505a413ed
 
     /**
@@ -51,13 +52,14 @@ class Graph {
     static std::string getAVMEPriceUSD(std::string AVAXUnitPriceUSD);
 
     /**
-     * Get the HISTORICAL AVME prices in fiat (USD), from the last X days (starting from today).
+     * Get the HISTORICAL token prices in fiat (USD), from the last X days (starting from today).
      * Data might span more than X days (e.g. skipping days w/ no price action),
      * so "days" is really just the number of registered dates in history.
      * Returns a string/string map vector with the UNIX timestamps and
      * prices in fixed point (e.g. "12.34").
      * TODO: do this for AVAX when Pangolin fixes their priceUSD logic in graph
      */
+    static std::vector<std::map<std::string, std::string>> getUSDTPriceHistory(int days);
     static std::vector<std::map<std::string, std::string>> getAVMEPriceHistory(int days);
 };
 

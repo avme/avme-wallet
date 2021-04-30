@@ -566,7 +566,7 @@ class System : public QObject {
     Q_INVOKABLE void getMarketData(int days) {
       QtConcurrent::run([=](){
         std::string AVAXUnitPrice, AVMEUnitPrice;
-        std::vector<std::map<std::string, std::string>> graphList;
+        std::vector<std::map<std::string, std::string>> listUSDT, listAVME;
         QVariantList graphRet;
 
         // Get the current AVAX price in fiat (USD) and round it to two decimals
@@ -577,13 +577,21 @@ class System : public QObject {
         AVAXUnitPrice = AVAXss.str();
 
         // Get the historical AVME prices in fiat (USD) and send back
-        graphList = Graph::getAVMEPriceHistory(days);
-        for (std::map<std::string, std::string> map : graphList) {
-          std::string obj;
-          obj += "{\"unixdate\": " + map["date"];
-          obj += ", \"priceUSD\": " + map["priceUSD"];
-          obj += "}";
-          graphRet << QString::fromStdString(obj);
+        listUSDT = Graph::getUSDTPriceHistory(days);
+        listAVME = Graph::getAVMEPriceHistory(days);
+        for (std::map<std::string, std::string> mapUSDT : listUSDT) {
+          for (std::map<std::string, std::string> mapAVME : listAVME) {
+            if (mapUSDT["date"] == mapAVME["date"]) {
+              std::string obj;
+              bigfloat realAVMEValue = (
+                (1 / bigfloat(mapUSDT["priceUSD"])) * bigfloat(mapAVME["priceUSD"])
+              );
+              obj += "{\"unixdate\": " + mapAVME["date"];
+              obj += ", \"priceUSD\": " + boost::lexical_cast<std::string>(realAVMEValue);
+              obj += "}";
+              graphRet << QString::fromStdString(obj);
+            }
+          }
         }
         emit marketDataUpdated(
           days,
@@ -1147,15 +1155,14 @@ class System : public QObject {
         emit rewardUpdated(QString::fromStdString(poolReward));
       });
     }
-	Q_INVOKABLE bool firstHigherThanSecond(QString first, QString second) {
-		bigfloat firstFloat = boost::lexical_cast<bigfloat>(first.toStdString());
-		bigfloat secondFloat = boost::lexical_cast<bigfloat>(second.toStdString());
-		
-		if (firstFloat > secondFloat)
-			return true;
-		return false;
-		
-	}
+
+    Q_INVOKABLE bool firstHigherThanSecond(QString first, QString second) {
+      bigfloat firstFloat = boost::lexical_cast<bigfloat>(first.toStdString());
+      bigfloat secondFloat = boost::lexical_cast<bigfloat>(second.toStdString());
+      if (firstFloat > secondFloat)
+        return true;
+      return false;
+    }
 };
 
 #endif // MAIN_GUI_H

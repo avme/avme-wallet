@@ -13,7 +13,7 @@ Official wallet for the AVME Project.
 
 Example steps for APT-based distros:
 * `sudo apt-get build-dep qt5-default`
-* `sudo apt-get install bison build-essential mingw-w64 make automake autotools-dev cmake curl g++-multilib libtool binutils-gold bsdmainutils pkg-config python3 patch libxcb-xinerama0-dev`
+* `sudo apt-get install bison build-essential mingw-w64 make automake autotools-dev cmake curl g++-multilib libdouble-conversion-dev libtool binutils-gold bsdmainutils pkg-config python3 patch libxcb-xinerama0-dev`
 
 ### Instructions
 
