@@ -55,7 +55,7 @@ class System : public QObject {
     void historyLoaded(QVariantList data);
     void roiCalculated(QString ROI);
     void marketDataUpdated(
-      QString currentAVAXPrice, QString currentAVMEPrice, QVariantList AVMEHistory
+      int days, QString currentAVAXPrice, QString currentAVMEPrice, QVariantList AVMEHistory
     );
     void operationOverride(QString op, QString amountCoin, QString amountToken, QString amountLP);
     void txStart(
@@ -576,19 +576,17 @@ class System : public QObject {
         AVAXss << std::setprecision(2) << std::fixed << bigfloat(AVAXUnitPrice);
         AVAXUnitPrice = AVAXss.str();
 
-        // Get the historical AVME prices in fiat (USD)
+        // Get the historical AVME prices in fiat (USD) and send back
         graphList = Graph::getAVMEPriceHistory(days);
         for (std::map<std::string, std::string> map : graphList) {
           std::string obj;
-          const std::time_t p1 = boost::lexical_cast<time_t>(map["date"]);
-          QDateTime timestamp;
-          timestamp.setTime_t(p1);
           obj += "{\"unixdate\": " + map["date"];
           obj += ", \"priceUSD\": " + map["priceUSD"];
           obj += "}";
           graphRet << QString::fromStdString(obj);
         }
         emit marketDataUpdated(
+          days,
           QString::fromStdString(AVAXUnitPrice),
           QString::fromStdString(AVMEUnitPrice),
           graphRet

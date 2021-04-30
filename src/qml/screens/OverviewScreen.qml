@@ -41,23 +41,77 @@ Item {
       roiPercentage.roi = ROI
       roiTimer.start()
     }
-    function onMarketDataUpdated(currentAVAXPrice, currentAVMEPrice, AVMEHistory) {
+    function onMarketDataUpdated(days, currentAVAXPrice, currentAVMEPrice, AVMEHistory) {
       currentAVAXAmount.amount = currentAVAXPrice
       currentAVMEAmount.amount = currentAVMEPrice
       var minY = -1
       var maxY = -1
-      marketLine.countX = (AVMEHistory.length / 2)
+      marketGraph.countX = (AVMEHistory.length / 2)
+
       for (var i = 0; i < AVMEHistory.length; i++) {
+        // Get the current candlestick (and previous if not at the end yet)
         var obj = JSON.parse(AVMEHistory[i])
-        var timedate = new Date(obj.unixdate * 1000)
-        if (i == 0) { marketLine.maxX = timedate }
-        if (i == AVMEHistory.length - 1) { marketLine.minX = timedate }
+        var timestamp = new Date(obj.unixdate * 1000)
+        var candlestick = Qt.createQmlObject(
+          "import QtCharts 2.2; CandlestickSet { timestamp: " + timestamp.getTime() + " }", marketGraph
+        )
+        var prevObj = null
+        var prevTimestamp = null
+        if (i != AVMEHistory.length - 1) {
+          prevObj = JSON.parse(AVMEHistory[i+1])
+          prevTimestamp = new Date(prevObj.unixdate * 1000)
+        }
+
+        // Fill any gaps between days
+        if (prevTimestamp != null) {
+          var timediff = timestamp.getTime() - prevTimestamp.getTime()
+          if (timediff > 86400000) {  // diff > 1 day means there are gaps
+            while (timediff > 0) {
+              var prevCandlestick = Qt.createQmlObject(
+                "import QtCharts 2.2; CandlestickSet { timestamp: " + (timediff - 86400000) + " }", marketGraph
+              )
+              prevCandlestick.open = obj.priceUSD
+              prevCandlestick.high = obj.priceUSD
+              prevCandlestick.low = obj.priceUSD
+              prevCandlestick.close = obj.priceUSD
+              marketGraph.append(prevCandlestick)
+              timediff -= 86400000
+            }
+          }
+        }
+
+        // Set candlestick values
+        if (i == AVMEHistory.length - 1) {
+          // Oldest candlestick
+          candlestick.open = 0
+          candlestick.high = Math.max(0, obj.priceUSD)
+          candlestick.low = Math.min(0, obj.priceUSD)
+          candlestick.close = obj.priceUSD
+        } else {
+          // The rest up until the newest
+          candlestick.open = prevObj.priceUSD
+          candlestick.high = Math.max(prevObj.priceUSD, obj.priceUSD)
+          candlestick.low = Math.min(prevObj.priceUSD, obj.priceUSD)
+          candlestick.close = obj.priceUSD
+        }
+
+        // Set axis limits before inserting
+        if (i == 0) {
+          marketGraph.maxX = timestamp
+          marketGraph.minX = new Date(timestamp.getTime() - (86400000 * days))
+        }
         minY = (minY == -1 || obj.priceUSD < minY) ? obj.priceUSD : minY
         maxY = (maxY == -1 || obj.priceUSD > maxY) ? obj.priceUSD : maxY
-        marketLine.append(timedate, obj.priceUSD)
+        if (candlestick.open == 0) {
+          marketGraph.minY = 0
+        } else {
+          marketGraph.minY = (minY - (minY * 0.1) > 0) ? minY - (minY * 0.1) : 0
+        }
+        marketGraph.maxY = maxY + (maxY * 0.1)
+
+        // Insert the candlestick into the graph
+        marketGraph.append(candlestick)
       }
-      marketLine.minY = (minY - 1 > 0) ? minY - 1 : 0
-      marketLine.maxY = maxY + (maxY * 0.2)
       marketChart.visible = true
     }
   }
@@ -731,21 +785,106 @@ Item {
       }
       margins { right: 0; bottom: 0; left: 0; top: 0 }
 
-      SplineSeries {
-        id: marketLine
+      MouseArea {
+        id: chartArea
+        x: parent.plotArea.x
+        y: parent.plotArea.y
+        width: parent.plotArea.width
+        height: parent.plotArea.height
+        hoverEnabled: true
+        onEntered: {
+          mouseRectX.visible = mouseRectY.visible = true
+          mouseLineX.visible = mouseLineY.visible = true
+        }
+        onExited: {
+          mouseRectX.visible = mouseRectY.visible = false
+          mouseLineX.visible = mouseLineY.visible = false
+        }
+        onPositionChanged: {
+          var valueXPerPixel = (marketGraph.maxX.getTime() - marketGraph.minX.getTime()) / width
+          var valueYPerPixel = (marketGraph.maxY - marketGraph.minY) / height
+          var valueX = new Date(marketGraph.minX.getTime() + (mouse.x * valueXPerPixel))
+          var valueY = marketGraph.maxY - (mouse.y * valueYPerPixel)
+          mouseRectX.info = Qt.formatDate(valueX, "dd/MM")
+          mouseRectY.info = valueY.toFixed(3)
+          mouseRectX.x = mouse.x + (mouseRectX.width / 2)
+          mouseRectY.y = mouse.y + mouseRectY.height
+          mouseLineX.x = mouseRectX.x + (mouseRectX.width / 2)
+          mouseLineY.y = mouseRectY.y + (mouseRectY.height / 2)
+        }
+      }
+
+      Rectangle {
+        id: mouseRectX
+        property string info
+        visible: false
+        width: 60
+        height: 30
+        anchors.top: chartArea.bottom
+        radius: 5
+        color: "#3E4653"
+        Text {
+          color: "#FFFFFF"
+          anchors.centerIn: parent
+          text: parent.info
+        }
+      }
+
+      Rectangle {
+        id: mouseRectY
+        property string info
+        visible: false
+        width: 60
+        height: 30
+        anchors.right: chartArea.left
+        radius: 5
+        color: "#3E4653"
+        Text {
+          color: "#FFFFFF"
+          anchors.centerIn: parent
+          text: parent.info
+        }
+      }
+
+      Rectangle {
+        id: mouseLineX
+        visible: false
+        width: 1
+        color: "#FFFFFF"
+        anchors {
+          top: chartArea.top
+          bottom: chartArea.bottom
+        }
+      }
+
+      Rectangle {
+        id: mouseLineY
+        visible: false
+        height: 1
+        color: "#FFFFFF"
+        anchors {
+          left: chartArea.left
+          right: chartArea.right
+        }
+      }
+
+      CandlestickSeries {
+        id: marketGraph
         property int countX: 0
         property alias minX: marketAxisX.min
         property alias maxX: marketAxisX.max
         property alias minY: marketAxisY.min
         property alias maxY: marketAxisY.max
         name: "<b>AVME Price (USD)</b>"
-        color: "#368097"
-        width: 3.0
+        increasingColor: "green"
+        decreasingColor: "red"
+        bodyOutlineVisible: false
+        minimumColumnWidth: 10
         axisX: DateTimeAxis {
           id: marketAxisX
           labelsColor: "#FFFFFF"
           gridLineColor: "#22FFFFFF"
-          tickCount: marketLine.countX
+          tickCount: marketGraph.countX
           format: "dd/MM"
         }
         axisY: ValueAxis {
