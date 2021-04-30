@@ -370,7 +370,7 @@ Item {
               fundsPopup.open()
             } else {
               System.setScreen(content, "qml/screens/TransactionScreen.qml")
-              System.operationOverride("Swap AVAX -> AVME", swapInput.text, "", "")
+              System.operationOverride("Swap AVAX -> AVME", swapInput.text, swapEstimate, "")
             }
           } else {
             var acc = System.getAccountBalances(System.getCurrentAccount())
@@ -378,7 +378,7 @@ Item {
               fundsPopup.open()
             } else {
               System.setScreen(content, "qml/screens/TransactionScreen.qml")
-              System.operationOverride("Swap AVME -> AVAX", "", swapInput.text, "")
+              System.operationOverride("Swap AVME -> AVAX", swapEstimate, swapInput.text, "")
             }
           }
         }
