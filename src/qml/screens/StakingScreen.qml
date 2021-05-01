@@ -69,7 +69,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         color: "#FFFFFF"
         font.bold: true
-        font.pointSize: 18.0
+        font.pixelSize: 24.0
         text: (isStaking) ? "Stake LP" : "Unstake LP"
       }
 
@@ -98,7 +98,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
-        font.pointSize: 14.0
+        font.pixelSize: 18.0
         text: {
           var acc = System.getAccountBalances(System.getCurrentAccount())
           text: (isStaking)
@@ -207,7 +207,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         color: "#FFFFFF"
         font.bold: true
-        font.pointSize: 18.0
+        font.pixelSize: 24.0
         text: "Harvest AVME"
       }
 
@@ -224,7 +224,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
-        font.pointSize: 14.0
+        font.pixelSize: 18.0
         text: "Unharvested " + System.getCurrentToken() + ":<br><b>" + reward + "</b>"
       }
 

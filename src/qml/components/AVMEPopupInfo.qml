@@ -48,6 +48,7 @@ Popup {
       anchors.verticalCenter: png.verticalCenter
       horizontalAlignment: Text.AlignHCenter
       color: "#FFFFFF"
+      font.pixelSize: 14.0
       text: info
     }
   }

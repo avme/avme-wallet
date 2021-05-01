@@ -28,7 +28,7 @@ Rectangle {
     }
     color: "#FFFFFF"
     text: (!addressTimer.running) ? System.getCurrentAccount() : "Copied to clipboard!"
-    font.pointSize: 16.0
+    font.pixelSize: 24.0
     Timer { id: addressTimer; interval: 2000 }
 
     Rectangle {

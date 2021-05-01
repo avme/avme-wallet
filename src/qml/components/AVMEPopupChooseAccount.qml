@@ -82,6 +82,7 @@ Popup {
       anchors.horizontalCenter: parent.horizontalCenter
       horizontalAlignment: Text.AlignHCenter
       color: "#FFFFFF"
+      font.pixelSize: 14.0
       text: {
         if (infoPassTimer.running) {
           text: "Wrong password, please try again"

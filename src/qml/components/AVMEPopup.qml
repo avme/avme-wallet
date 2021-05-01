@@ -28,6 +28,7 @@ Popup {
     anchors.centerIn: parent
     horizontalAlignment: Text.AlignHCenter
     color: "#FFFFFF"
+    font.pixelSize: 14.0
     text: info
   }
 }

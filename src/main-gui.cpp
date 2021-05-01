@@ -12,8 +12,13 @@ int main(int argc, char *argv[]) {
   dev::setupLogging(loggingOptions);
 
   // Create the application and register our custom class into it
-  QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
+  // TODO: This display DPI fix is an workaround. But Qt have few bugs that doesn't allow much to be done beside this ifdef.
+  #ifdef __MINGW32__
+  	::SetProcessDPIAware();
+  #endif
   QApplication app(argc, argv);
+  app.setAttribute(Qt::AA_EnableHighDpiScaling);
   QQmlApplicationEngine engine;
   System sys;
   engine.rootContext()->setContextProperty("System", &sys);

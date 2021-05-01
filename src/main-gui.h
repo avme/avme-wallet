@@ -21,6 +21,10 @@
 
 #ifdef __MINGW32__
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+// Redefine the WINNT version for MinGW, use windows 7 intead of windows XP
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x0601
+#define WINVER 0x0601
 #else
 Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
 #endif

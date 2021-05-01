@@ -40,6 +40,7 @@ Button {
     horizontalAlignment: Text.AlignHCenter
     verticalAlignment: Text.AlignVCenter
     color: btnTextColor
+    font.pixelSize: 14.0
     elide: Text.ElideRight
   }
 }
