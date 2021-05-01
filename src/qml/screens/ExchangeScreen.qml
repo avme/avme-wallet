@@ -136,10 +136,10 @@ Item {
     if (System.firstHigherThanSecond(coinAmount, maxAmountAVAX)) {
       maxAmountAVME = tokenAmount
     }
-	
-	if (System.firstHigherThanSecond(tokenAmount, maxAmountAVME)) {
-	  maxAmountAVAX = coinAmount
-	}
+    if (System.firstHigherThanSecond(tokenAmount, maxAmountAVME)) {
+      maxAmountAVAX = coinAmount
+    }
+
     // Set the values accordingly
     if (lowerToken == System.getCurrentCoin()) {
       liquidityCoinInput.text = maxAmountAVAX
@@ -343,18 +343,33 @@ Item {
         text: "Price impact: <b>" + swapImpact + "%</b>"
       }
 
+      CheckBox {
+        id: ignoreImpactCheck
+        checked: false
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: "Ignore price impact"
+        contentItem: Text {
+          text: parent.text
+          font: parent.font
+          color: parent.checked ? "#FFFFFF" : "#888888"
+          verticalAlignment: Text.AlignVCenter
+          leftPadding: parent.indicator.width + parent.spacing
+        }
+      }
+
       AVMEButton {
         id: swapBtn
         width: (parent.width * 0.5)
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: allowance != "" && (
           !System.isApproved(swapInput.text, allowance) || swapInput.acceptableInput
-        ) && swapImpact <= 10.0
+        ) && (swapImpact <= 10.0 || ignoreImpactCheck.checked)
         text: {
           if (allowance == "") {
             text: "Checking approval..."
           } else if (System.isApproved(swapInput.text, allowance)) {
-            text: (swapImpact <= 10.0) ? "Make Swap" : "Price impact too high"
+            text: (swapImpact <= 10.0 || ignoreImpactCheck.checked)
+            ? "Make Swap" : "Price impact too high"
           } else {
             text: "Approve"
           }
