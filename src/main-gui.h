@@ -672,6 +672,11 @@ class System : public QObject {
         }
       }
       u256 totalU256 = u256(Utils::fixedPointToWei(balanceAVAXStr, this->currentCoinDecimals));
+	  if ((gasLimitU256 * gasPriceU256) > totalU256) {
+	    return QString::fromStdString(Utils::weiToFixedPoint(
+        boost::lexical_cast<std::string>(u256(0)), 18
+        ));
+      }
       totalU256 -= (gasLimitU256 * gasPriceU256);
       std::string totalStr = Utils::weiToFixedPoint(
         boost::lexical_cast<std::string>(totalU256), 18
