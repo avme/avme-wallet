@@ -55,12 +55,14 @@ class System : public QObject {
     void accountCreated(QVariantMap data);
     void accountCreationFailed();
     void accountBalancesUpdated(QVariantMap data);
+    void accountFiatBalancesUpdated(QVariantMap data);
     void walletBalancesUpdated(QVariantMap data);
-    void historyLoaded(QVariantList data);
+    void walletFiatBalancesUpdated(QVariantMap data);
     void roiCalculated(QString ROI);
     void marketDataUpdated(
       int days, QString currentAVAXPrice, QString currentAVMEPrice, QVariantList AVMEHistory
     );
+    void historyLoaded(QVariantList data);
     void operationOverride(QString op, QString amountCoin, QString amountToken, QString amountLP);
     void txStart(
       QString operation, QString to,
@@ -378,6 +380,32 @@ class System : public QObject {
             balanceLPLockedStr = a.balanceLPLocked;
             a.balancesThreadLock.unlock();
 
+            ret.insert("balanceAVAX", QString::fromStdString(balanceAVAXStr));
+            ret.insert("balanceAVME", QString::fromStdString(balanceAVMEStr));
+            ret.insert("balanceLPFree", QString::fromStdString(balanceLPFreeStr));
+            ret.insert("balanceLPLocked", QString::fromStdString(balanceLPLockedStr));
+            break;
+          }
+        }
+        emit accountBalancesUpdated(ret);
+      });
+    }
+
+    // Same thing as above but for the Overview screen
+    Q_INVOKABLE void getAccountFiatBalancesOverview(QString address) {
+      QtConcurrent::run([=](){
+        QVariantMap ret;
+        for (Account &a : w.accounts) {
+          if (a.address == address.toStdString()) {
+            // Whole balances (for calculating fiat balances)
+            std::string balanceAVAXStr, balanceAVMEStr, balanceLPFreeStr, balanceLPLockedStr;
+            a.balancesThreadLock.lock();
+            balanceAVAXStr = a.balanceAVAX;
+            balanceAVMEStr = a.balanceAVME;
+            balanceLPFreeStr = a.balanceLPFree;
+            balanceLPLockedStr = a.balanceLPLocked;
+            a.balancesThreadLock.unlock();
+
             // Fiat balances
             std::string AVAXUnitPrice = Graph::getAVAXPriceUSD();
             std::string AVMEUnitPrice = Graph::getAVMEPriceUSD(AVAXUnitPrice);
@@ -405,11 +433,7 @@ class System : public QObject {
             std::string AVAXPercentage = AVAXss.str();
             std::string AVMEPercentage = AVMEss.str();
 
-            // Pack up and send back to GUI
-            ret.insert("balanceAVAX", QString::fromStdString(balanceAVAXStr));
-            ret.insert("balanceAVME", QString::fromStdString(balanceAVMEStr));
-            ret.insert("balanceLPFree", QString::fromStdString(balanceLPFreeStr));
-            ret.insert("balanceLPLocked", QString::fromStdString(balanceLPLockedStr));
+            // Pack up fiat balances and send back to GUI
             ret.insert("balanceAVAXUSD", QString::fromStdString(AVAXPrice));
             ret.insert("balanceAVMEUSD", QString::fromStdString(AVMEPrice));
             ret.insert("percentageAVAXUSD", QString::fromStdString(AVAXPercentage));
@@ -417,12 +441,58 @@ class System : public QObject {
             break;
           }
         }
-        emit accountBalancesUpdated(ret);
+        emit accountFiatBalancesUpdated(ret);
       });
     }
 
     // Get the sum of all Accounts' balances in the Wallet for the Overview
     Q_INVOKABLE void getAllAccountBalancesOverview() {
+      QtConcurrent::run([=](){
+        QVariantMap ret;
+        u256 totalAVAX = 0, totalAVME = 0, totalLPFree = 0, totalLPLocked = 0;
+        std::string totalAVAXStr = "", totalAVMEStr = "", totalLPFreeStr = "", totalLPLockedStr = "";
+
+        // Whole balances
+        for (Account &a : w.accounts) {
+          a.balancesThreadLock.lock();
+          totalAVAX += boost::lexical_cast<u256>(
+            Utils::fixedPointToWei(a.balanceAVAX, this->currentCoinDecimals)
+          );
+          totalAVME += boost::lexical_cast<u256>(
+            Utils::fixedPointToWei(a.balanceAVME, this->currentTokenDecimals)
+          );
+          totalLPFree += boost::lexical_cast<u256>(
+            Utils::fixedPointToWei(a.balanceLPFree, 18)
+          );
+          totalLPLocked += boost::lexical_cast<u256>(
+            Utils::fixedPointToWei(a.balanceLPLocked, 18)
+          );
+          a.balancesThreadLock.unlock();
+        }
+        totalAVAXStr = Utils::weiToFixedPoint(
+          boost::lexical_cast<std::string>(totalAVAX), this->currentCoinDecimals
+        );
+        totalAVMEStr = Utils::weiToFixedPoint(
+          boost::lexical_cast<std::string>(totalAVME), this->currentTokenDecimals
+        );
+        totalLPFreeStr = Utils::weiToFixedPoint(
+          boost::lexical_cast<std::string>(totalLPFree), 18
+        );
+        totalLPLockedStr = Utils::weiToFixedPoint(
+          boost::lexical_cast<std::string>(totalLPLocked), 18
+        );
+
+        // Pack up and send back to GUI
+        ret.insert("balanceAVAX", QString::fromStdString(totalAVAXStr));
+        ret.insert("balanceAVME", QString::fromStdString(totalAVMEStr));
+        ret.insert("balanceLPFree", QString::fromStdString(totalLPFreeStr));
+        ret.insert("balanceLPLocked", QString::fromStdString(totalLPLockedStr));
+        emit walletBalancesUpdated(ret);
+      });
+    }
+
+    // Same as above but for fiat balances
+    Q_INVOKABLE void getAllAccountFiatBalancesOverview() {
       QtConcurrent::run([=](){
         QVariantMap ret;
         u256 totalAVAX = 0, totalAVME = 0, totalLPFree = 0, totalLPLocked = 0;
@@ -486,15 +556,11 @@ class System : public QObject {
         std::string AVMEPercentage = AVMEss.str();
 
         // Pack up and send back to GUI
-        ret.insert("balanceAVAX", QString::fromStdString(totalAVAXStr));
-        ret.insert("balanceAVME", QString::fromStdString(totalAVMEStr));
-        ret.insert("balanceLPFree", QString::fromStdString(totalLPFreeStr));
-        ret.insert("balanceLPLocked", QString::fromStdString(totalLPLockedStr));
         ret.insert("balanceAVAXUSD", QString::fromStdString(AVAXPrice));
         ret.insert("balanceAVMEUSD", QString::fromStdString(AVMEPrice));
         ret.insert("percentageAVAXUSD", QString::fromStdString(AVAXPercentage));
         ret.insert("percentageAVMEUSD", QString::fromStdString(AVMEPercentage));
-        emit walletBalancesUpdated(ret);
+        emit walletFiatBalancesUpdated(ret);
       });
     }
 

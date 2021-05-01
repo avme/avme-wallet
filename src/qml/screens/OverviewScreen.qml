@@ -16,22 +16,28 @@ Item {
     function onAccountBalancesUpdated(data) {
       accountCoinBalance.text = data.balanceAVAX
       accountTokenBalance.text = data.balanceAVME
-      accountCoinPrice.text = "$" + data.balanceAVAXUSD
-      accountTokenPrice.text = "$" + data.balanceAVMEUSD
-      accountSliceAVAX.value = data.percentageAVAXUSD
-      accountSliceAVME.value = data.percentageAVMEUSD
       stakingFreeBalance.text = data.balanceLPFree
       stakingLockedBalance.text = data.balanceLPLocked
       accountBalancesReloadTimer.start()
     }
+    function onAccountFiatBalancesUpdated(data) {
+      accountCoinPrice.text = "$" + data.balanceAVAXUSD
+      accountTokenPrice.text = "$" + data.balanceAVMEUSD
+      accountSliceAVAX.value = data.percentageAVAXUSD
+      accountSliceAVME.value = data.percentageAVMEUSD
+      accountFiatBalancesReloadTimer.start()
+    }
     function onWalletBalancesUpdated(data) {
       walletCoinBalance.text = data.balanceAVAX
       walletTokenBalance.text = data.balanceAVME
+      walletBalancesReloadTimer.start()
+    }
+    function onWalletFiatBalancesUpdated(data) {
       walletCoinPrice.text = "$" + data.balanceAVAXUSD
       walletTokenPrice.text = "$" + data.balanceAVMEUSD
       walletSliceAVAX.value = data.percentageAVAXUSD
       walletSliceAVME.value = data.percentageAVMEUSD
-      walletBalancesReloadTimer.start()
+      walletFiatBalancesReloadTimer.start()
     }
     function onRewardUpdated(poolReward) {
       rewardAmount.reward = poolReward
@@ -124,12 +130,28 @@ Item {
     onTriggered: System.getAccountBalancesOverview(System.getCurrentAccount())
   }
 
-  // Timer for reloading the Wallet balaces
+  // Timer for reloading the Account fiat balances
+  Timer {
+    id: accountFiatBalancesReloadTimer
+    interval: 2500
+    repeat: false
+    onTriggered: System.getAccountFiatBalancesOverview(System.getCurrentAccount())
+  }
+
+  // Timer for reloading the Wallet balances
   Timer {
     id: walletBalancesReloadTimer
     interval: 2500
     repeat: false
     onTriggered: System.getAllAccountBalancesOverview()
+  }
+
+  // Timer for reloading the Wallet fiat balances
+  Timer {
+    id: walletFiatBalancesReloadTimer
+    interval: 2500
+    repeat: false
+    onTriggered: System.getAllAccountFiatBalancesOverview()
   }
 
   // Timer for reloading the current AVME reward
@@ -156,7 +178,9 @@ Item {
     stakingFreeBalance.text = "Loading..."
     stakingLockedBalance.text = "Loading..."
     System.getAccountBalancesOverview(System.getCurrentAccount())
+    System.getAccountFiatBalancesOverview(System.getCurrentAccount())
     System.getAllAccountBalancesOverview()
+    System.getAllAccountFiatBalancesOverview()
     System.getPoolReward()
     System.calculateRewardCurrentROI()
     System.getMarketData(30)
