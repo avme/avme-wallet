@@ -94,7 +94,7 @@ Item {
   AVMEPopupViewSeed {
     id: viewSeedPopup
     showBtn.onClicked: {
-      if (System.checkWalletPass(pass)) {
+      if (System.checkWalletPass(pass.text)) {
         viewSeedPopup.showSeed()
       } else {
         viewSeedPopup.showErrorMsg()
