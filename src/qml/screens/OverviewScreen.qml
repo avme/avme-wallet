@@ -685,7 +685,7 @@ Item {
           }
           color: "#FFFFFF"
           font.pixelSize: 14.0
-          text: "Current ROI"
+          text: "Current APY"
         }
       }
     }

@@ -67,7 +67,7 @@ Item {
     anchors {
       top: parent.top
       left: parent.left
-      topMargin: 50
+      topMargin: 20
       leftMargin: 50
     }
     antialiasing: true
@@ -105,7 +105,7 @@ Item {
     anchors {
       top: logo.bottom
       left: parent.left
-      topMargin: 50
+      topMargin: 20
       leftMargin: 50
     }
     color: "#2D3542"
@@ -138,12 +138,12 @@ Item {
   Rectangle {
     id: createRect
     width: parent.width * 0.4
-    height: 420
+    height: 500
     visible: isCreate
     anchors {
       top: logo.bottom
       left: parent.left
-      topMargin: 50
+      topMargin: 20
       leftMargin: 50
     }
     color: "#2D3542"
@@ -194,32 +194,58 @@ Item {
         id: createPassInput
         anchors.horizontalCenter: parent.horizontalCenter
         width: (createItems.width * 0.9)
-        echoMode: TextInput.Password
+        echoMode: (viewPassCheck.checked) ? TextInput.Normal : TextInput.Password
         passwordCharacter: "*"
         label: "Passphrase"
         placeholder: "Your Wallet's passphrase"
       }
 
-      // Default path checkbox
-      CheckBox {
-        id: defaultCheck
-        checked: true
-        enabled: true
+      AVMEInput {
+        id: createPassCheckInput
         anchors.horizontalCenter: parent.horizontalCenter
-        font.pixelSize: 14.0
-        text: "Use default path"
-        contentItem: Text {
-          text: parent.text
-          font: parent.font
-          color: parent.checked ? "#FFFFFF" : "#888888"
-          verticalAlignment: Text.AlignVCenter
-          leftPadding: parent.indicator.width + parent.spacing
+        width: (createItems.width * 0.9)
+        echoMode: (viewPassCheck.checked) ? TextInput.Normal : TextInput.Password
+        passwordCharacter: "*"
+        label: "Confirm passphrase"
+        placeholder: "Your Wallet's passphrase"
+      }
+
+      Row {
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: 10
+
+        // View password checkbox
+        CheckBox {
+          id: viewPassCheck
+          text: "View passphrase"
+          contentItem: Text {
+            text: parent.text
+            font: parent.font
+            color: parent.checked ? "#FFFFFF" : "#888888"
+            verticalAlignment: Text.AlignVCenter
+            leftPadding: parent.indicator.width + parent.spacing
+          }
         }
-        Component.onCompleted: {
-          createWalletExists = System.checkFolderForWallet(createFolderInput.text)
-        }
-        onClicked: {
-          createWalletExists = System.checkFolderForWallet(createFolderInput.text)
+
+        // Default path checkbox
+        CheckBox {
+          id: defaultCheck
+          checked: true
+          enabled: true
+          text: "Use default path"
+          contentItem: Text {
+            text: parent.text
+            font: parent.font
+            color: parent.checked ? "#FFFFFF" : "#888888"
+            verticalAlignment: Text.AlignVCenter
+            leftPadding: parent.indicator.width + parent.spacing
+          }
+          Component.onCompleted: {
+            createWalletExists = System.checkFolderForWallet(createFolderInput.text)
+          }
+          onClicked: {
+            createWalletExists = System.checkFolderForWallet(createFolderInput.text)
+          }
         }
       }
 
@@ -269,10 +295,12 @@ Item {
           }
           onClicked: {
             try {
-              if (!createWalletExists && createSeedInput.text == "") {
+              if (createPassInput.text != createPassCheckInput.text) {
+                throw "Passphrases don't match. Please check your inputs."
+              } else if (!createWalletExists && createSeedInput.text == "") {
                 if (!System.createWallet(createFolderInput.text, createPassInput.text)) {
                   throw "Error on Wallet creation. Please check"
-                  + "<br>the folder path and/or passphrase.";
+                  + "<br>the folder path and/or passphrase."
                 }
                 console.log("Wallet created successfully, now loading it...")
               } else if (!createWalletExists && createSeedInput.text != "") {
@@ -319,7 +347,7 @@ Item {
     anchors {
       top: logo.bottom
       left: parent.left
-      topMargin: 50
+      topMargin: 20
       leftMargin: 50
     }
     color: "#2D3542"
