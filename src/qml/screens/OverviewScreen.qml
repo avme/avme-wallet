@@ -855,10 +855,10 @@ Item {
           var valueY = marketGraph.maxY - (mouse.y * valueYPerPixel)
           mouseRectX.info = Qt.formatDate(valueX, "dd/MM")
           mouseRectY.info = valueY.toFixed(3)
-          mouseRectX.x = mouse.x + (mouseRectX.width / 2)
-          mouseRectY.y = mouse.y + mouseRectY.height
-          mouseLineX.x = mouseRectX.x + (mouseRectX.width / 2)
-          mouseLineY.y = mouseRectY.y + (mouseRectY.height / 2)
+          mouseLineX.x = parent.plotArea.x + mouse.x
+          mouseLineY.y = parent.plotArea.y + mouse.y
+          mouseRectX.x = mouseLineX.x - (mouseRectX.width / 2)
+          mouseRectY.y = mouseLineY.y - (mouseRectY.height / 2)
         }
       }
 
