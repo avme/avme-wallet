@@ -105,7 +105,7 @@ if (BUILD_CLI)
   if (DEPENDS_PREFIX EQUAL "x86_64-w64-mingw32")
     target_link_libraries(avme-cli PUBLIC avme-lib -static)
   else()
-    target_link_libraries(avme-cli PUBLIC avme-lib)
+    target_link_libraries(avme-cli PUBLIC avme-lib -static)
   endif()
 endif()
 

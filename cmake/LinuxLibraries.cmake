@@ -1,6 +1,6 @@
 # TODO: revise library order, it's very messy
 SET(QT_LIBS "")
-LIST(APPEND QT_LIBS "-ldl -ldouble-conversion")
+LIST(APPEND QT_LIBS "-ldl /usr/lib/x86_64-linux-gnu/libdouble-conversion.a") # Force the usage of static double-conversion due different versions between distros
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Network.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Gui.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Qml.a")
