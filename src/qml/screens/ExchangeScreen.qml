@@ -649,7 +649,7 @@ Item {
               System.hasInsufficientFunds(
                 "Coin", System.getRealMaxAVAXAmount("250000", System.getAutomaticFee()),
                 liquidityCoinInput.text
-              ) || System.hasInsufficientFunds("Token", acc.balanceAVME, liquidityCoinInput.text)
+              ) || System.hasInsufficientFunds("Token", acc.balanceAVME, liquidityTokenInput.text)
             ) {
               fundsPopup.open()
             } else {
