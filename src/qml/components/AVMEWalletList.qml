@@ -48,7 +48,7 @@ ListView {
       color: "white"
       padding: 5
       text: "Account"
-      font.pointSize: 10.0
+      font.pixelSize: 12.0
     }
     Text {
       id: headerName
@@ -58,7 +58,7 @@ ListView {
       color: "white"
       padding: 5
       text: "Name"
-      font.pointSize: 10.0
+      font.pixelSize: 12.0
     }
     Text {
       id: headerCoinBalance
@@ -68,7 +68,7 @@ ListView {
       color: "white"
       padding: 5
       text: "Coin Balance"
-      font.pointSize: 10.0
+      font.pixelSize: 12.0
     }
     Text {
       id: headerTokenBalance
@@ -78,7 +78,7 @@ ListView {
       color: "white"
       padding: 5
       text: "Token Balance"
-      font.pointSize: 10.0
+      font.pixelSize: 12.0
     }
     Text {
       id: headerLPFreeBalance
@@ -88,7 +88,7 @@ ListView {
       color: "white"
       padding: 5
       text: "Free LP Balance"
-      font.pointSize: 10.0
+      font.pixelSize: 12.0
     }
     Text {
       id: headerLPLockedBalance
@@ -98,7 +98,7 @@ ListView {
       color: "white"
       padding: 5
       text: "Locked LP Balance"
-      font.pointSize: 10.0
+      font.pixelSize: 12.0
     }
   }
   headerPositioning: ListView.OverlayHeader // Prevent header scrolling along
@@ -125,7 +125,7 @@ ListView {
         padding: 5
         elide: Text.ElideRight
         text: itemAccount
-        font.pointSize: 10.0
+        font.pixelSize: 12.0
       }
       Text {
         id: delegateName
@@ -136,7 +136,7 @@ ListView {
         padding: 5
         elide: Text.ElideRight
         text: itemName
-        font.pointSize: 10.0
+        font.pixelSize: 12.0
       }
       Text {
         id: delegateCoinBalance
@@ -147,7 +147,7 @@ ListView {
         padding: 5
         elide: Text.ElideRight
         text: (itemCoinAmount) ? itemCoinAmount : "Loading..."
-        font.pointSize: 10.0
+        font.pixelSize: 12.0
       }
       Text {
         id: delegateTokenBalance
@@ -158,7 +158,7 @@ ListView {
         padding: 5
         elide: Text.ElideRight
         text: (itemTokenAmount) ? itemTokenAmount : "Loading..."
-        font.pointSize: 10.0
+        font.pixelSize: 12.0
       }
       Text {
         id: delegateLPFreeBalance
@@ -169,7 +169,7 @@ ListView {
         padding: 5
         elide: Text.ElideRight
         text: (itemFreeLPAmount) ? itemFreeLPAmount : "Loading..."
-        font.pointSize: 10.0
+        font.pixelSize: 12.0
       }
       Text {
         id: delegateLPTokenBalance
@@ -180,7 +180,7 @@ ListView {
         padding: 5
         elide: Text.ElideRight
         text: (itemLockedLPAmount) ? itemLockedLPAmount : "Loading..."
-        font.pointSize: 10.0
+        font.pixelSize: 12.0
       }
       MouseArea {
         id: delegateMouseArea

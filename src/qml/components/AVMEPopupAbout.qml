@@ -27,7 +27,7 @@ Popup {
       horizontalCenter: parent.horizontalCenter
       topMargin: 20
     }
-    font.pointSize: 18.0
+    font.pixelSize: 24.0
     color: "#FFFFFF"
     horizontalAlignment: Text.AlignHCenter
     text: "About the AVME Wallet"
@@ -55,6 +55,7 @@ Popup {
       topMargin: 10
     }
     color: "#FFFFFF"
+    font.pixelSize: 14.0
     horizontalAlignment: Text.AlignHCenter
     textFormat: Text.RichText
     text: "Copyright (c) 2020-2021 AVME Developers<br>
@@ -70,7 +71,7 @@ Popup {
       bottom: parent.bottom
       horizontalCenter: parent.horizontalCenter
       bottomMargin: 20
-    }  
+    }
     spacing: 10
 
     AVMEButton {

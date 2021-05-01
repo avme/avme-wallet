@@ -83,7 +83,7 @@ Item {
       }
       font.bold: true
       color: "#FFFFFF"
-      font.pointSize: 32.0
+      font.pixelSize: 36.0
       text: {
         if (isCreate) {
           text: "Create/Import Wallet"
@@ -206,6 +206,7 @@ Item {
         checked: true
         enabled: true
         anchors.horizontalCenter: parent.horizontalCenter
+        font.pixelSize: 14.0
         text: "Use default path"
         contentItem: Text {
           text: parent.text
@@ -226,6 +227,7 @@ Item {
       Text {
         id: createSeedText
         color: "#FFFFFF"
+        font.pixelSize: 14.0
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
         text: "Importing an existing Wallet?"

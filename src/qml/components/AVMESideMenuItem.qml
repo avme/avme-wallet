@@ -37,7 +37,7 @@ Rectangle {
     anchors.bottom: parent.bottom
     horizontalAlignment: Text.AlignHCenter
     verticalAlignment: Text.AlignVCenter
-    font.pointSize: 8.0
+    font.pixelSize: 12.0
     color: "#FFFFFF"
   }
 

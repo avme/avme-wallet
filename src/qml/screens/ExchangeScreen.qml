@@ -136,10 +136,10 @@ Item {
     if (System.firstHigherThanSecond(coinAmount, maxAmountAVAX)) {
       maxAmountAVME = tokenAmount
     }
-	
-	if (System.firstHigherThanSecond(tokenAmount, maxAmountAVME)) {
-	  maxAmountAVAX = coinAmount
-	}
+    if (System.firstHigherThanSecond(tokenAmount, maxAmountAVME)) {
+      maxAmountAVAX = coinAmount
+    }
+
     // Set the values accordingly
     if (lowerToken == System.getCurrentCoin()) {
       liquidityCoinInput.text = maxAmountAVAX
@@ -196,7 +196,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.bold: true
-        font.pointSize: 18.0
+        font.pixelSize: 24.0
         text: (coinToToken) ? "Swap AVAX -> AVME" : "Swap AVME -> AVAX"
       }
 
@@ -221,7 +221,7 @@ Item {
           id: swapOrder
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
-          font.pointSize: 42.0
+          font.pixelSize: 48.0
           text: " -> "
         }
 
@@ -314,7 +314,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
         color: "#FFFFFF"
-        font.pointSize: 14.0
+        font.pixelSize: 18.0
         text: "Estimated return in " + (
           (!coinToToken) ? System.getCurrentCoin() : System.getCurrentToken()
         ) + ":<br><b>" + swapEstimate + "</b>"
@@ -339,7 +339,7 @@ Item {
             color: "#FF4444"
           }
         }
-        font.pointSize: 14.0
+        font.pixelSize: 18.0
         text: "Price impact: <b>" + swapImpact + "%</b>"
       }
 
@@ -415,7 +415,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.bold: true
-        font.pointSize: 18.0
+        font.pixelSize: 24.0
         text: (addToPool) ? "Add Liquidity" : "Remove Liquidity"
       }
 
@@ -439,7 +439,7 @@ Item {
           id: liquidityCoinArrow
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
-          font.pointSize: 42.0
+          font.pixelSize: 48.0
           text: (addToPool) ? " -> " : " <- "
         }
 
@@ -457,7 +457,7 @@ Item {
           id: liquidityTokenArrow
           anchors.verticalCenter: parent.verticalCenter
           color: "#FFFFFF"
-          font.pointSize: 42.0
+          font.pixelSize: 48.0
           text: (addToPool) ? " <- " : " -> "
         }
 
@@ -538,7 +538,7 @@ Item {
           anchors.leftMargin: 10
           anchors.verticalCenter: parent.verticalCenter
           color: (parent.enabled) ? "#FFFFFF" : "#444444"
-          font.pointSize: 18.0
+          font.pixelSize: 24.0
           text: parent.value + "%"
         }
       }
@@ -589,7 +589,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
-        font.pointSize: 14.0
+        font.pixelSize: 18.0
         text: "Estimated returns:"
         + "<br><b>" + ((removeLPEstimate) ? removeLPEstimate : "0") + " LP"
         + "<br>" + System.weiToFixedPoint(

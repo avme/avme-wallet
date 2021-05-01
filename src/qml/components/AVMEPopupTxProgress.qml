@@ -133,7 +133,7 @@ Popup {
       horizontalCenter: parent.horizontalCenter
       margins: 30
     }
-    font.pointSize: 18.0
+    font.pixelSize: 24.0
     color: "#FFFFFF"
     horizontalAlignment: Text.AlignHCenter
     text: {
@@ -222,7 +222,7 @@ Popup {
 
       Text {
         id: buildText
-        font.pointSize: 18.0
+        font.pixelSize: 24.0
         color: "#FFFFFF"
         text: "Building transaction..."
       }
@@ -254,7 +254,7 @@ Popup {
 
       Text {
         id: signText
-        font.pointSize: 18.0
+        font.pixelSize: 24.0
         color: "#444444"
         text: "Signing transaction..."
       }
@@ -286,7 +286,7 @@ Popup {
 
       Text {
         id: sendText
-        font.pointSize: 18.0
+        font.pixelSize: 24.0
         color: "#444444"
         text: "Broadcasting transaction..."
       }

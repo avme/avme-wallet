@@ -79,7 +79,7 @@ Item {
     }
     horizontalAlignment: Text.AlignHCenter
     color: "#FFFFFF"
-    font.pointSize: 18.0
+    font.pixelSize: 24.0
     text: "No Accounts found.<br>You can create or import one using the button below."
     visible: (accountsList.count == 0)
   }
@@ -129,11 +129,15 @@ Item {
       id: btnUseAccount
       width: (parent.width / 3) - parent.spacing
       enabled: {
-        var hasCoin = (walletList.currentItem.itemCoinAmount != "")
-        var hasToken = (walletList.currentItem.itemTokenAmount != "")
-        var hasFreeLP = (walletList.currentItem.itemFreeLPAmount != "")
-        var hasLockedLP = (walletList.currentItem.itemLockedLPAmount != "")
-        enabled: (walletList.currentItem && (hasCoin && hasToken && hasFreeLP && hasLockedLP))
+        if (!walletList.currentItem) {
+          enabled: false
+        } else {
+          var hasCoin = (walletList.currentItem.itemCoinAmount != "")
+          var hasToken = (walletList.currentItem.itemTokenAmount != "")
+          var hasFreeLP = (walletList.currentItem.itemFreeLPAmount != "")
+          var hasLockedLP = (walletList.currentItem.itemLockedLPAmount != "")
+          enabled: (hasCoin && hasToken && hasFreeLP && hasLockedLP)
+        }
       }
       text: "Use this Account"
       onClicked: {
@@ -224,6 +228,7 @@ Item {
       anchors.bottomMargin: (parent.height / 2) + 50
       Timer { id: erasePassInfoTimer; interval: 2000 }
       color: "#FFFFFF"
+      font.pixelSize: 14.0
       text: (!erasePassInfoTimer.running)
       ? "Please authenticate to confirm the action."
       : "Wrong passphrase, please try again"

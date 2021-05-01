@@ -51,7 +51,7 @@ TextField {
     anchors.bottom: input.top
     anchors.left: input.left
     anchors.bottomMargin: 5
-    font.pointSize: 10.0
+    font.pixelSize: 12.0
     text: label
   }
 
@@ -61,6 +61,7 @@ TextField {
     anchors.verticalCenter: parent.verticalCenter
     leftPadding: 10
     color: inputPlaceholderColor
+    font.pixelSize: 14.0
     text: placeholder
     visible: !input.text
   }
