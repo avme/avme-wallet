@@ -14,6 +14,10 @@ import "qrc:/qml/components"
  * "Add Liquidity", "Remove Liquidity",
  * "Stake LP", "Unstake LP", "Harvest AVME", "Exit Staking"
  */
+ 
+// TODO: There needs to be some refactor on the part of calculating transaction costs, Currently it is working
+// But for good pratices and capabilities of maintaining the code, refactor it before editing anything.
+
 Item {
   id: transactionScreen
   property string txOperationStr
@@ -34,6 +38,13 @@ Item {
       autoLimitCheck.visible = false
       autoGasCheck.visible = false
       updateTxCost()
+	  switch (op) {
+	    case "Swap AVME -> AVAX":
+	      txTotalCoinStr = System.calculateTransactionCost(
+            "0", txGasLimitInput.text, txGasPriceInput.text
+          )
+	      break;
+	  }
     }
   }
 
@@ -54,14 +65,14 @@ Item {
     var isFreeLP = (txOperationStr == "Remove Liquidity" || txOperationStr == "Stake LP")
     var hasCoinFunds = !System.hasInsufficientFunds(
       "Coin", acc.balanceAVAX, System.calculateTransactionCost(
-        txAmountCoinInput.text, txGasLimitInput.text, txGasPriceInput.text
+        txTotalCoinStr.text, txGasLimitInput.text, txGasPriceInput.text
       )
     )
     var hasTokenFunds = !System.hasInsufficientFunds(
-      "Token", acc.balanceAVME, txAmountTokenInput.text
+      "Token", acc.balanceAVME, txTotalTokenStr.text
     )
     var hasLPFunds = !System.hasInsufficientFunds(
-      "LP", ((isFreeLP) ? acc.balanceLPFree : acc.balanceLPLocked), txAmountLPInput.text
+      "LP", ((isFreeLP) ? acc.balanceLPFree : acc.balanceLPLocked), txTotalLPStr.text
     )
     switch (txOperationStr) {
       case "Send AVAX":
