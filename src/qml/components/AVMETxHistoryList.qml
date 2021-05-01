@@ -42,6 +42,7 @@ ListView {
       width: parent.width / 2
       x: 16 + 5
       color: "white"
+      font.pixelSize: 14.0
       padding: 5
       text: "Timestamp"
     }
@@ -51,6 +52,7 @@ ListView {
       width: parent.width / 2
       x: headerDateTime.x + headerDateTime.width
       color: "white"
+      font.pixelSize: 14.0
       padding: 5
       text: "Operation"
     }
@@ -100,6 +102,7 @@ ListView {
         width: parent.width / 2
         x: delegateConfirmed.x + delegateConfirmed.width
         color: "white"
+        font.pixelSize: 14.0
         padding: 5
         elide: Text.ElideRight
         text: itemDateTime
@@ -110,6 +113,7 @@ ListView {
         width: parent.width / 2
         x: delegateDateTime.x + delegateDateTime.width
         color: "white"
+        font.pixelSize: 14.0
         padding: 5
         elide: Text.ElideRight
         text: itemOperation

@@ -39,6 +39,7 @@ Item {
         id: viewPrivKeyText
         width: parent.width * 0.8
         color: "#FFFFFF"
+        font.pixelSize: 14.0
         text: "View/Export the private key for this Account"
 
         AVMEButton {
@@ -61,6 +62,7 @@ Item {
         id: viewSeedText
         width: parent.width * 0.8
         color: "#FFFFFF"
+        font.pixelSize: 14.0
         text: "View/Export the BIP39 seed for this Wallet"
 
         AVMEButton {

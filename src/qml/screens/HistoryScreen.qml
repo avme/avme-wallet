@@ -123,7 +123,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
-        font.pointSize: 18.0
+        font.pixelSize: 18.0
         visible: false
       }
 
@@ -139,7 +139,7 @@ Item {
         id: detailsText
         elide: Text.ElideRight
         color: "#FFFFFF"
-        font.pointSize: 14.0
+        font.pixelSize: 14.0
         text: (historyList.currentItem)
         ? "<b>Operation:</b> " + historyList.currentItem.itemOperation + "<br><br>"
         + "<b>From:</b> " + historyList.currentItem.itemFrom + "<br><br>"

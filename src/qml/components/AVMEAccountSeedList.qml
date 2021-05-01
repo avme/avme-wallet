@@ -43,6 +43,7 @@ ListView {
       anchors.verticalCenter: parent.verticalCenter
       width: parent.width / 8
       color: "white"
+      font.pixelSize: 14.0
       padding: 5
       text: "Index"
     }
@@ -53,6 +54,7 @@ ListView {
       width: parent.width / 2
       x: headerIndex.width
       color: "white"
+      font.pixelSize: 14.0
       padding: 5
       text: "Account"
     }
@@ -63,6 +65,7 @@ ListView {
       width: parent.width / 2
       x: headerIndex.width + headerAccount.width
       color: "white"
+      font.pixelSize: 14.0
       padding: 5
       text: "Coin Balance"
     }
@@ -85,6 +88,7 @@ ListView {
         anchors.verticalCenter: parent.verticalCenter
         width: parent.width / 8
         color: "white"
+        font.pixelSize: 14.0
         padding: 5
         elide: Text.ElideRight
         text: itemIndex
@@ -95,6 +99,7 @@ ListView {
         width: parent.width / 2
         x: delegateIndex.width
         color: "white"
+        font.pixelSize: 14.0
         padding: 5
         elide: Text.ElideRight
         text: itemAccount
@@ -105,6 +110,7 @@ ListView {
         width: parent.width / 2
         x: delegateIndex.width + delegateAccount.width
         color: "white"
+        font.pixelSize: 14.0
         padding: 5
         elide: Text.ElideRight
         text: itemBalance

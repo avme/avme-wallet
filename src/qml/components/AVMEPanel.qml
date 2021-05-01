@@ -9,7 +9,7 @@ import "qrc:/qml/components"
 // Panel template for basic info/data/etc.
 Rectangle {
   id: panel
-  property alias title: titleLabel.text
+  property alias title: titleText.text
   property alias header: panelHeader
 
   implicitWidth: 300
@@ -25,12 +25,13 @@ Rectangle {
     color: "#1D212A"
     radius: 10
 
-    Label {
-      id: titleLabel
+    Text {
+      id: titleText
       anchors.verticalCenter: parent.verticalCenter
       anchors.left: parent.left
       anchors.leftMargin: 10
       color: "#FFFFFF"
+      font.pixelSize: 16.0
       text: "Title"
     }
     Rectangle {

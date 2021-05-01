@@ -181,6 +181,7 @@ Item {
         verticalAlignment: Text.AlignVCenter
         width: (parent.width * 0.6)
         color: "#FFFFFF"
+        font.pixelSize: 14.0
         text: "Operation: <b>" + txOperationStr + "</b>"
 
         AVMEButton {
@@ -317,6 +318,7 @@ Item {
           checked: true
           enabled: true
           text: "Automatic Limit"
+          font.pixelSize: 14.0
           contentItem: Text {
             text: parent.text
             font: parent.font
@@ -359,6 +361,7 @@ Item {
           checked: true
           enabled: true
           text: "Recommended Fee"
+          font.pixelSize: 14.0
           contentItem: Text {
             text: parent.text
             font: parent.font
@@ -412,6 +415,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         width: parent.width
         color: "#FFFFFF"
+        font.pixelSize: 14.0
         text: "You will"
       }
 
@@ -421,7 +425,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         width: parent.width
         color: "#FFFFFF"
-        font.pointSize: 18.0
+        font.pixelSize: 24.0
         font.bold: true
         text: txOperationStr
       }
@@ -432,6 +436,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         width: parent.width
         color: "#FFFFFF"
+        font.pixelSize: 14.0
         text: {
           switch (txOperationStr) {
             case "Send AVAX":
@@ -481,6 +486,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         width: parent.width
         color: "#FFFFFF"
+        font.pixelSize: 14.0
         text: "Amounts for the transaction:"
       }
 
@@ -490,6 +496,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         width: parent.width
         font.bold: true
+        font.pixelSize: 14.0
         color: "#FFFFFF"
         text: {
           switch (txOperationStr) {
@@ -546,6 +553,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         width: parent.width
         color: "#FFFFFF"
+        font.pixelSize: 14.0
         text: "Total cost to make the transaction:"
       }
 
@@ -555,6 +563,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         width: parent.width
         font.bold: true
+        font.pixelSize: 14.0
         color: "#FFFFFF"
         text: {
           switch (txOperationStr) {
@@ -589,6 +598,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         width: parent.width
         color: "#FFFFFF"
+        font.pixelSize: 14.0
         text: (!txPassTimer.running)
         ? "Enter your passphrase to confirm the transaction."
         : "Wrong passphrase, please try again."

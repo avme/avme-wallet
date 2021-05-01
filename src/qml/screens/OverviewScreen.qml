@@ -192,6 +192,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
+        font.pixelSize: 14.0
         text: "This Account"
       }
 
@@ -222,7 +223,7 @@ Item {
               verticalCenterOffset: -10
             }
             font.bold: true
-            font.pointSize: 14.0
+            font.pixelSize: 14.0
             color: accountChart.coinColor
             text: accountSliceAVAX.value + "%"
           }
@@ -234,7 +235,7 @@ Item {
               verticalCenterOffset: 10
             }
             font.bold: true
-            font.pointSize: 14.0
+            font.pixelSize: 14.0
             color: accountChart.tokenColor
             text: accountSliceAVME.value + "%"
           }
@@ -296,6 +297,7 @@ Item {
                 leftMargin: 10
               }
               color: "#FFFFFF"
+              font.pixelSize: 14.0
               elide: Text.ElideRight
             }
 
@@ -309,6 +311,7 @@ Item {
                 leftMargin: 10
               }
               color: "#FFFFFF"
+              font.pixelSize: 14.0
               elide: Text.ElideRight
             }
           }
@@ -346,6 +349,7 @@ Item {
                 leftMargin: 10
               }
               color: "#FFFFFF"
+              font.pixelSize: 14.0
               elide: Text.ElideRight
             }
 
@@ -359,6 +363,7 @@ Item {
                 leftMargin: 10
               }
               color: "#FFFFFF"
+              font.pixelSize: 14.0
               elide: Text.ElideRight
             }
           }
@@ -370,6 +375,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
+        font.pixelSize: 14.0
         text: "Total from Wallet"
       }
 
@@ -400,7 +406,7 @@ Item {
               verticalCenterOffset: -10
             }
             font.bold: true
-            font.pointSize: 14.0
+            font.pixelSize: 14.0
             color: walletChart.coinColor
             text: walletSliceAVAX.value + "%"
           }
@@ -412,7 +418,7 @@ Item {
               verticalCenterOffset: 10
             }
             font.bold: true
-            font.pointSize: 14.0
+            font.pixelSize: 14.0
             color: walletChart.tokenColor
             text: walletSliceAVME.value + "%"
           }
@@ -474,6 +480,7 @@ Item {
                 leftMargin: 10
               }
               color: "#FFFFFF"
+              font.pixelSize: 14.0
               elide: Text.ElideRight
             }
 
@@ -487,6 +494,7 @@ Item {
                 leftMargin: 10
               }
               color: "#FFFFFF"
+              font.pixelSize: 14.0
               elide: Text.ElideRight
             }
           }
@@ -524,6 +532,7 @@ Item {
                 leftMargin: 10
               }
               color: "#FFFFFF"
+              font.pixelSize: 14.0
               elide: Text.ElideRight
             }
 
@@ -537,6 +546,7 @@ Item {
                 leftMargin: 10
               }
               color: "#FFFFFF"
+              font.pixelSize: 14.0
               elide: Text.ElideRight
             }
           }
@@ -564,6 +574,7 @@ Item {
           }
           width: parent.width * 0.75
           color: "#FFFFFF"
+          font.pixelSize: 14.0
           elide: Text.ElideRight
         }
 
@@ -576,6 +587,7 @@ Item {
             rightMargin: 10
           }
           color: "#FFFFFF"
+          font.pixelSize: 14.0
           text: "Free LP"
         }
 
@@ -589,6 +601,7 @@ Item {
           }
           width: parent.width * 0.75
           color: "#FFFFFF"
+          font.pixelSize: 14.0
           elide: Text.ElideRight
         }
 
@@ -601,6 +614,7 @@ Item {
             rightMargin: 10
           }
           color: "#FFFFFF"
+          font.pixelSize: 14.0
           text: "Locked LP"
         }
       }
@@ -626,6 +640,7 @@ Item {
             leftMargin: 10
           }
           color: "#FFFFFF"
+          font.pixelSize: 14.0
           text: (reward) ? reward : "Loading..."
           elide: Text.ElideRight
           horizontalAlignment: Text.AlignHCenter
@@ -640,6 +655,7 @@ Item {
             rightMargin: 10
           }
           color: "#FFFFFF"
+          font.pixelSize: 14.0
           text: "Current AVME Reward"
         }
 
@@ -653,6 +669,7 @@ Item {
             leftMargin: 10
           }
           color: "#FFFFFF"
+          font.pixelSize: 14.0
           text: (roi) ? roi + "%" : "Loading..."
           elide: Text.ElideRight
           horizontalAlignment: Text.AlignHCenter
@@ -667,6 +684,7 @@ Item {
             rightMargin: 10
           }
           color: "#FFFFFF"
+          font.pixelSize: 14.0
           text: "Current ROI"
         }
       }
@@ -706,6 +724,7 @@ Item {
           leftMargin: 10
         }
         color: "#FFFFFF"
+        font.pixelSize: 14.0
         text: (amount) ? amount : "Loading..."
         elide: Text.ElideRight
         horizontalAlignment: Text.AlignHCenter
@@ -720,6 +739,7 @@ Item {
           rightMargin: 10
         }
         color: "#FFFFFF"
+        font.pixelSize: 14.0
         text: "Current AVAX Price (USD)"
       }
 
@@ -733,6 +753,7 @@ Item {
           leftMargin: 10
         }
         color: "#FFFFFF"
+        font.pixelSize: 14.0
         text: (amount) ? amount : "Loading..."
         elide: Text.ElideRight
         horizontalAlignment: Text.AlignHCenter
@@ -747,6 +768,7 @@ Item {
           rightMargin: 10
         }
         color: "#FFFFFF"
+        font.pixelSize: 14.0
         text: "Current AVME Price (USD)"
       }
     }
@@ -759,7 +781,7 @@ Item {
         margins: 10
       }
       visible: (!marketChart.visible)
-      font.pointSize: 14.0
+      font.pixelSize: 14.0
       color: "#FFFFFF"
       text: "Loading historical prices..."
     }
@@ -774,14 +796,16 @@ Item {
         margins: 10
       }
       visible: false
+      antialiasing: true
+      backgroundColor: "#881D212A"
       title: "<b>Historical AVME Prices</b>"
       titleColor: "#FFFFFF"
-      backgroundColor: "#881D212A"
-      antialiasing: true
+      titleFont.pixelSize: 14.0
       legend {
         color: "#FFFFFF"
         labelColor: "#FFFFFF"
         alignment: Qt.AlignBottom
+        font.pixelSize: 14.0
       }
       margins { right: 0; bottom: 0; left: 0; top: 0 }
 
@@ -825,6 +849,7 @@ Item {
         color: "#3E4653"
         Text {
           color: "#FFFFFF"
+          font.pixelSize: 14.0
           anchors.centerIn: parent
           text: parent.info
         }
@@ -841,6 +866,7 @@ Item {
         color: "#3E4653"
         Text {
           color: "#FFFFFF"
+          font.pixelSize: 14.0
           anchors.centerIn: parent
           text: parent.info
         }
@@ -883,6 +909,7 @@ Item {
         axisX: DateTimeAxis {
           id: marketAxisX
           labelsColor: "#FFFFFF"
+          labelsFont.pixelSize: 14.0
           gridLineColor: "#22FFFFFF"
           tickCount: marketGraph.countX
           format: "dd/MM"
@@ -890,6 +917,7 @@ Item {
         axisY: ValueAxis {
           id: marketAxisY
           labelsColor: "#FFFFFF"
+          labelsFont.pixelSize: 14.0
           gridLineColor: "#22FFFFFF"
         }
       }
