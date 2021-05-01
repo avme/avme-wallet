@@ -379,22 +379,30 @@ Item {
             System.setScreen(content, "qml/screens/TransactionScreen.qml")
             System.operationOverride("Approve Exchange", "", "", "")
           } else if (coinToToken) {
-            if (System.hasInsufficientFunds(
-              "Coin", System.getRealMaxAVAXAmount("180000", System.getAutomaticFee()), swapInput.text
-            )) {
-              fundsPopup.open()
-            } else {
-              System.setScreen(content, "qml/screens/TransactionScreen.qml")
-              System.operationOverride("Swap AVAX -> AVME", swapInput.text, swapEstimate, "")
-            }
+		    if (System.balanceIsZero(swapInput.text, 18)) {
+			  zeroSwapPopup.open()
+			} else {
+              if (System.hasInsufficientFunds(
+                "Coin", System.getRealMaxAVAXAmount("180000", System.getAutomaticFee()), swapInput.text
+              )) {
+                fundsPopup.open()
+              } else {
+                System.setScreen(content, "qml/screens/TransactionScreen.qml")
+                System.operationOverride("Swap AVAX -> AVME", swapInput.text, swapEstimate, "")
+              }
+		    }
           } else {
             var acc = System.getAccountBalances(System.getCurrentAccount())
-            if (System.hasInsufficientFunds("Token", acc.balanceAVME, swapInput.text)) {
-              fundsPopup.open()
-            } else {
-              System.setScreen(content, "qml/screens/TransactionScreen.qml")
-              System.operationOverride("Swap AVME -> AVAX", swapEstimate, swapInput.text, "")
-            }
+			if (System.balanceIsZero(swapInput.text, 18)) {
+			  zeroSwapPopup.open()
+			} else {
+              if (System.hasInsufficientFunds("Token", acc.balanceAVME, swapInput.text)) {
+                fundsPopup.open()
+              } else {
+                System.setScreen(content, "qml/screens/TransactionScreen.qml")
+                System.operationOverride("Swap AVME -> AVAX", swapEstimate, swapInput.text, "")
+              }
+			}
           }
         }
       }
@@ -675,5 +683,10 @@ Item {
     id: fundsPopup
     icon: "qrc:/img/warn.png"
     info: "Insufficient funds. Please check your inputs."
+  }
+  AVMEPopupInfo {
+    id: zeroSwapPopup
+    icon: "qrc:/img/warn.png"
+    info: "Cannot send swap for 0 value"
   }
 }
