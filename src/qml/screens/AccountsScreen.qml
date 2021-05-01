@@ -128,7 +128,13 @@ Item {
     AVMEButton {
       id: btnUseAccount
       width: (parent.width / 3) - parent.spacing
-      enabled: (walletList.currentItem)
+      enabled: {
+        var hasCoin = (walletList.currentItem.itemCoinAmount != "")
+        var hasToken = (walletList.currentItem.itemTokenAmount != "")
+        var hasFreeLP = (walletList.currentItem.itemFreeLPAmount != "")
+        var hasLockedLP = (walletList.currentItem.itemLockedLPAmount != "")
+        enabled: (walletList.currentItem && (hasCoin && hasToken && hasFreeLP && hasLockedLP))
+      }
       text: "Use this Account"
       onClicked: {
         System.setCurrentAccount(walletList.currentItem.itemAccount)
