@@ -14,10 +14,12 @@ import "qrc:/qml/components"
  * "Add Liquidity", "Remove Liquidity",
  * "Stake LP", "Unstake LP", "Harvest AVME", "Exit Staking"
  */
- 
-// TODO: There needs to be some refactor on the part of calculating transaction costs, Currently it is working
-// But for good pratices and capabilities of maintaining the code, refactor it before editing anything.
 
+/**
+ * TODO: There needs to be some refactor on the part of calculating
+ * transaction costs, currently it is working but for good pratices and
+ * capabilities of maintaining the code, refactor it before editing anything.
+ */
 Item {
   id: transactionScreen
   property string txOperationStr
@@ -38,13 +40,13 @@ Item {
       autoLimitCheck.visible = false
       autoGasCheck.visible = false
       updateTxCost()
-	  switch (op) {
-	    case "Swap AVME -> AVAX":
-	      txTotalCoinStr = System.calculateTransactionCost(
+      switch (op) {
+        case "Swap AVME -> AVAX":
+          txTotalCoinStr = System.calculateTransactionCost(
             "0", txGasLimitInput.text, txGasPriceInput.text
           )
-	      break;
-	  }
+          break;
+      }
     }
   }
 
@@ -603,49 +605,37 @@ Item {
         }
       }
 
-      Text {
-        id: txPass
-        anchors.horizontalCenter: parent.horizontalCenter
-        horizontalAlignment: Text.AlignHCenter
-        width: parent.width
-        color: "#FFFFFF"
-        font.pixelSize: 14.0
-        text: (!txPassTimer.running)
-        ? "Enter your passphrase to confirm the transaction."
-        : "Wrong passphrase, please try again."
-        Timer { id: txPassTimer; interval: 2000; }
-      }
-
-      AVMEInput {
-        id: txPassInput
-        width: (txDetailsColumn.width * 0.5)
-        anchors.horizontalCenter: parent.horizontalCenter
-        echoMode: TextInput.Password
-        passwordCharacter: "*"
-        placeholder: "Your Wallet's passphrase"
-      }
-
       AVMEButton {
         id: btnMakeTx
         width: (txDetailsColumn.width * 0.5)
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (txPassInput.text != "")
         text: "Make Transaction"
         onClicked: {
-          if (!System.checkWalletPass(txPassInput.text)) {
-            txPassTimer.start()
-            txPassFundsTimer.stop()
-          } else if (!checkTransactionFunds()) {
+          if (!checkTransactionFunds()) {
             fundsPopup.open()
           } else {
-            txProgressPopup.open()
-            System.txStart(
-              txOperationStr, txToInput.text,
-              txAmountCoinInput.text, txAmountTokenInput.text, txAmountLPInput.text,
-              txGasLimitInput.text, txGasPriceInput.text, txPassInput.text
-            )
+            confirmTxPopup.open()
           }
         }
+      }
+    }
+  }
+
+  // Popup for confirming transaction
+  AVMEPopupConfirmTx {
+    id: confirmTxPopup
+    okBtn.onClicked: {
+      if (!System.checkWalletPass(pass)) {
+        timer.start()
+      } else {
+        confirmTxPopup.close()
+        txProgressPopup.open()
+        System.txStart(
+          txOperationStr, txToInput.text,
+          txAmountCoinInput.text, txAmountTokenInput.text, txAmountLPInput.text,
+          txGasLimitInput.text, txGasPriceInput.text, pass
+        )
+        confirmTxPopup.clean()
       }
     }
   }
