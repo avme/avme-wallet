@@ -43,22 +43,6 @@ Item {
     }
   }
 
-  // Background logo image
-  Image {
-    id: logoBg
-    anchors {
-      horizontalCenter: parent.horizontalCenter
-      horizontalCenterOffset: 400
-    }
-    width: 1000
-    height: 1000
-    opacity: 0.15
-    antialiasing: true
-    smooth: true
-    fillMode: Image.PreserveAspectFit
-    source: "qrc:/img/avme_logo_hd.png"
-  }
-
   // Header (logo + text)
   Image {
     id: logo

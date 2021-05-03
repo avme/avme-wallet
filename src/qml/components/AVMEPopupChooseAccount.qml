@@ -62,131 +62,145 @@ Popup {
   }
 
   width: parent.width * 0.9
-  height: parent.height * 0.9
+  height: 700
   x: (parent.width * 0.1) / 2
-  y: (parent.height * 0.1) / 2
+  y: (parent.height * 0.5) - (height / 2)
   modal: true
   focus: true
   padding: 0  // Remove white borders
   closePolicy: Popup.NoAutoClose
   background: Rectangle { anchors.fill: parent; color: popupBgColor; radius: 10 }
 
-  Column {
-    id: items
-    anchors.fill: parent
-    spacing: 30
-    topPadding: 20
-
-    Text {
-      id: infoLabel
-      anchors.horizontalCenter: parent.horizontalCenter
-      horizontalAlignment: Text.AlignHCenter
-      color: "#FFFFFF"
-      font.pixelSize: 14.0
-      text: {
-        if (infoPassTimer.running) {
-          text: "Wrong password, please try again"
-        } else if (infoSeedTimer.running) {
-          text: "Seed is invalid, please try another"
-        } else if (infoAddressTimer.running) {
-          text: "Address is already in Wallet, please try another"
-        } else if (isWaiting) {
-          text: "Generating Accounts... this may take a while, please wait..."
-        } else if (chooseAccountList.currentIndex > -1) {
-          text: "Choose an Account from the list."
-        } else {
-          text: "Enter your passphrase to generate an Account list."
-        }
-      }
-      Timer { id: infoPassTimer; interval: 2000 }
-      Timer { id: infoSeedTimer; interval: 2000 }
-      Timer { id: infoAddressTimer; interval: 2000 }
+  Text {
+    id: infoLabel
+    anchors {
+      top: parent.top
+      horizontalCenter: parent.horizontalCenter
+      margins: 20
     }
-
-    Rectangle {
-      id: listRect
-      width: (items.width * 0.9)
-      height: (items.height * 0.55)
-      anchors.horizontalCenter: parent.horizontalCenter
-      radius: 5
-      color: "#4458A0C9"
-
-      AVMEAccountSeedList {
-        id: chooseAccountList
-        anchors.fill: parent
-        model: ListModel { id: accountList }
+    horizontalAlignment: Text.AlignHCenter
+    color: "#FFFFFF"
+    font.pixelSize: 14.0
+    text: {
+      if (infoPassTimer.running) {
+        text: "Wrong password, please try again"
+      } else if (infoSeedTimer.running) {
+        text: "Seed is invalid, please try another"
+      } else if (infoAddressTimer.running) {
+        text: "Address is already in Wallet, please try another"
+      } else if (isWaiting) {
+        text: "Generating Accounts... this may take a while, please wait..."
+      } else if (chooseAccountList.currentIndex > -1) {
+        text: "Choose an Account from the list."
+      } else {
+        text: "Enter your passphrase to generate an Account list."
       }
+    }
+    Timer { id: infoPassTimer; interval: 2000 }
+    Timer { id: infoSeedTimer; interval: 2000 }
+    Timer { id: infoAddressTimer; interval: 2000 }
+  }
+
+  Rectangle {
+    id: listRect
+    anchors {
+      top: infoLabel.bottom
+      left: parent.left
+      right: parent.right
+      margins: 20
+    }
+    height: (parent.height * 0.55)
+    radius: 5
+    color: "#4458A0C9"
+
+    AVMEAccountSeedList {
+      id: chooseAccountList
+      anchors.fill: parent
+      model: ListModel { id: accountList }
+    }
+  }
+
+  AVMEInput {
+    id: seedInput
+    anchors {
+      top: listRect.bottom
+      horizontalCenter: parent.horizontalCenter
+      margins: 40
+    }
+    width: (parent.width * 0.9)
+    label: "(Optional) Override seed"
+    placeholder: "Enter a seed here to import Accounts from different Wallets"
+  }
+
+  Row {
+    id: inputRow
+    anchors {
+      top: seedInput.bottom
+      horizontalCenter: parent.horizontalCenter
+      bottom: bottomRow.top
+      margins: 40
+    }
+    spacing: 10
+
+    AVMEInput {
+      id: nameInput
+      width: chooseAccountPopup.width / 4
+      enabled: (!isWaiting && chooseAccountList.currentIndex > -1)
+      label: "(Optional) Name"
+      placeholder: "Name for your Account"
     }
 
     AVMEInput {
-      id: seedInput
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: (items.width * 0.9)
-      label: "(Optional) Override seed"
-      placeholder: "Enter a seed here to import Accounts from different Wallets"
+      id: passInput
+      width: chooseAccountPopup.width / 4
+      enabled: (!isWaiting)
+      echoMode: TextInput.Password
+      passwordCharacter: "*"
+      label: "Passphrase"
+      placeholder: "Your Wallet's passphrase"
     }
+  }
 
-    Row {
-      id: inputRow
-      anchors.horizontalCenter: parent.horizontalCenter
-      spacing: 10
+  Row {
+    id: bottomRow
+    anchors {
+      bottom: parent.bottom
+      horizontalCenter: parent.horizontalCenter
+      margins: 20
+    }
+    spacing: 10
 
-      AVMEInput {
-        id: nameInput
-        width: items.width / 4
-        enabled: (!isWaiting && chooseAccountList.currentIndex > -1)
-        label: "(Optional) Name"
-        placeholder: "Name for your Account"
-      }
-
-      AVMEInput {
-        id: passInput
-        width: items.width / 4
-        enabled: (!isWaiting)
-        echoMode: TextInput.Password
-        passwordCharacter: "*"
-        label: "Passphrase"
-        placeholder: "Your Wallet's passphrase"
+    AVMEButton {
+      id: btnBack
+      width: (chooseAccountPopup.width / 4) - parent.spacing
+      enabled: (!isWaiting)
+      text: "Back"
+      onClicked: {
+        chooseAccountPopup.clean()
+        chooseAccountPopup.close()
       }
     }
-
-    Row {
-      id: bottomRow
-      anchors.horizontalCenter: parent.horizontalCenter
-      spacing: 10
-
-      AVMEButton {
-        id: btnBack
-        width: (items.width / 4) - parent.spacing
-        enabled: (!isWaiting)
-        text: "Back"
-        onClicked: {
-          chooseAccountPopup.clean()
-          chooseAccountPopup.close()
-        }
-      }
-      AVMEButton {
-        id: btnChoose
-        width: (items.width / 4) - parent.spacing
-        enabled: (!isWaiting && passInput.text != "" && chooseAccountList.currentIndex > -1)
-        text: "Choose this Account"
-      }
-      AVMEButton {
-        id: btnMore
-        width: (items.width / 4) - parent.spacing
-        enabled: (!isWaiting && passInput.text != "")
-        text: "Generate +10 Accounts"
-        onClicked: {
-          if (seedInput.text != "" && !System.seedIsValid(seedInput.text)) {
-            infoSeedTimer.start()
-          } else if (!System.checkWalletPass(passInput.text)) {
-            infoPassTimer.start()
-          } else {
-            seedInput.enabled = false
-            if (seedInput.text != "") { foreignSeed = seedInput.text }
-            if (startingIndex != -1) { startingIndex += 10 }
-            refreshList()
-          }
+    AVMEButton {
+      id: btnChoose
+      width: (chooseAccountPopup.width / 4) - parent.spacing
+      enabled: (!isWaiting && passInput.text != "" && chooseAccountList.currentIndex > -1)
+      text: "Choose this Account"
+    }
+    AVMEButton {
+      id: btnMore
+      width: (chooseAccountPopup.width / 4) - parent.spacing
+      enabled: (!isWaiting && passInput.text != "")
+      text: "Generate +10 Accounts"
+      onClicked: {
+        if (seedInput.text != "" && !System.seedIsValid(seedInput.text)) {
+          infoSeedTimer.start()
+        } else if (!System.checkWalletPass(passInput.text)) {
+          infoPassTimer.start()
+        } else {
+          seedInput.enabled = false
+          if (seedInput.text != "") { foreignSeed = seedInput.text }
+          if (startingIndex != -1) { startingIndex += 10 }
+          refreshList()
         }
       }
     }
