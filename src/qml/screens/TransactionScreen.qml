@@ -614,6 +614,7 @@ Item {
           if (!checkTransactionFunds()) {
             fundsPopup.open()
           } else {
+            confirmTxPopup.isSameAddress = (txFromInput.text === txToInput.text)
             confirmTxPopup.open()
           }
         }

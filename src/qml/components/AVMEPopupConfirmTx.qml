@@ -10,12 +10,13 @@ Popup {
   property alias pass: passInput.text
   property alias timer: infoTimer
   property alias okBtn: btnOk
+  property bool isSameAddress: false
   property color popupBgColor: "#1C2029"
 
-  width: (parent.width * 0.5)
-  height: (parent.height * 0.3)
-  x: (parent.width * 0.5) / 2
-  y: (parent.height * 0.7) / 2
+  width: parent.width * ((isSameAddress) ? 0.6 : 0.5)
+  height: parent.height * ((isSameAddress) ? 0.4 : 0.3)
+  x: (parent.width * ((isSameAddress) ? 0.4 : 0.5)) / 2
+  y: (parent.height * ((isSameAddress) ? 0.6 : 0.7)) / 2
   background: Rectangle { anchors.fill: parent; color: popupBgColor; radius: 10 }
   modal: true
   focus: true
@@ -30,6 +31,18 @@ Popup {
     anchors.fill: parent
     spacing: 30
     topPadding: 30
+
+    Text {
+      id: warning
+      anchors.horizontalCenter: parent.horizontalCenter
+      horizontalAlignment: Text.AlignHCenter
+      color: "#FFFFFF"
+      font.bold: true
+      font.pixelSize: 14.0
+      visible: (isSameAddress)
+      text: "ATTENTION: receiver Account is the exact same as the sender.<br>"
+      + "If this is not what you want, go back now and set another Account as the receiver."
+    }
 
     Text {
       id: info
