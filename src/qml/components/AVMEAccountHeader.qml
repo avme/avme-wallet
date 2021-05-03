@@ -19,17 +19,31 @@ Rectangle {
   color: "#1D212A"
   radius: 10
 
+  Timer { id: addressTimer; interval: 2000 }
+
   Text {
-    id: addressText
+    id: addressLabel
     anchors {
       verticalCenter: parent.verticalCenter
       left: parent.left
       leftMargin: 10
     }
     color: "#FFFFFF"
+    text: "Address:"
+    font.pixelSize: 18.0
+  }
+
+  Text {
+    id: addressText
+    anchors {
+      verticalCenter: parent.verticalCenter
+      left: addressLabel.right
+      leftMargin: 10
+    }
+    color: "#FFFFFF"
     text: (!addressTimer.running) ? System.getCurrentAccount() : "Copied to clipboard!"
-    font.pixelSize: 24.0
-    Timer { id: addressTimer; interval: 2000 }
+    font.bold: true
+    font.pixelSize: 18.0
 
     Rectangle {
       id: addressRect
@@ -51,6 +65,22 @@ Rectangle {
           addressTimer.start()
         }
       }
+    }
+  }
+
+  AVMEButton {
+    id: btnCopyToClipboard
+    width: parent.width * 0.15
+    anchors {
+      verticalCenter: parent.verticalCenter
+      right: btnChangeAccount.left
+      rightMargin: 10
+    }
+    enabled: (!addressTimer.running)
+    text: (!addressTimer.running) ? "Copy To Clipboard" : "Copied!"
+    onClicked: {
+      System.copyToClipboard(System.getCurrentAccount())
+      addressTimer.start()
     }
   }
 
