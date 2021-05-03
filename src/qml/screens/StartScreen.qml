@@ -322,12 +322,9 @@ Item {
                 + "<br>the folder path and/or passphrase.";
               }
               console.log("Wallet loaded successfully")
-              viewSeedPopup.pass.text = createPassInput.text
-              viewSeedPopup.pass.enabled = false
-              viewSeedPopup.showBtn.enabled = false
-              viewSeedPopup.newWalletPass = createPassInput.text
-              viewSeedPopup.showSeed()
-              viewSeedPopup.open()
+              newWalletSeedPopup.newWalletPass = createPassInput.text
+              newWalletSeedPopup.showSeed()
+              newWalletSeedPopup.open()
             } catch (error) {
               walletFailPopup.info = error.toString()
               walletFailPopup.open()
@@ -464,14 +461,13 @@ Item {
     icon: "qrc:/img/warn.png"
   }
 
-  // Popup for viewing the Wallet's seed
-  AVMEPopupViewSeed {
-    id: viewSeedPopup
-    closeBtn.onClicked: {
-      pass.enabled = true
+  // Popup for viewing the seed at Wallet creation
+  AVMEPopupNewWalletSeed {
+    id: newWalletSeedPopup
+    okBtn.onClicked: {
       System.createAccount(newWalletSeed, 0, "", newWalletPass)
-      viewSeedPopup.clean()
-      viewSeedPopup.close()
+      newWalletSeedPopup.clean()
+      newWalletSeedPopup.close()
       walletNewPopup.open()
     }
   }
