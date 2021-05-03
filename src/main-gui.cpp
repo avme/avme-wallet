@@ -17,8 +17,8 @@ int main(int argc, char *argv[]) {
   #ifdef __MINGW32__
   	::SetProcessDPIAware();
   #endif
+  QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   QApplication app(argc, argv);
-  app.setAttribute(Qt::AA_EnableHighDpiScaling);
   QQmlApplicationEngine engine;
   System sys;
   engine.rootContext()->setContextProperty("System", &sys);
