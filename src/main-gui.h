@@ -27,6 +27,8 @@ Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
 #define WINVER 0x0601
 #else
 Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
+#undef FONTCONFIG_PATH
+#define FONTCONFIG_PATH "/etc/fonts" // Redefine fontconfig path for the program.
 #endif
 Q_IMPORT_PLUGIN(QtQuick2Plugin)
 Q_IMPORT_PLUGIN(QtQuick2WindowPlugin)
