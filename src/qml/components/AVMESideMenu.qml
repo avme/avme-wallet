@@ -160,12 +160,10 @@ Rectangle {
       id: itemAbout
       icon: "qrc:/img/icons/info.png"
       label: "About"
-      area.onClicked: aboutPopup.open()
+      area.onClicked: {
+        itemSelection.y = y
+        changeScreen("About")
+      }
     }
-  }
-
-  // Popup for the About option
-  AVMEPopupAbout {
-    id: aboutPopup
   }
 }
