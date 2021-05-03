@@ -873,7 +873,7 @@ Item {
         color: "#3E4653"
         Text {
           color: "#FFFFFF"
-          font.pixelSize: 14.0
+          font.pixelSize: 12.0
           anchors.centerIn: parent
           text: parent.info
         }
@@ -890,7 +890,7 @@ Item {
         color: "#3E4653"
         Text {
           color: "#FFFFFF"
-          font.pixelSize: 14.0
+          font.pixelSize: 12.0
           anchors.centerIn: parent
           text: parent.info
         }
@@ -933,7 +933,7 @@ Item {
         axisX: DateTimeAxis {
           id: marketAxisX
           labelsColor: "#FFFFFF"
-          labelsFont.pixelSize: 14.0
+          labelsFont.pixelSize: 12.0
           gridLineColor: "#22FFFFFF"
           tickCount: marketGraph.countX
           format: "dd/MM"
@@ -941,7 +941,7 @@ Item {
         axisY: ValueAxis {
           id: marketAxisY
           labelsColor: "#FFFFFF"
-          labelsFont.pixelSize: 14.0
+          labelsFont.pixelSize: 12.0
           gridLineColor: "#22FFFFFF"
         }
       }
