@@ -26,6 +26,7 @@ TextField {
   implicitHeight: 40
   selectByMouse: true
   color: "#FFFFFF"
+  font.pixelSize: 14.0
   selectionColor: inputSelectionColor
   background: Rectangle {
     width: parent.width

@@ -334,7 +334,7 @@ Item {
           font.pixelSize: 14.0
           contentItem: Text {
             text: parent.text
-            font: parent.font
+            font.pixelSize: 14.0
             color: parent.checked ? "#FFFFFF" : "#888888"
             verticalAlignment: Text.AlignVCenter
             leftPadding: parent.indicator.width + parent.spacing
@@ -377,7 +377,7 @@ Item {
           font.pixelSize: 14.0
           contentItem: Text {
             text: parent.text
-            font: parent.font
+            font.pixelSize: 14.0
             color: parent.checked ? "#FFFFFF" : "#888888"
             verticalAlignment: Text.AlignVCenter
             leftPadding: parent.indicator.width + parent.spacing

@@ -92,6 +92,7 @@ Popup {
     selectByMouse: true
     selectionColor: popupSelectionColor
     color: "#FFFFFF"
+    font.pixelSize: 14.0
     background: Rectangle {
       width: parent.width
       height: parent.height
