@@ -9,9 +9,9 @@ Button {
   id: btn
   property color btnColor: "#782D8B"
   property color btnTextColor: "#FFFFFF"
-  property color btnPressedColor: "#671C7A"
-  property color btnHoveredColor: "#9A4FAD"
-  property color btnDisabledColor: "#88340947"
+  property color btnPressedColor: "#3C0D4C"
+  property color btnHoveredColor: "#B66EC8"
+  property color btnDisabledColor: "#000000"
 
   text: "Button"
   implicitWidth: 120
