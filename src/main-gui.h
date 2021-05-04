@@ -15,6 +15,7 @@
 #include <QtGui/QFont>
 #include <QtGui/QFontDatabase>
 #include <QtGui/QIcon>
+#include <QtGui/QScreen>
 #include <QtCore/QThread>
 #include <QtCore/QDateTime>
 #include <QtConcurrent/qtconcurrentrun.h>

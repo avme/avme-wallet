@@ -14,9 +14,10 @@ Popup {
   property color popupBgColor: "#1C2029"
 
   width: parent.width * ((isSameAddress) ? 0.6 : 0.5)
-  height: parent.height * ((isSameAddress) ? 0.4 : 0.3)
+  height: (isSameAddress) ? 280 : 220
   x: (parent.width * ((isSameAddress) ? 0.4 : 0.5)) / 2
-  y: (parent.height * ((isSameAddress) ? 0.6 : 0.7)) / 2
+  //y: (parent.height * ((isSameAddress) ? 0.6 : 0.7)) / 2
+  y: (parent.height * 0.5) - (height / 2)
   background: Rectangle { anchors.fill: parent; color: popupBgColor; radius: 10 }
   modal: true
   focus: true
@@ -27,63 +28,73 @@ Popup {
     passInput.text = ""
   }
 
-  Column {
-    anchors.fill: parent
-    spacing: 30
-    topPadding: 30
-
-    Text {
-      id: warning
-      anchors.horizontalCenter: parent.horizontalCenter
-      horizontalAlignment: Text.AlignHCenter
-      color: "#FFFFFF"
-      font.bold: true
-      font.pixelSize: 14.0
-      visible: (isSameAddress)
-      text: "ATTENTION: receiver Account is the exact same as the sender.<br>"
-      + "If this is not what you want, go back now and set another Account as the receiver."
+  Text {
+    id: warning
+    anchors {
+      top: parent.top
+      horizontalCenter: parent.horizontalCenter
+      topMargin: 20
     }
+    horizontalAlignment: Text.AlignHCenter
+    color: "#FFFFFF"
+    font.bold: true
+    font.pixelSize: 14.0
+    visible: (isSameAddress)
+    text: "ATTENTION: receiver Account is the exact same as the sender.<br>"
+    + "If this is not what you want, go back now and set another Account as the receiver."
+  }
 
-    Text {
-      id: info
-      anchors.horizontalCenter: parent.horizontalCenter
-      horizontalAlignment: Text.AlignHCenter
-      color: "#FFFFFF"
-      font.pixelSize: 14.0
-      text: (!infoTimer.running)
-      ? "Please authenticate to confirm this transaction."
-      : "Wrong passphrase, please try again."
-      Timer { id: infoTimer; interval: 2000 }
+  Text {
+    id: info
+    anchors {
+      top: (isSameAddress) ? warning.bottom : parent.top
+      horizontalCenter: parent.horizontalCenter
+      margins: 20
     }
+    horizontalAlignment: Text.AlignHCenter
+    color: "#FFFFFF"
+    font.pixelSize: 14.0
+    text: (!infoTimer.running)
+    ? "Please authenticate to confirm this transaction."
+    : "Wrong passphrase, please try again."
+    Timer { id: infoTimer; interval: 2000 }
+  }
 
-    AVMEInput {
-      id: passInput
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: parent.width / 2
-      echoMode: TextInput.Password
-      passwordCharacter: "*"
-      label: "Passphrase"
-      placeholder: "Your Wallet's passphrase"
+  AVMEInput {
+    id: passInput
+    anchors {
+      bottom: btnRow.top
+      horizontalCenter: parent.horizontalCenter
+      margins: 20
     }
+    width: parent.width / 2
+    echoMode: TextInput.Password
+    passwordCharacter: "*"
+    label: "Passphrase"
+    placeholder: "Your Wallet's passphrase"
+  }
 
-    Row {
-      id: btnRow
-      anchors.horizontalCenter: parent.horizontalCenter
-      spacing: 10
+  Row {
+    id: btnRow
+    anchors {
+      bottom: parent.bottom
+      horizontalCenter: parent.horizontalCenter
+      bottomMargin: 20
+    }
+    spacing: 10
 
-      AVMEButton {
-        id: btnBack
-        text: "Back"
-        onClicked: {
-          confirmTxPopup.clean()
-          confirmTxPopup.close()
-        }
+    AVMEButton {
+      id: btnBack
+      text: "Back"
+      onClicked: {
+        confirmTxPopup.clean()
+        confirmTxPopup.close()
       }
-      AVMEButton {
-        id: btnOk
-        text: "OK"
-        enabled: (passInput.text !== "")
-      }
+    }
+    AVMEButton {
+      id: btnOk
+      text: "OK"
+      enabled: (passInput.text !== "")
     }
   }
 }

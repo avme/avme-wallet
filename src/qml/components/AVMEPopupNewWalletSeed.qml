@@ -25,61 +25,68 @@ Popup {
   }
 
   width: (parent.width * 0.9)
-  height: (parent.height * 0.5)
+  height: 320
   x: (parent.width * 0.1) / 2
-  y: (parent.height * 0.5) / 2
+  y: (parent.height * 0.5) - (height / 2)
   modal: true
   focus: true
   padding: 0  // Remove white borders
   closePolicy: Popup.NoAutoClose
   background: Rectangle { anchors.fill: parent; color: popupBgColor; radius: 10 }
 
-  Column {
-    anchors.fill: parent
-    spacing: 30
-    topPadding: 40
-
-    Text {
-      id: warningText
-      anchors.horizontalCenter: parent.horizontalCenter
-      horizontalAlignment: Text.AlignHCenter
-      color: "#FFFFFF"
-      font.pixelSize: 14.0
-      text: "This is your seed for this Wallet. Please note it down.<br>"
-      + "You can view it at any time in the Settings menu.<br>"
-      + "<br><br><b>YOU ARE FULLY RESPONSIBLE FOR GUARDING YOUR SEED."
-      + "<br>KEEP IT AWAY FROM PRYING EYES AND DO NOT SHARE IT WITH ANYONE."
-      + "<br>WE ARE NOT HELD LIABLE FOR ANY POTENTIAL FUND LOSSES CAUSED BY THIS."
-      + "<br>PROCEED AT YOUR OWN RISK.</b>"
+  Text {
+    id: warningText
+    anchors {
+      top: parent.top
+      horizontalCenter: parent.horizontalCenter
+      topMargin: 20
     }
+    horizontalAlignment: Text.AlignHCenter
+    color: "#FFFFFF"
+    font.pixelSize: 14.0
+    text: "This is your seed for this Wallet. Please note it down.<br>"
+    + "You can view it at any time in the Settings menu.<br>"
+    + "<br><br><b>YOU ARE FULLY RESPONSIBLE FOR GUARDING YOUR SEED."
+    + "<br>KEEP IT AWAY FROM PRYING EYES AND DO NOT SHARE IT WITH ANYONE."
+    + "<br>WE ARE NOT HELD LIABLE FOR ANY POTENTIAL FUND LOSSES CAUSED BY THIS."
+    + "<br>PROCEED AT YOUR OWN RISK.</b>"
+  }
 
-    TextArea {
-      id: seedText
-      width: parent.width - 100
-      height: 50
-      anchors.horizontalCenter: parent.horizontalCenter
-      horizontalAlignment: Text.AlignHCenter
-      verticalAlignment: Text.AlignVCenter
-      readOnly: true
-      selectByMouse: true
-      selectionColor: popupSelectionColor
-      color: "#FFFFFF"
-      background: Rectangle {
-        width: parent.width
-        height: parent.height
-        color: popupSeedBgColor
-        radius: 10
-      }
+  TextArea {
+    id: seedText
+    anchors {
+      top: warningText.bottom
+      left: parent.left
+      right: parent.right
+      bottom: btnOk.top
+      margins: 20
     }
+    horizontalAlignment: Text.AlignHCenter
+    verticalAlignment: Text.AlignVCenter
+    readOnly: true
+    selectByMouse: true
+    selectionColor: popupSelectionColor
+    color: "#FFFFFF"
+    font.pixelSize: 14.0
+    background: Rectangle {
+      width: parent.width
+      height: parent.height
+      color: popupSeedBgColor
+      radius: 10
+    }
+  }
 
-    AVMEButton {
-      id: btnOk
-      anchors.horizontalCenter: parent.horizontalCenter
-      text: "OK"
-      onClicked: {
-        newWalletSeedPopup.clean()
-        newWalletSeedPopup.close()
-      }
+  AVMEButton {
+    id: btnOk
+    anchors {
+      bottom: parent.bottom
+      horizontalCenter: parent.horizontalCenter
+      bottomMargin: 20
+    }
+    text: "OK"
+    onClicked: {
+      newWalletSeedPopup.clean()
+      newWalletSeedPopup.close()
     }
   }
 }
