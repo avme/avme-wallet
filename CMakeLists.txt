@@ -62,6 +62,7 @@ add_subdirectory(external/openssl-cmake)
 include(ProjectSecp256k1)
 include(ProjectToolbox)
 include(ProjectBip3x)
+include(ProjectLibLedgerCore)
 find_package(Threads)
 
 # Include headers and libs
@@ -96,7 +97,7 @@ file(GLOB AVME_SOURCES "src/lib/*.cpp")
 # Compile the project library
 add_library(avme-lib ${AVME_HEADERS} ${AVME_SOURCES})
 target_link_libraries(avme-lib PUBLIC
-  devcore devcrypto ethcore ethash::ethash ssl crypto toolbox bip39 ${BOOST_LIBS}
+  devcore devcrypto ethcore ethash::ethash ssl crypto toolbox bip39 ledgercore ${BOOST_LIBS}
 )
 
 # Compile the CLI executable (for debugging/testing)
