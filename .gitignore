@@ -1,3 +1,4 @@
 build/
 *.qmlc
 .directory
+*.kate-swp
