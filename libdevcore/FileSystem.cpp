@@ -5,7 +5,6 @@
 
 #include "FileSystem.h"
 #include "Common.h"
-#include "Log.h"
 
 #if defined(_WIN32)
 #include <shlobj.h>
@@ -68,7 +67,7 @@ fs::path dev::getDefaultDataDir(string _prefix)
 	else
 	{
 	#ifndef _MSC_VER // todo?
-		cwarn << "getDataDir(): SHGetSpecialFolderPathA() failed.";
+		// cwarn << "getDataDir(): SHGetSpecialFolderPathA() failed.";
 	#endif
 		BOOST_THROW_EXCEPTION(std::runtime_error("getDataDir() - SHGetSpecialFolderPathA() failed."));
 	}

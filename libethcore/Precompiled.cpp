@@ -5,7 +5,6 @@
 
 #include "Precompiled.h"
 #include "ChainOperationParams.h"
-#include <libdevcore/Log.h>
 #include <libdevcore/SHA3.h>
 #include <libdevcrypto/Blake2.h>
 #include <libdevcrypto/Common.h>

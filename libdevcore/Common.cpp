@@ -4,7 +4,6 @@
 
 #include "Common.h"
 #include "Exceptions.h"
-#include "Log.h"
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -24,7 +23,7 @@ void InvariantChecker::checkInvariants(HasInvariants const* _this, char const* _
 {
     if (!_this->invariants())
     {
-        cwarn << (_pre ? "Pre" : "Post") << "invariant failed in" << _fn << "at" << _file << ":" << _line;
+        // cwarn << (_pre ? "Pre" : "Post") << "invariant failed in" << _fn << "at" << _file << ":" << _line;
         ::boost::exception_detail::throw_exception_(FailedInvariant(), _fn, _file, _line);
     }
 }
@@ -32,9 +31,9 @@ void InvariantChecker::checkInvariants(HasInvariants const* _this, char const* _
 TimerHelper::~TimerHelper()
 {
     auto e = std::chrono::high_resolution_clock::now() - m_t;
-    if (!m_ms || e > chrono::milliseconds(m_ms))
-        clog(VerbosityDebug, "timer")
-            << m_id << " " << chrono::duration_cast<chrono::milliseconds>(e).count() << " ms";
+  //  if (!m_ms || e > chrono::milliseconds(m_ms))
+  //      clog(VerbosityDebug, "timer")
+    //        << m_id << " " << chrono::duration_cast<chrono::milliseconds>(e).count() << " ms";
 }
 
 int64_t utcTime()

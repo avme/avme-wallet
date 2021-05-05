@@ -6,7 +6,6 @@
 #pragma once
 
 #include <memory>
-#include "Log.h"
 #include "Exceptions.h"
 #include "SHA3.h"
 #include "TrieCommon.h"
@@ -205,7 +204,7 @@ public:
         }
         catch (...)
         {
-            cwarn << boost::current_exception_diagnostic_information();
+            // cwarn << boost::current_exception_diagnostic_information();
             return false;
         }
     }

@@ -4,7 +4,6 @@
 
 
 #include <libdevcore/Common.h>
-#include <libdevcore/Log.h>
 #include <libdevcore/RLP.h>
 #include <libdevcore/TrieDB.h>
 #include <libdevcore/StateCacheDB.h>
