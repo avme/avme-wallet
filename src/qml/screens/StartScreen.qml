@@ -43,22 +43,6 @@ Item {
     }
   }
 
-  // Background logo image
-  Image {
-    id: logoBg
-    anchors {
-      horizontalCenter: parent.horizontalCenter
-      horizontalCenterOffset: 400
-    }
-    width: 1000
-    height: 1000
-    opacity: 0.15
-    antialiasing: true
-    smooth: true
-    fillMode: Image.PreserveAspectFit
-    source: "qrc:/img/avme_logo_hd.png"
-  }
-
   // Header (logo + text)
   Image {
     id: logo
@@ -220,7 +204,7 @@ Item {
           text: "View passphrase"
           contentItem: Text {
             text: parent.text
-            font: parent.font
+            font.pixelSize: 14.0
             color: parent.checked ? "#FFFFFF" : "#888888"
             verticalAlignment: Text.AlignVCenter
             leftPadding: parent.indicator.width + parent.spacing
@@ -235,7 +219,7 @@ Item {
           text: "Use default path"
           contentItem: Text {
             text: parent.text
-            font: parent.font
+            font.pixelSize: 14.0
             color: parent.checked ? "#FFFFFF" : "#888888"
             verticalAlignment: Text.AlignVCenter
             leftPadding: parent.indicator.width + parent.spacing

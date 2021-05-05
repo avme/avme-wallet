@@ -7,7 +7,6 @@
 #include <libdevcore/Base64.h>
 #include <libdevcore/Terminal.h>
 #include <libdevcore/CommonIO.h>
-#include <libdevcore/Log.h>
 #include <libdevcore/SHA3.h>
 #include "Exceptions.h"
 #include "BlockHeader.h"
@@ -119,7 +118,7 @@ static void badBlockInfo(BlockHeader const& _bi, string const& _err)
 	ss << c_border + ("                     Bad Block #" + string(max<int>(0, 8 - bin.size()), '0') + bin + "." + _bi.hash().abridged() + "                    ") + c_border << "\n";
 	ss << c_space << "\n";
 	ss << c_line;
-	cwarn << "\n" + ss.str();
+	// cwarn << "\n" + ss.str();
 }
 
 void badBlock(bytesConstRef _block, string const& _err)

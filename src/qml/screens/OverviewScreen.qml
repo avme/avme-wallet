@@ -201,516 +201,512 @@ Item {
     }
     title: "Balances & Staking Statistics"
 
-    Column {
+    Text {
+      id: accountText
       anchors {
         top: parent.header.bottom
-        bottom: parent.bottom
+        horizontalCenter: parent.horizontalCenter
+        topMargin: 10
+      }
+      horizontalAlignment: Text.AlignHCenter
+      color: "#FFFFFF"
+      font.pixelSize: 14.0
+      text: "This Account"
+    }
+
+    ChartView {
+      id: accountChart
+      property color coinColor: "#782D8B"
+      property color tokenColor: "#368097"
+      anchors {
+        top: accountText.bottom
         left: parent.left
         right: parent.right
         topMargin: 10
       }
-      spacing: 5
-
-      Text {
-        id: accountText
-        anchors.horizontalCenter: parent.horizontalCenter
-        horizontalAlignment: Text.AlignHCenter
-        color: "#FFFFFF"
-        font.pixelSize: 14.0
-        text: "This Account"
-      }
-
-      ChartView {
-        id: accountChart
-        property color coinColor: "#782D8B"
-        property color tokenColor: "#368097"
-        width: parent.width
-        height: (parent.height * 0.3)
-        backgroundColor: "transparent"
-        antialiasing: true
-        legend.visible: false
-        margins { right: 0; bottom: 0; left: 0; top: 0 }
-
-        Rectangle {
-          anchors {
-            top: parent.top
-            left: parent.left
-            bottom: parent.bottom
-          }
-          width: (parent.width * 0.275)
-          color: "transparent"
-
-          Text {
-            id: accountSliceAVAXText
-            anchors {
-              centerIn: parent
-              verticalCenterOffset: -10
-            }
-            font.bold: true
-            font.pixelSize: 14.0
-            color: accountChart.coinColor
-            text: accountSliceAVAX.value + "%"
-          }
-
-          Text {
-            id: accountSliceAVMEText
-            anchors {
-              centerIn: parent
-              verticalCenterOffset: 10
-            }
-            font.bold: true
-            font.pixelSize: 14.0
-            color: accountChart.tokenColor
-            text: accountSliceAVME.value + "%"
-          }
-        }
-
-        PieSeries {
-          id: accountPie
-          size: 0.8
-          holeSize: 0.65
-          horizontalPosition: 0.125
-          PieSlice {
-            id: accountSliceAVAX; color: accountChart.coinColor; borderColor: "transparent"
-          }
-          PieSlice {
-            id: accountSliceAVME; color: accountChart.tokenColor; borderColor: "transparent"
-          }
-        }
-
-        Column {
-          width: (parent.width * 0.7)
-          anchors {
-            top: parent.top
-            right: parent.right
-            bottom: parent.bottom
-            margins: 20
-          }
-          spacing: 10
-
-          Rectangle {
-            id: accountCoinRect
-            width: parent.width
-            anchors.horizontalCenter: parent.horizontalCenter
-            height: 60
-            radius: 10
-            color: accountChart.coinColor
-
-            Image {
-              id: accountCoinLogo
-              height: parent.height
-              anchors {
-                top: parent.top
-                left: parent.left
-                bottom: parent.bottom
-                margins: 10
-              }
-              antialiasing: true
-              smooth: true
-              source: "qrc:/img/avax_logo.png"
-              fillMode: Image.PreserveAspectFit
-            }
-
-            Text {
-              id: accountCoinBalance
-              width: parent.width * 0.8
-              anchors {
-                verticalCenter: parent.verticalCenter
-                verticalCenterOffset: -10
-                left: accountCoinLogo.right
-                leftMargin: 10
-              }
-              color: "#FFFFFF"
-              font.pixelSize: 14.0
-              elide: Text.ElideRight
-            }
-
-            Text {
-              id: accountCoinPrice
-              width: parent.width * 0.8
-              anchors {
-                verticalCenter: parent.verticalCenter
-                verticalCenterOffset: 10
-                left: accountCoinLogo.right
-                leftMargin: 10
-              }
-              color: "#FFFFFF"
-              font.pixelSize: 14.0
-              elide: Text.ElideRight
-            }
-          }
-
-          Rectangle {
-            id: accountTokenRect
-            width: parent.width
-            anchors.horizontalCenter: parent.horizontalCenter
-            height: 60
-            radius: 10
-            color: accountChart.tokenColor
-
-            Image {
-              id: accountTokenLogo
-              height: parent.height
-              anchors {
-                top: parent.top
-                left: parent.left
-                bottom: parent.bottom
-                margins: 10
-              }
-              antialiasing: true
-              smooth: true
-              source: "qrc:/img/avme_logo.png"
-              fillMode: Image.PreserveAspectFit
-            }
-
-            Text {
-              id: accountTokenBalance
-              width: parent.width * 0.8
-              anchors {
-                verticalCenter: parent.verticalCenter
-                verticalCenterOffset: -10
-                left: accountTokenLogo.right
-                leftMargin: 10
-              }
-              color: "#FFFFFF"
-              font.pixelSize: 14.0
-              elide: Text.ElideRight
-            }
-
-            Text {
-              id: accountTokenPrice
-              width: parent.width * 0.8
-              anchors {
-                verticalCenter: parent.verticalCenter
-                verticalCenterOffset: 10
-                left: accountTokenLogo.right
-                leftMargin: 10
-              }
-              color: "#FFFFFF"
-              font.pixelSize: 14.0
-              elide: Text.ElideRight
-            }
-          }
-        }
-      }
-
-      Text {
-        id: walletText
-        anchors.horizontalCenter: parent.horizontalCenter
-        horizontalAlignment: Text.AlignHCenter
-        color: "#FFFFFF"
-        font.pixelSize: 14.0
-        text: "Total from Wallet"
-      }
-
-      ChartView {
-        id: walletChart
-        property color coinColor: "#782D8B"
-        property color tokenColor: "#368097"
-        width: parent.width
-        height: (parent.height * 0.3)
-        backgroundColor: "transparent"
-        antialiasing: true
-        legend.visible: false
-        margins { right: 0; bottom: 0; left: 0; top: 0 }
-
-        Rectangle {
-          anchors {
-            top: parent.top
-            left: parent.left
-            bottom: parent.bottom
-          }
-          width: (parent.width * 0.275)
-          color: "transparent"
-
-          Text {
-            id: walletSliceAVAXText
-            anchors {
-              centerIn: parent
-              verticalCenterOffset: -10
-            }
-            font.bold: true
-            font.pixelSize: 14.0
-            color: walletChart.coinColor
-            text: walletSliceAVAX.value + "%"
-          }
-
-          Text {
-            id: walletSliceAVMEText
-            anchors {
-              centerIn: parent
-              verticalCenterOffset: 10
-            }
-            font.bold: true
-            font.pixelSize: 14.0
-            color: walletChart.tokenColor
-            text: walletSliceAVME.value + "%"
-          }
-        }
-
-        PieSeries {
-          id: walletPie
-          size: 0.8
-          holeSize: 0.65
-          horizontalPosition: 0.125
-          PieSlice {
-            id: walletSliceAVAX; color: walletChart.coinColor; borderColor: "transparent"
-          }
-          PieSlice {
-            id: walletSliceAVME; color: walletChart.tokenColor; borderColor: "transparent"
-          }
-        }
-
-        Column {
-          width: (parent.width * 0.7)
-          anchors {
-            top: parent.top
-            right: parent.right
-            bottom: parent.bottom
-            margins: 20
-          }
-          spacing: 10
-
-          Rectangle {
-            id: walletCoinRect
-            width: parent.width
-            anchors.horizontalCenter: parent.horizontalCenter
-            height: 60
-            radius: 10
-            color: walletChart.coinColor
-
-            Image {
-              id: walletCoinLogo
-              height: parent.height
-              anchors {
-                top: parent.top
-                left: parent.left
-                bottom: parent.bottom
-                margins: 10
-              }
-              antialiasing: true
-              smooth: true
-              source: "qrc:/img/avax_logo.png"
-              fillMode: Image.PreserveAspectFit
-            }
-
-            Text {
-              id: walletCoinBalance
-              width: parent.width * 0.8
-              anchors {
-                verticalCenter: parent.verticalCenter
-                verticalCenterOffset: -10
-                left: walletCoinLogo.right
-                leftMargin: 10
-              }
-              color: "#FFFFFF"
-              font.pixelSize: 14.0
-              elide: Text.ElideRight
-            }
-
-            Text {
-              id: walletCoinPrice
-              width: parent.width * 0.8
-              anchors {
-                verticalCenter: parent.verticalCenter
-                verticalCenterOffset: 10
-                left: walletCoinLogo.right
-                leftMargin: 10
-              }
-              color: "#FFFFFF"
-              font.pixelSize: 14.0
-              elide: Text.ElideRight
-            }
-          }
-
-          Rectangle {
-            id: walletTokenRect
-            width: parent.width
-            anchors.horizontalCenter: parent.horizontalCenter
-            height: 60
-            radius: 10
-            color: walletChart.tokenColor
-
-            Image {
-              id: walletTokenLogo
-              height: parent.height
-              anchors {
-                top: parent.top
-                left: parent.left
-                bottom: parent.bottom
-                margins: 10
-              }
-              antialiasing: true
-              smooth: true
-              source: "qrc:/img/avme_logo.png"
-              fillMode: Image.PreserveAspectFit
-            }
-
-            Text {
-              id: walletTokenBalance
-              width: parent.width * 0.8
-              anchors {
-                verticalCenter: parent.verticalCenter
-                verticalCenterOffset: -10
-                left: walletTokenLogo.right
-                leftMargin: 10
-              }
-              color: "#FFFFFF"
-              font.pixelSize: 14.0
-              elide: Text.ElideRight
-            }
-
-            Text {
-              id: walletTokenPrice
-              width: parent.width * 0.8
-              anchors {
-                verticalCenter: parent.verticalCenter
-                verticalCenterOffset: 10
-                left: walletTokenLogo.right
-                leftMargin: 10
-              }
-              color: "#FFFFFF"
-              font.pixelSize: 14.0
-              elide: Text.ElideRight
-            }
-          }
-        }
-      }
+      height: (parent.height * 0.3)
+      backgroundColor: "transparent"
+      antialiasing: true
+      legend.visible: false
+      margins { right: 0; bottom: 0; left: 0; top: 0 }
 
       Rectangle {
-        id: stakingBalancesRect
-        width: parent.width * 0.9
-        height: 60
         anchors {
-          horizontalCenter: parent.horizontalCenter
-          margins: 20
+          top: parent.top
+          left: parent.left
+          bottom: parent.bottom
         }
-        color: "#3E4653"
-        radius: 10
+        width: (parent.width * 0.275)
+        color: "transparent"
 
         Text {
-          id: stakingFreeBalance
+          id: accountSliceAVAXText
           anchors {
-            verticalCenter: parent.verticalCenter
+            centerIn: parent
             verticalCenterOffset: -10
-            left: parent.left
-            leftMargin: 10
           }
-          width: parent.width * 0.75
-          color: "#FFFFFF"
+          font.bold: true
           font.pixelSize: 14.0
-          elide: Text.ElideRight
+          color: accountChart.coinColor
+          text: accountSliceAVAX.value + "%"
         }
 
         Text {
-          id: stakingFreeText
+          id: accountSliceAVMEText
           anchors {
-            verticalCenter: parent.verticalCenter
-            verticalCenterOffset: -10
-            right: parent.right
-            rightMargin: 10
-          }
-          color: "#FFFFFF"
-          font.pixelSize: 14.0
-          text: "Free LP"
-        }
-
-        Text {
-          id: stakingLockedBalance
-          anchors {
-            verticalCenter: parent.verticalCenter
+            centerIn: parent
             verticalCenterOffset: 10
-            left: parent.left
-            leftMargin: 10
           }
-          width: parent.width * 0.75
-          color: "#FFFFFF"
+          font.bold: true
           font.pixelSize: 14.0
-          elide: Text.ElideRight
-        }
-
-        Text {
-          id: stakingLockedText
-          anchors {
-            verticalCenter: parent.verticalCenter
-            verticalCenterOffset: 10
-            right: parent.right
-            rightMargin: 10
-          }
-          color: "#FFFFFF"
-          font.pixelSize: 14.0
-          text: "Locked LP"
+          color: accountChart.tokenColor
+          text: accountSliceAVME.value + "%"
         }
       }
 
-      Rectangle {
-        id: stakingRewardsRect
-        width: parent.width * 0.9
-        height: 60
+      PieSeries {
+        id: accountPie
+        size: 0.8
+        holeSize: 0.65
+        horizontalPosition: 0.125
+        PieSlice {
+          id: accountSliceAVAX; color: accountChart.coinColor; borderColor: "transparent"
+        }
+        PieSlice {
+          id: accountSliceAVME; color: accountChart.tokenColor; borderColor: "transparent"
+        }
+      }
+
+      Column {
+        width: (parent.width * 0.7)
         anchors {
-          horizontalCenter: parent.horizontalCenter
+          top: parent.top
+          right: parent.right
+          bottom: parent.bottom
           margins: 20
         }
-        color: "#3E4653"
-        radius: 10
+        spacing: 10
+
+        Rectangle {
+          id: accountCoinRect
+          width: parent.width
+          anchors.horizontalCenter: parent.horizontalCenter
+          height: (parent.height / 2) - 5
+          radius: 10
+          color: accountChart.coinColor
+
+          Image {
+            id: accountCoinLogo
+            height: parent.height
+            anchors {
+              top: parent.top
+              left: parent.left
+              bottom: parent.bottom
+              margins: 10
+            }
+            antialiasing: true
+            smooth: true
+            source: "qrc:/img/avax_logo.png"
+            fillMode: Image.PreserveAspectFit
+          }
+
+          Text {
+            id: accountCoinBalance
+            width: parent.width * 0.8
+            anchors {
+              verticalCenter: parent.verticalCenter
+              verticalCenterOffset: -10
+              left: accountCoinLogo.right
+              leftMargin: 10
+            }
+            color: "#FFFFFF"
+            font.pixelSize: 14.0
+            elide: Text.ElideRight
+          }
+
+          Text {
+            id: accountCoinPrice
+            width: parent.width * 0.8
+            anchors {
+              verticalCenter: parent.verticalCenter
+              verticalCenterOffset: 10
+              left: accountCoinLogo.right
+              leftMargin: 10
+            }
+            color: "#FFFFFF"
+            font.pixelSize: 14.0
+            elide: Text.ElideRight
+          }
+        }
+
+        Rectangle {
+          id: accountTokenRect
+          width: parent.width
+          anchors.horizontalCenter: parent.horizontalCenter
+          height: (parent.height / 2) - 5
+          radius: 10
+          color: accountChart.tokenColor
+
+          Image {
+            id: accountTokenLogo
+            height: parent.height
+            anchors {
+              top: parent.top
+              left: parent.left
+              bottom: parent.bottom
+              margins: 10
+            }
+            antialiasing: true
+            smooth: true
+            source: "qrc:/img/avme_logo.png"
+            fillMode: Image.PreserveAspectFit
+          }
+
+          Text {
+            id: accountTokenBalance
+            width: parent.width * 0.8
+            anchors {
+              verticalCenter: parent.verticalCenter
+              verticalCenterOffset: -10
+              left: accountTokenLogo.right
+              leftMargin: 10
+            }
+            color: "#FFFFFF"
+            font.pixelSize: 14.0
+            elide: Text.ElideRight
+          }
+
+          Text {
+            id: accountTokenPrice
+            width: parent.width * 0.8
+            anchors {
+              verticalCenter: parent.verticalCenter
+              verticalCenterOffset: 10
+              left: accountTokenLogo.right
+              leftMargin: 10
+            }
+            color: "#FFFFFF"
+            font.pixelSize: 14.0
+            elide: Text.ElideRight
+          }
+        }
+      }
+    }
+
+    Text {
+      id: walletText
+      anchors {
+        top: accountChart.bottom
+        horizontalCenter: parent.horizontalCenter
+        topMargin: 10
+      }
+      horizontalAlignment: Text.AlignHCenter
+      color: "#FFFFFF"
+      font.pixelSize: 14.0
+      text: "Total from Wallet"
+    }
+
+    ChartView {
+      id: walletChart
+      property color coinColor: "#782D8B"
+      property color tokenColor: "#368097"
+      anchors {
+        top: walletText.bottom
+        left: parent.left
+        right: parent.right
+        topMargin: 10
+      }
+      height: (parent.height * 0.3)
+      backgroundColor: "transparent"
+      antialiasing: true
+      legend.visible: false
+      margins { right: 0; bottom: 0; left: 0; top: 0 }
+
+      Rectangle {
+        anchors {
+          top: parent.top
+          left: parent.left
+          bottom: parent.bottom
+        }
+        width: (parent.width * 0.275)
+        color: "transparent"
 
         Text {
-          id: rewardAmount
-          property string reward
+          id: walletSliceAVAXText
           anchors {
-            verticalCenter: parent.verticalCenter
+            centerIn: parent
             verticalCenterOffset: -10
-            left: parent.left
-            leftMargin: 10
           }
-          color: "#FFFFFF"
+          font.bold: true
           font.pixelSize: 14.0
-          text: (reward) ? reward : "Loading..."
-          elide: Text.ElideRight
-          horizontalAlignment: Text.AlignHCenter
+          color: walletChart.coinColor
+          text: walletSliceAVAX.value + "%"
         }
 
         Text {
-          id: rewardTitle
+          id: walletSliceAVMEText
           anchors {
-            verticalCenter: parent.verticalCenter
-            verticalCenterOffset: -10
-            right: parent.right
-            rightMargin: 10
-          }
-          color: "#FFFFFF"
-          font.pixelSize: 14.0
-          text: "Current AVME Reward"
-        }
-
-        Text {
-          id: roiPercentage
-          property string roi
-          anchors {
-            verticalCenter: parent.verticalCenter
+            centerIn: parent
             verticalCenterOffset: 10
-            left: parent.left
-            leftMargin: 10
           }
-          color: "#FFFFFF"
+          font.bold: true
           font.pixelSize: 14.0
-          text: (roi) ? roi + "%" : "Loading..."
-          elide: Text.ElideRight
-          horizontalAlignment: Text.AlignHCenter
+          color: walletChart.tokenColor
+          text: walletSliceAVME.value + "%"
+        }
+      }
+
+      PieSeries {
+        id: walletPie
+        size: 0.8
+        holeSize: 0.65
+        horizontalPosition: 0.125
+        PieSlice {
+          id: walletSliceAVAX; color: walletChart.coinColor; borderColor: "transparent"
+        }
+        PieSlice {
+          id: walletSliceAVME; color: walletChart.tokenColor; borderColor: "transparent"
+        }
+      }
+
+      Column {
+        width: (parent.width * 0.7)
+        anchors {
+          top: parent.top
+          right: parent.right
+          bottom: parent.bottom
+          margins: 20
+        }
+        spacing: 10
+
+        Rectangle {
+          id: walletCoinRect
+          width: parent.width
+          anchors.horizontalCenter: parent.horizontalCenter
+          height: (parent.height / 2) - 5
+          radius: 10
+          color: walletChart.coinColor
+
+          Image {
+            id: walletCoinLogo
+            height: parent.height
+            anchors {
+              top: parent.top
+              left: parent.left
+              bottom: parent.bottom
+              margins: 10
+            }
+            antialiasing: true
+            smooth: true
+            source: "qrc:/img/avax_logo.png"
+            fillMode: Image.PreserveAspectFit
+          }
+
+          Text {
+            id: walletCoinBalance
+            width: parent.width * 0.8
+            anchors {
+              verticalCenter: parent.verticalCenter
+              verticalCenterOffset: -10
+              left: walletCoinLogo.right
+              leftMargin: 10
+            }
+            color: "#FFFFFF"
+            font.pixelSize: 14.0
+            elide: Text.ElideRight
+          }
+
+          Text {
+            id: walletCoinPrice
+            width: parent.width * 0.8
+            anchors {
+              verticalCenter: parent.verticalCenter
+              verticalCenterOffset: 10
+              left: walletCoinLogo.right
+              leftMargin: 10
+            }
+            color: "#FFFFFF"
+            font.pixelSize: 14.0
+            elide: Text.ElideRight
+          }
         }
 
-        Text {
-          id: roiTitle
-          anchors {
-            verticalCenter: parent.verticalCenter
-            verticalCenterOffset: 10
-            right: parent.right
-            rightMargin: 10
+        Rectangle {
+          id: walletTokenRect
+          width: parent.width
+          anchors.horizontalCenter: parent.horizontalCenter
+          height: (parent.height / 2) - 5
+          radius: 10
+          color: walletChart.tokenColor
+
+          Image {
+            id: walletTokenLogo
+            height: parent.height
+            anchors {
+              top: parent.top
+              left: parent.left
+              bottom: parent.bottom
+              margins: 10
+            }
+            antialiasing: true
+            smooth: true
+            source: "qrc:/img/avme_logo.png"
+            fillMode: Image.PreserveAspectFit
           }
-          color: "#FFFFFF"
-          font.pixelSize: 14.0
-          text: "Current APY"
+
+          Text {
+            id: walletTokenBalance
+            width: parent.width * 0.8
+            anchors {
+              verticalCenter: parent.verticalCenter
+              verticalCenterOffset: -10
+              left: walletTokenLogo.right
+              leftMargin: 10
+            }
+            color: "#FFFFFF"
+            font.pixelSize: 14.0
+            elide: Text.ElideRight
+          }
+
+          Text {
+            id: walletTokenPrice
+            width: parent.width * 0.8
+            anchors {
+              verticalCenter: parent.verticalCenter
+              verticalCenterOffset: 10
+              left: walletTokenLogo.right
+              leftMargin: 10
+            }
+            color: "#FFFFFF"
+            font.pixelSize: 14.0
+            elide: Text.ElideRight
+          }
         }
+      }
+    }
+
+    Rectangle {
+      id: stakingRect
+      anchors {
+        top: walletChart.bottom
+        horizontalCenter: parent.horizontalCenter
+        bottom: parent.bottom
+        margins: 10
+      }
+      width: parent.width * 0.9
+      color: "#3E4653"
+      radius: 10
+
+      Text {
+        id: stakingFreeBalance
+        anchors {
+          verticalCenter: parent.verticalCenter
+          verticalCenterOffset: -30
+          left: parent.left
+          leftMargin: 10
+        }
+        width: parent.width * 0.75
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        elide: Text.ElideRight
+      }
+
+      Text {
+        id: stakingFreeText
+        anchors {
+          verticalCenter: parent.verticalCenter
+          verticalCenterOffset: -30
+          right: parent.right
+          rightMargin: 10
+        }
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        text: "Free LP"
+      }
+
+      Text {
+        id: stakingLockedBalance
+        anchors {
+          verticalCenter: parent.verticalCenter
+          verticalCenterOffset: -10
+          left: parent.left
+          leftMargin: 10
+        }
+        width: parent.width * 0.75
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        elide: Text.ElideRight
+      }
+
+      Text {
+        id: stakingLockedText
+        anchors {
+          verticalCenter: parent.verticalCenter
+          verticalCenterOffset: -10
+          right: parent.right
+          rightMargin: 10
+        }
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        text: "Locked LP"
+      }
+
+      Text {
+        id: rewardAmount
+        property string reward
+        anchors {
+          verticalCenter: parent.verticalCenter
+          verticalCenterOffset: 10
+          left: parent.left
+          leftMargin: 10
+        }
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        text: (reward) ? reward : "Loading..."
+        elide: Text.ElideRight
+        horizontalAlignment: Text.AlignHCenter
+      }
+
+      Text {
+        id: rewardTitle
+        anchors {
+          verticalCenter: parent.verticalCenter
+          verticalCenterOffset: 10
+          right: parent.right
+          rightMargin: 10
+        }
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        text: "Current AVME Reward"
+      }
+
+      Text {
+        id: roiPercentage
+        property string roi
+        anchors {
+          verticalCenter: parent.verticalCenter
+          verticalCenterOffset: 30
+          left: parent.left
+          leftMargin: 10
+        }
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        text: (roi) ? roi + "%" : "Loading..."
+        elide: Text.ElideRight
+        horizontalAlignment: Text.AlignHCenter
+      }
+
+      Text {
+        id: roiTitle
+        anchors {
+          verticalCenter: parent.verticalCenter
+          verticalCenterOffset: 30
+          right: parent.right
+          rightMargin: 10
+        }
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        text: "Current APY"
       }
     }
   }

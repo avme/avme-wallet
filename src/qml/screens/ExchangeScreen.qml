@@ -350,7 +350,7 @@ Item {
         text: "Ignore price impact"
         contentItem: Text {
           text: parent.text
-          font: parent.font
+          font.pointSize: 14.0
           color: parent.checked ? "#FFFFFF" : "#888888"
           verticalAlignment: Text.AlignVCenter
           leftPadding: parent.indicator.width + parent.spacing
@@ -379,9 +379,9 @@ Item {
             System.setScreen(content, "qml/screens/TransactionScreen.qml")
             System.operationOverride("Approve Exchange", "", "", "")
           } else if (coinToToken) {
-		    if (System.balanceIsZero(swapInput.text, 18)) {
-			  zeroSwapPopup.open()
-			} else {
+            if (System.balanceIsZero(swapInput.text, 18)) {
+              zeroSwapPopup.open()
+            } else {
               if (System.hasInsufficientFunds(
                 "Coin", System.getRealMaxAVAXAmount("180000", System.getAutomaticFee()), swapInput.text
               )) {
@@ -390,19 +390,19 @@ Item {
                 System.setScreen(content, "qml/screens/TransactionScreen.qml")
                 System.operationOverride("Swap AVAX -> AVME", swapInput.text, swapEstimate, "")
               }
-		    }
+            }
           } else {
             var acc = System.getAccountBalances(System.getCurrentAccount())
-			if (System.balanceIsZero(swapInput.text, 18)) {
-			  zeroSwapPopup.open()
-			} else {
+            if (System.balanceIsZero(swapInput.text, 18)) {
+              zeroSwapPopup.open()
+            } else {
               if (System.hasInsufficientFunds("Token", acc.balanceAVME, swapInput.text)) {
                 fundsPopup.open()
               } else {
                 System.setScreen(content, "qml/screens/TransactionScreen.qml")
                 System.operationOverride("Swap AVME -> AVAX", swapEstimate, swapInput.text, "")
               }
-			}
+            }
           }
         }
       }

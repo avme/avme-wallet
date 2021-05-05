@@ -15,6 +15,7 @@
 #include <QtGui/QFont>
 #include <QtGui/QFontDatabase>
 #include <QtGui/QIcon>
+#include <QtGui/QScreen>
 #include <QtCore/QThread>
 #include <QtCore/QDateTime>
 #include <QtConcurrent/qtconcurrentrun.h>
@@ -418,6 +419,13 @@ class System : public QObject {
             std::string AVAXPrice = boost::lexical_cast<std::string>(AVAXPriceFloat);
             std::string AVMEPrice = boost::lexical_cast<std::string>(AVMEPriceFloat);
 
+            // Round the fiat balances to two decimals
+            std::stringstream AVAXPricess, AVMEPricess;
+            AVAXPricess << std::setprecision(2) << std::fixed << bigfloat(AVAXPrice);
+            AVMEPricess << std::setprecision(2) << std::fixed << bigfloat(AVMEPrice);
+            AVAXPrice = AVAXPricess.str();
+            AVMEPrice = AVMEPricess.str();
+
             // Fiat percentages (for the chart)
             bigfloat totalUSD, AVAXPercentageFloat, AVMEPercentageFloat;
             totalUSD = boost::lexical_cast<double>(AVAXPrice) + boost::lexical_cast<double>(AVMEPrice);
@@ -429,11 +437,11 @@ class System : public QObject {
             }
 
             // Round the percentages to two decimals
-            std::stringstream AVAXss, AVMEss;
-            AVAXss << std::setprecision(2) << std::fixed << AVAXPercentageFloat << std::endl;
-            AVMEss << std::setprecision(2) << std::fixed << AVMEPercentageFloat << std::endl;
-            std::string AVAXPercentage = AVAXss.str();
-            std::string AVMEPercentage = AVMEss.str();
+            std::stringstream AVAXPercentagess, AVMEPercentagess;
+            AVAXPercentagess << std::setprecision(2) << std::fixed << bigfloat(AVAXPercentageFloat);
+            AVMEPercentagess << std::setprecision(2) << std::fixed << bigfloat(AVMEPercentageFloat);
+            std::string AVAXPercentage = AVAXPercentagess.str();
+            std::string AVMEPercentage = AVMEPercentagess.str();
 
             // Pack up fiat balances and send back to GUI
             ret.insert("balanceAVAXUSD", QString::fromStdString(AVAXPrice));
@@ -540,6 +548,13 @@ class System : public QObject {
         std::string AVAXPrice = boost::lexical_cast<std::string>(AVAXPriceFloat);
         std::string AVMEPrice = boost::lexical_cast<std::string>(AVMEPriceFloat);
 
+        // Round the fiat balances to two decimals
+        std::stringstream AVAXPricess, AVMEPricess;
+        AVAXPricess << std::setprecision(2) << std::fixed << bigfloat(AVAXPrice);
+        AVMEPricess << std::setprecision(2) << std::fixed << bigfloat(AVMEPrice);
+        AVAXPrice = AVAXPricess.str();
+        AVMEPrice = AVMEPricess.str();
+
         // Fiat percentages (for the chart)
         bigfloat totalUSD, AVAXPercentageFloat, AVMEPercentageFloat;
         totalUSD = boost::lexical_cast<double>(AVAXPrice) + boost::lexical_cast<double>(AVMEPrice);
@@ -551,11 +566,11 @@ class System : public QObject {
         }
 
         // Round the percentages to two decimals
-        std::stringstream AVAXss, AVMEss;
-        AVAXss << std::setprecision(2) << std::fixed << AVAXPercentageFloat << std::endl;
-        AVMEss << std::setprecision(2) << std::fixed << AVMEPercentageFloat << std::endl;
-        std::string AVAXPercentage = AVAXss.str();
-        std::string AVMEPercentage = AVMEss.str();
+        std::stringstream AVAXPercentagess, AVMEPercentagess;
+        AVAXPercentagess << std::setprecision(2) << std::fixed << bigfloat(AVAXPercentageFloat);
+        AVMEPercentagess << std::setprecision(2) << std::fixed << bigfloat(AVMEPercentageFloat);
+        std::string AVAXPercentage = AVAXPercentagess.str();
+        std::string AVMEPercentage = AVMEPercentagess.str();
 
         // Pack up and send back to GUI
         ret.insert("balanceAVAXUSD", QString::fromStdString(AVAXPrice));
@@ -740,9 +755,9 @@ class System : public QObject {
         }
       }
       u256 totalU256 = u256(Utils::fixedPointToWei(balanceAVAXStr, this->currentCoinDecimals));
-	  if ((gasLimitU256 * gasPriceU256) > totalU256) {
-	    return QString::fromStdString(Utils::weiToFixedPoint(
-        boost::lexical_cast<std::string>(u256(0)), 18
+      if ((gasLimitU256 * gasPriceU256) > totalU256) {
+        return QString::fromStdString(Utils::weiToFixedPoint(
+          boost::lexical_cast<std::string>(u256(0)), 18
         ));
       }
       totalU256 -= (gasLimitU256 * gasPriceU256);

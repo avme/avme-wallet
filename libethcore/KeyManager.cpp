@@ -8,7 +8,6 @@
 #include <mutex>
 #include <boost/filesystem.hpp>
 #include <json_spirit/JsonSpiritHeaders.h>
-#include <libdevcore/Log.h>
 #include <libdevcore/Guards.h>
 #include <libdevcore/RLP.h>
 #include <libdevcore/SHA3.h>
@@ -85,7 +84,7 @@ bool KeyManager::load(string const& _pass)
 							saveRequired = true;
 					}
 					else
-						cwarn << "Missing key:" << uuid << addr;
+						// cwarn << "Missing key:" << uuid << addr;
 				}
 				else
 					m_keyInfo[addr] = KeyInfo(h256(i[2]), string(i[3]), i.itemCount() > 4 ? string(i[4]) : "");

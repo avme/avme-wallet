@@ -4,7 +4,6 @@
 #pragma once
 
 #include "Common.h"
-#include "Log.h"
 #include "RLP.h"
 
 namespace dev

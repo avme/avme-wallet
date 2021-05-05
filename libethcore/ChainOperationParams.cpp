@@ -5,7 +5,6 @@
 
 #include "ChainOperationParams.h"
 #include <libdevcore/CommonData.h>
-#include <libdevcore/Log.h>
 
 using namespace std;
 using namespace dev;

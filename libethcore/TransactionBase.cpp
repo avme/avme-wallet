@@ -3,7 +3,6 @@
 // Licensed under the GNU General Public License, Version 3.
 
 #include <libdevcore/vector_ref.h>
-#include <libdevcore/Log.h>
 #include <libdevcrypto/Common.h>
 #include <libethcore/Exceptions.h>
 #include "TransactionBase.h"

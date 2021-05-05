@@ -50,7 +50,7 @@ Item {
   // Transaction list
   Row {
     id: listBtnRow
-    width: (parent.width * 0.35) + anchors.margins
+    width: (parent.width * 0.4) - (anchors.margins * 2)
     anchors {
       top: accountHeader.bottom
       left: parent.left
@@ -76,9 +76,10 @@ Item {
     }
   }
 
+  // The list itself
   Rectangle {
     id: listRect
-    width: (parent.width * 0.35) + anchors.margins
+    width: (parent.width * 0.4) - (anchors.margins * 2)
     anchors {
       top: listBtnRow.bottom
       bottom: parent.bottom
@@ -98,7 +99,7 @@ Item {
   // Transaction details panel
   AVMEPanel {
     id: historyPanel
-    width: (parent.width * 0.6) + anchors.margins
+    width: (parent.width * 0.6) - (anchors.margins * 2)
     anchors {
       top: accountHeader.bottom
       bottom: parent.bottom

@@ -15,10 +15,8 @@ ApplicationWindow {
   title: "AVME Wallet"
   width: 1280
   height: 720
-  minimumWidth: width
-  minimumHeight: height
-  maximumWidth: width
-  maximumHeight: height
+  minimumWidth: 1280
+  minimumHeight: 720
   visible: true
 
   Connections {
@@ -52,12 +50,13 @@ ApplicationWindow {
 
     Image {
       id: logoBg
-      anchors {
-        horizontalCenter: parent.horizontalCenter
-        horizontalCenterOffset: 400
-      }
       width: 1000
       height: 1000
+      anchors {
+        right: parent.right
+        bottom: parent.bottom
+        margins: -300
+      }
       opacity: 0.15
       antialiasing: true
       smooth: true

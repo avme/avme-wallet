@@ -45,8 +45,8 @@ std::string StateCacheDB::lookup(h256 const& _h) const
     {
         if (!m_enforceRefs || it->second.second > 0)
             return it->second.first;
-        else
-            cwarn << "Lookup required for value with refcount == 0. This is probably a critical trie issue" << _h;
+    //    else
+            // cwarn << "Lookup required for value with refcount == 0. This is probably a critical trie issue" << _h;
     }
     return std::string();
 }
