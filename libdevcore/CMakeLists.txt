@@ -7,5 +7,5 @@ target_link_libraries(devcore
   PUBLIC
     avme_wallet-buildinfo ${BOOST_LIBS} ${QT_LIBS}
   PRIVATE
-    ethash::ethash bip39
+    ethash::ethash bip39 toolbox
 )
