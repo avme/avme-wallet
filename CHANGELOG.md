@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - "Copy to Clipboard" button and "Address:" label in the Account header.
 - Confirmation popup before making a transaction.
 - Warning message in the confirmation popup when sender and receiver Accounts are the same.
+- Project version now shows up in the window bar and the About screen.
 
 ### Changed
 - Seed popup at Wallet creation should be less confusing now (no extra disabled controls).

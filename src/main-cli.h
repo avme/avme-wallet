@@ -10,6 +10,8 @@
 #include "lib/Utils.h"
 #include "lib/Wallet.h"
 
+#include "version.h"
+
 /**
  * Menu prompts for the AVME CLI Wallet, for containerizing logic
  * and user input error handling, according to each menu's context.

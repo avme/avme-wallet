@@ -12,7 +12,7 @@ ApplicationWindow {
   id: window
   property bool menuToggle: false
 
-  title: "AVME Wallet"
+  title: "AVME Wallet " + System.getProjectVersion()
   width: 1280
   height: 720
   minimumWidth: 1280
