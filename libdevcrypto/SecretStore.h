@@ -8,6 +8,7 @@
 #include <mutex>
 #include <libdevcore/FixedHash.h>
 #include <libdevcore/FileSystem.h>
+#include <libdevcore/CommonIO.h>
 #include "Common.h"
 
 #include <boost/filesystem.hpp>

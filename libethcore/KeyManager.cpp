@@ -83,7 +83,7 @@ bool KeyManager::load(string const& _pass)
 						if (m_store.noteAddress(uuid, addr))
 							saveRequired = true;
 					}
-					else
+	//				else
 						// cwarn << "Missing key:" << uuid << addr;
 				}
 				else
@@ -364,7 +364,7 @@ KeyPair KeyManager::newKeyPair(KeyManager::NewKeyType _type)
 		{
 			done++;
 			if (done % 1000 == 0)
-				cnote << "Tried" << done << "keys";
+			//	cnote << "Tried" << done << "keys";
 			lp = KeyPair::create();
 			auto a = lp.address();
 			if (_type == NewKeyType::NoVanity ||
