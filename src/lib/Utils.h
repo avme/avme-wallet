@@ -14,7 +14,6 @@
 
 #include <libdevcore/CommonIO.h>
 #include <libdevcore/FileSystem.h>
-#include <libdevcore/LoggingProgramOptions.h>
 #include <libdevcore/SHA3.h>
 #include <libethcore/KeyManager.h>
 #include <libethcore/TransactionBase.h>

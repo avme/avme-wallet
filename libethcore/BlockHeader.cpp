@@ -217,7 +217,7 @@ void BlockHeader::verify(Strictness _s, BlockHeader const& _parent, bytesConstRe
         auto txList = root[1];
         auto expectedRoot = trieRootOver(txList.itemCount(), [&](unsigned i){ return rlp(i); }, [&](unsigned i){ return txList[i].data().toBytes(); });
 
-        LOG(m_logger) << "Expected trie root: " << toString(expectedRoot);
+        // LOG(m_logger) << "Expected trie root: " << toString(expectedRoot);
         if (m_transactionsRoot != expectedRoot)
         {
             StateCacheDB tm;
@@ -234,18 +234,18 @@ void BlockHeader::verify(Strictness _s, BlockHeader const& _parent, bytesConstRe
                 transactionsTrie.insert(&k.out(), txList[i].data());
 
                 txs.push_back(txList[i].data());
-                cdebug << toHex(k.out()) << toHex(txList[i].data());
+                // cdebug << toHex(k.out()) << toHex(txList[i].data());
             }
-            cdebug << "trieRootOver" << expectedRoot;
-            cdebug << "orderedTrieRoot" << orderedTrieRoot(txs);
-            cdebug << "TrieDB" << transactionsTrie.root();
-            cdebug << "Contents:";
+            // cdebug << "trieRootOver" << expectedRoot;
+            // cdebug << "orderedTrieRoot" << orderedTrieRoot(txs);
+            // cdebug << "TrieDB" << transactionsTrie.root();
+            // cdebug << "Contents:";
             for (auto const& t: txs)
-                cdebug << toHex(t);
+                // cdebug << toHex(t);
 
             BOOST_THROW_EXCEPTION(InvalidTransactionsRoot() << Hash256RequirementError(expectedRoot, m_transactionsRoot));
         }
-        LOG(m_logger) << "Expected uncle hash: " << toString(sha3(root[2].data()));
+        // LOG(m_logger) << "Expected uncle hash: " << toString(sha3(root[2].data()));
         if (m_sha3Uncles != sha3(root[2].data()))
             BOOST_THROW_EXCEPTION(InvalidUnclesHash() << Hash256RequirementError(sha3(root[2].data()), m_sha3Uncles));
     }

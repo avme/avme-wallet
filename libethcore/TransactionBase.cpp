@@ -88,7 +88,7 @@ TransactionBase::TransactionBase(bytesConstRef _rlpData, CheckTransaction _check
     }
     catch (Exception& _e)
     {
-        _e << errinfo_name("invalid transaction format: " + toString(rlp) + " RLP: " + toHex(rlp.data()));
+        _e << errinfo_name("invalid transaction format RLP: " + toHex(rlp.data()));
         throw;
     }
 }

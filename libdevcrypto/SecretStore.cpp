@@ -209,7 +209,7 @@ void SecretStore::load(fs::path const& _keysPath)
 
 h128 SecretStore::readKey(fs::path const& _file, bool _takeFileOwnership)
 {
-	ctrace << "Reading" << _file.string();
+	// ctrace << "Reading" << _file.string();
 	return readKeyContent(contentsString(_file), _takeFileOwnership ? _file : string());
 }
 
