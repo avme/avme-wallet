@@ -3,9 +3,9 @@
 // file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "Graph.h"
 
-std::string Graph::host = "graph-node.avax.network";
+std::string Graph::host = "api.thegraph.com";
 std::string Graph::port = "443";
-std::string Graph::target = "/subgraphs/name/dasconnor/pangolindex";
+std::string Graph::target = "/subgraphs/name/dasconnor/pangolin-dex";
 
 std::string Graph::httpGetRequest(std::string reqBody) {
   std::string result = "";
@@ -59,7 +59,7 @@ std::string Graph::httpGetRequest(std::string reqBody) {
     std::string body { boost::asio::buffers_begin(res.body().data()),boost::asio::buffers_end(res.body().data()) };
     result = body;
 
-	Utils::logToDebug("GRAPH Result ID " + RequestID + " : " + result);
+    Utils::logToDebug("GRAPH Result ID " + RequestID + " : " + result);
     //std::cout << "REQUEST RESULT: \n" << result << std::endl; // Uncomment for debugging
 
     boost::system::error_code ec;
@@ -72,7 +72,7 @@ std::string Graph::httpGetRequest(std::string reqBody) {
     if (ec)
       throw boost::system::system_error{ec};
   } catch (std::exception const& e) {
-	Utils::logToDebug("GRAPH ID " + RequestID + " ERROR:" + e.what());
+    Utils::logToDebug("GRAPH ID " + RequestID + " ERROR:" + e.what());
     return "";
   }
 

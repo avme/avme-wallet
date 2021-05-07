@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Seed popup at Wallet creation should be less confusing now (no extra disabled controls).
 - About popup is now a screen of its own, fitting better with the wallet's design.
 - Better color contrast between button states.
+- Pangolin's [Graph](https://api.thegraph.com/subgraphs/name/dasconnor/pangolin-dex) endpoint has been changed
+  - The old one is functional but has been deprecated and won't receive further updates
 
 ### Fixed
 - Market graph legends now shouldn't be cut off anymore (e.g. "05/..." instead of "05/03").
