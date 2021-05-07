@@ -340,14 +340,10 @@ Item {
             leftPadding: parent.indicator.width + parent.spacing
           }
           onClicked: {
-            if (!txGasLimitInput.enabled) {
-              // Disabled field (auto limit on)
+            if (!txGasLimitInput.enabled) { // Disabled field (auto limit on)
               txGasLimitInput.text = prev
-              prev = ""
-            } else {
-              // Enabled field (auto limit off)
+            } else { // Enabled field (auto limit off)
               prev = txGasLimitInput.text
-              txGasLimitInput.text = ""
             }
             updateTxCost()
           }
@@ -383,14 +379,10 @@ Item {
             leftPadding: parent.indicator.width + parent.spacing
           }
           onClicked: {
-            if (!txGasPriceInput.enabled) {
-              // Disabled field (auto fee on)
+            if (!txGasPriceInput.enabled) { // Disabled field (auto fee on)
               txGasPriceInput.text = prev
-              prev = ""
-            } else {
-              // Enabled field (auto fee off)
+            } else {  // Enabled field (auto fee off)
               prev = txGasPriceInput.text
-              txGasPriceInput.text = ""
             }
             updateTxCost()
           }

@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Windows:** proper high DPI scaling using QT\_SCALE\_FACTOR.
 - Fiat pricings in the overview are now properly rounded to two decimals.
   - This fixes balances being shown as scientific notations (e.g. "$3.4717e-16" instead of "$3.47").
+- Gas checkboxes now don't lose their predefined values anymore when clicking too fast
 
 ## [0.1.0] - 2021-05-01
 ### Added
