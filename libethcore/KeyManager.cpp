@@ -363,7 +363,7 @@ KeyPair KeyManager::newKeyPair(KeyManager::NewKeyType _type)
 		while (keepGoing)
 		{
 			done++;
-			if (done % 1000 == 0)
+			// if (done % 1000 == 0)
 			//	cnote << "Tried" << done << "keys";
 			lp = KeyPair::create();
 			auto a = lp.address();

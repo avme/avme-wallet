@@ -225,12 +225,12 @@ h128 SecretStore::readKeyContent(string const& _content, fs::path const& _file)
 			Address address = ZeroAddress;
 			if (o.find("address") != o.end() && isHex(o["address"].get_str()))
 				address = Address(o["address"].get_str());
-			else
+			// else
 				// cwarn << "Account address is either not defined or not in hex format" << _file.string();
 			m_keys[uuid] = EncryptedKey{js::write_string(o["crypto"], false), _file, address};
 			return uuid;
 		}
-		else
+		// else
 			// cwarn << "Invalid JSON in key file" << _file.string();
 		return h128();
 	}
@@ -417,7 +417,7 @@ bytesSec SecretStore::decrypt(string const& _v, string const& _pass)
 			return bytesSec();
 		}
 	}
-	else
+	// else
 		// cwarn << "No MAC. Proceeding anyway.";
 
 	// decrypt
