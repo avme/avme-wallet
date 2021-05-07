@@ -186,6 +186,7 @@ struct TransactionSkeleton
 	Address to;
 	u256 value;
 	bytes data;
+	uint64_t chainId;
 	u256 nonce = Invalid256;
 	u256 gas = Invalid256;
 	u256 gasPrice = Invalid256;
