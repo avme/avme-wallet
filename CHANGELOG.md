@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Confirmation popup before making a transaction.
 - Warning message in the confirmation popup when sender and receiver Accounts are the same.
 - Project version now shows up in the window bar and the About screen.
+- Support for replay protection ([EIP-155](https://eips.ethereum.org/EIPS/eip-155))
 
 ### Changed
 - Seed popup at Wallet creation should be less confusing now (no extra disabled controls).
@@ -17,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Better color contrast between button states.
 - Pangolin's [Graph](https://api.thegraph.com/subgraphs/name/dasconnor/pangolin-dex) endpoint has been changed
   - The old one is functional but has been deprecated and won't receive further updates
+
+### Removed
+- Boost::log as a dependency (the removal helps with MacOS compiling)
 
 ### Fixed
 - Market graph legends now shouldn't be cut off anymore (e.g. "05/..." instead of "05/03").
