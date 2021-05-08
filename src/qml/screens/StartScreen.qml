@@ -122,7 +122,7 @@ Item {
   Rectangle {
     id: createRect
     width: parent.width * 0.4
-    height: 500
+    height: 420
     visible: isCreate
     anchors {
       top: logo.bottom
@@ -147,88 +147,102 @@ Item {
 
         AVMEInput {
           id: createFolderInput
-          property string path
           width: (createItems.width * 0.9) - (createFolderDialogBtn.width + parent.spacing)
-          enabled: (!defaultCheck.checked)
           readOnly: true
           label: "Wallet folder"
           placeholder: "Your Wallet's top folder"
-          text: (defaultCheck.checked) ? System.getDefaultWalletPath() : path
+          Component.onCompleted: {
+            createFolderInput.text = System.getDefaultWalletPath()
+            createWalletExists = System.checkFolderForWallet(createFolderInput.text)
+          }
         }
         AVMEButton {
           id: createFolderDialogBtn
-          width: 40
-          enabled: (!defaultCheck.checked)
+          width: (createItems.width * 0.1)
           height: createFolderInput.height
-          text: "..."
+          text: ""
           onClicked: createFolderDialog.visible = true
+          Image {
+            anchors.fill: parent
+            anchors.margins: 10
+            source: "qrc:/img/icons/folder.png"
+            antialiasing: true
+            smooth: true
+            fillMode: Image.PreserveAspectFit
+          }
         }
         FolderDialog {
           id: createFolderDialog
           title: "Choose your Wallet folder"
           onAccepted: {
-            createFolderInput.path = System.cleanPath(createFolderDialog.folder)
+            createFolderInput.text = System.cleanPath(createFolderDialog.folder)
             createWalletExists = System.checkFolderForWallet(createFolderInput.text)
           }
         }
       }
 
-      // Passphrase
-      AVMEInput {
-        id: createPassInput
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: (createItems.width * 0.9)
-        echoMode: (viewPassCheck.checked) ? TextInput.Normal : TextInput.Password
-        passwordCharacter: "*"
-        label: "Passphrase"
-        placeholder: "Your Wallet's passphrase"
-      }
-
-      AVMEInput {
-        id: createPassCheckInput
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: (createItems.width * 0.9)
-        echoMode: (viewPassCheck.checked) ? TextInput.Normal : TextInput.Password
-        passwordCharacter: "*"
-        label: "Confirm passphrase"
-        placeholder: "Your Wallet's passphrase"
-      }
-
+      // Passphrase + view button
       Row {
+        id: createPassRow
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: 10
 
-        // View password checkbox
-        CheckBox {
-          id: viewPassCheck
-          text: "View passphrase"
-          contentItem: Text {
-            text: parent.text
-            font.pixelSize: 14.0
-            color: parent.checked ? "#FFFFFF" : "#888888"
-            verticalAlignment: Text.AlignVCenter
-            leftPadding: parent.indicator.width + parent.spacing
+        AVMEInput {
+          id: createPassInput
+          width: (createItems.width * 0.9) - (createPassViewBtn.width + parent.spacing)
+          echoMode: (createPassViewBtn.view) ? TextInput.Normal : TextInput.Password
+          passwordCharacter: "*"
+          label: "Passphrase"
+          placeholder: "Your Wallet's passphrase"
+        }
+        AVMEButton {
+          id: createPassViewBtn
+          property bool view: false
+          width: (createItems.width * 0.1)
+          height: createPassInput.height
+          text: ""
+          onClicked: view = !view
+          Image {
+            anchors.fill: parent
+            anchors.margins: 10
+            source: (parent.view) ? "qrc:/img/icons/eye-f.png" : "qrc:/img/icons/eye-close-f.png"
+            antialiasing: true
+            smooth: true
+            fillMode: Image.PreserveAspectFit
           }
         }
+      }
 
-        // Default path checkbox
-        CheckBox {
-          id: defaultCheck
-          checked: true
-          enabled: true
-          text: "Use default path"
-          contentItem: Text {
-            text: parent.text
-            font.pixelSize: 14.0
-            color: parent.checked ? "#FFFFFF" : "#888888"
-            verticalAlignment: Text.AlignVCenter
-            leftPadding: parent.indicator.width + parent.spacing
-          }
-          Component.onCompleted: {
-            createWalletExists = System.checkFolderForWallet(createFolderInput.text)
-          }
-          onClicked: {
-            createWalletExists = System.checkFolderForWallet(createFolderInput.text)
+      // Confirm passphrase + check icon
+      Row {
+        id: createPassCheckRow
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: 10
+
+        AVMEInput {
+          id: createPassCheckInput
+          width: (createItems.width * 0.9) - (createPassCheckIcon.width + parent.spacing)
+          echoMode: (createPassViewBtn.view) ? TextInput.Normal : TextInput.Password
+          passwordCharacter: "*"
+          label: "Confirm passphrase"
+          placeholder: "Your Wallet's passphrase"
+        }
+
+        Image {
+          id: createPassCheckIcon
+          width: (createItems.width * 0.1)
+          height: createPassCheckInput.height
+          antialiasing: true
+          smooth: true
+          fillMode: Image.PreserveAspectFit
+          source: {
+            if (createPassInput.text == "" || createPassCheckInput.text == "") {
+              source: ""
+            } else if (createPassInput.text == createPassCheckInput.text) {
+              source: "qrc:/img/ok.png"
+            } else {
+              source: "qrc:/img/no.png"
+            }
           }
         }
       }
@@ -267,7 +281,11 @@ Item {
         AVMEButton {
           id: btnCreate
           width: (createItems.width * 0.4)
-          enabled: (createFolderInput.text != "" && createPassInput.text != "" && !createWalletExists)
+          enabled: (
+            createFolderInput.text != "" && createPassInput.text != ""
+            && createPassCheckInput.text != "" && !createWalletExists
+            && createPassInput.text == createPassCheckInput.text
+          )
           text: {
             if (createWalletExists) {
               text: "Wallet exists"
@@ -353,12 +371,8 @@ Item {
           label: "Wallet folder"
           placeholder: "Your Wallet's top folder"
           Component.onCompleted: {
-            var path = System.getDefaultWalletPath()
-            var exists = System.checkFolderForWallet(path)
-            if (exists) {
-              loadFolderInput.text = path
-              loadWalletExists = exists
-            }
+            loadFolderInput.text = System.getDefaultWalletPath()
+            loadWalletExists = System.checkFolderForWallet(loadFolderInput.text)
           }
         }
         AVMEButton {

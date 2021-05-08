@@ -44,6 +44,9 @@
 
         <file>img/icons/create.png</file>
         <file>img/icons/save.png</file>
+        <file>img/icons/eye-f.png</file>
+        <file>img/icons/eye-close-f.png</file>
+        <file>img/icons/folder.png</file>
         <file>img/icons/cog.png</file>
         <file>img/icons/cogSelect.png</file>
         <file>img/icons/coin.png</file>
