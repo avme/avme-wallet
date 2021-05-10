@@ -1,6 +1,6 @@
 # TODO: revise library order, it's very messy
 SET(QT_LIBS "")
-LIST(APPEND QT_LIBS "-limm32 -ldwmapi -lwinmm -lversion -lwtsapi32 -lmincore -luserenv -lnetui1 -lnetapi32 -ldxgi -ld3d11")
+LIST(APPEND QT_LIBS "-limm32 -ldwmapi -lwinmm -lversion -lwtsapi32 -lmincore -luserenv -lnetui1 -lnetapi32 -ldxgi -ld3d11 -lsetupapi")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Network.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Gui.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Qml.a")
@@ -35,6 +35,10 @@ LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/qml/Qt/labs/p
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Widgets.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/qml/QtCharts/libqtchartsqml2.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Charts.a")
+LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libprotobuf.a")
+LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libusb-1.0.a")
+LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libhidapi.a")
+
 LIST(APPEND QT_LIBS "-static -luxtheme")
 
 SET(BOOST_LIBS "")
