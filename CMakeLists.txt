@@ -88,6 +88,7 @@ link_directories(
 add_subdirectory(libdevcore)
 add_subdirectory(libdevcrypto)
 add_subdirectory(libethcore)
+add_subdirectory(libledger)
 
 # Organize executable sources and headers
 file(GLOB AVME_HEADERS "src/lib/*.h")
@@ -96,7 +97,7 @@ file(GLOB AVME_SOURCES "src/lib/*.cpp")
 # Compile the project library
 add_library(avme-lib ${AVME_HEADERS} ${AVME_SOURCES})
 target_link_libraries(avme-lib PUBLIC
-  devcore devcrypto ethcore ethash::ethash ssl crypto toolbox bip39 ${BOOST_LIBS}
+  devcore devcrypto ethcore ethash::ethash ledger ssl crypto toolbox bip39 ${BOOST_LIBS}
 )
 
 # Compile the CLI executable (for debugging/testing)
