@@ -30,7 +30,7 @@ namespace ledger {
 		// 00 00 00 00 --- 0   -- 0 itself  = 00 00 00 00
 		std::vector<unsigned char> parsePath(std::string unparsedPath) {
 			std::vector<unsigned char> ret;
-			unsigned char nDerivations = 1;
+			unsigned char nDerivations = 0;
 			std::vector<uint32_t> derivationIndexes;
 			std::string tmpIndex = "";
 			bool isHardened;
