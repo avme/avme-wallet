@@ -48,4 +48,66 @@ namespace ledger {
 		hid_exit();
 		return false;
 	}
+	
+	std::vector<encoding::receiveBuf> communication::exchangeMessage(std::vector<encoding::sendBuf> sendBufferVector) {
+		std::vector<encoding::receiveBuf> ret;
+		unsigned int  res = 0;
+		unsigned char sendBuffer[65];
+		unsigned char receiveBuffer[64];
+		// Open connection with the device...
+		if (hid_init())
+			return {};
+		this->device_handle = hid_open(this->ledgerVID, this->ledgerPID, NULL);
+		if (!this->device_handle) {
+			return {};
+		}
+		// Create packages of 3 buffers.
+		// Ledger accepts up to 3 send messages (192 Bytes) before returning a answer
+		// Trying to send more than 255 bytes will crash the device
+		std::vector<std::vector<encoding::sendBuf>> sendBufferPackages;
+		unsigned int messageSize = 3;
+		sendBufferPackages.reserve((sendBufferVector.size() + 1) / messageSize);
+
+		for(size_t i = 0; i < sendBufferVector.size(); i += messageSize) {
+			auto last = std::min(sendBufferVector.size(), i + messageSize);
+			sendBufferPackages.emplace_back(sendBufferVector.begin() + i, sendBufferVector.begin() + last);
+		} 
+		
+		// Read and write 
+		for (auto vec : sendBufferPackages) {
+			// Write
+			for (auto vec2 : vec) {
+				memset(sendBuffer, 0, sizeof(sendBuffer));
+				// Load message into buffer array.
+				for (size_t i = 0; i < 65; ++i)
+					sendBuffer[i] = vec2[i];
+				res = hid_write(this->device_handle, sendBuffer, 65);
+				if (res < 0) {
+					std::cout << "Unable to write" << std::endl;
+					return {};
+				}
+			}
+			// Read.
+			// Get first answer...
+			memset(receiveBuffer, 0, sizeof(receiveBuffer));
+			res = hid_read(this->device_handle, receiveBuffer, sizeof(receiveBuffer));
+			encoding::receiveBuf tmpRet;
+			for (size_t i = 0; i < 64; ++i)
+				tmpRet[i] = receiveBuffer[i];
+			ret.push_back(tmpRet);
+			// Read more messages, if there is any.
+			for (;;) {
+				memset(receiveBuffer, 0, sizeof(receiveBuffer));
+				res = hid_read_timeout(this->device_handle, receiveBuffer, sizeof(receiveBuffer), 200);
+				if (res == 0)
+					break;
+				for (size_t i = 0; i < 64; ++i)
+					tmpRet[i] = receiveBuffer[i];
+				ret.push_back(tmpRet);
+			}
+		}
+		
+		
+		return ret;
+	}
 }

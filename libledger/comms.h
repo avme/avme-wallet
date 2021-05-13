@@ -13,8 +13,8 @@ namespace ledger {
                 unsigned short product_id;
         };
         const std::vector<usb_device_params> ledger_devices_ids {
-			{usb_device_params{0x2c97, 0x0001}},
-			{usb_device_params{0x2c97, 0x0004}}
+			{usb_device_params{0x2c97, 0x0001}}, // Ledger S
+			{usb_device_params{0x2c97, 0x0004}}  // Ledger X
         };
 
 	}
@@ -29,8 +29,9 @@ namespace ledger {
 		
 		public:
 		
-		bool isLedgerConnected();
-		bool isAppOpen();
+		bool isLedgerConnected();																				// Check if ledger is connected via USB.
+		bool isAppOpen();																						// Check if ledger is opened in App.
+		std::vector<encoding::receiveBuf> exchangeMessage(std::vector<encoding::sendBuf> sendBufferVector);		// Exchange messages with the device.
 		
 		
 	};
