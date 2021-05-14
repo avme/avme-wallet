@@ -3,6 +3,9 @@
 #include <iostream>
 #include <vector>
 #include <array>
+#include <sstream>
+#include <iomanip>
+#include <libdevcore/CommonData.h>
 #include <boost/lexical_cast.hpp>
 
 
@@ -50,8 +53,9 @@ namespace ledger {
 		using receiveBuf = std::array<unsigned char, 64>;
 		const uint32_t hardened = 2147483648;
 		
-		std::vector<unsigned char> parsePath(std::string unparsedPath);		// Parse a string path into encoded input data.
-		std::vector<sendBuf> encodeBip32Message(std::string unparsedPath);
+		std::vector<unsigned char> parsePath(std::string unparsedPath);			// Parse a string path into encoded input data.
+		std::vector<sendBuf> encodeBip32Message(std::string unparsedPath);  	// Encode a derivation string into an USB Message for ledger.
+		std::string decodeBip32Message(std::vector<receiveBuf> receiveBuffer);	// Decode the bip32 message from ledger, returning the address string or "" in failure.
 	
 	}
 }

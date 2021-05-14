@@ -49,6 +49,15 @@ namespace ledger {
 		return false;
 	}
 	
+	bool communication::messageHasError(encoding::receiveBuf message) {
+		if(message[6] == 2) { // Check if payload size is 2, which determine it as a error.
+			if (message[7] != 0x90 && message[8] != 0x90) {// 90 00 is the code which defines as no error happened.
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	std::vector<encoding::receiveBuf> communication::exchangeMessage(std::vector<encoding::sendBuf> sendBufferVector) {
 		std::vector<encoding::receiveBuf> ret;
 		unsigned int  res = 0;
@@ -95,6 +104,11 @@ namespace ledger {
 			for (size_t i = 0; i < 64; ++i)
 				tmpRet[i] = receiveBuffer[i];
 			ret.push_back(tmpRet);
+			// If input was wrong, the first message will always have the error code. check for it.
+			if (this->messageHasError(tmpRet)) {
+				return ret;
+			}
+				
 			// Read more messages, if there is any.
 			for (;;) {
 				memset(receiveBuffer, 0, sizeof(receiveBuffer));
@@ -106,8 +120,6 @@ namespace ledger {
 				ret.push_back(tmpRet);
 			}
 		}
-		
-		
 		return ret;
 	}
 }

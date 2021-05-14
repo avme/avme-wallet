@@ -112,5 +112,40 @@ namespace ledger {
 			ret.push_back(buffer);
 			return ret;
 		}
+       /** bip32 output data (Taken from Ledger documentation, seems incorred!!!)
+        *
+        * |------------------------------------------------------------------------------|
+        * |  Description                              |  len  							 |
+        * |-------------------------------------------|----------------------------------|
+        * |  Public Key length						  |  1 bytes						 |
+        * |------------------------------------------------------------------------------|
+        * |  Uncompressed Public Key                  |  Var							 |
+        * |------------------------------------------------------------------------------|
+        * |  Ethereum address length                  |  1 bytes						 |
+        * |------------------------------------------------------------------------------|
+        * |  Ethereum address        	              |  Var							 |
+        * |------------------------------------------------------------------------------|
+        * |  Chain code if requested  	              |  32 Bytes						 |
+        * |------------------------------------------------------------------------------|
+        */
+		
+		// Normally, bip32 messages are encoded in 3 vectors.
+		// If the vector size is only 1, it means a error happened.
+		std::string decodeBip32Message(std::vector<receiveBuf> receiveBuffer) {
+			std::string ret = "0x";
+			std::vector<unsigned char> message;
+			if (receiveBuffer.size() == 1)
+				return "";
+			// Read the address from the message
+			// Address is always on the second vector, starting at index 15 and ending at index 15 + 40
+			// Where 40 is number of characters in a given address
+			for (size_t i = 15; i < (15+40); ++i) {
+				std::stringstream ss;
+				ss << std::hex << std::setfill('0');
+				ss << std::hex << std::setw(1) << receiveBuffer[1][i];
+				ret += ss.str();
+			}
+			return ret;
+		}
 	}
 }
