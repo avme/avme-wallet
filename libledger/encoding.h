@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <libdevcore/CommonData.h>
 #include <libethcore/TransactionBase.h>
+#include <libdevcrypto/Common.h>
 #include <boost/lexical_cast.hpp>
 
 
@@ -69,6 +70,7 @@ namespace ledger {
 		std::vector<sendBuf> encodeBip32Message(std::string unparsedPath);  	// Encode a derivation string into an USB Message for ledger.
 		std::string decodeBip32Message(std::vector<receiveBuf> receiveBuffer);	// Decode the bip32 message from ledger, returning the address string or "" in failure.
 		std::vector<sendBuf> encodeSignEthMessage(dev::eth::TransactionBase tb, std::string addressPath);
+		dev::SignatureStruct decodeSignEthMessage(std::vector<receiveBuf> receiveBuffer);
 	
 	}
 }

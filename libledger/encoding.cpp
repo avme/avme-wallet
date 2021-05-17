@@ -265,5 +265,41 @@ namespace ledger {
 			}
 			return ret;
 		}
+		
+       /** SignEthMessage output data)
+        *
+        * |------------------------------------------------------------------------------|
+        * |  Description                              |  len  							 |
+        * |-------------------------------------------|----------------------------------|
+        * |  v										  |  1 bytes						 |
+        * |------------------------------------------------------------------------------|
+        * |  r                 					      |  32 Bytes						 |
+        * |------------------------------------------------------------------------------|
+        * |  s            						      |  32 Bytes						 |
+        * |------------------------------------------------------------------------------|
+        */
+		
+		// Following the structure above, the signature produced by the ledger will always be located in the last 2 vectors of the receiveBuffer.
+		dev::SignatureStruct decodeSignEthMessage(std::vector<receiveBuf> receiveBuffer) {
+			size_t bufferIndex = receiveBuffer.size() - 2;
+			std::vector<unsigned char> signature;
+			unsigned char v;
+			std::vector<unsigned char> r;
+			std::vector<unsigned char> s;
+			for (size_t i = 7; i < receiveBuffer[bufferIndex].size(); ++i) // Skip the HID/APDU Encoding, as it is not used
+				signature.push_back(receiveBuffer[bufferIndex][i]);
+				
+			for (size_t i = 5; i < receiveBuffer[bufferIndex+1].size(); ++i) // Skip the HID/APDU Encoding, as it is not used
+				signature.push_back(receiveBuffer[bufferIndex+1][i]);
+			v = signature[0];
+			r.insert(r.end(), signature.begin()+1, signature.begin() + 33);
+			s.insert(s.end(), signature.begin()+33, signature.begin()+65);
+			
+			dev::h256 _s(s);
+			dev::h256 _r(r);
+			
+			dev::SignatureStruct sigStruct(_r,_s,v);
+			return sigStruct;
+		}
 	}
 }
