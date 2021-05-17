@@ -6,6 +6,7 @@
 #include <sstream>
 #include <iomanip>
 #include <libdevcore/CommonData.h>
+#include <libethcore/TransactionBase.h>
 #include <boost/lexical_cast.hpp>
 
 
@@ -49,6 +50,17 @@ namespace ledger {
 			std::vector<unsigned char> payload;			// Payload.
 		};
 		
+		struct transactionPayload { // Payloads can contain a max of 150 bytes
+			size_t payloadSize = 0;
+			bool isHIDFirstMessage = true;
+			bool isFirstMessageEmpty = true;
+			bool isSecondMessageEmpty = true;
+			bool isThirdMessageEmpty = true;
+			std::array<unsigned char, 52> firstMessage = {0}; // Always contains max 52 bytes (64 - HIDencoding - APDUencoding)
+			std::array<unsigned char, 59> secondMessage = {0}; // Always contains max 59 bytes (64 - HIDencoding)
+			std::array<unsigned char, 39> thirdMessage = {0}; // Always contains max 39 bytes (150 - firstMessage.size() - secondMessage.size())
+		};
+		
 		using sendBuf = std::array<unsigned char, 65>;
 		using receiveBuf = std::array<unsigned char, 64>;
 		const uint32_t hardened = 2147483648;
@@ -56,6 +68,7 @@ namespace ledger {
 		std::vector<unsigned char> parsePath(std::string unparsedPath);			// Parse a string path into encoded input data.
 		std::vector<sendBuf> encodeBip32Message(std::string unparsedPath);  	// Encode a derivation string into an USB Message for ledger.
 		std::string decodeBip32Message(std::vector<receiveBuf> receiveBuffer);	// Decode the bip32 message from ledger, returning the address string or "" in failure.
+		std::vector<sendBuf> encodeSignEthMessage(dev::eth::TransactionBase tb, std::string addressPath);
 	
 	}
 }
