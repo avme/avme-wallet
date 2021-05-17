@@ -184,7 +184,10 @@ TransactionSkeleton Wallet::buildTransaction(
   txSkel.nonce = txNonce;
   txSkel.gas = u256(gasLimit);
   txSkel.gasPrice = u256(gasPrice);
-
+  // Support for EIP-155
+  // TODO: change ChainID to mainnet
+  txSkel.chainId = 43113;
+  
   return txSkel;
 }
 

@@ -24,7 +24,7 @@ HunterGate(
 
 # Project data
 project(avme_wallet)
-set(PROJECT_VERSION 0.1.0)
+set(PROJECT_VERSION 0.1.1)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -100,9 +100,12 @@ target_link_libraries(avme-lib PUBLIC
   devcore devcrypto ethcore ethash::ethash ledger ssl crypto toolbox bip39 ${BOOST_LIBS}
 )
 
+# Set the project version as a macro in a header file
+configure_file("${CMAKE_SOURCE_DIR}/src/version.h.in" "${CMAKE_SOURCE_DIR}/src/version.h" @ONLY)
+
 # Compile the CLI executable (for debugging/testing)
 if (BUILD_CLI)
-  add_executable(avme-cli src/main-cli.h src/main-cli.cpp)
+  add_executable(avme-cli src/version.h src/main-cli.h src/main-cli.cpp)
   if (DEPENDS_PREFIX EQUAL "x86_64-w64-mingw32")
     target_link_libraries(avme-cli PUBLIC avme-lib -static)
   else()
@@ -136,12 +139,12 @@ add_custom_command(
 if("${TOOLCHAIN_PREFIX}" STREQUAL "x86_64-w64-mingw32")
   set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_SOURCE_DIR}/src/winico.rc")
   add_executable(avme-gui WIN32
-    src/main-gui.h src/main-gui.cpp build/moc_main-gui.cpp build/qml.cpp
+    src/version.h src/main-gui.h src/main-gui.cpp build/moc_main-gui.cpp build/qml.cpp
     ${APP_ICON_RESOURCE_WINDOWS}
   )
 else()
   add_executable(avme-gui
-    src/main-gui.h src/main-gui.cpp build/moc_main-gui.cpp build/qml.cpp
+    src/version.h src/main-gui.h src/main-gui.cpp build/moc_main-gui.cpp build/qml.cpp
   )
 endif()
 target_link_libraries(avme-gui PUBLIC avme-lib ${QT_LIBS})

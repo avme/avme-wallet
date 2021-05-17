@@ -813,7 +813,7 @@ Item {
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        margins: 10
+        margins: 5
       }
       visible: false
       antialiasing: true

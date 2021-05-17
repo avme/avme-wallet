@@ -2,3 +2,4 @@ build/
 *.qmlc
 .directory
 *.kate-swp
+src/version.h

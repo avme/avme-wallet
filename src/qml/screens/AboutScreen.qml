@@ -42,7 +42,7 @@ Item {
         font.pixelSize: 32.0
         color: "#FFFFFF"
         horizontalAlignment: Text.AlignHCenter
-        text: "AVME Wallet"
+        text: "AVME Wallet " + System.getProjectVersion()
       }
 
       Image {

@@ -23,7 +23,7 @@ Example for APT-based distros:
 * Go to the project's root folder, create a "build" folder and change to it:
   * `cd avme-wallet && mkdir build && cd build`
 * Compile the depends system:
-  * If using **GCC**: `make -C ../depends -j($nproc)`
+  * If using **GCC**: `make -C ../depends -j$(nproc)`
   * If using **MinGW**: `make HOST=x86_64-w64-mingw32 -C ../depends -j$(nproc)`
 * Run `cmake` inside the build folder:
   * If using **GCC**: `cmake -DCMAKE_BUILD_TYPE=Release ..`
