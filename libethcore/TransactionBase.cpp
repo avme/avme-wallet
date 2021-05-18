@@ -152,6 +152,12 @@ void TransactionBase::sign(Secret const& _priv)
         m_vrs = sigStruct;
 }
 
+void TransactionBase::signFromSigStruct(SignatureStruct const& sigStruct)
+{
+	if(sigStruct.isValid())
+        m_vrs = sigStruct;
+}
+
 void TransactionBase::streamRLP(RLPStream& _s, IncludeSignature _sig, bool _forEip155hash) const
 {
     if (m_type == NullTransaction)

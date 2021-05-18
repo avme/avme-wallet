@@ -148,7 +148,7 @@ namespace ledger {
 			return ret;
 		}
 
-		std::vector<sendBuf> encodeSignEthMessage(dev::eth::TransactionBase tb, std::string addressPath) {
+		std::vector<sendBuf> encodeSignEthMessage(dev::eth::TransactionBase& tb, std::string addressPath) {
 			std::vector<sendBuf> ret;
 			sendBuf buffer = {0};
 			std::vector<unsigned char> bip32 = parsePath(addressPath);
@@ -291,7 +291,11 @@ namespace ledger {
 				
 			for (size_t i = 5; i < receiveBuffer[bufferIndex+1].size(); ++i) // Skip the HID/APDU Encoding, as it is not used
 				signature.push_back(receiveBuffer[bufferIndex+1][i]);
-			v = signature[0];
+			if (signature[0] % 2 == 0){
+				v = 0x01;
+			} else {
+				v = 0x00;
+			}
 			r.insert(r.end(), signature.begin()+1, signature.begin() + 33);
 			s.insert(s.end(), signature.begin()+33, signature.begin()+65);
 			

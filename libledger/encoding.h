@@ -69,7 +69,7 @@ namespace ledger {
 		std::vector<unsigned char> parsePath(std::string unparsedPath);			// Parse a string path into encoded input data.
 		std::vector<sendBuf> encodeBip32Message(std::string unparsedPath);  	// Encode a derivation string into an USB Message for ledger.
 		std::string decodeBip32Message(std::vector<receiveBuf> receiveBuffer);	// Decode the bip32 message from ledger, returning the address string or "" in failure.
-		std::vector<sendBuf> encodeSignEthMessage(dev::eth::TransactionBase tb, std::string addressPath);
+		std::vector<sendBuf> encodeSignEthMessage(dev::eth::TransactionBase& tb, std::string addressPath);
 		dev::SignatureStruct decodeSignEthMessage(std::vector<receiveBuf> receiveBuffer);
 	
 	}
