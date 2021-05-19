@@ -2,6 +2,7 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "main-gui.h"
+#include <hidapi/hidapi.h>
 
 // Implementation of AVME Wallet as a GUI (Qt) program.
 
