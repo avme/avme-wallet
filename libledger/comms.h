@@ -32,7 +32,7 @@ namespace ledger {
 		
 		bool isLedgerConnected();																				// Check if ledger is connected via USB.
 		bool isAppOpen();																						// Check if ledger is opened in App.
-//		bool isAvaxOpen();																						// Check if correct App is open on the ledger by getting a bip32 address.
+		bool isAvaxOpen();																						// Check if correct App is open on the ledger by getting a bip32 address.
 		std::vector<encoding::receiveBuf> exchangeMessage(std::vector<encoding::sendBuf> sendBufferVector);		// Exchange messages with the device.
 		
 		

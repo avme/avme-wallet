@@ -122,4 +122,17 @@ namespace ledger {
 		}
 		return ret;
 	}
+	
+	bool communication::isAvaxOpen() {
+		if (!this->isLedgerConnected())
+			return false;
+		if (!this->isAppOpen())
+			return false;
+		
+		auto address = encoding::decodeBip32Message(this->exchangeMessage(encoding::encodeBip32Message("m/44'/60'/0'/0")));
+		if (address.size() == 42)
+			return true;
+		
+		return false;
+	}
 }
