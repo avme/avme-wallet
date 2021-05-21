@@ -28,6 +28,7 @@ Example for APT-based distros:
 * Run `cmake` inside the build folder:
   * If using **GCC**: `cmake -DCMAKE_BUILD_TYPE=Release ..`
   * If using **MinGW**: `cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=cmake/x86_64-w64-mingw32.cmake ..`
+  * If using **MacOS**: `cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=cmake/x86_64-apple-darwin20.cmake ..`
 * Build the executable:
   * `cmake --build . -- -j$(nproc)`
 
