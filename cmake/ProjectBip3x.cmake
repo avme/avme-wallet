@@ -30,7 +30,7 @@ ExternalProject_Add(
     ${_overwrite_install_command}
     LOG_INSTALL 1
     BUILD_BYPRODUCTS "${BIP3X_LIBRARY}"
-	DEPENDS openssl
+	DEPENDS openssl toolbox
 )
 
 add_library(bip39 STATIC IMPORTED)
@@ -38,4 +38,4 @@ file(MAKE_DIRECTORY "${BIP3X_INCLUDE_DIR}")  # Must exist.
 set_property(TARGET bip39 PROPERTY IMPORTED_CONFIGURATIONS Release)
 set_property(TARGET bip39 PROPERTY IMPORTED_LOCATION_RELEASE "${BIP3X_LIBRARY}")
 set_property(TARGET bip39 PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${BIP3X_INCLUDE_DIR}")
-add_dependencies(bip39 Toolbox bip3x ssl crypto openssl)
+add_dependencies(bip39 toolbox bip3x ssl crypto openssl)
