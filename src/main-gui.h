@@ -27,7 +27,11 @@ Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
 #define _WIN32_WINNT 0x0601
 #define WINVER 0x0601
 #else
+#ifdef __APPLE__
+Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin)
+#else
 Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
+#endif
 #undef FONTCONFIG_PATH
 #define FONTCONFIG_PATH "/etc/fonts" // Redefine fontconfig path for the program.
 #endif
@@ -46,8 +50,6 @@ Q_IMPORT_PLUGIN(QtChartsQml2Plugin)
 #include "lib/Staking.h"
 #include "lib/Utils.h"
 #include "lib/Wallet.h"
-
-#include "version.h"
 
 // QObject/wrapper for interfacing between C++ (wallet) and QML (gui)
 class System : public QObject {
@@ -120,11 +122,6 @@ class System : public QObject {
 
     Q_INVOKABLE QString getCurrentAccount() { return QString::fromStdString(this->currentAccount); }
     Q_INVOKABLE void setCurrentAccount(QString account) { this->currentAccount = account.toStdString(); }
-
-    // Get the project's version
-    Q_INVOKABLE QString getProjectVersion() {
-      return QString::fromStdString(PROJECT_VERSION);
-    }
 
     // Open the "About Qt" window
     Q_INVOKABLE void openQtAbout() {

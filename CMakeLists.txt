@@ -43,10 +43,17 @@ if("${TOOLCHAIN_PREFIX}" STREQUAL "x86_64-w64-mingw32")
   message("Loading Windows Libraries")
   include("${CMAKE_SOURCE_DIR}/cmake/WindowsLibraries.cmake")
 else()
-  set(DEPENDS_PREFIX "x86_64-pc-linux-gnu")
-  message("Toolchain: x86_64-pc-linux-gnu")
-  message("Loading Linux Libraries")
-  include("${CMAKE_SOURCE_DIR}/cmake/LinuxLibraries.cmake")
+  if("${TOOLCHAIN_PREFIX}" STREQUAL "x86_64-apple-darwin20")
+    message("Toolchain: x86_64-apple-darwin20")
+    set(DEPENDS_PREFIX "x86_64-apple-darwin20.2.0")
+    message("Loading Darwin Libraries")
+    include("${CMAKE_SOURCE_DIR}/cmake/DarwinLibraries.cmake")
+  else()
+    message("Toolchain: x86_64-pc-linux-gnu")
+    set(DEPENDS_PREFIX "x86_64-pc-linux-gnu")
+    include("${CMAKE_SOURCE_DIR}/cmake/LinuxLibraries.cmake")
+    message("Loading Linux Libraries")
+  endif()
 endif()
 
 # Add Hunter packages
@@ -57,10 +64,10 @@ find_package(libscrypt CONFIG REQUIRED)
 
 # Add external modules
 add_subdirectory(external/openssl-cmake)
+include(ProjectEthash)
 include(ProjectSecp256k1)
 include(ProjectToolbox)
 include(ProjectBip3x)
-include(ProjectEthash)
 find_package(Threads)
 
 # Include headers and libs
@@ -96,7 +103,7 @@ file(GLOB AVME_SOURCES "src/lib/*.cpp")
 # Compile the project library
 add_library(avme-lib ${AVME_HEADERS} ${AVME_SOURCES})
 target_link_libraries(avme-lib PUBLIC
-  devcore devcrypto ethcore Ethash ledger ssl crypto toolbox bip39 ${BOOST_LIBS}
+  devcore devcrypto ethcore ${ETHASH_BYPRODUCTS} Ethash ssl crypto toolbox bip39 ${BOOST_LIBS}
 )
 
 # Set the project version as a macro in a header file

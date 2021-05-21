@@ -22,6 +22,7 @@ ExternalProject_Add(
                -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
                -DCMAKE_C_FLAGS=-I${BIP3X_INCLUDE_DIR}\ -I${CMAKE_SOURCE_DIR}/build/external/openssl-cmake/include
                -DCMAKE_CXX_FLAGS=-I${BIP3X_INCLUDE_DIR}\ -I${CMAKE_SOURCE_DIR}/build/external/openssl-cmake/include
+               -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
                -DENABLE_CONAN=OFF
                -DENABLE_BIP39_JNI=OFF
                ${_only_release_configuration}

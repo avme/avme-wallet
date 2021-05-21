@@ -114,14 +114,20 @@ boost::filesystem::path JSON::getDefaultDataDir() {
       pathRet = fs::path("/");
     else
       pathRet = fs::path(pszHome);
+  #ifdef __APPLE__
+    return pathRet / "Library/Application Support/AVME";
+  #else
     return pathRet / ".avme";
+  #endif
   #endif
 }
 
 boost::filesystem::path JSON::getDataDir() {
   boost::filesystem::path dataPath = getDefaultDataDir();
-  if (!boost::filesystem::exists(dataPath))
-    boost::filesystem::create_directory(dataPath);
+  try {
+    if (!boost::filesystem::exists(dataPath))
+      boost::filesystem::create_directory(dataPath);
+    } catch (...) {}
   return dataPath;
 }
 
