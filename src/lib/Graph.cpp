@@ -3,6 +3,9 @@
 // file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "Graph.h"
 
+
+// Tesnet Graph node does not exists
+// So we use mainnet for all purposes
 std::string Graph::host = "api.thegraph.com";
 std::string Graph::port = "443";
 std::string Graph::target = "/subgraphs/name/dasconnor/pangolin-dex";

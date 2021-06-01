@@ -26,6 +26,7 @@ Example for APT-based distros:
   * If using **GCC**: `make -C ../depends -j$(nproc)`
   * If using **MinGW**: `make HOST=x86_64-w64-mingw32 -C ../depends -j$(nproc)`
 * Run `cmake` inside the build folder:
+  * If building for **testnet**: `cmake -DTESTNET=ON ..`
   * If using **GCC**: `cmake -DCMAKE_BUILD_TYPE=Release ..`
   * If using **MinGW**: `cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=cmake/x86_64-w64-mingw32.cmake ..`
   * If using **MacOS**: `cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=cmake/x86_64-apple-darwin20.cmake ..`

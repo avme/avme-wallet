@@ -29,6 +29,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+option(TESTNET OFF)
 option(BUILD_CLI "Build CLI executable (for testing/debugging)" OFF)
 message("C++ Standard: ${CMAKE_CXX_STANDARD}")
 message("C++ Standard is required: ${CMAKE_CXX_STANDARD_REQUIRED}")
@@ -140,7 +141,10 @@ add_custom_command(
   COMMAND "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/native/bin/rcc" "${CMAKE_SOURCE_DIR}/src/qml.qrc" -o "${CMAKE_SOURCE_DIR}/build/qml.cpp"
   DEPENDS always_rebuild
 )
-
+# Set testnet or mainnet
+if(TESTNET)
+	add_definitions(-DTESTNET)
+endif()
 # Compile the GUI executable
 if("${TOOLCHAIN_PREFIX}" STREQUAL "x86_64-w64-mingw32")
   set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_SOURCE_DIR}/src/winico.rc")

@@ -463,7 +463,7 @@ Item {
   AVMEPopupNewWalletSeed {
     id: newWalletSeedPopup
     okBtn.onClicked: {
-      System.createAccount(newWalletSeed, 0, "", newWalletPass)
+      System.createAccount(newWalletSeed, 0, "default", newWalletPass)
       newWalletSeedPopup.clean()
       newWalletSeedPopup.close()
       walletNewPopup.open()

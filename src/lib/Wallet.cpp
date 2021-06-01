@@ -185,9 +185,11 @@ TransactionSkeleton Wallet::buildTransaction(
   txSkel.gas = u256(gasLimit);
   txSkel.gasPrice = u256(gasPrice);
   // Support for EIP-155
-  // TODO: change ChainID to mainnet
-  txSkel.chainId = 43113;
-  
+  #ifdef TESTNET
+	txSkel.chainId = 43113;
+  #else
+	txSkel.chainId = 43114;
+  #endif
   return txSkel;
 }
 
@@ -207,14 +209,15 @@ std::string Wallet::signTransaction(TransactionSkeleton txSkel, std::string pass
 
   return txHexBuffer.str();
 }
-
-// TODO: change the hardcoded link when switching between mainnet and testnet
 std::string Wallet::sendTransaction(std::string txidHex, std::string operation) {
   // Send the transaction
   std::string txid = API::broadcastTx(txidHex);
   if (txid == "") { return ""; }
-  std::string txLink = "https://cchain.explorer.avax-test.network/tx/" + txid;
-
+  #ifdef TESTNET
+	std::string txLink = "https://cchain.explorer.avax-test.network/tx/" + txid;
+  #else
+	std::string txLink = "https://cchain.explorer.avax.network/tx/" + txid;
+  #endif
   /**
    * Store the successful transaction in the Account's history.
    * Since the AVAX chain is pretty fast, we can ask if the transaction was

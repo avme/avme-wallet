@@ -3,10 +3,15 @@
 // file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "API.h"
 
-// TODO: find a way to toggle between testnet and mainnet later
+#ifdef TESTNET
 std::string API::host = "api.avax-test.network";
 std::string API::port = "443";
 std::string API::target = "/ext/bc/C/rpc";
+#else
+std::string API::host = "api.avax.network";
+std::string API::port = "443";
+std::string API::target = "/ext/bc/C/rpc";	
+#endif
 
 std::string API::httpGetRequest(std::string reqBody) {
   std::string result = "";
