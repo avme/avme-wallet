@@ -606,8 +606,12 @@ Item {
           if (!checkTransactionFunds()) {
             fundsPopup.open()
           } else {
-            confirmTxPopup.isSameAddress = (txFromInput.text === txToInput.text)
-            confirmTxPopup.open()
+			if (!(txToInput.text.length === 42)) {
+			  incorrectInputPupup.open()
+			} else {
+              confirmTxPopup.isSameAddress = (txFromInput.text === txToInput.text)
+              confirmTxPopup.open()
+			}
           }
         }
       }
@@ -638,6 +642,12 @@ Item {
     id: fundsPopup
     icon: "qrc:/img/warn.png"
     info: "Insufficient funds. Please check your inputs."
+  }
+
+  AVMEPopupInfo {
+    id: incorrectInputPupup
+    icon: "qrc:/img/warn.png"
+    info: "Incorrect destination address. Please check your inputs."
   }
 
   // Popup for transaction progress
