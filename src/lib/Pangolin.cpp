@@ -18,8 +18,7 @@ std::map<std::string, std::string> Pangolin::pairContracts = {
 
 #else
 std::string Pangolin::routerContract = "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106";
-// TODO: Change to Mainnet staking contract once deployed
-std::string Pangolin::stakingContract = "0xfCA717d68EE18526e2626267594625Ee4CEFc66F";
+std::string Pangolin::stakingContract = "0xCc39b8c253f33BEa6E8326f0E5029Aa8627df757";
 
 std::map<std::string, std::string> Pangolin::tokenContracts = {
   {"WAVAX", "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7"},
