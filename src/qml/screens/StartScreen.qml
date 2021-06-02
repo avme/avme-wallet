@@ -295,7 +295,7 @@ Item {
               text: "Import Wallet"
             }
           }
-          onClicked: {
+          function createWallet() {
             try {
               if (createPassInput.text != createPassCheckInput.text) {
                 throw "Passphrases don't match. Please check your inputs."
@@ -332,9 +332,12 @@ Item {
               walletFailPopup.open()
             }
           }
+		onClicked: btnCreate.createWallet();
         }
       }
     }
+	Keys.onReturnPressed: btnCreate.createWallet() // Enter key
+	Keys.onEnterPressed: btnCreate.createWallet() // Numpad enter key
   }
 
   // Load rectangle
@@ -421,7 +424,7 @@ Item {
           width: (loadItems.width * 0.4)
           enabled: (loadFolderInput.text != "" && loadPassInput.text != "" && loadWalletExists)
           text: (loadWalletExists) ? "Load Wallet" : "No Wallet found"
-          onClicked: {
+          function loadWallet() {
             try {
               if (System.isWalletLoaded()) {
                 System.stopAllBalanceThreads()
@@ -448,9 +451,12 @@ Item {
               walletFailPopup.open()
             }
           }
+		  onClicked: btnLoad.loadWallet()
         }
       }
     }
+	Keys.onReturnPressed: btnLoad.loadWallet() // Enter key
+	Keys.onEnterPressed: btnLoad.loadWallet() // Numpad enter key
   }
 
   // Info popup for if the Wallet creation/loading/importing fails
