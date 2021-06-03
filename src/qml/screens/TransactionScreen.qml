@@ -606,12 +606,12 @@ Item {
           if (!checkTransactionFunds()) {
             fundsPopup.open()
           } else {
-			if (!(txToInput.text.length === 42) && txToInput.visible) {
-			  incorrectInputPupup.open()
-			} else {
+            if (!(txToInput.text.length === 42) && txToInput.visible) {
+              incorrectInputPopup.open()
+            } else {
               confirmTxPopup.isSameAddress = (txFromInput.text === txToInput.text)
               confirmTxPopup.open()
-			}
+            }
           }
         }
       }
@@ -645,7 +645,7 @@ Item {
   }
 
   AVMEPopupInfo {
-    id: incorrectInputPupup
+    id: incorrectInputPopup
     icon: "qrc:/img/warn.png"
     info: "Incorrect destination address. Please check your inputs."
   }

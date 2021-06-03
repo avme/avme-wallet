@@ -19,7 +19,7 @@ bool Wallet::create(boost::filesystem::path folder, std::string pass) {
     Utils::walletFolderPath = folder;
     return true;
   } catch (Exception const& _e) {
-	Utils::logToDebug(std::string("Unable to create wallet: ") + boost::diagnostic_information(_e));
+    Utils::logToDebug(std::string("Unable to create wallet: ") + boost::diagnostic_information(_e));
     return false;
   }
 }
@@ -184,12 +184,14 @@ TransactionSkeleton Wallet::buildTransaction(
   txSkel.nonce = txNonce;
   txSkel.gas = u256(gasLimit);
   txSkel.gasPrice = u256(gasPrice);
+
   // Support for EIP-155
   #ifdef TESTNET
-	txSkel.chainId = 43113;
+    txSkel.chainId = 43113;
   #else
-	txSkel.chainId = 43114;
+    txSkel.chainId = 43114;
   #endif
+
   return txSkel;
 }
 
@@ -203,21 +205,23 @@ std::string Wallet::signTransaction(TransactionSkeleton txSkel, std::string pass
     t.sign(s);
     txHexBuffer << toHex(t.rlp());
   } catch (Exception& ex) {
-	Utils::logToDebug(std::string("Invalid Transaction: ") + ex.what());
+    Utils::logToDebug(std::string("Invalid Transaction: ") + ex.what());
     return "";
   }
 
   return txHexBuffer.str();
 }
+
 std::string Wallet::sendTransaction(std::string txidHex, std::string operation) {
   // Send the transaction
   std::string txid = API::broadcastTx(txidHex);
   if (txid == "") { return ""; }
   #ifdef TESTNET
-	std::string txLink = "https://cchain.explorer.avax-test.network/tx/" + txid;
+    std::string txLink = "https://cchain.explorer.avax-test.network/tx/" + txid;
   #else
-	std::string txLink = "https://cchain.explorer.avax.network/tx/" + txid;
+    std::string txLink = "https://cchain.explorer.avax.network/tx/" + txid;
   #endif
+
   /**
    * Store the successful transaction in the Account's history.
    * Since the AVAX chain is pretty fast, we can ask if the transaction was
