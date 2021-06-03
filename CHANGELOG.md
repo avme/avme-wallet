@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2021-06-02
+### Added
+- Official release.
+- Support for MacOS Big Sur.
+- Base libs for Ledger support (not implemented yet).
+- Toggle for mainnet and testnet when compiling from source.
+  - `cmake -DTESTNET=ON`, this is off by default.
+
+### Fixed
+- Input logic on Send screen.
+  - Coin/token amount regex should enable amounts like ".05" now.
+  - Receiver address is now checked for input correctness.
+
 ## [0.1.1] - 2021-05-11
 ### Added
 - "Copy to Clipboard" button and "Address:" label in the Account header.
@@ -25,7 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - The old one is functional but has been deprecated and won't receive further updates.
 
 ### Removed
-- Boost::log as a dependency (the removal helps with MacOS compiling)
+- Boost::log as a dependency (the removal helps with MacOS compiling).
 
 ### Fixed
 - Market graph legends now shouldn't be cut off anymore (e.g. "05/..." instead of "05/03").
