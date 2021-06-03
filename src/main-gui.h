@@ -51,6 +51,8 @@ Q_IMPORT_PLUGIN(QtChartsQml2Plugin)
 #include "lib/Utils.h"
 #include "lib/Wallet.h"
 
+#include "version.h"
+
 // QObject/wrapper for interfacing between C++ (wallet) and QML (gui)
 class System : public QObject {
   Q_OBJECT
@@ -122,6 +124,11 @@ class System : public QObject {
 
     Q_INVOKABLE QString getCurrentAccount() { return QString::fromStdString(this->currentAccount); }
     Q_INVOKABLE void setCurrentAccount(QString account) { this->currentAccount = account.toStdString(); }
+
+    // Get the project's version
+    Q_INVOKABLE QString getProjectVersion() {
+      return QString::fromStdString(PROJECT_VERSION);
+    }
 
     // Open the "About Qt" window
     Q_INVOKABLE void openQtAbout() {
