@@ -28,6 +28,7 @@
         <file>qml/components/AVMEPopupYesNo.qml</file>
         <file>qml/components/AVMEPopupNewWalletSeed.qml</file>
         <file>qml/components/AVMEPopupChooseAccount.qml</file>
+        <file>qml/components/AVMEPopupLedger.qml</file>
         <file>qml/components/AVMEPopupViewSeed.qml</file>
         <file>qml/components/AVMEPopupViewPrivKey.qml</file>
         <file>qml/components/AVMEPopupConfirmTx.qml</file>

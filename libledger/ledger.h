@@ -43,4 +43,4 @@ namespace ledger {
   };
 }
 
-#endif  //LEDGER_H
+#endif  // LEDGER_H

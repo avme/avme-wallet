@@ -20,6 +20,20 @@ Rectangle {
   radius: 10
 
   Timer { id: addressTimer; interval: 2000 }
+  Timer { id: ledgerRetryTimer; interval: 250; onTriggered: checkLedger() }
+
+  function checkLedger() {
+    var data = System.checkForLedger()
+    if (data.state) {
+      ledgerFailPopup.close()
+      ledgerRetryTimer.stop()
+      ledgerPopup.open()
+    } else {
+      ledgerFailPopup.info = data.message
+      ledgerFailPopup.open()
+      ledgerRetryTimer.start()
+    }
+  }
 
   Text {
     id: addressLabel
@@ -94,8 +108,12 @@ Rectangle {
     }
     text: "Change Account"
     onClicked: {
-      System.hideMenu()
-      System.setScreen(content, "qml/screens/AccountsScreen.qml")
+      if (System.isLedger()) {
+        checkLedger()
+      } else {
+        System.hideMenu()
+        System.setScreen(content, "qml/screens/AccountsScreen.qml")
+      }
     }
   }
 
@@ -109,8 +127,28 @@ Rectangle {
     }
     text: "Change Wallet"
     onClicked: {
+      System.setLedger(false)
       System.hideMenu()
       System.setScreen(content, "qml/screens/StartScreen.qml")
     }
+  }
+
+  // Popup for Ledger accounts
+  AVMEPopupLedger {
+    id: ledgerPopup
+    chooseBtn.onClicked: {
+      System.setLedger(true);
+      System.setCurrentAccount(ledgerList.currentItem.itemAccount)
+      System.goToOverview();
+      System.setScreen(content, "qml/screens/OverviewScreen.qml")
+    }
+  }
+
+  // Info popup for if communication with Ledger fails
+  AVMEPopupInfo {
+    id: ledgerFailPopup
+    icon: "qrc:/img/warn.png"
+    onAboutToHide: ledgerRetryTimer.stop()
+    okBtn.text: "Close"
   }
 }

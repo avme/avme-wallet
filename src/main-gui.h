@@ -51,6 +51,8 @@ Q_IMPORT_PLUGIN(QtChartsQml2Plugin)
 #include "lib/Utils.h"
 #include "lib/Wallet.h"
 
+#include <libledger/ledger.h>
+
 #include "version.h"
 
 // QObject/wrapper for interfacing between C++ (wallet) and QML (gui)
@@ -98,7 +100,9 @@ class System : public QObject {
 
   private:
     Wallet w;
+    ledger::device ledgerDevice;
     bool firstLoad;
+    bool ledgerFlag;
     std::string currentCoin;
     int currentCoinDecimals;
     std::string currentToken;
@@ -112,6 +116,9 @@ class System : public QObject {
 
     Q_INVOKABLE bool getFirstLoad() { return this->firstLoad; }
     Q_INVOKABLE void setFirstLoad(bool b) { this->firstLoad = b; }
+
+    Q_INVOKABLE bool isLedger() { return this->ledgerFlag; }
+    Q_INVOKABLE void setLedger(bool b) { this->ledgerFlag = b; }
 
     Q_INVOKABLE int getCurrentCoinDecimals() { return this->currentCoinDecimals; }
     Q_INVOKABLE void setCurrentCoinDecimals(int decimals) { this->currentCoinDecimals = decimals; }
@@ -212,6 +219,15 @@ class System : public QObject {
       return (seedSuccess.first) ? QString::fromStdString(mnemonic.raw) : "";
     }
 
+    // Check if Ledger device is connected
+    Q_INVOKABLE QVariantMap checkForLedger() {
+      QVariantMap ret;
+      std::pair<bool, std::string> check = this->ledgerDevice.checkForDevice();
+      ret.insert("state", check.first);
+      ret.insert("message", QString::fromStdString(check.second));
+      return ret;
+    }
+
     // Load the Accounts into the Wallet
     Q_INVOKABLE void loadAccounts() {
       this->w.loadAccounts();
@@ -288,6 +304,31 @@ class System : public QObject {
             }
             ct++;
           }
+          obj += "\"}";
+          ret << QString::fromStdString(obj);
+        }
+        emit accountsGenerated(ret);
+      });
+    }
+
+    // Same as above but for Ledger devices
+    Q_INVOKABLE void generateLedgerAccounts(QString path, int idx) {
+      QtConcurrent::run([=](){
+        QVariantList ret;
+        for (int i = idx; i < idx + 10; i++) {
+          std::string fullPath = path.toStdString() + boost::lexical_cast<std::string>(i);
+          this->ledgerDevice.generateBip32Account(fullPath);
+        }
+        for (ledger::account acc : this->ledgerDevice.getAccountList()) {
+          std::string obj;
+          std::string idxStr = acc.index.substr(acc.index.find_last_of("/") + 1);
+          std::string bal = API::getAVAXBalance(acc.address);
+          u256 AVAXbalance = boost::lexical_cast<HexTo<u256>>(bal);
+          obj += "{\"idx\": \"" + idxStr;
+          obj += "\", \"account\": \"" + acc.address;
+          obj += "\", \"balance\": \"" + Utils::weiToFixedPoint(
+            boost::lexical_cast<std::string>(AVAXbalance), 18
+          );
           obj += "\"}";
           ret << QString::fromStdString(obj);
         }

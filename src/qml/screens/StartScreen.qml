@@ -43,6 +43,19 @@ Item {
     }
   }
 
+  function checkLedger() {
+    var data = System.checkForLedger()
+    if (data.state) {
+      ledgerFailPopup.close()
+      ledgerRetryTimer.stop()
+      ledgerPopup.open()
+    } else {
+      ledgerFailPopup.info = data.message
+      ledgerFailPopup.open()
+      ledgerRetryTimer.start()
+    }
+  }
+
   // Header (logo + text)
   Image {
     id: logo
@@ -84,7 +97,7 @@ Item {
   Rectangle {
     id: startRect
     width: parent.width * 0.4
-    height: 150
+    height: 200
     visible: (!isCreate && !isLoad)
     anchors {
       top: logo.bottom
@@ -100,7 +113,7 @@ Item {
       width: parent.width * 0.9
       anchors {
         centerIn: parent
-        verticalCenterOffset: -30
+        verticalCenterOffset: -50
       }
       text: "Create/Import Wallet"
       onClicked: isCreate = true
@@ -111,10 +124,21 @@ Item {
       width: parent.width * 0.9
       anchors {
         centerIn: parent
-        verticalCenterOffset: 30
       }
       text: "Load Wallet"
       onClicked: isLoad = true
+    }
+
+    AVMEButton {
+      id: btnStartLedger
+      width: parent.width * 0.9
+      anchors {
+        centerIn: parent
+        verticalCenterOffset: 50
+      }
+      text: "Open Ledger Wallet"
+      Timer { id: ledgerRetryTimer; interval: 250; onTriggered: checkLedger() }
+      onClicked: checkLedger()
     }
   }
 
@@ -295,6 +319,7 @@ Item {
               text: "Import Wallet"
             }
           }
+          onClicked: btnCreate.createWallet();
           function createWallet() {
             try {
               if (createPassInput.text != createPassCheckInput.text) {
@@ -332,12 +357,11 @@ Item {
               walletFailPopup.open()
             }
           }
-		onClicked: btnCreate.createWallet();
         }
       }
     }
-	Keys.onReturnPressed: btnCreate.createWallet() // Enter key
-	Keys.onEnterPressed: btnCreate.createWallet() // Numpad enter key
+    Keys.onReturnPressed: btnCreate.createWallet() // Enter key
+    Keys.onEnterPressed: btnCreate.createWallet() // Numpad enter key
   }
 
   // Load rectangle
@@ -424,6 +448,7 @@ Item {
           width: (loadItems.width * 0.4)
           enabled: (loadFolderInput.text != "" && loadPassInput.text != "" && loadWalletExists)
           text: (loadWalletExists) ? "Load Wallet" : "No Wallet found"
+          onClicked: btnLoad.loadWallet()
           function loadWallet() {
             try {
               if (System.isWalletLoaded()) {
@@ -451,18 +476,36 @@ Item {
               walletFailPopup.open()
             }
           }
-		  onClicked: btnLoad.loadWallet()
         }
       }
     }
-	Keys.onReturnPressed: btnLoad.loadWallet() // Enter key
-	Keys.onEnterPressed: btnLoad.loadWallet() // Numpad enter key
+    Keys.onReturnPressed: btnLoad.loadWallet() // Enter key
+    Keys.onEnterPressed: btnLoad.loadWallet() // Numpad enter key
+  }
+
+  // Popup for Ledger accounts
+  AVMEPopupLedger {
+    id: ledgerPopup
+    chooseBtn.onClicked: {
+      System.setLedger(true);
+      System.setCurrentAccount(ledgerList.currentItem.itemAccount)
+      System.goToOverview();
+      System.setScreen(content, "qml/screens/OverviewScreen.qml")
+    }
   }
 
   // Info popup for if the Wallet creation/loading/importing fails
   AVMEPopupInfo {
     id: walletFailPopup
     icon: "qrc:/img/warn.png"
+  }
+
+  // Info popup for if communication with Ledger fails
+  AVMEPopupInfo {
+    id: ledgerFailPopup
+    icon: "qrc:/img/warn.png"
+    onAboutToHide: ledgerRetryTimer.stop()
+    okBtn.text: "Close"
   }
 
   // Popup for viewing the seed at Wallet creation

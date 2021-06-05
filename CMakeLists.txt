@@ -104,7 +104,7 @@ file(GLOB AVME_SOURCES "src/lib/*.cpp")
 # Compile the project library
 add_library(avme-lib ${AVME_HEADERS} ${AVME_SOURCES})
 target_link_libraries(avme-lib PUBLIC
-  devcore devcrypto ethcore ${ETHASH_BYPRODUCTS} Ethash ssl crypto toolbox bip39 ${BOOST_LIBS}
+  devcore devcrypto ethcore ledger ${ETHASH_BYPRODUCTS} Ethash ssl crypto toolbox bip39 ${BOOST_LIBS}
 )
 
 # Set the project version as a macro in a header file
@@ -140,11 +140,13 @@ add_custom_command(
   OUTPUT "${CMAKE_SOURCE_DIR}/build/qml.cpp"
   COMMAND "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/native/bin/rcc" "${CMAKE_SOURCE_DIR}/src/qml.qrc" -o "${CMAKE_SOURCE_DIR}/build/qml.cpp"
   DEPENDS always_rebuild
-)
+  )
+
 # Set testnet or mainnet
 if(TESTNET)
-	add_definitions(-DTESTNET)
+  add_definitions(-DTESTNET)
 endif()
+
 # Compile the GUI executable
 if("${TOOLCHAIN_PREFIX}" STREQUAL "x86_64-w64-mingw32")
   set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_SOURCE_DIR}/src/winico.rc")
@@ -169,6 +171,4 @@ set(CPACK_PACKAGE_FILE_NAME ${PROJECT_NAME})
 set(CPACK_PACKAGE_CHECKSUM SHA256)
 set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY FALSE)
 include(CPack)
-
-# TODO: the install part
 

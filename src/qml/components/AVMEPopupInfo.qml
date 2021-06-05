@@ -14,6 +14,7 @@ Popup {
   id: infoPopup
   property string icon
   property string info
+  property alias okBtn: btnOk
   property color popupBgColor: "#1C2029"
 
   width: window.width / 2
@@ -54,7 +55,7 @@ Popup {
   }
 
   AVMEButton {
-    id: btn
+    id: btnOk
     anchors {
       horizontalCenter: parent.horizontalCenter
       bottom: parent.bottom
