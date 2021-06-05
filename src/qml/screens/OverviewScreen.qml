@@ -48,6 +48,7 @@ Item {
       roiTimer.start()
     }
     function onMarketDataUpdated(days, currentAVAXPrice, currentAVMEPrice, AVMEHistory) {
+      marketGraph.clear()
       currentAVAXAmount.amount = currentAVAXPrice
       currentAVMEAmount.amount = currentAVMEPrice
       var minY = -1
@@ -119,6 +120,7 @@ Item {
         marketGraph.append(candlestick)
       }
       marketChart.visible = true
+      marketDataTimer.start()
     }
   }
 
@@ -168,6 +170,14 @@ Item {
     interval: 2500
     repeat: false
     onTriggered: System.calculateRewardCurrentROI()
+  }
+
+  // Timer for reloading the market data
+  Timer {
+    id: marketDataTimer
+    interval: 2500
+    repeat: false
+    onTriggered: System.getMarketData(30)
   }
 
   Component.onCompleted: {
