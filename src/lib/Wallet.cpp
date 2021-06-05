@@ -89,6 +89,11 @@ void Wallet::loadAccounts() {
   }
 }
 
+void Wallet::importLedgerAccount(std::string address, std::string path) {
+  Account acc("ledger-" + path, "", address);
+  this->accounts.push_back(acc);
+}
+
 Account Wallet::getAccountByName(std::string name) {
   for (int i = 0; i < this->accounts.size(); i++) {
     if (this->accounts[i].name == name) {

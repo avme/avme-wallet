@@ -82,7 +82,7 @@ class System : public QObject {
       QString gasLimit, QString gasPrice, QString pass
     );
     void txBuilt(bool b);
-    void txSigned(bool b);
+    void txSigned(bool b, QString msg);
     void txSent(bool b, QString linkUrl);
     void txRetry();
     void allowancesUpdated(
@@ -109,6 +109,7 @@ class System : public QObject {
     std::string currentToken;
     int currentTokenDecimals;
     std::string currentAccount;
+    std::string currentAccountPath;
 
   public:
     // Getters/Setters for private vars
@@ -132,6 +133,9 @@ class System : public QObject {
 
     Q_INVOKABLE QString getCurrentAccount() { return QString::fromStdString(this->currentAccount); }
     Q_INVOKABLE void setCurrentAccount(QString account) { this->currentAccount = account.toStdString(); }
+
+    Q_INVOKABLE QString getCurrentAccountPath() { return QString::fromStdString(this->currentAccountPath); }
+    Q_INVOKABLE void setCurrentAccountPath(QString path) { this->currentAccountPath = path.toStdString(); }
 
     // Get the project's version
     Q_INVOKABLE QString getProjectVersion() {
@@ -352,6 +356,11 @@ class System : public QObject {
           emit accountCreationFailed();
         }
       });
+    }
+
+    // Import a Ledger account to the Wallet
+    Q_INVOKABLE void importLedgerAccount(QString address, QString path) {
+      this->w.importLedgerAccount(address.toStdString(), path.toStdString());
     }
 
     // Erase an Account
@@ -1023,8 +1032,21 @@ class System : public QObject {
         emit txBuilt(txSkel.nonce != Utils::MAX_U256_VALUE());
 
         // Sign the transaction
-        std::string signedTx = this->w.signTransaction(txSkel, passStr);
-        emit txSigned(!signedTx.empty());
+        bool signSuccess;
+        std::string msg;
+        std::string signedTx;
+        if (isLedger()) {
+          std::pair<bool, std::string> signStatus;
+          signStatus = this->ledgerDevice.signTransaction(txSkel, this->currentAccountPath);
+          signSuccess = signStatus.first;
+          signedTx = (signSuccess) ? signStatus.second : "";
+          msg = (signSuccess) ? "Transaction signed!" : signStatus.second;
+        } else {
+          signedTx = this->w.signTransaction(txSkel, passStr);
+          signSuccess = !signedTx.empty();
+          msg = (signSuccess) ? "Transaction signed!" : "Error on signing transaction.";
+        }
+        emit txSigned(signSuccess, QString::fromStdString(msg));
 
         // Send the transaction
         std::string txLink = this->w.sendTransaction(signedTx, operationStr);
@@ -1035,7 +1057,14 @@ class System : public QObject {
         ) {
           emit txRetry();
           txSkel.nonce++;
-          signedTx = this->w.signTransaction(txSkel, passStr);
+          if (isLedger()) {
+            std::pair<bool, std::string> signStatus;
+            signStatus = this->ledgerDevice.signTransaction(txSkel, this->currentAccountPath);
+            signSuccess = signStatus.first;
+            signedTx = (signSuccess) ? signStatus.second : "";
+          } else {
+            signedTx = this->w.signTransaction(txSkel, passStr);
+          }
           txLink = this->w.sendTransaction(signedTx, operationStr);
         }
         emit txSent(true, QString::fromStdString(txLink));

@@ -59,18 +59,18 @@ Popup {
         btnClose.visible = true
       }
     }
-    function onTxSigned(b) {
+    function onTxSigned(b, msg) {
       signPngRotate.stop()
       signPng.rotation = 0
       if (b) {
         signText.color = "limegreen"
-        signText.text = "Transaction signed!"
+        signText.text = msg
         signPng.source = "qrc:/img/ok.png"
         sendText.color = "#FFFFFF"
         sendPngRotate.start()
       } else {
         signText.color = "crimson"
-        signText.text = "Error on signing transaction."
+        signText.text = msg
         signPng.source = "qrc:/img/no.png"
         btnClose.visible = true
       }

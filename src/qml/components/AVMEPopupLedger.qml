@@ -141,6 +141,25 @@ Popup {
       width: (ledgerPopup.width / 4) - parent.spacing
       enabled: (!isWaiting && ledgerAccountList.currentIndex > -1)
       text: "Choose this Account"
+      onClicked: {
+        // Always default to AVAX & AVME on first load
+        if (System.getCurrentCoin() == "") {
+          System.setCurrentCoin("AVAX")
+          System.setCurrentCoinDecimals(18)
+        }
+        if (System.getCurrentToken() == "") {
+          System.setCurrentToken("AVME")
+          System.setCurrentTokenDecimals(18)
+        }
+        System.stopAllBalanceThreads()
+        System.setLedger(true);
+        System.setCurrentAccount(ledgerList.currentItem.itemAccount)
+        System.setCurrentAccountPath(ledgerPopup.pathValue + ledgerPopup.index)
+        System.importLedgerAccount(System.getCurrentAccount(), System.getCurrentAccountPath());
+        System.startAllBalanceThreads()
+        System.goToOverview();
+        System.setScreen(content, "qml/screens/OverviewScreen.qml")
+      }
     }
     AVMEButton {
       id: btnMore

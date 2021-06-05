@@ -602,6 +602,24 @@ Item {
         width: (txDetailsColumn.width * 0.5)
         anchors.horizontalCenter: parent.horizontalCenter
         text: "Make Transaction"
+        Timer { id: ledgerRetryTimer; interval: 250; onTriggered: checkLedger() }
+        function checkLedger() {
+          var data = System.checkForLedger()
+          if (data.state) {
+            ledgerFailPopup.close()
+            ledgerRetryTimer.stop()
+            txProgressPopup.open()
+            System.txStart(
+              txOperationStr, txToInput.text,
+              txAmountCoinInput.text, txAmountTokenInput.text, txAmountLPInput.text,
+              txGasLimitInput.text, txGasPriceInput.text, ""
+            )
+          } else {
+            ledgerFailPopup.info = data.message
+            ledgerFailPopup.open()
+            ledgerRetryTimer.start()
+          }
+        }
         onClicked: {
           if (!checkTransactionFunds()) {
             fundsPopup.open()
@@ -610,7 +628,11 @@ Item {
               incorrectInputPopup.open()
             } else {
               confirmTxPopup.isSameAddress = (txFromInput.text === txToInput.text)
-              confirmTxPopup.open()
+              if (System.isLedger()) {
+                checkLedger()
+              } else {
+                confirmTxPopup.open()
+              }
             }
           }
         }
@@ -653,5 +675,13 @@ Item {
   // Popup for transaction progress
   AVMEPopupTxProgress {
     id: txProgressPopup
+  }
+
+  // Info popup for if communication with Ledger fails
+  AVMEPopupInfo {
+    id: ledgerFailPopup
+    icon: "qrc:/img/warn.png"
+    onAboutToHide: ledgerRetryTimer.stop()
+    okBtn.text: "Close"
   }
 }

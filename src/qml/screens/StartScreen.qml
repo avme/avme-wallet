@@ -486,12 +486,6 @@ Item {
   // Popup for Ledger accounts
   AVMEPopupLedger {
     id: ledgerPopup
-    chooseBtn.onClicked: {
-      System.setLedger(true);
-      System.setCurrentAccount(ledgerList.currentItem.itemAccount)
-      System.goToOverview();
-      System.setScreen(content, "qml/screens/OverviewScreen.qml")
-    }
   }
 
   // Info popup for if the Wallet creation/loading/importing fails

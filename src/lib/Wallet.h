@@ -97,6 +97,11 @@ class Wallet {
     void loadAccounts();
 
     /**
+     * Import a Ledger account to the Wallet's account vector.
+     */
+    void importLedgerAccount(std::string address, std::string path);
+
+    /**
      * Get an Account from the list using its name or address, respectively.
      * Returns the initialized Account object, or an "empty" one if not found.
      */
