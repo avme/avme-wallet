@@ -62,7 +62,8 @@ class System : public QObject {
   signals:
     void hideMenu();
     void goToOverview();
-    void accountsGenerated(QVariantList accounts);
+    void accountGenerated(QVariantMap data);
+    void ledgerAccountGenerated(QVariantMap data);
     void accountCreated(QVariantMap data);
     void accountCreationFailed();
     void accountBalancesUpdated(QVariantMap data);
@@ -293,21 +294,21 @@ class System : public QObject {
         QVariantList ret;
         std::vector<std::string> list = BIP39::generateAccountsFromSeed(seed.toStdString(), idx);
         for (std::string s : list) {
+          QVariantMap obj;
           std::stringstream listss(s);
-          std::string item, obj;
+          std::string item;
           int ct = 0;
           while (std::getline(listss, item, ' ')) {
+            QString itemStr = QString::fromStdString(item);
             switch (ct) {
-              case 0: obj += "{\"idx\": \"" + item; break;
-              case 1: obj += "\", \"account\": \"" + item; break;
-              case 2: obj += "\", \"balance\": \"" + item; break;
+              case 0: obj["idx"] = QVariant(itemStr); break;
+              case 1: obj["account"] = QVariant(itemStr); break;
+              case 2: obj["balance"] = QVariant(itemStr); break;
             }
             ct++;
           }
-          obj += "\"}";
-          ret << QString::fromStdString(obj);
+          emit accountGenerated(obj);
         }
-        emit accountsGenerated(ret);
       });
     }
 
@@ -320,19 +321,17 @@ class System : public QObject {
           this->ledgerDevice.generateBip32Account(fullPath);
         }
         for (ledger::account acc : this->ledgerDevice.getAccountList()) {
-          std::string obj;
+          QVariantMap obj;
           std::string idxStr = acc.index.substr(acc.index.find_last_of("/") + 1);
           std::string bal = API::getAVAXBalance(acc.address);
           u256 AVAXbalance = boost::lexical_cast<HexTo<u256>>(bal);
-          obj += "{\"idx\": \"" + idxStr;
-          obj += "\", \"account\": \"" + acc.address;
-          obj += "\", \"balance\": \"" + Utils::weiToFixedPoint(
+          obj["idx"] = QVariant(QString::fromStdString(idxStr));
+          obj["account"] = QVariant(QString::fromStdString(acc.address));
+          obj["balance"] = QVariant(QString::fromStdString(Utils::weiToFixedPoint(
             boost::lexical_cast<std::string>(AVAXbalance), 18
-          );
-          obj += "\"}";
-          ret << QString::fromStdString(obj);
+          )));
+          emit ledgerAccountGenerated(obj);
         }
-        emit accountsGenerated(ret);
       });
     }
 

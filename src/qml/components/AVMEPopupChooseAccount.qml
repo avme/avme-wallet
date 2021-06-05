@@ -36,10 +36,8 @@ Popup {
 
   Connections {
     target: System
-    function onAccountsGenerated(accounts) {
-      for (var i = 0; i < accounts.length; i++) {
-        accountList.append(JSON.parse(accounts[i]))
-      }
+    function onAccountGenerated(data) {
+      accountList.append(data)
       isWaiting = false
     }
   }
