@@ -21,8 +21,8 @@ namespace ledger {
 
     // Array of supported Ledger devices.
     const std::vector<usb_device_params> ledger_devices_ids {
-      {usb_device_params{0x2c97, 0x0001}}, // Ledger S
-      {usb_device_params{0x2c97, 0x0004}}  // Ledger X
+      {usb_device_params{0x2c97, 0x0001}}, // Ledger Nano S
+      {usb_device_params{0x2c97, 0x0004}}  // Ledger Nano X
     };
   }
 
