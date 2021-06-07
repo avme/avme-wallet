@@ -105,8 +105,10 @@ Item {
     txOperationStr = op
     txToInput.visible = (op == "Send AVAX" || op == "Send AVME")
     autoLimitCheck.checked = autoGasCheck.checked = true
-    if (op == "Send AVAX" || op == "Send AVME") {
+    if (op == "Send AVAX") {
       txGasLimitInput.text = "21000"
+    } else if (op == "Send AVME") {
+      txGasLimitInput.text = "70000"
     } else if (op == "Swap AVAX -> AVME" || op == "Swap AVME -> AVAX") {
       txGasLimitInput.text = "180000"
     } else {
