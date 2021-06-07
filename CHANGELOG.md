@@ -6,11 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- Support for Ledger Nano S and Nano X.
+- Support for Ledger Nano S, Nano X and the Ethereum app.
+
+### Changed
+- Default gas limit for sending AVME has increased from 21000 to 70000.
 
 ### Fixed
 - Project version should show up again at window title bar and the About screen.
 - Market chart should now auto-reload its data along with the rest in the Overview screen.
+- Tx confirmation popup should now focus automatically and accept Enter key as input.
 
 ## [1.0.0] - 2021-06-02
 ### Added
