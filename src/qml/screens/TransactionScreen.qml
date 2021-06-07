@@ -645,7 +645,7 @@ Item {
   // Popup for confirming transaction
   AVMEPopupConfirmTx {
     id: confirmTxPopup
-    okBtn.onClicked: {
+    function confirmPass() {
       if (!System.checkWalletPass(pass)) {
         timer.start()
       } else {
@@ -657,6 +657,13 @@ Item {
           txGasLimitInput.text, txGasPriceInput.text, pass
         )
         confirmTxPopup.clean()
+      }
+    }
+    okBtn.onClicked: confirmPass()
+    Shortcut {
+      sequences: ["Enter", "Return"]
+      onActivated: {
+        if (confirmTxPopup.passFocus) { confirmTxPopup.confirmPass() }
       }
     }
   }

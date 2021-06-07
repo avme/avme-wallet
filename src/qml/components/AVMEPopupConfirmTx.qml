@@ -8,6 +8,7 @@ import QtQuick.Controls 2.2
 Popup {
   id: confirmTxPopup
   property alias pass: passInput.text
+  property alias passFocus: passInput.focus
   property alias timer: infoTimer
   property alias okBtn: btnOk
   property bool isSameAddress: false
@@ -26,6 +27,10 @@ Popup {
 
   function clean() {
     passInput.text = ""
+  }
+
+  onAboutToShow: {
+    passInput.focus = true
   }
 
   Text {
