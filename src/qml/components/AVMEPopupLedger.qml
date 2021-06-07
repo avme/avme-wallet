@@ -40,13 +40,13 @@ Popup {
   }
 
   function refreshList() {
-    if (startingIndex == -1) { startingIndex = 0 }
     System.generateLedgerAccounts(chosenPath, startingIndex)
     isWaiting = true
   }
 
   function clean() {
     accountList.clear()
+    System.cleanLedgerAccounts()
     startingIndex = -1
     isWaiting = false
     chosenPath = ""
@@ -167,11 +167,15 @@ Popup {
       enabled: (!isWaiting)
       text: "Generate +10 Accounts"
       onClicked: {
-        if (startingIndex != -1) { startingIndex += 10 }
+        if (startingIndex == -1) {
+          startingIndex = 0
+        } else if (startingIndex != -1) {
+          startingIndex += 10
+        }
         if (pathValue != chosenPath) {
           chosenPath = pathValue
-          accountList.clear()
         }
+        accountList.clear()
         refreshList()
       }
     }

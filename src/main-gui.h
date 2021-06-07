@@ -339,6 +339,11 @@ class System : public QObject {
       });
     }
 
+    // Clean up the Ledger account vector
+    Q_INVOKABLE void cleanLedgerAccounts() {
+      this->ledgerDevice.cleanAccountList();
+    }
+
     // Create a new Account
     Q_INVOKABLE void createAccount(QString seed, int index, QString name, QString pass) {
       QtConcurrent::run([=](){

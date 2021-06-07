@@ -30,6 +30,9 @@ namespace ledger {
       // Get the list of accounts inside the Ledger device.
       std::vector<account> getAccountList() { return ledgerAccounts; }
 
+      // Clean the account vector
+      void cleanAccountList() { ledgerAccounts.clear(); }
+
       // Check if Ledger device is connected.
       std::pair<bool, std::string> checkForDevice();
 
