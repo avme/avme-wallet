@@ -24,6 +24,7 @@ namespace ledger {
       {usb_device_params{0x2c97, 0x0001}},  // Ledger Nano S
       {usb_device_params{0x2c97, 0x0004}},  // Ledger Nano X
       {usb_device_params{0x2c97, 0x1015}},  // Ledger Nano S Ethereum App
+	  {usb_device_params{0x2c97, 0x4015}},  // Ledger Nano X Ethereum App
     };
   }
 
