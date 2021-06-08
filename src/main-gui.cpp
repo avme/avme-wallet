@@ -9,10 +9,12 @@
 int main(int argc, char *argv[]) {
   // Get the system's DPI scale using a dummy temp QApplication
   QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-  QApplication* temp = new QApplication(argc, argv);
-  double scaleFactor = temp->screens()[0]->logicalDotsPerInch() / 96.0;
-  delete temp;
-  qputenv("QT_SCALE_FACTOR", QByteArray::number(scaleFactor));
+  #if !defined(__APPLE__)
+    QApplication* temp = new QApplication(argc, argv);
+    double scaleFactor = temp->screens()[0]->logicalDotsPerInch() / 96.0;
+    delete temp;
+    qputenv("QT_SCALE_FACTOR", QByteArray::number(scaleFactor));
+  #endif
 
   // Create the actual application and register our custom class into it
   QApplication app(argc, argv);
