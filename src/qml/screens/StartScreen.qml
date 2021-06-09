@@ -116,7 +116,10 @@ Item {
         verticalCenterOffset: -50
       }
       text: "Create/Import Wallet"
-      onClicked: isCreate = true
+      onClicked: {
+        System.setLedger(false)
+        isCreate = true
+      }
     }
 
     AVMEButton {
@@ -126,7 +129,10 @@ Item {
         centerIn: parent
       }
       text: "Load Wallet"
-      onClicked: isLoad = true
+      onClicked: {
+        System.setLedger(false)
+        isLoad = true
+      }
     }
 
     AVMEButton {

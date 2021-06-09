@@ -604,7 +604,7 @@ Item {
         width: (txDetailsColumn.width * 0.5)
         anchors.horizontalCenter: parent.horizontalCenter
         text: "Make Transaction"
-        Timer { id: ledgerRetryTimer; interval: 250; onTriggered: checkLedger() }
+        Timer { id: ledgerRetryTimer; interval: 250; onTriggered: btnMakeTx.checkLedger() }
         function checkLedger() {
           var data = System.checkForLedger()
           if (data.state) {
