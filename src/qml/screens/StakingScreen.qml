@@ -126,7 +126,7 @@ Item {
 		anchors.horizontalCenterOffset: parent.width / 4
         anchors.horizontalCenter: parent.horizontalCenter
 		anchors.verticalCenter: parent.verticalCenter
-        text: "YY Compound"
+        text: "YieldYak Compound"
         onClicked: {
           isClassic = false
         }
