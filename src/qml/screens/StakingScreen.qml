@@ -578,7 +578,7 @@ Item {
         color: "#FFFFFF"
         font.bold: true
         font.pixelSize: 24.0
-        text: "Reinvest AVME"
+        text: "Reinvest AVME (Optional)"
       }
 
       Image {
