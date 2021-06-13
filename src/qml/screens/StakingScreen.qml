@@ -620,28 +620,26 @@ Item {
         font.pixelSize: 18.0
         text: "Reinvest Reward " + System.getCurrentToken() + ":<br><b>" + (reinvestreward * 0.05) + "</b>"
       }
-      Row {
-        anchors.horizontalCenter: parent.horizontalCenter
-        spacing: 10
-		height: 128
-		Text {
-			id: poweredBy
-		    width: (reinvestDetailsColumn.width * 0.5) - parent.spacing
-			verticalAlignment: Text.AlignVCenter
-			height: parent.height
-			color: "#FFFFFF"
-			font.pixelSize: 18.0
-			text: "Powered By: "
-		}
-		Image {
-			id: yyLogo
-			width: 128
-			height: 64
-			anchors.verticalCenter: parent.verticalCenter
-			source: "qrc:/img/yieldyak.png"
-		}
-	  }
     }
+	Image {
+	  anchors.bottom: parent.bottom
+	  anchors.right: parent.right
+	  anchors.margins: 35
+	  id: yyLogo
+	  width: 128
+	  height: 64
+	  source: "qrc:/img/yieldyak.png"
+	  Text {
+	    color: "#FFFFFF"
+        font.pixelSize: 18.0
+	    text: "Powered By"
+        anchors.bottom: parent.bottom
+        verticalAlignment: Text.AlignVCenter
+		anchors.bottomMargin: -20
+        anchors.left: parent.left
+        anchors.right: parent.right
+	  }
+	}	
   }
 
   // Popup for insufficient funds
