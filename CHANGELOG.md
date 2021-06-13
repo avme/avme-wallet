@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Support for compound Staking.
+- Locked LP value information.
 
 ## [1.1.0] - 2021-06-08
 ### Added
