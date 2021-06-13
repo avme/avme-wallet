@@ -86,7 +86,7 @@ class System : public QObject {
     void txSent(bool b, QString linkUrl);
     void txRetry();
     void allowancesUpdated(
-      QString exchangeAllowance, QString liquidityAllowance, QString stakingAllowance
+      QString exchangeAllowance, QString liquidityAllowance, QString stakingAllowance, QString compoundAllowance
     );
     void exchangeDataUpdated(
       QString lowerTokenName, QString lowerTokenReserves,
@@ -98,6 +98,7 @@ class System : public QObject {
       QString totalLiquidity
     );
     void rewardUpdated(QString poolReward);
+	void compoundUpdated(QString reinvestReward);
 
   private:
     Wallet w;
@@ -249,7 +250,7 @@ class System : public QObject {
         obj += "\", \"coinAmount\": \"" + a.balanceAVAX;
         obj += "\", \"tokenAmount\": \"" + a.balanceAVME;
         obj += "\", \"freeLPAmount\": \"" + a.balanceLPFree;
-        obj += "\", \"lockedLPAmount\": \"" + a.balanceLPLocked;
+        obj += "\", \"lockedLPAmount\": \"" + a.balanceTotalLPLocked;
         obj += "\"}";
         a.balancesThreadLock.unlock();
         ret << QString::fromStdString(obj);
@@ -283,7 +284,8 @@ class System : public QObject {
           a.balancesThreadLock.lock();
           hasBalances = (
             a.balanceAVAX != "" && a.balanceAVME != "" &&
-            a.balanceLPFree != "" && a.balanceLPLocked != ""
+            a.balanceLPFree != "" && a.balanceLPLocked != "" &&
+			a.balanceLockedCompoundLP != ""
           );
           a.balancesThreadLock.unlock();
           break;
@@ -415,18 +417,22 @@ class System : public QObject {
       QVariantMap ret;
       for (Account &a : w.accounts) {
         if (a.address == address.toStdString()) {
-          std::string balanceAVAXStr, balanceAVMEStr, balanceLPFreeStr, balanceLPLockedStr;
+          std::string balanceAVAXStr, balanceAVMEStr, balanceLPFreeStr, balanceLPLockedStr, balanceLockedCompoundLP, balanceTotalLPLocked;
           a.balancesThreadLock.lock();
           balanceAVAXStr = a.balanceAVAX;
           balanceAVMEStr = a.balanceAVME;
           balanceLPFreeStr = a.balanceLPFree;
           balanceLPLockedStr = a.balanceLPLocked;
+		  balanceLockedCompoundLP = a.balanceLockedCompoundLP;
+		  balanceTotalLPLocked = a.balanceTotalLPLocked;
           a.balancesThreadLock.unlock();
 
           ret.insert("balanceAVAX", QString::fromStdString(balanceAVAXStr));
           ret.insert("balanceAVME", QString::fromStdString(balanceAVMEStr));
           ret.insert("balanceLPFree", QString::fromStdString(balanceLPFreeStr));
           ret.insert("balanceLPLocked", QString::fromStdString(balanceLPLockedStr));
+		  ret.insert("balanceLockedCompoundLP", QString::fromStdString(balanceLockedCompoundLP));
+		  ret.insert("balanceTotalLPLocked", QString::fromStdString(balanceTotalLPLocked));
           break;
         }
       }
@@ -440,18 +446,22 @@ class System : public QObject {
         for (Account &a : w.accounts) {
           if (a.address == address.toStdString()) {
             // Whole balances
-            std::string balanceAVAXStr, balanceAVMEStr, balanceLPFreeStr, balanceLPLockedStr;
+            std::string balanceAVAXStr, balanceAVMEStr, balanceLPFreeStr, balanceLPLockedStr, balanceLockedCompoundLP, balanceTotalLPLocked;
             a.balancesThreadLock.lock();
             balanceAVAXStr = a.balanceAVAX;
             balanceAVMEStr = a.balanceAVME;
             balanceLPFreeStr = a.balanceLPFree;
             balanceLPLockedStr = a.balanceLPLocked;
+			balanceLockedCompoundLP = a.balanceLockedCompoundLP;
+			balanceTotalLPLocked = a.balanceTotalLPLocked;
             a.balancesThreadLock.unlock();
 
             ret.insert("balanceAVAX", QString::fromStdString(balanceAVAXStr));
             ret.insert("balanceAVME", QString::fromStdString(balanceAVMEStr));
             ret.insert("balanceLPFree", QString::fromStdString(balanceLPFreeStr));
             ret.insert("balanceLPLocked", QString::fromStdString(balanceLPLockedStr));
+			ret.insert("balanceLockedCompoundLP", QString::fromStdString(balanceLockedCompoundLP));
+			ret.insert("balanceTotalLPLocked", QString::fromStdString(balanceTotalLPLocked));
             break;
           }
         }
@@ -540,7 +550,7 @@ class System : public QObject {
             Utils::fixedPointToWei(a.balanceLPFree, 18)
           );
           totalLPLocked += boost::lexical_cast<u256>(
-            Utils::fixedPointToWei(a.balanceLPLocked, 18)
+            Utils::fixedPointToWei(a.balanceTotalLPLocked, 18)
           );
           a.balancesThreadLock.unlock();
         }
@@ -932,6 +942,11 @@ class System : public QObject {
             this->currentAccount, Pangolin::getPair(this->currentCoin, this->currentToken),
             "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::stakingContract)
           );
+		} else if (operationStr == "Approve Compound") {
+          txSkel = this->w.buildTransaction(
+            this->currentAccount, Pangolin::getPair(this->currentCoin, this->currentToken),
+            "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::compoundContract)
+          );
         } else if (operationStr == "Swap AVAX -> AVME") {
           u256 amountOutMin = boost::lexical_cast<u256>(tokenAmountStr);
           amountOutMin -= (amountOutMin / 200); // 0.5% Slippage
@@ -1018,15 +1033,31 @@ class System : public QObject {
             this->currentAccount, Pangolin::stakingContract,
             "0", gasLimitStr, gasPriceStr, Staking::stake(lpAmountStr)
           );
+		} else if (operationStr == "Stake Compound LP") {
+          txSkel = this->w.buildTransaction(
+            this->currentAccount, Pangolin::compoundContract,
+            "0", gasLimitStr, gasPriceStr, Staking::stakeCompound(lpAmountStr)
+          );
         } else if (operationStr == "Unstake LP") {
           txSkel = this->w.buildTransaction(
             this->currentAccount, Pangolin::stakingContract,
             "0", gasLimitStr, gasPriceStr, Staking::withdraw(lpAmountStr)
           );
+		  
+		} else if (operationStr == "Unstake Compound LP") {
+          txSkel = this->w.buildTransaction(
+            this->currentAccount, Pangolin::compoundContract,
+            "0", gasLimitStr, gasPriceStr, Staking::compoundWithdraw(lpAmountStr)
+          );
         } else if (operationStr == "Harvest AVME") {
           txSkel = this->w.buildTransaction(
             this->currentAccount, Pangolin::stakingContract,
             "0", gasLimitStr, gasPriceStr, Staking::getReward()
+          );
+		} else if (operationStr == "Reinvest AVME") {
+          txSkel = this->w.buildTransaction(
+            this->currentAccount, Pangolin::compoundContract,
+            "0", "500000", gasPriceStr, Staking::reinvest()
           );
         } else if (operationStr == "Exit Staking") {
           txSkel = this->w.buildTransaction(
@@ -1091,10 +1122,15 @@ class System : public QObject {
           Pangolin::getPair(this->currentCoin, this->currentToken),
           this->currentAccount, Pangolin::stakingContract
         );
+        std::string compoundAllowance = Pangolin::allowance(
+          Pangolin::getPair(this->currentCoin, this->currentToken),
+          this->currentAccount, Pangolin::compoundContract
+        );
         emit allowancesUpdated(
           QString::fromStdString(exchangeAllowance),
           QString::fromStdString(liquidityAllowance),
-          QString::fromStdString(stakingAllowance)
+          QString::fromStdString(stakingAllowance),
+		  QString::fromStdString(compoundAllowance)
         );
       });
     }
@@ -1327,6 +1363,14 @@ class System : public QObject {
         std::string poolRewardWei = Staking::earned(this->currentAccount);
         std::string poolReward = Utils::weiToFixedPoint(poolRewardWei, this->currentCoinDecimals);
         emit rewardUpdated(QString::fromStdString(poolReward));
+      });
+    }
+
+    Q_INVOKABLE void getCompoundReward() {
+      QtConcurrent::run([=](){
+        std::string poolRewardWei = Staking::getCompoundReward();
+        std::string poolReward = Utils::weiToFixedPoint(poolRewardWei, this->currentCoinDecimals);
+        emit compoundUpdated(QString::fromStdString(poolReward));
       });
     }
 

@@ -42,6 +42,12 @@ class API {
     static std::string getAVAXBalance(std::string address);
     static std::string getAVMEBalance(std::string address, std::string contractAddress);
 
+
+    /** 
+	 * Get Locked LP Balance inside YY Contract
+	 */
+	static std::string getCompoundLPBalance(std::string address, std::string contractAddress);
+	
     /**
      * Get the recommended gas price for a transaction.
      * Returns the gas price in Gwei, which has to be converted to Wei

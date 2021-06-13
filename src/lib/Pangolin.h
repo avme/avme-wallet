@@ -31,6 +31,7 @@ class Pangolin {
     // See https://github.com/pangolindex/exchange-contracts
     static std::string routerContract;
     static std::string stakingContract;
+	static std::string compoundContract;
 
     // Arrays for the supported token/pair contracts and IDs for ABI functions.
     static std::map<std::string, std::string> tokenContracts;

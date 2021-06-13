@@ -104,6 +104,25 @@ std::string API::getAVMEBalance(std::string address, std::string contractAddress
   return JSON::getString(resp, "result");
 }
 
+std::string API::getCompoundLPBalance(std::string address, std::string contractAddress) {
+  std::stringstream query;
+  std::string add = (address.substr(0,2) == "0x") ? address.substr(2) : address;
+  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\",\"params\": [{\"to\": \""
+        << contractAddress
+        << "\",\"data\": \"0x70a08231000000000000000000000000" << add
+        << "\"},\"latest\"]}";
+  std::string resp = httpGetRequest(query.str());
+  u256 contractBalance = boost::lexical_cast<HexTo<u256>>(JSON::getString(resp, "result"));
+  std::string contractBalanceStr = boost::lexical_cast<std::string>(contractBalance);
+  std::stringstream secondQuery;
+  secondQuery << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\",\"params\": [{\"to\": \""
+        << contractAddress
+        << "\",\"data\": \"0xeab89a5a" << Utils::uintToHex(contractBalanceStr)
+        << "\"},\"latest\"]}";
+  resp = httpGetRequest(secondQuery.str());
+  return JSON::getString(resp, "result");
+}
+
 std::string API::getAutomaticFee() {
   return "225"; // AVAX fees are fixed
 }

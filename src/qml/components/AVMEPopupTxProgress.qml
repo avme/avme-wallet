@@ -155,6 +155,9 @@ Popup {
         case "Approve Staking":
           text: "Sending approval for staking...";
           break;
+		case "Approve Compound":
+          text: "Sending approval for staking...";
+          break;
         case "Swap AVAX -> AVME":
           text: "Swapping <b>" + coinAmountStr + " " + System.getCurrentCoin() + "</b>..."
           break;
@@ -172,11 +175,20 @@ Popup {
         case "Stake LP":
           text: "Staking <b>" + lpAmountStr + " LP</b>...";
           break;
+		case "Stake Compound LP":
+          text: "Compound Staking <b>" + lpAmountStr + " LP</b>...";
+          break;
         case "Unstake LP":
+          text: "Withdrawing <b>" + lpAmountStr + " LP</b>...";
+          break;
+		case "Unstake Compound LP":
           text: "Withdrawing <b>" + lpAmountStr + " LP</b>...";
           break;
         case "Harvest AVME":
           text: "Requesting rewards from the staking pool..."
+          break;
+		case "Reinvest AVME":
+          text: "Requesting reinvest rewards from the compound pool..."
           break;
         case "Exit Staking":
           text: "Exiting the staking pool..."

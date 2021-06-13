@@ -12,17 +12,23 @@ Item {
   id: stakingScreen
   property bool isStaking: true
   property bool isExiting: false
+  property bool isyyCompound: true
   property string allowance
   property string reward
+  property string compoundallowance
+  property string reinvestreward
+  property bool isClassic: true
 
   Connections {
     target: System
     function onAllowancesUpdated(
-      exchangeAllowance, liquidityAllowance, stakingAllowance
+      exchangeAllowance, liquidityAllowance, stakingAllowance, compoundAllowance
     ) {
       allowance = stakingAllowance
+	  compoundallowance = compoundAllowance
     }
     function onRewardUpdated(poolReward) { reward = poolReward }
+	function onCompoundUpdated(reinvestReward) { reinvestreward = reinvestReward }
   }
 
   Timer {
@@ -31,22 +37,67 @@ Item {
     repeat: true
     onTriggered: System.getPoolReward()
   }
+  
+  Timer {
+    id: reloadCompoundTimer
+    interval: 1000
+    repeat: true
+    onTriggered: System.getCompoundReward()
+  }
 
   Component.onCompleted: {
     System.getAllowances()
     reloadRewardTimer.start()
+	reloadCompoundTimer.start()
   }
 
   AVMEAccountHeader {
     id: accountHeader
   }
 
+  // Panel for selecting Classic x Compound
+    AVMEPanel {
+	  id: stakingSelectPanel
+	  color: "#1D212A"
+	  anchors {
+	  	top: accountHeader.bottom
+	  	left: parent.left
+	  	margins: 10
+	  }
+	  width: (parent.width - (anchors.margins * 2))
+	  height: (parent.height * 0.075)
+	  title: ""
+	  AVMEButton {
+        id: btnSwitchClassic
+        width: parent.width * 0.25
+		anchors.horizontalCenterOffset: -(parent.width / 4)
+        anchors.horizontalCenter: parent.horizontalCenter
+		anchors.verticalCenter: parent.verticalCenter
+        text: "Classic"
+        onClicked: {
+          isClassic = true
+        }
+      }
+	  AVMEButton {
+        id: btnSwitchYYCompound
+        width: parent.width * 0.25
+		anchors.horizontalCenterOffset: parent.width / 4
+        anchors.horizontalCenter: parent.horizontalCenter
+		anchors.verticalCenter: parent.verticalCenter
+        text: "YY Compound"
+        onClicked: {
+          isClassic = false
+        }
+      }
+	}
+  
   // Panel for staking/unstaking LP
   AVMEPanel {
     id: stakingPanel
     width: (parent.width * 0.5) - (anchors.margins * 2)
+	visible: isClassic
     anchors {
-      top: accountHeader.bottom
+      top: stakingSelectPanel.bottom
       left: parent.left
       bottom: parent.bottom
       margins: 10
@@ -182,9 +233,10 @@ Item {
   // Panel for harvesting/exiting
   AVMEPanel {
     id: harvestPanel
+	visible: isClassic
     width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
-      top: accountHeader.bottom
+      top: stakingSelectPanel.bottom
       right: parent.right
       bottom: parent.bottom
       margins: 10
@@ -261,6 +313,241 @@ Item {
           System.operationOverride("Harvest AVME", "", "", "")
         }
       }
+    }
+  }
+
+  // Panel for Investing/Withdrawing from YY
+  AVMEPanel {
+    id: yyCompoundPanel
+    width: (parent.width * 0.5) - (anchors.margins * 2)
+	visible: !isClassic
+    anchors {
+      top: stakingSelectPanel.bottom
+      left: parent.left
+      bottom: parent.bottom
+      margins: 10
+    }
+    title: "YieldYak Compound Details"
+
+    Column {
+      id: yyCompoundDetailsColumn
+      anchors {
+        top: parent.header.bottom
+        bottom: parent.bottom
+        left: parent.left
+        right: parent.right
+        margins: 20
+      }
+      spacing: 30
+
+      Text {
+        id: compoundTitle
+        anchors.horizontalCenter: parent.horizontalCenter
+        color: "#FFFFFF"
+        font.bold: true
+        font.pixelSize: 24.0
+        text: (isyyCompound) ? "Stake LP" : "Unstake LP"
+      }
+
+      Image {
+        id: compoundLogo
+        width: 64
+        height: 64
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.margins: 20
+        source: "qrc:/img/pangolin.png"
+      }
+
+      AVMEButton {
+        id: btnSwitchCompoundOrder
+        width: parent.width * 0.5
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: "Switch to " + ((isyyCompound) ? "Unstake" : "Stake")
+        onClicked: {
+          isyyCompound = !isyyCompound
+          compoundInput.text = ""
+        }
+      }
+
+      Text {
+        id: compoundBalance
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        color: "#FFFFFF"
+        font.pixelSize: 18.0
+        text: {
+          var acc = System.getAccountBalances(System.getCurrentAccount())
+          text: (isyyCompound)
+          ? "Free (unstaked) LP:<br><b>" + acc.balanceLPFree + "</b>"
+          : "Locked (staked) LP:<br><b>" + acc.balanceLockedCompoundLP + "</b>"
+        }
+      }
+
+      AVMEInput {
+        id: compoundInput
+        width: parent.width * 0.75
+        anchors.horizontalCenter: parent.horizontalCenter
+        enabled: (allowance != "")
+        validator: RegExpValidator { regExp: /[0-9]{1,}(?:\.[0-9]{1,18})?/ }
+        label: "Amount of LP to " + ((isyyCompound) ? "stake" : "unstake")
+        placeholder: "Fixed point amount (e.g. 0.5)"
+      }
+
+      Row {
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: 10
+
+        AVMEButton {
+          id: btnMaxAmountCompound
+          width: (yyCompoundDetailsColumn.width * 0.5) - parent.spacing
+          enabled: (compoundallowance != "")
+          text: "Max Amount"
+          onClicked: {
+            var acc = System.getAccountBalances(System.getCurrentAccount())
+            compoundInput.text = (isyyCompound) ? acc.balanceLPFree : acc.balanceLockedCompoundLP
+          }
+        }
+
+        AVMEButton {
+          id: btnDepositCompound
+          width: (yyCompoundDetailsColumn.width * 0.5) - parent.spacing
+          enabled: {
+            var acc = System.getAccountBalances(System.getCurrentAccount())
+            enabled: compoundallowance != "" && (
+              !System.isApproved(acc.balanceLPFree, compoundallowance) || compoundInput.acceptableInput
+            )
+          }
+          text: {
+            var acc = System.getAccountBalances(System.getCurrentAccount())
+            if (compoundallowance == "") {
+              text: "Checking approval..."
+            } else if (isyyCompound && System.isApproved(acc.balanceLPFree, compoundallowance)) {
+              text: "Stake"
+            } else if (!isyyCompound && System.isApproved(acc.balanceLockedCompoundLP, compoundallowance)) {
+              text: "Unstake"
+            } else {
+              text: "Approve"
+            }
+          }
+          onClicked: {
+            var acc = System.getAccountBalances(System.getCurrentAccount())
+            if (!System.isApproved(acc.balanceLPFree, compoundallowance)) {
+              System.setScreen(content, "qml/screens/TransactionScreen.qml")
+              System.operationOverride("Approve Compound", "", "", "")
+            } else if (isyyCompound) {
+              if (System.hasInsufficientFunds("LP", acc.balanceLPFree, compoundInput.text)) {
+                fundsPopup.open()
+              } else {
+                System.setScreen(content, "qml/screens/TransactionScreen.qml")
+                System.operationOverride("Stake Compound LP", "", "", compoundInput.text)
+              }
+            } else {
+              if (System.hasInsufficientFunds("LP", acc.balanceLockedCompoundLP, compoundInput.text)) {
+                fundsPopup.open()
+              } else {
+                System.setScreen(content, "qml/screens/TransactionScreen.qml")
+                System.operationOverride("Unstake Compound LP", "", "", compoundInput.text)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Panel for reinvesting in YY
+  AVMEPanel {
+    id: reinvestPanel
+	visible: !isClassic
+    width: (parent.width * 0.5) - (anchors.margins * 2)
+    anchors {
+      top: stakingSelectPanel.bottom
+      right: parent.right
+      bottom: parent.bottom
+      margins: 10
+    }
+    title: "Reinvesting Details"
+
+    Column {
+      id: reinvestDetailsColumn
+      anchors {
+        top: parent.header.bottom
+        bottom: parent.bottom
+        left: parent.left
+        right: parent.right
+        margins: 20
+      }
+      spacing: 30
+
+      Text {
+        id: reinvestTitle
+        anchors.horizontalCenter: parent.horizontalCenter
+        color: "#FFFFFF"
+        font.bold: true
+        font.pixelSize: 24.0
+        text: "Reinvest AVME"
+      }
+
+      Image {
+        id: reinvestTokenLogo
+        width: 64
+        height: 64
+        anchors.horizontalCenter: parent.horizontalCenter
+        source: "qrc:/img/avme_logo.png"
+      }
+
+      Text {
+        id: reinvestAmount
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        color: "#FFFFFF"
+        font.pixelSize: 18.0
+        text: "Unreinvested " + System.getCurrentToken() + ":<br><b>" + reinvestreward + "</b>"
+      }
+
+      AVMEButton {
+        id: btnreinvest
+        width: (parent.width * 0.75)
+        anchors.horizontalCenter: parent.horizontalCenter
+        enabled: (reinvestreward != "" && !System.balanceIsZero(reinvestreward, System.getCurrentTokenDecimals()))
+        text: (reinvestreward != "")
+        ? "Reinvest " + System.getCurrentToken()
+        : "Querying Reinvest..."
+        onClicked: {
+          System.setScreen(content, "qml/screens/TransactionScreen.qml")
+          System.operationOverride("Reinvest AVME", "", "", "")
+        }
+      }
+      Text {
+        id: reinvestRewardText
+        anchors.horizontalCenter: parent.horizontalCenter
+		width: 128
+        horizontalAlignment: Text.AlignHCenter
+        color: "#FFFFFF"
+        font.pixelSize: 18.0
+        text: "Reinvest Reward " + System.getCurrentToken() + ":<br><b>" + (reinvestreward * 0.05) + "</b>"
+      }
+      Row {
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: 10
+		height: 128
+		Text {
+			id: poweredBy
+		    width: (reinvestDetailsColumn.width * 0.5) - parent.spacing
+			verticalAlignment: Text.AlignVCenter
+			height: parent.height
+			color: "#FFFFFF"
+			font.pixelSize: 18.0
+			text: "Powered By: "
+		}
+		Image {
+			id: yyLogo
+			width: 128
+			height: 64
+			anchors.verticalCenter: parent.verticalCenter
+			source: "qrc:/img/yieldyak.png"
+		}
+	  }
     }
   }
 

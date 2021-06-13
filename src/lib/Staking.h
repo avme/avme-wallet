@@ -20,6 +20,9 @@ class Staking {
   public:
     // Array for the supported IDs for ABI functions.
     static std::map<std::string, std::string> funcs;
+	
+	// Array for the supported IDs for ABI functions (YY Compoound).
+	static std::map<std::string, std::string> YYfuncs;
 
     /**
      * (ABI) Get the total LP supply in the staking contract.
@@ -45,19 +48,23 @@ class Staking {
      */
     static std::string balanceOf(std::string address);
     static std::string earned(std::string address);
+	static std::string getCompoundReward();
 
     /**
      * (TX) Stake/unstake a given amount of LP, respectively.
      * Returns the data hex string.
      */
     static std::string stake(std::string amount);
+	static std::string stakeCompound(std::string amount);
     static std::string withdraw(std::string amount);
+	static std::string compoundWithdraw(std::string amount);
 
     /**
      * (TX) Harvest available rewards from the pool.
      * Returns the data hex string.
      */
     static std::string getReward();
+	static std::string reinvest();
 
     /**
      * (TX) Exit the pool (harvest all + unstake all).

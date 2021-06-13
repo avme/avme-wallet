@@ -64,7 +64,7 @@ Item {
 
   function checkTransactionFunds() {
     var acc = System.getAccountBalances(System.getCurrentAccount())
-    var isFreeLP = (txOperationStr == "Remove Liquidity" || txOperationStr == "Stake LP")
+    var isFreeLP = (txOperationStr == "Remove Liquidity" || txOperationStr == "Stake LP" || txOperationStr == "Stake Compound LP")
     var hasCoinFunds = !System.hasInsufficientFunds(
       "Coin", acc.balanceAVAX, System.calculateTransactionCost(
         txTotalCoinStr.text, txGasLimitInput.text, txGasPriceInput.text
@@ -76,13 +76,19 @@ Item {
     var hasLPFunds = !System.hasInsufficientFunds(
       "LP", ((isFreeLP) ? acc.balanceLPFree : acc.balanceLPLocked), txTotalLPStr.text
     )
+	
+	var hasCompoundLPFunds = !System.hasInsufficientFunds(
+      "LP", ((isFreeLP) ? acc.balanceLPFree : acc.balanceLockedCompoundLP), txTotalLPStr.text
+    )
     switch (txOperationStr) {
       case "Send AVAX":
       case "Swap AVAX -> AVME":
       case "Approve Exchange":
       case "Approve Liquidity":
       case "Approve Staking":
+	  case "Approve Compound":
       case "Harvest AVME":
+	  case "Reinvest AVME":
       case "Exit Staking":
         return (hasCoinFunds);
         break;
@@ -93,9 +99,14 @@ Item {
         break;
       case "Remove Liquidity":
       case "Stake LP":
+	  case "Stake Compound LP":
+	  case "Stake Compound LP":
       case "Unstake LP":
         return (hasCoinFunds && hasLPFunds);
         break;
+	  case "Unstake Compound LP":
+		return (hasCoinFunds && hasCompoundLPFunds);
+		break;
     }
   }
 
@@ -140,7 +151,13 @@ Item {
       // LP only
       case "Remove Liquidity":
       case "Stake LP":
+	  case "Stake Compound LP":
       case "Unstake LP":
+        txAmountCoinInput.visible = false
+        txAmountTokenInput.visible = false
+        txAmountLPInput.visible = true
+        break;
+      case "Unstake Compound LP":
         txAmountCoinInput.visible = false
         txAmountTokenInput.visible = false
         txAmountLPInput.visible = true
@@ -149,7 +166,9 @@ Item {
       case "Approve Exchange":
       case "Approve Liquidity":
       case "Approve Staking":
+	  case "Approve Compound":
       case "Harvest AVME":
+	  case "Reinvest AVME":
       case "Exit Staking":
         txAmountCoinInput.visible = false
         txAmountTokenInput.visible = false
@@ -462,6 +481,10 @@ Item {
               text: "(give approval to the staking contract to use your"
               + "<br>Account's currencies for staking/harvesting rewards)";
               break;
+			case "Approve Compound":
+              text: "(give approval to the compound contract to use your"
+              + "<br>Account's currencies for staking/harvesting rewards)";
+              break;
             case "Swap AVAX -> AVME":
             case "Swap AVME -> AVAX":
               text: "via Pangolin";
@@ -475,9 +498,16 @@ Item {
             case "Stake LP":
               text: "in the staking contract";
               break;
+			case "Stake Compound LP":
+			  text: "in the compound staking contract";
+			  break;
             case "Unstake LP":
+			case "Unstake Compound LP":
             case "Harvest AVME":
               text: "from the staking contract";
+              break;
+            case "Reinvest AVME":
+              text: "from the compound staking contract";
               break;
             case "Exit Staking":
               text: "(harvest all of the available reward and unstake"
@@ -526,7 +556,9 @@ Item {
             case "Approve Exchange":
             case "Approve Liquidity":
             case "Approve Staking":
+			case "Approve Compound":
             case "Harvest AVME":
+			case "Reinvest AVME":
             case "Exit Staking":
               text: "Gas Limit: " + System.weiToFixedPoint(txGasLimitInput.text, 18)
               + " " + System.getCurrentCoin()
@@ -543,7 +575,15 @@ Item {
               break;
             case "Remove Liquidity":
             case "Stake LP":
+			case "Stake Compound LP":
             case "Unstake LP":
+              text: txAmountLPInput.text + " LP"
+              + "<br>Gas Limit: " + System.weiToFixedPoint(txGasLimitInput.text, 18)
+              + " " + System.getCurrentCoin()
+              + "<br>Gas Price: " + System.weiToFixedPoint(txGasPriceInput.text, 9)
+              + " " + System.getCurrentCoin();
+              break;
+			case "Unstake Compound LP":
               text: txAmountLPInput.text + " LP"
               + "<br>Gas Limit: " + System.weiToFixedPoint(txGasLimitInput.text, 18)
               + " " + System.getCurrentCoin()
@@ -578,8 +618,10 @@ Item {
             case "Approve Exchange":
             case "Approve Liquidity":
             case "Approve Staking":
+			case "Approve Compound":
             case "Swap AVAX -> AVME":
             case "Harvest AVME":
+			case "Reinvest AVME":
             case "Exit Staking":
               text: txTotalCoinStr + " " + System.getCurrentCoin();
               break;
@@ -591,7 +633,11 @@ Item {
               break;
             case "Remove Liquidity":
             case "Stake LP":
+			case "Stake Compound LP":
             case "Unstake LP":
+              text: txTotalCoinStr + " " + System.getCurrentCoin()
+              + "<br>" + txTotalLPStr + " LP";
+            case "Unstake Compound LP":
               text: txTotalCoinStr + " " + System.getCurrentCoin()
               + "<br>" + txTotalLPStr + " LP";
               break;

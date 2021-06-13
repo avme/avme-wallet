@@ -19,6 +19,7 @@ std::map<std::string, std::string> Pangolin::pairContracts = {
 #else
 std::string Pangolin::routerContract = "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106";
 std::string Pangolin::stakingContract = "0xCc39b8c253f33BEa6E8326f0E5029Aa8627df757";
+std::string Pangolin::compoundContract = "0xb34fE8A87DFEbD5Ab0a03DB73F2d49b903E63DB6";
 
 std::map<std::string, std::string> Pangolin::tokenContracts = {
   {"WAVAX", "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7"},

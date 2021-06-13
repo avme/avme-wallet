@@ -48,6 +48,8 @@ class Account {
     std::string balanceAVME;
     std::string balanceLPFree;
     std::string balanceLPLocked;
+	std::string balanceLockedCompoundLP;
+	std::string balanceTotalLPLocked;
     std::vector<TxData> history;
     std::atomic_bool balancesThreadFlag;
     std::mutex balancesThreadLock;
@@ -65,6 +67,8 @@ class Account {
       this->balanceAVME = acc.balanceAVME;
       this->balanceLPFree = acc.balanceLPFree;
       this->balanceLPLocked = acc.balanceLPLocked;
+	  this->balanceLockedCompoundLP = acc.balanceLockedCompoundLP;
+	  this->balanceTotalLPLocked = acc.balanceTotalLPLocked;
       this->history = acc.history;
     }
     Account(std::string id, std::string name, std::string address) {

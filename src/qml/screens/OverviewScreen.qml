@@ -17,7 +17,7 @@ Item {
       accountCoinBalance.text = data.balanceAVAX
       accountTokenBalance.text = data.balanceAVME
       stakingFreeBalance.text = data.balanceLPFree
-      stakingLockedBalance.text = data.balanceLPLocked
+      stakingLockedBalance.text = data.balanceTotalLPLocked
       accountBalancesReloadTimer.start()
     }
     function onAccountFiatBalancesUpdated(data) {

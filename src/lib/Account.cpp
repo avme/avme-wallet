@@ -15,7 +15,10 @@ void Account::reloadBalances(Account &a) {
   std::string LockedLPBal = API::getAVMEBalance(
     a.address, Pangolin::stakingContract
   );
-  if (AVAXBal == "" || AVMEBal == "" || FreeLPBal == "" || LockedLPBal == "") {
+  std::string LockedCompoundLPBalance = API::getCompoundLPBalance(
+    a.address, Pangolin::compoundContract
+  );
+  if (AVAXBal == "" || AVMEBal == "" || FreeLPBal == "" || LockedLPBal == "" || LockedCompoundLPBalance == "") {
     return;
   }
 
@@ -24,10 +27,13 @@ void Account::reloadBalances(Account &a) {
   u256 AVMEu256 = boost::lexical_cast<HexTo<u256>>(AVMEBal);
   u256 FreeLPu256 = boost::lexical_cast<HexTo<u256>>(FreeLPBal);
   u256 LockedLPu256 = boost::lexical_cast<HexTo<u256>>(LockedLPBal);
+  u256 LockedCompoundLPu256 = boost::lexical_cast<HexTo<u256>>(LockedCompoundLPBalance);
   std::string AVAXstr = boost::lexical_cast<std::string>(AVAXu256);
   std::string AVMEstr = boost::lexical_cast<std::string>(AVMEu256);
   std::string FreeLPstr = boost::lexical_cast<std::string>(FreeLPu256);
   std::string LockedLPstr = boost::lexical_cast<std::string>(LockedLPu256);
+  std::string LockedCompoundLPstr = boost::lexical_cast<std::string>(LockedCompoundLPu256);
+  std::string LockedTotalLPstr = boost::lexical_cast<std::string>(u256(LockedLPu256+LockedCompoundLPu256));
 
   // Check if strings are valid
   bool AVAXisValid = (
@@ -42,7 +48,10 @@ void Account::reloadBalances(Account &a) {
   bool LockedLPisValid = (
     LockedLPstr != "" && LockedLPstr.find_first_not_of("0123456789.") == std::string::npos
   );
-  if (!AVAXisValid || !AVMEisValid || !FreeLPisValid || !LockedLPisValid) {
+  bool LockedCompoundLPisValid = (
+    LockedCompoundLPstr != "" && LockedCompoundLPstr.find_first_not_of("0123456789.") == std::string::npos
+  );
+  if (!AVAXisValid || !AVMEisValid || !FreeLPisValid || !LockedLPisValid || !LockedCompoundLPisValid) {
     return;
   }
 
@@ -52,6 +61,8 @@ void Account::reloadBalances(Account &a) {
   a.balanceAVME = Utils::weiToFixedPoint(AVMEstr, 18);
   a.balanceLPFree = Utils::weiToFixedPoint(FreeLPstr, 18);
   a.balanceLPLocked = Utils::weiToFixedPoint(LockedLPstr, 18);
+  a.balanceLockedCompoundLP = Utils::weiToFixedPoint(LockedCompoundLPstr, 18);
+  a.balanceTotalLPLocked = Utils::weiToFixedPoint(LockedTotalLPstr,18);
   a.balancesThreadLock.unlock();
   return;
 }
