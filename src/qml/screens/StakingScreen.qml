@@ -17,6 +17,18 @@ Item {
   property string reward
   property string compoundallowance
   property string reinvestreward
+  property string lowerToken
+  property string lowerReserves
+  property string higherToken
+  property string higherReserves
+  property string liquidity
+  property string userClassicLowerReserves
+  property string userClassicHigherReserves
+  property string userCompoundLowerReserves
+  property string userCompoundHigherReserves
+  property string userLPSharePercentage
+  property string removeLPEstimate
+  
   property bool isClassic: true
 
   Connections {
@@ -29,6 +41,26 @@ Item {
     }
     function onRewardUpdated(poolReward) { reward = poolReward }
 	function onCompoundUpdated(reinvestReward) { reinvestreward = reinvestReward }
+    function onLiquidityDataUpdated(
+      lowerTokenName, lowerTokenReserves, higherTokenName, higherTokenReserves, totalLiquidity
+    ) {
+      lowerToken = lowerTokenName
+      lowerReserves = lowerTokenReserves
+      higherToken = higherTokenName
+      higherReserves = higherTokenReserves
+      liquidity = totalLiquidity
+	  var acc = System.getAccountBalances(System.getCurrentAccount())
+      var userClassicShares = System.calculatePoolSharesForTokenValue(
+        lowerReserves, higherReserves, liquidity, acc.balanceLPLocked
+      )
+      var userCompoundShares = System.calculatePoolSharesForTokenValue(
+        lowerReserves, higherReserves, liquidity, acc.balanceLockedCompoundLP
+      )
+      userClassicLowerReserves = userClassicShares.lower
+      userClassicHigherReserves = userClassicShares.higher
+      userCompoundLowerReserves = userCompoundShares.lower
+      userCompoundHigherReserves = userCompoundShares.higher
+    }
   }
 
   Timer {
@@ -44,11 +76,21 @@ Item {
     repeat: true
     onTriggered: System.getCompoundReward()
   }
+  
+  Timer {
+    id: reloadLiquidityDataTimer
+    interval: 5000
+    repeat: true
+    onTriggered: {
+      System.updateLiquidityData(System.getCurrentCoin(), System.getCurrentToken())
+	}
+  }
 
   Component.onCompleted: {
     System.getAllowances()
     reloadRewardTimer.start()
 	reloadCompoundTimer.start()
+	reloadLiquidityDataTimer.start()
   }
 
   AVMEAccountHeader {
@@ -227,6 +269,31 @@ Item {
           }
         }
       }
+	  Rectangle {
+	    id: classicLPReturns
+	    anchors.horizontalCenter: parent.horizontalCenter
+		width: parent.width
+		color: "#3e4653"
+		radius: 10
+	    Text {
+		  id: classicLPReturnsText
+          anchors.left: parent.left
+          anchors.leftMargin: 10
+		  width: parent.width
+		  verticalAlignment: Text.AlignVCenter
+          color: "#FFFFFF"
+		  text: "Locked LP Estimates:"
+          + "<br><b>" + System.weiToFixedPoint(
+            ((System.getCurrentCoin() == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves),
+            System.getCurrentCoinDecimals()
+          ) + " " + System.getCurrentCoin()
+          + "<br>" + System.weiToFixedPoint(
+            ((System.getCurrentToken() == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves),
+            System.getCurrentTokenDecimals()
+          ) + " " + System.getCurrentToken() + "</b>"
+	    }
+		height: classicLPReturnsText.height
+	  }
     }
   }
 
@@ -394,6 +461,7 @@ Item {
       }
 
       Row {
+	    id: yyCompoundButtonRow
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: 10
 
@@ -452,6 +520,31 @@ Item {
           }
         }
       }
+	  Rectangle {
+	    id: compoundLPReturns
+	    anchors.horizontalCenter: parent.horizontalCenter
+		width: parent.width
+		color: "#3e4653"
+		radius: 10
+	    Text {
+		  id: compoundLPReturnsText
+          anchors.left: parent.left
+          anchors.leftMargin: 10
+		  width: parent.width
+		  verticalAlignment: Text.AlignVCenter
+          color: "#FFFFFF"
+		  text: "Locked LP Estimates:"
+          + "<br><b>" + System.weiToFixedPoint(
+            ((System.getCurrentCoin() == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves),
+            System.getCurrentCoinDecimals()
+          ) + " " + System.getCurrentCoin()
+          + "<br>" + System.weiToFixedPoint(
+            ((System.getCurrentToken() == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves),
+            System.getCurrentTokenDecimals()
+          ) + " " + System.getCurrentToken() + "</b>"
+	    }
+		height: compoundLPReturnsText.height
+	  }
     }
   }
 

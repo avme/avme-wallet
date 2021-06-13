@@ -1357,6 +1357,33 @@ class System : public QObject {
       return ret;
     }
 
+    Q_INVOKABLE QVariantMap calculatePoolSharesForTokenValue(
+      QString lowerReserves, QString higherReserves, QString totalLiquidity, QString LPTokenValue
+    ) {
+      QVariantMap ret;
+      u256 lowerReservesU256 = boost::lexical_cast<u256>(lowerReserves.toStdString());
+      u256 higherReservesU256 = boost::lexical_cast<u256>(higherReserves.toStdString());
+      u256 totalLiquidityU256 = boost::lexical_cast<u256>(totalLiquidity.toStdString());
+      u256 userLiquidityU256 = boost::lexical_cast<u256>(
+        Utils::fixedPointToWei(LPTokenValue.toStdString(), 18)
+      );
+
+      bigfloat userLPPercentage = (
+        bigfloat(userLiquidityU256) / bigfloat(totalLiquidityU256)
+      );
+      u256 userLowerReservesU256 = u256(bigfloat(lowerReservesU256) * userLPPercentage);
+      u256 userHigherReservesU256 = u256(bigfloat(higherReservesU256) * userLPPercentage);
+
+      std::string lower = boost::lexical_cast<std::string>(userLowerReservesU256);
+      std::string higher = boost::lexical_cast<std::string>(userHigherReservesU256);
+      std::string liquidity = boost::lexical_cast<std::string>(userLPPercentage * 100);
+
+      ret.insert("lower", QString::fromStdString(lower));
+      ret.insert("higher", QString::fromStdString(higher));
+      ret.insert("liquidity", QString::fromStdString(liquidity));
+      return ret;
+    }
+
     // Get the staking rewards for a given Account
     Q_INVOKABLE void getPoolReward() {
       QtConcurrent::run([=](){
