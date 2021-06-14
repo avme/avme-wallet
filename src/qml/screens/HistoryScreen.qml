@@ -40,6 +40,8 @@ Item {
     historyModel.clear()
     infoText.text = "Loading transactions..."
     infoText.visible = true
+	var acc = System.getCurrentAccount()
+	System.updateTransactionStatus()
     System.listAccountTransactions(System.getCurrentAccount())
   }
 

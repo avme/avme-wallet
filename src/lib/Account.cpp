@@ -216,17 +216,20 @@ bool Account::updateAllTxStatus() {
   boost::filesystem::path txFilePath = Utils::walletFolderPath.string()
     + "/wallet/c-avax/accounts/transactions/" + this->address.c_str();
   loadTxHistory();
+  u256 currentBlock = boost::lexical_cast<HexTo<u256>>(API::getCurrentBlock());
   try {
     for (TxData &txData : this->history) {
       if (!txData.invalid && !txData.confirmed) {
         const auto p1 = std::chrono::system_clock::now();
         uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
-        if (txData.unixDate + 60 < now) { // Tx is cfered invalid after 60 seconds without confirmation
-          txData.invalid = true;
-        } else {
-          std::string status = API::getTxStatus(txData.hex);
-          if (status == "0x1") txData.confirmed = true;
-        }
+        std::string status = API::getTxStatus(txData.hex);
+        if (status == "0x1") txData.confirmed = true;
+		if (status == "0x0") {
+		  u256 transactionBlock = boost::lexical_cast<HexTo<u256>>(API::getTxBlock(txData.hex));
+		  if (currentBlock > transactionBlock) {
+			txData.invalid = true;
+		  }
+		}
       }
     }
   } catch (std::exception &e) {

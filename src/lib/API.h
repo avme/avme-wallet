@@ -66,6 +66,8 @@ class API {
      * Returns a link to the successful transaction, or an empty string on failure.
      */
     static std::string broadcastTx(std::string txidHex);
+	
+	static std::string getCurrentBlock();
 
     /**
      * Get the transaction status from the API to check if it has been confirmed.
@@ -73,6 +75,8 @@ class API {
      * or an empty string on failure.
      */
     static std::string getTxStatus(std::string txidHex);
+	
+	static std::string getTxBlock(std::string txidHex);
 };
 
 #endif // API_H

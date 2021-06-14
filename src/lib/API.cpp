@@ -147,6 +147,14 @@ std::string API::broadcastTx(std::string txidHex) {
   return JSON::getString(resp, "result");
 }
 
+std::string API::getCurrentBlock() {
+  std::stringstream query;
+  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_blockNumber\",\"params\": []}";
+  std::string resp = httpGetRequest(query.str());
+  return JSON::getString(resp, "result");
+}
+
+
 std::string API::getTxStatus(std::string txidHex) {
   std::stringstream query;
   std::string ApitxidHex = "0x";
@@ -158,3 +166,13 @@ std::string API::getTxStatus(std::string txidHex) {
   return JSON::getString(resp, "result/status", "/");
 }
 
+std::string API::getTxBlock(std::string txidHex) {
+  std::stringstream query;
+  std::string ApitxidHex = "0x";
+  ApitxidHex += txidHex;
+  query << "{\"jsonrpc\": \"2.0\",\"method\": \"eth_getTransactionReceipt\",\"params\": [\""
+        << ApitxidHex
+        << "\"],\"id\": 1}";
+  std::string resp = httpGetRequest(query.str());
+  return JSON::getString(resp, "result/blockNumber", "/");
+}

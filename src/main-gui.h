@@ -137,7 +137,16 @@ class System : public QObject {
 
     Q_INVOKABLE QString getCurrentAccountPath() { return QString::fromStdString(this->currentAccountPath); }
     Q_INVOKABLE void setCurrentAccountPath(QString path) { this->currentAccountPath = path.toStdString(); }
-
+	
+	Q_INVOKABLE void updateTransactionStatus() {       
+	  for (Account &a : w.accounts) {
+  	    if (a.address == this->currentAccount){
+		  a.updateAllTxStatus();
+		  return;
+		}
+	  }
+	}
+	
     // Get the project's version
     Q_INVOKABLE QString getProjectVersion() {
       return QString::fromStdString(PROJECT_VERSION);
