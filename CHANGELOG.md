@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for compound Staking.
 - Locked LP value information.
 
+### Fixed
+- Properly load transaction history
+
 ## [1.1.0] - 2021-06-08
 ### Added
 - Support for Ledger Nano S, Nano X and the Ethereum app.
