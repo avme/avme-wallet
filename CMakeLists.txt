@@ -66,6 +66,7 @@ find_package(libscrypt CONFIG REQUIRED)
 # Add external modules
 add_subdirectory(external/openssl-cmake)
 include(ProjectEthash)
+include(ProjectLevelDB)
 include(ProjectSecp256k1)
 include(ProjectToolbox)
 include(ProjectBip3x)
@@ -104,7 +105,7 @@ file(GLOB AVME_SOURCES "src/lib/*.cpp")
 # Compile the project library
 add_library(avme-lib ${AVME_HEADERS} ${AVME_SOURCES})
 target_link_libraries(avme-lib PUBLIC
-  devcore devcrypto ethcore ledger ${ETHASH_BYPRODUCTS} Ethash ssl crypto toolbox bip39 ${BOOST_LIBS}
+  devcore devcrypto ethcore ledger ${ETHASH_BYPRODUCTS} Ethash ssl crypto toolbox bip39 LevelDB ${BOOST_LIBS}
 )
 
 # Set the project version as a macro in a header file
