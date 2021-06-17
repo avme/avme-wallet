@@ -51,7 +51,7 @@ Q_IMPORT_PLUGIN(QtChartsQml2Plugin)
 #include "lib/Utils.h"
 #include "lib/Wallet.h"
 
-#include <libledger/ledger.h>
+#include <lib/ledger/ledger.h>
 
 #include "version.h"
 

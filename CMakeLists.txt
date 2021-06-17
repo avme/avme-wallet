@@ -75,6 +75,7 @@ find_package(Threads)
 # Include headers and libs
 include_directories(
   "${CMAKE_SOURCE_DIR}"
+  "${CMAKE_SOURCE_DIR}/src"
   "${CMAKE_SOURCE_DIR}/build"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/include"
 )
