@@ -8,6 +8,7 @@
 #include <fstream>
 #include <iosfwd>
 #include <iostream>
+#include <mutex>
 #include <string>
 #include <thread>
 #include <vector>
@@ -19,6 +20,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/chrono.hpp>
 
 #include <lib/devcore/CommonIO.h>
 #include <lib/devcore/FileSystem.h>
@@ -26,13 +28,12 @@
 #include <lib/ethcore/KeyManager.h>
 #include <lib/ethcore/TransactionBase.h>
 
-#include <core/Account.h>
 #include <core/BIP39.h>
+#include <core/JSON.h>
 #include <core/Utils.h>
-#include <network/API.h>
 
 using namespace dev;  // u256
-using namespace dev::eth;
+using namespace dev::eth; // TransactionBase
 using namespace boost::algorithm;
 using namespace boost::filesystem;
 
@@ -60,8 +61,15 @@ class Wallet {
     std::map<std::string, std::string> ledgerAccounts;
 
   public:
+    // Getters for private vars
+    std::pair<std::string, std::string> getCurrentAccount() { return this->currentAccount; }
+    std::vector<TxData> getCurrentAccountHistory() { return this->currentAccountHistory; }
     std::map<std::string, std::string> getAccounts() { return this->accounts; }
     std::map<std::string, std::string> getLedgerAccounts() { return this->ledgerAccounts; }
+
+    // ======================================================================
+    // WALLET MANAGEMENT
+    // ======================================================================
 
     /**
      * Create a new Wallet, which should be loaded manually afterwards.
@@ -94,20 +102,25 @@ class Wallet {
      */
     bool auth(std::string pass);
 
-    /**
-     * Create/import an Account in the Wallet, based on a given seed and index.
-     * Returns a struct with the Account's data, or an empty struct on failure.
-     */
-    Account createAccount(
-      std::string &seed, int64_t index, std::string name, std::string &pass
-    );
+    // ======================================================================
+    // ACCOUNT MANAGEMENT
+    // ======================================================================
 
     /**
-     * Load the Wallet's Accounts and their coin and token balances.
-     * Tokens are loaded from their proper contract address, beside their
-     * respective Wallet Accounts.
+     * (Re)Load the Wallet's Accounts into the list.
+     * Any function that manipulates the KeyManager's Accounts should call
+     * this one at the end to refresh the list.
      */
     void loadAccounts();
+
+    /**
+     * Create/import an Account in the Wallet, based on a given seed and index.
+     * Automatically reloads the Account list on success.
+     * Returns a pair with the address and name, or an empty pair on failure.
+     */
+    std::pair<std::string, std::string> createAccount(
+      std::string &seed, int64_t index, std::string name, std::string &pass
+    );
 
     /**
      * Import a Ledger account to the Wallet's account vector.
@@ -116,20 +129,21 @@ class Wallet {
 
     /**
      * Erase an Account from the Wallet.
+     * Automatically reloads the Account list on success.
      * Returns true on success, false on failure.
      */
-    bool eraseAccount(std::string account);
+    bool eraseAccount(std::string address);
 
     /**
-     * Check if an Account exists in the Wallet.
+     * Check if an Account exists (is loaded on the list).
      * Returns true on success, false on failure.
      */
-    bool accountExists(std::string account);
+    bool accountExists(std::string address);
 
     /**
      * Set the current Account to be used by the Wallet.
      */
-    void setCurrentAccount(std::string address, std::string name);
+    void setCurrentAccount(std::string address);
 
     /**
      * Check if there's an Account being used by the Wallet.
@@ -150,6 +164,10 @@ class Wallet {
      * Returns the proper Secret, or an "empty" Secret on failure.
      */
     Secret getSecret(std::string const& account, std::string pass);
+
+    // ======================================================================
+    // TRANSACTION/HISTORY MANAGEMENT
+    // ======================================================================
 
     /**
      * Build a transaction from user data.

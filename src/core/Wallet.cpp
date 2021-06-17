@@ -12,7 +12,7 @@ bool Wallet::create(boost::filesystem::path folder, std::string pass) {
   if (!exists(secretsFolder)) { create_directories(secretsFolder); }
   if (!exists(historyFolder)) { create_directories(historyFolder); }
 
-  // Initialize a new Wallet, hash+salt the passphrase and store both
+  // Initialize a new Wallet
   KeyManager w(walletFile, secretsFolder);
   try {
     w.create(pass);
@@ -42,6 +42,7 @@ bool Wallet::load(boost::filesystem::path folder, std::string pass) {
 
 void Wallet::close() {
   this->currentAccount = std::make_pair("", "");
+  this->currentAccountHistory.clear();
   this->accounts.clear();
   this->ledgerAccounts.clear();
   this->passHash = bytesSec();
@@ -57,23 +58,6 @@ bool Wallet::isLoaded() {
 bool Wallet::auth(std::string pass) {
   bytesSec hash = dev::pbkdf2(pass, passSalt.asBytes(), passIterations);
   return (hash.ref().toString() == passHash.ref().toString());
-}
-
-Account Wallet::createAccount(
-  std::string &seed, int64_t index, std::string name, std::string &pass
-) {
-  bip3x::Bip39Mnemonic::MnemonicResult mnemonic;
-  if (!seed.empty()) { // Using a foreign seed
-    mnemonic.raw = seed;
-  } else {  // Using the Wallet's own seed
-    std::pair<bool,std::string> seedSuccess = BIP39::loadEncryptedMnemonic(mnemonic, pass);
-    if (!seedSuccess.first) { return Account(); }
-  }
-  std::string indexStr = boost::lexical_cast<std::string>(index);
-  bip3x::HDKey keyPair = BIP39::createKey(mnemonic.raw, "m/44'/60'/0'/0/" + indexStr);
-  KeyPair k(Secret::frombip3x(keyPair.privateKey));
-  h128 u = this->km.import(k.secret(), name, pass, "");
-  return Account(toUUID(u), name, k.address().hex());
 }
 
 void Wallet::loadAccounts() {
@@ -92,29 +76,48 @@ void Wallet::loadAccounts() {
   }
 }
 
-void Wallet::importLedgerAccount(std::string address, std::string path) {
-  this->ledgerAccounts.emplace(address, "ledger-" + path);
+std::pair<std::string, std::string> Wallet::createAccount(
+  std::string &seed, int64_t index, std::string name, std::string &pass
+) {
+  bip3x::Bip39Mnemonic::MnemonicResult mnemonic;
+  if (!seed.empty()) { // Using a foreign seed
+    mnemonic.raw = seed;
+  } else {  // Using the Wallet's own seed
+    std::pair<bool,std::string> seedSuccess = BIP39::loadEncryptedMnemonic(mnemonic, pass);
+    if (!seedSuccess.first) { return std::make_pair("", ""); }
+  }
+  std::string indexStr = boost::lexical_cast<std::string>(index);
+  bip3x::HDKey keyPair = BIP39::createKey(mnemonic.raw, "m/44'/60'/0'/0/" + indexStr);
+  KeyPair k(Secret::frombip3x(keyPair.privateKey));
+  h128 u = this->km.import(k.secret(), name, pass, "");
+  loadAccounts();
+  return std::make_pair(k.address().hex(), name);
 }
 
-bool Wallet::eraseAccount(std::string account) {
-  if (accountExists(account)) {
-    this->km.kill(userToAddress(account));
+void Wallet::importLedgerAccount(std::string address, std::string path) {
+  // Only import if it hasn't been imported yet
+  if (this->ledgerAccounts.find(address) == std::map::end) {
+    this->ledgerAccounts.emplace(address, "ledger-" + path);
+  }
+}
+
+bool Wallet::eraseAccount(std::string address) {
+  if (accountExists(address)) {
+    this->km.kill(userToAddress(address));
+    loadAccounts();
     return true;
   }
   return false; // Account was not found
 }
 
-bool Wallet::accountExists(std::string account) {
-  for (Address const& a: this->km.accounts()) {
-    std::string acc = "0x" + boost::lexical_cast<std::string>(a);
-    std::string acc2 = "0x" + boost::lexical_cast<std::string>(userToAddress(account));
-    if (acc == acc2) { return true; }
-  }
-  return false;
+bool Wallet::accountExists(std::string address) {
+  return (this->accounts.find(address) != std::map::end);
 }
 
-void Wallet::setCurrentAccount(std::string address, std::string name) {
-  this->currentAccount = std::make_pair(address, name);
+void Wallet::setCurrentAccount(std::string address) {
+  if (accountExists(address)) {
+    this->currentAccount = this->accounts.find(address);
+  }
 }
 
 bool Wallet::hasAccountSet() {

@@ -42,7 +42,6 @@ Q_IMPORT_PLUGIN(QtQuickControls2Plugin)
 Q_IMPORT_PLUGIN(QtLabsPlatformPlugin)
 Q_IMPORT_PLUGIN(QtChartsQml2Plugin)
 
-#include <core/Account.h>
 #include <core/BIP39.h>
 #include <core/Utils.h>
 #include <core/Wallet.h>
