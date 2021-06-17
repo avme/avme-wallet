@@ -34,6 +34,7 @@ int main(int argc, char *argv[]) {
   // Load the main screen and start the app
   engine.load(QUrl(QStringLiteral("qrc:/qml/screens/main.qml")));
   if (engine.rootObjects().isEmpty()) return -1;
+  QObject::connect(&app, SIGNAL(aboutToQuit()), &sys, SLOT(cleanAndClose()));
   return app.exec();
 }
 

@@ -100,6 +100,11 @@ class System : public QObject {
     void rewardUpdated(QString poolReward);
     void compoundUpdated(QString reinvestReward);
 
+  public slots:
+    void cleanAndClose() {
+      // TODO: Clean database, threads, etc before closing the program
+      return;
+    }
   private:
     Wallet w;
     ledger::device ledgerDevice;
