@@ -4,9 +4,37 @@
 #include "Utils.h"
 
 boost::filesystem::path Utils::walletFolderPath;
-
+std::mutex Utils::debugFileLock;
 u256 Utils::MAX_U256_VALUE() {
   return (raiseToPow(2, 256) - 1);
+}
+
+void Utils::logToDebug(std::string debug) {
+  boost::filesystem::path debugFilePath = walletFolderPath / "debug.log";
+  debugFileLock.lock();
+  // Timestamps (epoch and human-readable) and confirmed
+  const auto p1 = std::chrono::system_clock::now();
+  auto t = std::time(nullptr);
+  auto tm = *std::localtime(&t);
+  std::stringstream timestream;
+  timestream << std::put_time(&tm, "[%d-%m-%Y %H-%M-%S] ");
+  std::string toWrite = timestream.str();
+  toWrite += debug;
+
+  std::ofstream debugFile (debugFilePath.c_str(), std::ios::out | std::ios::app);
+  debugFile << toWrite << std::endl;
+  debugFile.close();
+
+  debugFileLock.unlock();
+  return;
+}
+
+std::string Utils::randomHexBytes() {
+  unsigned char saltBytes[32];
+  RAND_bytes(saltBytes, sizeof(saltBytes));
+  return toHex(
+    dev::sha3(std::string((char*)saltBytes, sizeof(saltBytes)), false)
+  ).substr(0,16);
 }
 
 TxData Utils::decodeRawTransaction(std::string rawTxHex) {
@@ -57,37 +85,6 @@ TxData Utils::decodeRawTransaction(std::string rawTxHex) {
   ret.unixDate = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
   ret.invalid = false;
   return ret;
-}
-
-std::mutex Utils::debugFileLock;
-
-void Utils::logToDebug(std::string debug) {
-	boost::filesystem::path debugFilePath = walletFolderPath / "debug.log";
-	debugFileLock.lock();
-	// Timestamps (epoch and human-readable) and confirmed
-	const auto p1 = std::chrono::system_clock::now();
-	auto t = std::time(nullptr);
-	auto tm = *std::localtime(&t);
-	std::stringstream timestream;
-	timestream << std::put_time(&tm, "[%d-%m-%Y %H-%M-%S] ");
-	std::string toWrite = timestream.str();
-	toWrite += debug;
-	
-	std::ofstream debugFile (debugFilePath.c_str(), std::ios::out | std::ios::app);
-	debugFile << toWrite << std::endl;
-	debugFile.close();
-	
-	
-	debugFileLock.unlock();
-	return;
-}
-
-std::string Utils::randomHexBytes() {
-	unsigned char saltBytes[32];
-	RAND_bytes(saltBytes, sizeof(saltBytes));
-	return toHex(
-		dev::sha3(std::string((char*)saltBytes, sizeof(saltBytes)), false)
-	).substr(0,16);
 }
 
 std::string Utils::weiToFixedPoint(std::string amount, size_t digits) {
@@ -154,7 +151,8 @@ std::string Utils::fixedPointToWei(std::string amount, int decimals) {
 }
 
 std::string Utils::uintToHex(std::string input) {
-  std::string padding = "0000000000000000000000000000000000000000000000000000000000000000"; // 32 bytes
+  // Padding is 32 bytes
+  std::string padding = "0000000000000000000000000000000000000000000000000000000000000000";
   std::stringstream ss;
   std::string valueHex;
   u256 value;
@@ -178,7 +176,8 @@ std::string Utils::uintToHex(std::string input) {
 }
 
 std::string Utils::addressToHex(std::string input) {
-  std::string padding = "0000000000000000000000000000000000000000000000000000000000000000"; // 32 bytes
+  // Padding is 32 bytes
+  std::string padding = "0000000000000000000000000000000000000000000000000000000000000000";
 
   // Get rid of the "0x" before converting and lowercase all letters
   input = (input.substr(0, 2) == "0x") ? input.substr(2) : input;

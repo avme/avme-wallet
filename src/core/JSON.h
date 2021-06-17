@@ -7,8 +7,6 @@
 #include <iostream>
 #include <string>
 
-#include <lib/json_spirit/JsonSpiritHeaders.h>
-
 #ifdef __MINGW32__
 #include <winsock2.h> // Windows.h asked for winsock2 to be included.
 #include <windows.h>
@@ -17,7 +15,9 @@
 #include <shlobj.h>
 #endif
 
-#include "Utils.h"
+#include <lib/json_spirit/JsonSpiritHeaders.h>
+
+#include <core/Utils.h>
 
 /**
  * Namespace for JSON manipulation (e.g. reading/writing/parsing/etc),

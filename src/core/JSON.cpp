@@ -40,7 +40,7 @@ json_spirit::mValue JSON::getValue(
       std::cout << "Error reading json, check value: " << jsonStr << std::endl;
     }
   } catch (std::exception &e) {
-	Utils::logToDebug(std::string("Error when reading json for : ") + value + " " + e.what() + " Message: " + objectItem(objectItem(ret, "error"), "message").get_str());
+    Utils::logToDebug(std::string("Error when reading json for : ") + value + " " + e.what() + " Message: " + objectItem(objectItem(ret, "error"), "message").get_str());
   }
 
   return ret;
@@ -51,7 +51,7 @@ std::string JSON::getString(std::string jsonStr, std::string value, std::string 
   try {
     return val.get_str();
   } catch (std::exception &e) {
-	Utils::logToDebug(std::string("Error when trying getString") + e.what());
+    Utils::logToDebug(std::string("Error when trying getString") + e.what());
     return "";
   }
 }
@@ -86,7 +86,7 @@ std::vector<std::map<std::string, std::string>> JSON::getObjectArray(
     }
     return ret;
   } catch (std::exception &e) {
-	Utils::logToDebug(std::string("Error when trying getObjectArray: ") + e.what());
+    Utils::logToDebug(std::string("Error when trying getObjectArray: ") + e.what());
     return {};
   }
 }

@@ -64,27 +64,25 @@ typedef struct TxData {
  * Namespace for general utility functions.
  */
 namespace Utils {
-  extern boost::filesystem::path walletFolderPath; // The top folder in which the Wallet resides.
+  extern boost::filesystem::path walletFolderPath; // Top folder where the Wallet is.
+  extern std::mutex debugFileLock;  // Mutex for the deug log file.
   u256 MAX_U256_VALUE();  // Maximum 256-bit unsigned int value (for error handling).
+
+  /**
+   * Write information to the debug log file.
+   */
+  void logToDebug(std::string debug);
+
+  /**
+   * Generate a random 16-byte Hex to be used as a tag/ID.
+   */
+  std::string randomHexBytes();
 
   /**
    * Decode a raw transaction in Hex.
    * Returns a struct with the transaction's data.
    */
   TxData decodeRawTransaction(std::string rawTxHex);
-  
-  
-  /**
-	* Write information to debug file for further debugging
-	*/
-  extern std::mutex debugFileLock;
-  void logToDebug(std::string debug);
-  
-  
-  /**
-	* Create an random 16 bytes HEX for usage in identification.
-	*/
-  std::string randomHexBytes();
 
   /**
    * Convert a full Wei amount to a fixed point amount and vice-versa,
