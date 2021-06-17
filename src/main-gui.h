@@ -42,14 +42,14 @@ Q_IMPORT_PLUGIN(QtQuickControls2Plugin)
 Q_IMPORT_PLUGIN(QtLabsPlatformPlugin)
 Q_IMPORT_PLUGIN(QtChartsQml2Plugin)
 
-#include "lib/Account.h"
-#include "lib/API.h"
-#include "lib/BIP39.h"
-#include "lib/Graph.h"
-#include "lib/Pangolin.h"
-#include "lib/Staking.h"
-#include "lib/Utils.h"
-#include "lib/Wallet.h"
+#include <core/Account.h>
+#include <core/BIP39.h>
+#include <core/Utils.h>
+#include <core/Wallet.h>
+#include <network/API.h>
+#include <network/Graph.h>
+#include <network/Pangolin.h>
+#include <network/Staking.h>
 
 #include <lib/ledger/ledger.h>
 
@@ -98,7 +98,7 @@ class System : public QObject {
       QString totalLiquidity
     );
     void rewardUpdated(QString poolReward);
-	void compoundUpdated(QString reinvestReward);
+    void compoundUpdated(QString reinvestReward);
 
   private:
     Wallet w;
@@ -137,16 +137,16 @@ class System : public QObject {
 
     Q_INVOKABLE QString getCurrentAccountPath() { return QString::fromStdString(this->currentAccountPath); }
     Q_INVOKABLE void setCurrentAccountPath(QString path) { this->currentAccountPath = path.toStdString(); }
-	
-	Q_INVOKABLE void updateTransactionStatus() {       
-	  for (Account &a : w.accounts) {
-  	    if (a.address == this->currentAccount){
-		  a.updateAllTxStatus();
-		  return;
-		}
-	  }
-	}
-	
+
+    Q_INVOKABLE void updateTransactionStatus() {
+      for (Account &a : w.accounts) {
+        if (a.address == this->currentAccount){
+          a.updateAllTxStatus();
+          return;
+        }
+      }
+    }
+
     // Get the project's version
     Q_INVOKABLE QString getProjectVersion() {
       return QString::fromStdString(PROJECT_VERSION);
@@ -1042,7 +1042,7 @@ class System : public QObject {
             this->currentAccount, Pangolin::stakingContract,
             "0", gasLimitStr, gasPriceStr, Staking::stake(lpAmountStr)
           );
-		} else if (operationStr == "Stake Compound LP") {
+        } else if (operationStr == "Stake Compound LP") {
           txSkel = this->w.buildTransaction(
             this->currentAccount, Pangolin::compoundContract,
             "0", gasLimitStr, gasPriceStr, Staking::stakeCompound(lpAmountStr)
@@ -1052,8 +1052,7 @@ class System : public QObject {
             this->currentAccount, Pangolin::stakingContract,
             "0", gasLimitStr, gasPriceStr, Staking::withdraw(lpAmountStr)
           );
-		  
-		} else if (operationStr == "Unstake Compound LP") {
+        } else if (operationStr == "Unstake Compound LP") {
           txSkel = this->w.buildTransaction(
             this->currentAccount, Pangolin::compoundContract,
             "0", gasLimitStr, gasPriceStr, Staking::compoundWithdraw(lpAmountStr)
@@ -1063,7 +1062,7 @@ class System : public QObject {
             this->currentAccount, Pangolin::stakingContract,
             "0", gasLimitStr, gasPriceStr, Staking::getReward()
           );
-		} else if (operationStr == "Reinvest AVME") {
+        } else if (operationStr == "Reinvest AVME") {
           txSkel = this->w.buildTransaction(
             this->currentAccount, Pangolin::compoundContract,
             "0", "500000", gasPriceStr, Staking::reinvest()

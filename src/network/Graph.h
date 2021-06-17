@@ -14,9 +14,9 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 
-#include "JSON.h"
-#include "Utils.h"
-#include "root_certificates.hpp"
+#include <core/JSON.h>
+#include <core/Utils.h>
+#include <network/root_certificates.hpp>
 
 /**
  * Class for Pangolin's Graph-related functions (e.g. market data, fiat balances, etc.).

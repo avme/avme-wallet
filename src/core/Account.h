@@ -28,10 +28,10 @@
 #include <lib/ethcore/KeyManager.h>
 #include <lib/ethcore/TransactionBase.h>
 
-#include "API.h"
-#include "JSON.h"
-#include "Pangolin.h"
-#include "Utils.h"
+#include <core/JSON.h>
+#include <core/Utils.h>
+#include <network/API.h>
+#include <network/Pangolin.h>
 
 using namespace dev::eth; // TransactionBase
 

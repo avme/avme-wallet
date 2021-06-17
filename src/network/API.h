@@ -14,8 +14,8 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 
-#include "JSON.h"
-#include "root_certificates.hpp"
+#include <core/JSON.h>
+#include <network/root_certificates.hpp>
 
 // Class for API/ethcall-related functions (e.g. requesting data from the blockchain API).
 class API {
@@ -42,12 +42,11 @@ class API {
     static std::string getAVAXBalance(std::string address);
     static std::string getAVMEBalance(std::string address, std::string contractAddress);
 
+    /**
+     * Get Locked LP Balance inside YY Contract
+     */
+    static std::string getCompoundLPBalance(std::string address, std::string contractAddress);
 
-    /** 
-	 * Get Locked LP Balance inside YY Contract
-	 */
-	static std::string getCompoundLPBalance(std::string address, std::string contractAddress);
-	
     /**
      * Get the recommended gas price for a transaction.
      * Returns the gas price in Gwei, which has to be converted to Wei
@@ -66,8 +65,8 @@ class API {
      * Returns a link to the successful transaction, or an empty string on failure.
      */
     static std::string broadcastTx(std::string txidHex);
-	
-	static std::string getCurrentBlock();
+
+    static std::string getCurrentBlock();
 
     /**
      * Get the transaction status from the API to check if it has been confirmed.
@@ -75,8 +74,8 @@ class API {
      * or an empty string on failure.
      */
     static std::string getTxStatus(std::string txidHex);
-	
-	static std::string getTxBlock(std::string txidHex);
+
+    static std::string getTxBlock(std::string txidHex);
 };
 
 #endif // API_H

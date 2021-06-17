@@ -225,9 +225,8 @@ std::string Wallet::sendTransaction(std::string txidHex, std::string operation) 
   TxData txData = Utils::decodeRawTransaction(txidHex);
   txData.txlink = txLink;
   txData.operation = operation;
-  Account a = getAccountByAddress(txData.from);
-  a.saveTxToHistory(txData);
-  a.updateAllTxStatus();
+  saveTxToHistory(txData);
+  updateAllTxStatus();
   return txLink;
 }
 

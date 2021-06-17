@@ -26,10 +26,10 @@
 #include <lib/ethcore/KeyManager.h>
 #include <lib/ethcore/TransactionBase.h>
 
-#include "Account.h"
-#include "API.h"
-#include "BIP39.h"
-#include "Utils.h"
+#include <core/Account.h>
+#include <core/BIP39.h>
+#include <core/Utils.h>
+#include <network/API.h>
 
 using namespace dev;  // u256
 using namespace dev::eth;
@@ -60,6 +60,9 @@ class Wallet {
     std::map<std::string, std::string> ledgerAccounts;
 
   public:
+    std::map<std::string, std::string> getAccounts() { return this->accounts; }
+    std::map<std::string, std::string> getLedgerAccounts() { return this->ledgerAccounts; }
+
     /**
      * Create a new Wallet, which should be loaded manually afterwards.
      * Automatically hashes+salts the passphrase and stores both.

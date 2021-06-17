@@ -92,17 +92,25 @@ link_directories(
 #endforeach()
 
 # Add local libs
-add_subdirectory(libdevcore)
-add_subdirectory(libdevcrypto)
-add_subdirectory(libethcore)
-add_subdirectory(libledger)
+add_subdirectory(src/lib/devcore)
+add_subdirectory(src/lib/devcrypto)
+add_subdirectory(src/lib/ethcore)
+add_subdirectory(src/lib/ledger)
 
 # Organize executable sources and headers
-file(GLOB AVME_HEADERS "src/lib/*.h")
-file(GLOB AVME_SOURCES "src/lib/*.cpp")
+file(GLOB AVME_LIB_HEADERS "src/lib/**/*.h")
+file(GLOB AVME_LIB_SOURCES "src/lib/**/*.cpp")
+file(GLOB AVME_CORE_HEADERS "src/core/*.h")
+file(GLOB AVME_CORE_SOURCES "src/core/*.cpp")
+file(GLOB AVME_NETWORK_HEADERS "src/network/*.h")
+file(GLOB AVME_NETWORK_SOURCES "src/network/*.cpp")
 
 # Compile the project library
-add_library(avme-lib ${AVME_HEADERS} ${AVME_SOURCES})
+add_library(avme-lib
+  ${AVME_LIB_HEADERS} ${AVME_LIB_SOURCES}
+  ${AVME_CORE_HEADERS} ${AVME_CORE_SOURCES}
+  ${AVME_NETWORK_HEADERS} ${AVME_NETWORK_SOURCES}
+)
 target_link_libraries(avme-lib PUBLIC
   devcore devcrypto ethcore ledger ${ETHASH_BYPRODUCTS} Ethash ssl crypto toolbox bip39 LevelDB ${BOOST_LIBS}
 )
