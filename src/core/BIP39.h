@@ -20,7 +20,6 @@
 #include <bip3x/utils.h>
 #include <bip3x/wordlist.h>
 
-#include "API.h"
 #include "Cipher.h"
 #include "JSON.h"
 #include "Utils.h"
@@ -49,8 +48,8 @@ namespace BIP39 {
   bool wordExists(std::string word);
 
   /**
-   * Generate an Account list based on a given seed and a starting index.
-   * Returns a vetor with the Accounts, their indices and balances.
+   * Generate a list with 10 Accounts based on a given seed and a starting index.
+   * Returns a vector with the addresses.
    */
   std::vector<std::string> generateAccountsFromSeed(std::string seed, int64_t start);
 
