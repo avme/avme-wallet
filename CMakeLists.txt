@@ -30,12 +30,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 option(TESTNET OFF)
-option(BUILD_CLI "Build CLI executable (for testing/debugging)" OFF)
 message("C++ Standard: ${CMAKE_CXX_STANDARD}")
 message("C++ Standard is required: ${CMAKE_CXX_STANDARD_REQUIRED}")
 message("C++ extensions: ${CMAKE_CXX_EXTENSIONS}")
 message("Using PIC: ${CMAKE_POSITION_INDEPENDENT_CODE}")
-message("Compiling CLI for testing: ${BUILD_CLI}")
 cable_add_buildinfo_library(PROJECT_NAME avme_wallet)
 set(DEPENDS_PREFIX "")
 if("${TOOLCHAIN_PREFIX}" STREQUAL "x86_64-w64-mingw32")
@@ -111,16 +109,6 @@ target_link_libraries(avme-lib PUBLIC
 
 # Set the project version as a macro in a header file
 configure_file("${CMAKE_SOURCE_DIR}/src/version.h.in" "${CMAKE_SOURCE_DIR}/src/version.h" @ONLY)
-
-# Compile the CLI executable (for debugging/testing)
-if (BUILD_CLI)
-  add_executable(avme-cli src/version.h src/main-cli.h src/main-cli.cpp)
-  if (DEPENDS_PREFIX EQUAL "x86_64-w64-mingw32")
-    target_link_libraries(avme-cli PUBLIC avme-lib -static)
-  else()
-    target_link_libraries(avme-cli PUBLIC avme-lib -static)
-  endif()
-endif()
 
 # Compile Qt-specific stuff to embed into the GUI executable.
 # First command is a dummy output to force whatever depends on it to
