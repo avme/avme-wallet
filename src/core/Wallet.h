@@ -38,18 +38,28 @@ using namespace boost::filesystem;
 
 /**
  * Class for the Wallet and related functions.
- * e.g. create/load, authenticate, manage Accounts, build/sign/send transactions, etc.
+ * e.g. create/load, authenticate, manage Accounts and their tx history,
+ * build/sign/send transactions, etc.
  */
 class Wallet {
   private:
-    KeyManager km;  // The "proper" Wallet. Functions interact directly with this object.
+    // The "proper" Wallet. Functions interact directly with this object.
+    KeyManager km;
+
+    // Password hash, salt and the number of iterations used to create the hash.
     bytesSec passHash;
     h256 passSalt;
     int passIterations = 100000;
 
-  public:
-    std::vector<Account> accounts;  // The list of Accounts that belong to this Wallet.
+    // Current Account and its tx history.
+    std::pair<std::string, std::string> currentAccount;
+    std::vector<TxData> currentAccountHistory;
 
+    // Lists of Accounts being used.
+    std::map<std::string, std::string> accounts;
+    std::map<std::string, std::string> ledgerAccounts;
+
+  public:
     /**
      * Create a new Wallet, which should be loaded manually afterwards.
      * Automatically hashes+salts the passphrase and stores both.
@@ -102,13 +112,6 @@ class Wallet {
     void importLedgerAccount(std::string address, std::string path);
 
     /**
-     * Get an Account from the list using its name or address, respectively.
-     * Returns the initialized Account object, or an "empty" one if not found.
-     */
-    Account getAccountByName(std::string name);
-    Account getAccountByAddress(std::string address);
-
-    /**
      * Erase an Account from the Wallet.
      * Returns true on success, false on failure.
      */
@@ -119,6 +122,17 @@ class Wallet {
      * Returns true on success, false on failure.
      */
     bool accountExists(std::string account);
+
+    /**
+     * Set the current Account to be used by the Wallet.
+     */
+    void setCurrentAccount(std::string address, std::string name);
+
+    /**
+     * Check if there's an Account being used by the Wallet.
+     * Returns true on success, false on failure.
+     */
+    bool hasAccountSet();
 
     /**
      * Select the appropriate Account name or address stored in
@@ -159,6 +173,29 @@ class Wallet {
      * Returns a link to the transaction in the blockchain, or an empty string on failure.
      */
     std::string sendTransaction(std::string txidHex, std::string operation);
+
+    /**
+     * Convert the transaction history from the current Account to a JSON array.
+     */
+    json_spirit::mArray txDataToJSON();
+
+    /**
+     * (Re)Load the transaction history for the current Account.
+     */
+    void loadTxHistory();
+
+    /**
+     * Save a new transaction to the history and reload the list.
+     * Returns true on success, false on failure.
+     */
+    bool saveTxToHistory(TxData tx);
+
+    /**
+     * Query the confirmed status of *all* transactions made from the
+     * current Account in the API and update accordingly, then reload the list.
+     * Returns true on success, false on failure.
+     */
+    bool updateAllTxStatus();
 };
 
 #endif // WALLET_H

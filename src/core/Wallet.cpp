@@ -41,7 +41,9 @@ bool Wallet::load(boost::filesystem::path folder, std::string pass) {
 }
 
 void Wallet::close() {
+  this->currentAccount = std::make_pair("", "");
   this->accounts.clear();
+  this->ledgerAccounts.clear();
   this->passHash = bytesSec();
   this->passSalt = h256();
   this->km = KeyManager();
@@ -82,36 +84,16 @@ void Wallet::loadAccounts() {
   for (auto const& u : keys) {
     if (Address a = this->km.address(u)) {
       got.insert(a);
-      Account acc(toUUID(u), this->km.accountName(a),
-        "0x" + boost::lexical_cast<std::string>(a));
-      this->accounts.push_back(acc);
+      this->accounts.emplace(
+        "0x" + boost::lexical_cast<std::string>(a),
+        this->km.accountName(a)
+      );
     }
   }
 }
 
 void Wallet::importLedgerAccount(std::string address, std::string path) {
-  Account acc("ledger-" + path, "", address);
-  this->accounts.push_back(acc);
-}
-
-Account Wallet::getAccountByName(std::string name) {
-  for (int i = 0; i < this->accounts.size(); i++) {
-    if (this->accounts[i].name == name) {
-      return this->accounts[i];
-    }
-  }
-  return Account();
-}
-
-Account Wallet::getAccountByAddress(std::string address) {
-  // Add the "0x" if it's missing
-  if (address.substr(0, 2) != "0x") { address.insert(0, "0x"); }
-  for (int i = 0; i < this->accounts.size(); i++) {
-    if (this->accounts[i].address == address) {
-      return this->accounts[i];
-    }
-  }
-  return Account();
+  this->ledgerAccounts.emplace(address, "ledger-" + path);
 }
 
 bool Wallet::eraseAccount(std::string account) {
@@ -129,6 +111,14 @@ bool Wallet::accountExists(std::string account) {
     if (acc == acc2) { return true; }
   }
   return false;
+}
+
+void Wallet::setCurrentAccount(std::string address, std::string name) {
+  this->currentAccount = std::make_pair(address, name);
+}
+
+bool Wallet::hasAccountSet() {
+  return (!this->currentAccount.first.empty() && !this->currentAccount.second.empty());
 }
 
 Address Wallet::userToAddress(std::string const& input) {
@@ -239,5 +229,165 @@ std::string Wallet::sendTransaction(std::string txidHex, std::string operation) 
   a.saveTxToHistory(txData);
   a.updateAllTxStatus();
   return txLink;
+}
+
+json_spirit::mArray Wallet::txDataToJSON() {
+  json_spirit::mArray transactionsArray;
+  for (TxData savedTxData : this->currentAccountHistory) {
+    json_spirit::mObject savedTransaction;
+    savedTransaction["txlink"] = savedTxData.txlink;
+    savedTransaction["operation"] = savedTxData.operation;
+    savedTransaction["hex"] = savedTxData.hex;
+    savedTransaction["type"] = savedTxData.type;
+    savedTransaction["code"] = savedTxData.code;
+    savedTransaction["to"] = savedTxData.to;
+    savedTransaction["from"] = savedTxData.from;
+    savedTransaction["data"] = savedTxData.data;
+    savedTransaction["creates"] = savedTxData.creates;
+    savedTransaction["value"] = savedTxData.value;
+    savedTransaction["nonce"] = savedTxData.nonce;
+    savedTransaction["gas"] = savedTxData.gas;
+    savedTransaction["price"] = savedTxData.price;
+    savedTransaction["hash"] = savedTxData.hash;
+    savedTransaction["v"] = savedTxData.v;
+    savedTransaction["r"] = savedTxData.r;
+    savedTransaction["s"] = savedTxData.s;
+    savedTransaction["humanDate"] = savedTxData.humanDate;
+    savedTransaction["unixDate"] = savedTxData.unixDate;
+    savedTransaction["confirmed"] = savedTxData.confirmed;
+    savedTransaction["invalid"] = savedTxData.invalid;
+    transactionsArray.push_back(savedTransaction);
+  }
+  return transactionsArray;
+}
+
+void Wallet::loadTxHistory() {
+  json_spirit::mValue txData, txArray;
+  boost::filesystem::path txFilePath = Utils::walletFolderPath.string()
+    + "/wallet/c-avax/accounts/transactions/" + this->currentAccount.first.c_str();
+
+  txData = JSON::readFile(txFilePath);
+  try {
+    txArray = JSON::objectItem(txData, "transactions");
+    json_spirit::mValue txArray = JSON::objectItem(txData, "transactions");
+    this->currentAccountHistory.clear();
+    for (int i = 0; i < txArray.get_array().size(); ++i) {
+      TxData txData;
+      txData.txlink = JSON::objectItem(JSON::arrayItem(txArray, i), "txlink").get_str();
+      txData.operation = JSON::objectItem(JSON::arrayItem(txArray, i), "operation").get_str();
+      txData.hex = JSON::objectItem(JSON::arrayItem(txArray, i), "hex").get_str();
+      txData.type = JSON::objectItem(JSON::arrayItem(txArray, i), "type").get_str();
+      txData.code = JSON::objectItem(JSON::arrayItem(txArray, i), "code").get_str();
+      txData.to = JSON::objectItem(JSON::arrayItem(txArray, i), "to").get_str();
+      txData.from = JSON::objectItem(JSON::arrayItem(txArray, i), "from").get_str();
+      txData.data = JSON::objectItem(JSON::arrayItem(txArray, i), "data").get_str();
+      txData.creates = JSON::objectItem(JSON::arrayItem(txArray, i), "creates").get_str();
+      txData.value = JSON::objectItem(JSON::arrayItem(txArray, i), "value").get_str();
+      txData.nonce = JSON::objectItem(JSON::arrayItem(txArray, i), "nonce").get_str();
+      txData.gas = JSON::objectItem(JSON::arrayItem(txArray, i), "gas").get_str();
+      txData.price = JSON::objectItem(JSON::arrayItem(txArray, i), "price").get_str();
+      txData.hash = JSON::objectItem(JSON::arrayItem(txArray, i), "hash").get_str();
+      txData.v = JSON::objectItem(JSON::arrayItem(txArray, i), "v").get_str();
+      txData.r = JSON::objectItem(JSON::arrayItem(txArray, i), "r").get_str();
+      txData.s = JSON::objectItem(JSON::arrayItem(txArray, i), "s").get_str();
+      txData.humanDate = JSON::objectItem(JSON::arrayItem(txArray, i), "humanDate").get_str();
+      txData.unixDate = JSON::objectItem(JSON::arrayItem(txArray, i), "unixDate").get_uint64();
+      txData.confirmed = JSON::objectItem(JSON::arrayItem(txArray, i), "confirmed").get_bool();
+      txData.invalid = JSON::objectItem(JSON::arrayItem(txArray, i), "invalid").get_bool();
+      this->currentAccountHistory.push_back(txData);
+    }
+  } catch (std::exception &e) {
+    Utils::logToDebug(std::string("Couldn't load history for account ")
+      + this->currentAccount.first + " : " + JSON::objectItem(txData, "ERROR").get_str());
+    // Uncomment to see output
+    //std::cout << "Couldn't load history for Account " << this->currentAccount.first
+    //          << ": " << JSON::objectItem(txData, "ERROR").get_str() << std::endl;
+  }
+}
+
+bool Wallet::saveTxToHistory(TxData TxData) {
+  loadTxHistory();
+  json_spirit::mObject transactionsRoot;
+  json_spirit::mArray transactionsArray = txDataToJSON();
+  json_spirit::mObject transaction;
+  boost::filesystem::path txFilePath = Utils::walletFolderPath.string()
+    + "/wallet/c-avax/accounts/transactions/" + this->currentAccount.first.c_str();
+
+  transaction["txlink"] = TxData.txlink;
+  transaction["operation"] = TxData.operation;
+  transaction["hex"] = TxData.hex;
+  transaction["type"] = TxData.type;
+  transaction["code"] = TxData.code;
+  transaction["to"] = TxData.to;
+  transaction["from"] = TxData.from;
+  transaction["data"] = TxData.data;
+  transaction["creates"] = TxData.creates;
+  transaction["value"] = TxData.value;
+  transaction["nonce"] = TxData.nonce;
+  transaction["gas"] = TxData.gas;
+  transaction["price"] = TxData.price;
+  transaction["hash"] = TxData.hash;
+  transaction["v"] = TxData.v;
+  transaction["r"] = TxData.r;
+  transaction["s"] = TxData.s;
+  transaction["humanDate"] = TxData.humanDate;
+  transaction["unixDate"] = TxData.unixDate;
+  transaction["confirmed"] = TxData.confirmed;
+  transaction["invalid"] = TxData.invalid;
+  transactionsArray.push_back(transaction);
+
+  transactionsRoot["transactions"] = transactionsArray;
+  json_spirit::mValue success = JSON::writeFile(transactionsRoot, txFilePath);
+
+  // Try/Catch are "inverted"
+  // Error happens when trying to find the error.
+  // If there is no "error" on the JSON, it will throw, meaning that it was successfull
+  try {
+    Utils::logToDebug("Error happened when writing JSON file: " + success.get_obj().at("ERROR").get_str());
+  } catch (std::exception &e) {
+    loadTxHistory();
+    return true;
+  }
+  loadTxHistory();
+  return false;
+}
+
+bool Wallet::updateAllTxStatus() {
+  boost::filesystem::path txFilePath = Utils::walletFolderPath.string()
+    + "/wallet/c-avax/accounts/transactions/" + this->currentAccount.first.c_str();
+  loadTxHistory();
+  u256 currentBlock = boost::lexical_cast<HexTo<u256>>(API::getCurrentBlock());
+  try {
+    for (TxData &txData : this->currentAccountHistory) {
+      if (!txData.invalid && !txData.confirmed) {
+        const auto p1 = std::chrono::system_clock::now();
+        uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
+        std::string status = API::getTxStatus(txData.hex);
+        if (status == "0x1") txData.confirmed = true;
+        if (status == "0x0") {
+          u256 transactionBlock = boost::lexical_cast<HexTo<u256>>(API::getTxBlock(txData.hex));
+          if (currentBlock > transactionBlock) {
+            txData.invalid = true;
+          }
+        }
+      }
+    }
+  } catch (std::exception &e) {
+    Utils::logToDebug(std::string("Error when updating AllTxStatus: ") + e.what());
+  }
+  json_spirit::mObject transactionsRoot;
+  json_spirit::mArray transactionsArray = txDataToJSON();
+  transactionsRoot["transactions"] = transactionsArray;
+  json_spirit::mValue success = JSON::writeFile(transactionsRoot, txFilePath);
+
+  try {
+    std::string error = success.get_obj().at("ERROR").get_str();
+    Utils::logToDebug(std::string("Error happened when writing JSON file: ") + error);
+  } catch (std::exception &e) {
+    loadTxHistory();
+    return true;
+  }
+  loadTxHistory();
+  return false;
 }
 
