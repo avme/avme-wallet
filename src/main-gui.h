@@ -22,7 +22,7 @@
 
 #ifdef __MINGW32__
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
-// Redefine the WINNT version for MinGW, use windows 7 intead of windows XP
+// Redefine the WINNT version for MinGW to use Windows 7 instead of XP
 #undef _WIN32_WINNT
 #define _WIN32_WINNT 0x0601
 #define WINVER 0x0601
@@ -61,10 +61,6 @@ class System : public QObject {
   signals:
     void hideMenu();
     void goToOverview();
-    void accountGenerated(QVariantMap data);
-    void ledgerAccountGenerated(QVariantMap data);
-    void accountCreated(QVariantMap data);
-    void accountCreationFailed();
     void accountBalancesUpdated(QVariantMap data);
     void accountFiatBalancesUpdated(QVariantMap data);
     void walletBalancesUpdated(QVariantMap data);
@@ -73,7 +69,6 @@ class System : public QObject {
     void marketDataUpdated(
       int days, QString currentAVAXPrice, QString currentAVMEPrice, QVariantList AVMEHistory
     );
-    void historyLoaded(QVariantList data);
     void operationOverride(QString op, QString amountCoin, QString amountToken, QString amountLP);
     void txStart(
       QString operation, QString to,
@@ -105,10 +100,6 @@ class System : public QObject {
       return;
     }
   private:
-    Wallet w;
-    ledger::device ledgerDevice;
-    bool firstLoad;
-    bool ledgerFlag;
     std::string currentCoin;
     int currentCoinDecimals;
     std::string currentToken;
@@ -120,12 +111,6 @@ class System : public QObject {
     // Getters/Setters for private vars
     Q_INVOKABLE QString getCurrentCoin() { return QString::fromStdString(this->currentCoin); }
     Q_INVOKABLE void setCurrentCoin(QString coin) { this->currentCoin = coin.toStdString(); }
-
-    Q_INVOKABLE bool getFirstLoad() { return this->firstLoad; }
-    Q_INVOKABLE void setFirstLoad(bool b) { this->firstLoad = b; }
-
-    Q_INVOKABLE bool isLedger() { return this->ledgerFlag; }
-    Q_INVOKABLE void setLedger(bool b) { this->ledgerFlag = b; }
 
     Q_INVOKABLE int getCurrentCoinDecimals() { return this->currentCoinDecimals; }
     Q_INVOKABLE void setCurrentCoinDecimals(int decimals) { this->currentCoinDecimals = decimals; }
@@ -151,306 +136,8 @@ class System : public QObject {
       }
     }
 
-    // Get the project's version
-    Q_INVOKABLE QString getProjectVersion() {
-      return QString::fromStdString(PROJECT_VERSION);
-    }
 
-    // Open the "About Qt" window
-    Q_INVOKABLE void openQtAbout() {
-      QApplication::aboutQt();
-    }
 
-    // Change the current loaded screen
-    Q_INVOKABLE void setScreen(QObject* loader, QString qmlFile) {
-      loader->setProperty("source", "qrc:/" + qmlFile);
-    }
-
-    // Copy a string to the system clipboard
-    Q_INVOKABLE void copyToClipboard(QString str) {
-      QApplication::clipboard()->setText(str);
-    }
-
-    // Get the default path for a Wallet
-    Q_INVOKABLE QString getDefaultWalletPath() {
-      return QString::fromStdString(JSON::getDataDir().string());
-    }
-
-    // Remove the "file://" prefix from a folder path
-    Q_INVOKABLE QString cleanPath(QString path) {
-      #ifdef __MINGW32__
-        return path.remove("file:///");
-      #else
-        return path.remove("file://");
-      #endif
-    }
-
-    // Check if a Wallet exists in a given folder
-    Q_INVOKABLE bool checkFolderForWallet(QString folder) {
-      QString walletFile = QString(folder + "/wallet/c-avax/wallet.info");
-      QString secretsFolder = QString(folder + "/wallet/c-avax/accounts/secrets");
-      return (QFile::exists(walletFile) && QFile::exists(secretsFolder));
-    }
-
-    // Check if given passphrase equals the Wallet's
-    Q_INVOKABLE bool checkWalletPass(QString pass) {
-      return w.auth(pass.toStdString());
-    }
-
-    // Create, import, load and close a Wallet, respectively
-    Q_INVOKABLE bool createWallet(QString folder, QString pass) {
-      std::string passStr = pass.toStdString();
-      bool createSuccess = this->w.create(folder.toStdString(), passStr);
-      bip3x::Bip39Mnemonic::MnemonicResult mnemonic = BIP39::createNewMnemonic();
-      std::pair<bool,std::string> seedSuccess = BIP39::saveEncryptedMnemonic(mnemonic, passStr);
-      return (createSuccess && seedSuccess.first);
-    }
-
-    Q_INVOKABLE bool importWallet(QString seed, QString folder, QString pass) {
-      std::string passStr = pass.toStdString();
-      bool createSuccess = this->w.create(folder.toStdString(), passStr);
-      bip3x::Bip39Mnemonic::MnemonicResult mnemonic;
-      mnemonic.raw = seed.toStdString();
-      std::pair<bool,std::string> seedSuccess = BIP39::saveEncryptedMnemonic(mnemonic, passStr);
-      return (createSuccess && seedSuccess.first);
-    }
-
-    Q_INVOKABLE bool loadWallet(QString folder, QString pass) {
-      std::string passStr = pass.toStdString();
-      bool loadSuccess = this->w.load(folder.toStdString(), passStr);
-      return loadSuccess;
-    }
-
-    Q_INVOKABLE void closeWallet() {
-      this->w.close();
-    }
-
-    // Check if a Wallet is loaded
-    Q_INVOKABLE bool isWalletLoaded() {
-      return this->w.isLoaded();
-    }
-
-    // Get the seed for the Wallet
-    Q_INVOKABLE QString getWalletSeed(QString pass) {
-      std::string passStr = pass.toStdString();
-      bip3x::Bip39Mnemonic::MnemonicResult mnemonic;
-      std::pair<bool,std::string> seedSuccess = BIP39::loadEncryptedMnemonic(mnemonic, passStr);
-      return (seedSuccess.first) ? QString::fromStdString(mnemonic.raw) : "";
-    }
-
-    // Check if Ledger device is connected
-    Q_INVOKABLE QVariantMap checkForLedger() {
-      QVariantMap ret;
-      std::pair<bool, std::string> check = this->ledgerDevice.checkForDevice();
-      ret.insert("state", check.first);
-      ret.insert("message", QString::fromStdString(check.second));
-      return ret;
-    }
-
-    // Load the Accounts into the Wallet
-    Q_INVOKABLE void loadAccounts() {
-      this->w.loadAccounts();
-    }
-
-    // List the Wallet's Accounts
-    Q_INVOKABLE QVariantList listAccounts() {
-      QVariantList ret;
-      for (Account &a : w.accounts) {
-        std::string obj;
-        a.balancesThreadLock.lock();
-        obj += "{\"account\": \"" + a.address;
-        obj += "\", \"name\": \"" + a.name;
-        obj += "\", \"coinAmount\": \"" + a.balanceAVAX;
-        obj += "\", \"tokenAmount\": \"" + a.balanceAVME;
-        obj += "\", \"freeLPAmount\": \"" + a.balanceLPFree;
-        obj += "\", \"lockedLPAmount\": \"" + a.balanceTotalLPLocked;
-        obj += "\"}";
-        a.balancesThreadLock.unlock();
-        ret << QString::fromStdString(obj);
-      }
-      return ret;
-    }
-
-    // Start/stop balance threads for all Accounts in the Wallet, respectively
-    Q_INVOKABLE void startAllBalanceThreads() {
-      for (Account &a : w.accounts) {
-        Account::startBalancesThread(a);
-      }
-    }
-
-    Q_INVOKABLE void stopAllBalanceThreads() {
-      for (Account &a : w.accounts) {
-        a.interruptThread = true;
-      }
-      for (Account &a : w.accounts) {
-        while (!a.threadWasInterrupted) {
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
-        }
-      }
-    }
-
-    // Check if an Account has loaded the balances
-    Q_INVOKABLE bool accountHasBalances(QString address) {
-      bool hasBalances = false;
-      for (Account &a : w.accounts) {
-        if (a.address == address.toStdString()) {
-          a.balancesThreadLock.lock();
-          hasBalances = (
-            a.balanceAVAX != "" && a.balanceAVME != "" &&
-            a.balanceLPFree != "" && a.balanceLPLocked != "" &&
-			a.balanceLockedCompoundLP != ""
-          );
-          a.balancesThreadLock.unlock();
-          break;
-        }
-      }
-      return hasBalances;
-    }
-
-    // Generate an Account list from a given seed, starting from a given index
-    Q_INVOKABLE void generateAccounts(QString seed, int idx) {
-      QtConcurrent::run([=](){
-        QVariantList ret;
-        std::vector<std::string> list = BIP39::generateAccountsFromSeed(seed.toStdString(), idx);
-        for (std::string s : list) {
-          QVariantMap obj;
-          std::stringstream listss(s);
-          std::string item;
-          int ct = 0;
-          while (std::getline(listss, item, ' ')) {
-            QString itemStr = QString::fromStdString(item);
-            switch (ct) {
-              case 0: obj["idx"] = QVariant(itemStr); break;
-              case 1: obj["account"] = QVariant(itemStr); break;
-              case 2: obj["balance"] = QVariant(itemStr); break;
-            }
-            ct++;
-          }
-          emit accountGenerated(obj);
-        }
-      });
-    }
-
-    // Same as above but for Ledger devices
-    Q_INVOKABLE void generateLedgerAccounts(QString path, int idx) {
-      QtConcurrent::run([=](){
-        QVariantList ret;
-        for (int i = idx; i < idx + 10; i++) {
-          std::string fullPath = path.toStdString() + boost::lexical_cast<std::string>(i);
-          this->ledgerDevice.generateBip32Account(fullPath);
-        }
-        for (ledger::account acc : this->ledgerDevice.getAccountList()) {
-          QVariantMap obj;
-          std::string idxStr = acc.index.substr(acc.index.find_last_of("/") + 1);
-          std::string bal = API::getAVAXBalance(acc.address);
-          u256 AVAXbalance = boost::lexical_cast<HexTo<u256>>(bal);
-          obj["idx"] = QVariant(QString::fromStdString(idxStr));
-          obj["account"] = QVariant(QString::fromStdString(acc.address));
-          obj["balance"] = QVariant(QString::fromStdString(Utils::weiToFixedPoint(
-            boost::lexical_cast<std::string>(AVAXbalance), 18
-          )));
-          emit ledgerAccountGenerated(obj);
-        }
-      });
-    }
-
-    // Clean up the Ledger account vector
-    Q_INVOKABLE void cleanLedgerAccounts() {
-      this->ledgerDevice.cleanAccountList();
-    }
-
-    // Create a new Account
-    Q_INVOKABLE void createAccount(QString seed, int index, QString name, QString pass) {
-      QtConcurrent::run([=](){
-        QVariantMap obj;
-        std::string seedStr = seed.toStdString();
-        std::string nameStr = name.toStdString();
-        std::string passStr = pass.toStdString();
-        Account a = this->w.createAccount(seedStr, index, nameStr, passStr);
-        if (!a.id.empty()) {
-          obj.insert("accId", QString::fromStdString(a.id));
-          obj.insert("accName", QString::fromStdString(a.name));
-          obj.insert("accAddress", "0x" + QString::fromStdString(a.address));
-          emit accountCreated(obj);
-        } else {
-          emit accountCreationFailed();
-        }
-      });
-    }
-
-    // Import a Ledger account to the Wallet
-    Q_INVOKABLE void importLedgerAccount(QString address, QString path) {
-      this->w.importLedgerAccount(address.toStdString(), path.toStdString());
-    }
-
-    // Erase an Account
-    Q_INVOKABLE bool eraseAccount(QString account) {
-      return this->w.eraseAccount(account.toStdString());
-    }
-
-    // Check if Account exists
-    Q_INVOKABLE bool accountExists(QString account) {
-      return this->w.accountExists(account.toStdString());
-    }
-
-    // List the Account's transactions, updating their statuses on the spot if required
-    Q_INVOKABLE void listAccountTransactions(QString address) {
-      QtConcurrent::run([=](){
-        QVariantList ret;
-        for (Account &a : w.accounts) {
-          if (a.address == address.toStdString()) {
-            a.updateAllTxStatus();
-            a.loadTxHistory();
-            for (TxData tx : a.history) {
-              std::string obj;
-              obj += "{\"txlink\": \"" + tx.txlink;
-              obj += "\", \"operation\": \"" + tx.operation;
-              obj += "\", \"txdata\": \"" + tx.data;
-              obj += "\", \"from\": \"" + tx.from;
-              obj += "\", \"to\": \"" + tx.to;
-              obj += "\", \"value\": \"" + tx.value;
-              obj += "\", \"gas\": \"" + tx.gas;
-              obj += "\", \"price\": \"" + tx.price;
-              obj += "\", \"datetime\": \"" + tx.humanDate;
-              obj += "\", \"unixtime\": " + std::to_string(tx.unixDate);
-              obj += ", \"confirmed\": " + QVariant(tx.confirmed).toString().toStdString();
-              obj += ", \"invalid\": " + QVariant(tx.invalid).toString().toStdString();
-              obj += "}";
-              ret << QString::fromStdString(obj);
-            }
-            break;
-          }
-        }
-        emit historyLoaded(ret);
-      });
-    }
-
-    // Get an Account's balances
-    Q_INVOKABLE QVariantMap getAccountBalances(QString address) {
-      QVariantMap ret;
-      for (Account &a : w.accounts) {
-        if (a.address == address.toStdString()) {
-          std::string balanceAVAXStr, balanceAVMEStr, balanceLPFreeStr, balanceLPLockedStr, balanceLockedCompoundLP, balanceTotalLPLocked;
-          a.balancesThreadLock.lock();
-          balanceAVAXStr = a.balanceAVAX;
-          balanceAVMEStr = a.balanceAVME;
-          balanceLPFreeStr = a.balanceLPFree;
-          balanceLPLockedStr = a.balanceLPLocked;
-		  balanceLockedCompoundLP = a.balanceLockedCompoundLP;
-		  balanceTotalLPLocked = a.balanceTotalLPLocked;
-          a.balancesThreadLock.unlock();
-
-          ret.insert("balanceAVAX", QString::fromStdString(balanceAVAXStr));
-          ret.insert("balanceAVME", QString::fromStdString(balanceAVMEStr));
-          ret.insert("balanceLPFree", QString::fromStdString(balanceLPFreeStr));
-          ret.insert("balanceLPLocked", QString::fromStdString(balanceLPLockedStr));
-		  ret.insert("balanceLockedCompoundLP", QString::fromStdString(balanceLockedCompoundLP));
-		  ret.insert("balanceTotalLPLocked", QString::fromStdString(balanceTotalLPLocked));
-          break;
-        }
-      }
-      return ret;
-    }
 
     // Same thing as above but for the Overview screen
     Q_INVOKABLE void getAccountBalancesOverview(QString address) {
@@ -465,16 +152,16 @@ class System : public QObject {
             balanceAVMEStr = a.balanceAVME;
             balanceLPFreeStr = a.balanceLPFree;
             balanceLPLockedStr = a.balanceLPLocked;
-			balanceLockedCompoundLP = a.balanceLockedCompoundLP;
-			balanceTotalLPLocked = a.balanceTotalLPLocked;
+            balanceLockedCompoundLP = a.balanceLockedCompoundLP;
+            balanceTotalLPLocked = a.balanceTotalLPLocked;
             a.balancesThreadLock.unlock();
 
             ret.insert("balanceAVAX", QString::fromStdString(balanceAVAXStr));
             ret.insert("balanceAVME", QString::fromStdString(balanceAVMEStr));
             ret.insert("balanceLPFree", QString::fromStdString(balanceLPFreeStr));
             ret.insert("balanceLPLocked", QString::fromStdString(balanceLPLockedStr));
-			ret.insert("balanceLockedCompoundLP", QString::fromStdString(balanceLockedCompoundLP));
-			ret.insert("balanceTotalLPLocked", QString::fromStdString(balanceTotalLPLocked));
+            ret.insert("balanceLockedCompoundLP", QString::fromStdString(balanceLockedCompoundLP));
+            ret.insert("balanceTotalLPLocked", QString::fromStdString(balanceTotalLPLocked));
             break;
           }
         }
@@ -774,27 +461,7 @@ class System : public QObject {
       });
     }
 
-    // Get an Account's private keys
-    Q_INVOKABLE QString getPrivateKeys(QString account, QString pass) {
-      Secret s = w.getSecret(account.toStdString(), pass.toStdString());
-      std::string key = toHex(s.ref());
-      return QString::fromStdString(key);
-    }
 
-    // Check if Account seed is valid
-    Q_INVOKABLE bool seedIsValid(QString seed) {
-      std::stringstream ss(seed.toStdString());
-      std::string word;
-      int ct = 0;
-
-      while (std::getline(ss, word, ' ')) {
-        if (!BIP39::wordExists(word)) { return false; }
-        ct++;
-      }
-      if (ct != 12) { return false; }
-
-      return true;
-    }
 
     // Get gas price from network
     Q_INVOKABLE QString getAutomaticFee() {
@@ -955,7 +622,7 @@ class System : public QObject {
             this->currentAccount, Pangolin::getPair(this->currentCoin, this->currentToken),
             "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::stakingContract)
           );
-		} else if (operationStr == "Approve Compound") {
+        } else if (operationStr == "Approve Compound") {
           txSkel = this->w.buildTransaction(
             this->currentAccount, Pangolin::getPair(this->currentCoin, this->currentToken),
             "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::compoundContract)
