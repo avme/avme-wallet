@@ -21,10 +21,6 @@
 class QmlWallet : public QObject {
   Q_OBJECT
 
-  signals:
-    // TODO: move to QmlOverview
-    void historyLoaded(QVariantList data);
-
   public:
     // Check if a Wallet exists in a given folder
     Q_INVOKABLE bool checkFolderForWallet(QString folder) {
@@ -100,39 +96,6 @@ class QmlWallet : public QObject {
       }
       if (ct != 12) { return false; }
       return true;
-    }
-
-    // List the Account's transactions, updating their statuses on the spot if required
-    // TODO: move to QmlOverview
-    Q_INVOKABLE void listAccountTransactions(QString address) {
-      QtConcurrent::run([=](){
-        QVariantList ret;
-        for (Account &a : w.accounts) {
-          if (a.address == address.toStdString()) {
-            a.updateAllTxStatus();
-            a.loadTxHistory();
-            for (TxData tx : a.history) {
-              std::string obj;
-              obj += "{\"txlink\": \"" + tx.txlink;
-              obj += "\", \"operation\": \"" + tx.operation;
-              obj += "\", \"txdata\": \"" + tx.data;
-              obj += "\", \"from\": \"" + tx.from;
-              obj += "\", \"to\": \"" + tx.to;
-              obj += "\", \"value\": \"" + tx.value;
-              obj += "\", \"gas\": \"" + tx.gas;
-              obj += "\", \"price\": \"" + tx.price;
-              obj += "\", \"datetime\": \"" + tx.humanDate;
-              obj += "\", \"unixtime\": " + std::to_string(tx.unixDate);
-              obj += ", \"confirmed\": " + QVariant(tx.confirmed).toString().toStdString();
-              obj += ", \"invalid\": " + QVariant(tx.invalid).toString().toStdString();
-              obj += "}";
-              ret << QString::fromStdString(obj);
-            }
-            break;
-          }
-        }
-        emit historyLoaded(ret);
-      });
     }
 }
 

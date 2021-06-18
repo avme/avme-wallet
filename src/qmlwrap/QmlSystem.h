@@ -11,6 +11,7 @@
 #include <QtWidgets/QApplication>
 
 #include <core/JSON.h>
+#include <core/Utils.h>
 
 #include "version.h"
 
@@ -19,6 +20,16 @@
  */
 class QmlSystem : public QObject {
   Q_OBJECT
+
+  signals:
+    void hideMenu();
+    void goToOverview();
+
+  public slots:
+    void cleanAndClose() {
+      // TODO: Clean database, threads, etc before closing the program
+      return;
+    }
 
   public:
     Wallet w;
@@ -58,6 +69,32 @@ class QmlSystem : public QObject {
       #else
         return path.remove("file://");
       #endif
+    }
+
+    // Convert fixed point to Wei and vice-versa
+    Q_INVOKABLE QString fixedPointToWei(QString amount, int decimals) {
+      return QString::fromStdString(
+        Utils::fixedPointToWei(amount.toStdString(), decimals)
+      );
+    }
+
+    Q_INVOKABLE QString weiToFixedPoint(QString amount, int digits) {
+      return QString::fromStdString(
+        Utils::weiToFixedPoint(amount.toStdString(), digits)
+      );
+    }
+
+    // Check if a balance is zero
+    Q_INVOKABLE bool balanceIsZero(QString amount, int decimals) {
+      u256 amountU256 = u256(Utils::fixedPointToWei(amount.toStdString(), decimals));
+      return (amountU256 == 0);
+    }
+
+    // Check if a balance is higher than another
+    Q_INVOKABLE bool firstHigherThanSecond(QString first, QString second) {
+      bigfloat firstFloat = boost::lexical_cast<bigfloat>(first.toStdString());
+      bigfloat secondFloat = boost::lexical_cast<bigfloat>(second.toStdString());
+      return (firstFloat > secondFloat);
     }
 }
 
