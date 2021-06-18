@@ -42,6 +42,8 @@ Q_IMPORT_PLUGIN(QtQuickControls2Plugin)
 Q_IMPORT_PLUGIN(QtLabsPlatformPlugin)
 Q_IMPORT_PLUGIN(QtChartsQml2Plugin)
 
+#include <lib/ledger/ledger.h>
+
 #include <core/BIP39.h>
 #include <core/Utils.h>
 #include <core/Wallet.h>
@@ -50,7 +52,14 @@ Q_IMPORT_PLUGIN(QtChartsQml2Plugin)
 #include <network/Pangolin.h>
 #include <network/Staking.h>
 
-#include <lib/ledger/ledger.h>
+#include <qmlwrap/QmlSystem.h>
+#include <qmlwrap/QmlWallet.h>
+#include <qmlwrap/QmlAccount.h>
+#include <qmlwrap/QmlOverview.h>
+#include <qmlwrap/QmlHistory.h>
+#include <qmlwrap/QmlSend.h>
+#include <qmlwrap/QmlExchange.h>
+#include <qmlwrap/QmlStaking.h>
 
 #include "version.h"
 
