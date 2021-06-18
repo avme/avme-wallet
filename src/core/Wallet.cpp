@@ -96,7 +96,7 @@ std::pair<std::string, std::string> Wallet::createAccount(
 
 void Wallet::importLedgerAccount(std::string address, std::string path) {
   // Only import if it hasn't been imported yet
-  if (this->ledgerAccounts.find(address) == std::map::end) {
+  if (this->ledgerAccounts.find(address) == this->ledgerAccounts.end()) {
     this->ledgerAccounts.emplace(address, "ledger-" + path);
   }
 }
@@ -111,12 +111,12 @@ bool Wallet::eraseAccount(std::string address) {
 }
 
 bool Wallet::accountExists(std::string address) {
-  return (this->accounts.find(address) != std::map::end);
+  return (this->accounts.find(address) != this->accounts.end());
 }
 
 void Wallet::setCurrentAccount(std::string address) {
   if (accountExists(address)) {
-    this->currentAccount = this->accounts.find(address);
+    this->currentAccount = *this->accounts.find(address);
   }
 }
 

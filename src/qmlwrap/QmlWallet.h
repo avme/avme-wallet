@@ -33,7 +33,7 @@ class QmlWallet : public QObject {
     // TODO: join this and import with 'QString seed = ""' as a parameter
     Q_INVOKABLE bool createWallet(QString folder, QString pass) {
       std::string passStr = pass.toStdString();
-      bool createSuccess = QmlSystem.w.create(folder.toStdString(), passStr);
+      bool createSuccess = QmlSystem::getWallet()->create(folder.toStdString(), passStr);
       bip3x::Bip39Mnemonic::MnemonicResult mnemonic = BIP39::createNewMnemonic();
       std::pair<bool,std::string> seedSuccess = BIP39::saveEncryptedMnemonic(mnemonic, passStr);
       return (createSuccess && seedSuccess.first);
@@ -41,7 +41,7 @@ class QmlWallet : public QObject {
 
     Q_INVOKABLE bool importWallet(QString seed, QString folder, QString pass) {
       std::string passStr = pass.toStdString();
-      bool createSuccess = QmlSystem.w.create(folder.toStdString(), passStr);
+      bool createSuccess = QmlSystem::getWallet()->create(folder.toStdString(), passStr);
       bip3x::Bip39Mnemonic::MnemonicResult mnemonic;
       mnemonic.raw = seed.toStdString();
       std::pair<bool,std::string> seedSuccess = BIP39::saveEncryptedMnemonic(mnemonic, passStr);
@@ -50,22 +50,22 @@ class QmlWallet : public QObject {
 
     Q_INVOKABLE bool loadWallet(QString folder, QString pass) {
       std::string passStr = pass.toStdString();
-      bool loadSuccess = QmlSystem.w.load(folder.toStdString(), passStr);
+      bool loadSuccess = QmlSystem::getWallet()->load(folder.toStdString(), passStr);
       return loadSuccess;
     }
 
     Q_INVOKABLE void closeWallet() {
-      QmlSystem.w.close();
+      QmlSystem::getWallet()->close();
     }
 
     // Check if the Wallet is loaded
     Q_INVOKABLE bool isWalletLoaded() {
-      return QmlSystem.w.isLoaded();
+      return QmlSystem::getWallet()->isLoaded();
     }
 
     // Check if given passphrase equals the Wallet's
     Q_INVOKABLE bool checkWalletPass(QString pass) {
-      return QmlSystem.w.auth(pass.toStdString());
+      return QmlSystem::getWallet()->auth(pass.toStdString());
     }
 
     // Get the seed for the Wallet
@@ -79,7 +79,7 @@ class QmlWallet : public QObject {
     // Check if Ledger device is connected
     Q_INVOKABLE QVariantMap checkForLedger() {
       QVariantMap ret;
-      std::pair<bool, std::string> check = this->ledgerDevice.checkForDevice();
+      std::pair<bool, std::string> check = QmlSystem::getLedgerDevice()->checkForDevice();
       ret.insert("state", check.first);
       ret.insert("message", QString::fromStdString(check.second));
       return ret;
@@ -97,6 +97,6 @@ class QmlWallet : public QObject {
       if (ct != 12) { return false; }
       return true;
     }
-}
+};
 
 #endif  // QTWALLET_H

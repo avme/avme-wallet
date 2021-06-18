@@ -31,11 +31,20 @@ class QmlSystem : public QObject {
       return;
     }
 
+  private:
+    static Wallet* w;
+    static ledger::device* ledgerDevice;
+    static bool firstLoad;
+    static bool ledgerFlag;
+
   public:
-    Wallet w;
-    ledger::device ledgerDevice;
-    bool firstLoad;
-    bool ledgerFlag;
+    // Getters/Setters for private vars
+    static Wallet* getWallet() { return w; }
+    static ledger::device* getLedgerDevice() { return ledgerDevice; }
+    static bool getFirstLoad() { return firstLoad; }
+    static void setFirstLoad(bool b) { firstLoad = b; }
+    static bool getLedgerFlag() { return ledgerDevice; }
+    static void setLedgerFlag(bool b) { ledgerFlag = b; }
 
     // Get the project's version
     Q_INVOKABLE QString getProjectVersion() {
@@ -96,6 +105,6 @@ class QmlSystem : public QObject {
       bigfloat secondFloat = boost::lexical_cast<bigfloat>(second.toStdString());
       return (firstFloat > secondFloat);
     }
-}
+};
 
 #endif  //QTSYSTEM_H

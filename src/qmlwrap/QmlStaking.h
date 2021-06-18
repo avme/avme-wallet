@@ -43,6 +43,6 @@ class QmlStaking : public QObject {
         emit compoundUpdated(QString::fromStdString(poolReward));
       });
     }
-}
+};
 
 #endif // QMLSTAKING_H

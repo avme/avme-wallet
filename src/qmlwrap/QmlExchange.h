@@ -187,13 +187,8 @@ class QmlExchange : public QObject {
     ) {
       QVariantMap ret;
       std::string balanceLPFreeStr;
-      for (Account &a : w.accounts) {
-        if (a.address == this->currentAccount) {
-          a.balancesThreadLock.lock();
-          balanceLPFreeStr = a.balanceLPFree;
-          a.balancesThreadLock.unlock();
-        }
-      }
+      // TODO: check this later
+      //balanceLPFreeStr = this->currentAccount.balanceLPFree;
       if (lowerReserves.isEmpty()) { lowerReserves = QString("0"); }
       if (higherReserves.isEmpty()) { higherReserves = QString("0"); }
 
@@ -249,13 +244,8 @@ class QmlExchange : public QObject {
     ) {
       QVariantMap ret;
       std::string balanceLPFreeStr;
-      for (Account &a : w.accounts) {
-        if (a.address == this->currentAccount) {
-          a.balancesThreadLock.lock();
-          balanceLPFreeStr = a.balanceLPFree;
-          a.balancesThreadLock.unlock();
-        }
-      }
+      // TODO: check this later
+      //balanceLPFreeStr = this->currentAccount.balanceLPFree;
       u256 lowerReservesU256 = boost::lexical_cast<u256>(lowerReserves.toStdString());
       u256 higherReservesU256 = boost::lexical_cast<u256>(higherReserves.toStdString());
       u256 totalLiquidityU256 = boost::lexical_cast<u256>(totalLiquidity.toStdString());
@@ -305,6 +295,6 @@ class QmlExchange : public QObject {
       ret.insert("liquidity", QString::fromStdString(liquidity));
       return ret;
     }
-}
+};
 
 #endif  // QMLEXCHANGE_H

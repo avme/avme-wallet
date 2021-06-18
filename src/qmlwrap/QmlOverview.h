@@ -31,12 +31,14 @@ class QmlOverview : public QObject {
     );
 
   public:
-    // Same thing as above but for the Overview screen
+    // TODO: check all of those later
+    // Get an Account's crypto and fiat balances, respectively
+    /*
     Q_INVOKABLE void getAccountBalancesOverview(QString address) {
       QtConcurrent::run([=](){
         QVariantMap ret;
-        for (Account &a : QmlSystem.w.accounts) {
-          if (a.address == address.toStdString()) {
+        for (std::pair<std::string, std::string> a : QmlSystem::getWallet()->getAccounts()) {
+          if (a.first == address.toStdString()) {
             // Whole balances
             std::string balanceAVAXStr, balanceAVMEStr, balanceLPFreeStr, balanceLPLockedStr, balanceLockedCompoundLP, balanceTotalLPLocked;
             a.balancesThreadLock.lock();
@@ -61,7 +63,6 @@ class QmlOverview : public QObject {
       });
     }
 
-    // Same thing as above but for the Overview screen
     Q_INVOKABLE void getAccountFiatBalancesOverview(QString address) {
       QtConcurrent::run([=](){
         QVariantMap ret;
@@ -122,7 +123,7 @@ class QmlOverview : public QObject {
       });
     }
 
-    // Get the sum of all Accounts' balances in the Wallet for the Overview
+    // Get the sum of all Accounts' crypto and fiat balances, respectively
     Q_INVOKABLE void getAllAccountBalancesOverview() {
       QtConcurrent::run([=](){
         QVariantMap ret;
@@ -130,7 +131,7 @@ class QmlOverview : public QObject {
         std::string totalAVAXStr = "", totalAVMEStr = "", totalLPFreeStr = "", totalLPLockedStr = "";
 
         // Whole balances
-        for (Account &a : QmlSystem.w.accounts) {
+        for (std::pair<std::string, std::string> a : QmlSystem::getWallet()->getAccounts()) {
           a.balancesThreadLock.lock();
           totalAVAX += boost::lexical_cast<u256>(
             Utils::fixedPointToWei(a.balanceAVAX, this->currentCoinDecimals)
@@ -168,7 +169,6 @@ class QmlOverview : public QObject {
       });
     }
 
-    // Same as above but for fiat balances
     Q_INVOKABLE void getAllAccountFiatBalancesOverview() {
       QtConcurrent::run([=](){
         QVariantMap ret;
@@ -176,7 +176,7 @@ class QmlOverview : public QObject {
         std::string totalAVAXStr = "", totalAVMEStr = "", totalLPFreeStr = "", totalLPLockedStr = "";
 
         // Whole balances
-        for (Account &a : QmlSystem.w.accounts) {
+        for (std::pair<std::string, std::string> a : QmlSystem::getWallet()->getAccounts()) {
           a.balancesThreadLock.lock();
           totalAVAX += boost::lexical_cast<u256>(
             Utils::fixedPointToWei(a.balanceAVAX, this->currentCoinDecimals)
@@ -247,6 +247,7 @@ class QmlOverview : public QObject {
         emit walletFiatBalancesUpdated(ret);
       });
     }
+    */
 
     // Get the current ROI for the staking reward
     Q_INVOKABLE void calculateRewardCurrentROI() {
@@ -352,6 +353,6 @@ class QmlOverview : public QObject {
         );
       });
     }
-}
+};
 
 #endif  // QMLOVERVIEW_H

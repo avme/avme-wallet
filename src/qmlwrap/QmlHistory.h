@@ -24,29 +24,24 @@ class QmlHistory : public QObject {
     Q_INVOKABLE void listAccountTransactions(QString address) {
       QtConcurrent::run([=](){
         QVariantList ret;
-        for (Account &a : QmlSystem.w.accounts) {
-          if (a.address == address.toStdString()) {
-            a.updateAllTxStatus();
-            a.loadTxHistory();
-            for (TxData tx : a.history) {
-              std::string obj;
-              obj += "{\"txlink\": \"" + tx.txlink;
-              obj += "\", \"operation\": \"" + tx.operation;
-              obj += "\", \"txdata\": \"" + tx.data;
-              obj += "\", \"from\": \"" + tx.from;
-              obj += "\", \"to\": \"" + tx.to;
-              obj += "\", \"value\": \"" + tx.value;
-              obj += "\", \"gas\": \"" + tx.gas;
-              obj += "\", \"price\": \"" + tx.price;
-              obj += "\", \"datetime\": \"" + tx.humanDate;
-              obj += "\", \"unixtime\": " + std::to_string(tx.unixDate);
-              obj += ", \"confirmed\": " + QVariant(tx.confirmed).toString().toStdString();
-              obj += ", \"invalid\": " + QVariant(tx.invalid).toString().toStdString();
-              obj += "}";
-              ret << QString::fromStdString(obj);
-            }
-            break;
-          }
+        QmlSystem::getWallet()->updateAllTxStatus();
+        QmlSystem::getWallet()->loadTxHistory();
+        for (TxData tx : QmlSystem::getWallet()->getCurrentAccountHistory()) {
+          std::string obj;
+          obj += "{\"txlink\": \"" + tx.txlink;
+          obj += "\", \"operation\": \"" + tx.operation;
+          obj += "\", \"txdata\": \"" + tx.data;
+          obj += "\", \"from\": \"" + tx.from;
+          obj += "\", \"to\": \"" + tx.to;
+          obj += "\", \"value\": \"" + tx.value;
+          obj += "\", \"gas\": \"" + tx.gas;
+          obj += "\", \"price\": \"" + tx.price;
+          obj += "\", \"datetime\": \"" + tx.humanDate;
+          obj += "\", \"unixtime\": " + std::to_string(tx.unixDate);
+          obj += ", \"confirmed\": " + QVariant(tx.confirmed).toString().toStdString();
+          obj += ", \"invalid\": " + QVariant(tx.invalid).toString().toStdString();
+          obj += "}";
+          ret << QString::fromStdString(obj);
         }
         emit historyLoaded(ret);
       });
@@ -54,8 +49,8 @@ class QmlHistory : public QObject {
 
     // Update the statuses of all transactions in the list
     Q_INVOKABLE void updateTransactionStatus() {
-      QmlSystem.w.updateAllTxStatus();
+      QmlSystem::getWallet()->updateAllTxStatus();
     }
-}
+};
 
 #endif  //QMLHISTORY_H

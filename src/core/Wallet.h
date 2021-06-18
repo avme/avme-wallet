@@ -31,6 +31,7 @@
 #include <core/BIP39.h>
 #include <core/JSON.h>
 #include <core/Utils.h>
+#include <network/API.h>
 
 using namespace dev;  // u256
 using namespace dev::eth; // TransactionBase

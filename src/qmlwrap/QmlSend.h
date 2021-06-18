@@ -50,14 +50,9 @@ class QmlSend : public QObject {
       u256 gasLimitU256 = u256(gasLimitStr);
       u256 gasPriceU256 = u256(gasPriceStr);
 
+      // TODO: check this later
       std::string balanceAVAXStr;
-      for (Account &a : w.accounts) {
-        if (a.address == this->currentAccount) {
-          a.balancesThreadLock.lock();
-          balanceAVAXStr = a.balanceAVAX;
-          a.balancesThreadLock.unlock();
-        }
-      }
+      //balanceAVAXStr = this->currentAccount.balanceAVAX;
       u256 totalU256 = u256(Utils::fixedPointToWei(balanceAVAXStr, this->currentCoinDecimals));
       if ((gasLimitU256 * gasPriceU256) > totalU256) {
         return QString::fromStdString(Utils::weiToFixedPoint(
@@ -148,31 +143,31 @@ class QmlSend : public QObject {
         std::string dataHex;
         TransactionSkeleton txSkel;
         if (operationStr == "Send AVAX") {
-          txSkel = this->w.buildTransaction(
+          txSkel = QmlSystem::getWallet()->buildTransaction(
             this->currentAccount, toStr, coinAmountStr, gasLimitStr, gasPriceStr
           );
         } else if (operationStr == "Send AVME") {
-          txSkel = this->w.buildTransaction(
+          txSkel = QmlSystem::getWallet()->buildTransaction(
             this->currentAccount, Pangolin::tokenContracts[this->currentToken],
             "0", gasLimitStr, gasPriceStr, Pangolin::transfer(toStr, tokenAmountStr)
           );
         } else if (operationStr == "Approve Exchange") {
-          txSkel = this->w.buildTransaction(
+          txSkel = QmlSystem::getWallet()->buildTransaction(
             this->currentAccount, Pangolin::tokenContracts["AVME"],
             "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::routerContract)
           );
         } else if (operationStr == "Approve Liquidity") {
-          txSkel = this->w.buildTransaction(
+          txSkel = QmlSystem::getWallet()->buildTransaction(
             this->currentAccount, Pangolin::getPair(this->currentCoin, this->currentToken),
             "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::routerContract)
           );
         } else if (operationStr == "Approve Staking") {
-          txSkel = this->w.buildTransaction(
+          txSkel = QmlSystem::getWallet()->buildTransaction(
             this->currentAccount, Pangolin::getPair(this->currentCoin, this->currentToken),
             "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::stakingContract)
           );
         } else if (operationStr == "Approve Compound") {
-          txSkel = this->w.buildTransaction(
+          txSkel = QmlSystem::getWallet()->buildTransaction(
             this->currentAccount, Pangolin::getPair(this->currentCoin, this->currentToken),
             "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::compoundContract)
           );
@@ -190,7 +185,7 @@ class QmlSend : public QObject {
               ).count() + 300000 // + 5 minutes (300 seconds), in milliseconds
             )
           );
-          txSkel = this->w.buildTransaction(
+          txSkel = QmlSystem::getWallet()->buildTransaction(
             this->currentAccount, Pangolin::routerContract,
             coinAmountStr, gasLimitStr, gasPriceStr, dataHex
           );
@@ -209,7 +204,7 @@ class QmlSend : public QObject {
               ).count() + 300000 // + 5 minutes (300 seconds), in milliseconds
             )
           );
-          txSkel = this->w.buildTransaction(
+          txSkel = QmlSystem::getWallet()->buildTransaction(
             this->currentAccount, Pangolin::routerContract,
             "0", gasLimitStr, gasPriceStr, dataHex
           );
@@ -231,7 +226,7 @@ class QmlSend : public QObject {
               ).count() + 300000 // + 5 minutes (300 seconds), in milliseconds
             )
           );
-          txSkel = this->w.buildTransaction(
+          txSkel = QmlSystem::getWallet()->buildTransaction(
             this->currentAccount, Pangolin::routerContract,
             coinAmountStr, gasLimitStr, gasPriceStr, dataHex
           );
@@ -253,42 +248,42 @@ class QmlSend : public QObject {
               ).count() + 300000 // + 5 minutes (300 seconds), in milliseconds
             )
           );
-          txSkel = this->w.buildTransaction(
+          txSkel = QmlSystem::getWallet()->buildTransaction(
             this->currentAccount, Pangolin::routerContract,
             "0", gasLimitStr, gasPriceStr, dataHex
           );
         } else if (operationStr == "Stake LP") {
-          txSkel = this->w.buildTransaction(
+          txSkel = QmlSystem::getWallet()->buildTransaction(
             this->currentAccount, Pangolin::stakingContract,
             "0", gasLimitStr, gasPriceStr, Staking::stake(lpAmountStr)
           );
         } else if (operationStr == "Stake Compound LP") {
-          txSkel = this->w.buildTransaction(
+          txSkel = QmlSystem::getWallet()->buildTransaction(
             this->currentAccount, Pangolin::compoundContract,
             "0", gasLimitStr, gasPriceStr, Staking::stakeCompound(lpAmountStr)
           );
         } else if (operationStr == "Unstake LP") {
-          txSkel = this->w.buildTransaction(
+          txSkel = QmlSystem::getWallet()->buildTransaction(
             this->currentAccount, Pangolin::stakingContract,
             "0", gasLimitStr, gasPriceStr, Staking::withdraw(lpAmountStr)
           );
         } else if (operationStr == "Unstake Compound LP") {
-          txSkel = this->w.buildTransaction(
+          txSkel = QmlSystem::getWallet()->buildTransaction(
             this->currentAccount, Pangolin::compoundContract,
             "0", gasLimitStr, gasPriceStr, Staking::compoundWithdraw(lpAmountStr)
           );
         } else if (operationStr == "Harvest AVME") {
-          txSkel = this->w.buildTransaction(
+          txSkel = QmlSystem::getWallet()->buildTransaction(
             this->currentAccount, Pangolin::stakingContract,
             "0", gasLimitStr, gasPriceStr, Staking::getReward()
           );
         } else if (operationStr == "Reinvest AVME") {
-          txSkel = this->w.buildTransaction(
+          txSkel = QmlSystem::getWallet()->buildTransaction(
             this->currentAccount, Pangolin::compoundContract,
             "0", "500000", gasPriceStr, Staking::reinvest()
           );
         } else if (operationStr == "Exit Staking") {
-          txSkel = this->w.buildTransaction(
+          txSkel = QmlSystem::getWallet()->buildTransaction(
             this->currentAccount, Pangolin::stakingContract,
             "0", gasLimitStr, gasPriceStr, Staking::exit()
           );
@@ -299,21 +294,21 @@ class QmlSend : public QObject {
         bool signSuccess;
         std::string msg;
         std::string signedTx;
-        if (isLedger()) {
+        if (QmlSystem::getLedgerFlag()) {
           std::pair<bool, std::string> signStatus;
-          signStatus = this->ledgerDevice.signTransaction(txSkel, this->currentAccountPath);
+          signStatus = QmlSystem::getLedgerDevice()->signTransaction(txSkel, this->currentAccountPath);
           signSuccess = signStatus.first;
           signedTx = (signSuccess) ? signStatus.second : "";
           msg = (signSuccess) ? "Transaction signed!" : signStatus.second;
         } else {
-          signedTx = this->w.signTransaction(txSkel, passStr);
+          signedTx = QmlSystem::getWallet()->signTransaction(txSkel, passStr);
           signSuccess = !signedTx.empty();
           msg = (signSuccess) ? "Transaction signed!" : "Error on signing transaction.";
         }
         emit txSigned(signSuccess, QString::fromStdString(msg));
 
         // Send the transaction
-        std::string txLink = this->w.sendTransaction(signedTx, operationStr);
+        std::string txLink = QmlSystem::getWallet()->sendTransaction(signedTx, operationStr);
         if (txLink.empty()) { emit txSent(false, ""); }
         while (
           txLink.find("Transaction nonce is too low") != std::string::npos ||
@@ -321,20 +316,20 @@ class QmlSend : public QObject {
         ) {
           emit txRetry();
           txSkel.nonce++;
-          if (isLedger()) {
+          if (QmlSystem::getLedgerFlag()) {
             std::pair<bool, std::string> signStatus;
-            signStatus = this->ledgerDevice.signTransaction(txSkel, this->currentAccountPath);
+            signStatus = QmlSystem::getLedgerDevice()->signTransaction(txSkel, this->currentAccountPath);
             signSuccess = signStatus.first;
             signedTx = (signSuccess) ? signStatus.second : "";
           } else {
-            signedTx = this->w.signTransaction(txSkel, passStr);
+            signedTx = QmlSystem::getWallet()->signTransaction(txSkel, passStr);
           }
-          txLink = this->w.sendTransaction(signedTx, operationStr);
+          txLink = QmlSystem::getWallet()->sendTransaction(signedTx, operationStr);
         }
         emit txSent(true, QString::fromStdString(txLink));
       });
     }
-}
+};
 
 #endif  // QMLSEND_H
 
