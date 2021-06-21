@@ -9,6 +9,8 @@ import "qrc:/qml/components"
 // Header that shows the current Account and options for changing it
 Rectangle {
   id: accountHeader
+  property var tokenList
+  property var selectedToken
   anchors {
     top: parent.top
     left: parent.left
@@ -33,6 +35,10 @@ Rectangle {
       ledgerFailPopup.open()
       ledgerRetryTimer.start()
     }
+  }
+
+  function refreshTokenList() {
+    tokenList = QmlSystem.getARC20Tokens()
   }
 
   Text {

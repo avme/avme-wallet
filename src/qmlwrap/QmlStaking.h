@@ -30,8 +30,10 @@ class QmlStaking : public QObject {
     // Get the staking and compound rewards for a given Account, respectively.
     Q_INVOKABLE void getPoolReward() {
       QtConcurrent::run([=](){
-        std::string poolRewardWei = Staking::earned(this->currentAccount);
-        std::string poolReward = Utils::weiToFixedPoint(poolRewardWei, this->currentCoinDecimals);
+        std::string poolRewardWei = Staking::earned(
+          QmlSystem::getWallet()->getCurrentAccount().first
+        );
+        std::string poolReward = Utils::weiToFixedPoint(poolRewardWei, 18);
         emit rewardUpdated(QString::fromStdString(poolReward));
       });
     }
@@ -39,7 +41,7 @@ class QmlStaking : public QObject {
     Q_INVOKABLE void getCompoundReward() {
       QtConcurrent::run([=](){
         std::string poolRewardWei = Staking::getCompoundReward();
-        std::string poolReward = Utils::weiToFixedPoint(poolRewardWei, this->currentCoinDecimals);
+        std::string poolReward = Utils::weiToFixedPoint(poolRewardWei, 18);
         emit compoundUpdated(QString::fromStdString(poolReward));
       });
     }

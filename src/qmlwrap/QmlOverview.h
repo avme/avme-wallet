@@ -134,7 +134,7 @@ class QmlOverview : public QObject {
         for (std::pair<std::string, std::string> a : QmlSystem::getWallet()->getAccounts()) {
           a.balancesThreadLock.lock();
           totalAVAX += boost::lexical_cast<u256>(
-            Utils::fixedPointToWei(a.balanceAVAX, this->currentCoinDecimals)
+            Utils::fixedPointToWei(a.balanceAVAX, 18)
           );
           totalAVME += boost::lexical_cast<u256>(
             Utils::fixedPointToWei(a.balanceAVME, this->currentTokenDecimals)
@@ -148,7 +148,7 @@ class QmlOverview : public QObject {
           a.balancesThreadLock.unlock();
         }
         totalAVAXStr = Utils::weiToFixedPoint(
-          boost::lexical_cast<std::string>(totalAVAX), this->currentCoinDecimals
+          boost::lexical_cast<std::string>(totalAVAX), 18
         );
         totalAVMEStr = Utils::weiToFixedPoint(
           boost::lexical_cast<std::string>(totalAVME), this->currentTokenDecimals
@@ -179,7 +179,7 @@ class QmlOverview : public QObject {
         for (std::pair<std::string, std::string> a : QmlSystem::getWallet()->getAccounts()) {
           a.balancesThreadLock.lock();
           totalAVAX += boost::lexical_cast<u256>(
-            Utils::fixedPointToWei(a.balanceAVAX, this->currentCoinDecimals)
+            Utils::fixedPointToWei(a.balanceAVAX, 18)
           );
           totalAVME += boost::lexical_cast<u256>(
             Utils::fixedPointToWei(a.balanceAVME, this->currentTokenDecimals)
@@ -193,7 +193,7 @@ class QmlOverview : public QObject {
           a.balancesThreadLock.unlock();
         }
         totalAVAXStr = Utils::weiToFixedPoint(
-          boost::lexical_cast<std::string>(totalAVAX), this->currentCoinDecimals
+          boost::lexical_cast<std::string>(totalAVAX), 18
         );
         totalAVMEStr = Utils::weiToFixedPoint(
           boost::lexical_cast<std::string>(totalAVME), this->currentTokenDecimals
@@ -267,7 +267,7 @@ class QmlOverview : public QObject {
         bigfloat AVMEreserves = ("AVME" == first)
           ? boost::lexical_cast<bigfloat>(u256(reserves[0]))
           : boost::lexical_cast<bigfloat>(u256(reserves[1]));
-        bigfloat AVAXamount = bigfloat(Utils::fixedPointToWei("1", this->currentCoinDecimals));
+        bigfloat AVAXamount = bigfloat(Utils::fixedPointToWei("1", 18));
         // Amount and reserves are converted back to a non-scientific notation number
         bigfloat AVMEamount = bigfloat(Pangolin::calcLiquidityAmountOut(
           boost::lexical_cast<std::string>(u256(AVAXamount)),

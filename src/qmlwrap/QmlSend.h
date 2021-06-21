@@ -30,16 +30,10 @@ class QmlSend : public QObject {
       return QString::fromStdString(API::getAutomaticFee());
     }
 
-    // Create a RegExp for coin and token transaction amount input, respectively
-    Q_INVOKABLE QRegExp createCoinRegExp() {
+    // Create a RegExp for transaction amount inputs
+    Q_INVOKABLE QRegExp createTxRegExp(int decimals) {
       QRegExp rx;
-      rx.setPattern("[0-9]{0,99}(?:\\.[0-9]{1," + QString::number(this->currentCoinDecimals) + "})?");
-      return rx;
-    }
-
-    Q_INVOKABLE QRegExp createTokenRegExp() {
-      QRegExp rx;
-      rx.setPattern("[0-9]{0,99}(?:\\.[0-9]{1," + QString::number(this->currentTokenDecimals) + "})?");
+      rx.setPattern("[0-9]{0,99}(?:\\.[0-9]{1," + QString::number(decimals) + "})?");
       return rx;
     }
 
@@ -52,8 +46,8 @@ class QmlSend : public QObject {
 
       // TODO: check this later
       std::string balanceAVAXStr;
-      //balanceAVAXStr = this->currentAccount.balanceAVAX;
-      u256 totalU256 = u256(Utils::fixedPointToWei(balanceAVAXStr, this->currentCoinDecimals));
+      //balanceAVAXStr = QmlSystem::getWallet()->getCurrentAccount().first.balanceAVAX;
+      u256 totalU256 = u256(Utils::fixedPointToWei(balanceAVAXStr, 18));
       if ((gasLimitU256 * gasPriceU256) > totalU256) {
         return QString::fromStdString(Utils::weiToFixedPoint(
           boost::lexical_cast<std::string>(u256(0)), 18
@@ -94,17 +88,14 @@ class QmlSend : public QObject {
 
     /**
      * Check for insufficient funds in a transaction.
-     * Types are "Coin", "Token" and "LP", respectively.
+     * Returns true if funds are lacking, or false if they're not.
+     * TODO: maybe invert this logic to hasFunds?
      */
     Q_INVOKABLE bool hasInsufficientFunds(
-      QString type, QString senderAmount, QString receiverAmount
+      QString senderAmount, QString receiverAmount, int decimals
     ) {
       std::string senderStr, receiverStr;
       u256 senderU256, receiverU256;
-      int decimals;
-      if (type == "Coin") decimals = this->currentCoinDecimals;
-      else if (type == "Token") decimals = this->currentTokenDecimals;
-      else if (type == "LP") decimals = 18;
       senderStr = Utils::fixedPointToWei(senderAmount.toStdString(), decimals);
       receiverStr = Utils::fixedPointToWei(receiverAmount.toStdString(), decimals);
       senderU256 = u256(senderStr);
@@ -115,7 +106,9 @@ class QmlSend : public QObject {
     // Make a transaction with the collected data
     Q_INVOKABLE void makeTransaction(
       QString operation, QString to,
-      QString coinAmount, QString tokenAmount, QString lpAmount,
+      QString coinAmount, int coinDecimals,
+      QString tokenAmount, int tokenDecimals,
+      QString lpAmount, int lpDecimals,
       QString gasLimit, QString gasPrice, QString pass
     ) {
       QtConcurrent::run([=](){
@@ -132,9 +125,9 @@ class QmlSend : public QObject {
         // Convert the values required for a transaction to their Wei formats.
         // Gas price is in Gwei (10^9 Wei) and amounts are in fixed point.
         // Gas limit is already in Wei so we skip that.
-        coinAmountStr = Utils::fixedPointToWei(coinAmountStr, this->currentCoinDecimals);
-        tokenAmountStr = Utils::fixedPointToWei(tokenAmountStr, this->currentTokenDecimals);
-        lpAmountStr = Utils::fixedPointToWei(lpAmountStr, 18);
+        coinAmountStr = Utils::fixedPointToWei(coinAmountStr, coinDecimals);
+        tokenAmountStr = Utils::fixedPointToWei(tokenAmountStr, tokenDecimals);
+        lpAmountStr = Utils::fixedPointToWei(lpAmountStr, lpDecimals);
         gasPriceStr = boost::lexical_cast<std::string>(
           boost::lexical_cast<u256>(gasPriceStr) * raiseToPow(10, 9)
         );
@@ -144,31 +137,31 @@ class QmlSend : public QObject {
         TransactionSkeleton txSkel;
         if (operationStr == "Send AVAX") {
           txSkel = QmlSystem::getWallet()->buildTransaction(
-            this->currentAccount, toStr, coinAmountStr, gasLimitStr, gasPriceStr
+            QmlSystem::getWallet()->getCurrentAccount().first, toStr, coinAmountStr, gasLimitStr, gasPriceStr
           );
         } else if (operationStr == "Send AVME") {
           txSkel = QmlSystem::getWallet()->buildTransaction(
-            this->currentAccount, Pangolin::tokenContracts[this->currentToken],
+            QmlSystem::getWallet()->getCurrentAccount().first, Pangolin::tokenContracts["AVME"],
             "0", gasLimitStr, gasPriceStr, Pangolin::transfer(toStr, tokenAmountStr)
           );
         } else if (operationStr == "Approve Exchange") {
           txSkel = QmlSystem::getWallet()->buildTransaction(
-            this->currentAccount, Pangolin::tokenContracts["AVME"],
+            QmlSystem::getWallet()->getCurrentAccount().first, Pangolin::tokenContracts["AVME"],
             "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::routerContract)
           );
         } else if (operationStr == "Approve Liquidity") {
           txSkel = QmlSystem::getWallet()->buildTransaction(
-            this->currentAccount, Pangolin::getPair(this->currentCoin, this->currentToken),
+            QmlSystem::getWallet()->getCurrentAccount().first, Pangolin::getPair("AVAX", "AVME"),
             "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::routerContract)
           );
         } else if (operationStr == "Approve Staking") {
           txSkel = QmlSystem::getWallet()->buildTransaction(
-            this->currentAccount, Pangolin::getPair(this->currentCoin, this->currentToken),
+            QmlSystem::getWallet()->getCurrentAccount().first, Pangolin::getPair("AVAX", "AVME"),
             "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::stakingContract)
           );
         } else if (operationStr == "Approve Compound") {
           txSkel = QmlSystem::getWallet()->buildTransaction(
-            this->currentAccount, Pangolin::getPair(this->currentCoin, this->currentToken),
+            QmlSystem::getWallet()->getCurrentAccount().first, Pangolin::getPair("AVAX", "AVME"),
             "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::compoundContract)
           );
         } else if (operationStr == "Swap AVAX -> AVME") {
@@ -178,7 +171,7 @@ class QmlSend : public QObject {
             // amountOutMin, path, to, deadline
             boost::lexical_cast<std::string>(amountOutMin),
             { Pangolin::tokenContracts["WAVAX"], Pangolin::tokenContracts["AVME"] },
-            this->currentAccount,
+            QmlSystem::getWallet()->getCurrentAccount().first,
             boost::lexical_cast<std::string>(
               std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch()
@@ -186,7 +179,7 @@ class QmlSend : public QObject {
             )
           );
           txSkel = QmlSystem::getWallet()->buildTransaction(
-            this->currentAccount, Pangolin::routerContract,
+            QmlSystem::getWallet()->getCurrentAccount().first, Pangolin::routerContract,
             coinAmountStr, gasLimitStr, gasPriceStr, dataHex
           );
         } else if (operationStr == "Swap AVME -> AVAX") {
@@ -197,7 +190,7 @@ class QmlSend : public QObject {
             tokenAmountStr,
             boost::lexical_cast<std::string>(amountOutMin),
             { Pangolin::tokenContracts["AVME"], Pangolin::tokenContracts["WAVAX"] },
-            this->currentAccount,
+            QmlSystem::getWallet()->getCurrentAccount().first,
             boost::lexical_cast<std::string>(
               std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch()
@@ -205,7 +198,7 @@ class QmlSend : public QObject {
             )
           );
           txSkel = QmlSystem::getWallet()->buildTransaction(
-            this->currentAccount, Pangolin::routerContract,
+            QmlSystem::getWallet()->getCurrentAccount().first, Pangolin::routerContract,
             "0", gasLimitStr, gasPriceStr, dataHex
           );
         } else if (operationStr == "Add Liquidity") {
@@ -215,11 +208,11 @@ class QmlSend : public QObject {
           amountTokenMin -= (amountTokenMin / 200); // 0.5%
           dataHex = Pangolin::addLiquidityAVAX(
             // tokenAddress, amountTokenDesired, amountTokenMin, amountAVAXMin, to, deadline
-            Pangolin::tokenContracts[this->currentToken],
+            Pangolin::tokenContracts["AVME"],
             tokenAmountStr,
             boost::lexical_cast<std::string>(amountTokenMin),
             boost::lexical_cast<std::string>(amountAVAXMin),
-            this->currentAccount,
+            QmlSystem::getWallet()->getCurrentAccount().first,
             boost::lexical_cast<std::string>(
               std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch()
@@ -227,7 +220,7 @@ class QmlSend : public QObject {
             )
           );
           txSkel = QmlSystem::getWallet()->buildTransaction(
-            this->currentAccount, Pangolin::routerContract,
+            QmlSystem::getWallet()->getCurrentAccount().first, Pangolin::routerContract,
             coinAmountStr, gasLimitStr, gasPriceStr, dataHex
           );
         } else if (operationStr == "Remove Liquidity") {
@@ -237,11 +230,11 @@ class QmlSend : public QObject {
           amountTokenMin -= (amountTokenMin / 200); // 0.5%
           dataHex = Pangolin::removeLiquidityAVAX(
             // tokenAddress, liquidity, amountTokenMin, amountAVAXMin, to, deadline
-            Pangolin::tokenContracts[this->currentToken],
+            Pangolin::tokenContracts["AVME"],
             lpAmountStr,
             boost::lexical_cast<std::string>(amountTokenMin),
             boost::lexical_cast<std::string>(amountAVAXMin),
-            this->currentAccount,
+            QmlSystem::getWallet()->getCurrentAccount().first,
             boost::lexical_cast<std::string>(
               std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch()
@@ -249,42 +242,42 @@ class QmlSend : public QObject {
             )
           );
           txSkel = QmlSystem::getWallet()->buildTransaction(
-            this->currentAccount, Pangolin::routerContract,
+            QmlSystem::getWallet()->getCurrentAccount().first, Pangolin::routerContract,
             "0", gasLimitStr, gasPriceStr, dataHex
           );
         } else if (operationStr == "Stake LP") {
           txSkel = QmlSystem::getWallet()->buildTransaction(
-            this->currentAccount, Pangolin::stakingContract,
+            QmlSystem::getWallet()->getCurrentAccount().first, Pangolin::stakingContract,
             "0", gasLimitStr, gasPriceStr, Staking::stake(lpAmountStr)
           );
         } else if (operationStr == "Stake Compound LP") {
           txSkel = QmlSystem::getWallet()->buildTransaction(
-            this->currentAccount, Pangolin::compoundContract,
+            QmlSystem::getWallet()->getCurrentAccount().first, Pangolin::compoundContract,
             "0", gasLimitStr, gasPriceStr, Staking::stakeCompound(lpAmountStr)
           );
         } else if (operationStr == "Unstake LP") {
           txSkel = QmlSystem::getWallet()->buildTransaction(
-            this->currentAccount, Pangolin::stakingContract,
+            QmlSystem::getWallet()->getCurrentAccount().first, Pangolin::stakingContract,
             "0", gasLimitStr, gasPriceStr, Staking::withdraw(lpAmountStr)
           );
         } else if (operationStr == "Unstake Compound LP") {
           txSkel = QmlSystem::getWallet()->buildTransaction(
-            this->currentAccount, Pangolin::compoundContract,
+            QmlSystem::getWallet()->getCurrentAccount().first, Pangolin::compoundContract,
             "0", gasLimitStr, gasPriceStr, Staking::compoundWithdraw(lpAmountStr)
           );
         } else if (operationStr == "Harvest AVME") {
           txSkel = QmlSystem::getWallet()->buildTransaction(
-            this->currentAccount, Pangolin::stakingContract,
+            QmlSystem::getWallet()->getCurrentAccount().first, Pangolin::stakingContract,
             "0", gasLimitStr, gasPriceStr, Staking::getReward()
           );
         } else if (operationStr == "Reinvest AVME") {
           txSkel = QmlSystem::getWallet()->buildTransaction(
-            this->currentAccount, Pangolin::compoundContract,
+            QmlSystem::getWallet()->getCurrentAccount().first, Pangolin::compoundContract,
             "0", "500000", gasPriceStr, Staking::reinvest()
           );
         } else if (operationStr == "Exit Staking") {
           txSkel = QmlSystem::getWallet()->buildTransaction(
-            this->currentAccount, Pangolin::stakingContract,
+            QmlSystem::getWallet()->getCurrentAccount().first, Pangolin::stakingContract,
             "0", gasLimitStr, gasPriceStr, Staking::exit()
           );
         }
@@ -296,7 +289,9 @@ class QmlSend : public QObject {
         std::string signedTx;
         if (QmlSystem::getLedgerFlag()) {
           std::pair<bool, std::string> signStatus;
-          signStatus = QmlSystem::getLedgerDevice()->signTransaction(txSkel, this->currentAccountPath);
+          signStatus = QmlSystem::getLedgerDevice()->signTransaction(
+            txSkel, QmlSystem::getWallet()->getCurrentAccount().first
+          );
           signSuccess = signStatus.first;
           signedTx = (signSuccess) ? signStatus.second : "";
           msg = (signSuccess) ? "Transaction signed!" : signStatus.second;
@@ -318,7 +313,9 @@ class QmlSend : public QObject {
           txSkel.nonce++;
           if (QmlSystem::getLedgerFlag()) {
             std::pair<bool, std::string> signStatus;
-            signStatus = QmlSystem::getLedgerDevice()->signTransaction(txSkel, this->currentAccountPath);
+            signStatus = QmlSystem::getLedgerDevice()->signTransaction(
+              txSkel, QmlSystem::getWallet()->getCurrentAccount().first
+            );
             signSuccess = signStatus.first;
             signedTx = (signSuccess) ? signStatus.second : "";
           } else {

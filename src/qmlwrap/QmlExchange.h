@@ -39,20 +39,24 @@ class QmlExchange : public QObject {
     Q_INVOKABLE void getAllowances() {
       QtConcurrent::run([=](){
         std::string exchangeAllowance = Pangolin::allowance(
-          Pangolin::tokenContracts[this->currentToken],
-          this->currentAccount, Pangolin::routerContract
+          Pangolin::tokenContracts["AVME"],
+          QmlSystem::getWallet()->getCurrentAccount().first,
+          Pangolin::routerContract
         );
         std::string liquidityAllowance = Pangolin::allowance(
-          Pangolin::getPair(this->currentCoin, this->currentToken),
-          this->currentAccount, Pangolin::routerContract
+          Pangolin::getPair("AVAX", "AVME"),
+          QmlSystem::getWallet()->getCurrentAccount().first,
+          Pangolin::routerContract
         );
         std::string stakingAllowance = Pangolin::allowance(
-          Pangolin::getPair(this->currentCoin, this->currentToken),
-          this->currentAccount, Pangolin::stakingContract
+          Pangolin::getPair("AVAX", "AVME"),
+          QmlSystem::getWallet()->getCurrentAccount().first,
+          Pangolin::stakingContract
         );
         std::string compoundAllowance = Pangolin::allowance(
-          Pangolin::getPair(this->currentCoin, this->currentToken),
-          this->currentAccount, Pangolin::compoundContract
+          Pangolin::getPair("AVAX", "AVME"),
+          QmlSystem::getWallet()->getCurrentAccount().first,
+          Pangolin::compoundContract
         );
         emit allowancesUpdated(
           QString::fromStdString(exchangeAllowance),
@@ -188,7 +192,7 @@ class QmlExchange : public QObject {
       QVariantMap ret;
       std::string balanceLPFreeStr;
       // TODO: check this later
-      //balanceLPFreeStr = this->currentAccount.balanceLPFree;
+      //balanceLPFreeStr = QmlSystem::getWallet()->getCurrentAccount().first.balanceLPFree;
       if (lowerReserves.isEmpty()) { lowerReserves = QString("0"); }
       if (higherReserves.isEmpty()) { higherReserves = QString("0"); }
 
@@ -245,7 +249,7 @@ class QmlExchange : public QObject {
       QVariantMap ret;
       std::string balanceLPFreeStr;
       // TODO: check this later
-      //balanceLPFreeStr = this->currentAccount.balanceLPFree;
+      //balanceLPFreeStr = QmlSystem::getWallet()->getCurrentAccount().first.balanceLPFree;
       u256 lowerReservesU256 = boost::lexical_cast<u256>(lowerReserves.toStdString());
       u256 higherReservesU256 = boost::lexical_cast<u256>(higherReserves.toStdString());
       u256 totalLiquidityU256 = boost::lexical_cast<u256>(totalLiquidity.toStdString());

@@ -66,34 +66,6 @@ Q_IMPORT_PLUGIN(QtChartsQml2Plugin)
 // QObject/wrapper for interfacing between C++ (wallet) and QML (gui)
 class System : public QObject {
   Q_OBJECT
-
-  private:
-    std::string currentCoin;
-    int currentCoinDecimals;
-    std::string currentToken;
-    int currentTokenDecimals;
-    std::string currentAccount;
-    std::string currentAccountPath;
-
-  public:
-    // Getters/Setters for private vars
-    Q_INVOKABLE QString getCurrentCoin() { return QString::fromStdString(this->currentCoin); }
-    Q_INVOKABLE void setCurrentCoin(QString coin) { this->currentCoin = coin.toStdString(); }
-
-    Q_INVOKABLE int getCurrentCoinDecimals() { return this->currentCoinDecimals; }
-    Q_INVOKABLE void setCurrentCoinDecimals(int decimals) { this->currentCoinDecimals = decimals; }
-
-    Q_INVOKABLE QString getCurrentToken() { return QString::fromStdString(this->currentToken); }
-    Q_INVOKABLE void setCurrentToken(QString token) { this->currentToken = token.toStdString(); }
-
-    Q_INVOKABLE int getCurrentTokenDecimals() { return this->currentTokenDecimals; }
-    Q_INVOKABLE void setCurrentTokenDecimals(int decimals) { this->currentTokenDecimals = decimals; }
-
-    Q_INVOKABLE QString getCurrentAccount() { return QString::fromStdString(this->currentAccount); }
-    Q_INVOKABLE void setCurrentAccount(QString account) { this->currentAccount = account.toStdString(); }
-
-    Q_INVOKABLE QString getCurrentAccountPath() { return QString::fromStdString(this->currentAccountPath); }
-    Q_INVOKABLE void setCurrentAccountPath(QString path) { this->currentAccountPath = path.toStdString(); }
 };
 
 #endif // MAIN_GUI_H

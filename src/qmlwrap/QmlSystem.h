@@ -16,7 +16,7 @@
 #include "version.h"
 
 /**
- * Wrappers for common stuff that is shared across the whole program.
+ * Wrappers for common stuff shared across the whole program.
  */
 class QmlSystem : public QObject {
   Q_OBJECT
@@ -105,6 +105,22 @@ class QmlSystem : public QObject {
       bigfloat secondFloat = boost::lexical_cast<bigfloat>(second.toStdString());
       return (firstFloat > secondFloat);
     }
+
+    // Get the list of registered tokens from the Wallet
+    Q_INVOKABLE QVariantList getARC20Tokens() {
+      std::vector<ARC20Token> list = QmlSystem::getWallet()->getARC20Tokens();
+      QVariantList ret;
+      for (ARC20Token token : list) {
+        QVariantMap tokenObj;
+        tokenObj.insert("address", QString::fromStdString(token.address));
+        tokenObj.insert("symbol", QString::fromStdString(token.symbol));
+        tokenObj.insert("name", QString::fromStdString(token.name));
+        tokenObj.insert("decimals", token.decimals);
+        tokenObj.insert("avaxPairContract", QString::fromStdString(token.avaxPairContract));
+        ret << tokenObj;
+      }
+      return ret;
+    }
 };
 
-#endif  //QTSYSTEM_H
+#endif  //QMLSYSTEM_H
