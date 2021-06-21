@@ -60,6 +60,59 @@ bool Wallet::auth(std::string pass) {
   return (hash.ref().toString() == passHash.ref().toString());
 }
 
+void Wallet::loadARC20Tokens() {
+  boost::filesystem::path tokensFolder = folder.string() + "/wallet/c-avax/tokens";
+  if (!exists(tokensFolder)) { create_directories(tokensFolder); }
+  this->ARC20Tokens.clear();
+  for (auto &entry : recursive_directory_iterator(tokensFolder)) {
+    if (entry.path().extension() == ".json") {
+      ARC20Token token;
+      json_spirit::mValue tokenData = JSON::readFile(entry.path());
+      token.address = JSON::objectItem(tokenData, "address").get_str();
+      token.symbol = JSON::objectItem(tokenData, "symbol").get_str();
+      token.name = JSON::objectItem(tokenData, "name").get_str();
+      token.decimals = JSON::objectItem(tokenData, "decimals").get_int();
+      token.avaxPairContract = JSON::objectItem(tokenData, "avaxPairContract").get_str();
+      this->ARC20Tokens.push_back(token);
+    }
+  }
+}
+
+bool Wallet::addARC20Token(
+  std::string address, std::string symbol, std::string name,
+  int decimals, std::string avaxPairContract
+) {
+  boost::filesystem::path tokenFile;
+  json_spirit::mObject token;
+  token["address"] = address;
+  token["symbol"] = symbol;
+  token["name"] = name;
+  token["decimals"] = decimals;
+  token["avaxPairContract"] = avaxPairContract;
+  tokenFile = folder.string() + "/wallet/c-avax/tokens/" + address + ".json";
+  json_spirit::mValue success = JSON::writeFile(token, tokenFile);
+
+  // Try/Catch are "inverted"
+  // Error happens when trying to find the error.
+  // If there is no "error" on the JSON, it will throw, meaning that it was successfull
+  try {
+    Utils::logToDebug("Error happened when writing JSON file: " + success.get_obj().at("ERROR").get_str());
+  } catch (std::exception &e) {
+    loadARC20Tokens();
+    return true;
+  }
+  loadARC20Tokens();
+  return false;
+}
+
+bool Wallet::removeARC20Token(std::string address) {
+  boost::filesystem::path tokenFile;
+  tokenFile = folder.string() + "/wallet/c-avax/tokens/" + address + ".json";
+  bool success = boost::filesystem::remove(tokenFile);
+  if (success) { loadARC20Tokens(); }
+  return success;
+}
+
 void Wallet::loadAccounts() {
   this->accounts.clear();
   if (this->km.store().keys().empty()) { return; }

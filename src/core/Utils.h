@@ -35,6 +35,19 @@ struct HexTo {
   }
 };
 
+// Struct for a single ARC20 Token.
+typedef struct ARC20Token {
+  // Those are stored in JSON
+  std::string address;
+  std::string symbol;
+  std::string name;
+  int decimals;
+  std::string avaxPairContract;
+  // Those are NOT stored in JSON
+  bigfloat reserve;
+  bigfloat avaxReserve;
+} ARC20Token;
+
 // Struct for a single Transaction.
 typedef struct TxData {
   std::string txlink;

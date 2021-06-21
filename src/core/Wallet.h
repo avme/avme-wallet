@@ -53,6 +53,9 @@ class Wallet {
     h256 passSalt;
     int passIterations = 100000;
 
+    // List of registered ARC20 tokens.
+    std::vector<ARC20Token> ARC20Tokens;
+
     // Current Account and its tx history.
     std::pair<std::string, std::string> currentAccount;
     std::vector<TxData> currentAccountHistory;
@@ -63,6 +66,7 @@ class Wallet {
 
   public:
     // Getters for private vars
+    std::vector<ARC20Token> getARC20Tokens() { return this->ARC20Tokens; }
     std::pair<std::string, std::string> getCurrentAccount() { return this->currentAccount; }
     std::vector<TxData> getCurrentAccountHistory() { return this->currentAccountHistory; }
     std::map<std::string, std::string> getAccounts() { return this->accounts; }
@@ -102,6 +106,28 @@ class Wallet {
      * Returns true on success, false on failure.
      */
     bool auth(std::string pass);
+
+    // ======================================================================
+    // TOKEN MANAGEMENT
+    // ======================================================================
+
+    /**
+     * (Re)Load all registered ARC20 tokens into the list.
+     */
+    void loadARC20Tokens();
+
+    /**
+     * Register a new ARC20 token into the Wallet.
+     */
+    bool addARC20Token(
+      std::string address, std::string symbol, std::string name,
+      int decimals, std::string avaxPairContract
+    );
+
+    /**
+     * Remove an ARC20 token from the Wallet.
+     */
+    bool removeARC20Token(std::string address);
 
     // ======================================================================
     // ACCOUNT MANAGEMENT
@@ -167,7 +193,7 @@ class Wallet {
     Secret getSecret(std::string const& account, std::string pass);
 
     // ======================================================================
-    // TRANSACTION/HISTORY MANAGEMENT
+    // TRANSACTION MANAGEMENT
     // ======================================================================
 
     /**
@@ -195,6 +221,10 @@ class Wallet {
      * Returns a link to the transaction in the blockchain, or an empty string on failure.
      */
     std::string sendTransaction(std::string txidHex, std::string operation);
+
+    // ======================================================================
+    // HISTORY MANAGEMENT
+    // ======================================================================
 
     /**
      * Convert the transaction history from the current Account to a JSON array.
