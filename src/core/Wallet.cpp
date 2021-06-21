@@ -61,7 +61,8 @@ bool Wallet::auth(std::string pass) {
 }
 
 void Wallet::loadARC20Tokens() {
-  boost::filesystem::path tokensFolder = folder.string() + "/wallet/c-avax/tokens";
+  boost::filesystem::path tokensFolder;
+  tokensFolder = Utils::walletFolderPath.string() + "/wallet/c-avax/tokens";
   if (!exists(tokensFolder)) { create_directories(tokensFolder); }
   this->ARC20Tokens.clear();
   for (auto &entry : recursive_directory_iterator(tokensFolder)) {
@@ -89,7 +90,7 @@ bool Wallet::addARC20Token(
   token["name"] = name;
   token["decimals"] = decimals;
   token["avaxPairContract"] = avaxPairContract;
-  tokenFile = folder.string() + "/wallet/c-avax/tokens/" + address + ".json";
+  tokenFile = Utils::walletFolderPath.string() + "/wallet/c-avax/tokens/" + address + ".json";
   json_spirit::mValue success = JSON::writeFile(token, tokenFile);
 
   // Try/Catch are "inverted"
@@ -107,7 +108,7 @@ bool Wallet::addARC20Token(
 
 bool Wallet::removeARC20Token(std::string address) {
   boost::filesystem::path tokenFile;
-  tokenFile = folder.string() + "/wallet/c-avax/tokens/" + address + ".json";
+  tokenFile = Utils::walletFolderPath.string() + "/wallet/c-avax/tokens/" + address + ".json";
   bool success = boost::filesystem::remove(tokenFile);
   if (success) { loadARC20Tokens(); }
   return success;
