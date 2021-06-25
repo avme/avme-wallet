@@ -20,7 +20,7 @@ TextField {
   property color inputSelectionColor: "#58A0B9"
   property color inputPlaceholderColor: "#88FFFFFF"
   property color inputBorderColor: "#5C5575"
- 
+
   implicitWidth: 320
   implicitHeight: 40
   selectByMouse: true
@@ -32,11 +32,11 @@ TextField {
     height: parent.height
     anchors.bottom: parent.bottom
     color: input.enabled ? inputColor : inputDisabledColor
-	border.color: inputBorderColor
-	border.width: 3
-	radius: 1
+    border.color: inputBorderColor
+    border.width: 3
+    radius: 1
   }
-	
+
   // Label above the input field
   Text {
     id: labelText

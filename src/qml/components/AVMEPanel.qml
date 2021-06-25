@@ -4,42 +4,40 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
-import "qrc:/qml/components"
-
 // Panel template for basic info/data/etc.
 Rectangle {
   id: panel
   property alias title: titleText.text
-  property alias header: panelHeader
 
   implicitWidth: 300
   implicitHeight: 300
-  color: "#2D3542"
-  radius: 10
+  color: "#1D1827"
+  radius: 5
+  border.color: "#211E2B"
+  border.width: 10
 
-  Rectangle {
-    id: panelHeader
-    anchors.top: parent.top
-    width: parent.width
-    height: 40
-    color: "#1D212A"
-    radius: 10
-
-    Text {
-      id: titleText
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.left: parent.left
-      anchors.leftMargin: 10
-      color: "#FFFFFF"
-      font.pixelSize: 16.0
-      text: "Title"
+  Text {
+    id: titleText
+    anchors {
+      top: parent.top
+      horizontalCenter: parent.horizontalCenter
+      margins: 20
     }
+    color: "#FFFFFF"
+    font.pixelSize: 16.0
+    font.capitalization: Font.AllUppercase
+    text: "Title"
+
     Rectangle {
-      id: headerBottom
-      anchors.bottom: parent.bottom
-      width: parent.width
-      height: 10
-      color: "#1D212A"
+      id: titleUnderline
+      color: parent.color
+      width: (parent.width * 1.1)
+      height: 1
+      anchors {
+        top: parent.bottom
+        horizontalCenter: parent.horizontalCenter
+        topMargin: 5
+      }
     }
   }
 }

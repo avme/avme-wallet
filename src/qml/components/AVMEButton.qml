@@ -32,8 +32,8 @@ Button {
         color: btnColor
       }
     }
-	border.color: btnBorderColor
-	border.width: 3
+    border.color: btnBorderColor
+    border.width: 3
     opacity: btn.down ? "0.7" : "1.0"
     radius: 1
   }

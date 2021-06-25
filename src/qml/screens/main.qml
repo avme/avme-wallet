@@ -46,7 +46,10 @@ ApplicationWindow {
   Rectangle {
     id: bg
     anchors.fill: parent
-    color: "#252935"
+    gradient: Gradient {
+      GradientStop { position: 0.0; color: "#0F0C18" }
+      GradientStop { position: 1.0; color: "#190B25" }
+    }
 
     Image {
       id: logoBg
