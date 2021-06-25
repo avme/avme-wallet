@@ -14,14 +14,13 @@ TextField {
   id: input
   property string label
   property string placeholder
-  property color inputColor: "#449CE3FD"
+  property color inputColor: "#1D1B26"
   property color inputLabelColor: "#FFFFFF"
   property color inputDisabledColor: "#44888888"
   property color inputSelectionColor: "#58A0B9"
-  property color inputLineColor: "#7AC1DB"
-  property color inputLineDisabledColor: "#888888"
   property color inputPlaceholderColor: "#88FFFFFF"
-
+  property color inputBorderColor: "#5C5575"
+ 
   implicitWidth: 320
   implicitHeight: 40
   selectByMouse: true
@@ -33,18 +32,11 @@ TextField {
     height: parent.height
     anchors.bottom: parent.bottom
     color: input.enabled ? inputColor : inputDisabledColor
+	border.color: inputBorderColor
+	border.width: 3
+	radius: 1
   }
-
-  // "Neon" line below the input field
-  Rectangle {
-    width: parent.width
-    height: 2
-    anchors.bottom: parent.bottom
-    border.width: 2
-    border.color: input.enabled ? inputLineColor : inputLineDisabledColor
-    color: "transparent"
-  }
-
+	
   // Label above the input field
   Text {
     id: labelText
