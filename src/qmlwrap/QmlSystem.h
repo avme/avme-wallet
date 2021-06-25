@@ -106,10 +106,10 @@ class QmlSystem : public QObject {
     // ======================================================================
 
     // Getters/Setters for private vars
-    bool getFirstLoad() { return firstLoad; }
-    void setFirstLoad(bool b) { firstLoad = b; }
-    bool getLedgerFlag() { return ledgerFlag; }
-    void setLedgerFlag(bool b) { ledgerFlag = b; }
+    Q_INVOKABLE bool getFirstLoad() { return firstLoad; }
+    Q_INVOKABLE void setFirstLoad(bool b) { firstLoad = b; }
+    Q_INVOKABLE bool getLedgerFlag() { return ledgerFlag; }
+    Q_INVOKABLE void setLedgerFlag(bool b) { ledgerFlag = b; }
 
     // Get the project's version
     Q_INVOKABLE QString getProjectVersion();

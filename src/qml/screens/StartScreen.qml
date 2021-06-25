@@ -117,7 +117,7 @@ Item {
       }
       text: "Create/Import Wallet"
       onClicked: {
-        QmlSystem.setLedger(false)
+        QmlSystem.setLedgerFlag(false)
         isCreate = true
       }
     }
@@ -130,7 +130,7 @@ Item {
       }
       text: "Load Wallet"
       onClicked: {
-        QmlSystem.setLedger(false)
+        QmlSystem.setLedgerFlag(false)
         isLoad = true
       }
     }
