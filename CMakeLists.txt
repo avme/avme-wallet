@@ -98,31 +98,34 @@ add_subdirectory(src/lib/ethcore)
 add_subdirectory(src/lib/ledger)
 
 # Organize executable sources and headers
-file(GLOB AVME_LIB_HEADERS "src/lib/**/*.h")
-file(GLOB AVME_LIB_SOURCES "src/lib/**/*.cpp")
 file(GLOB AVME_CORE_HEADERS "src/core/*.h")
 file(GLOB AVME_CORE_SOURCES "src/core/*.cpp")
 file(GLOB AVME_NETWORK_HEADERS "src/network/*.h")
 file(GLOB AVME_NETWORK_SOURCES "src/network/*.cpp")
+file(GLOB AVME_QMLWRAP_HEADERS "src/qmlwrap/*.h")
+file(GLOB AVME_QMLWRAP_SOURCES "src/qmlwrap/*.cpp")
 
 # Compile the project library
 add_library(avme-lib
-  ${AVME_LIB_HEADERS} ${AVME_LIB_SOURCES}
   ${AVME_CORE_HEADERS} ${AVME_CORE_SOURCES}
   ${AVME_NETWORK_HEADERS} ${AVME_NETWORK_SOURCES}
 )
 target_link_libraries(avme-lib PUBLIC
-  devcore devcrypto ethcore ledger ${ETHASH_BYPRODUCTS} Ethash ssl crypto toolbox bip39 LevelDB ${BOOST_LIBS}
+  devcore devcrypto ethcore ledger ${ETHASH_BYPRODUCTS} Ethash ssl crypto
+  toolbox bip39 LevelDB ${BOOST_LIBS}
 )
 
 # Set the project version as a macro in a header file
-configure_file("${CMAKE_SOURCE_DIR}/src/version.h.in" "${CMAKE_SOURCE_DIR}/src/version.h" @ONLY)
+configure_file(
+  "${CMAKE_SOURCE_DIR}/src/version.h.in" "${CMAKE_SOURCE_DIR}/src/version.h" @ONLY
+)
 
 # Compile Qt-specific stuff to embed into the GUI executable.
 # First command is a dummy output to force whatever depends on it to
 # always be rebuilt (adapted from https://stackoverflow.com/a/32062884).
 # moc creates a source file with meta-object data that allows for
-# C++/Qt interfacing (e.g. classes that use the Q_OBJECT macro).
+# C++/Qt interfacing (e.g. classes that use the Q_OBJECT macro),
+# unfortunately only one at a time but that's the best we have.
 # rcc creates a source file with all the resources used in the .qrc file
 # to be compiled into the executable.
 add_custom_command(
@@ -130,15 +133,19 @@ add_custom_command(
   COMMAND ""
 )
 add_custom_command(
-  OUTPUT "${CMAKE_SOURCE_DIR}/build/moc_main-gui.cpp"
-  COMMAND "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/native/bin/moc" "${CMAKE_SOURCE_DIR}/src/main-gui.h" -o "${CMAKE_SOURCE_DIR}/build/moc_main-gui.cpp"
+  OUTPUT "${CMAKE_SOURCE_DIR}/build/moc_QmlSystem.cpp"
+  COMMAND "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/native/bin/moc"
+          "${CMAKE_SOURCE_DIR}/src/qmlwrap/QmlSystem.h"
+          -o "${CMAKE_SOURCE_DIR}/build/moc_QmlSystem.cpp"
   DEPENDS always_rebuild
 )
 add_custom_command(
   OUTPUT "${CMAKE_SOURCE_DIR}/build/qml.cpp"
-  COMMAND "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/native/bin/rcc" "${CMAKE_SOURCE_DIR}/src/qml.qrc" -o "${CMAKE_SOURCE_DIR}/build/qml.cpp"
+  COMMAND "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/native/bin/rcc"
+          "${CMAKE_SOURCE_DIR}/src/qml.qrc"
+          -o "${CMAKE_SOURCE_DIR}/build/qml.cpp"
   DEPENDS always_rebuild
-  )
+)
 
 # Set testnet or mainnet
 if(TESTNET)
@@ -149,12 +156,16 @@ endif()
 if("${TOOLCHAIN_PREFIX}" STREQUAL "x86_64-w64-mingw32")
   set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_SOURCE_DIR}/src/winico.rc")
   add_executable(avme-gui WIN32
-    src/version.h src/main-gui.h src/main-gui.cpp build/moc_main-gui.cpp build/qml.cpp
+    src/version.h src/main-gui.h src/main-gui.cpp
+    ${AVME_QMLWRAP_HEADERS} ${AVME_QMLWRAP_SOURCES}
+    build/moc_QmlSystem.cpp build/qml.cpp
     ${APP_ICON_RESOURCE_WINDOWS}
   )
 else()
   add_executable(avme-gui
-    src/version.h src/main-gui.h src/main-gui.cpp build/moc_main-gui.cpp build/qml.cpp
+    src/version.h src/main-gui.h src/main-gui.cpp
+    ${AVME_QMLWRAP_HEADERS} ${AVME_QMLWRAP_SOURCES}
+    build/moc_QmlSystem.cpp build/qml.cpp
   )
 endif()
 target_link_libraries(avme-gui PUBLIC avme-lib ${QT_LIBS})

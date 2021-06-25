@@ -2,7 +2,6 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "main-gui.h"
-#include <hidapi/hidapi.h>
 
 // Implementation of AVME Wallet as a GUI (Qt) program.
 
@@ -16,27 +15,11 @@ int main(int argc, char *argv[]) {
     qputenv("QT_SCALE_FACTOR", QByteArray::number(scaleFactor));
   #endif
 
-  // Create the actual application and register our custom classes into it
+  // Create the actual application and register our custom class into it
   QApplication app(argc, argv);
   QQmlApplicationEngine engine;
-  System sys;
   QmlSystem qmlsystem;
-  QmlWallet qmlwallet;
-  QmlAccount qmlaccount;
-  QmlOverview qmloverview;
-  QmlHistory qmlhistory;
-  QmlSend qmlsend;
-  QmlExchange qmlexchange;
-  QmlStaking qmlstaking;
-  engine.rootContext()->setContextProperty("System", &sys);
   engine.rootContext()->setContextProperty("QmlSystem", &qmlsystem);
-  engine.rootContext()->setContextProperty("QmlWallet", &qmlwallet);
-  engine.rootContext()->setContextProperty("QmlAccount", &qmlaccount);
-  engine.rootContext()->setContextProperty("QmlOverview", &qmloverview);
-  engine.rootContext()->setContextProperty("QmlHistory", &qmlhistory);
-  engine.rootContext()->setContextProperty("QmlSend", &qmlsend);
-  engine.rootContext()->setContextProperty("QmlExchange", &qmlexchange);
-  engine.rootContext()->setContextProperty("QmlStaking", &qmlstaking);
 
   // Set the app's text font and icon
   QFontDatabase::addApplicationFont(":/fonts/RobotoMono-Bold.ttf");
@@ -50,7 +33,7 @@ int main(int argc, char *argv[]) {
   // Load the main screen and start the app
   engine.load(QUrl(QStringLiteral("qrc:/qml/screens/main.qml")));
   if (engine.rootObjects().isEmpty()) return -1;
-  QObject::connect(&app, SIGNAL(aboutToQuit()), &sys, SLOT(cleanAndClose()));
+  QObject::connect(&app, SIGNAL(aboutToQuit()), &qmlsystem, SLOT(cleanAndClose()));
   return app.exec();
 }
 

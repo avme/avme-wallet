@@ -53,19 +53,9 @@ Q_IMPORT_PLUGIN(QtChartsQml2Plugin)
 #include <network/Staking.h>
 
 #include <qmlwrap/QmlSystem.h>
-#include <qmlwrap/QmlWallet.h>
-#include <qmlwrap/QmlAccount.h>
-#include <qmlwrap/QmlOverview.h>
-#include <qmlwrap/QmlHistory.h>
-#include <qmlwrap/QmlSend.h>
-#include <qmlwrap/QmlExchange.h>
-#include <qmlwrap/QmlStaking.h>
+
+#include <hidapi/hidapi.h>
 
 #include "version.h"
-
-// QObject/wrapper for interfacing between C++ (wallet) and QML (gui)
-class System : public QObject {
-  Q_OBJECT
-};
 
 #endif // MAIN_GUI_H
