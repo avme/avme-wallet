@@ -16,7 +16,7 @@ Popup {
 
   function showPrivKey() {
     if (keyText.timer.running) { keyText.timer.stop() }
-    keyText.text = System.getPrivateKeys(account, keyPassInput.text)
+    keyText.text = QmlSystem.getPrivateKeys(account, keyPassInput.text)
   }
 
   function showErrorMsg() {

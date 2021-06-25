@@ -19,7 +19,7 @@ Popup {
   property color popupBgColor: "#1C2029"
 
   Connections {
-    target: System
+    target: QmlSystem
     function onTxStart(
       operation, to, coinAmount, tokenAmount, lpAmount, gasLimit, gasPrice, pass
     ) {
@@ -39,7 +39,7 @@ Popup {
       gasLimitStr = gasLimit
       gasPriceStr = gasPrice
       resetStatuses()
-      System.makeTransaction(
+      QmlSystem.makeTransaction(
         operation, to, coinAmount, tokenAmount, lpAmount, gasLimit, gasPrice, pass
       )
     }
@@ -139,11 +139,11 @@ Popup {
     text: {
       switch (opStr) {
         case "Send AVAX":
-          text: "Sending <b>" + coinAmountStr + " " + System.getCurrentCoin() + "</b>"
+          text: "Sending <b>" + coinAmountStr + " " + QmlSystem.getCurrentCoin() + "</b>"
           + "<br>to the address <b>" + toStr + "</b>...";
           break;
         case "Send AVME":
-          text: "Sending <b>" + tokenAmountStr + " " + System.getCurrentToken() + "</b>"
+          text: "Sending <b>" + tokenAmountStr + " " + QmlSystem.getCurrentToken() + "</b>"
           + "<br>to the address <b>" + toStr + "</b>...";
           break;
         case "Approve Exchange":
@@ -159,14 +159,14 @@ Popup {
           text: "Sending approval for staking...";
           break;
         case "Swap AVAX -> AVME":
-          text: "Swapping <b>" + coinAmountStr + " " + System.getCurrentCoin() + "</b>..."
+          text: "Swapping <b>" + coinAmountStr + " " + QmlSystem.getCurrentCoin() + "</b>..."
           break;
         case "Swap AVME -> AVAX":
-          text: "Swapping <b>" + tokenAmountStr + " " + System.getCurrentToken() + "</b>..."
+          text: "Swapping <b>" + tokenAmountStr + " " + QmlSystem.getCurrentToken() + "</b>..."
           break;
         case "Add Liquidity":
-          text: "Adding <b>" + coinAmountStr + " " + System.getCurrentCoin() + "</b>"
-          + "<br>and <b>" + tokenAmountStr + " " + System.getCurrentToken() + "</b>"
+          text: "Adding <b>" + coinAmountStr + " " + QmlSystem.getCurrentCoin() + "</b>"
+          + "<br>and <b>" + tokenAmountStr + " " + QmlSystem.getCurrentToken() + "</b>"
           + "<br>to the pool...";
           break;
         case "Remove Liquidity":
@@ -329,8 +329,8 @@ Popup {
     onClicked: {
       txProgressPopup.clean()
       txProgressPopup.close()
-      System.goToOverview()
-      System.setScreen(content, "qml/screens/OverviewScreen.qml")
+      QmlSystem.goToOverview()
+      QmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
     }
   }
 }

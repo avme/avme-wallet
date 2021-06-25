@@ -30,7 +30,7 @@ Item {
   property string removeLPEstimate
 
   Connections {
-    target: System
+    target: QmlSystem
     function onAllowancesUpdated(
       exchangeAllowance, liquidityAllowance, stakingAllowance
     ) {
@@ -54,7 +54,7 @@ Item {
       higherToken = higherTokenName
       higherReserves = higherTokenReserves
       liquidity = totalLiquidity
-      var userShares = System.calculatePoolShares(
+      var userShares = QmlSystem.calculatePoolShares(
         lowerReserves, higherReserves, liquidity
       )
       userLowerReserves = userShares.lower
@@ -68,7 +68,7 @@ Item {
     interval: 5000
     repeat: true
     onTriggered: {
-      System.updateExchangeData(System.getCurrentCoin(), System.getCurrentToken())
+      QmlSystem.updateExchangeData(QmlSystem.getCurrentCoin(), QmlSystem.getCurrentToken())
       calculateExchangeAmountOut()
     }
   }
@@ -78,18 +78,18 @@ Item {
     interval: 5000
     repeat: true
     onTriggered: {
-      System.updateLiquidityData(System.getCurrentCoin(), System.getCurrentToken())
+      QmlSystem.updateLiquidityData(QmlSystem.getCurrentCoin(), QmlSystem.getCurrentToken())
     }
   }
 
   function calculateExchangeAmountOut() {
     var amountIn = swapInput.text
-    var amountName = (coinToToken) ? System.getCurrentCoin() : System.getCurrentToken()
+    var amountName = (coinToToken) ? QmlSystem.getCurrentCoin() : QmlSystem.getCurrentToken()
     var amountOut = ""
     if (amountName == lowerToken) {
-      amountOut = System.calculateExchangeAmount(amountIn, lowerReserves, higherReserves)
+      amountOut = QmlSystem.calculateExchangeAmount(amountIn, lowerReserves, higherReserves)
     } else if (amountName == higherToken) {
-      amountOut = System.calculateExchangeAmount(amountIn, higherReserves, lowerReserves)
+      amountOut = QmlSystem.calculateExchangeAmount(amountIn, higherReserves, lowerReserves)
     }
     swapEstimate = amountOut
   }
@@ -97,16 +97,16 @@ Item {
   // For manual input
   function calculateAddLiquidityAmount(fromCoin) {
     var amountIn = (fromCoin) ? liquidityCoinInput.text : liquidityTokenInput.text
-    var amountName = (fromCoin) ? System.getCurrentCoin() : System.getCurrentToken()
-    var maxAmountAVAX = System.getRealMaxAVAXAmount("250000", System.getAutomaticFee())
-    var maxAmountAVME = System.getAccountBalances(System.getCurrentAccount()).balanceAVME
+    var amountName = (fromCoin) ? QmlSystem.getCurrentCoin() : QmlSystem.getCurrentToken()
+    var maxAmountAVAX = QmlSystem.getRealMaxAVAXAmount("250000", QmlSystem.getAutomaticFee())
+    var maxAmountAVME = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount()).balanceAVME
     var amountOut, coinAmount, tokenAmount
 
     // Set the values accordingly
     if (amountName == lowerToken) {
-      amountOut = System.calculateAddLiquidityAmount(amountIn, lowerReserves, higherReserves)
+      amountOut = QmlSystem.calculateAddLiquidityAmount(amountIn, lowerReserves, higherReserves)
     } else if (amountName == higherToken) {
-      amountOut = System.calculateAddLiquidityAmount(amountIn, higherReserves, lowerReserves)
+      amountOut = QmlSystem.calculateAddLiquidityAmount(amountIn, higherReserves, lowerReserves)
     }
     if (fromCoin) {
       liquidityTokenInput.text = amountOut
@@ -117,47 +117,47 @@ Item {
 
   // For the Max Amounts button
   function calculateMaxAddLiquidityAmount() {
-    var maxAmountAVAX = System.getRealMaxAVAXAmount("250000", System.getAutomaticFee())
-    var maxAmountAVME = System.getAccountBalances(System.getCurrentAccount()).balanceAVME
+    var maxAmountAVAX = QmlSystem.getRealMaxAVAXAmount("250000", QmlSystem.getAutomaticFee())
+    var maxAmountAVME = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount()).balanceAVME
     var coinAmount, tokenAmount
 
     // Get the expected amounts for maxed values
-    if (lowerToken == System.getCurrentCoin()) {
-      tokenAmount = System.calculateAddLiquidityAmount(maxAmountAVAX, lowerReserves, higherReserves)
-      coinAmount = System.calculateAddLiquidityAmount(maxAmountAVME, higherReserves, lowerReserves)
-    } else if (lowerToken == System.getCurrentToken()) {
-      coinAmount = System.calculateAddLiquidityAmount(maxAmountAVME, lowerReserves, higherReserves)
-      tokenAmount = System.calculateAddLiquidityAmount(maxAmountAVAX, higherReserves, lowerReserves)
+    if (lowerToken == QmlSystem.getCurrentCoin()) {
+      tokenAmount = QmlSystem.calculateAddLiquidityAmount(maxAmountAVAX, lowerReserves, higherReserves)
+      coinAmount = QmlSystem.calculateAddLiquidityAmount(maxAmountAVME, higherReserves, lowerReserves)
+    } else if (lowerToken == QmlSystem.getCurrentToken()) {
+      coinAmount = QmlSystem.calculateAddLiquidityAmount(maxAmountAVME, lowerReserves, higherReserves)
+      tokenAmount = QmlSystem.calculateAddLiquidityAmount(maxAmountAVAX, higherReserves, lowerReserves)
     }
 
     // Limit the max amount to the lowest the user has.
     // If coinAmount is higher than the user's AVAX balance,
     // then the AVAX user balance is limiting. Same with tokenAmount and AVME.
-    if (System.firstHigherThanSecond(coinAmount, maxAmountAVAX)) {
+    if (QmlSystem.firstHigherThanSecond(coinAmount, maxAmountAVAX)) {
       maxAmountAVME = tokenAmount
     }
-    if (System.firstHigherThanSecond(tokenAmount, maxAmountAVME)) {
+    if (QmlSystem.firstHigherThanSecond(tokenAmount, maxAmountAVME)) {
       maxAmountAVAX = coinAmount
     }
 
     // Set the values accordingly
-    if (lowerToken == System.getCurrentCoin()) {
+    if (lowerToken == QmlSystem.getCurrentCoin()) {
       liquidityCoinInput.text = maxAmountAVAX
-      liquidityTokenInput.text = System.calculateAddLiquidityAmount(
+      liquidityTokenInput.text = QmlSystem.calculateAddLiquidityAmount(
         maxAmountAVAX, lowerReserves, higherReserves
       )
-    } else if (lowerToken == System.getCurrentToken()) {
+    } else if (lowerToken == QmlSystem.getCurrentToken()) {
       liquidityTokenInput.text = maxAmountAVME
-      liquidityCoinInput.text = System.calculateAddLiquidityAmount(
+      liquidityCoinInput.text = QmlSystem.calculateAddLiquidityAmount(
         maxAmountAVME, lowerReserves, higherReserves
       )
     }
   }
 
   Component.onCompleted: {
-    System.getAllowances()
-    System.updateExchangeData(System.getCurrentCoin(), System.getCurrentToken())
-    System.updateLiquidityData(System.getCurrentCoin(), System.getCurrentToken())
+    QmlSystem.getAllowances()
+    QmlSystem.updateExchangeData(QmlSystem.getCurrentCoin(), QmlSystem.getCurrentToken())
+    QmlSystem.updateLiquidityData(QmlSystem.getCurrentCoin(), QmlSystem.getCurrentToken())
     calculateExchangeAmountOut()
     reloadExchangeDataTimer.start()
     reloadLiquidityDataTimer.start()
@@ -256,23 +256,23 @@ Item {
         width: (parent.width * 0.8)
         enabled: (allowance != "")
         validator: RegExpValidator {
-          regExp: (coinToToken) ? System.createCoinRegExp() : System.createTokenRegExp()
+          regExp: (coinToToken) ? QmlSystem.createCoinRegExp() : QmlSystem.createTokenRegExp()
         }
         label: "Amount of " + (
-          (coinToToken) ? System.getCurrentCoin() : System.getCurrentToken()
+          (coinToToken) ? QmlSystem.getCurrentCoin() : QmlSystem.getCurrentToken()
         ) + " to swap"
         placeholder: "Fixed point amount (e.g. 0.5)"
         onTextEdited: {
           calculateExchangeAmountOut()
           if (coinToToken) {
-            swapImpact = System.calculateExchangePriceImpact(
-              ((System.getCurrentCoin() == lowerToken) ? lowerReserves : higherReserves),
-              swapInput.text, System.getCurrentCoinDecimals()
+            swapImpact = QmlSystem.calculateExchangePriceImpact(
+              ((QmlSystem.getCurrentCoin() == lowerToken) ? lowerReserves : higherReserves),
+              swapInput.text, QmlSystem.getCurrentCoinDecimals()
             )
           } else {
-            swapImpact = System.calculateExchangePriceImpact(
-              ((System.getCurrentToken() == lowerToken) ? lowerReserves : higherReserves),
-              swapInput.text, System.getCurrentTokenDecimals()
+            swapImpact = QmlSystem.calculateExchangePriceImpact(
+              ((QmlSystem.getCurrentToken() == lowerToken) ? lowerReserves : higherReserves),
+              swapInput.text, QmlSystem.getCurrentTokenDecimals()
             )
           }
         }
@@ -287,20 +287,20 @@ Item {
           text: "Max"
           enabled: (allowance != "")
           onClicked: {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
+            var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
             swapInput.text = (coinToToken)
-              ? System.getRealMaxAVAXAmount("180000", System.getAutomaticFee())
+              ? QmlSystem.getRealMaxAVAXAmount("180000", QmlSystem.getAutomaticFee())
               : acc.balanceAVME
             calculateExchangeAmountOut()
             if (coinToToken) {
-              swapImpact = System.calculateExchangePriceImpact(
-                ((System.getCurrentCoin() == lowerToken) ? lowerReserves : higherReserves),
-                swapInput.text, System.getCurrentCoinDecimals()
+              swapImpact = QmlSystem.calculateExchangePriceImpact(
+                ((QmlSystem.getCurrentCoin() == lowerToken) ? lowerReserves : higherReserves),
+                swapInput.text, QmlSystem.getCurrentCoinDecimals()
               )
             } else {
-              swapImpact = System.calculateExchangePriceImpact(
-                ((System.getCurrentToken() == lowerToken) ? lowerReserves : higherReserves),
-                swapInput.text, System.getCurrentTokenDecimals()
+              swapImpact = QmlSystem.calculateExchangePriceImpact(
+                ((QmlSystem.getCurrentToken() == lowerToken) ? lowerReserves : higherReserves),
+                swapInput.text, QmlSystem.getCurrentTokenDecimals()
               )
             }
           }
@@ -316,7 +316,7 @@ Item {
         color: "#FFFFFF"
         font.pixelSize: 18.0
         text: "Estimated return in " + (
-          (!coinToToken) ? System.getCurrentCoin() : System.getCurrentToken()
+          (!coinToToken) ? QmlSystem.getCurrentCoin() : QmlSystem.getCurrentToken()
         ) + ":<br><b>" + swapEstimate + "</b>"
       }
 
@@ -362,12 +362,12 @@ Item {
         width: (parent.width * 0.5)
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: allowance != "" && (
-          !System.isApproved(swapInput.text, allowance) || swapInput.acceptableInput
+          !QmlSystem.isApproved(swapInput.text, allowance) || swapInput.acceptableInput
         ) && (swapImpact <= 10.0 || ignoreImpactCheck.checked)
         text: {
           if (allowance == "") {
             text: "Checking approval..."
-          } else if (System.isApproved(swapInput.text, allowance)) {
+          } else if (QmlSystem.isApproved(swapInput.text, allowance)) {
             text: (swapImpact <= 10.0 || ignoreImpactCheck.checked)
             ? "Make Swap" : "Price impact too high"
           } else {
@@ -375,32 +375,32 @@ Item {
           }
         }
         onClicked: {
-          if (!System.isApproved(swapInput.text, allowance)) {
-            System.setScreen(content, "qml/screens/TransactionScreen.qml")
-            System.operationOverride("Approve Exchange", "", "", "")
+          if (!QmlSystem.isApproved(swapInput.text, allowance)) {
+            QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+            QmlSystem.operationOverride("Approve Exchange", "", "", "")
           } else if (coinToToken) {
-            if (System.balanceIsZero(swapInput.text, 18)) {
+            if (QmlSystem.balanceIsZero(swapInput.text, 18)) {
               zeroSwapPopup.open()
             } else {
-              if (System.hasInsufficientFunds(
-                "Coin", System.getRealMaxAVAXAmount("180000", System.getAutomaticFee()), swapInput.text
+              if (QmlSystem.hasInsufficientFunds(
+                "Coin", QmlSystem.getRealMaxAVAXAmount("180000", QmlSystem.getAutomaticFee()), swapInput.text
               )) {
                 fundsPopup.open()
               } else {
-                System.setScreen(content, "qml/screens/TransactionScreen.qml")
-                System.operationOverride("Swap AVAX -> AVME", swapInput.text, swapEstimate, "")
+                QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+                QmlSystem.operationOverride("Swap AVAX -> AVME", swapInput.text, swapEstimate, "")
               }
             }
           } else {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
-            if (System.balanceIsZero(swapInput.text, 18)) {
+            var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
+            if (QmlSystem.balanceIsZero(swapInput.text, 18)) {
               zeroSwapPopup.open()
             } else {
-              if (System.hasInsufficientFunds("Token", acc.balanceAVME, swapInput.text)) {
+              if (QmlSystem.hasInsufficientFunds("Token", acc.balanceAVME, swapInput.text)) {
                 fundsPopup.open()
               } else {
-                System.setScreen(content, "qml/screens/TransactionScreen.qml")
-                System.operationOverride("Swap AVME -> AVAX", swapEstimate, swapInput.text, "")
+                QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+                QmlSystem.operationOverride("Swap AVME -> AVAX", swapEstimate, swapInput.text, "")
               }
             }
           }
@@ -508,8 +508,8 @@ Item {
         width: parent.width
         enabled: (addAllowance != "")
         visible: (addToPool)
-        validator: RegExpValidator { regExp: System.createCoinRegExp() }
-        label: "Amount of " + System.getCurrentCoin() + " to add"
+        validator: RegExpValidator { regExp: QmlSystem.createCoinRegExp() }
+        label: "Amount of " + QmlSystem.getCurrentCoin() + " to add"
         placeholder: "Fixed point amount (e.g. 0.5)"
         onTextEdited: calculateAddLiquidityAmount(true)
       }
@@ -519,8 +519,8 @@ Item {
         width: parent.width
         enabled: (addAllowance != "")
         visible: (addToPool)
-        validator: RegExpValidator { regExp: System.createTokenRegExp() }
-        label: "Amount of " + System.getCurrentToken() + " to add"
+        validator: RegExpValidator { regExp: QmlSystem.createTokenRegExp() }
+        label: "Amount of " + QmlSystem.getCurrentToken() + " to add"
         placeholder: "Fixed point amount (e.g. 0.5)"
         onTextEdited: calculateAddLiquidityAmount(false)
       }
@@ -548,7 +548,7 @@ Item {
         anchors.margins: 20
         enabled: (removeAllowance != "" && lowerReserves != "" && higherReserves != "" && liquidity != "")
         onMoved: {
-          var estimates = System.calculateRemoveLiquidityAmount(
+          var estimates = QmlSystem.calculateRemoveLiquidityAmount(
             userLowerReserves, userHigherReserves, value
           )
           removeLowerEstimate = estimates.lower
@@ -615,14 +615,14 @@ Item {
         font.pixelSize: 18.0
         text: "Estimated returns:"
         + "<br><b>" + ((removeLPEstimate) ? removeLPEstimate : "0") + " LP"
-        + "<br>" + System.weiToFixedPoint(
-          ((System.getCurrentCoin() == lowerToken) ? removeLowerEstimate : removeHigherEstimate),
-          System.getCurrentCoinDecimals()
-        ) + " " + System.getCurrentCoin()
-        + "<br>" + System.weiToFixedPoint(
-          ((System.getCurrentToken() == lowerToken) ? removeLowerEstimate : removeHigherEstimate),
-          System.getCurrentTokenDecimals()
-        ) + " " + System.getCurrentToken() + "</b>"
+        + "<br>" + QmlSystem.weiToFixedPoint(
+          ((QmlSystem.getCurrentCoin() == lowerToken) ? removeLowerEstimate : removeHigherEstimate),
+          QmlSystem.getCurrentCoinDecimals()
+        ) + " " + QmlSystem.getCurrentCoin()
+        + "<br>" + QmlSystem.weiToFixedPoint(
+          ((QmlSystem.getCurrentToken() == lowerToken) ? removeLowerEstimate : removeHigherEstimate),
+          QmlSystem.getCurrentTokenDecimals()
+        ) + " " + QmlSystem.getCurrentToken() + "</b>"
       }
 
       AVMEButton {
@@ -630,47 +630,47 @@ Item {
         width: (parent.width * 0.5)
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: (addToPool && addAllowance != "" && (
-          !System.isApproved(liquidityTokenInput.text, addAllowance) ||
+          !QmlSystem.isApproved(liquidityTokenInput.text, addAllowance) ||
           (liquidityCoinInput.acceptableInput && liquidityTokenInput.acceptableInput)
         )) || (!addToPool && removeAllowance != "" && (
-          !System.isApproved(liquidityTokenInput.text, removeAllowance) ||
+          !QmlSystem.isApproved(liquidityTokenInput.text, removeAllowance) ||
           liquidityLPSlider.value > 0
         ))
         text: {
           if (addAllowance == "" || removeAllowance == "") {
             text: "Checking approval..."
-          } else if (addToPool && System.isApproved(liquidityTokenInput.text, addAllowance)) {
+          } else if (addToPool && QmlSystem.isApproved(liquidityTokenInput.text, addAllowance)) {
             text: "Add to the pool"
-          } else if (!addToPool && System.isApproved(liquidityTokenInput.text, removeAllowance)) {
+          } else if (!addToPool && QmlSystem.isApproved(liquidityTokenInput.text, removeAllowance)) {
             text: "Remove from the pool"
           } else {
             text: "Approve"
           }
         }
         onClicked: {
-          var acc = System.getAccountBalances(System.getCurrentAccount())
+          var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
           if (addToPool) {
-            if (!System.isApproved(liquidityTokenInput.text, addAllowance)) {
-              System.setScreen(content, "qml/screens/TransactionScreen.qml")
-              System.operationOverride("Approve Exchange", "", "", "")
+            if (!QmlSystem.isApproved(liquidityTokenInput.text, addAllowance)) {
+              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              QmlSystem.operationOverride("Approve Exchange", "", "", "")
             } else if (
-              System.hasInsufficientFunds(
-                "Coin", System.getRealMaxAVAXAmount("250000", System.getAutomaticFee()),
+              QmlSystem.hasInsufficientFunds(
+                "Coin", QmlSystem.getRealMaxAVAXAmount("250000", QmlSystem.getAutomaticFee()),
                 liquidityCoinInput.text
-              ) || System.hasInsufficientFunds("Token", acc.balanceAVME, liquidityTokenInput.text)
+              ) || QmlSystem.hasInsufficientFunds("Token", acc.balanceAVME, liquidityTokenInput.text)
             ) {
               fundsPopup.open()
             } else {
-              System.setScreen(content, "qml/screens/TransactionScreen.qml")
-              System.operationOverride("Add Liquidity", liquidityCoinInput.text, liquidityTokenInput.text, "")
+              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              QmlSystem.operationOverride("Add Liquidity", liquidityCoinInput.text, liquidityTokenInput.text, "")
             }
           } else {
-            if (!System.isApproved(removeLPEstimate, removeAllowance)) {
-              System.setScreen(content, "qml/screens/TransactionScreen.qml")
-              System.operationOverride("Approve Liquidity", "", "", "")
+            if (!QmlSystem.isApproved(removeLPEstimate, removeAllowance)) {
+              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              QmlSystem.operationOverride("Approve Liquidity", "", "", "")
             } else {
-              System.setScreen(content, "qml/screens/TransactionScreen.qml")
-              System.operationOverride("Remove Liquidity", "", "", removeLPEstimate)
+              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              QmlSystem.operationOverride("Remove Liquidity", "", "", removeLPEstimate)
             }
           }
         }

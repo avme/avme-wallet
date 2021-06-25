@@ -42,7 +42,7 @@ Item {
         font.pixelSize: 32.0
         color: "#FFFFFF"
         horizontalAlignment: Text.AlignHCenter
-        text: "AVME Wallet " + System.getProjectVersion()
+        text: "AVME Wallet " + QmlSystem.getProjectVersion()
       }
 
       Image {
@@ -74,7 +74,7 @@ Item {
         id: btnAboutQt
         anchors.horizontalCenter: parent.horizontalCenter
         text: "About Qt"
-        onClicked: System.openQtAbout()
+        onClicked: QmlSystem.openQtAbout()
       }
     }
   }

@@ -12,7 +12,7 @@ Item {
   property bool sortByNew: true
 
   Connections {
-    target: System
+    target: QmlSystem
     function onHistoryLoaded(data) {
       if (data != null) {
         if (sortByNew) {
@@ -40,9 +40,9 @@ Item {
     historyModel.clear()
     infoText.text = "Loading transactions..."
     infoText.visible = true
-	var acc = System.getCurrentAccount()
-	System.updateTransactionStatus()
-    System.listAccountTransactions(System.getCurrentAccount())
+	var acc = QmlSystem.getCurrentAccount()
+	QmlSystem.updateTransactionStatus()
+    QmlSystem.listAccountTransactions(QmlSystem.getCurrentAccount())
   }
 
   AVMEAccountHeader {

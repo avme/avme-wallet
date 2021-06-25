@@ -35,7 +35,7 @@ Popup {
   property color popupBgColor: "#1C2029"
 
   Connections {
-    target: System
+    target: QmlSystem
     function onAccountGenerated(data) {
       accountList.append(data)
       isWaiting = false
@@ -44,8 +44,8 @@ Popup {
 
   function refreshList() {
     if (startingIndex == -1) { startingIndex = 0 }
-    System.generateAccounts(
-      ((foreignSeed != "") ? foreignSeed : System.getWalletSeed(passInput.text)),
+    QmlSystem.generateAccounts(
+      ((foreignSeed != "") ? foreignSeed : QmlSystem.getWalletSeed(passInput.text)),
       startingIndex
     );
     isWaiting = true
@@ -190,9 +190,9 @@ Popup {
       enabled: (!isWaiting && passInput.text != "")
       text: "Generate +10 Accounts"
       onClicked: {
-        if (seedInput.text != "" && !System.seedIsValid(seedInput.text)) {
+        if (seedInput.text != "" && !QmlSystem.seedIsValid(seedInput.text)) {
           infoSeedTimer.start()
-        } else if (!System.checkWalletPass(passInput.text)) {
+        } else if (!QmlSystem.checkWalletPass(passInput.text)) {
           infoPassTimer.start()
         } else {
           seedInput.enabled = false

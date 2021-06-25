@@ -32,7 +32,7 @@ Item {
   property bool isClassic: true
 
   Connections {
-    target: System
+    target: QmlSystem
     function onAllowancesUpdated(
       exchangeAllowance, liquidityAllowance, stakingAllowance, compoundAllowance
     ) {
@@ -49,11 +49,11 @@ Item {
       higherToken = higherTokenName
       higherReserves = higherTokenReserves
       liquidity = totalLiquidity
-	  var acc = System.getAccountBalances(System.getCurrentAccount())
-      var userClassicShares = System.calculatePoolSharesForTokenValue(
+	  var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
+      var userClassicShares = QmlSystem.calculatePoolSharesForTokenValue(
         lowerReserves, higherReserves, liquidity, acc.balanceLPLocked
       )
-      var userCompoundShares = System.calculatePoolSharesForTokenValue(
+      var userCompoundShares = QmlSystem.calculatePoolSharesForTokenValue(
         lowerReserves, higherReserves, liquidity, acc.balanceLockedCompoundLP
       )
       userClassicLowerReserves = userClassicShares.lower
@@ -67,14 +67,14 @@ Item {
     id: reloadRewardTimer
     interval: 1000
     repeat: true
-    onTriggered: System.getPoolReward()
+    onTriggered: QmlSystem.getPoolReward()
   }
   
   Timer {
     id: reloadCompoundTimer
     interval: 1000
     repeat: true
-    onTriggered: System.getCompoundReward()
+    onTriggered: QmlSystem.getCompoundReward()
   }
   
   Timer {
@@ -82,12 +82,12 @@ Item {
     interval: 5000
     repeat: true
     onTriggered: {
-      System.updateLiquidityData(System.getCurrentCoin(), System.getCurrentToken())
+      QmlSystem.updateLiquidityData(QmlSystem.getCurrentCoin(), QmlSystem.getCurrentToken())
 	}
   }
 
   Component.onCompleted: {
-    System.getAllowances()
+    QmlSystem.getAllowances()
     reloadRewardTimer.start()
 	reloadCompoundTimer.start()
 	reloadLiquidityDataTimer.start()
@@ -193,7 +193,7 @@ Item {
         color: "#FFFFFF"
         font.pixelSize: 18.0
         text: {
-          var acc = System.getAccountBalances(System.getCurrentAccount())
+          var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
           text: (isStaking)
           ? "Free (unstaked) LP:<br><b>" + acc.balanceLPFree + "</b>"
           : "Locked (staked) LP:<br><b>" + acc.balanceLPLocked + "</b>"
@@ -220,7 +220,7 @@ Item {
           enabled: (allowance != "")
           text: "Max Amount"
           onClicked: {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
+            var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
             stakeInput.text = (isStaking) ? acc.balanceLPFree : acc.balanceLPLocked
           }
         }
@@ -229,41 +229,41 @@ Item {
           id: btnStake
           width: (stakingDetailsColumn.width * 0.5) - parent.spacing
           enabled: {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
+            var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
             enabled: allowance != "" && (
-              !System.isApproved(acc.balanceLPFree, allowance) || stakeInput.acceptableInput
+              !QmlSystem.isApproved(acc.balanceLPFree, allowance) || stakeInput.acceptableInput
             )
           }
           text: {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
+            var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
             if (allowance == "") {
               text: "Checking approval..."
-            } else if (isStaking && System.isApproved(acc.balanceLPFree, allowance)) {
+            } else if (isStaking && QmlSystem.isApproved(acc.balanceLPFree, allowance)) {
               text: "Stake"
-            } else if (!isStaking && System.isApproved(acc.balanceLPLocked, allowance)) {
+            } else if (!isStaking && QmlSystem.isApproved(acc.balanceLPLocked, allowance)) {
               text: "Unstake"
             } else {
               text: "Approve"
             }
           }
           onClicked: {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
-            if (!System.isApproved(acc.balanceLPFree, allowance)) {
-              System.setScreen(content, "qml/screens/TransactionScreen.qml")
-              System.operationOverride("Approve Staking", "", "", "")
+            var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
+            if (!QmlSystem.isApproved(acc.balanceLPFree, allowance)) {
+              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              QmlSystem.operationOverride("Approve Staking", "", "", "")
             } else if (isStaking) {
-              if (System.hasInsufficientFunds("LP", acc.balanceLPFree, stakeInput.text)) {
+              if (QmlSystem.hasInsufficientFunds("LP", acc.balanceLPFree, stakeInput.text)) {
                 fundsPopup.open()
               } else {
-                System.setScreen(content, "qml/screens/TransactionScreen.qml")
-                System.operationOverride("Stake LP", "", "", stakeInput.text)
+                QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+                QmlSystem.operationOverride("Stake LP", "", "", stakeInput.text)
               }
             } else {
-              if (System.hasInsufficientFunds("LP", acc.balanceLPLocked, stakeInput.text)) {
+              if (QmlSystem.hasInsufficientFunds("LP", acc.balanceLPLocked, stakeInput.text)) {
                 fundsPopup.open()
               } else {
-                System.setScreen(content, "qml/screens/TransactionScreen.qml")
-                System.operationOverride("Unstake LP", "", "", stakeInput.text)
+                QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+                QmlSystem.operationOverride("Unstake LP", "", "", stakeInput.text)
               }
             }
           }
@@ -283,14 +283,14 @@ Item {
 		  verticalAlignment: Text.AlignVCenter
           color: "#FFFFFF"
 		  text: "Locked LP Estimates:"
-          + "<br><b>" + System.weiToFixedPoint(
-            ((System.getCurrentCoin() == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves),
-            System.getCurrentCoinDecimals()
-          ) + " " + System.getCurrentCoin()
-          + "<br>" + System.weiToFixedPoint(
-            ((System.getCurrentToken() == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves),
-            System.getCurrentTokenDecimals()
-          ) + " " + System.getCurrentToken() + "</b>"
+          + "<br><b>" + QmlSystem.weiToFixedPoint(
+            ((QmlSystem.getCurrentCoin() == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves),
+            QmlSystem.getCurrentCoinDecimals()
+          ) + " " + QmlSystem.getCurrentCoin()
+          + "<br>" + QmlSystem.weiToFixedPoint(
+            ((QmlSystem.getCurrentToken() == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves),
+            QmlSystem.getCurrentTokenDecimals()
+          ) + " " + QmlSystem.getCurrentToken() + "</b>"
 	    }
 		height: classicLPReturnsText.height
 	  }
@@ -344,7 +344,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.pixelSize: 18.0
-        text: "Unharvested " + System.getCurrentToken() + ":<br><b>" + reward + "</b>"
+        text: "Unharvested " + QmlSystem.getCurrentToken() + ":<br><b>" + reward + "</b>"
       }
 
       AVMEButton {
@@ -352,18 +352,18 @@ Item {
         width: (parent.width * 0.75)
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: {
-          var acc = System.getAccountBalances(System.getCurrentAccount())
+          var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
           enabled: (
-            reward != "" && !System.balanceIsZero(reward, System.getCurrentTokenDecimals()) &&
-            !System.balanceIsZero(acc.balanceLPLocked, 18)
+            reward != "" && !QmlSystem.balanceIsZero(reward, QmlSystem.getCurrentTokenDecimals()) &&
+            !QmlSystem.balanceIsZero(acc.balanceLPLocked, 18)
           )
         }
         text: (reward != "")
-        ? "Harvest " + System.getCurrentToken() + " & Unstake LP"
+        ? "Harvest " + QmlSystem.getCurrentToken() + " & Unstake LP"
         : "Querying reward..."
         onClicked: {
-          System.setScreen(content, "qml/screens/TransactionScreen.qml")
-          System.operationOverride("Exit Staking", "", "", "")
+          QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+          QmlSystem.operationOverride("Exit Staking", "", "", "")
         }
       }
 
@@ -371,13 +371,13 @@ Item {
         id: btnHarvest
         width: (parent.width * 0.75)
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (reward != "" && !System.balanceIsZero(reward, System.getCurrentTokenDecimals()))
+        enabled: (reward != "" && !QmlSystem.balanceIsZero(reward, QmlSystem.getCurrentTokenDecimals()))
         text: (reward != "")
-        ? "Harvest " + System.getCurrentToken()
+        ? "Harvest " + QmlSystem.getCurrentToken()
         : "Querying reward..."
         onClicked: {
-          System.setScreen(content, "qml/screens/TransactionScreen.qml")
-          System.operationOverride("Harvest AVME", "", "", "")
+          QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+          QmlSystem.operationOverride("Harvest AVME", "", "", "")
         }
       }
     }
@@ -443,7 +443,7 @@ Item {
         color: "#FFFFFF"
         font.pixelSize: 18.0
         text: {
-          var acc = System.getAccountBalances(System.getCurrentAccount())
+          var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
           text: (isyyCompound)
           ? "Free (unstaked) LP:<br><b>" + acc.balanceLPFree + "</b>"
           : "Locked (staked) LP:<br><b>" + acc.balanceLockedCompoundLP + "</b>"
@@ -471,7 +471,7 @@ Item {
           enabled: (compoundallowance != "")
           text: "Max Amount"
           onClicked: {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
+            var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
             compoundInput.text = (isyyCompound) ? acc.balanceLPFree : acc.balanceLockedCompoundLP
           }
         }
@@ -480,41 +480,41 @@ Item {
           id: btnDepositCompound
           width: (yyCompoundDetailsColumn.width * 0.5) - parent.spacing
           enabled: {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
+            var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
             enabled: compoundallowance != "" && (
-              !System.isApproved(acc.balanceLPFree, compoundallowance) || compoundInput.acceptableInput
+              !QmlSystem.isApproved(acc.balanceLPFree, compoundallowance) || compoundInput.acceptableInput
             )
           }
           text: {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
+            var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
             if (compoundallowance == "") {
               text: "Checking approval..."
-            } else if (isyyCompound && System.isApproved(acc.balanceLPFree, compoundallowance)) {
+            } else if (isyyCompound && QmlSystem.isApproved(acc.balanceLPFree, compoundallowance)) {
               text: "Stake"
-            } else if (!isyyCompound && System.isApproved(acc.balanceLockedCompoundLP, compoundallowance)) {
+            } else if (!isyyCompound && QmlSystem.isApproved(acc.balanceLockedCompoundLP, compoundallowance)) {
               text: "Unstake"
             } else {
               text: "Approve"
             }
           }
           onClicked: {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
-            if (!System.isApproved(acc.balanceLPFree, compoundallowance)) {
-              System.setScreen(content, "qml/screens/TransactionScreen.qml")
-              System.operationOverride("Approve Compound", "", "", "")
+            var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
+            if (!QmlSystem.isApproved(acc.balanceLPFree, compoundallowance)) {
+              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              QmlSystem.operationOverride("Approve Compound", "", "", "")
             } else if (isyyCompound) {
-              if (System.hasInsufficientFunds("LP", acc.balanceLPFree, compoundInput.text)) {
+              if (QmlSystem.hasInsufficientFunds("LP", acc.balanceLPFree, compoundInput.text)) {
                 fundsPopup.open()
               } else {
-                System.setScreen(content, "qml/screens/TransactionScreen.qml")
-                System.operationOverride("Stake Compound LP", "", "", compoundInput.text)
+                QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+                QmlSystem.operationOverride("Stake Compound LP", "", "", compoundInput.text)
               }
             } else {
-              if (System.hasInsufficientFunds("LP", acc.balanceLockedCompoundLP, compoundInput.text)) {
+              if (QmlSystem.hasInsufficientFunds("LP", acc.balanceLockedCompoundLP, compoundInput.text)) {
                 fundsPopup.open()
               } else {
-                System.setScreen(content, "qml/screens/TransactionScreen.qml")
-                System.operationOverride("Unstake Compound LP", "", "", compoundInput.text)
+                QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+                QmlSystem.operationOverride("Unstake Compound LP", "", "", compoundInput.text)
               }
             }
           }
@@ -534,14 +534,14 @@ Item {
 		  verticalAlignment: Text.AlignVCenter
           color: "#FFFFFF"
 		  text: "Locked LP Estimates:"
-          + "<br><b>" + System.weiToFixedPoint(
-            ((System.getCurrentCoin() == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves),
-            System.getCurrentCoinDecimals()
-          ) + " " + System.getCurrentCoin()
-          + "<br>" + System.weiToFixedPoint(
-            ((System.getCurrentToken() == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves),
-            System.getCurrentTokenDecimals()
-          ) + " " + System.getCurrentToken() + "</b>"
+          + "<br><b>" + QmlSystem.weiToFixedPoint(
+            ((QmlSystem.getCurrentCoin() == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves),
+            QmlSystem.getCurrentCoinDecimals()
+          ) + " " + QmlSystem.getCurrentCoin()
+          + "<br>" + QmlSystem.weiToFixedPoint(
+            ((QmlSystem.getCurrentToken() == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves),
+            QmlSystem.getCurrentTokenDecimals()
+          ) + " " + QmlSystem.getCurrentToken() + "</b>"
 	    }
 		height: compoundLPReturnsText.height
 	  }
@@ -595,20 +595,20 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.pixelSize: 18.0
-        text: "Unreinvested " + System.getCurrentToken() + ":<br><b>" + reinvestreward + "</b>"
+        text: "Unreinvested " + QmlSystem.getCurrentToken() + ":<br><b>" + reinvestreward + "</b>"
       }
 
       AVMEButton {
         id: btnreinvest
         width: (parent.width * 0.75)
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (reinvestreward != "" && !System.balanceIsZero(reinvestreward, System.getCurrentTokenDecimals()))
+        enabled: (reinvestreward != "" && !QmlSystem.balanceIsZero(reinvestreward, QmlSystem.getCurrentTokenDecimals()))
         text: (reinvestreward != "")
-        ? "Reinvest " + System.getCurrentToken()
+        ? "Reinvest " + QmlSystem.getCurrentToken()
         : "Querying Reinvest..."
         onClicked: {
-          System.setScreen(content, "qml/screens/TransactionScreen.qml")
-          System.operationOverride("Reinvest AVME", "", "", "")
+          QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+          QmlSystem.operationOverride("Reinvest AVME", "", "", "")
         }
       }
       Text {
@@ -618,7 +618,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.pixelSize: 18.0
-        text: "Reinvest Reward " + System.getCurrentToken() + ":<br><b>" + (reinvestreward * 0.05) + "</b>"
+        text: "Reinvest Reward " + QmlSystem.getCurrentToken() + ":<br><b>" + (reinvestreward * 0.05) + "</b>"
       }
     }
 	Image {

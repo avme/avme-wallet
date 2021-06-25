@@ -12,7 +12,7 @@ Item {
   id: overviewScreen
 
   Connections {
-    target: System
+    target: QmlSystem
     function onAccountBalancesUpdated(data) {
       accountCoinBalance.text = data.balanceAVAX
       accountTokenBalance.text = data.balanceAVME
@@ -129,7 +129,7 @@ Item {
     id: accountBalancesReloadTimer
     interval: 2500
     repeat: false
-    onTriggered: System.getAccountBalancesOverview(System.getCurrentAccount())
+    onTriggered: QmlSystem.getAccountBalancesOverview(QmlSystem.getCurrentAccount())
   }
 
   // Timer for reloading the Account fiat balances
@@ -137,7 +137,7 @@ Item {
     id: accountFiatBalancesReloadTimer
     interval: 2500
     repeat: false
-    onTriggered: System.getAccountFiatBalancesOverview(System.getCurrentAccount())
+    onTriggered: QmlSystem.getAccountFiatBalancesOverview(QmlSystem.getCurrentAccount())
   }
 
   // Timer for reloading the Wallet balances
@@ -145,7 +145,7 @@ Item {
     id: walletBalancesReloadTimer
     interval: 2500
     repeat: false
-    onTriggered: System.getAllAccountBalancesOverview()
+    onTriggered: QmlSystem.getAllAccountBalancesOverview()
   }
 
   // Timer for reloading the Wallet fiat balances
@@ -153,7 +153,7 @@ Item {
     id: walletFiatBalancesReloadTimer
     interval: 2500
     repeat: false
-    onTriggered: System.getAllAccountFiatBalancesOverview()
+    onTriggered: QmlSystem.getAllAccountFiatBalancesOverview()
   }
 
   // Timer for reloading the current AVME reward
@@ -161,7 +161,7 @@ Item {
     id: rewardReloadTimer
     interval: 2500
     repeat: false
-    onTriggered: System.getPoolReward()
+    onTriggered: QmlSystem.getPoolReward()
   }
 
   // Timer for reloading the staking ROI
@@ -169,7 +169,7 @@ Item {
     id: roiTimer
     interval: 2500
     repeat: false
-    onTriggered: System.calculateRewardCurrentROI()
+    onTriggered: QmlSystem.calculateRewardCurrentROI()
   }
 
   // Timer for reloading the market data
@@ -177,7 +177,7 @@ Item {
     id: marketDataTimer
     interval: 2500
     repeat: false
-    onTriggered: System.getMarketData(30)
+    onTriggered: QmlSystem.getMarketData(30)
   }
 
   Component.onCompleted: {
@@ -187,13 +187,13 @@ Item {
     walletTokenBalance.text = walletTokenPrice.text = "Loading..."
     stakingFreeBalance.text = "Loading..."
     stakingLockedBalance.text = "Loading..."
-    System.getAccountBalancesOverview(System.getCurrentAccount())
-    System.getAccountFiatBalancesOverview(System.getCurrentAccount())
-    System.getAllAccountBalancesOverview()
-    System.getAllAccountFiatBalancesOverview()
-    System.getPoolReward()
-    System.calculateRewardCurrentROI()
-    System.getMarketData(30)
+    QmlSystem.getAccountBalancesOverview(QmlSystem.getCurrentAccount())
+    QmlSystem.getAccountFiatBalancesOverview(QmlSystem.getCurrentAccount())
+    QmlSystem.getAllAccountBalancesOverview()
+    QmlSystem.getAllAccountFiatBalancesOverview()
+    QmlSystem.getPoolReward()
+    QmlSystem.calculateRewardCurrentROI()
+    QmlSystem.getMarketData(30)
   }
 
   AVMEAccountHeader {

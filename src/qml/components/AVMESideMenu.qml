@@ -14,13 +14,13 @@ Rectangle {
   color: "#1C2029"
 
   Connections {
-    target: System
+    target: QmlSystem
     function onGoToOverview() { itemSelection.y = itemOverview.y }
   }
 
   function changeScreen(name) {
     content.active = false
-    System.setScreen(content, "qml/screens/" + name + "Screen.qml")
+    QmlSystem.setScreen(content, "qml/screens/" + name + "Screen.qml")
     content.active = true
   }
 

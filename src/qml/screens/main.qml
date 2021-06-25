@@ -12,7 +12,7 @@ ApplicationWindow {
   id: window
   property bool menuToggle: false
 
-  title: "AVME Wallet " + System.getProjectVersion()
+  title: "AVME Wallet " + QmlSystem.getProjectVersion()
   width: 1280
   height: 720
   minimumWidth: 1280
@@ -20,7 +20,7 @@ ApplicationWindow {
   visible: true
 
   Connections {
-    target: System
+    target: QmlSystem
     function onHideMenu() { menuToggle = false }
     function onGoToOverview() { menuToggle = true }
   }

@@ -52,7 +52,7 @@ Item {
           }
           text: "View Private Key"
           onClicked: {
-            viewPrivKeyPopup.account = System.getCurrentAccount()
+            viewPrivKeyPopup.account = QmlSystem.getCurrentAccount()
             viewPrivKeyPopup.open()
           }
         }
@@ -84,7 +84,7 @@ Item {
   AVMEPopupViewPrivKey {
     id: viewPrivKeyPopup
     showBtn.onClicked: {
-      if (System.checkWalletPass(pass)) {
+      if (QmlSystem.checkWalletPass(pass)) {
         viewPrivKeyPopup.showPrivKey()
       } else {
         viewPrivKeyPopup.showErrorMsg()
@@ -96,7 +96,7 @@ Item {
   AVMEPopupViewSeed {
     id: viewSeedPopup
     showBtn.onClicked: {
-      if (System.checkWalletPass(pass.text)) {
+      if (QmlSystem.checkWalletPass(pass.text)) {
         viewSeedPopup.showSeed()
       } else {
         viewSeedPopup.showErrorMsg()

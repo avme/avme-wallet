@@ -12,7 +12,7 @@ Item {
   id: accountsScreen
 
   Connections {
-    target: System
+    target: QmlSystem
     function onAccountCreated(data) {
       createAccountPopup.close()
       reloadList()
@@ -24,8 +24,8 @@ Item {
   }
 
   Component.onCompleted: {
-    if (System.getFirstLoad()) {
-      System.setFirstLoad(false)
+    if (QmlSystem.getFirstLoad()) {
+      QmlSystem.setFirstLoad(false)
       reloadList()
     } else {
       fetchAccounts()
@@ -44,11 +44,11 @@ Item {
   function reloadList() {
     console.log("Reloading list...")
     fetchAccountsPopup.open()
-    System.stopAllBalanceThreads()
+    QmlSystem.stopAllBalanceThreads()
     listReloadTimer.stop()
-    System.loadAccounts()
+    QmlSystem.loadAccounts()
     fetchAccounts()
-    System.startAllBalanceThreads()
+    QmlSystem.startAllBalanceThreads()
     listReloadTimer.start()
     fetchAccountsPopup.close()
   }
@@ -56,14 +56,14 @@ Item {
   function fetchAccounts() {
     console.log("Fetching Accounts...")
     accountsList.clear()
-    var accList = System.listAccounts()
+    var accList = QmlSystem.listAccounts()
     for (var i = 0; i < accList.length; i++) {
       accountsList.append(JSON.parse(accList[i]))
     }
   }
 
   function reloadBalances() {
-    var accList = System.listAccounts()
+    var accList = QmlSystem.listAccounts()
     for (var i = 0; i < accList.length; i++) {
       accountsList.set(i, JSON.parse(accList[i]))
     }
@@ -141,10 +141,10 @@ Item {
       }
       text: "Use this Account"
       onClicked: {
-        System.setCurrentAccount(walletList.currentItem.itemAccount)
+        QmlSystem.setCurrentAccount(walletList.currentItem.itemAccount)
         listReloadTimer.stop()
-        System.goToOverview();
-        System.setScreen(content, "qml/screens/OverviewScreen.qml")
+        QmlSystem.goToOverview();
+        QmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
       }
     }
 
@@ -164,16 +164,16 @@ Item {
   AVMEPopupChooseAccount {
     id: chooseAccountPopup
     chooseBtn.onClicked: {
-      if (System.accountExists(item.itemAccount)) {
+      if (QmlSystem.accountExists(item.itemAccount)) {
         addressTimer.start()
-      } else if (!System.checkWalletPass(pass)) {
+      } else if (!QmlSystem.checkWalletPass(pass)) {
         infoTimer.start()
       } else {
         try {
-          System.stopAllBalanceThreads()
+          QmlSystem.stopAllBalanceThreads()
           listReloadTimer.stop()
           chooseAccountPopup.close()
-          System.createAccount(foreignSeed, index, name, pass)
+          QmlSystem.createAccount(foreignSeed, index, name, pass)
           chooseAccountPopup.clean()
           createAccountPopup.open()
         } catch (error) {
@@ -247,9 +247,9 @@ Item {
     }
 
     yesBtn.onClicked: {
-      if (System.checkWalletPass(erasePassInput.text)) {
-        if (System.eraseAccount(walletList.currentItem.itemAccount)) {
-          System.stopAllBalanceThreads()
+      if (QmlSystem.checkWalletPass(erasePassInput.text)) {
+        if (QmlSystem.eraseAccount(walletList.currentItem.itemAccount)) {
+          QmlSystem.stopAllBalanceThreads()
           listReloadTimer.stop()
           erasePopup.close()
           erasePopup.account = ""

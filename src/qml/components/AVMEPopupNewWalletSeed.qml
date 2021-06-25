@@ -16,7 +16,7 @@ Popup {
   property color popupSelectionColor: "#58A0B9"
 
   function showSeed() {
-    seedText.text = System.getWalletSeed(newWalletPass)
+    seedText.text = QmlSystem.getWalletSeed(newWalletPass)
     newWalletSeed = seedText.text
   }
 

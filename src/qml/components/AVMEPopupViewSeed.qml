@@ -19,7 +19,7 @@ Popup {
 
   function showSeed() {
     if (seedText.timer.running) { seedText.timer.stop() }
-    seedText.text = System.getWalletSeed(passInput.text)
+    seedText.text = QmlSystem.getWalletSeed(passInput.text)
     newWalletSeed = seedText.text
   }
 

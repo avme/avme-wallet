@@ -17,25 +17,25 @@ Item {
   property bool loadWalletExists
 
   Connections {
-    target: System
+    target: QmlSystem
     function onAccountCreated(obj) {
       // Always default to AVAX & AVME on first load
-      if (System.getCurrentCoin() == "") {
-        System.setCurrentCoin("AVAX")
-        System.setCurrentCoinDecimals(18)
+      if (QmlSystem.getCurrentCoin() == "") {
+        QmlSystem.setCurrentCoin("AVAX")
+        QmlSystem.setCurrentCoinDecimals(18)
       }
-      if (System.getCurrentToken() == "") {
-        System.setCurrentToken("AVME")
-        System.setCurrentTokenDecimals(18)
+      if (QmlSystem.getCurrentToken() == "") {
+        QmlSystem.setCurrentToken("AVME")
+        QmlSystem.setCurrentTokenDecimals(18)
       }
-      System.setCurrentAccount(obj.accAddress)
-      System.setFirstLoad(true)
-      System.loadAccounts()
-      System.startAllBalanceThreads()
-      while (!System.accountHasBalances(obj.accAddress)) {} // This is ugly but hey it works
+      QmlSystem.setCurrentAccount(obj.accAddress)
+      QmlSystem.setFirstLoad(true)
+      QmlSystem.loadAccounts()
+      QmlSystem.startAllBalanceThreads()
+      while (!QmlSystem.accountHasBalances(obj.accAddress)) {} // This is ugly but hey it works
       walletNewPopup.close()
-      System.goToOverview();
-      System.setScreen(content, "qml/screens/OverviewScreen.qml")
+      QmlSystem.goToOverview();
+      QmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
     }
     function onAccountCreationFailed() {
       walletFailPopup.info = error.toString()
@@ -44,7 +44,7 @@ Item {
   }
 
   function checkLedger() {
-    var data = System.checkForLedger()
+    var data = QmlSystem.checkForLedger()
     if (data.state) {
       ledgerFailPopup.close()
       ledgerRetryTimer.stop()
@@ -117,7 +117,7 @@ Item {
       }
       text: "Create/Import Wallet"
       onClicked: {
-        System.setLedger(false)
+        QmlSystem.setLedger(false)
         isCreate = true
       }
     }
@@ -130,7 +130,7 @@ Item {
       }
       text: "Load Wallet"
       onClicked: {
-        System.setLedger(false)
+        QmlSystem.setLedger(false)
         isLoad = true
       }
     }
@@ -182,8 +182,8 @@ Item {
           label: "Wallet folder"
           placeholder: "Your Wallet's top folder"
           Component.onCompleted: {
-            createFolderInput.text = System.getDefaultWalletPath()
-            createWalletExists = System.checkFolderForWallet(createFolderInput.text)
+            createFolderInput.text = QmlSystem.getDefaultWalletPath()
+            createWalletExists = QmlSystem.checkFolderForWallet(createFolderInput.text)
           }
         }
         AVMEButton {
@@ -205,8 +205,8 @@ Item {
           id: createFolderDialog
           title: "Choose your Wallet folder"
           onAccepted: {
-            createFolderInput.text = System.cleanPath(createFolderDialog.folder)
-            createWalletExists = System.checkFolderForWallet(createFolderInput.text)
+            createFolderInput.text = QmlSystem.cleanPath(createFolderDialog.folder)
+            createWalletExists = QmlSystem.checkFolderForWallet(createFolderInput.text)
           }
         }
       }
@@ -331,26 +331,26 @@ Item {
               if (createPassInput.text != createPassCheckInput.text) {
                 throw "Passphrases don't match. Please check your inputs."
               } else if (!createWalletExists && createSeedInput.text == "") {
-                if (!System.createWallet(createFolderInput.text, createPassInput.text)) {
+                if (!QmlSystem.createWallet(createFolderInput.text, createPassInput.text)) {
                   throw "Error on Wallet creation. Please check"
                   + "<br>the folder path and/or passphrase."
                 }
                 console.log("Wallet created successfully, now loading it...")
               } else if (!createWalletExists && createSeedInput.text != "") {
-                if (!System.seedIsValid(createSeedInput.text)) {
+                if (!QmlSystem.seedIsValid(createSeedInput.text)) {
                   throw "Error on Wallet importing. Seed is invalid,"
                   + "<br>please check the spelling and/or formatting."
-                } else if (!System.importWallet(createSeedInput.text, createFolderInput.text, createPassInput.text)) {
+                } else if (!QmlSystem.importWallet(createSeedInput.text, createFolderInput.text, createPassInput.text)) {
                   throw "Error on Wallet importing. Please check"
                   + "<br>the folder path and/or passphrase.";
                 }
                 console.log("Wallet imported successfully, now loading it...")
               }
-              if (System.isWalletLoaded()) {
-                System.stopAllBalanceThreads()
-                System.closeWallet()
+              if (QmlSystem.isWalletLoaded()) {
+                QmlSystem.stopAllBalanceThreads()
+                QmlSystem.closeWallet()
               }
-              if (!System.loadWallet(createFolderInput.text, createPassInput.text)) {
+              if (!QmlSystem.loadWallet(createFolderInput.text, createPassInput.text)) {
                 throw "Error on Wallet loading. Please check"
                 + "<br>the folder path and/or passphrase.";
               }
@@ -404,8 +404,8 @@ Item {
           label: "Wallet folder"
           placeholder: "Your Wallet's top folder"
           Component.onCompleted: {
-            loadFolderInput.text = System.getDefaultWalletPath()
-            loadWalletExists = System.checkFolderForWallet(loadFolderInput.text)
+            loadFolderInput.text = QmlSystem.getDefaultWalletPath()
+            loadWalletExists = QmlSystem.checkFolderForWallet(loadFolderInput.text)
           }
         }
         AVMEButton {
@@ -419,8 +419,8 @@ Item {
           id: loadFolderDialog
           title: "Choose your Wallet folder"
           onAccepted: {
-            loadFolderInput.text = System.cleanPath(loadFolderDialog.folder)
-            loadWalletExists = System.checkFolderForWallet(loadFolderInput.text)
+            loadFolderInput.text = QmlSystem.cleanPath(loadFolderDialog.folder)
+            loadWalletExists = QmlSystem.checkFolderForWallet(loadFolderInput.text)
           }
         }
       }
@@ -457,26 +457,26 @@ Item {
           onClicked: btnLoad.loadWallet()
           function loadWallet() {
             try {
-              if (System.isWalletLoaded()) {
-                System.stopAllBalanceThreads()
-                System.closeWallet()
+              if (QmlSystem.isWalletLoaded()) {
+                QmlSystem.stopAllBalanceThreads()
+                QmlSystem.closeWallet()
               }
-              if (!System.loadWallet(loadFolderInput.text, loadPassInput.text)) {
+              if (!QmlSystem.loadWallet(loadFolderInput.text, loadPassInput.text)) {
                 throw "Error on Wallet loading. Please check"
                 + "<br>the folder path and/or passphrase.";
               }
               console.log("Wallet loaded successfully")
               // Always default to AVAX & AVME on first load
-              if (System.getCurrentCoin() == "") {
-                System.setCurrentCoin("AVAX")
-                System.setCurrentCoinDecimals(18)
+              if (QmlSystem.getCurrentCoin() == "") {
+                QmlSystem.setCurrentCoin("AVAX")
+                QmlSystem.setCurrentCoinDecimals(18)
               }
-              if (System.getCurrentToken() == "") {
-                System.setCurrentToken("AVME")
-                System.setCurrentTokenDecimals(18)
+              if (QmlSystem.getCurrentToken() == "") {
+                QmlSystem.setCurrentToken("AVME")
+                QmlSystem.setCurrentTokenDecimals(18)
               }
-              System.setFirstLoad(true)
-              System.setScreen(content, "qml/screens/AccountsScreen.qml")
+              QmlSystem.setFirstLoad(true)
+              QmlSystem.setScreen(content, "qml/screens/AccountsScreen.qml")
             } catch (error) {
               walletFailPopup.info = error.toString()
               walletFailPopup.open()
@@ -512,7 +512,7 @@ Item {
   AVMEPopupNewWalletSeed {
     id: newWalletSeedPopup
     okBtn.onClicked: {
-      System.createAccount(newWalletSeed, 0, "default", newWalletPass)
+      QmlSystem.createAccount(newWalletSeed, 0, "default", newWalletPass)
       newWalletSeedPopup.clean()
       newWalletSeedPopup.close()
       walletNewPopup.open()

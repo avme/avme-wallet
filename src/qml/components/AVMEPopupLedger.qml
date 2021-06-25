@@ -32,7 +32,7 @@ Popup {
   property color popupBgColor: "#1C2029"
 
   Connections {
-    target: System
+    target: QmlSystem
     function onLedgerAccountGenerated(data) {
       accountList.append(data)
       isWaiting = false
@@ -40,13 +40,13 @@ Popup {
   }
 
   function refreshList() {
-    System.generateLedgerAccounts(chosenPath, startingIndex)
+    QmlSystem.generateLedgerAccounts(chosenPath, startingIndex)
     isWaiting = true
   }
 
   function clean() {
     accountList.clear()
-    System.cleanLedgerAccounts()
+    QmlSystem.cleanLedgerAccounts()
     startingIndex = -1
     isWaiting = false
     chosenPath = ""
@@ -143,22 +143,22 @@ Popup {
       text: "Choose this Account"
       onClicked: {
         // Always default to AVAX & AVME on first load
-        if (System.getCurrentCoin() == "") {
-          System.setCurrentCoin("AVAX")
-          System.setCurrentCoinDecimals(18)
+        if (QmlSystem.getCurrentCoin() == "") {
+          QmlSystem.setCurrentCoin("AVAX")
+          QmlSystem.setCurrentCoinDecimals(18)
         }
-        if (System.getCurrentToken() == "") {
-          System.setCurrentToken("AVME")
-          System.setCurrentTokenDecimals(18)
+        if (QmlSystem.getCurrentToken() == "") {
+          QmlSystem.setCurrentToken("AVME")
+          QmlSystem.setCurrentTokenDecimals(18)
         }
-        System.stopAllBalanceThreads()
-        System.setLedger(true);
-        System.setCurrentAccount(ledgerList.currentItem.itemAccount)
-        System.setCurrentAccountPath(ledgerPopup.pathValue + ledgerPopup.index)
-        System.importLedgerAccount(System.getCurrentAccount(), System.getCurrentAccountPath());
-        System.startAllBalanceThreads()
-        System.goToOverview();
-        System.setScreen(content, "qml/screens/OverviewScreen.qml")
+        QmlSystem.stopAllBalanceThreads()
+        QmlSystem.setLedger(true);
+        QmlSystem.setCurrentAccount(ledgerList.currentItem.itemAccount)
+        QmlSystem.setCurrentAccountPath(ledgerPopup.pathValue + ledgerPopup.index)
+        QmlSystem.importLedgerAccount(QmlSystem.getCurrentAccount(), QmlSystem.getCurrentAccountPath());
+        QmlSystem.startAllBalanceThreads()
+        QmlSystem.goToOverview();
+        QmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
       }
     }
     AVMEButton {

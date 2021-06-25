@@ -25,7 +25,7 @@ Rectangle {
   Timer { id: ledgerRetryTimer; interval: 250; onTriggered: checkLedger() }
 
   function checkLedger() {
-    var data = System.checkForLedger()
+    var data = QmlSystem.checkForLedger()
     if (data.state) {
       ledgerFailPopup.close()
       ledgerRetryTimer.stop()
@@ -61,7 +61,7 @@ Rectangle {
       leftMargin: 10
     }
     color: "#FFFFFF"
-    text: (!addressTimer.running) ? System.getCurrentAccount() : "Copied to clipboard!"
+    text: (!addressTimer.running) ? QmlSystem.getCurrentAccount() : "Copied to clipboard!"
     font.bold: true
     font.pixelSize: 18.0
 
@@ -81,7 +81,7 @@ Rectangle {
         onExited: parent.color = "#1D212A"
         onClicked: {
           parent.color = "#1D212A"
-          System.copyToClipboard(System.getCurrentAccount())
+          QmlSystem.copyToClipboard(QmlSystem.getCurrentAccount())
           addressTimer.start()
         }
       }
@@ -99,7 +99,7 @@ Rectangle {
     enabled: (!addressTimer.running)
     text: (!addressTimer.running) ? "Copy To Clipboard" : "Copied!"
     onClicked: {
-      System.copyToClipboard(System.getCurrentAccount())
+      QmlSystem.copyToClipboard(QmlSystem.getCurrentAccount())
       addressTimer.start()
     }
   }
@@ -114,11 +114,11 @@ Rectangle {
     }
     text: "Change Account"
     onClicked: {
-      if (System.isLedger()) {
+      if (QmlSystem.isLedger()) {
         checkLedger()
       } else {
-        System.hideMenu()
-        System.setScreen(content, "qml/screens/AccountsScreen.qml")
+        QmlSystem.hideMenu()
+        QmlSystem.setScreen(content, "qml/screens/AccountsScreen.qml")
       }
     }
   }
@@ -133,9 +133,9 @@ Rectangle {
     }
     text: "Change Wallet"
     onClicked: {
-      System.setLedger(false)
-      System.hideMenu()
-      System.setScreen(content, "qml/screens/StartScreen.qml")
+      QmlSystem.setLedger(false)
+      QmlSystem.hideMenu()
+      QmlSystem.setScreen(content, "qml/screens/StartScreen.qml")
     }
   }
 
