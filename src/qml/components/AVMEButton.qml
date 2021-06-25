@@ -7,11 +7,12 @@ import QtQuick.Controls 2.2
 // Stylized button with AVME's color set.
 Button {
   id: btn
-  property color btnColor: "#782D8B"
+  property color btnColor: "#AD00FA"
   property color btnTextColor: "#FFFFFF"
-  property color btnPressedColor: "#3C0D4C"
-  property color btnHoveredColor: "#B66EC8"
-  property color btnDisabledColor: "#000000"
+  property color btnPressedColor: "#BB4AE3"
+  property color btnHoveredColor: "#7E18A6"
+  property color btnDisabledColor: "#1D1827"
+  property color btnBorderColor: "#AD00FA"
 
   text: "Button"
   implicitWidth: 120
@@ -31,8 +32,10 @@ Button {
         color: btnColor
       }
     }
+	border.color: btnBorderColor
+	border.width: 3
     opacity: btn.down ? "0.7" : "1.0"
-    radius: 5
+    radius: 1
   }
 
   contentItem: Text {
