@@ -22,6 +22,9 @@ Example for APT-based distros:
   * If you've already cloned it, just update the submodules with `git submodule update --init external/openssl-cmake`
 * Go to the project's root folder, create a "build" folder and change to it:
   * `cd avme-wallet && mkdir build && cd build`
+* *If cross-compiling with MinGW*, make sure to set it to POSIX like so:
+  * `sudo update-alternatives --config x86_64-w64-mingw32-g++`
+  * Then, choose the option that ends with `-posix`
 * Compile the depends system:
   * If using **GCC**: `make -C ../depends -j$(nproc)`
   * If using **MinGW**: `make HOST=x86_64-w64-mingw32 -C ../depends -j$(nproc)`
