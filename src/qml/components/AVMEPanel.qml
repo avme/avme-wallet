@@ -11,9 +11,9 @@ Rectangle {
 
   implicitWidth: 300
   implicitHeight: 300
-  color: "#1D1827"
+  color: "#0F0C18"
   radius: 5
-  border.color: "#211E2B"
+  border.color: "#1D1827"
   border.width: 10
 
   Text {
