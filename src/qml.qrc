@@ -16,6 +16,7 @@
 
         <file>qml/panels/AVMEPanelCreateWallet.qml</file>
         <file>qml/panels/AVMEPanelLoadWallet.qml</file>
+		<file>qml/panels/AVMEPanelAccountSelect.qml</file>
 
         <file>qml/components/AVMEButton.qml</file>
         <file>qml/components/AVMEInput.qml</file>
@@ -76,7 +77,7 @@
         <file>img/icons/refreshSelect.png</file>
         <file>img/icons/upload.png</file>
         <file>img/icons/uploadSelect.png</file>
-		<file>img/icons/Icon_Profile.png</file>
+		<file>img/icons/Icon_Profile_White.png</file>
 
         <file>fonts/RobotoMono-Bold.ttf</file>
         <file>fonts/RobotoMono-Italic.ttf</file>
