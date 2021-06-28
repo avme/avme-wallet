@@ -62,7 +62,6 @@ hunter_add_package(libscrypt)
 find_package(libscrypt CONFIG REQUIRED)
 
 # Add external modules
-add_subdirectory(external/openssl-cmake)
 include(ProjectEthash)
 include(ProjectLevelDB)
 include(ProjectSecp256k1)
@@ -111,7 +110,7 @@ add_library(avme-lib
   ${AVME_NETWORK_HEADERS} ${AVME_NETWORK_SOURCES}
 )
 target_link_libraries(avme-lib PUBLIC
-  devcore devcrypto ethcore ledger ${ETHASH_BYPRODUCTS} Ethash ssl crypto
+  devcore devcrypto ethcore ledger ${ETHASH_BYPRODUCTS} Ethash ${OPENSSL_LIBS}
   toolbox bip39 LevelDB ${BOOST_LIBS}
 )
 
@@ -168,7 +167,7 @@ else()
     build/moc_QmlSystem.cpp build/qml.cpp
   )
 endif()
-target_link_libraries(avme-gui PUBLIC avme-lib ${QT_LIBS})
+target_link_libraries(avme-gui PUBLIC avme-lib ${QT_LIBS} ${OPENSSL_LIBS})
 
 # CPack stuff for packaging cross-platform binaries
 if(WIN32)
