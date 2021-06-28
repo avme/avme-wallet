@@ -6,6 +6,7 @@
 #ifdef TESTNET
 std::string Pangolin::routerContract = "0x2D99ABD9008Dc933ff5c0CD271B88309593aB921";
 std::string Pangolin::stakingContract = "0xfCA717d68EE18526e2626267594625Ee4CEFc66F";
+std::string Pangolin::compoundContract = "0xb34fE8A87DFEbD5Ab0a03DB73F2d49b903E63DB6";
 
 std::map<std::string, std::string> Pangolin::tokenContracts = {
   {"WAVAX", "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"},
