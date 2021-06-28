@@ -15,6 +15,7 @@
 
 #include <lib/ledger/ledger.h>
 
+#include <network/API.h>
 #include <core/BIP39.h>
 #include <core/JSON.h>
 #include <core/Utils.h>

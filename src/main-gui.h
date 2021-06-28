@@ -44,10 +44,10 @@ Q_IMPORT_PLUGIN(QtChartsQml2Plugin)
 
 #include <lib/ledger/ledger.h>
 
+#include <network/API.h>
 #include <core/BIP39.h>
 #include <core/Utils.h>
 #include <core/Wallet.h>
-#include <network/API.h>
 #include <network/Graph.h>
 #include <network/Pangolin.h>
 #include <network/Staking.h>
