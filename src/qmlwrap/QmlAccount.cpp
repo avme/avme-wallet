@@ -124,30 +124,25 @@ QString QmlSystem::getPrivateKeys(QString account, QString pass) {
   return QString::fromStdString(key);
 }
 
-/*
-QVariantMap QmlSystem::getAccountBalances(QString address) {
-  QVariantMap ret;
-  for (std::pair<std::string, std::string> a : this->w.getAccounts()) {
-    if (a.first == address.toStdString()) {
-      std::string balanceAVAXStr, balanceAVMEStr, balanceLPFreeStr, balanceLPLockedStr, balanceLockedCompoundLP, balanceTotalLPLocked;
-      a.balancesThreadLock.lock();
-      balanceAVAXStr = a.balanceAVAX;
-      balanceAVMEStr = a.balanceAVME;
-      balanceLPFreeStr = a.balanceLPFree;
-      balanceLPLockedStr = a.balanceLPLocked;
-      balanceLockedCompoundLP = a.balanceLockedCompoundLP;
-      balanceTotalLPLocked = a.balanceTotalLPLocked;
-      a.balancesThreadLock.unlock();
-
-      ret.insert("balanceAVAX", QString::fromStdString(balanceAVAXStr));
-      ret.insert("balanceAVME", QString::fromStdString(balanceAVMEStr));
-      ret.insert("balanceLPFree", QString::fromStdString(balanceLPFreeStr));
-      ret.insert("balanceLPLocked", QString::fromStdString(balanceLPLockedStr));
-      ret.insert("balanceLockedCompoundLP", QString::fromStdString(balanceLockedCompoundLP));
-      ret.insert("balanceTotalLPLocked", QString::fromStdString(balanceTotalLPLocked));
-      break;
-    }
-  }
-  return ret;
+QString QmlSystem::getAccountAVAXBalance(QString address) {
+  std::string hexBal = API::getAVAXBalance(address.toStdString());
+  u256 avaxWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
+  bigfloat avaxPointBalFloat = bigfloat(Utils::weiToFixedPoint(
+    boost::lexical_cast<std::string>(avaxWeiBal), 18
+  ));
+  std::stringstream ss;
+  ss << std::setprecision(4) << std::fixed << avaxPointBalFloat;
+  std::string avaxPointBal = ss.str();
+  return QString::fromStdString(avaxPointBal);
 }
-*/
+
+QString QmlSystem::getAccountAVAXValue(QString address, QString amount) {
+  bigfloat avaxUSDPrice = boost::lexical_cast<bigfloat>(Graph::getAVAXPriceUSD());
+  bigfloat avaxBal = boost::lexical_cast<bigfloat>(amount.toStdString());
+  bigfloat avaxUSDValueFloat = avaxUSDPrice * avaxBal;
+  std::stringstream ss;
+  ss << std::setprecision(2) << std::fixed << avaxUSDValueFloat;
+  std::string avaxUSDValue = ss.str();
+  return QString::fromStdString(avaxUSDValue);
+}
+

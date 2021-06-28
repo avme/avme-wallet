@@ -12,13 +12,26 @@ import "qrc:/qml/panels"
 Item {
   id: accountsScreen
 
-  Component.onCompleted: fetchAccounts()
+  Component.onCompleted: {
+    fetchAccounts()
+  }
 
   function fetchAccounts() {
     // TODO: clear list here
     var accList = QmlSystem.listAccounts()
     for (var i = 0; i < accList.length; i++) {
       accountSelectPanel.accountList.set(i, JSON.parse(accList[i]))
+    }
+    fetchBalances()
+  }
+
+  function fetchBalances() {
+    for (var i = 0; i < accountSelectPanel.accountList.count; i++) {
+      var address = accountSelectPanel.accountList.get(i).address
+      var bal = QmlSystem.getAccountAVAXBalance(address)
+      var usd = QmlSystem.getAccountAVAXValue(address, bal)
+      accountSelectPanel.accountList.setProperty(i, "coinAmount", bal + " AVAX")
+      accountSelectPanel.accountList.setProperty(i, "coinValue", "$" + usd)
     }
   }
 

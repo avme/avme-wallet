@@ -38,6 +38,7 @@ class API {
      * For a list of addresses, make one call per address in the list.
      * Returns balances in Hex, which have to be converted later, or empty strings on failure.
      * TODO: maybe rename to getCoinBalance / getTokenBalance?
+     * TODO: return values NOT in Hex
      */
     static std::string getAVAXBalance(std::string address);
     static std::string getAVMEBalance(std::string address, std::string contractAddress);
