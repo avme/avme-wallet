@@ -17,23 +17,18 @@ Example for APT-based distros:
 
 ### Instructions
 
-* Clone the project:
-  * `git clone --recurse-submodules https://github.com/avme/avme-wallet`
-  * If you've already cloned it, just update the submodules with `git submodule update --init external/openssl-cmake`
+* Clone the project: `git clone https://github.com/avme/avme-wallet`
 * Go to the project's root folder, create a "build" folder and change to it:
   * `cd avme-wallet && mkdir build && cd build`
-* *If cross-compiling with MinGW*, make sure to set it to POSIX like so:
-  * `sudo update-alternatives --config x86_64-w64-mingw32-g++`
-  * Then, choose the option that ends with `-posix`
 * Compile the depends system:
   * If using **GCC**: `make -C ../depends -j$(nproc)`
   * If using **MinGW**: `make HOST=x86_64-w64-mingw32 -C ../depends -j$(nproc)`
 * Run `cmake` inside the build folder:
-  * If building for **testnet**: `cmake -DTESTNET=ON ..`
   * If using **GCC**: `cmake -DCMAKE_BUILD_TYPE=Release ..`
   * If using **MinGW**: `cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=cmake/x86_64-w64-mingw32.cmake ..`
   * If using **MacOS**: `cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=cmake/x86_64-apple-darwin20.cmake ..`
-  * Use `-DCMAKE_BUILD_TYPE=RelWithDebInfo` for debug symbols
+  * Use `-DTESTNET=ON` to build for testnet
+  * Use `-DCMAKE_BUILD_TYPE=RelWithDebInfo` to build with debug symbols
 * Build the executable:
   * `cmake --build . -- -j$(nproc)`
 
