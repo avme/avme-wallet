@@ -12,8 +12,9 @@ QVariantList QmlSystem::listAccounts() {
   QVariantList ret;
   for (std::pair<std::string, std::string> a : this->w.getAccounts()) {
     std::string obj;
-    obj += "{\"account\": \"" + a.first;
+    obj += "{\"address\": \"" + a.first;
     obj += "\", \"name\": \"" + a.second;
+    obj += "\"}";
     ret << QString::fromStdString(obj);
   }
   return ret;

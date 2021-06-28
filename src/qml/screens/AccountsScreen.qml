@@ -10,8 +10,20 @@ import "qrc:/qml/panels"
 // Screen for listing Accounts and their general operations
 
 Item {
+  id: accountsScreen
+
+  Component.onCompleted: fetchAccounts()
+
+  function fetchAccounts() {
+    // TODO: clear list here
+    var accList = QmlSystem.listAccounts()
+    for (var i = 0; i < accList.length; i++) {
+      accountSelectPanel.accountList.set(i, JSON.parse(accList[i]))
+    }
+  }
 
 	AVMEPanelAccountSelect {
+    id: accountSelectPanel
 		height: parent.height * 0.9
 		width: parent.width * 0.95
 		anchors.horizontalCenter: parent.horizontalCenter

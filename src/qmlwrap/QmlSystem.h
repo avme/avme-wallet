@@ -184,16 +184,19 @@ class QmlSystem : public QObject {
     // TODO: check this later
     //Q_INVOKABLE bool accountHasBalances(QString address);
 
-    // Generate an Account list from a given seed, starting from a given index
+    // Generate an Account list from a given seed, starting from a given index.
+    // Emits accountGenerated()
     Q_INVOKABLE void generateAccounts(QString seed, int idx);
 
-    // Same as above but for Ledger devices
+    // Same as above but for Ledger devices.
+    // Emits ledgerAccountGenerated()
     Q_INVOKABLE void generateLedgerAccounts(QString path, int idx);
 
     // Clean up the Ledger account vector
     Q_INVOKABLE void cleanLedgerAccounts();
 
-    // Create a new Account
+    // Create a new Account.
+    // Emits accountCreated() on success, accountCreationFailed() on failure
     Q_INVOKABLE void createAccount(QString seed, int index, QString name, QString pass);
 
     // Import a Ledger account to the Wallet
@@ -217,23 +220,28 @@ class QmlSystem : public QObject {
     // ======================================================================
 
     // TODO: check all of those later
-    // Get the crypto and fiat balances for an Account and the whole Wallet, respectively
+    // Get the crypto and fiat balances for an Account and the whole Wallet, respectively.
+    // Emits, in order: accountBalancesUpdated(), accountFiatBalancesUpdated(),
+    // walletBalancesUpdated() and walletFiatBalancesUpdated()
     //Q_INVOKABLE void getAccountBalancesOverview(QString address);
     //Q_INVOKABLE void getAccountFiatBalancesOverview(QString address);
     //Q_INVOKABLE void getAllAccountBalancesOverview();
     //Q_INVOKABLE void getAllAccountFiatBalancesOverview();
 
-    // Get the current ROI for the staking reward
+    // Get the current ROI for the staking reward.
+    // Emits roiCalculated()
     Q_INVOKABLE void calculateRewardCurrentROI();
 
-    // Get data for the market chart for the last X days (most to least recent)
+    // Get data for the market chart for the last X days (most to least recent).
+    // Emits marketDataUpdated()
     Q_INVOKABLE void getMarketData(int days);
 
     // ======================================================================
     // HISTORY SCREEN FUNCTIONS
     // ======================================================================
 
-    // List the Account's transactions, updating their statuses on the spot if required
+    // List the Account's transactions, updating their statuses on the spot if required.
+    // Emits historyLoaded()
     Q_INVOKABLE void listAccountTransactions(QString address);
 
     // Update the statuses of all transactions in the list
@@ -270,7 +278,8 @@ class QmlSystem : public QObject {
       QString senderAmount, QString receiverAmount, int decimals
     );
 
-    // Make a transaction with the collected data
+    // Make a transaction with the collected data.
+    // Emits txBuilt(), txSigned(), txSent() and txRetry()
     Q_INVOKABLE void makeTransaction(
       QString operation, QString to,
       QString coinAmount, int coinDecimals,
@@ -283,16 +292,19 @@ class QmlSystem : public QObject {
     // EXCHANGE SCREEN FUNCTIONS
     // ======================================================================
 
-    // Get approval amounts for exchange and liquidity
+    // Get approval amounts for exchange and liquidity.
+    // Emits allowancesUpdated()
     Q_INVOKABLE void getAllowances();
 
     // Check if approval needs to be refreshed
     Q_INVOKABLE bool isApproved(QString amount, QString allowed);
 
-    // Update reserves for the exchange screen
+    // Update reserves for the exchange screen.
+    // Emits exchangeDataUpdated()
     Q_INVOKABLE void updateExchangeData(QString tokenNameA, QString tokenNameB);
 
-    // Update reserves and liquidity supply for the exchange screen
+    // Update reserves and liquidity supply for the exchange screen.
+    // Emits liquidityDataUpdated()
     Q_INVOKABLE void updateLiquidityData(QString tokenNameA, QString tokenNameB);
 
     /**
@@ -325,7 +337,7 @@ class QmlSystem : public QObject {
       QString lowerReserves, QString higherReserves, QString totalLiquidity
     );
 
-    // TODO: comment this
+    // Same as above but for advanced compound
     Q_INVOKABLE QVariantMap calculatePoolSharesForTokenValue(
       QString lowerReserves, QString higherReserves, QString totalLiquidity, QString LPTokenValue
     );
@@ -335,6 +347,7 @@ class QmlSystem : public QObject {
     // ======================================================================
 
     // Get the staking and compound rewards for a given Account, respectively.
+    // Emits, in order: rewardUpdated() and compoundUpdated()
     Q_INVOKABLE void getPoolReward();
     Q_INVOKABLE void getCompoundReward();
 };

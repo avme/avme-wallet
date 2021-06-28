@@ -133,6 +133,7 @@ AVMEPanel {
             }
             console.log("Wallet loaded successfully")
             QmlSystem.setFirstLoad(true)
+            QmlSystem.loadAccounts()
             QmlSystem.setScreen(content, "qml/screens/AccountsScreen.qml")
           } catch (error) {
             walletFailPopup.info = error.toString()

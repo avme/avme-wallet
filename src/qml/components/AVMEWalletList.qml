@@ -15,40 +15,65 @@ import QtQuick.Controls 2.2
  * - "backgroundGradientEnd": the BG Gradient color end
  */
 ListView {
-	id: walletList
-	highlight: Rectangle {
-		color: "#342e43";
-		radius: 10;
-		anchors.verticalCenter: walletList.currentItem.verticalCenter
-	}
-	highlightMoveVelocity: 1500
-	focus: true
-	clip: true
-	width: parent.width
-	height: parent.height
-	boundsBehavior: Flickable.StopAtBounds
-	leftMargin: 20
-	rightMargin: 20
-	snapMode: ListView.SnapToItem
-	spacing: 40
-	orientation: ListView.Horizontal
+  id: walletList
+
+  width: parent.width
+  height: parent.height
+  focus: true
+  clip: true
+  boundsBehavior: Flickable.StopAtBounds
+  leftMargin: 20
+  rightMargin: 20
+  snapMode: ListView.SnapToItem
+  spacing: 40
+  orientation: ListView.Horizontal
+  highlight: Rectangle {
+    color: "#342e43";
+    radius: 10;
+    anchors.verticalCenter: walletList.currentItem.verticalCenter
+  }
+  highlightMoveVelocity: 1500
+
 	delegate: Component {
 		id: listDelegate
-		Item {
-			id: delegateItem
+
+    Item {
+			id: listItem
+      readonly property string itemName: name
+      readonly property string itemAddress: address
+      readonly property string itemCoinAmount: coinAmount
+      readonly property string itemCoinValue: coinValue
 			width: parent.parent.width / 4
-			height: parent.height
+      height: parent.height
+
 			Rectangle {
-				id: delegateRectangle
+        id: delegateRectangle
+        property string backgroundGradientStart
+        property string backgroundGradientEnd
+        property var gradientStart: [
+          "#9300F5", "#5600F5", "#9300F5", "#E44A41",
+          "#00B5F4", "#DB4285", "#00F4DB", "#BB3FCE"
+        ]
+        property var gradientEnd: [
+          "#3BC5F4", "#3BC5F4", "#483BF4", "#5239F2",
+          "#00CC61", "#DB4285", "#5E34BA", "#007CF7"
+        ]
+
+        Component.onCompleted: {
+          var num = Math.floor(Math.random() * gradientStart.length)
+          backgroundGradientStart = gradientStart[num]
+          backgroundGradientEnd = gradientEnd[num]
+        }
+
 				gradient: Gradient {
-					GradientStop { position: 0.0; color: backgroundGradientStart }
-					GradientStop { position: 1.0; color: backgroundGradientEnd }
+					GradientStop { position: 0.0; color: delegateRectangle.backgroundGradientStart }
+					GradientStop { position: 1.0; color: delegateRectangle.backgroundGradientEnd }
 				}
-				radius: 10
-				anchors.verticalCenter: parent.verticalCenter
-				anchors.horizontalCenter: parent.horizontalCenter
-				width: parent.width - parent.width * 0.075
-				height: parent.height - parent.height * 0.075
+        radius: 10
+        anchors.centerIn: parent
+				width: (parent.width * 0.95)
+				height: (parent.height * 0.95)
+
 				Image {
 					source: "qrc:/img/icons/Icon_Profile_White.png"
 					anchors.top: parent.top
@@ -59,43 +84,55 @@ ListView {
 				}
 				Text {
 					id: delegateName
-					anchors.horizontalCenter: parent.horizontalCenter
-					anchors.top: parent.top
-					anchors.topMargin: parent.height * 0.4
-					text: name
-					color: "#ffffff"
-					font.pixelSize: 24.0
+          anchors {
+            horizontalCenter: parent.horizontalCenter
+					  top: parent.top
+					  topMargin: parent.height * 0.4
+          }
+          text: (itemName) ? itemName : "-unnamed-"
+          width: parent.width * 0.9
+          color: "#ffffff"
+					font.pixelSize: 18.0
+          font.bold: true
+          elide: Text.ElideRight
 					horizontalAlignment: Text.AlignHCenter
-					font.bold: true
 				}
 				Text {
 					id: delegateAddress
-					anchors.horizontalCenter: parent.horizontalCenter
-					anchors.top: parent.top
-					anchors.topMargin: parent.height * 0.5
-					text: address
+          anchors {
+            horizontalCenter: parent.horizontalCenter
+            top: parent.top
+            topMargin: parent.height * 0.5
+          }
+					text: itemAddress
+          width: parent.width * 0.9
 					color: "#ffffff"
-					font.pixelSize: 16.0
+					font.pixelSize: 14.0
+          elide: Text.ElideRight
 					horizontalAlignment: Text.AlignHCenter
 				}
 				Text {
 					id: delegateCoinAmount
-					anchors.bottom: parent.bottom
-					anchors.bottomMargin: parent.height * 0.2
-					anchors.right: parent.right
-					anchors.rightMargin: parent.width * 0.1
-					text: coinAmount
+          anchors {
+            bottom: parent.bottom
+            bottomMargin: parent.height * 0.2
+            right: parent.right
+            rightMargin: parent.width * 0.1
+          }
+					text: itemCoinAmount
 					color: "#ffffff"
 					font.pixelSize: 16.0
 					horizontalAlignment: Text.AlignHCenter
 				}
 				Text {
           id: delegateCoinValue
-          anchors.bottom: parent.bottom
-          anchors.bottomMargin: parent.height * 0.1
-          anchors.right: parent.right
-          anchors.rightMargin: parent.width * 0.1
-          text: coinValue
+          anchors {
+            bottom: parent.bottom
+            bottomMargin: parent.height * 0.1
+            right: parent.right
+            rightMargin: parent.width * 0.1
+          }
+          text: itemCoinValue
           color: "#ffffff"
           font.pixelSize: 16.0
           horizontalAlignment: Text.AlignHCenter
