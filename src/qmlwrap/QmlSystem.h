@@ -7,6 +7,7 @@
 #include <QtConcurrent/qtconcurrentrun.h>
 #include <QtCore/QFile>
 #include <QtCore/QString>
+#include <QtCore/QStringList>
 #include <QtCore/QVariant>
 #include <QtGui/QClipboard>
 #include <QtQml/QQmlContext>
@@ -123,6 +124,9 @@ class QmlSystem : public QObject {
 
     // Copy a string to the system clipboard
     Q_INVOKABLE void copyToClipboard(QString str);
+
+    // Get a BIP39 seed from the clipboard, split into individual words
+    Q_INVOKABLE QStringList copySeedFromClipboard();
 
     // Get the default path for the Wallet
     Q_INVOKABLE QString getDefaultWalletPath();

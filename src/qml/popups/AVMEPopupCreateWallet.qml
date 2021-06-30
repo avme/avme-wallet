@@ -22,6 +22,18 @@ AVMEPopup {
   //Keys.onReturnPressed: btnCreate.createWallet() // Enter key
   //Keys.onEnterPressed: btnCreate.createWallet() // Numpad enter key
 
+  onAboutToShow: {
+    createFolderInput.text = QmlSystem.getDefaultWalletPath()
+    walletExists = QmlSystem.checkFolderForWallet(createFolderInput.text)
+  }
+
+  function clean() {
+    seed = ""
+    createFolderInput.text = ""
+    createPassInput.text = ""
+    createPassCheckInput.text = ""
+  }
+
   Column {
     id: createItems
     width: parent.width
@@ -49,10 +61,6 @@ AVMEPopup {
         readOnly: true
         label: "Wallet folder"
         placeholder: "Your Wallet's top folder"
-        Component.onCompleted: {
-          createFolderInput.text = QmlSystem.getDefaultWalletPath()
-          walletExists = QmlSystem.checkFolderForWallet(createFolderInput.text)
-        }
       }
       AVMEButton {
         id: createFolderDialogBtn
@@ -155,8 +163,8 @@ AVMEPopup {
         id: btnClose
         width: (createItems.width * 0.3)
         text: "Back"
-        // TODO: clean popup inputs and data here
         onClicked: {
+          createWalletPopup.clean()
           createWalletPopup.close()
         }
       }

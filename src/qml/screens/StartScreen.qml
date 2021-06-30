@@ -49,6 +49,13 @@ Item {
     }
   }
 
+  function useSeedForWallet() {
+    createWalletPopup.seed = seedPopup.fullSeed
+    seedPopup.clean()
+    seedPopup.close()
+    createWalletPopup.open()
+  }
+
   Timer { id: ledgerRetryTimer; interval: 250; onTriggered: parent.checkLedger() }
 
   // Header logo
@@ -87,14 +94,17 @@ Item {
         width: (parent.width * 0.6)
         anchors.horizontalCenter: parent.horizontalCenter
         text: "Create New Wallet"
-        onClicked: createWalletPopup.open()
+        onClicked: {
+          createWalletPopup.seed = ""
+          createWalletPopup.open()
+        }
       }
       AVMEButton {
         id: btnImportWallet
         width: (parent.width * 0.6)
         anchors.horizontalCenter: parent.horizontalCenter
         text: "Import Wallet Seed"
-        onClicked: {} // TODO
+        onClicked: seedPopup.open()
       }
       AVMEButton {
         id: btnLoadWallet
@@ -114,13 +124,9 @@ Item {
   }
 
   // TODO: use a signal at Wallet creation (before seed popup)
-  AVMEPopupCreateWallet {
-    id: createWalletPopup
-  }
-
-  AVMEPopupLoadWallet {
-    id: loadWalletPopup
-  }
+  AVMEPopupCreateWallet { id: createWalletPopup }
+  AVMEPopupLoadWallet { id: loadWalletPopup }
+  AVMEPopupSeed { id: seedPopup }
 
   // Popup for Ledger accounts
   AVMEPopupLedger {
@@ -139,6 +145,13 @@ Item {
   AVMEPopupInfo {
     id: walletFailPopup
     icon: "qrc:/img/warn.png"
+  }
+
+  // Info popup for if the seed import fails
+  AVMEPopupInfo {
+    id: seedFailPopup
+    icon: "qrc:/img/warn.png"
+    info: "Seed is invalid. Please check if it's typed correctly."
   }
 
   // Popup for viewing the seed at Wallet creation

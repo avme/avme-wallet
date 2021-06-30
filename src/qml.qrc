@@ -16,6 +16,7 @@
 
         <file>qml/popups/AVMEPopupCreateWallet.qml</file>
         <file>qml/popups/AVMEPopupLoadWallet.qml</file>
+        <file>qml/popups/AVMEPopupSeed.qml</file>
 
         <file>qml/panels/AVMEPanelAccountSelect.qml</file>
 

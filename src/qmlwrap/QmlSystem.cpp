@@ -20,6 +20,10 @@ void QmlSystem::copyToClipboard(QString str) {
   QApplication::clipboard()->setText(str);
 }
 
+QStringList QmlSystem::copySeedFromClipboard() {
+  return QApplication::clipboard()->text().split(" ");
+}
+
 QString QmlSystem::getDefaultWalletPath() {
   return QString::fromStdString(JSON::getDataDir().string());
 }
