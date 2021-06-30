@@ -18,9 +18,6 @@ AVMEPopup {
   sizePct: 0.5
   property string seed
   property bool walletExists
-  // TODO: check this
-  //Keys.onReturnPressed: btnCreate.createWallet() // Enter key
-  //Keys.onEnterPressed: btnCreate.createWallet() // Numpad enter key
 
   onAboutToShow: {
     createFolderInput.text = QmlSystem.getDefaultWalletPath()
@@ -39,6 +36,15 @@ AVMEPopup {
     width: parent.width
     anchors.verticalCenter: parent.verticalCenter
     spacing: 30
+
+    // Enter/Numpad enter key override
+    Keys.onPressed: {
+      if ((event.key == Qt.Key_Return) || (event.key == Qt.Key_Enter)) {
+        if (btnCreate.enabled) {
+          btnCreate.createWallet()
+        }
+      }
+    }
 
     Text {
       id: info
