@@ -18,21 +18,21 @@ Item {
   }
 
   function fetchAccounts() {
-    accountSelectPanel.accountList.clear()
+    accountSelectPanel.accountModel.clear()
     var accList = QmlSystem.listAccounts()
     for (var i = 0; i < accList.length; i++) {
-      accountSelectPanel.accountList.set(i, JSON.parse(accList[i]))
+      accountSelectPanel.accountModel.set(i, JSON.parse(accList[i]))
     }
     fetchBalances()
   }
 
   function fetchBalances() {
-    for (var i = 0; i < accountSelectPanel.accountList.count; i++) {
-      var address = accountSelectPanel.accountList.get(i).address
+    for (var i = 0; i < accountSelectPanel.accountModel.count; i++) {
+      var address = accountSelectPanel.accountModel.get(i).address
       var bal = QmlSystem.getAccountAVAXBalance(address)
       var usd = QmlSystem.getAccountAVAXValue(address, bal)
-      accountSelectPanel.accountList.setProperty(i, "coinAmount", bal + " AVAX")
-      accountSelectPanel.accountList.setProperty(i, "coinValue", "$" + usd)
+      accountSelectPanel.accountModel.setProperty(i, "coinAmount", bal + " AVAX")
+      accountSelectPanel.accountModel.setProperty(i, "coinValue", "$" + usd)
     }
   }
 
@@ -45,7 +45,9 @@ Item {
       chooseAccountPopup.open()
     }
     btnSelect.onClicked: {
-      // TODO
+      QmlSystem.setCurrentAccount(accountList.currentItem.itemAddress)
+      QmlSystem.goToOverview()
+      QmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
     }
     btnErase.onClicked: {
       // TODO

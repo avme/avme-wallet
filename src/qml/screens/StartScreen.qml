@@ -20,14 +20,10 @@ Item {
   Connections {
     target: QmlSystem
     function onAccountCreated(obj) {
-      // TODO: fix this
       QmlSystem.setCurrentAccount(obj.accAddress)
       QmlSystem.setFirstLoad(true)
-      QmlSystem.loadAccounts()
-      QmlSystem.startAllBalanceThreads()
-      while (!QmlSystem.accountHasBalances(obj.accAddress)) {} // This is ugly but hey it works
       walletNewPopup.close()
-      QmlSystem.goToOverview();
+      QmlSystem.goToOverview()
       QmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
     }
     function onAccountCreationFailed() {
@@ -169,7 +165,11 @@ Item {
   // TODO: fix this
   AVMEPopup {
     id: walletNewPopup
-    property string pass
-    //info: "Creating an Account<br>for the new Wallet..."
+    Text {
+      color: "#FFFFFF"
+      horizontalAlignment: Text.AlignHCenter
+      anchors.centerIn: parent
+      text: "Creating an Account<br>for the new Wallet..."
+    }
   }
 }

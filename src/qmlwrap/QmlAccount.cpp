@@ -4,6 +4,14 @@
 
 #include <qmlwrap/QmlSystem.h>
 
+QString QmlSystem::getCurrentAccount() {
+  return QString::fromStdString(this->w.getCurrentAccount().first);
+}
+
+void QmlSystem::setCurrentAccount(QString address) {
+  this->w.setCurrentAccount(address.toStdString());
+}
+
 void QmlSystem::loadAccounts() {
   this->w.loadAccounts();
 }

@@ -125,7 +125,6 @@ AVMEPopup {
         function loadWallet() {
           try {
             if (QmlSystem.isWalletLoaded()) {
-              QmlSystem.stopAllBalanceThreads()
               QmlSystem.closeWallet()
             }
             if (!QmlSystem.loadWallet(loadFolderInput.text, loadPassInput.text)) {

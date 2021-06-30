@@ -214,7 +214,6 @@ AVMEPopup {
               console.log("Wallet imported successfully, now loading it...")
             }
             if (QmlSystem.isWalletLoaded()) {
-              QmlSystem.stopAllBalanceThreads()
               QmlSystem.closeWallet()
             }
             if (!QmlSystem.loadWallet(createFolderInput.text, createPassInput.text)) {

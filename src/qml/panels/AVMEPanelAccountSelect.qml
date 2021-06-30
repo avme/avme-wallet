@@ -8,7 +8,8 @@ import "qrc:/qml/components"
 
 AVMEPanel {
   id: accountSelectPanel
-  property alias accountList: walletModel
+  property alias accountList: walletList
+  property alias accountModel: walletModel
   property alias btnCreate: createImportBtn
   property alias btnSelect: selectAccountBtn
   property alias btnErase: eraseAccountBtn

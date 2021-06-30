@@ -178,6 +178,10 @@ class QmlSystem : public QObject {
     // ACCOUNT SCREEN FUNCTIONS
     // ======================================================================
 
+    // Getter/setter for the selected Account
+    Q_INVOKABLE QString getCurrentAccount();
+    Q_INVOKABLE void setCurrentAccount(QString address);
+
     // Load the Accounts into the Wallet
     Q_INVOKABLE void loadAccounts();
 
