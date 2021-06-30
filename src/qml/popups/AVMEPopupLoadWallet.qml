@@ -7,61 +7,32 @@ import Qt.labs.platform 1.0
 
 import "qrc:/qml/components"
 
-AVMEPanel {
-  id: loadWalletPanel
-  title: "Load Wallet"
-  property alias retryTimer: ledgerRetryTimer
-  Keys.onReturnPressed: btnLoad.loadWallet() // Enter key
-  Keys.onEnterPressed: btnLoad.loadWallet() // Numpad enter key
+/**
+ * Popup for loading an existing Wallet.
+ * Parameters:
+ * - walletExists: bool for when a Wallet exists in the given path
+ */
+AVMEPopup {
+  id: loadWalletPopup
+  sizePct: 0.5
+  property bool walletExists
+  // TODO: check this
+  //Keys.onReturnPressed: btnLoad.loadWallet() // Enter key
+  //Keys.onEnterPressed: btnLoad.loadWallet() // Numpad enter key
 
   Column {
     id: loadItems
-    anchors {
-      left: parent.left
-      right: parent.right
-      verticalCenter: parent.verticalCenter
-      margins: 20
-    }
+    width: parent.width
+    anchors.verticalCenter: parent.verticalCenter
     spacing: 30
-    topPadding: 50
 
-    // Ledger button
     Text {
-      id: ledgerTitle
+      id: info
+      horizontalAlignment: Text.AlignHCenter
+      anchors.horizontalCenter: parent.horizontalCenter
       color: "#FFFFFF"
-      font.bold: true
-      anchors.horizontalCenter: parent.horizontalCenter
-      text: "Have a Ledger device?"
-    }
-    
-    AVMEButton {
-      id: btnStartLedger
-      width: (parent.width * 0.9)
-      anchors.horizontalCenter: parent.horizontalCenter
-      text: "Open Ledger Wallet"
-      Timer { id: ledgerRetryTimer; interval: 250; onTriggered: parent.checkLedger() }
-      onClicked: checkLedger()
-      function checkLedger() {
-        var data = QmlSystem.checkForLedger()
-        if (data.state) {
-          ledgerFailPopup.close()
-          ledgerRetryTimer.stop()
-          ledgerPopup.open()
-        } else {
-          ledgerFailPopup.info = data.message
-          ledgerFailPopup.open()
-          ledgerRetryTimer.start()
-        }
-      }
-    }
-
-    // Text separator
-    Text {
-      id: separator
-      color: "#FFFFFF"
-      font.bold: true
-      anchors.horizontalCenter: parent.horizontalCenter
-      text: "- or -"
+      font.pixelSize: 14.0
+      text: "Enter the following details to load a Wallet."
     }
 
     // Load Wallet folder
@@ -78,22 +49,30 @@ AVMEPanel {
         placeholder: "Your Wallet's top folder"
         Component.onCompleted: {
           loadFolderInput.text = QmlSystem.getDefaultWalletPath()
-          loadWalletExists = QmlSystem.checkFolderForWallet(loadFolderInput.text)
+          walletExists = QmlSystem.checkFolderForWallet(loadFolderInput.text)
         }
       }
       AVMEButton {
         id: loadFolderDialogBtn
-        width: 40
+        width: (loadItems.width * 0.1)
         height: loadFolderInput.height
-        text: "..."
+        text: ""
         onClicked: loadFolderDialog.visible = true
+        Image {
+          anchors.fill: parent
+          anchors.margins: 10
+          source: "qrc:/img/icons/folder.png"
+          antialiasing: true
+          smooth: true
+          fillMode: Image.PreserveAspectFit
+        }
       }
       FolderDialog {
         id: loadFolderDialog
         title: "Choose your Wallet folder"
         onAccepted: {
           loadFolderInput.text = QmlSystem.cleanPath(loadFolderDialog.folder)
-          loadWalletExists = QmlSystem.checkFolderForWallet(loadFolderInput.text)
+          walletExists = QmlSystem.checkFolderForWallet(loadFolderInput.text)
         }
       }
     }
@@ -116,10 +95,20 @@ AVMEPanel {
       spacing: 20
 
       AVMEButton {
+        id: btnClose
+        width: (loadItems.width * 0.3)
+        text: "Back"
+        // TODO: clean popup inputs and data here
+        onClicked: {
+          loadWalletPopup.close()
+        }
+      }
+
+      AVMEButton {
         id: btnLoad
-        width: (loadItems.width * 0.4)
-        enabled: (loadFolderInput.text != "" && loadPassInput.text != "" && loadWalletExists)
-        text: (loadWalletExists) ? "Load Wallet" : "No Wallet found"
+        width: (loadItems.width * 0.3)
+        enabled: (loadFolderInput.text != "" && loadPassInput.text != "" && walletExists)
+        text: (walletExists) ? "Load Wallet" : "No Wallet found"
         onClicked: btnLoad.loadWallet()
         function loadWallet() {
           try {

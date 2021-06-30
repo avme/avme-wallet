@@ -8,6 +8,7 @@ import "qrc:/qml/components"
 import "qrc:/qml/panels"
 
 // Screen for listing Accounts and their general operations
+// TODO: back button that closes the Wallet
 
 Item {
   id: accountsScreen
@@ -17,7 +18,7 @@ Item {
   }
 
   function fetchAccounts() {
-    // TODO: clear list here
+    accountSelectPanel.accountList.clear()
     var accList = QmlSystem.listAccounts()
     for (var i = 0; i < accList.length; i++) {
       accountSelectPanel.accountList.set(i, JSON.parse(accList[i]))
@@ -35,12 +36,24 @@ Item {
     }
   }
 
-	AVMEPanelAccountSelect {
+  AVMEPanelAccountSelect {
     id: accountSelectPanel
-		height: parent.height * 0.9
-		width: parent.width * 0.95
-		anchors.horizontalCenter: parent.horizontalCenter
-		anchors.verticalCenter: parent.verticalCenter
-	}
+    height: parent.height * 0.9
+    width: parent.width * 0.9
+    anchors.centerIn: parent
+    btnCreate.onClicked: {
+      chooseAccountPopup.open()
+    }
+    btnSelect.onClicked: {
+      // TODO
+    }
+    btnErase.onClicked: {
+      // TODO
+    }
+  }
+
+  AVMEPopupChooseAccount {
+    id: chooseAccountPopup
+  }
 }
 

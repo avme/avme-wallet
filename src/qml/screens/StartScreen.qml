@@ -7,6 +7,7 @@ import Qt.labs.platform 1.0
 
 import "qrc:/qml/components"
 import "qrc:/qml/panels"
+import "qrc:/qml/popups"
 
 // Starting screen (for managing Wallets)
 // TODO: set Ledger flag
@@ -19,6 +20,7 @@ Item {
   Connections {
     target: QmlSystem
     function onAccountCreated(obj) {
+      // TODO: fix this
       QmlSystem.setCurrentAccount(obj.accAddress)
       QmlSystem.setFirstLoad(true)
       QmlSystem.loadAccounts()
@@ -33,6 +35,21 @@ Item {
       walletFailPopup.open()
     }
   }
+
+  function checkLedger() {
+    var data = QmlSystem.checkForLedger()
+    if (data.state) {
+      ledgerFailPopup.close()
+      ledgerRetryTimer.stop()
+      ledgerPopup.open()
+    } else {
+      ledgerFailPopup.info = data.message
+      ledgerFailPopup.open()
+      ledgerRetryTimer.start()
+    }
+  }
+
+  Timer { id: ledgerRetryTimer; interval: 250; onTriggered: parent.checkLedger() }
 
   // Header logo
   Image {
@@ -49,39 +66,60 @@ Item {
     fillMode: Image.PreserveAspectFit
   }
 
-  // Create/Import Panel
-  AVMEPanelCreateWallet {
-    id: createWalletPanel
+  AVMEPanel {
+    id: startPanel
+    title: "Welcome to the AVME Wallet"
     width: (parent.width * 0.4)
-    height: (parent.height * 0.65)
+    height: (parent.height * 0.5)
     anchors {
-      left: parent.left
+      horizontalCenter: parent.horizontalCenter
       verticalCenter: parent.verticalCenter
-      verticalCenterOffset: 50
-      margins: 50
+    }
+
+    Column {
+      width: (parent.width * 0.9)
+      height: (parent.height * 0.5)
+      anchors.centerIn: parent
+      spacing: 20
+
+      AVMEButton {
+        id: btnCreateWallet
+        width: (parent.width * 0.6)
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: "Create New Wallet"
+        onClicked: createWalletPopup.open()
+      }
+      AVMEButton {
+        id: btnImportWallet
+        width: (parent.width * 0.6)
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: "Import Wallet Seed"
+        onClicked: {} // TODO
+      }
+      AVMEButton {
+        id: btnLoadWallet
+        width: (parent.width * 0.6)
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: "Load Wallet"
+        onClicked: loadWalletPopup.open()
+      }
+      AVMEButton {
+        id: btnOpenLedger
+        width: (parent.width * 0.6)
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: "Open Ledger"
+        onClicked: startScreen.checkLedger()
+      }
     }
   }
 
-  // Text separator
-  Text {
-    id: separator
-    color: "#FFFFFF"
-    font.bold: true
-    anchors.centerIn: parent
-    text: "- or -"
+  // TODO: use a signal at Wallet creation (before seed popup)
+  AVMEPopupCreateWallet {
+    id: createWalletPopup
   }
 
-  // Load/Ledger Panel
-  AVMEPanelLoadWallet {
-    id: loadWalletPanel
-    width: (parent.width * 0.4)
-    height: (parent.height * 0.65)
-    anchors {
-      right: parent.right
-      verticalCenter: parent.verticalCenter
-      verticalCenterOffset: 50
-      margins: 50
-    }
+  AVMEPopupLoadWallet {
+    id: loadWalletPopup
   }
 
   // Popup for Ledger accounts
@@ -93,7 +131,7 @@ Item {
   AVMEPopupInfo {
     id: ledgerFailPopup
     icon: "qrc:/img/warn.png"
-    onAboutToHide: loadWalletPanel.retryTimer.stop()
+    onAboutToHide: ledgerRetryTimer.stop()
     okBtn.text: "Close"
   }
 
@@ -115,9 +153,10 @@ Item {
   }
 
   // Popup for waiting while the first Account is created for a new Wallet
+  // TODO: fix this
   AVMEPopup {
     id: walletNewPopup
     property string pass
-    info: "Creating an Account<br>for the new Wallet..."
+    //info: "Creating an Account<br>for the new Wallet..."
   }
 }

@@ -9,6 +9,9 @@ import "qrc:/qml/components"
 AVMEPanel {
   id: accountSelectPanel
   property alias accountList: walletModel
+  property alias btnCreate: createImportBtn
+  property alias btnSelect: selectAccountBtn
+  property alias btnErase: eraseAccountBtn
   title: "Accounts"
 
   Rectangle {
@@ -16,8 +19,8 @@ AVMEPanel {
     color: "transparent"
     anchors {
       fill: parent
-      topMargin: parent.height * 0.175
-      bottomMargin: parent.height * 0.25
+      topMargin: parent.height * 0.2
+      bottomMargin: parent.height * 0.2
       leftMargin: parent.width * 0.05
       rightMargin: parent.width * 0.05
     }

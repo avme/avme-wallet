@@ -7,24 +7,35 @@ import Qt.labs.platform 1.0
 
 import "qrc:/qml/components"
 
-// TODO: use a signal at Wallet creation (before seed popup)
-
-AVMEPanel {
-  id: createWalletPanel
-  title: "Create/Import Wallet"
-  Keys.onReturnPressed: btnCreate.createWallet() // Enter key
-  Keys.onEnterPressed: btnCreate.createWallet() // Numpad enter key
+/**
+ * Popup for creating a new Wallet.
+ * Parameters:
+ * - seed: optional BIP39 12-word seed to be used
+ * - walletExists: bool for when a Wallet exists in the given path
+ */
+AVMEPopup {
+  id: createWalletPopup
+  sizePct: 0.5
+  property string seed
+  property bool walletExists
+  // TODO: check this
+  //Keys.onReturnPressed: btnCreate.createWallet() // Enter key
+  //Keys.onEnterPressed: btnCreate.createWallet() // Numpad enter key
 
   Column {
     id: createItems
-    anchors {
-      left: parent.left
-      right: parent.right
-      verticalCenter: parent.verticalCenter
-      margins: 20
-    }
+    width: parent.width
+    anchors.verticalCenter: parent.verticalCenter
     spacing: 30
-    topPadding: 50
+
+    Text {
+      id: info
+      horizontalAlignment: Text.AlignHCenter
+      anchors.horizontalCenter: parent.horizontalCenter
+      color: "#FFFFFF"
+      font.pixelSize: 14.0
+      text: "Enter the following details to create a Wallet."
+    }
 
     // Create Wallet folder
     Row {
@@ -40,7 +51,7 @@ AVMEPanel {
         placeholder: "Your Wallet's top folder"
         Component.onCompleted: {
           createFolderInput.text = QmlSystem.getDefaultWalletPath()
-          createWalletExists = QmlSystem.checkFolderForWallet(createFolderInput.text)
+          walletExists = QmlSystem.checkFolderForWallet(createFolderInput.text)
         }
       }
       AVMEButton {
@@ -63,7 +74,7 @@ AVMEPanel {
         title: "Choose your Wallet folder"
         onAccepted: {
           createFolderInput.text = QmlSystem.cleanPath(createFolderDialog.folder)
-          createWalletExists = QmlSystem.checkFolderForWallet(createFolderInput.text)
+          walletExists = QmlSystem.checkFolderForWallet(createFolderInput.text)
         }
       }
     }
@@ -134,24 +145,6 @@ AVMEPanel {
       }
     }
 
-    // Optional seed (Import)
-    Text {
-      id: createSeedText
-      color: "#FFFFFF"
-      font.pixelSize: 14.0
-      anchors.horizontalCenter: parent.horizontalCenter
-      horizontalAlignment: Text.AlignHCenter
-      text: "Importing an existing Wallet?"
-    }
-
-    AVMEInput {
-      id: createSeedInput
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: (createItems.width * 0.9)
-      label: "(Optional) Seed"
-      placeholder: "Your 12-word seed phrase"
-    }
-
     // Buttons for Create/Import Wallet
     Row {
       id: btnCreateRow
@@ -159,19 +152,29 @@ AVMEPanel {
       spacing: 20
 
       AVMEButton {
+        id: btnClose
+        width: (createItems.width * 0.3)
+        text: "Back"
+        // TODO: clean popup inputs and data here
+        onClicked: {
+          createWalletPopup.close()
+        }
+      }
+
+      AVMEButton {
         id: btnCreate
-        width: (createItems.width * 0.4)
+        width: (createItems.width * 0.3)
         enabled: (
           createFolderInput.text != "" && createPassInput.text != ""
-          && createPassCheckInput.text != "" && !createWalletExists
+          && createPassCheckInput.text != "" && !walletExists
           && createPassInput.text == createPassCheckInput.text
         )
         text: {
-          if (createWalletExists) {
+          if (walletExists) {
             text: "Wallet exists"
-          } else if (!createWalletExists && createSeedInput.text == "") {
+          } else if (!walletExists && seed == "") {
             text: "Create Wallet"
-          } else if (!createWalletExists && createSeedInput.text != "") {
+          } else if (!walletExists && seed != "") {
             text: "Import Wallet"
           }
         }
@@ -180,17 +183,17 @@ AVMEPanel {
           try {
             if (createPassInput.text != createPassCheckInput.text) {
               throw "Passphrases don't match. Please check your inputs."
-            } else if (!createWalletExists && createSeedInput.text == "") {
+            } else if (!walletExists && seed == "") {
               if (!QmlSystem.createWallet(createFolderInput.text, createPassInput.text)) {
                 throw "Error on Wallet creation. Please check"
                 + "<br>the folder path and/or passphrase."
               }
               console.log("Wallet created successfully, now loading it...")
-            } else if (!createWalletExists && createSeedInput.text != "") {
-              if (!QmlSystem.seedIsValid(createSeedInput.text)) {
+            } else if (!walletExists && seed != "") {
+              if (!QmlSystem.seedIsValid(seed)) {
                 throw "Error on Wallet importing. Seed is invalid,"
                 + "<br>please check the spelling and/or formatting."
-              } else if (!QmlSystem.importWallet(createSeedInput.text, createFolderInput.text, createPassInput.text)) {
+              } else if (!QmlSystem.importWallet(seed, createFolderInput.text, createPassInput.text)) {
                 throw "Error on Wallet importing. Please check"
                 + "<br>the folder path and/or passphrase.";
               }
