@@ -4,14 +4,19 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
-// Template for creating popups.
-// Requires a size percentage (sizePct) between 0.0 and 1.0
+/**
+ * Template for creating popups.
+ * Parameters:
+ * - widthPct: width percentage (0.0 - 1.0)
+ * - heightPct: height percentage (0.0 - 1.0)
+ */
 Popup {
   id: popup
-  property real sizePct
+  property real widthPct
+  property real heightPct
 
-  width: window.width * sizePct
-  height: window.height * sizePct
+  width: window.width * widthPct
+  height: window.height * heightPct
   x: (window.width / 2) - (width / 2)
   y: (window.height / 2) - (height / 2)
   background: Rectangle { anchors.fill: parent; color: "#1C2029"; radius: 10 }

@@ -6,6 +6,7 @@ import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
 import "qrc:/qml/panels"
+import "qrc:/qml/popups"
 
 // Screen for listing Accounts and their general operations
 // TODO: back button that closes the Wallet

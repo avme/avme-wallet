@@ -13,7 +13,8 @@ import "qrc:/qml/components"
  */
 AVMEPopup {
   id: seedPopup
-  sizePct: 0.75
+  widthPct: 0.4
+  heightPct: 0.8
   property string fullSeed
 
   function handlePaste(event) {
@@ -81,7 +82,7 @@ AVMEPopup {
         spacing: 20
         AVMEInput {
           id: seedInput1
-          width: (seedItems.width * 0.25)
+          width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
             id: seedLabel1
@@ -97,7 +98,7 @@ AVMEPopup {
         }
         AVMEInput {
           id: seedInput2
-          width: (seedItems.width * 0.25)
+          width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
             id: seedLabel2
@@ -113,7 +114,7 @@ AVMEPopup {
         }
         AVMEInput {
           id: seedInput3
-          width: (seedItems.width * 0.25)
+          width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
             id: seedLabel3
@@ -129,7 +130,7 @@ AVMEPopup {
         }
         AVMEInput {
           id: seedInput4
-          width: (seedItems.width * 0.25)
+          width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
             id: seedLabel4
@@ -145,7 +146,7 @@ AVMEPopup {
         }
         AVMEInput {
           id: seedInput5
-          width: (seedItems.width * 0.25)
+          width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
             id: seedLabel5
@@ -161,7 +162,7 @@ AVMEPopup {
         }
         AVMEInput {
           id: seedInput6
-          width: (seedItems.width * 0.25)
+          width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
             id: seedLabel6
@@ -183,7 +184,7 @@ AVMEPopup {
         spacing: 20
         AVMEInput {
           id: seedInput7
-          width: (seedItems.width * 0.25)
+          width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
             id: seedLabel7
@@ -199,7 +200,7 @@ AVMEPopup {
         }
         AVMEInput {
           id: seedInput8
-          width: (seedItems.width * 0.25)
+          width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
             id: seedLabel8
@@ -215,7 +216,7 @@ AVMEPopup {
         }
         AVMEInput {
           id: seedInput9
-          width: (seedItems.width * 0.25)
+          width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
             id: seedLabel9
@@ -231,7 +232,7 @@ AVMEPopup {
         }
         AVMEInput {
           id: seedInput10
-          width: (seedItems.width * 0.25)
+          width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
             id: seedLabel10
@@ -247,7 +248,7 @@ AVMEPopup {
         }
         AVMEInput {
           id: seedInput11
-          width: (seedItems.width * 0.25)
+          width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
             id: seedLabel11
@@ -263,7 +264,7 @@ AVMEPopup {
         }
         AVMEInput {
           id: seedInput12
-          width: (seedItems.width * 0.25)
+          width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
             id: seedLabel12
@@ -280,34 +281,30 @@ AVMEPopup {
       }
     }
 
-    Row {
-      id: btnSeedRow
+    AVMEButton {
+      id: btnOk
+      width: (seedItems.width * 0.9)
       anchors.horizontalCenter: parent.horizontalCenter
-      spacing: 20
+      enabled: (
+        seedInput1.text != "" && seedInput2.text != "" &&
+        seedInput3.text != "" && seedInput4.text != "" &&
+        seedInput5.text != "" && seedInput6.text != "" &&
+        seedInput7.text != "" && seedInput8.text != "" &&
+        seedInput9.text != "" && seedInput10.text != "" &&
+        seedInput11.text != "" && seedInput12.text != ""
+      )
+      text: "Done"
+      onClicked: checkSeed()
+    }
 
-      AVMEButton {
-        id: btnClose
-        width: (seedItems.width * 0.1)
-        text: "Back"
-        onClicked: {
-          seedPopup.clean()
-          seedPopup.close()
-        }
-      }
-
-      AVMEButton {
-        id: btnOk
-        width: (seedItems.width * 0.1)
-        enabled: (
-          seedInput1.text != "" && seedInput2.text != "" &&
-          seedInput3.text != "" && seedInput4.text != "" &&
-          seedInput5.text != "" && seedInput6.text != "" &&
-          seedInput7.text != "" && seedInput8.text != "" &&
-          seedInput9.text != "" && seedInput10.text != "" &&
-          seedInput11.text != "" && seedInput12.text != ""
-        )
-        text: "Done"
-        onClicked: checkSeed()
+    AVMEButton {
+      id: btnClose
+      width: (seedItems.width * 0.9)
+      anchors.horizontalCenter: parent.horizontalCenter
+      text: "Back"
+      onClicked: {
+        seedPopup.clean()
+        seedPopup.close()
       }
     }
   }

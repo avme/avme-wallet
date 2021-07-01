@@ -41,7 +41,7 @@ ListView {
     Text {
       id: headerIndex
       anchors.verticalCenter: parent.verticalCenter
-      width: parent.width / 8
+      width: (parent.width * 0.1)
       color: "white"
       font.pixelSize: 14.0
       padding: 5
@@ -51,7 +51,7 @@ ListView {
     Text {
       id: headerAccount
       anchors.verticalCenter: parent.verticalCenter
-      width: parent.width / 2
+      width: (parent.width * 0.4)
       x: headerIndex.width
       color: "white"
       font.pixelSize: 14.0
@@ -62,12 +62,12 @@ ListView {
     Text {
       id: headerBalance
       anchors.verticalCenter: parent.verticalCenter
-      width: parent.width / 2
+      width: (parent.width * 0.5)
       x: headerIndex.width + headerAccount.width
       color: "white"
       font.pixelSize: 14.0
       padding: 5
-      text: "Coin Balance"
+      text: "AVAX Balance"
     }
   }
   headerPositioning: ListView.OverlayHeader // Prevent header scrolling along
@@ -86,7 +86,7 @@ ListView {
       Text {
         id: delegateIndex
         anchors.verticalCenter: parent.verticalCenter
-        width: parent.width / 8
+        width: (parent.width * 0.1)
         color: "white"
         font.pixelSize: 14.0
         padding: 5
@@ -96,18 +96,18 @@ ListView {
       Text {
         id: delegateAccount
         anchors.verticalCenter: parent.verticalCenter
-        width: parent.width / 2
+        width: (parent.width * 0.4)
         x: delegateIndex.width
         color: "white"
         font.pixelSize: 14.0
         padding: 5
-        elide: Text.ElideRight
+        elide: Text.ElideMiddle
         text: itemAccount
       }
       Text {
         id: delegateBalance
         anchors.verticalCenter: parent.verticalCenter
-        width: parent.width / 2
+        width: (parent.width * 0.5)
         x: delegateIndex.width + delegateAccount.width
         color: "white"
         font.pixelSize: 14.0

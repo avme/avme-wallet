@@ -14,7 +14,8 @@ import "qrc:/qml/components"
  */
 AVMEPopup {
   id: loadWalletPopup
-  sizePct: 0.5
+  widthPct: 0.4
+  heightPct: 0.5
   property bool walletExists
 
   onAboutToShow: {
@@ -100,46 +101,41 @@ AVMEPopup {
       placeholder: "Your Wallet's passphrase"
     }
 
-    // Buttons for Load Wallet
-    Row {
-      id: btnLoadRow
+    AVMEButton {
+      id: btnLoad
+      width: (loadItems.width * 0.9)
       anchors.horizontalCenter: parent.horizontalCenter
-      spacing: 20
-
-      AVMEButton {
-        id: btnClose
-        width: (loadItems.width * 0.3)
-        text: "Back"
-        onClicked: {
-          loadWalletPopup.clean()
-          loadWalletPopup.close()
+      enabled: (loadFolderInput.text != "" && loadPassInput.text != "" && walletExists)
+      text: (walletExists) ? "Load Wallet" : "No Wallet found"
+      onClicked: btnLoad.loadWallet()
+      function loadWallet() {
+        try {
+          if (QmlSystem.isWalletLoaded()) {
+            QmlSystem.closeWallet()
+          }
+          if (!QmlSystem.loadWallet(loadFolderInput.text, loadPassInput.text)) {
+            throw "Error on Wallet loading. Please check"
+            + "<br>the folder path and/or passphrase.";
+          }
+          console.log("Wallet loaded successfully")
+          QmlSystem.setFirstLoad(true)
+          QmlSystem.loadAccounts()
+          QmlSystem.setScreen(content, "qml/screens/AccountsScreen.qml")
+        } catch (error) {
+          walletFailPopup.info = error.toString()
+          walletFailPopup.open()
         }
       }
+    }
 
-      AVMEButton {
-        id: btnLoad
-        width: (loadItems.width * 0.3)
-        enabled: (loadFolderInput.text != "" && loadPassInput.text != "" && walletExists)
-        text: (walletExists) ? "Load Wallet" : "No Wallet found"
-        onClicked: btnLoad.loadWallet()
-        function loadWallet() {
-          try {
-            if (QmlSystem.isWalletLoaded()) {
-              QmlSystem.closeWallet()
-            }
-            if (!QmlSystem.loadWallet(loadFolderInput.text, loadPassInput.text)) {
-              throw "Error on Wallet loading. Please check"
-              + "<br>the folder path and/or passphrase.";
-            }
-            console.log("Wallet loaded successfully")
-            QmlSystem.setFirstLoad(true)
-            QmlSystem.loadAccounts()
-            QmlSystem.setScreen(content, "qml/screens/AccountsScreen.qml")
-          } catch (error) {
-            walletFailPopup.info = error.toString()
-            walletFailPopup.open()
-          }
-        }
+    AVMEButton {
+      id: btnClose
+      width: (loadItems.width * 0.9)
+      anchors.horizontalCenter: parent.horizontalCenter
+      text: "Back"
+      onClicked: {
+        loadWalletPopup.clean()
+        loadWalletPopup.close()
       }
     }
   }

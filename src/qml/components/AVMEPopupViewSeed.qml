@@ -5,6 +5,7 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 // Popup for viewing the Wallet's seed.
+// TODO: add a button for copying to clipboard
 Popup {
   id: viewSeedPopup
   property string newWalletPass
