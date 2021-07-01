@@ -16,6 +16,7 @@ ExternalProject_Add(
     DOWNLOAD_NO_PROGRESS 1
     URL https://github.com/itamarcps/bip3x/archive/9363c7b20ccf3318eb04354547aacedc907e9ad0.tar.gz
     URL_HASH SHA256=26691fcf3532afac1798c2651fc2d8f9afe16c1b37c1cd7b0a9906edf995fd25
+    PATCH_COMMAND patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/cmake/bip3x_strings_fix.patch
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
                -DCMAKE_POSITION_INDEPENDENT_CODE=${BUILD_SHARED_LIBS}
                -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
@@ -25,6 +26,7 @@ ExternalProject_Add(
                -DENABLE_CONAN=OFF
                -DENABLE_BIP39_JNI=OFF
                ${_only_release_configuration}
+               -DCMAKE_INSTALL_LIBDIR=lib
     LOG_CONFIGURE 1
     BUILD_COMMAND ""
     ${_overwrite_install_command}
@@ -39,3 +41,4 @@ set_property(TARGET bip39 PROPERTY IMPORTED_CONFIGURATIONS Release)
 set_property(TARGET bip39 PROPERTY IMPORTED_LOCATION_RELEASE "${BIP3X_LIBRARY}")
 set_property(TARGET bip39 PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${BIP3X_INCLUDE_DIR}")
 add_dependencies(bip39 toolbox bip3x ${OPENSSL_LIBS})
+
