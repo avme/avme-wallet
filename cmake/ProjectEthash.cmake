@@ -23,6 +23,7 @@ ExternalProject_Add(
                -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
 			   -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
 			   -DETHASH_BUILD_TESTS=OFF
+		-DCMAKE_INSTALL_LIBDIR=lib
                ${_only_release_configuration}
     LOG_CONFIGURE 1
     BUILD_COMMAND ""
