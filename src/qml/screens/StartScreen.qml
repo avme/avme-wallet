@@ -153,6 +153,8 @@ Item {
   // Popup for viewing the seed at Wallet creation
   AVMEPopupNewWalletSeed {
     id: newWalletSeedPopup
+    widthPct: 0.9
+    heightPct: 0.5
     okBtn.onClicked: {
       QmlSystem.createAccount(newWalletSeed, 0, "default", newWalletPass)
       newWalletSeedPopup.clean()

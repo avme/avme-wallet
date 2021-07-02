@@ -16,6 +16,7 @@
 
         <file>qml/popups/AVMEPopupCreateWallet.qml</file>
         <file>qml/popups/AVMEPopupLoadWallet.qml</file>
+        <file>qml/popups/AVMEPopupNewWalletSeed.qml</file>
         <file>qml/popups/AVMEPopupSeed.qml</file>
         <file>qml/popups/AVMEPopupChooseAccount.qml</file>
 
@@ -33,7 +34,6 @@
         <file>qml/components/AVMEPopup.qml</file>
         <file>qml/components/AVMEPopupInfo.qml</file>
         <file>qml/components/AVMEPopupYesNo.qml</file>
-        <file>qml/components/AVMEPopupNewWalletSeed.qml</file>
         <file>qml/components/AVMEPopupLedger.qml</file>
         <file>qml/components/AVMEPopupViewSeed.qml</file>
         <file>qml/components/AVMEPopupViewPrivKey.qml</file>
