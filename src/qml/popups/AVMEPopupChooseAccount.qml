@@ -95,13 +95,15 @@ AVMEPopup {
     Rectangle {
       id: listRect
       anchors.horizontalCenter: parent.horizontalCenter
-      width: (parent.width * 0.9)
+      width: (parent.width * 0.7)
       height: (parent.height * 0.6)
       radius: 5
-      color: "#4458A0C9"
+      color: "#16141F"
 
       AVMEAccountSeedList {
         id: chooseAccountList
+        height: parent.height
+        width: parent.width
         anchors.fill: parent
         model: ListModel { id: accountList }
       }
