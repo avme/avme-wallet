@@ -8,6 +8,8 @@ import "qrc:/qml/components"
 
 /**
  * Popup for inserting a BIP39 seed.
+ * Requires a "useSeed()" function defined outside, which would copy the
+ * fullSeed parameter below to the desired place where it will be used.
  * Parameters:
  * - fullSeed: the validated seed in a single string, words separated by space
  */
@@ -22,9 +24,16 @@ AVMEPopup {
       var clip = QmlSystem.copySeedFromClipboard()
       var leftCol = seedColLeft.children
       var rightCol = seedColRight.children
-      for (var i = 0; i < 6; i++) {
-        leftCol[i].text = (clip[i]) ? clip[i] : ""
-        rightCol[i].text = (clip[i+6]) ? clip[i+6] : ""
+      for (var i = 0; i < 12; i++) {
+        // Remove unnecessary spaces and invisible newlines from each word
+        var word = clip[i]
+        word = word.replace(" ", "")
+        word = word.replace("\n", "")
+        if (i < 6) {
+          leftCol[i].text = word
+        } else {
+          rightCol[i-6].text = word
+        }
       }
     }
   }
@@ -39,7 +48,7 @@ AVMEPopup {
       if (i != 5) { fullSeed += " " }
     }
     if (QmlSystem.seedIsValid(fullSeed)) {
-      useSeedForWallet()
+      useSeed()
     } else {
       fullSeed = ""
       seedFailPopup.open()

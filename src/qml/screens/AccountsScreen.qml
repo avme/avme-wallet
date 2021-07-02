@@ -14,6 +14,22 @@ import "qrc:/qml/popups"
 Item {
   id: accountsScreen
 
+  Connections {
+    target: QmlSystem
+    function onAccountCreated(data) {
+      chooseAccountPopup.clean()
+      chooseAccountPopup.close()
+      createAccountPopup.close()
+      importAccountPopup.close()
+      fetchAccounts()
+    }
+    function onAccountCreationFailed() {
+      createAccountPopup.close()
+      importAccountPopup.close()
+      accountFailPopup.open()
+    }
+  }
+
   Component.onCompleted: {
     fetchAccounts()
   }
@@ -37,26 +53,103 @@ Item {
     }
   }
 
+  function useSeed() {
+    chooseAccountPopup.foreignSeed = seedPopup.fullSeed
+    seedPopup.clean()
+    seedPopup.close()
+    chooseAccountPopup.open()
+  }
+
+  AVMEPopupChooseAccount { id: chooseAccountPopup }
+  AVMEPopupSeed { id: seedPopup }
+
   AVMEPanelAccountSelect {
     id: accountSelectPanel
     height: parent.height * 0.9
     width: parent.width * 0.9
     anchors.centerIn: parent
-    btnCreate.onClicked: {
-      chooseAccountPopup.open()
-    }
+    btnCreate.onClicked: chooseAccountPopup.open()
+    btnImport.onClicked: seedPopup.open()
     btnSelect.onClicked: {
       QmlSystem.setCurrentAccount(accountList.currentItem.itemAddress)
       QmlSystem.goToOverview()
       QmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
     }
-    btnErase.onClicked: {
-      // TODO
+    btnErase.onClicked: confirmErasePopup.open()
+  }
+
+  // Popups for waiting for a new Account to be created/imported, respectively
+  // TODO: unify those into one
+  AVMEPopup {
+    id: createAccountPopup
+    widthPct: 0.2
+    heightPct: 0.1
+    Text {
+      color: "#FFFFFF"
+      horizontalAlignment: Text.AlignHCenter
+      anchors.centerIn: parent
+      font.pixelSize: 14.0
+      text: "Creating Account..."
     }
   }
 
-  AVMEPopupChooseAccount {
-    id: chooseAccountPopup
+  AVMEPopup {
+    id: importAccountPopup
+    widthPct: 0.2
+    heightPct: 0.1
+    Text {
+      color: "#FFFFFF"
+      horizontalAlignment: Text.AlignHCenter
+      anchors.centerIn: parent
+      font.pixelSize: 14.0
+      text: "Importing Account..."
+    }
+  }
+
+  AVMEPopup {
+    id: eraseAccountPopup
+    widthPct: 0.2
+    heightPct: 0.1
+    Text {
+      color: "#FFFFFF"
+      horizontalAlignment: Text.AlignHCenter
+      anchors.centerIn: parent
+      font.pixelSize: 14.0
+      text: "Erasing Account..."
+    }
+  }
+
+  // Info popup for if the seed import fails
+  AVMEPopupInfo {
+    id: seedFailPopup
+    icon: "qrc:/img/warn.png"
+    info: "Seed is invalid. Please check if it's typed correctly."
+  }
+
+  AVMEPopupInfo {
+    id: eraseFailPopup
+    icon: "qrc:/img/warn.png"
+    info: "Failed to erase Account, please try again."
+  }
+
+  AVMEPopupYesNo {
+    id: confirmErasePopup
+    icon: "qrc:/img/warn.png"
+    info: "Are you sure you want to erase this Account?"
+    yesBtn.onClicked: {
+      confirmErasePopup.close()
+      eraseAccountPopup.open()
+      if (QmlSystem.eraseAccount(accountSelectPanel.accountList.currentItem.itemAddress)) {
+        eraseAccountPopup.close()
+        fetchAccounts()
+      } else {
+        eraseAccountPopup.close()
+        eraseFailPopup.open()
+      }
+    }
+    noBtn.onClicked: {
+      confirmErasePopup.close()
+    }
   }
 }
 

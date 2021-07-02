@@ -193,11 +193,11 @@ class QmlSystem : public QObject {
     //Q_INVOKABLE bool accountHasBalances(QString address);
 
     // Generate an Account list from a given seed, starting from a given index.
-    // Emits accountGenerated()
+    // Emits accountGenerated() for each generated Account
     Q_INVOKABLE void generateAccounts(QString seed, int idx);
 
     // Same as above but for Ledger devices.
-    // Emits ledgerAccountGenerated()
+    // Emits ledgerAccountGenerated() for each generated Account
     Q_INVOKABLE void generateLedgerAccounts(QString path, int idx);
 
     // Clean up the Ledger account vector

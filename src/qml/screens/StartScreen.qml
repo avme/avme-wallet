@@ -45,7 +45,7 @@ Item {
     }
   }
 
-  function useSeedForWallet() {
+  function useSeed() {
     createWalletPopup.seed = seedPopup.fullSeed
     seedPopup.clean()
     seedPopup.close()
@@ -162,13 +162,15 @@ Item {
   }
 
   // Popup for waiting while the first Account is created for a new Wallet
-  // TODO: fix this
   AVMEPopup {
     id: walletNewPopup
+    widthPct: 0.2
+    heightPct: 0.1
     Text {
       color: "#FFFFFF"
       horizontalAlignment: Text.AlignHCenter
       anchors.centerIn: parent
+      font.pixelSize: 14.0
       text: "Creating an Account<br>for the new Wallet..."
     }
   }

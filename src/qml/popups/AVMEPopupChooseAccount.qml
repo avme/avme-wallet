@@ -135,23 +135,29 @@ AVMEPopup {
       spacing: 10
 
       AVMEButton {
-        id: btnSeed
-        width: (chooseAccountPopup.width * 0.3)
-        text: "Import/Clear Seed"
-        onClicked: {} // TODO
-      }
-
-      AVMEButton {
         id: btnChoose
-        width: (chooseAccountPopup.width * 0.3)
+        width: (chooseAccountPopup.width * 0.4)
         enabled: (!isWaiting && passInput.text != "" && chooseAccountList.currentIndex > -1)
         text: "Choose this Account"
-        onClicked: {} // TODO
+        onClicked: {
+          if (QmlSystem.accountExists(item.itemAccount)) {
+            addressTimer.start()
+          } else if (!QmlSystem.checkWalletPass(pass)) {
+            infoTimer.start()
+          } else {
+            if (foreignSeed == "") {
+              createAccountPopup.open()
+            } else {
+              importAccountPopup.open()
+            }
+            QmlSystem.createAccount(foreignSeed, index, name, pass)
+          }
+        }
       }
 
       AVMEButton {
         id: btnMore
-        width: (chooseAccountPopup.width * 0.3)
+        width: (chooseAccountPopup.width * 0.4)
         enabled: (!isWaiting && passInput.text != "")
         text: "Generate +10 Accounts"
         onClicked: {
@@ -169,7 +175,7 @@ AVMEPopup {
 
     AVMEButton {
       id: btnBack
-      width: (chooseAccountPopup.width * 0.9)
+      width: (chooseAccountPopup.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
       enabled: (!isWaiting)
       text: "Back"
