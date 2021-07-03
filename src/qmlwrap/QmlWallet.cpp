@@ -10,27 +10,29 @@ bool QmlSystem::checkFolderForWallet(QString folder) {
   return (QFile::exists(walletFile) && QFile::exists(secretsFolder));
 }
 
-bool QmlSystem::createWallet(QString folder, QString pass) {
-  std::string passStr = pass.toStdString();
-  bool createSuccess = this->w.create(folder.toStdString(), passStr);
-  bip3x::Bip39Mnemonic::MnemonicResult mnemonic = BIP39::createNewMnemonic();
-  std::pair<bool,std::string> seedSuccess = BIP39::saveEncryptedMnemonic(mnemonic, passStr);
-  return (createSuccess && seedSuccess.first);
+void QmlSystem::createWallet(QString folder, QString pass, QString seed) {
+  QtConcurrent::run([=](){
+    std::string folderStr = folder.toStdString();
+    std::string passStr = pass.toStdString();
+    std::string seedStr = seed.toStdString();
+    bip3x::Bip39Mnemonic::MnemonicResult mnemonic;
+    bool createSuccess = this->w.create(folderStr, passStr);
+    if (seedStr.empty()) {
+      mnemonic = BIP39::createNewMnemonic();
+    } else {
+      mnemonic.raw = seedStr;
+    }
+    std::pair<bool,std::string> seedSuccess = BIP39::saveEncryptedMnemonic(mnemonic, passStr);
+    emit walletCreated(createSuccess && seedSuccess.first);
+  });
 }
 
-bool QmlSystem::importWallet(QString seed, QString folder, QString pass) {
-  std::string passStr = pass.toStdString();
-  bool createSuccess = this->w.create(folder.toStdString(), passStr);
-  bip3x::Bip39Mnemonic::MnemonicResult mnemonic;
-  mnemonic.raw = seed.toStdString();
-  std::pair<bool,std::string> seedSuccess = BIP39::saveEncryptedMnemonic(mnemonic, passStr);
-  return (createSuccess && seedSuccess.first);
-}
-
-bool QmlSystem::loadWallet(QString folder, QString pass) {
-  std::string passStr = pass.toStdString();
-  bool loadSuccess = this->w.load(folder.toStdString(), passStr);
-  return loadSuccess;
+void QmlSystem::loadWallet(QString folder, QString pass) {
+  QtConcurrent::run([=](){
+    std::string passStr = pass.toStdString();
+    bool loadSuccess = this->w.load(folder.toStdString(), passStr);
+    emit walletLoaded(loadSuccess);
+  });
 }
 
 void QmlSystem::closeWallet() {

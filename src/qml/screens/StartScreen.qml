@@ -14,20 +14,54 @@ import "qrc:/qml/popups"
 
 Item {
   id: startScreen
-  property bool createWalletExists
-  property bool loadWalletExists
+  property bool createAndLoad
 
   Connections {
     target: QmlSystem
+    function onWalletCreated(success) {
+      createAndLoad = true
+      if (success) {
+        infoPopup.info = "Loading Wallet,<br>please wait..."
+        if (QmlSystem.isWalletLoaded()) { QmlSystem.closeWallet() }
+        QmlSystem.loadWallet(createWalletPopup.folder, createWalletPopup.pass)
+      } else {
+        infoPopup.close()
+        walletFailPopup.info = "Error on Wallet "
+          + ((createWalletPopup.seed) ? "importing." : "creating.")
+        walletFailPopup.open()
+      }
+    }
+    function onWalletLoaded(success) {
+      if (success) {
+        if (createAndLoad) {
+          infoPopup.info = "Creating an Account<br>for the new Wallet..."
+          QmlSystem.createAccount(
+            createWalletPopup.seed, 0, "default", createWalletPopup.pass
+          )
+        } else {
+          infoPopup.close()
+          QmlSystem.loadAccounts()
+          QmlSystem.setScreen(content, "qml/screens/AccountsScreen.qml")
+        }
+      } else {
+        infoPopup.close()
+        walletFailPopup.info = "Error on Wallet loading.<br>Please check your passphrase."
+        walletFailPopup.open()
+      }
+    }
+    // TODO: merge those two
     function onAccountCreated(obj) {
+      infoPopup.close()
       QmlSystem.setCurrentAccount(obj.accAddress)
       QmlSystem.setFirstLoad(true)
-      walletNewPopup.close()
-      QmlSystem.goToOverview()
-      QmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
+      newWalletSeedPopup.showSeed(createWalletPopup.pass)
+      newWalletSeedPopup.open()
+      createWalletPopup.clean()
+      createWalletPopup.close()
     }
     function onAccountCreationFailed() {
-      walletFailPopup.info = error.toString()
+      infoPopup.close()
+      walletFailPopup.info = "Error on Account creation."
       walletFailPopup.open()
     }
   }
@@ -119,10 +153,55 @@ Item {
     }
   }
 
-  // TODO: use a signal at Wallet creation (before seed popup)
-  AVMEPopupCreateWallet { id: createWalletPopup }
-  AVMEPopupLoadWallet { id: loadWalletPopup }
+  // Popup for creating a new Wallet
+  AVMEPopupCreateWallet {
+    id: createWalletPopup
+    widthPct: 0.4
+    heightPct: 0.6
+    createBtn.onClicked: createWallet()
+    function createWallet() {
+      infoPopup.info = ((seed) ? "Importing" : "Creating") + " Wallet,<br>please wait..."
+      infoPopup.open()
+      QmlSystem.createWallet(folder, pass, seed)
+    }
+  }
+
+  // Popup for loading an existing Wallet
+  AVMEPopupLoadWallet {
+    id: loadWalletPopup
+    widthPct: 0.4
+    heightPct: 0.5
+    loadBtn.onClicked: loadWallet()
+    function loadWallet() {
+      createAndLoad = false
+      infoPopup.info = "Loading Wallet,<br>please wait..."
+      infoPopup.open()
+      if (QmlSystem.isWalletLoaded()) { QmlSystem.closeWallet() }
+      QmlSystem.loadWallet(folder, pass)
+    }
+  }
+
+  // Popup for entering a BIP39 seed
   AVMEPopupSeed { id: seedPopup }
+
+  AVMEPopup {
+    id: infoPopup
+    property alias info: infoText.text
+    widthPct: 0.2
+    heightPct: 0.1
+    Text {
+      id: infoText
+      color: "#FFFFFF"
+      horizontalAlignment: Text.AlignHCenter
+      anchors.centerIn: parent
+      font.pixelSize: 14.0
+    }
+  }
+
+  AVMEPopupInfo {
+    id: errorPopup
+    icon: "qrc:/img/warn.png"
+  }
 
   // Popup for Ledger accounts
   AVMEPopupLedger {
@@ -156,24 +235,10 @@ Item {
     widthPct: 0.9
     heightPct: 0.5
     okBtn.onClicked: {
-      QmlSystem.createAccount(newWalletSeed, 0, "default", newWalletPass)
       newWalletSeedPopup.clean()
       newWalletSeedPopup.close()
-      walletNewPopup.open()
-    }
-  }
-
-  // Popup for waiting while the first Account is created for a new Wallet
-  AVMEPopup {
-    id: walletNewPopup
-    widthPct: 0.2
-    heightPct: 0.1
-    Text {
-      color: "#FFFFFF"
-      horizontalAlignment: Text.AlignHCenter
-      anchors.centerIn: parent
-      font.pixelSize: 14.0
-      text: "Creating an Account<br>for the new Wallet..."
+      QmlSystem.goToOverview()
+      QmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
     }
   }
 }

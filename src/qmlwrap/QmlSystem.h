@@ -50,6 +50,10 @@ class QmlSystem : public QObject {
     void hideMenu();
     void goToOverview();
 
+    // Start/Wallet screen signals
+    void walletCreated(bool success);
+    void walletLoaded(bool success);
+
     // Account screen signals
     void accountGenerated(QVariantMap data);
     void ledgerAccountGenerated(QVariantMap data);
@@ -149,11 +153,15 @@ class QmlSystem : public QObject {
     // Check if a Wallet exists in a given folder
     Q_INVOKABLE bool checkFolderForWallet(QString folder);
 
-    // Create, import, load and close a Wallet, respectively
-    // TODO: join create and import with 'QString seed = ""' as a parameter
-    Q_INVOKABLE bool createWallet(QString folder, QString pass);
-    Q_INVOKABLE bool importWallet(QString seed, QString folder, QString pass);
-    Q_INVOKABLE bool loadWallet(QString folder, QString pass);
+    // Create/Import a new Wallet. Importing requires seed to be non-empty.
+    // Emits walletCreated(success)
+    Q_INVOKABLE void createWallet(QString folder, QString pass, QString seed = "");
+
+    // Load an existing Wallet.
+    // Emits walletLoaded(success)
+    Q_INVOKABLE void loadWallet(QString folder, QString pass);
+
+    // Close the Wallet.
     Q_INVOKABLE void closeWallet();
 
     // Check if the Wallet is loaded

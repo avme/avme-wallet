@@ -10,15 +10,14 @@ import "qrc:/qml/components"
 AVMEPopup {
   id: newWalletSeedPopup
   property string newWalletSeed
-  property string newWalletPass
   property alias seed: seedText
   property alias okBtn: btnOk
   property color popupBgColor: "#1C2029"
   property color popupSeedBgColor: "#2D3542"
   property color popupSelectionColor: "#58A0B9"
 
-  function showSeed() {
-    seedText.text = QmlSystem.getWalletSeed(newWalletPass)
+  function showSeed(pass) {
+    seedText.text = QmlSystem.getWalletSeed(pass)
     newWalletSeed = seedText.text
   }
 

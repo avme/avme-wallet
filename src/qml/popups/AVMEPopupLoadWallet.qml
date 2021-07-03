@@ -10,13 +10,17 @@ import "qrc:/qml/components"
 /**
  * Popup for loading an existing Wallet.
  * Parameters:
+ * - folder: folder path where the Wallet is located
+ * - pass: the passphrase for the Wallet
  * - walletExists: bool for when a Wallet exists in the given path
+ * - loadBtn: alias for the "Load Wallet" button
  */
 AVMEPopup {
   id: loadWalletPopup
-  widthPct: 0.4
-  heightPct: 0.5
+  property alias folder: loadFolderInput.text
+  property alias pass: loadPassInput.text
   property bool walletExists
+  property alias loadBtn: btnLoad
 
   onAboutToShow: {
     loadFolderInput.text = QmlSystem.getDefaultWalletPath()
@@ -37,9 +41,7 @@ AVMEPopup {
     // Enter/Numpad enter key override
     Keys.onPressed: {
       if ((event.key == Qt.Key_Return) || (event.key == Qt.Key_Enter)) {
-        if (btnLoad.enabled) {
-          btnLoad.loadWallet()
-        }
+        if (btnLoad.enabled) { loadWallet() }
       }
     }
 
@@ -107,25 +109,6 @@ AVMEPopup {
       anchors.horizontalCenter: parent.horizontalCenter
       enabled: (loadFolderInput.text != "" && loadPassInput.text != "" && walletExists)
       text: (walletExists) ? "Load Wallet" : "No Wallet found"
-      onClicked: btnLoad.loadWallet()
-      function loadWallet() {
-        try {
-          if (QmlSystem.isWalletLoaded()) {
-            QmlSystem.closeWallet()
-          }
-          if (!QmlSystem.loadWallet(loadFolderInput.text, loadPassInput.text)) {
-            throw "Error on Wallet loading. Please check"
-            + "<br>the folder path and/or passphrase.";
-          }
-          console.log("Wallet loaded successfully")
-          QmlSystem.setFirstLoad(true)
-          QmlSystem.loadAccounts()
-          QmlSystem.setScreen(content, "qml/screens/AccountsScreen.qml")
-        } catch (error) {
-          walletFailPopup.info = error.toString()
-          walletFailPopup.open()
-        }
-      }
     }
 
     AVMEButton {
