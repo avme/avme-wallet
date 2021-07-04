@@ -20,10 +20,9 @@
 // Class for API/ethcall-related functions (e.g. requesting data from the blockchain API).
 class API {
   private:
-    // Strings for the API's host, port and target endpoint, respectively.
+    // Strings for the API's host and port, respectively.
     static std::string host;
     static std::string port;
-    static std::string target;
 
   public:
     /**

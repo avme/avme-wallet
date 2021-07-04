@@ -4,13 +4,11 @@
 #include "API.h"
 
 #ifdef TESTNET
-std::string API::host = "api.avax-test.network";
+std::string API::host = "testnet-api.avme.io";
 std::string API::port = "443";
-std::string API::target = "/ext/bc/C/rpc";
 #else
-std::string API::host = "api.avax.network";
+std::string API::host = "api.avme.io";
 std::string API::port = "443";
-std::string API::target = "/ext/bc/C/rpc";
 #endif
 
 std::string API::httpGetRequest(std::string reqBody) {
@@ -44,7 +42,7 @@ std::string API::httpGetRequest(std::string reqBody) {
     stream.handshake(ssl::stream_base::client);
 
     // Set up an HTTP GET request message
-    http::request<http::string_body> req{http::verb::post, API::target, 11};
+    http::request<http::string_body> req{http::verb::post, "/", 11};
     req.set(http::field::host, API::host);
     req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
     req.set(http::field::content_type, "application/json");
