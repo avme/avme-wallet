@@ -151,7 +151,7 @@ Popup {
           QmlSystem.setCurrentToken("AVME")
           QmlSystem.setCurrentTokenDecimals(18)
         }
-        QmlSystem.setLedger(true);
+        QmlSystem.setLedgerFlag(true);
         QmlSystem.setCurrentAccount(ledgerList.currentItem.itemAccount)
         QmlSystem.setCurrentAccountPath(ledgerPopup.pathValue + ledgerPopup.index)
         QmlSystem.importLedgerAccount(QmlSystem.getCurrentAccount(), QmlSystem.getCurrentAccountPath());

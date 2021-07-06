@@ -18,7 +18,7 @@ Rectangle {
     margins: 10
   }
   height: 50
-  color: "#1D212A"
+  color: "transparent"
   radius: 10
 
   Timer { id: addressTimer; interval: 2000 }
@@ -42,22 +42,10 @@ Rectangle {
   }
 
   Text {
-    id: addressLabel
-    anchors {
-      verticalCenter: parent.verticalCenter
-      left: parent.left
-      leftMargin: 10
-    }
-    color: "#FFFFFF"
-    text: "Address:"
-    font.pixelSize: 18.0
-  }
-
-  Text {
     id: addressText
     anchors {
       verticalCenter: parent.verticalCenter
-      left: addressLabel.right
+      left: parent.left
       leftMargin: 10
     }
     color: "#FFFFFF"
@@ -69,18 +57,18 @@ Rectangle {
       id: addressRect
       anchors.fill: parent
       anchors.margins: -10
-      color: "#1D212A"
+      color: "transparent"
       z: parent.z - 1
-      radius: 10
+      radius: 5
       MouseArea {
         id: addressMouseArea
         anchors.fill: parent
         hoverEnabled: true
         enabled: (!addressTimer.running)
         onEntered: parent.color = "#3F434C"
-        onExited: parent.color = "#1D212A"
+        onExited: parent.color = "transparent"
         onClicked: {
-          parent.color = "#1D212A"
+          parent.color = "transparent"
           QmlSystem.copyToClipboard(QmlSystem.getCurrentAccount())
           addressTimer.start()
         }
@@ -114,7 +102,7 @@ Rectangle {
     }
     text: "Change Account"
     onClicked: {
-      if (QmlSystem.isLedger()) {
+      if (QmlSystem.getLedgerFlag()) {
         checkLedger()
       } else {
         QmlSystem.hideMenu()
@@ -133,7 +121,7 @@ Rectangle {
     }
     text: "Change Wallet"
     onClicked: {
-      QmlSystem.setLedger(false)
+      QmlSystem.setLedgerFlag(false)
       QmlSystem.hideMenu()
       QmlSystem.setScreen(content, "qml/screens/StartScreen.qml")
     }

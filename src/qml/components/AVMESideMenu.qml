@@ -9,160 +9,166 @@ import "qrc:/qml/components"
 // Side panel that acts as a "global menu"
 Rectangle {
   id: sideMenu
-  implicitWidth: 80
+  property string currentScreen
+  implicitWidth: 240
   implicitHeight: parent.height
   color: "#1C2029"
 
   Connections {
     target: QmlSystem
-    function onGoToOverview() { itemSelection.y = itemOverview.y }
+    function onGoToOverview() {
+      itemSelection.y = items.y + itemOverview.y
+      changeScreen("Overview")
+    }
   }
 
   function changeScreen(name) {
     content.active = false
+    currentScreen = name
     QmlSystem.setScreen(content, "qml/screens/" + name + "Screen.qml")
     content.active = true
   }
 
   Rectangle {
     id: itemSelection
-    width: 2
-    height: 70
-    anchors.right: parent.right
-    visible: (y > 0)
-    y: 0
-    color: "#782D8B"
+    width: (parent.width * 0.05)
+    height: 40
+    visible: (currentScreen != "Settings" && currentScreen != "About")
+    anchors.left: parent.left
+    y: items.y
+    color: "#AD00FA"
+  }
+
+  Image {
+    id: logo
+    height: 60
+    anchors {
+      top: parent.top
+      horizontalCenter: parent.horizontalCenter
+      topMargin: 20
+    }
+    source: "qrc:/img/Welcome_Logo_AVME.png"
+    fillMode: Image.PreserveAspectFit
+    antialiasing: true
+    smooth: true
   }
 
   Column {
     id: items
-    anchors.fill: parent
-    spacing: 5
+    width: parent.width
+    anchors.verticalCenter: parent.verticalCenter
+    spacing: 20
 
-    Image {
-      id: logo
-      height: 60
-      anchors.horizontalCenter: parent.horizontalCenter
-      source: "qrc:/img/avme_logo.png"
-      fillMode: Image.PreserveAspectFit
-    }
-
-    Rectangle {
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: (parent.width - 10)
-      height: 1
-      color: "#4E525D"
-    }
-
-    AVMESideMenuItem {
+    AVMEButton {
       id: itemOverview
-      icon: (itemSelection.y == y) ? "qrc:/img/icons/gridSelect.png" : "qrc:/img/icons/grid.png"
-      label: "Overview"
-      area.onClicked: {
-        itemSelection.y = y
+      width: (parent.width * 0.8)
+      anchors.horizontalCenter: parent.horizontalCenter
+      text: "Overview"
+      onClicked: {
+        itemSelection.y = items.y + y
         changeScreen("Overview")
       }
     }
 
-    Rectangle {
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: (parent.width - 10)
-      height: 1
-      color: "#4E525D"
-    }
-
-    AVMESideMenuItem {
+    AVMEButton {
       id: itemHistory
-      icon: (itemSelection.y == y) ? "qrc:/img/icons/inboxesSelect.png" : "qrc:/img/icons/inboxes.png"
-      label: "History"
-      area.onClicked: {
-        itemSelection.y = y
+      width: (parent.width * 0.8)
+      anchors.horizontalCenter: parent.horizontalCenter
+      text: "History"
+      onClicked: {
+        itemSelection.y = items.y + y
         changeScreen("History")
       }
     }
 
-    Rectangle {
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: (parent.width - 10)
-      height: 1
-      color: "#4E525D"
-    }
-
-    AVMESideMenuItem {
+    AVMEButton {
       id: itemSend
-      icon: (itemSelection.y == y) ? "qrc:/img/icons/directionsSelect.png" : "qrc:/img/icons/directions.png"
-      label: "Send"
-      area.onClicked: {
-        itemSelection.y = y
+      width: (parent.width * 0.8)
+      anchors.horizontalCenter: parent.horizontalCenter
+      text: "Send"
+      onClicked: {
+        itemSelection.y = items.y + y
         changeScreen("Transaction")
       }
     }
 
-    Rectangle {
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: (parent.width - 10)
-      height: 1
-      color: "#4E525D"
-    }
-
-    AVMESideMenuItem {
+    AVMEButton {
       id: itemExchange
-      icon: (itemSelection.y == y) ? "qrc:/img/icons/credit-cardSelect.png" : "qrc:/img/icons/credit-card.png"
-      label: "Exchange/<br>Liquidity"
-      area.onClicked: {
-        itemSelection.y = y
+      width: (parent.width * 0.8)
+      anchors.horizontalCenter: parent.horizontalCenter
+      text: "Exchange/Liquidity"
+      onClicked: {
+        itemSelection.y = items.y + y
         changeScreen("Exchange")
       }
     }
 
-    Rectangle {
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: (parent.width - 10)
-      height: 1
-      color: "#4E525D"
-    }
-
-    AVMESideMenuItem {
+    AVMEButton {
       id: itemStaking
-      icon: (itemSelection.y == y) ? "qrc:/img/icons/coinSelect.png" : "qrc:/img/icons/coin.png"
-      label: "Staking"
-      area.onClicked: {
-        itemSelection.y = y
+      width: (parent.width * 0.8)
+      anchors.horizontalCenter: parent.horizontalCenter
+      text: "Staking"
+      onClicked: {
+        itemSelection.y = items.y + y
         changeScreen("Staking")
       }
     }
 
-    Rectangle {
+    AVMEButton {
+      id: itemApplications
+      width: (parent.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
-      width: (parent.width - 10)
-      height: 1
-      color: "#4E525D"
+      text: "Applications (WIP)"
+      onClicked: {} // TODO
     }
+  }
 
-    AVMESideMenuItem {
+  Row {
+    id: statsRow
+    anchors {
+      bottom: parent.bottom
+      horizontalCenter: parent.horizontalCenter
+      bottomMargin: 20
+    }
+    spacing: 40
+
+    Image {
       id: itemSettings
-      icon: (itemSelection.y == y) ? "qrc:/img/icons/cogSelect.png" : "qrc:/img/icons/cog.png"
-      label: "Settings"
-      area.onClicked: {
-        itemSelection.y = y
-        changeScreen("Settings")
+      height: 24
+      source: (currentScreen == "Settings")
+        ? "qrc:/img/icons/Icon_Settings_On.png" : "qrc:/img/icons/Icon_Settings.png"
+      fillMode: Image.PreserveAspectFit
+      antialiasing: true
+      smooth: true
+      MouseArea {
+        anchors.fill: parent
+        onClicked: {
+          changeScreen("Settings")
+        }
       }
     }
 
-    Rectangle {
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: (parent.width - 10)
-      height: 1
-      color: "#4E525D"
+    Text {
+      id: versionText
+      color: "#FFFFFF"
+      font.pixelSize: 14.0
+      anchors.verticalCenter: parent.verticalCenter
+      text: "v" + QmlSystem.getProjectVersion()
     }
 
-    AVMESideMenuItem {
+    Image {
       id: itemAbout
-      icon: "qrc:/img/icons/info.png"
-      label: "About"
-      area.onClicked: {
-        itemSelection.y = y
-        changeScreen("About")
+      height: 24
+      source: (currentScreen == "About")
+        ? "qrc:/img/icons/Icon_Info_On.png" : "qrc:/img/icons/Icon_Info.png"
+      fillMode: Image.PreserveAspectFit
+      antialiasing: true
+      smooth: true
+      MouseArea {
+        anchors.fill: parent
+        onClicked: {
+          changeScreen("About")
+        }
       }
     }
   }

@@ -70,7 +70,6 @@ ApplicationWindow {
 
   AVMESideMenu {
     id: sideMenu
-    width: 80
     anchors {
       left: parent.left
       top: parent.top

@@ -676,7 +676,7 @@ Item {
               incorrectInputPopup.open()
             } else {
               confirmTxPopup.isSameAddress = (txFromInput.text === txToInput.text)
-              if (QmlSystem.isLedger()) {
+              if (QmlSystem.getLedgerFlag()) {
                 checkLedger()
               } else {
                 confirmTxPopup.open()
