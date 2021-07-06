@@ -82,13 +82,76 @@ std::string API::httpGetRequest(std::string reqBody) {
   return result;
 }
 
+std::string API::buildRequest(Request req) {
+  json_spirit::mObject reqObj;
+  json_spirit::mArray paramsArr;
+  for (std::string param : req.params) { paramsArr.push_back(param); }
+  reqObj["id"] = req.id;
+  reqObj["jsonrpc"] = req.jsonrpc;
+  reqObj["method"] = req.method;
+  reqObj["params"] = paramsArr;
+  std::string reqStr = json_spirit::write_string(json_spirit::mValue(reqObj), false);
+  return reqStr;
+}
+
+std::string API::buildMultiRequest(std::vector<Request> reqs) {
+  json_spirit::mArray reqArr;
+  for (Request req : reqs) {
+    json_spirit::mObject reqObj;
+    json_spirit::mArray paramsArr;
+    for (std::string param : req.params) { paramsArr.push_back(param); }
+    reqObj["id"] = req.id;
+    reqObj["jsonrpc"] = req.jsonrpc;
+    reqObj["method"] = req.method;
+    reqObj["params"] = paramsArr;
+    reqArr.push_back(reqObj);
+  }
+  std::string reqStr = json_spirit::write_string(json_spirit::mValue(reqArr), false);
+  int pos;
+  while ((pos = reqStr.find("\\")) != std::string::npos) {
+    reqStr.erase(pos, 1);
+  }
+  return reqStr;
+}
+
 std::string API::getAVAXBalance(std::string address) {
-  std::stringstream query;
-  query << "{\"jsonrpc\": \"2.0\",\"method\": \"eth_getBalance\",\"params\": [\""
-        << address
-        << "\",\"latest\"],\"id\": 1}";
-  std::string resp = httpGetRequest(query.str());
-  return JSON::getString(resp, "result");
+  Request req{1, "2.0", "eth_getBalance", {address, "latest"}};
+  std::string query = buildRequest(req);
+  std::string resp = httpGetRequest(query);
+  std::string hexBal = JSON::getString(resp, "result");
+  u256 avaxWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
+  bigfloat avaxPointBalFloat = bigfloat(Utils::weiToFixedPoint(
+    boost::lexical_cast<std::string>(avaxWeiBal), 18
+  ));
+  std::stringstream ss;
+  ss << avaxPointBalFloat;
+  std::string avaxPointBal = ss.str();
+  return avaxPointBal;
+}
+
+std::vector<std::string> API::getAVAXBalances(std::vector<std::string> addresses) {
+  std::vector<Request> reqs;
+  std::vector<std::string> ret;
+  for (int i = 0; i < addresses.size(); i++) {
+    Request req{i+1, "2.0", "eth_getBalance", {addresses[i], "latest"}};
+    reqs.push_back(req);
+  }
+  std::string query = buildMultiRequest(reqs);
+  std::string resp = httpGetRequest(query);
+  json_spirit::mValue resultArr;
+  json_spirit::read_string(resp, resultArr);
+  for (auto value : resultArr.get_array()) {
+    std::string hexBal = JSON::objectItem(value, "result").get_str();
+    u256 avaxWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
+    bigfloat avaxPointBalFloat = bigfloat(Utils::weiToFixedPoint(
+      boost::lexical_cast<std::string>(avaxWeiBal), 18
+    ));
+    std::stringstream ss;
+    ss << avaxPointBalFloat;
+    std::string avaxPointBal = ss.str();
+    ret.push_back(avaxPointBal);
+  }
+  return ret;
 }
 
 std::string API::getAVMEBalance(std::string address, std::string contractAddress) {

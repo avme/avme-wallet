@@ -227,10 +227,14 @@ class QmlSystem : public QObject {
     // Get an Account's private keys
     Q_INVOKABLE QString getPrivateKeys(QString account, QString pass);
 
-    // Get an Account's AVAX balance and value in fiat, respectively.
-    // TODO: use signals on both
-    Q_INVOKABLE QString getAccountAVAXBalance(QString address);
-    Q_INVOKABLE QString getAccountAVAXValue(QString address, QString amount);
+    // TODO: use signals in those four functions
+    // Get the AVAX balance for one or multiple Accounts, respectively.
+    Q_INVOKABLE QString getAVAXBalance(QString address);
+    Q_INVOKABLE QStringList getAVAXBalances(QStringList addresses);
+
+    // Get the AVAX price (in USD, 2 decimals) for one or multiple amounts, respectively.
+    Q_INVOKABLE QString getAVAXValue(QString amount);
+    Q_INVOKABLE QStringList getAVAXValues(QStringList amounts);
 
     // ======================================================================
     // OVERVIEW SCREEN FUNCTIONS

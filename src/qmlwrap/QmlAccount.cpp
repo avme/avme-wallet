@@ -132,19 +132,24 @@ QString QmlSystem::getPrivateKeys(QString account, QString pass) {
   return QString::fromStdString(key);
 }
 
-QString QmlSystem::getAccountAVAXBalance(QString address) {
-  std::string hexBal = API::getAVAXBalance(address.toStdString());
-  u256 avaxWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
-  bigfloat avaxPointBalFloat = bigfloat(Utils::weiToFixedPoint(
-    boost::lexical_cast<std::string>(avaxWeiBal), 18
-  ));
-  std::stringstream ss;
-  ss << std::setprecision(4) << std::fixed << avaxPointBalFloat;
-  std::string avaxPointBal = ss.str();
-  return QString::fromStdString(avaxPointBal);
+QString QmlSystem::getAVAXBalance(QString address) {
+  return QString::fromStdString(API::getAVAXBalance(address.toStdString()));
 }
 
-QString QmlSystem::getAccountAVAXValue(QString address, QString amount) {
+QStringList QmlSystem::getAVAXBalances(QStringList addresses) {
+  QStringList ret;
+  std::vector<std::string> addressesVec, balancesVec;
+  for (int i = 0; i < addresses.size(); i++) {
+    addressesVec.push_back(addresses.at(i).toStdString());
+  }
+  balancesVec = API::getAVAXBalances(addressesVec);
+  for (std::string balance : balancesVec) {
+    ret << QString::fromStdString(balance);
+  }
+  return ret;
+}
+
+QString QmlSystem::getAVAXValue(QString amount) {
   bigfloat avaxUSDPrice = boost::lexical_cast<bigfloat>(Graph::getAVAXPriceUSD());
   bigfloat avaxBal = boost::lexical_cast<bigfloat>(amount.toStdString());
   bigfloat avaxUSDValueFloat = avaxUSDPrice * avaxBal;
@@ -154,3 +159,16 @@ QString QmlSystem::getAccountAVAXValue(QString address, QString amount) {
   return QString::fromStdString(avaxUSDValue);
 }
 
+QStringList QmlSystem::getAVAXValues(QStringList amounts) {
+  QStringList ret;
+  bigfloat avaxUSDPrice = boost::lexical_cast<bigfloat>(Graph::getAVAXPriceUSD());
+  for (int i = 0; i < amounts.size(); i++) {
+    bigfloat avaxBal = boost::lexical_cast<bigfloat>(amounts.at(i).toStdString());
+    bigfloat avaxUSDValueFloat = avaxUSDPrice * avaxBal;
+    std::stringstream ss;
+    ss << std::setprecision(2) << std::fixed << avaxUSDValueFloat;
+    std::string avaxUSDValue = ss.str();
+    ret << QString::fromStdString(avaxUSDValue);
+  }
+  return ret;
+}

@@ -17,7 +17,18 @@
 #include <core/JSON.h>
 #include <network/root_certificates.hpp>
 
-// Class for API/ethcall-related functions (e.g. requesting data from the blockchain API).
+// Struct for a JSON request.
+typedef struct Request {
+  int id;
+  std::string jsonrpc;
+  std::string method;
+  std::vector<std::string> params;
+} Request;
+
+/**
+ * Class for API/ethcall-related functions (e.g. getting current balances, fees,
+ * block and nonce, broadcasting a transaction, etc).
+ */
 class API {
   private:
     // Strings for the API's host and port, respectively.
@@ -26,20 +37,25 @@ class API {
 
   public:
     /**
-     * Send an HTTP GET Request to the blockchain API.
+     * Send an HTTP GET Request to the API.
      * Returns the requested pure JSON data, or an empty string at connection failure.
-     * All other functions have to call this one and treat the data that returns from it.
      */
     static std::string httpGetRequest(std::string reqBody);
 
     /**
-     * Get coin/token balances from a given address in the blockchain API.
-     * For a list of addresses, make one call per address in the list.
-     * Returns balances in Hex, which have to be converted later, or empty strings on failure.
+     * Build one or multiple JSON requests to be sent to the API, respectively.
+     * Returns the streamlined JSON string.
+     */
+    static std::string buildRequest(Request req);
+    static std::string buildMultiRequest(std::vector<Request> reqs);
+
+    /**
+     * Get coin/token balances from one or multiple addresses in the API, respectively.
+     * Returns balances in fixed point, or empty strings on failure.
      * TODO: maybe rename to getCoinBalance / getTokenBalance?
-     * TODO: return values NOT in Hex
      */
     static std::string getAVAXBalance(std::string address);
+    static std::vector<std::string> getAVAXBalances(std::vector<std::string> addresses);
     static std::string getAVMEBalance(std::string address, std::string contractAddress);
 
     /**

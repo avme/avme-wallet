@@ -44,12 +44,17 @@ Item {
   }
 
   function fetchBalances() {
+    var addressList = []
     for (var i = 0; i < accountSelectPanel.accountModel.count; i++) {
-      var address = accountSelectPanel.accountModel.get(i).address
-      var bal = QmlSystem.getAccountAVAXBalance(address)
-      var usd = QmlSystem.getAccountAVAXValue(address, bal)
-      accountSelectPanel.accountModel.setProperty(i, "coinAmount", bal + " AVAX")
-      accountSelectPanel.accountModel.setProperty(i, "coinValue", "$" + usd)
+      addressList.push(accountSelectPanel.accountModel.get(i).address)
+    }
+    var balancesList = QmlSystem.getAVAXBalances(addressList)
+    for (var i = 0; i < accountSelectPanel.accountModel.count; i++) {
+      accountSelectPanel.accountModel.setProperty(i, "coinAmount", balancesList[i] + " AVAX")
+    }
+    var valuesList = QmlSystem.getAVAXValues(balancesList)
+    for (var i = 0; i < accountSelectPanel.accountModel.count; i++) {
+      accountSelectPanel.accountModel.setProperty(i, "coinValue", "$" + valuesList[i])
     }
   }
 

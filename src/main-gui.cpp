@@ -16,6 +16,7 @@ int main(int argc, char *argv[]) {
   #endif
 
   // Create the actual application and register our custom class into it
+  // TODO: use qmlRegisterType() here
   QApplication app(argc, argv);
   QQmlApplicationEngine engine;
   QmlSystem qmlsystem;
