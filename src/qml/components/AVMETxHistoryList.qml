@@ -16,8 +16,6 @@ ListView {
   property color listHoverColor: "#7AC1DB"
 
   highlight: Rectangle { color: listHighlightColor; radius: 5 }
-  implicitWidth: 500
-  implicitHeight: 500
   highlightMoveDuration: 0
   highlightMoveVelocity: 100000
   highlightResizeDuration: 0

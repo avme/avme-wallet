@@ -68,7 +68,7 @@ Item {
     interval: 5000
     repeat: true
     onTriggered: {
-      QmlSystem.updateExchangeData(QmlSystem.getCurrentCoin(), QmlSystem.getCurrentToken())
+      QmlSystem.updateExchangeData("AVAX", "Token") // TODO: token name here
       calculateExchangeAmountOut()
     }
   }
@@ -78,13 +78,13 @@ Item {
     interval: 5000
     repeat: true
     onTriggered: {
-      QmlSystem.updateLiquidityData(QmlSystem.getCurrentCoin(), QmlSystem.getCurrentToken())
+      QmlSystem.updateLiquidityData("AVAX", "Token") // TODO: token name here
     }
   }
 
   function calculateExchangeAmountOut() {
     var amountIn = swapInput.text
-    var amountName = (coinToToken) ? QmlSystem.getCurrentCoin() : QmlSystem.getCurrentToken()
+    var amountName = (coinToToken) ? "AVAX" : "Token" // TODO: token name here
     var amountOut = ""
     if (amountName == lowerToken) {
       amountOut = QmlSystem.calculateExchangeAmount(amountIn, lowerReserves, higherReserves)
@@ -97,7 +97,7 @@ Item {
   // For manual input
   function calculateAddLiquidityAmount(fromCoin) {
     var amountIn = (fromCoin) ? liquidityCoinInput.text : liquidityTokenInput.text
-    var amountName = (fromCoin) ? QmlSystem.getCurrentCoin() : QmlSystem.getCurrentToken()
+    var amountName = (fromCoin) ? "AVAX" : "Token"  // TODO: token name here
     var maxAmountAVAX = QmlSystem.getRealMaxAVAXAmount("250000", QmlSystem.getAutomaticFee())
     var maxAmountAVME = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount()).balanceAVME
     var amountOut, coinAmount, tokenAmount
@@ -122,10 +122,10 @@ Item {
     var coinAmount, tokenAmount
 
     // Get the expected amounts for maxed values
-    if (lowerToken == QmlSystem.getCurrentCoin()) {
+    if (lowerToken == "AVAX") {
       tokenAmount = QmlSystem.calculateAddLiquidityAmount(maxAmountAVAX, lowerReserves, higherReserves)
       coinAmount = QmlSystem.calculateAddLiquidityAmount(maxAmountAVME, higherReserves, lowerReserves)
-    } else if (lowerToken == QmlSystem.getCurrentToken()) {
+    } else if (lowerToken == "Token") { // TODO: token name here
       coinAmount = QmlSystem.calculateAddLiquidityAmount(maxAmountAVME, lowerReserves, higherReserves)
       tokenAmount = QmlSystem.calculateAddLiquidityAmount(maxAmountAVAX, higherReserves, lowerReserves)
     }
@@ -141,12 +141,12 @@ Item {
     }
 
     // Set the values accordingly
-    if (lowerToken == QmlSystem.getCurrentCoin()) {
+    if (lowerToken == "AVAX") {
       liquidityCoinInput.text = maxAmountAVAX
       liquidityTokenInput.text = QmlSystem.calculateAddLiquidityAmount(
         maxAmountAVAX, lowerReserves, higherReserves
       )
-    } else if (lowerToken == QmlSystem.getCurrentToken()) {
+    } else if (lowerToken == "Token") { // TODO: token name here
       liquidityTokenInput.text = maxAmountAVME
       liquidityCoinInput.text = QmlSystem.calculateAddLiquidityAmount(
         maxAmountAVME, lowerReserves, higherReserves
@@ -156,8 +156,8 @@ Item {
 
   Component.onCompleted: {
     QmlSystem.getAllowances()
-    QmlSystem.updateExchangeData(QmlSystem.getCurrentCoin(), QmlSystem.getCurrentToken())
-    QmlSystem.updateLiquidityData(QmlSystem.getCurrentCoin(), QmlSystem.getCurrentToken())
+    QmlSystem.updateExchangeData("AVAX", "Token") // TODO: token name here
+    QmlSystem.updateLiquidityData("AVAX", "Token") // TODO: token name here
     calculateExchangeAmountOut()
     reloadExchangeDataTimer.start()
     reloadLiquidityDataTimer.start()
@@ -259,23 +259,25 @@ Item {
         width: (parent.width * 0.8)
         enabled: (allowance != "")
         validator: RegExpValidator {
-          regExp: (coinToToken) ? QmlSystem.createCoinRegExp() : QmlSystem.createTokenRegExp()
+          regExp: (coinToToken)
+            ? QmlSystem.createTxRegExp(18)
+            : QmlSystem.createTxRegExp(18) // TODO: token decimals here
         }
         label: "Amount of " + (
-          (coinToToken) ? QmlSystem.getCurrentCoin() : QmlSystem.getCurrentToken()
+          (coinToToken) ? "AVAX" : "Token" // TODO: token name here
         ) + " to swap"
         placeholder: "Fixed point amount (e.g. 0.5)"
         onTextEdited: {
           calculateExchangeAmountOut()
           if (coinToToken) {
             swapImpact = QmlSystem.calculateExchangePriceImpact(
-              ((QmlSystem.getCurrentCoin() == lowerToken) ? lowerReserves : higherReserves),
-              swapInput.text, QmlSystem.getCurrentCoinDecimals()
+              (("AVAX" == lowerToken) ? lowerReserves : higherReserves),
+              swapInput.text, 18
             )
           } else {
             swapImpact = QmlSystem.calculateExchangePriceImpact(
-              ((QmlSystem.getCurrentToken() == lowerToken) ? lowerReserves : higherReserves),
-              swapInput.text, QmlSystem.getCurrentTokenDecimals()
+              (("Token" == lowerToken) ? lowerReserves : higherReserves),
+              swapInput.text, 18  // TODO: token name AND decimals here
             )
           }
         }
@@ -297,13 +299,13 @@ Item {
             calculateExchangeAmountOut()
             if (coinToToken) {
               swapImpact = QmlSystem.calculateExchangePriceImpact(
-                ((QmlSystem.getCurrentCoin() == lowerToken) ? lowerReserves : higherReserves),
-                swapInput.text, QmlSystem.getCurrentCoinDecimals()
+                (("AVAX" == lowerToken) ? lowerReserves : higherReserves),
+                swapInput.text, 18
               )
             } else {
               swapImpact = QmlSystem.calculateExchangePriceImpact(
-                ((QmlSystem.getCurrentToken() == lowerToken) ? lowerReserves : higherReserves),
-                swapInput.text, QmlSystem.getCurrentTokenDecimals()
+                (("Token" == lowerToken) ? lowerReserves : higherReserves),
+                swapInput.text, 18  // TODO: token name AND decimals here
               )
             }
           }
@@ -319,7 +321,7 @@ Item {
         color: "#FFFFFF"
         font.pixelSize: 18.0
         text: "Estimated return in " + (
-          (!coinToToken) ? QmlSystem.getCurrentCoin() : QmlSystem.getCurrentToken()
+          (!coinToToken) ? "AVAX" : "Token" // TODO: token name here
         ) + ":<br><b>" + swapEstimate + "</b>"
       }
 
@@ -514,8 +516,8 @@ Item {
         width: parent.width
         enabled: (addAllowance != "")
         visible: (addToPool)
-        validator: RegExpValidator { regExp: QmlSystem.createCoinRegExp() }
-        label: "Amount of " + QmlSystem.getCurrentCoin() + " to add"
+        validator: RegExpValidator { regExp: QmlSystem.createTxRegExp(18) }
+        label: "Amount of AVAX to add"
         placeholder: "Fixed point amount (e.g. 0.5)"
         onTextEdited: calculateAddLiquidityAmount(true)
       }
@@ -525,8 +527,8 @@ Item {
         width: parent.width
         enabled: (addAllowance != "")
         visible: (addToPool)
-        validator: RegExpValidator { regExp: QmlSystem.createTokenRegExp() }
-        label: "Amount of " + QmlSystem.getCurrentToken() + " to add"
+        validator: RegExpValidator { regExp: QmlSystem.createTxRegExp(18) } // TODO: token decimals here
+        label: "Amount of " + "Token" + " to add" // TODO: token name here
         placeholder: "Fixed point amount (e.g. 0.5)"
         onTextEdited: calculateAddLiquidityAmount(false)
       }
@@ -622,13 +624,11 @@ Item {
         text: "Estimated returns:"
         + "<br><b>" + ((removeLPEstimate) ? removeLPEstimate : "0") + " LP"
         + "<br>" + QmlSystem.weiToFixedPoint(
-          ((QmlSystem.getCurrentCoin() == lowerToken) ? removeLowerEstimate : removeHigherEstimate),
-          QmlSystem.getCurrentCoinDecimals()
-        ) + " " + QmlSystem.getCurrentCoin()
+          (("AVAX" == lowerToken) ? removeLowerEstimate : removeHigherEstimate), 18
+        ) + " AVAX"
         + "<br>" + QmlSystem.weiToFixedPoint(
-          ((QmlSystem.getCurrentToken() == lowerToken) ? removeLowerEstimate : removeHigherEstimate),
-          QmlSystem.getCurrentTokenDecimals()
-        ) + " " + QmlSystem.getCurrentToken() + "</b>"
+          (("Token" == lowerToken) ? removeLowerEstimate : removeHigherEstimate), 18
+        ) + " " + "Token" + "</b>"  // TODO: token name AND decimals here
       }
 
       AVMEButton {

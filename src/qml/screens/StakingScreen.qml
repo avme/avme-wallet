@@ -12,6 +12,7 @@ Item {
   id: stakingScreen
   property bool isStaking: true
   property bool isExiting: false
+  property bool isClassic: true
   property bool isyyCompound: true
   property string allowance
   property string reward
@@ -28,8 +29,6 @@ Item {
   property string userCompoundHigherReserves
   property string userLPSharePercentage
   property string removeLPEstimate
-  
-  property bool isClassic: true
 
   Connections {
     target: QmlSystem
@@ -37,7 +36,7 @@ Item {
       exchangeAllowance, liquidityAllowance, stakingAllowance, compoundAllowance
     ) {
       allowance = stakingAllowance
-	  compoundallowance = compoundAllowance
+      compoundallowance = compoundAllowance
     }
     function onRewardUpdated(poolReward) { reward = poolReward }
     function onCompoundUpdated(reinvestReward) { reinvestreward = reinvestReward }
@@ -69,20 +68,20 @@ Item {
     repeat: true
     onTriggered: QmlSystem.getPoolReward()
   }
-  
+
   Timer {
     id: reloadCompoundTimer
     interval: 1000
     repeat: true
     onTriggered: QmlSystem.getCompoundReward()
   }
-  
+
   Timer {
     id: reloadLiquidityDataTimer
     interval: 5000
     repeat: true
     onTriggered: {
-      QmlSystem.updateLiquidityData(QmlSystem.getCurrentCoin(), QmlSystem.getCurrentToken())
+      QmlSystem.updateLiquidityData("AVAX", "Token")  // TODO: token name here
     }
   }
 
@@ -99,17 +98,17 @@ Item {
 
   // Panel for selecting Classic x Compound
   AVMEPanel {
-	  id: stakingSelectPanel
-	  width: (parent.width - (anchors.margins * 2))
-	  height: (parent.height * 0.075)
-	  title: ""
-	  anchors {
-	  	top: accountHeader.bottom
-	  	left: parent.left
-	  	margins: 10
+    id: stakingSelectPanel
+    width: (parent.width - (anchors.margins * 2))
+    height: (parent.height * 0.075)
+    title: ""
+    anchors {
+      top: accountHeader.bottom
+      left: parent.left
+      margins: 10
     }
 
-	  AVMEButton {
+    AVMEButton {
       id: btnSwitchClassic
       width: parent.width * 0.25
       anchors {
@@ -120,7 +119,7 @@ Item {
       text: "Classic"
       onClicked: isClassic = true
     }
-	  AVMEButton {
+    AVMEButton {
       id: btnSwitchYYCompound
       width: parent.width * 0.25
       anchors {
@@ -131,8 +130,8 @@ Item {
       text: "YieldYak Compound"
       onClicked: isClassic = false
     }
-	}
-  
+  }
+
   // Panel for staking/unstaking LP
   AVMEPanel {
     id: stakingPanel
@@ -290,13 +289,11 @@ Item {
           color: "#FFFFFF"
           text: "Locked LP Estimates:"
             + "<br><b>" + QmlSystem.weiToFixedPoint(
-              ((QmlSystem.getCurrentCoin() == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves),
-              QmlSystem.getCurrentCoinDecimals()
-            ) + " " + QmlSystem.getCurrentCoin()
+              (("AVAX" == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves), 18
+            ) + " AVAX"
             + "<br>" + QmlSystem.weiToFixedPoint(
-              ((QmlSystem.getCurrentToken() == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves),
-              QmlSystem.getCurrentTokenDecimals()
-            ) + " " + QmlSystem.getCurrentToken() + "</b>"
+              (("Token" == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves), 18
+            ) + " " + "Token" + "</b>"  // TODO: token name AND decimals here
         }
       }
     }
@@ -352,7 +349,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.pixelSize: 18.0
-        text: "Unharvested " + QmlSystem.getCurrentToken() + ":<br><b>" + reward + "</b>"
+        text: "Unharvested " + "Token" + ":<br><b>" + reward + "</b>" // TODO: token name here
       }
 
       AVMEButton {
@@ -362,13 +359,13 @@ Item {
         enabled: {
           var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
           enabled: (
-            reward != "" && !QmlSystem.balanceIsZero(reward, QmlSystem.getCurrentTokenDecimals()) &&
+            reward != "" && !QmlSystem.balanceIsZero(reward, 18) && // TODO: token decimals here
             !QmlSystem.balanceIsZero(acc.balanceLPLocked, 18)
           )
         }
         text: (reward != "")
-          ? "Harvest " + QmlSystem.getCurrentToken() + " & Unstake LP"
-          : "Querying reward..."
+          ? "Harvest " + "Token" + " & Unstake LP"
+          : "Querying reward..."  // TODO: token name here
         onClicked: {
           QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
           QmlSystem.operationOverride("Exit Staking", "", "", "")
@@ -379,10 +376,10 @@ Item {
         id: btnHarvest
         width: (parent.width * 0.75)
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (reward != "" && !QmlSystem.balanceIsZero(reward, QmlSystem.getCurrentTokenDecimals()))
+        enabled: (reward != "" && !QmlSystem.balanceIsZero(reward, 18)) // TODO: token decimals here
         text: (reward != "")
-          ? "Harvest " + QmlSystem.getCurrentToken()
-          : "Querying reward..."
+          ? "Harvest " + "Token"
+          : "Querying reward..."  // TODO: token name here
         onClicked: {
           QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
           QmlSystem.operationOverride("Harvest AVME", "", "", "")
@@ -549,13 +546,11 @@ Item {
           color: "#FFFFFF"
           text: "Locked LP Estimates:"
             + "<br><b>" + QmlSystem.weiToFixedPoint(
-              ((QmlSystem.getCurrentCoin() == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves),
-              QmlSystem.getCurrentCoinDecimals()
-            ) + " " + QmlSystem.getCurrentCoin()
+              (("AVAX" == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves), 18
+            ) + " AVAX"
             + "<br>" + QmlSystem.weiToFixedPoint(
-              ((QmlSystem.getCurrentToken() == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves),
-              QmlSystem.getCurrentTokenDecimals()
-            ) + " " + QmlSystem.getCurrentToken() + "</b>"
+              (("Token" == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves), 18
+            ) + " " + "Token" + "</b>"  // TODO: token name AND decimals here
         }
       }
     }
@@ -611,17 +606,17 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.pixelSize: 18.0
-        text: "Unreinvested " + QmlSystem.getCurrentToken() + ":<br><b>" + reinvestreward + "</b>"
+        text: "Unreinvested " + "Token" + ":<br><b>" + reinvestreward + "</b>"  // TODO: token name here
       }
 
       AVMEButton {
         id: btnreinvest
         width: (parent.width * 0.75)
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (reinvestreward != "" && !QmlSystem.balanceIsZero(reinvestreward, QmlSystem.getCurrentTokenDecimals()))
+        enabled: (reinvestreward != "" && !QmlSystem.balanceIsZero(reinvestreward, 18)) // TODO: token decimals here
         text: (reinvestreward != "")
-          ? "Reinvest " + QmlSystem.getCurrentToken()
-          : "Querying Reinvest..."
+          ? "Reinvest " + "Token"
+          : "Querying Reinvest..."  // TODO: token name here
         onClicked: {
           QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
           QmlSystem.operationOverride("Reinvest AVME", "", "", "")
@@ -635,7 +630,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.pixelSize: 18.0
-        text: "Reinvest Reward " + QmlSystem.getCurrentToken() + ":<br><b>" + (reinvestreward * 0.05) + "</b>"
+        text: "Reinvest Reward " + "Token" + ":<br><b>" + (reinvestreward * 0.05) + "</b>"  // TODO: token name here
       }
     }
 
@@ -661,7 +656,7 @@ Item {
           bottomMargin: -20
         }
       }
-    }	
+    }
   }
 
   // Popup for insufficient funds
