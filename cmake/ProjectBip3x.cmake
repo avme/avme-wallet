@@ -22,7 +22,7 @@ ExternalProject_Add(
                -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
                -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
                -DCMAKE_C_FLAGS=-I${BIP3X_INCLUDE_DIR}
-               -DCMAKE_CXX_FLAGS=-I${BIP3X_INCLUDE_DIR}\ -I${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/include \-I${CMAKE_CXX_FLAGS}
+               -DCMAKE_CXX_FLAGS=-I${BIP3X_INCLUDE_DIR}\ -I${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/include\ ${CMAKE_CXX_FLAGS}
                -DENABLE_CONAN=OFF
                -DENABLE_BIP39_JNI=OFF
                ${_only_release_configuration}
