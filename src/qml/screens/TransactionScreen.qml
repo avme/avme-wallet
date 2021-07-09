@@ -86,9 +86,9 @@ Item {
       case "Approve Exchange":
       case "Approve Liquidity":
       case "Approve Staking":
-	  case "Approve Compound":
+      case "Approve Compound":
       case "Harvest AVME":
-	  case "Reinvest AVME":
+      case "Reinvest AVME":
       case "Exit Staking":
         return (hasCoinFunds);
         break;
@@ -99,14 +99,13 @@ Item {
         break;
       case "Remove Liquidity":
       case "Stake LP":
-	  case "Stake Compound LP":
-	  case "Stake Compound LP":
+      case "Stake Compound LP":
       case "Unstake LP":
         return (hasCoinFunds && hasLPFunds);
         break;
-	  case "Unstake Compound LP":
-		return (hasCoinFunds && hasCompoundLPFunds);
-		break;
+      case "Unstake Compound LP":
+        return (hasCoinFunds && hasCompoundLPFunds);
+        break;
     }
   }
 
@@ -151,7 +150,7 @@ Item {
       // LP only
       case "Remove Liquidity":
       case "Stake LP":
-	  case "Stake Compound LP":
+      case "Stake Compound LP":
       case "Unstake LP":
         txAmountCoinInput.visible = false
         txAmountTokenInput.visible = false
@@ -166,9 +165,9 @@ Item {
       case "Approve Exchange":
       case "Approve Liquidity":
       case "Approve Staking":
-	  case "Approve Compound":
+      case "Approve Compound":
       case "Harvest AVME":
-	  case "Reinvest AVME":
+      case "Reinvest AVME":
       case "Exit Staking":
         txAmountCoinInput.visible = false
         txAmountTokenInput.visible = false
@@ -202,11 +201,14 @@ Item {
     Column {
       id: txDetailsColumn
       anchors {
-        top: parent.header.bottom
+        top: parent.top
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        margins: 20
+        topMargin: 80
+        bottomMargin: 20
+        leftMargin: 40
+        rightMargin: 40
       }
       spacing: 40
 
@@ -427,11 +429,14 @@ Item {
     Column {
       id: txSummaryColumn
       anchors {
-        top: parent.header.bottom
+        top: parent.top
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        margins: 20
+        topMargin: 80
+        bottomMargin: 20
+        leftMargin: 40
+        rightMargin: 40
       }
       spacing: 20
 

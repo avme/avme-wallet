@@ -40,8 +40,8 @@ Item {
     historyModel.clear()
     infoText.text = "Loading transactions..."
     infoText.visible = true
-	var acc = QmlSystem.getCurrentAccount()
-	QmlSystem.updateTransactionStatus()
+    var acc = QmlSystem.getCurrentAccount()
+    QmlSystem.updateTransactionStatus()
     QmlSystem.listAccountTransactions(QmlSystem.getCurrentAccount())
   }
 
@@ -113,11 +113,14 @@ Item {
     Column {
       id: historyColumn
       anchors {
-        top: parent.header.bottom
+        top: parent.top
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        margins: 20
+        topMargin: 80
+        bottomMargin: 20
+        leftMargin: 40
+        rightMargin: 40
       }
       spacing: 20
 

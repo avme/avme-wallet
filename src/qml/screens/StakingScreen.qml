@@ -40,7 +40,7 @@ Item {
 	  compoundallowance = compoundAllowance
     }
     function onRewardUpdated(poolReward) { reward = poolReward }
-	function onCompoundUpdated(reinvestReward) { reinvestreward = reinvestReward }
+    function onCompoundUpdated(reinvestReward) { reinvestreward = reinvestReward }
     function onLiquidityDataUpdated(
       lowerTokenName, lowerTokenReserves, higherTokenName, higherTokenReserves, totalLiquidity
     ) {
@@ -49,7 +49,7 @@ Item {
       higherToken = higherTokenName
       higherReserves = higherTokenReserves
       liquidity = totalLiquidity
-	  var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
+      var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
       var userClassicShares = QmlSystem.calculatePoolSharesForTokenValue(
         lowerReserves, higherReserves, liquidity, acc.balanceLPLocked
       )
@@ -83,14 +83,14 @@ Item {
     repeat: true
     onTriggered: {
       QmlSystem.updateLiquidityData(QmlSystem.getCurrentCoin(), QmlSystem.getCurrentToken())
-	}
+    }
   }
 
   Component.onCompleted: {
     QmlSystem.getAllowances()
     reloadRewardTimer.start()
-	reloadCompoundTimer.start()
-	reloadLiquidityDataTimer.start()
+    reloadCompoundTimer.start()
+    reloadLiquidityDataTimer.start()
   }
 
   AVMEAccountHeader {
@@ -98,46 +98,46 @@ Item {
   }
 
   // Panel for selecting Classic x Compound
-    AVMEPanel {
+  AVMEPanel {
 	  id: stakingSelectPanel
-	  color: "#1D212A"
+	  width: (parent.width - (anchors.margins * 2))
+	  height: (parent.height * 0.075)
+	  title: ""
 	  anchors {
 	  	top: accountHeader.bottom
 	  	left: parent.left
 	  	margins: 10
-	  }
-	  width: (parent.width - (anchors.margins * 2))
-	  height: (parent.height * 0.075)
-	  title: ""
+    }
+
 	  AVMEButton {
-        id: btnSwitchClassic
-        width: parent.width * 0.25
-		anchors.horizontalCenterOffset: -(parent.width / 4)
-        anchors.horizontalCenter: parent.horizontalCenter
-		anchors.verticalCenter: parent.verticalCenter
-        text: "Classic"
-        onClicked: {
-          isClassic = true
-        }
+      id: btnSwitchClassic
+      width: parent.width * 0.25
+      anchors {
+        horizontalCenter: parent.horizontalCenter
+        verticalCenter: parent.verticalCenter
+        horizontalCenterOffset: -(parent.width / 4)
       }
+      text: "Classic"
+      onClicked: isClassic = true
+    }
 	  AVMEButton {
-        id: btnSwitchYYCompound
-        width: parent.width * 0.25
-		anchors.horizontalCenterOffset: parent.width / 4
-        anchors.horizontalCenter: parent.horizontalCenter
-		anchors.verticalCenter: parent.verticalCenter
-        text: "YieldYak Compound"
-        onClicked: {
-          isClassic = false
-        }
+      id: btnSwitchYYCompound
+      width: parent.width * 0.25
+      anchors {
+        horizontalCenter: parent.horizontalCenter
+        verticalCenter: parent.verticalCenter
+        horizontalCenterOffset: parent.width / 4
       }
+      text: "YieldYak Compound"
+      onClicked: isClassic = false
+    }
 	}
   
   // Panel for staking/unstaking LP
   AVMEPanel {
     id: stakingPanel
     width: (parent.width * 0.5) - (anchors.margins * 2)
-	visible: isClassic
+    visible: isClassic
     anchors {
       top: stakingSelectPanel.bottom
       left: parent.left
@@ -149,11 +149,14 @@ Item {
     Column {
       id: stakingDetailsColumn
       anchors {
-        top: parent.header.bottom
+        top: parent.top
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        margins: 20
+        topMargin: 80
+        bottomMargin: 20
+        leftMargin: 40
+        rightMargin: 40
       }
       spacing: 30
 
@@ -269,38 +272,40 @@ Item {
           }
         }
       }
-	  Rectangle {
-	    id: classicLPReturns
-	    anchors.horizontalCenter: parent.horizontalCenter
-		width: parent.width
-		color: "#3e4653"
-		radius: 10
-	    Text {
-		  id: classicLPReturnsText
-          anchors.left: parent.left
-          anchors.leftMargin: 10
-		  width: parent.width
-		  verticalAlignment: Text.AlignVCenter
+      Rectangle {
+        id: classicLPReturns
+        width: parent.width
+        height: classicLPReturnsText.height
+        anchors {
+          horizontalCenter: parent.horizontalCenter
+          left: parent.left
+          leftMargin: 10
+        }
+        color: "#3E4653"
+        radius: 10
+        Text {
+          id: classicLPReturnsText
+          width: parent.width
+          verticalAlignment: Text.AlignVCenter
           color: "#FFFFFF"
-		  text: "Locked LP Estimates:"
-          + "<br><b>" + QmlSystem.weiToFixedPoint(
-            ((QmlSystem.getCurrentCoin() == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves),
-            QmlSystem.getCurrentCoinDecimals()
-          ) + " " + QmlSystem.getCurrentCoin()
-          + "<br>" + QmlSystem.weiToFixedPoint(
-            ((QmlSystem.getCurrentToken() == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves),
-            QmlSystem.getCurrentTokenDecimals()
-          ) + " " + QmlSystem.getCurrentToken() + "</b>"
-	    }
-		height: classicLPReturnsText.height
-	  }
+          text: "Locked LP Estimates:"
+            + "<br><b>" + QmlSystem.weiToFixedPoint(
+              ((QmlSystem.getCurrentCoin() == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves),
+              QmlSystem.getCurrentCoinDecimals()
+            ) + " " + QmlSystem.getCurrentCoin()
+            + "<br>" + QmlSystem.weiToFixedPoint(
+              ((QmlSystem.getCurrentToken() == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves),
+              QmlSystem.getCurrentTokenDecimals()
+            ) + " " + QmlSystem.getCurrentToken() + "</b>"
+        }
+      }
     }
   }
 
   // Panel for harvesting/exiting
   AVMEPanel {
     id: harvestPanel
-	visible: isClassic
+    visible: isClassic
     width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
       top: stakingSelectPanel.bottom
@@ -313,11 +318,14 @@ Item {
     Column {
       id: harvestDetailsColumn
       anchors {
-        top: parent.header.bottom
+        top: parent.top
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        margins: 20
+        topMargin: 80
+        bottomMargin: 20
+        leftMargin: 40
+        rightMargin: 40
       }
       spacing: 30
 
@@ -359,8 +367,8 @@ Item {
           )
         }
         text: (reward != "")
-        ? "Harvest " + QmlSystem.getCurrentToken() + " & Unstake LP"
-        : "Querying reward..."
+          ? "Harvest " + QmlSystem.getCurrentToken() + " & Unstake LP"
+          : "Querying reward..."
         onClicked: {
           QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
           QmlSystem.operationOverride("Exit Staking", "", "", "")
@@ -373,8 +381,8 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: (reward != "" && !QmlSystem.balanceIsZero(reward, QmlSystem.getCurrentTokenDecimals()))
         text: (reward != "")
-        ? "Harvest " + QmlSystem.getCurrentToken()
-        : "Querying reward..."
+          ? "Harvest " + QmlSystem.getCurrentToken()
+          : "Querying reward..."
         onClicked: {
           QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
           QmlSystem.operationOverride("Harvest AVME", "", "", "")
@@ -387,7 +395,7 @@ Item {
   AVMEPanel {
     id: yyCompoundPanel
     width: (parent.width * 0.5) - (anchors.margins * 2)
-	visible: !isClassic
+    visible: !isClassic
     anchors {
       top: stakingSelectPanel.bottom
       left: parent.left
@@ -399,11 +407,14 @@ Item {
     Column {
       id: yyCompoundDetailsColumn
       anchors {
-        top: parent.header.bottom
+        top: parent.top
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        margins: 20
+        topMargin: 80
+        bottomMargin: 20
+        leftMargin: 40
+        rightMargin: 40
       }
       spacing: 30
 
@@ -445,8 +456,8 @@ Item {
         text: {
           var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
           text: (isyyCompound)
-          ? "Free (unstaked) LP:<br><b>" + acc.balanceLPFree + "</b>"
-          : "Locked (staked) LP:<br><b>" + acc.balanceLockedCompoundLP + "</b>"
+            ? "Free (unstaked) LP:<br><b>" + acc.balanceLPFree + "</b>"
+            : "Locked (staked) LP:<br><b>" + acc.balanceLockedCompoundLP + "</b>"
         }
       }
 
@@ -461,7 +472,7 @@ Item {
       }
 
       Row {
-	    id: yyCompoundButtonRow
+        id: yyCompoundButtonRow
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: 10
 
@@ -520,38 +531,40 @@ Item {
           }
         }
       }
-	  Rectangle {
-	    id: compoundLPReturns
-	    anchors.horizontalCenter: parent.horizontalCenter
-		width: parent.width
-		color: "#3e4653"
-		radius: 10
-	    Text {
-		  id: compoundLPReturnsText
-          anchors.left: parent.left
-          anchors.leftMargin: 10
-		  width: parent.width
-		  verticalAlignment: Text.AlignVCenter
+      Rectangle {
+        id: compoundLPReturns
+        width: parent.width
+        height: compoundLPReturnsText.height
+        anchors.horizontalCenter: parent.horizontalCenter
+        color: "#3e4653"
+        radius: 10
+        Text {
+          id: compoundLPReturnsText
+          width: parent.width
+          anchors {
+            left: parent.left
+            leftMargin: 10
+          }
+          verticalAlignment: Text.AlignVCenter
           color: "#FFFFFF"
-		  text: "Locked LP Estimates:"
-          + "<br><b>" + QmlSystem.weiToFixedPoint(
-            ((QmlSystem.getCurrentCoin() == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves),
-            QmlSystem.getCurrentCoinDecimals()
-          ) + " " + QmlSystem.getCurrentCoin()
-          + "<br>" + QmlSystem.weiToFixedPoint(
-            ((QmlSystem.getCurrentToken() == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves),
-            QmlSystem.getCurrentTokenDecimals()
-          ) + " " + QmlSystem.getCurrentToken() + "</b>"
-	    }
-		height: compoundLPReturnsText.height
-	  }
+          text: "Locked LP Estimates:"
+            + "<br><b>" + QmlSystem.weiToFixedPoint(
+              ((QmlSystem.getCurrentCoin() == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves),
+              QmlSystem.getCurrentCoinDecimals()
+            ) + " " + QmlSystem.getCurrentCoin()
+            + "<br>" + QmlSystem.weiToFixedPoint(
+              ((QmlSystem.getCurrentToken() == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves),
+              QmlSystem.getCurrentTokenDecimals()
+            ) + " " + QmlSystem.getCurrentToken() + "</b>"
+        }
+      }
     }
   }
 
   // Panel for reinvesting in YY
   AVMEPanel {
     id: reinvestPanel
-	visible: !isClassic
+    visible: !isClassic
     width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
       top: stakingSelectPanel.bottom
@@ -564,11 +577,14 @@ Item {
     Column {
       id: reinvestDetailsColumn
       anchors {
-        top: parent.header.bottom
+        top: parent.top
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        margins: 20
+        topMargin: 80
+        bottomMargin: 20
+        leftMargin: 40
+        rightMargin: 40
       }
       spacing: 30
 
@@ -604,42 +620,48 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: (reinvestreward != "" && !QmlSystem.balanceIsZero(reinvestreward, QmlSystem.getCurrentTokenDecimals()))
         text: (reinvestreward != "")
-        ? "Reinvest " + QmlSystem.getCurrentToken()
-        : "Querying Reinvest..."
+          ? "Reinvest " + QmlSystem.getCurrentToken()
+          : "Querying Reinvest..."
         onClicked: {
           QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
           QmlSystem.operationOverride("Reinvest AVME", "", "", "")
         }
       }
+
       Text {
         id: reinvestRewardText
         anchors.horizontalCenter: parent.horizontalCenter
-		width: 128
+        width: 128
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.pixelSize: 18.0
         text: "Reinvest Reward " + QmlSystem.getCurrentToken() + ":<br><b>" + (reinvestreward * 0.05) + "</b>"
       }
     }
-	Image {
-	  anchors.bottom: parent.bottom
-	  anchors.right: parent.right
-	  anchors.margins: 35
-	  id: yyLogo
-	  width: 128
-	  height: 64
-	  source: "qrc:/img/yieldyak.png"
-	  Text {
-	    color: "#FFFFFF"
+
+    Image {
+      id: yyLogo
+      anchors {
+        bottom: parent.bottom
+        right: parent.right
+        margins: 35
+      }
+      width: 128
+      height: 64
+      source: "qrc:/img/yieldyak.png"
+      Text {
+        color: "#FFFFFF"
         font.pixelSize: 18.0
-	    text: "Powered By"
-        anchors.bottom: parent.bottom
         verticalAlignment: Text.AlignVCenter
-		anchors.bottomMargin: -20
-        anchors.left: parent.left
-        anchors.right: parent.right
-	  }
-	}	
+        text: "Powered By"
+        anchors {
+          bottom: parent.bottom
+          left: parent.left
+          right: parent.right
+          bottomMargin: -20
+        }
+      }
+    }	
   }
 
   // Popup for insufficient funds

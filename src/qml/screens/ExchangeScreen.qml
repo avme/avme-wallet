@@ -182,11 +182,14 @@ Item {
     Column {
       id: exchangeDetailsColumn
       anchors {
-        top: parent.header.bottom
+        top: parent.top
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        margins: 20
+        topMargin: 80
+        bottomMargin: 20
+        leftMargin: 40
+        rightMargin: 40
       }
       spacing: 30
 
@@ -424,11 +427,14 @@ Item {
     Column {
       id: liquidityDetailsColumn
       anchors {
-        top: parent.header.bottom
+        top: parent.top
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        margins: 20
+        topMargin: 80
+        bottomMargin: 20
+        leftMargin: 40
+        rightMargin: 40
       }
       spacing: 30
 
