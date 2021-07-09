@@ -10,8 +10,8 @@ import "qrc:/qml/components"
 Rectangle {
   id: sideMenu
   property string currentScreen
-  implicitWidth: 240
-  implicitHeight: parent.height
+  width: 240
+  height: parent.height
   color: "#1C2029"
 
   Connections {

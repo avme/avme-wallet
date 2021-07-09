@@ -4,45 +4,39 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
+import "qrc:/qml/components"
+
 // Popup for viewing the Wallet's seed.
-// TODO: add a button for copying to clipboard
-Popup {
+AVMEPopup {
   id: viewSeedPopup
+  widthPct: 0.7
+  heightPct: 0.5
   property string newWalletPass
   property string newWalletSeed
-  property alias pass: passInput
-  property alias seed: seedText
-  property alias showBtn: btnShow
-  property alias closeBtn: btnClose
   property color popupBgColor: "#1C2029"
   property color popupSeedBgColor: "#2D3542"
   property color popupSelectionColor: "#58A0B9"
+
+  onAboutToShow: btnCopy.enabled = false
 
   function showSeed() {
     if (seedText.timer.running) { seedText.timer.stop() }
     seedText.text = QmlSystem.getWalletSeed(passInput.text)
     newWalletSeed = seedText.text
+    btnCopy.enabled = true
   }
 
   function showErrorMsg() {
     seedText.text = "Wrong passphrase, please try again"
     seedText.timer.start()
+    btnCopy.enabled = false
   }
 
   function clean() {
     passInput.text = ""
     seedText.text = ""
+    btnCopy.enabled = false
   }
-
-  width: (parent.width * 0.9)
-  height: 360
-  x: (parent.width * 0.1) / 2
-  y: (parent.height * 0.5) - (height / 2)
-  modal: true
-  focus: true
-  padding: 0  // Remove white borders
-  closePolicy: Popup.NoAutoClose
-  background: Rectangle { anchors.fill: parent; color: popupBgColor; radius: 10 }
 
   Text {
     id: warningText
@@ -110,7 +104,7 @@ Popup {
       horizontalCenter: parent.horizontalCenter
       bottomMargin: 20
     }
-    spacing: 10
+    spacing: 20
 
     AVMEButton {
       id: btnClose
@@ -121,9 +115,25 @@ Popup {
       }
     }
     AVMEButton {
+      id: btnCopy
+      text: (!copyTimer.running) ? "Copy" : "Copied!"
+      Timer { id: copyTimer; interval: 2000 }
+      onClicked: {
+        QmlSystem.copyToClipboard(seedText.text)
+        copyTimer.start()
+      }
+    }
+    AVMEButton {
       id: btnShow
       text: "Show"
       enabled: (passInput.text !== "")
+      onClicked: {
+        if (QmlSystem.checkWalletPass(passInput.text)) {
+          showSeed()
+        } else {
+          showErrorMsg()
+        }
+      }
     }
   }
 }

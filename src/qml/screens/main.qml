@@ -11,6 +11,7 @@ import "qrc:/qml/components"
 ApplicationWindow {
   id: window
   property bool menuToggle: false
+  property alias menuSize: sideMenu.width
 
   title: "AVME Wallet " + QmlSystem.getProjectVersion()
   width: 1280

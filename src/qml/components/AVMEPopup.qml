@@ -17,7 +17,7 @@ Popup {
 
   width: window.width * widthPct
   height: window.height * heightPct
-  x: (window.width / 2) - (width / 2)
+  x: ((window.width / 2) - (width / 2)) + ((window.menuToggle) ? -240 : 0)
   y: (window.height / 2) - (height / 2)
   background: Rectangle { anchors.fill: parent; color: "#1C2029"; radius: 10 }
   modal: true

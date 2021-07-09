@@ -27,23 +27,8 @@ Item {
     title: "About the Program"
 
     Column {
-      anchors {
-        top: parent.header.bottom
-        bottom: parent.bottom
-        left: parent.left
-        right: parent.right
-        margins: 20
-      }
-      spacing: 20
-
-      Text {
-        id: header
-        anchors.horizontalCenter: parent.horizontalCenter
-        font.pixelSize: 32.0
-        color: "#FFFFFF"
-        horizontalAlignment: Text.AlignHCenter
-        text: "AVME Wallet " + QmlSystem.getProjectVersion()
-      }
+      anchors.centerIn: parent
+      spacing: 40
 
       Image {
         id: logo
@@ -53,6 +38,16 @@ Item {
         smooth: true
         source: "qrc:/img/avme_logo_hd.png"
         fillMode: Image.PreserveAspectFit
+      }
+
+      Text {
+        id: header
+        anchors.horizontalCenter: parent.horizontalCenter
+        font.pixelSize: 18.0
+        color: "#FFFFFF"
+        horizontalAlignment: Text.AlignHCenter
+        font.bold: true
+        text: "AVME WALLET " + QmlSystem.getProjectVersion()
       }
 
       Text {

@@ -187,6 +187,7 @@ Address Wallet::userToAddress(std::string const& input) {
   return Address();
 }
 
+// TODO: fix this, it's broken for some reason
 Secret Wallet::getSecret(std::string const& address, std::string pass) {
   if (h128 u = fromUUID(address)) {
     return Secret(this->km.store().secret(u, [&](){ return pass; }, false));

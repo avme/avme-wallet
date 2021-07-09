@@ -5,6 +5,7 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
+import "qrc:/qml/popups"
 
 // Screen for showing general settings
 Item {
@@ -26,29 +27,32 @@ Item {
     title: "General Settings"
 
     Column {
+      id: settingsCol
       anchors {
-        top: parent.header.bottom
+        top: parent.top
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        margins: 20
+        topMargin: 80
+        bottomMargin: 40
+        leftMargin: 40
+        rightMargin: 40
       }
       spacing: 40
 
       Text {
         id: viewPrivKeyText
-        width: parent.width * 0.8
+        width: settingsCol.width * 0.75
         color: "#FFFFFF"
         font.pixelSize: 14.0
         text: "View/Export the private key for this Account"
 
         AVMEButton {
           id: btnViewPrivKey
-          width: settingsPanel.width * 0.2
+          width: settingsCol.width * 0.25
           anchors {
             verticalCenter: parent.verticalCenter
             left: parent.right
-            rightMargin: 20
           }
           text: "View Private Key"
           onClicked: {
@@ -60,18 +64,17 @@ Item {
 
       Text {
         id: viewSeedText
-        width: parent.width * 0.8
+        width: settingsCol.width * 0.75
         color: "#FFFFFF"
         font.pixelSize: 14.0
         text: "View/Export the BIP39 seed for this Wallet"
 
         AVMEButton {
           id: btnViewSeed
-          width: settingsPanel.width * 0.2
+          width: settingsCol.width * 0.25
           anchors {
             verticalCenter: parent.verticalCenter
             left: parent.right
-            rightMargin: 20
           }
           text: "View Wallet Seed"
           onClicked: viewSeedPopup.open()
@@ -80,27 +83,7 @@ Item {
     }
   }
 
-  // Popup for viewing the Account's private key
-  AVMEPopupViewPrivKey {
-    id: viewPrivKeyPopup
-    showBtn.onClicked: {
-      if (QmlSystem.checkWalletPass(pass)) {
-        viewPrivKeyPopup.showPrivKey()
-      } else {
-        viewPrivKeyPopup.showErrorMsg()
-      }
-    }
-  }
-
-  // Popup for viewing the Wallet's seed
-  AVMEPopupViewSeed {
-    id: viewSeedPopup
-    showBtn.onClicked: {
-      if (QmlSystem.checkWalletPass(pass.text)) {
-        viewSeedPopup.showSeed()
-      } else {
-        viewSeedPopup.showErrorMsg()
-      }
-    }
-  }
+  // Popups for viewing the Account's private key and seed, respectively
+  AVMEPopupViewPrivKey { id: viewPrivKeyPopup }
+  AVMEPopupViewSeed { id: viewSeedPopup }
 }

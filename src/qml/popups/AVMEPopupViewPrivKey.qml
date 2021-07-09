@@ -4,9 +4,13 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
+import "qrc:/qml/components"
+
 // Popup for viewing an Account's private key. Has to be opened manually.
-Popup {
+AVMEPopup {
   id: viewPrivKeyPopup
+  widthPct: 0.7
+  heightPct: 0.5
   property string account
   readonly property alias pass: keyPassInput.text
   property alias showBtn: btnShow
@@ -14,31 +18,26 @@ Popup {
   property color popupKeyBgColor: "#2D3542"
   property color popupSelectionColor: "#58A0B9"
 
+  onAboutToShow: btnCopy.enabled = false
+
   function showPrivKey() {
     if (keyText.timer.running) { keyText.timer.stop() }
     keyText.text = QmlSystem.getPrivateKeys(account, keyPassInput.text)
+    btnCopy.enabled = true
   }
 
   function showErrorMsg() {
     keyText.text = "Wrong passphrase, please try again"
     keyText.timer.start()
+    btnCopy.enabled = false
   }
 
   function clean() {
     account = ""
     keyPassInput.text = ""
     keyText.text = ""
+    btnCopy.enabled = false
   }
-
-  width: (parent.width * 0.9)
-  height: 360
-  x: (parent.width * 0.1) / 2
-  y: (parent.height * 0.5) - (height / 2)
-  modal: true
-  focus: true
-  padding: 0  // Remove white borders
-  closePolicy: Popup.NoAutoClose
-  background: Rectangle { anchors.fill: parent; color: popupBgColor; radius: 10 }
 
   Text {
     id: warningText
@@ -117,9 +116,25 @@ Popup {
       }
     }
     AVMEButton {
+      id: btnCopy
+      text: (!copyTimer.running) ? "Copy" : "Copied!"
+      Timer { id: copyTimer; interval: 2000 }
+      onClicked: {
+        QmlSystem.copyToClipboard(keyText.text)
+        copyTimer.start()
+      }
+    }
+    AVMEButton {
       id: btnShow
       text: "Show"
       enabled: (keyPassInput.text !== "")
+      onClicked: {
+        if (QmlSystem.checkWalletPass(pass)) {
+          showPrivKey()
+        } else {
+          showErrorMsg()
+        }
+      }
     }
   }
 }
