@@ -1,18 +1,14 @@
 /* Copyright (c) 2020-2021 AVME Developers
-   Distributed under the MIT/X11 software license, see the accompanying
-   file LICENSE or http://www.opensource.org/licenses/mit-license.php. */
+	 Distributed under the MIT/X11 software license, see the accompanying
+	 file LICENSE or http://www.opensource.org/licenses/mit-license.php. */
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 /**
- * Custom list for the Accounts generated with a BIP39 seed.
- * Requires a ListModel with the following items:
- * - "idx": the Account's index on the list
- * - "account": the Account's actual address
- * - "balance": the Account's balance in <coin-name>
+ * List of ARC20 tokens to be selected.
  */
 ListView {
-  id: accountSeedList
+  id: tokenSelectList
   property color listHighlightColor: "#9400F6"
   property color listBgColor: "#16141F"
   property color listHoverColor: "#2E2C3D"
@@ -30,7 +26,6 @@ ListView {
   clip: true
   boundsBehavior: Flickable.StopAtBounds
 
-  // Header (top bar)
   header: Rectangle {
     id: listHeader
     width: parent.width
@@ -51,59 +46,48 @@ ListView {
         anchors.horizontalCenter: parent.horizontalCenter
         color: "transparent"
         Text {
-          id: headerIndex
+          id: headerSymbol
           anchors.verticalCenter: parent.verticalCenter
           width: (parent.width * 0.2)
           color: "white"
           font.pixelSize: 14.0
           padding: 5
-          text: "Index"
+          text: "Symbol"
         }
     
         Text {
-          id: headerAccount
+          id: headerName
           anchors.verticalCenter: parent.verticalCenter
-          width: (parent.width * 0.5)
-          x: headerIndex.width
+          width: (parent.width * 0.8)
+          x: headerSymbol.width
           color: "white"
           font.pixelSize: 14.0
           padding: 5
-          text: "Account"
+          text: "Name"
         }
-    
-        Text {
-          id: headerBalance
-          anchors.verticalCenter: parent.verticalCenter
-          width: (parent.width * 0.3)
-          x: headerIndex.width + headerAccount.width
-          color: "white"
-          font.pixelSize: 14.0
-          padding: 5
-          text: "AVAX Balance"
-        }
+        // TODO: image and balance(?)
       }
-    // Spacing between header and list itself
     }
   }
-  headerPositioning: ListView.OverlayHeader // Prevent header scrolling along
 
-  // Delegate (structure for each item in the list)
   delegate: Component {
-    id: listDelegate
+    id: tokenSelectDelegate
     Item {
-      id: listItem
-      readonly property string itemIndex: idx
-      readonly property string itemAccount: account
-      readonly property string itemBalance: balance
+      id: tokenSelectItem
+      readonly property string itemAddress: address
+      readonly property string itemSymbol: symbol
+      readonly property string itemName: name
+      readonly property string itemDecimals: decimals
+      readonly property string itemAVAXPairContract: avaxPairContract
       width: parent.width
-      height: 30
+      height: 50
 
       Rectangle {
         id: delegateRectangle
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
         color: {
-          if (accountSeedList.currentIndex == index) {
+          if (tokenSelectList.currentIndex == index) {
             color: "#9400F6"
           } else {
             color: "#2E2C3D"
@@ -113,42 +97,32 @@ ListView {
         height: parent.height
         width: parent.width * 0.9
         Text {
-          id: delegateIndex
+          id: delegateSymbol
           anchors.verticalCenter: parent.verticalCenter
           width: (parent.width * 0.2)
           color: "white"
           font.pixelSize: 14.0
           padding: 5
           elide: Text.ElideRight
-          text: itemIndex
+          text: itemSymbol
         }
         Text {
-          id: delegateAccount
+          id: delegateName
           anchors.verticalCenter: parent.verticalCenter
-          width: (parent.width * 0.5)
-          x: delegateIndex.width
-          color: "white"
-          font.pixelSize: 14.0
-          padding: 5
-          elide: Text.ElideMiddle
-          text: itemAccount
-        }
-        Text {
-          id: delegateBalance
-          anchors.verticalCenter: parent.verticalCenter
-          width: (parent.width * 0.3)
-          x: delegateIndex.width + delegateAccount.width
+          width: (parent.width * 0.8)
+          x: delegateSymbol.width
           color: "white"
           font.pixelSize: 14.0
           padding: 5
           elide: Text.ElideRight
-          text: itemBalance
+          text: itemName
         }
+        // TODO: image and balance(?)
       }
       MouseArea {
         id: delegateMouseArea
         anchors.fill: parent
-        onClicked: accountSeedList.currentIndex = index
+        onClicked: tokenSelectList.currentIndex = index
       }
     }
   }

@@ -21,6 +21,7 @@
         <file>qml/popups/AVMEPopupChooseAccount.qml</file>
         <file>qml/popups/AVMEPopupViewSeed.qml</file>
         <file>qml/popups/AVMEPopupViewPrivKey.qml</file>
+        <file>qml/popups/AVMEPopupTokenSelect.qml</file>
 
         <file>qml/panels/AVMEPanelAccountSelect.qml</file>
 
@@ -38,6 +39,7 @@
         <file>qml/components/AVMEPopupLedger.qml</file>
         <file>qml/components/AVMEPopupConfirmTx.qml</file>
         <file>qml/components/AVMEPopupTxProgress.qml</file>
+        <file>qml/components/AVMETokenList.qml</file>
 
         <file>img/Welcome_Logo_AVME.png</file>
 
