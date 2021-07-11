@@ -71,6 +71,17 @@ Rectangle {
     }
 
     AVMEButton {
+      id: itemTokens
+      width: (parent.width * 0.8)
+      anchors.horizontalCenter: parent.horizontalCenter
+      text: "Tokens"
+      onClicked: {
+        itemSelection.y = items.y + y
+        changeScreen("Tokens")
+      }
+    }
+
+    AVMEButton {
       id: itemHistory
       width: (parent.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
