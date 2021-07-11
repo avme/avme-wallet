@@ -61,21 +61,18 @@ bool Wallet::auth(std::string pass) {
 }
 
 void Wallet::loadARC20Tokens() {
-  boost::filesystem::path tokensFolder;
-  tokensFolder = Utils::walletFolderPath.string() + "/wallet/c-avax/tokens";
-  if (!exists(tokensFolder)) { create_directories(tokensFolder); }
   this->ARC20Tokens.clear();
-  for (auto &entry : recursive_directory_iterator(tokensFolder)) {
-    if (entry.path().extension() == ".json") {
-      ARC20Token token;
-      json_spirit::mValue tokenData = JSON::readFile(entry.path());
-      token.address = JSON::objectItem(tokenData, "address").get_str();
-      token.symbol = JSON::objectItem(tokenData, "symbol").get_str();
-      token.name = JSON::objectItem(tokenData, "name").get_str();
-      token.decimals = JSON::objectItem(tokenData, "decimals").get_int();
-      token.avaxPairContract = JSON::objectItem(tokenData, "avaxPairContract").get_str();
-      this->ARC20Tokens.push_back(token);
-    }
+  std::vector<std::string> tokenJsonList = this->db.getAllTokenDBValues();
+  for (std::string tokenJson : tokenJsonList) {
+    ARC20Token token;
+    json_spirit::mValue tokenData;
+    json_spirit::read_string(tokenJson, tokenData);
+    token.address = JSON::objectItem(tokenData, "address").get_str();
+    token.symbol = JSON::objectItem(tokenData, "symbol").get_str();
+    token.name = JSON::objectItem(tokenData, "name").get_str();
+    token.decimals = JSON::objectItem(tokenData, "decimals").get_int();
+    token.avaxPairContract = JSON::objectItem(tokenData, "avaxPairContract").get_str();
+    this->ARC20Tokens.push_back(token);
   }
 }
 
@@ -83,33 +80,21 @@ bool Wallet::addARC20Token(
   std::string address, std::string symbol, std::string name,
   int decimals, std::string avaxPairContract
 ) {
-  boost::filesystem::path tokenFile;
   json_spirit::mObject token;
+  std::string tokenJsonStr;
   token["address"] = address;
   token["symbol"] = symbol;
   token["name"] = name;
   token["decimals"] = decimals;
   token["avaxPairContract"] = avaxPairContract;
-  tokenFile = Utils::walletFolderPath.string() + "/wallet/c-avax/tokens/" + address + ".json";
-  json_spirit::mValue success = JSON::writeFile(token, tokenFile);
-
-  // Try/Catch are "inverted"
-  // Error happens when trying to find the error.
-  // If there is no "error" on the JSON, it will throw, meaning that it was successfull
-  try {
-    Utils::logToDebug("Error happened when writing JSON file: " + success.get_obj().at("ERROR").get_str());
-  } catch (std::exception &e) {
-    loadARC20Tokens();
-    return true;
-  }
-  loadARC20Tokens();
-  return false;
+  tokenJsonStr = json_spirit::write_string(json_spirit::mValue(token), false);
+  bool success = this->db.putTokenDBValue(address, tokenJsonStr);
+  if (success) { loadARC20Tokens(); }
+  return success;
 }
 
 bool Wallet::removeARC20Token(std::string address) {
-  boost::filesystem::path tokenFile;
-  tokenFile = Utils::walletFolderPath.string() + "/wallet/c-avax/tokens/" + address + ".json";
-  bool success = boost::filesystem::remove(tokenFile);
+  bool success = this->db.deleteTokenDBValue(address);
   if (success) { loadARC20Tokens(); }
   return success;
 }

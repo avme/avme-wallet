@@ -7,13 +7,15 @@
 // TOKEN DATABASE FUNCTIONS
 // ======================================================================
 
-bool Database::openTokenDB(std::string path) {
+bool Database::openTokenDB() {
+  std::string path = Utils::walletFolderPath.string() + "/wallet/c-avax/tokens";
+  if (!exists(path)) { create_directories(path); }
   this->tokenStatus = leveldb::DB::Open(this->tokenOpts, path, &this->tokenDB);
   return this->tokenStatus.ok();
 }
 
 std::string Database::getTokenDBStatus() {
-  return this->tokenStatus.toString();
+  return this->tokenStatus.ToString();
 }
 
 void Database::closeTokenDB() {
@@ -22,7 +24,7 @@ void Database::closeTokenDB() {
 
 std::string Database::getTokenDBValue(std::string key) {
   this->tokenStatus = this->tokenDB->Get(leveldb::ReadOptions(), key, &this->tokenValue);
-  return (this->tokenStatus.ok()) ? this->tokenValue : this->tokenStatus.toString();
+  return (this->tokenStatus.ok()) ? this->tokenValue : this->tokenStatus.ToString();
 }
 
 bool Database::putTokenDBValue(std::string key, std::string value) {
@@ -35,17 +37,30 @@ bool Database::deleteTokenDBValue(std::string key) {
   return this->tokenStatus.ok();
 }
 
+std::vector<std::string> Database::getAllTokenDBValues() {
+  std::vector<std::string> ret;
+  leveldb::Iterator* it = this->tokenDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    ret.push_back(it->value().ToString());
+  }
+  delete it;
+  return ret;
+}
+
 // ======================================================================
 // TX HISTORY DATABASE FUNCTIONS
 // ======================================================================
 
-bool Database::openHistoryDB(std::string path) {
+bool Database::openHistoryDB(std::string address) {
+  std::string path = Utils::walletFolderPath.string()
+    + "/wallet/c-avax/accounts/transactions/" + address;
+  if (!exists(path)) { create_directories(path); }
   this->historyStatus = leveldb::DB::Open(this->historyOpts, path, &this->historyDB);
   return this->historyStatus.ok();
 }
 
 std::string Database::getHistoryDBStatus() {
-  return this->historyStatus.toString();
+  return this->historyStatus.ToString();
 }
 
 void Database::closeHistoryDB() {
@@ -54,7 +69,7 @@ void Database::closeHistoryDB() {
 
 std::string Database::getHistoryDBValue(std::string key) {
   this->historyStatus = this->tokenDB->Get(leveldb::ReadOptions(), key, &this->historyValue);
-  return (this->historyStatus.ok()) ? this->historyValue : this->historyStatus.toString();
+  return (this->historyStatus.ok()) ? this->historyValue : this->historyStatus.ToString();
 }
 
 bool Database::putHistoryDBValue(std::string key, std::string value) {
@@ -65,5 +80,15 @@ bool Database::putHistoryDBValue(std::string key, std::string value) {
 bool Database::deleteHistoryDBValue(std::string key) {
   this->historyStatus = this->historyDB->Delete(leveldb::WriteOptions(), key);
   return this->historyStatus.ok();
+}
+
+std::vector<std::string> Database::getAllHistoryDBValues() {
+  std::vector<std::string> ret;
+  leveldb::Iterator* it = this->historyDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    ret.push_back(it->value().ToString());
+  }
+  delete it;
+  return ret;
 }
 

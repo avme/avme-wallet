@@ -6,7 +6,12 @@
 
 #include <string>
 
+#include <core/Utils.h>
+
+#include <boost/filesystem.hpp>
 #include <leveldb/db.h>
+
+using namespace boost::filesystem;
 
 /**
  * Class for abstracting LevelDB operations.
@@ -33,20 +38,22 @@ class Database {
     }
 
     // Token database functions.
-    bool openTokenDB(std::string path);
+    bool openTokenDB();
     std::string getTokenDBStatus();
     void closeTokenDB();
     std::string getTokenDBValue(std::string key);
     bool putTokenDBValue(std::string key, std::string value);
     bool deleteTokenDBValue(std::string key);
+    std::vector<std::string> getAllTokenDBValues();
 
     // Tx history database functions.
-    bool openHistoryDB(std::string path);
+    bool openHistoryDB(std::string address);
     std::string getHistoryDBStatus();
     void closeHistoryDB();
     std::string getHistoryDBValue(std::string key);
     bool putHistoryDBValue(std::string key, std::string value);
     bool deleteHistoryDBValue(std::string key);
+    std::vector<std::string> getAllHistoryDBValues();
 };
 
 #endif  // DATABASE_H

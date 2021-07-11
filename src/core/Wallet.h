@@ -30,6 +30,7 @@
 
 #include <network/API.h>
 #include <core/BIP39.h>
+#include <core/Database.h>
 #include <core/JSON.h>
 #include <core/Utils.h>
 
@@ -45,8 +46,9 @@ using namespace boost::filesystem;
  */
 class Wallet {
   private:
-    // The "proper" Wallet. Functions interact directly with this object.
+    // Objects for the "proper" wallet and the token/history databases.
     KeyManager km;
+    Database db;
 
     // Password hash, salt and the number of iterations used to create the hash.
     bytesSec passHash;
@@ -106,6 +108,8 @@ class Wallet {
      * Returns true on success, false on failure.
      */
     bool auth(std::string pass);
+
+    // TODO: database management
 
     // ======================================================================
     // TOKEN MANAGEMENT
