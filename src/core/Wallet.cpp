@@ -60,6 +60,24 @@ bool Wallet::auth(std::string pass) {
   return (hash.ref().toString() == passHash.ref().toString());
 }
 
+bool Wallet::loadTokenDB() {
+  if (this->db.isTokenDBOpen()) { this->db.closeTokenDB(); }
+  return this->db.openTokenDB();
+}
+
+bool Wallet::loadHistoryDB(std::string address) {
+  if (this->db.isHistoryDBOpen()) { this->db.closeHistoryDB(); }
+  return this->db.openHistoryDB(address);
+}
+
+void Wallet::closeTokenDB() {
+  this->db.closeTokenDB();
+}
+
+void Wallet::closeHistoryDB() {
+  this->db.closeHistoryDB();
+}
+
 void Wallet::loadARC20Tokens() {
   this->ARC20Tokens.clear();
   std::vector<std::string> tokenJsonList = this->db.getAllTokenDBValues();

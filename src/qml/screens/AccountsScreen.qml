@@ -77,6 +77,9 @@ Item {
     btnImport.onClicked: seedPopup.open()
     btnSelect.onClicked: {
       QmlSystem.setCurrentAccount(accountList.currentItem.itemAddress)
+      QmlSystem.loadTokenDB()
+      QmlSystem.loadHistoryDB(QmlSystem.getCurrentAccount())
+      QmlSystem.loadARC20Tokens()
       QmlSystem.goToOverview()
       QmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
     }
@@ -139,6 +142,8 @@ Item {
 
   AVMEPopupYesNo {
     id: confirmErasePopup
+    widthPct: 0.4
+    heightPct: 0.25
     icon: "qrc:/img/warn.png"
     info: "Are you sure you want to erase this Account?"
     yesBtn.onClicked: {

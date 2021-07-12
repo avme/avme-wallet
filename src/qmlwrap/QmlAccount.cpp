@@ -172,3 +172,11 @@ QStringList QmlSystem::getAVAXValues(QStringList amounts) {
   }
   return ret;
 }
+
+bool QmlSystem::loadTokenDB() {
+  return this->w.loadTokenDB();
+}
+
+bool QmlSystem::loadHistoryDB(QString address) {
+  return this->w.loadHistoryDB(address.toStdString());
+}

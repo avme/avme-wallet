@@ -35,12 +35,15 @@ class Database {
     Database() {
       this->tokenOpts.create_if_missing = true;
       this->historyOpts.create_if_missing = true;
+      tokenDB = NULL;
+      historyDB = NULL;
     }
 
     // Token database functions.
     bool openTokenDB();
     std::string getTokenDBStatus();
     void closeTokenDB();
+    bool isTokenDBOpen();
     std::string getTokenDBValue(std::string key);
     bool putTokenDBValue(std::string key, std::string value);
     bool deleteTokenDBValue(std::string key);
@@ -50,6 +53,7 @@ class Database {
     bool openHistoryDB(std::string address);
     std::string getHistoryDBStatus();
     void closeHistoryDB();
+    bool isHistoryDBOpen();
     std::string getHistoryDBValue(std::string key);
     bool putHistoryDBValue(std::string key, std::string value);
     bool deleteHistoryDBValue(std::string key);

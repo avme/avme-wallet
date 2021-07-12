@@ -4,6 +4,8 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
+import "qrc:/qml/components"
+
 /**
  * Popup for a Yes/No selection.
  * Requires the following items:
@@ -12,23 +14,13 @@ import QtQuick.Controls 2.2
  * "yesBtn.onClicked": what to do when the "Yes" button is clicked
  * "noBtn.onClicked": what to do when the "No" button is clicked
  */
-Popup {
+AVMEPopup {
   id: yesnoPopup
   property string icon
   property string info
   property alias yesBtn: yes
   property alias noBtn: no
   property color popupBgColor: "#1C2029"
-
-  width: window.width / 2
-  height: window.height / 4
-  x: (window.width / 2) - (width / 2)
-  y: (window.height / 2) - (height / 2)
-  background: Rectangle { anchors.fill: parent; color: popupBgColor; radius: 10 }
-  modal: true
-  focus: true
-  padding: 0  // Remove white borders
-  closePolicy: Popup.NoAutoClose
 
   Row {
     id: yesnoContent

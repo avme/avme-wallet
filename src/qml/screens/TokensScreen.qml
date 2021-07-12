@@ -5,10 +5,27 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
+import "qrc:/qml/popups"
 
 // Screen for managing the Wallet's registered tokens.
 Item {
   id: tokensScreen
+  property string avmeAddress
+
+  Component.onCompleted: reloadTokens()
+
+  function reloadTokens() {
+    // AVME is hardcoded here and always shows up
+    tokenList.clear()
+    var avme = QmlSystem.getAVMEData()
+    tokenList.append(avme)
+    avmeAddress = avme.address
+    QmlSystem.loadARC20Tokens()
+    var tokens = QmlSystem.getARC20Tokens()
+    for (var i = 0; i < tokens.length; i++) {
+      tokenList.append(JSON.parse(tokens[i]));
+    }
+  }
 
   AVMEAccountHeader {
     id: accountHeader
@@ -16,7 +33,7 @@ Item {
 
   AVMEPanel {
     id: tokensPanel
-    property alias grid: tokenGrid
+    property alias selectedToken: tokenGrid.currentItem
     width: (parent.width * 0.6)
     title: "Token List"
     anchors {
@@ -52,14 +69,18 @@ Item {
         id: btnAdd
         width: (tokensPanel.width * 0.3)
         text: "Add a new token"
-        onClicked: {} // TODO
+        onClicked: addTokenPopup.open()
       }
       AVMEButton {
         id: btnRemove
         width: (tokensPanel.width * 0.3)
-        // TODO: check against AVME address to disable the button
-        text: "Remove this token"
-        onClicked: {} // TODO
+        enabled: (
+          tokensPanel.selectedItem != null &&
+          avmeAddress != "" &&
+          tokensPanel.selectedItem.itemAddress != avmeAddress
+        )
+        text: (enabled) ? "Remove this token" : "Can't remove"
+        onClicked: confirmEraseTokenPopup.open()
       }
     }
   }
@@ -86,7 +107,8 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.pixelSize: 18.0
-        text: "<b>" + tokensPanel.grid.currentItem.itemSymbol + "</b>"
+        font.bold: true
+        text: ((tokensPanel.selectedToken) ? tokensPanel.selectedToken.itemSymbol : "")
       }
       Text {
         id: tokenName
@@ -94,7 +116,8 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.pixelSize: 14.0
-        text: "<b>Name:</b> " + tokensPanel.grid.currentItem.itemName
+        text: "<b>Name:</b> "
+        + ((tokensPanel.selectedToken) ? tokensPanel.selectedToken.itemName : "")
       }
       Text {
         id: tokenDecimals
@@ -102,7 +125,8 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.pixelSize: 14.0
-        text: "<b>Decimals:</b> " + tokensPanel.grid.currentItem.itemDecimals
+        text: "<b>Decimals:</b> "
+        + ((tokensPanel.selectedToken) ? tokensPanel.selectedToken.itemDecimals : "")
       }
       Text {
         id: tokenAddress
@@ -110,7 +134,8 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.pixelSize: 14.0
-        text: "<b>Address:</b><br>" + tokensPanel.grid.currentItem.itemAddress
+        text: "<b>Address:</b><br>"
+        + ((tokensPanel.selectedToken) ? tokensPanel.selectedToken.itemAddress : "")
       }
       Text {
         id: tokenAVAXPairContract
@@ -118,8 +143,34 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.pixelSize: 14.0
-        text: "<b>AVAX Pair Contract:</b><br>" + tokensPanel.grid.currentItem.itemAVAXPairContract
+        text: "<b>AVAX Pair Contract:</b><br>"
+        + ((tokensPanel.selectedToken) ? tokensPanel.selectedToken.itemAVAXPairContract : "")
       }
+    }
+  }
+
+  // Popup for adding a new token
+  AVMEPopupTokenAdd {
+    id: addTokenPopup
+    widthPct: 0.4
+    heightPct: 0.7
+  }
+
+  // Popup for confirming token removal
+  AVMEPopupYesNo {
+    id: confirmEraseTokenPopup
+    widthPct: 0.4
+    heightPct: 0.25
+    icon: "qrc:/img/warn.png"
+    info: "Are you sure you want to remove this token?"
+    yesBtn.onClicked: {
+      // TODO: error handling and info popup(?)
+      QmlSystem.removeARC20Token(tokensPanel.selectedToken.itemAddress);
+      confirmEraseTokenPopup.close()
+      reloadTokens()
+    }
+    noBtn.onClicked: {
+      confirmEraseTokenPopup.close()
     }
   }
 }

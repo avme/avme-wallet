@@ -109,7 +109,13 @@ class Wallet {
      */
     bool auth(std::string pass);
 
-    // TODO: database management
+    /**
+     * (Re)Load and close the token and tx history databases, respectively.
+     */
+    bool loadTokenDB();
+    bool loadHistoryDB(std::string address);
+    void closeTokenDB();
+    void closeHistoryDB();
 
     // ======================================================================
     // TOKEN MANAGEMENT

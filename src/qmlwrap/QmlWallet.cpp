@@ -73,18 +73,3 @@ bool QmlSystem::seedIsValid(QString seed) {
   if (ct != 12) { return false; }
   return true;
 }
-
-QVariantList QmlSystem::getARC20Tokens() {
-  std::vector<ARC20Token> list = QmlSystem::w.getARC20Tokens();
-  QVariantList ret;
-  for (ARC20Token token : list) {
-    QVariantMap tokenObj;
-    tokenObj.insert("address", QString::fromStdString(token.address));
-    tokenObj.insert("symbol", QString::fromStdString(token.symbol));
-    tokenObj.insert("name", QString::fromStdString(token.name));
-    tokenObj.insert("decimals", token.decimals);
-    tokenObj.insert("avaxPairContract", QString::fromStdString(token.avaxPairContract));
-    ret << tokenObj;
-  }
-  return ret;
-}

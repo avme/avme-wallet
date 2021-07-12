@@ -40,8 +40,10 @@ class QmlSystem : public QObject {
     bool ledgerFlag;
 
   public slots:
+    // Clean database, threads, etc before closing the program
     void cleanAndClose() {
-      // TODO: Clean database, threads, etc before closing the program
+      this->w.closeTokenDB();
+      this->w.closeHistoryDB();
       return;
     }
 
@@ -179,9 +181,6 @@ class QmlSystem : public QObject {
     // Check if a BIP39 seed is valid
     Q_INVOKABLE bool seedIsValid(QString seed);
 
-    // Get the list of registered tokens from the Wallet
-    Q_INVOKABLE QVariantList getARC20Tokens();
-
     // ======================================================================
     // ACCOUNT SCREEN FUNCTIONS
     // ======================================================================
@@ -236,6 +235,10 @@ class QmlSystem : public QObject {
     Q_INVOKABLE QString getAVAXValue(QString amount);
     Q_INVOKABLE QStringList getAVAXValues(QStringList amounts);
 
+    // (Re)Load the token and tx history databases, respectively.
+    Q_INVOKABLE bool loadTokenDB();
+    Q_INVOKABLE bool loadHistoryDB(QString address);
+
     // ======================================================================
     // OVERVIEW SCREEN FUNCTIONS
     // ======================================================================
@@ -256,6 +259,23 @@ class QmlSystem : public QObject {
     // Get data for the market chart for the last X days (most to least recent).
     // Emits marketDataUpdated()
     Q_INVOKABLE void getMarketData(int days);
+
+    // ======================================================================
+    // TOKENS SCREEN FUNCTIONS
+    // ======================================================================
+
+    // Load and get the list of registered tokens from the Wallet, respectively.
+    Q_INVOKABLE void loadARC20Tokens();
+    Q_INVOKABLE QVariantList getARC20Tokens();
+
+    // Add and remove a token from the list, respectively.
+    Q_INVOKABLE bool addARC20Token(
+      QString address, QString symbol, QString name, int decimals, QString avaxPairContract
+    );
+    Q_INVOKABLE bool removeARC20Token(QString address);
+
+    // Get the hardcoded AVME token
+    Q_INVOKABLE QVariantMap getAVMEData();
 
     // ======================================================================
     // HISTORY SCREEN FUNCTIONS

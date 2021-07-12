@@ -20,6 +20,11 @@ std::string Database::getTokenDBStatus() {
 
 void Database::closeTokenDB() {
   delete this->tokenDB;
+  this->tokenDB = NULL;
+}
+
+bool Database::isTokenDBOpen() {
+  return (this->tokenDB != NULL);
 }
 
 std::string Database::getTokenDBValue(std::string key) {
@@ -65,6 +70,11 @@ std::string Database::getHistoryDBStatus() {
 
 void Database::closeHistoryDB() {
   delete this->historyDB;
+  this->historyDB = NULL;
+}
+
+bool Database::isHistoryDBOpen() {
+  return (this->historyDB != NULL);
 }
 
 std::string Database::getHistoryDBValue(std::string key) {
