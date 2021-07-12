@@ -5,9 +5,17 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
+import "qrc:/qml/popups"
 
 // Header that shows the current Account and options for changing it
 Rectangle {
+  function qrEncode() {
+    qrcodePopup.qrModel.clear()
+    var qrData = QmlSystem.getQRCodeFromAddress(QmlSystem.getCurrentAccount())
+    for (var i = 0; i < qrData.length; i++) {
+      qrcodePopup.qrModel.set(i, JSON.parse(qrData[i]))
+    }
+  }
   id: accountHeader
   property var tokenList
   property var selectedToken
@@ -51,7 +59,7 @@ Rectangle {
     color: "#FFFFFF"
     text: (!addressTimer.running) ? QmlSystem.getCurrentAccount() : "Copied to clipboard!"
     font.bold: true
-    font.pixelSize: 18.0
+    font.pixelSize: 17.0
 
     Rectangle {
       id: addressRect
@@ -72,6 +80,44 @@ Rectangle {
           QmlSystem.copyToClipboard(QmlSystem.getCurrentAccount())
           addressTimer.start()
         }
+      }
+    }
+  }
+
+  Rectangle {
+    id: qrCodeRect
+    anchors.top: parent.top
+    anchors.left: addressText.right
+    anchors.leftMargin: height / 2
+    anchors.verticalCenter: parent.verticalCenter
+    color: "transparent"
+    radius: 5
+    height: addressText.height
+    width: height
+    Image {
+      id: qrCodeImage
+      anchors.verticalCenter: parent.verticalCenter
+      anchors.horizontalCenter: parent.horizontalCenter
+      height: parent.height * 0.8
+      width: parent.width * 0.8
+      mipmap: true
+      source: "qrc:/img/icons/qrcode.png"
+    }
+    MouseArea {
+      id: qrCodeMouseArea
+      anchors.fill: parent
+      hoverEnabled: true
+      onEntered: {
+        parent.color = "#3F434C"
+        qrCodeImage.source = "qrc:/img/icons/qrcodeSelect.png"
+      }
+      onExited: {
+        parent.color = "transparent"
+        qrCodeImage.source = "qrc:/img/icons/qrcode.png"
+      }
+      onClicked: {
+        qrEncode()
+        qrcodePopup.open()
       }
     }
   }
@@ -138,5 +184,11 @@ Rectangle {
     icon: "qrc:/img/warn.png"
     onAboutToHide: ledgerRetryTimer.stop()
     okBtn.text: "Close"
+  }
+  
+  AVMEPopupQRCode {
+    id: qrcodePopup
+    qrcodeWidth: QmlSystem.getQRCodeSize(QmlSystem.getCurrentAccount())
+    textAddress.text: QmlSystem.getCurrentAccount()
   }
 }

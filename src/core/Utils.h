@@ -9,6 +9,7 @@
 
 #include <boost/chrono.hpp>
 #include <boost/lexical_cast.hpp>
+#include <qrencode.h>
 
 #include <openssl/rand.h>
 

@@ -170,7 +170,7 @@ else()
     build/moc_QmlSystem.cpp build/qml.cpp
   )
 endif()
-target_link_libraries(avme-gui PUBLIC avme-lib ${QT_LIBS} ${OPENSSL_LIBS})
+target_link_libraries(avme-gui PUBLIC avme-lib ${QT_LIBS} ${OPENSSL_LIBS} ${QRENCODE_LIBS})
 
 # CPack stuff for packaging cross-platform binaries
 if(WIN32)

@@ -243,6 +243,11 @@ class QmlSystem : public QObject {
     // OVERVIEW SCREEN FUNCTIONS
     // ======================================================================
 
+    // Get QRCode width/height size
+    Q_INVOKABLE qreal getQRCodeSize(QString address);
+    // Get a QVariantList with the QRCode information
+    Q_INVOKABLE QVariantList getQRCodeFromAddress(QString address);
+
     // TODO: check all of those later
     // Get the crypto and fiat balances for an Account and the whole Wallet, respectively.
     // Emits, in order: accountBalancesUpdated(), accountFiatBalancesUpdated(),
