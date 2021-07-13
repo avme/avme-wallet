@@ -91,6 +91,10 @@ std::string API::buildRequest(Request req) {
   reqObj["method"] = req.method;
   reqObj["params"] = paramsArr;
   std::string reqStr = json_spirit::write_string(json_spirit::mValue(reqObj), false);
+  int pos;
+  while ((pos = reqStr.find("\\")) != std::string::npos) { reqStr.erase(pos, 1); }
+  while ((pos = reqStr.find("\"{")) != std::string::npos) { reqStr.erase(pos, 1); }
+  while ((pos = reqStr.find("}\"")) != std::string::npos) { reqStr.erase(pos+1, 1); }
   return reqStr;
 }
 
@@ -108,9 +112,9 @@ std::string API::buildMultiRequest(std::vector<Request> reqs) {
   }
   std::string reqStr = json_spirit::write_string(json_spirit::mValue(reqArr), false);
   int pos;
-  while ((pos = reqStr.find("\\")) != std::string::npos) {
-    reqStr.erase(pos, 1);
-  }
+  while ((pos = reqStr.find("\\")) != std::string::npos) { reqStr.erase(pos, 1); }
+  while ((pos = reqStr.find("\"{")) != std::string::npos) { reqStr.erase(pos, 1); }
+  while ((pos = reqStr.find("}\"")) != std::string::npos) { reqStr.erase(pos+1, 1); }
   return reqStr;
 }
 
@@ -182,6 +186,66 @@ std::string API::getCompoundLPBalance(std::string address, std::string contractA
         << "\"},\"latest\"]}";
   resp = httpGetRequest(secondQuery.str());
   return JSON::getString(resp, "result");
+}
+
+// TODO: convert to multi request
+bool API::isARC20Token(std::string address) {
+  json_spirit::mObject supplyJson, balanceJson;
+  supplyJson["to"] = balanceJson["to"] = address;
+  supplyJson["data"] = Pangolin::ERC20Funcs["totalSupply"];
+  balanceJson["data"] = Pangolin::ERC20Funcs["balanceOf"] + Utils::addressToHex(address);
+  Request supplyReq{1, "2.0", "eth_call", {
+    json_spirit::write_string(json_spirit::mValue(supplyJson), false), "latest"
+  }};
+  Request balanceReq{1, "2.0", "eth_call", {
+    json_spirit::write_string(json_spirit::mValue(balanceJson), false), "latest"
+  }};
+  std::string supplyQuery, supplyResp, supplyHex, balanceQuery, balanceResp, balanceHex;
+  supplyQuery = buildRequest(supplyReq);
+  balanceQuery = buildRequest(balanceReq);
+  supplyResp = httpGetRequest(supplyQuery);
+  balanceResp = httpGetRequest(balanceQuery);
+  supplyHex = JSON::getString(supplyResp, "result");
+  balanceHex = JSON::getString(balanceResp, "result");
+  if (supplyHex == "0x" || supplyHex == "") { return false; }
+  if (balanceHex == "0x" || balanceHex == "") { return false; }
+  return true;
+}
+
+// TODO: convert to multi request
+ARC20Token API::getARC20TokenData(std::string address) {
+  json_spirit::mObject nameJson, symbolJson, decimalsJson;
+  nameJson["to"] = symbolJson["to"] = decimalsJson["to"] = address;
+  nameJson["data"] = Pangolin::ERC20Funcs["name"];
+  symbolJson["data"] = Pangolin::ERC20Funcs["symbol"];
+  decimalsJson["data"] = Pangolin::ERC20Funcs["decimals"];
+  Request nameReq{1, "2.0", "eth_call", {
+    json_spirit::write_string(json_spirit::mValue(nameJson), false), "latest"
+  }};
+  Request symbolReq{1, "2.0", "eth_call", {
+    json_spirit::write_string(json_spirit::mValue(symbolJson), false), "latest"
+  }};
+  Request decimalsReq{1, "2.0", "eth_call", {
+    json_spirit::write_string(json_spirit::mValue(decimalsJson), false), "latest"
+  }};
+  std::string nameQuery, nameResp, nameHex, symbolQuery, symbolResp, symbolHex,
+    decimalsQuery, decimalsResp, decimalsHex;
+  nameQuery = buildRequest(nameReq);
+  symbolQuery = buildRequest(symbolReq);
+  decimalsQuery = buildRequest(decimalsReq);
+  nameResp = httpGetRequest(nameQuery);
+  symbolResp = httpGetRequest(symbolQuery);
+  decimalsResp = httpGetRequest(decimalsQuery);
+  nameHex = JSON::getString(nameResp, "result");
+  symbolHex = JSON::getString(symbolResp, "result");
+  decimalsHex = JSON::getString(decimalsResp, "result");
+  ARC20Token ret;
+  ret.address = address;
+  ret.name = Utils::stringFromHex(nameHex);
+  ret.symbol = Utils::stringFromHex(symbolHex);
+  ret.decimals = boost::lexical_cast<int>(Utils::uintFromHex(decimalsHex));
+  ret.avaxPairContract = "";  // TODO
+  return ret;
 }
 
 std::string API::getAutomaticFee() {

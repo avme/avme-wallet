@@ -44,6 +44,7 @@ class Database {
     std::string getTokenDBStatus();
     void closeTokenDB();
     bool isTokenDBOpen();
+    bool tokenDBKeyExists(std::string key);
     std::string getTokenDBValue(std::string key);
     bool putTokenDBValue(std::string key, std::string value);
     bool deleteTokenDBValue(std::string key);
@@ -54,6 +55,7 @@ class Database {
     std::string getHistoryDBStatus();
     void closeHistoryDB();
     bool isHistoryDBOpen();
+    bool historyDBKeyExists(std::string key);
     std::string getHistoryDBValue(std::string key);
     bool putHistoryDBValue(std::string key, std::string value);
     bool deleteHistoryDBValue(std::string key);

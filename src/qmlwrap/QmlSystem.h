@@ -279,8 +279,17 @@ class QmlSystem : public QObject {
     );
     Q_INVOKABLE bool removeARC20Token(QString address);
 
-    // Get the hardcoded AVME token
+    // Get the hardcoded AVME token.
     Q_INVOKABLE QVariantMap getAVMEData();
+
+    // Check if a token exists in the network.
+    Q_INVOKABLE bool ARC20TokenExists(QString address);
+
+    // Retrieve a token's data from the network.
+    Q_INVOKABLE QVariantMap getARC20TokenData(QString address);
+
+    // Check if a token was already added in the Wallet.
+    Q_INVOKABLE bool ARC20TokenWasAdded(QString address);
 
     // ======================================================================
     // HISTORY SCREEN FUNCTIONS

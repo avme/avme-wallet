@@ -34,6 +34,10 @@ std::map<std::string, std::string> Pangolin::pairContracts = {
 #endif
 
 std::map<std::string, std::string> Pangolin::ERC20Funcs = {
+  {"name", "0x06fdde03"}, // name()
+  {"symbol", "0x95d89b41"}, // symbol()
+  {"decimals", "0x313ce567"}, // decimals()
+  {"totalSupply", "0x18160ddd"}, // totalSupply()
   {"balanceOf", "0x70a08231"},  // balanceOf(address)
   {"approve", "0x095ea7b3"},  // approve(address,uint256)
   {"allowance", "0xdd62ed3e"}, // allowance(address,address)

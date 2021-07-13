@@ -122,6 +122,13 @@ namespace Utils {
    */
   std::string uintToHex(std::string input);
   std::string addressToHex(std::string input);
+
+  /**
+   * Converts hex input to the correspondent value.
+   * Returns the converted value.
+   */
+  std::string uintFromHex(std::string hex);
+  std::string stringFromHex(std::string hex);
 };
 
 #endif  // UTILS_H

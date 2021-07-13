@@ -15,6 +15,8 @@
 #include <boost/beast/version.hpp>
 
 #include <core/JSON.h>
+#include <core/Utils.h>
+#include <network/Pangolin.h>
 #include <network/root_certificates.hpp>
 
 // Struct for a JSON request.
@@ -62,6 +64,16 @@ class API {
      * Get Locked LP Balance inside YY Contract
      */
     static std::string getCompoundLPBalance(std::string address, std::string contractAddress);
+
+    /**
+     * Check if a given address is an ARC20 token.
+     */
+    static bool isARC20Token(std::string address);
+
+    /**
+     * Get an ARC20 token's data.
+     */
+    static ARC20Token getARC20TokenData(std::string address);
 
     /**
      * Get the recommended gas price for a transaction.

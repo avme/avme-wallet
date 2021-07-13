@@ -117,6 +117,10 @@ bool Wallet::removeARC20Token(std::string address) {
   return success;
 }
 
+bool Wallet::ARC20TokenWasAdded(std::string address) {
+  return this->db.tokenDBKeyExists(address);
+}
+
 void Wallet::loadAccounts() {
   this->accounts.clear();
   if (this->km.store().keys().empty()) { return; }

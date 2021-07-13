@@ -139,6 +139,11 @@ class Wallet {
      */
     bool removeARC20Token(std::string address);
 
+    /**
+     * Check if a token was already added.
+     */
+    bool ARC20TokenWasAdded(std::string address);
+
     // ======================================================================
     // ACCOUNT MANAGEMENT
     // ======================================================================

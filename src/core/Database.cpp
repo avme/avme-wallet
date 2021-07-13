@@ -27,6 +27,14 @@ bool Database::isTokenDBOpen() {
   return (this->tokenDB != NULL);
 }
 
+bool Database::tokenDBKeyExists(std::string key) {
+  leveldb::Iterator* it = this->tokenDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    if (it->key().ToString() == key) return true;
+  }
+  return false;
+}
+
 std::string Database::getTokenDBValue(std::string key) {
   this->tokenStatus = this->tokenDB->Get(leveldb::ReadOptions(), key, &this->tokenValue);
   return (this->tokenStatus.ok()) ? this->tokenValue : this->tokenStatus.ToString();
@@ -75,6 +83,14 @@ void Database::closeHistoryDB() {
 
 bool Database::isHistoryDBOpen() {
   return (this->historyDB != NULL);
+}
+
+bool Database::historyDBKeyExists(std::string key) {
+  leveldb::Iterator* it = this->historyDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    if (it->key().ToString() == key) return true;
+  }
+  return false;
 }
 
 std::string Database::getHistoryDBValue(std::string key) {

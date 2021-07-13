@@ -195,3 +195,38 @@ std::string Utils::addressToHex(std::string input) {
   return padding;
 }
 
+std::string Utils::uintFromHex(std::string hex) {
+  std::string ret;
+  if (hex.substr(0, 2) == "0x") { hex = hex.substr(2); } // Remove the "0x"
+  unsigned int number = boost::lexical_cast<HexTo<unsigned int>>(hex);
+  ret = boost::lexical_cast<std::string>(number);
+  return ret;
+}
+
+std::string Utils::stringFromHex(std::string hex) {
+  std::string ret, offset, len, hexStr;
+  if (hex.substr(0, 2) == "0x") { hex = hex.substr(2); } // Remove the "0x"
+
+  // Split the hex string in several 64-char/32-byte pieces (2 chars = 1 byte)
+  for (int i = 0; i < hex.length(); i += 64) {
+    // Hex strings always come in this order: offset, length and the actual string
+    if (i == 0) {
+      offset = hex.substr(i, 64);
+    } else if (i == 64) {
+      len = hex.substr(i, 64);
+    } else {
+      hexStr += hex.substr(i, 64);
+    }
+  }
+
+  // Parse the hex string byte by byte (every two chars)
+  uint64_t offsetU256 = boost::lexical_cast<HexTo<uint64_t>>("0x" + offset) * 2;
+  uint64_t lengthU256 = boost::lexical_cast<HexTo<uint64_t>>("0x" + len) * 2;
+  for (uint64_t i = 0; i < lengthU256; i += 2) {
+    unsigned int hexInt = boost::lexical_cast<HexTo<unsigned int>>("0x" + hexStr.substr(i, 2));
+    unsigned char hexChar = hexInt;
+    ret += hexChar;
+  }
+  return ret;
+}
+

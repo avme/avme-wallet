@@ -46,3 +46,28 @@ QVariantMap QmlSystem::getAVMEData() {
   tokenObj.insert("avaxPairContract", QString::fromStdString(Pangolin::pairContracts["WAVAX-AVME"]));
   return tokenObj;
 }
+
+bool QmlSystem::ARC20TokenExists(QString address) {
+  return API::isARC20Token(address.toStdString());
+}
+
+// TODO: image
+QVariantMap QmlSystem::getARC20TokenData(QString address) {
+  ARC20Token token = API::getARC20TokenData(address.toStdString());
+  QVariantMap tokenObj;
+  tokenObj.insert("address", QString::fromStdString(token.address));
+  tokenObj.insert("symbol", QString::fromStdString(token.symbol));
+  tokenObj.insert("name", QString::fromStdString(token.name));
+  tokenObj.insert("decimals", token.decimals);
+  tokenObj.insert("avaxPairContract", QString::fromStdString(token.avaxPairContract));
+  return tokenObj;
+}
+
+bool QmlSystem::ARC20TokenWasAdded(QString address) {
+  std::string addressStr = address.toStdString();
+  std::string avmeStr = Pangolin::tokenContracts["AVME"];
+  std::transform(addressStr.begin(), addressStr.end(), addressStr.begin(), ::tolower);
+  std::transform(avmeStr.begin(), avmeStr.end(), avmeStr.begin(), ::tolower);
+  if (addressStr == avmeStr) { return true; }
+  return QmlSystem::w.ARC20TokenWasAdded(addressStr);
+}

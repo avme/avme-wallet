@@ -11,6 +11,7 @@ import "qrc:/qml/popups"
 Item {
   id: tokensScreen
   property string avmeAddress
+  property alias selectedToken: tokenGrid.currentItem
 
   Component.onCompleted: reloadTokens()
 
@@ -23,7 +24,7 @@ Item {
     QmlSystem.loadARC20Tokens()
     var tokens = QmlSystem.getARC20Tokens()
     for (var i = 0; i < tokens.length; i++) {
-      tokenList.append(JSON.parse(tokens[i]));
+      tokenList.append(tokens[i]);
     }
   }
 
@@ -33,7 +34,6 @@ Item {
 
   AVMEPanel {
     id: tokensPanel
-    property alias selectedToken: tokenGrid.currentItem
     width: (parent.width * 0.6)
     title: "Token List"
     anchors {
@@ -75,9 +75,8 @@ Item {
         id: btnRemove
         width: (tokensPanel.width * 0.3)
         enabled: (
-          tokensPanel.selectedItem != null &&
-          avmeAddress != "" &&
-          tokensPanel.selectedItem.itemAddress != avmeAddress
+          selectedToken != null && avmeAddress != "" &&
+          selectedToken.itemAddress != avmeAddress
         )
         text: (enabled) ? "Remove this token" : "Can't remove"
         onClicked: confirmEraseTokenPopup.open()
@@ -108,7 +107,7 @@ Item {
         color: "#FFFFFF"
         font.pixelSize: 18.0
         font.bold: true
-        text: ((tokensPanel.selectedToken) ? tokensPanel.selectedToken.itemSymbol : "")
+        text: ((selectedToken != null) ? selectedToken.itemSymbol : "")
       }
       Text {
         id: tokenName
@@ -117,7 +116,7 @@ Item {
         color: "#FFFFFF"
         font.pixelSize: 14.0
         text: "<b>Name:</b> "
-        + ((tokensPanel.selectedToken) ? tokensPanel.selectedToken.itemName : "")
+        + ((selectedToken != null) ? selectedToken.itemName : "")
       }
       Text {
         id: tokenDecimals
@@ -126,7 +125,7 @@ Item {
         color: "#FFFFFF"
         font.pixelSize: 14.0
         text: "<b>Decimals:</b> "
-        + ((tokensPanel.selectedToken) ? tokensPanel.selectedToken.itemDecimals : "")
+        + ((selectedToken != null) ? selectedToken.itemDecimals : "")
       }
       Text {
         id: tokenAddress
@@ -135,7 +134,7 @@ Item {
         color: "#FFFFFF"
         font.pixelSize: 14.0
         text: "<b>Address:</b><br>"
-        + ((tokensPanel.selectedToken) ? tokensPanel.selectedToken.itemAddress : "")
+        + ((selectedToken != null) ? selectedToken.itemAddress : "")
       }
       Text {
         id: tokenAVAXPairContract
@@ -144,7 +143,7 @@ Item {
         color: "#FFFFFF"
         font.pixelSize: 14.0
         text: "<b>AVAX Pair Contract:</b><br>"
-        + ((tokensPanel.selectedToken) ? tokensPanel.selectedToken.itemAVAXPairContract : "")
+        + ((selectedToken != null) ? selectedToken.itemAVAXPairContract : "")
       }
     }
   }
@@ -165,7 +164,7 @@ Item {
     info: "Are you sure you want to remove this token?"
     yesBtn.onClicked: {
       // TODO: error handling and info popup(?)
-      QmlSystem.removeARC20Token(tokensPanel.selectedToken.itemAddress);
+      QmlSystem.removeARC20Token(selectedToken.itemAddress);
       confirmEraseTokenPopup.close()
       reloadTokens()
     }
