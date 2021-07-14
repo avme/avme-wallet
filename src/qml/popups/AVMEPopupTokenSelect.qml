@@ -15,6 +15,31 @@ AVMEPopup {
   id: chooseTokenPopup
   widthPct: 0.4
   heightPct: 0.8
+  property alias selectedToken: tokenSelectList.currentItem
+  property var chosenToken
+
+  // Always default to AVME when popup is ready
+  Component.onCompleted: chosenToken = QmlSystem.getAVMEData()
+
+  onAboutToShow: {
+    // AVME is hardcoded here and always shows up
+    tokenList.clear()
+    var avme = QmlSystem.getAVMEData()
+    tokenList.append(avme)
+    QmlSystem.loadARC20Tokens()
+    var tokens = QmlSystem.getARC20Tokens()
+    for (var i = 0; i < tokens.length; i++) {
+      tokenList.append(tokens[i])
+    }
+  }
+
+  function chooseToken() {
+    chosenToken.address = selectedToken.itemAddress
+    chosenToken.symbol = selectedToken.itemSymbol
+    chosenToken.name = selectedToken.itemName
+    chosenToken.decimals = selectedToken.itemDecimals
+    chosenToken.avaxPairContract = selectedToken.itemAVAXPairContract
+  }
 
   Column {
     id: items
@@ -44,30 +69,7 @@ AVMEPopup {
         height: parent.height
         width: parent.width
         anchors.fill: parent
-        model: ListModel {  // TODO: real data here
-          id: tokenList
-          ListElement {
-            address: "0x12345"
-            symbol: "AAA"
-            name: "AAA Token"
-            decimals: 18
-            avaxPairContract: "0x12345"
-          }
-          ListElement {
-            address: "0x12345"
-            symbol: "BBB"
-            name: "BBB Token"
-            decimals: 18
-            avaxPairContract: "0x12345"
-          }
-          ListElement {
-            address: "0x12345"
-            symbol: "CCC"
-            name: "CCC Token"
-            decimals: 18
-            avaxPairContract: "0x12345"
-          }
-        }
+        model: ListModel { id: tokenList }
       }
     }
 
@@ -77,7 +79,10 @@ AVMEPopup {
       anchors.horizontalCenter: parent.horizontalCenter
       enabled: (tokenSelectList.currentIndex > -1)
       text: "Select this token"
-      onClicked: {} // TODO
+      onClicked: {
+        chooseToken()
+        chooseTokenPopup.close()
+      }
     }
 
     AVMEButton {
