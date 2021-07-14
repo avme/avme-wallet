@@ -39,11 +39,11 @@ bool QmlSystem::removeARC20Token(QString address) {
 // TODO: image
 QVariantMap QmlSystem::getAVMEData() {
   QVariantMap tokenObj;
-  tokenObj.insert("address", QString::fromStdString(Pangolin::tokenContracts["AVME"]));
+  tokenObj.insert("address", QString::fromStdString(Pangolin::contracts["AVME"]));
   tokenObj.insert("symbol", QString::fromStdString("AVME"));
   tokenObj.insert("name", QString::fromStdString("AV Me"));
   tokenObj.insert("decimals", 18);
-  tokenObj.insert("avaxPairContract", QString::fromStdString(Pangolin::pairContracts["WAVAX-AVME"]));
+  tokenObj.insert("avaxPairContract", QString::fromStdString(Pangolin::contracts["AVAX-AVME"]));
   return tokenObj;
 }
 
@@ -65,7 +65,7 @@ QVariantMap QmlSystem::getARC20TokenData(QString address) {
 
 bool QmlSystem::ARC20TokenWasAdded(QString address) {
   std::string addressStr = address.toStdString();
-  std::string avmeStr = Pangolin::tokenContracts["AVME"];
+  std::string avmeStr = Pangolin::contracts["AVME"];
   std::transform(addressStr.begin(), addressStr.end(), addressStr.begin(), ::tolower);
   std::transform(avmeStr.begin(), avmeStr.end(), avmeStr.begin(), ::tolower);
   if (addressStr == avmeStr) { return true; }

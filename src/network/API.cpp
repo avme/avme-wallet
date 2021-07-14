@@ -158,6 +158,7 @@ std::vector<std::string> API::getAVAXBalances(std::vector<std::string> addresses
   return ret;
 }
 
+// TODO: use json_spirit
 std::string API::getAVMEBalance(std::string address, std::string contractAddress) {
   std::stringstream query;
   std::string add = (address.substr(0,2) == "0x") ? address.substr(2) : address;
@@ -169,6 +170,7 @@ std::string API::getAVMEBalance(std::string address, std::string contractAddress
   return JSON::getString(resp, "result");
 }
 
+// TODO: use json_spirit
 std::string API::getCompoundLPBalance(std::string address, std::string contractAddress) {
   std::stringstream query;
   std::string add = (address.substr(0,2) == "0x") ? address.substr(2) : address;
@@ -244,7 +246,7 @@ ARC20Token API::getARC20TokenData(std::string address) {
   ret.name = Utils::stringFromHex(nameHex);
   ret.symbol = Utils::stringFromHex(symbolHex);
   ret.decimals = boost::lexical_cast<int>(Utils::uintFromHex(decimalsHex));
-  ret.avaxPairContract = "";  // TODO
+  ret.avaxPairContract = Pangolin::getAVAXPair(address);
   return ret;
 }
 
@@ -252,6 +254,7 @@ std::string API::getAutomaticFee() {
   return "225"; // AVAX fees are fixed
 }
 
+// TODO: use json_spirit
 std::string API::getNonce(std::string address) {
   std::stringstream query;
   query << "{\"jsonrpc\": \"2.0\",\"method\": \"eth_getTransactionCount\",\"params\": [\""
@@ -261,6 +264,7 @@ std::string API::getNonce(std::string address) {
   return JSON::getString(resp, "result");
 }
 
+// TODO: use json_spirit
 std::string API::broadcastTx(std::string txidHex) {
   std::stringstream query;
   std::string ApitxidHex = "0x";
@@ -272,6 +276,7 @@ std::string API::broadcastTx(std::string txidHex) {
   return JSON::getString(resp, "result");
 }
 
+// TODO: use json_spirit
 std::string API::getCurrentBlock() {
   std::stringstream query;
   query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_blockNumber\",\"params\": []}";
@@ -279,7 +284,7 @@ std::string API::getCurrentBlock() {
   return JSON::getString(resp, "result");
 }
 
-
+// TODO: use json_spirit
 std::string API::getTxStatus(std::string txidHex) {
   std::stringstream query;
   std::string ApitxidHex = "0x";
@@ -291,6 +296,7 @@ std::string API::getTxStatus(std::string txidHex) {
   return JSON::getString(resp, "result/status", "/");
 }
 
+// TODO: use json_spirit
 std::string API::getTxBlock(std::string txidHex) {
   std::stringstream query;
   std::string ApitxidHex = "0x";

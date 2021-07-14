@@ -128,6 +128,7 @@ namespace Utils {
    * Returns the converted value.
    */
   std::string uintFromHex(std::string hex);
+  std::string addressFromHex(std::string hex);
   std::string stringFromHex(std::string hex);
 };
 

@@ -43,6 +43,7 @@ Item {
       margins: 10
     }
 
+    // TODO: sort alphabetically by ticker (currently it's sorted by address)
     AVMETokenGrid {
       id: tokenGrid
       width: (parent.width * 0.9)

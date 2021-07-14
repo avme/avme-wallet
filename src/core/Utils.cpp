@@ -203,6 +203,14 @@ std::string Utils::uintFromHex(std::string hex) {
   return ret;
 }
 
+std::string Utils::addressFromHex(std::string hex) {
+  // Hex is 32 bytes (64 chars), address is 20 bytes (40 chars), so just remove
+  // the first 12 bytes (24 chars) of padding after "0x" and return.
+  std::string ret = hex;
+  ret.erase(2, 24);
+  return ret;
+}
+
 std::string Utils::stringFromHex(std::string hex) {
   std::string ret, offset, len, hexStr;
   if (hex.substr(0, 2) == "0x") { hex = hex.substr(2); } // Remove the "0x"

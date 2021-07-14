@@ -31,7 +31,7 @@ std::string Staking::totalSupply() {
 
   // Query and get the result, returning if empty
   query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << Pangolin::stakingContract
+        << "[{\"to\": \"" << Pangolin::contracts["staking"]
         << "\",\"data\": \"" << Staking::funcs["totalSupply"]
         << "\"},\"latest\"]}";
   std::string str = API::httpGetRequest(query.str());
@@ -49,7 +49,7 @@ std::string Staking::getRewardForDuration() {
 
   // Query and get the result, returning if empty
   query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << Pangolin::stakingContract
+        << "[{\"to\": \"" << Pangolin::contracts["staking"]
         << "\",\"data\": \"" << Staking::funcs["getRewardForDuration"]
         << "\"},\"latest\"]}";
   std::string str = API::httpGetRequest(query.str());
@@ -67,7 +67,7 @@ std::string Staking::rewardsDuration() {
 
   // Query and get the result, returning if empty
   query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << Pangolin::stakingContract
+        << "[{\"to\": \"" << Pangolin::contracts["staking"]
         << "\",\"data\": \"" << Staking::funcs["rewardsDuration"]
         << "\"},\"latest\"]}";
   std::string str = API::httpGetRequest(query.str());
@@ -85,7 +85,7 @@ std::string Staking::balanceOf(std::string address) {
 
   // Query and get the result, returning if empty
   query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << Pangolin::stakingContract
+        << "[{\"to\": \"" << Pangolin::contracts["staking"]
         << "\",\"data\": \"" << Pangolin::ERC20Funcs["balanceOf"]
                              << Utils::addressToHex(address)
         << "\"},\"latest\"]}";
@@ -104,7 +104,7 @@ std::string Staking::earned(std::string address) {
 
   // Query and get the result, returning if empty
   query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << Pangolin::stakingContract
+        << "[{\"to\": \"" << Pangolin::contracts["staking"]
         << "\",\"data\": \"" << Staking::funcs["earned"]
                              << Utils::addressToHex(address)
         << "\"},\"latest\"]}";
@@ -123,7 +123,7 @@ std::string Staking::getCompoundReward() {
 
   // Query and get the result, returning if empty
   query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << Pangolin::compoundContract
+        << "[{\"to\": \"" << Pangolin::contracts["compound"]
         << "\",\"data\": \"" << Staking::YYfuncs["checkReward"]
         << "\"},\"latest\"]}";
   std::string str = API::httpGetRequest(query.str());
@@ -156,7 +156,7 @@ std::string Staking::compoundWithdraw(std::string amount) {
 
   // Query and get the result, returning if empty
   query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << Pangolin::compoundContract
+        << "[{\"to\": \"" << Pangolin::contracts["compound"]
         << "\",\"data\": \"" << Staking::YYfuncs["getSharesForDepositTokens"] << Utils::uintToHex(amount)
         << "\"},\"latest\"]}";
   std::string str = API::httpGetRequest(query.str());

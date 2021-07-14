@@ -118,7 +118,6 @@ AVMEPopup {
             symbolInput.text = tokenData.symbol
             nameInput.text = tokenData.name
             decimalsInput.text = tokenData.decimals
-            // TODO: maybe image and AVAX pair contract?
           } else {
             notFoundTimer.start()
           }

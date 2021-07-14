@@ -4,33 +4,25 @@
 #include "Pangolin.h"
 
 #ifdef TESTNET
-std::string Pangolin::routerContract = "0x2D99ABD9008Dc933ff5c0CD271B88309593aB921";
-std::string Pangolin::stakingContract = "0xfCA717d68EE18526e2626267594625Ee4CEFc66F";
-std::string Pangolin::compoundContract = "0xb34fE8A87DFEbD5Ab0a03DB73F2d49b903E63DB6";
-
-std::map<std::string, std::string> Pangolin::tokenContracts = {
-  {"WAVAX", "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"},
+std::map<std::string, std::string> Pangolin::contracts = {
+  {"factory", "0xE4A575550C2b460d2307b82dCd7aFe84AD1484dd"},
+  {"router", "0x2D99ABD9008Dc933ff5c0CD271B88309593aB921"},
+  {"staking", "0xfCA717d68EE18526e2626267594625Ee4CEFc66F"},
+  {"compound", "0xb34fE8A87DFEbD5Ab0a03DB73F2d49b903E63DB6"},
+  {"AVAX", "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"},
   {"AVME", "0x02aDedcfe78757C3d0a545CB0Cbd78a7d19eEE4f"},
+  {"AVAX-AVME", "0x0A7bc2Ab390774fE16610b3BA53748FDf4C6a955"},
 };
-
-std::map<std::string, std::string> Pangolin::pairContracts = {
-  {"WAVAX-AVME", "0x0A7bc2Ab390774fE16610b3BA53748FDf4C6a955"},
-};
-
 #else
-std::string Pangolin::routerContract = "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106";
-std::string Pangolin::stakingContract = "0xCc39b8c253f33BEa6E8326f0E5029Aa8627df757";
-std::string Pangolin::compoundContract = "0xb34fE8A87DFEbD5Ab0a03DB73F2d49b903E63DB6";
-
-std::map<std::string, std::string> Pangolin::tokenContracts = {
-  {"WAVAX", "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7"},
+std::map<std::string, std::string> Pangolin::contracts = {
+  {"factory", "0xefa94DE7a4656D787667C749f7E1223D71E9FD88"},
+  {"router", "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106"},
+  {"staking", "0xCc39b8c253f33BEa6E8326f0E5029Aa8627df757"},
+  {"compound", "0xb34fE8A87DFEbD5Ab0a03DB73F2d49b903E63DB6"},
+  {"AVAX", "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7"},
   {"AVME", "0x1ECd47FF4d9598f89721A2866BFEb99505a413Ed"},
+  {"AVAX-AVME", "0x381cc7bcba0afd3aeb0eaec3cb05d7796ddfd860"},
 };
-
-std::map<std::string, std::string> Pangolin::pairContracts = {
-  {"WAVAX-AVME", "0x381cc7bcba0afd3aeb0eaec3cb05d7796ddfd860"},
-};
-
 #endif
 
 std::map<std::string, std::string> Pangolin::ERC20Funcs = {
@@ -42,6 +34,10 @@ std::map<std::string, std::string> Pangolin::ERC20Funcs = {
   {"approve", "0x095ea7b3"},  // approve(address,uint256)
   {"allowance", "0xdd62ed3e"}, // allowance(address,address)
   {"transfer", "0xa9059cbb"}, // transfer(address,uint256)
+};
+
+std::map<std::string, std::string> Pangolin::factoryFuncs = {
+  {"getPair", "0xe6a43905"}, // getPair(address,address)
 };
 
 std::map<std::string, std::string> Pangolin::pairFuncs = {
@@ -85,30 +81,32 @@ std::vector<std::string> Pangolin::parseHex(std::string hexStr, std::vector<std:
   return ret;
 }
 
-std::string Pangolin::getPair(std::string tokenNameA, std::string tokenNameB) {
-  std::string pairName;
-  if (tokenNameA == "AVAX") { tokenNameA = "WAVAX"; }
-  if (tokenNameB == "AVAX") { tokenNameB = "WAVAX"; }
-  if (pairContracts.find(tokenNameA + "-" + tokenNameB) != pairContracts.end()) {
-    pairName = tokenNameA + "-" + tokenNameB;
-  } else if (pairContracts.find(tokenNameB + "-" + tokenNameA) != pairContracts.end()) {
-    pairName = tokenNameB + "-" + tokenNameA;
-  } else {
-    pairName = "";  // Not found
-  }
-  return (!pairName.empty()) ? pairContracts[pairName] : "";
+std::string Pangolin::getPair(std::string tokenAddressA, std::string tokenAddressB) {
+  json_spirit::mObject reqJson;
+  std::string query, resp, hex;
+  reqJson["to"] = Pangolin::contracts["factory"];
+  reqJson["data"] = Pangolin::factoryFuncs["getPair"]
+    + Utils::addressToHex(tokenAddressA) + Utils::addressToHex(tokenAddressB);
+  Request req{1, "2.0", "eth_call", {
+    json_spirit::write_string(json_spirit::mValue(reqJson), false), "latest"
+  }};
+  query = API::buildRequest(req);
+  resp = API::httpGetRequest(query);
+  hex = JSON::getString(resp, "result");
+  return Utils::addressFromHex(hex);
 }
 
-std::string Pangolin::getFirstFromPair(std::string tokenNameA, std::string tokenNameB) {
-  if (tokenNameA == "AVAX") { tokenNameA = "WAVAX"; }
-  if (tokenNameB == "AVAX") { tokenNameB = "WAVAX"; }
-  std::string addressA = Pangolin::tokenContracts[tokenNameA];
-  std::string addressB = Pangolin::tokenContracts[tokenNameB];
-  u256 valueA = boost::lexical_cast<HexTo<u256>>(addressA);
-  u256 valueB = boost::lexical_cast<HexTo<u256>>(addressB);
-  return (valueA < valueB) ? tokenNameA : tokenNameB;
+std::string Pangolin::getAVAXPair(std::string tokenAddress) {
+  return getPair(Pangolin::contracts["AVAX"], tokenAddress);
 }
 
+std::string Pangolin::getFirstFromPair(std::string tokenAddressA, std::string tokenAddressB) {
+  u256 valueA = boost::lexical_cast<HexTo<u256>>(tokenAddressA);
+  u256 valueB = boost::lexical_cast<HexTo<u256>>(tokenAddressB);
+  return (valueA < valueB) ? tokenAddressA : tokenAddressB;
+}
+
+// TODO: use json_spirit
 std::string Pangolin::totalSupply(std::string tokenNameA, std::string tokenNameB) {
   std::string result;
   std::stringstream query;
@@ -127,6 +125,7 @@ std::string Pangolin::totalSupply(std::string tokenNameA, std::string tokenNameB
   return parseHex(result, {"uint"})[0];
 }
 
+// TODO: use json_spirit
 std::vector<std::string> Pangolin::getReserves(std::string tokenNameA, std::string tokenNameB) {
   std::string result;
   std::stringstream query;
@@ -188,6 +187,7 @@ std::string Pangolin::approve(std::string spender) {
   return dataHex;
 }
 
+// TODO: use json_spirit
 std::string Pangolin::allowance(
   std::string receiver, std::string owner, std::string spender
 ) {

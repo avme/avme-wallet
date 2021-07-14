@@ -27,16 +27,13 @@
  */
 class Pangolin {
   public:
-    // Pangolin's router and staking contracts.
+    // Map with hardcoded Pangolin and token contracts.
     // See https://github.com/pangolindex/exchange-contracts
-    static std::string routerContract;
-    static std::string stakingContract;
-    static std::string compoundContract;
+    static std::map<std::string, std::string> contracts;
 
-    // Arrays for the supported token/pair contracts and IDs for ABI functions.
-    static std::map<std::string, std::string> tokenContracts;
-    static std::map<std::string, std::string> pairContracts;
+    // Maps for the supported ABI function IDs.
     static std::map<std::string, std::string> ERC20Funcs;
+    static std::map<std::string, std::string> factoryFuncs;
     static std::map<std::string, std::string> pairFuncs;
     static std::map<std::string, std::string> routerFuncs;
 
@@ -48,16 +45,17 @@ class Pangolin {
     static std::vector<std::string> parseHex(std::string hexStr, std::vector<std::string> types);
 
     /**
-     * (LOCAL) Get the address for a given pair.
-     * Returns the address, or empty if no pair is found.
+     * (ABI) Get the address for a given Token-Token or AVAX-Token pair, respectively.
+     * Returns the address, or an empty string if no pair is found.
      */
-    static std::string getPair(std::string tokenNameA, std::string tokenNameB);
+    static std::string getPair(std::string tokenAddressA, std::string tokenAddressB);
+    static std::string getAVAXPair(std::string tokenAddress);
 
     /**
      * (LOCAL) Calculate the first (lower) address from a given token pair.
-     * Returns the name of the token first (lower) token.
+     * Returns the first (lower) token address.
      */
-    static std::string getFirstFromPair(std::string tokenNameA, std::string tokenNameB);
+    static std::string getFirstFromPair(std::string tokenAddressA, std::string tokenAddressB);
 
     /**
      * (ABI) Get the total supply of liquidity tokens in a coin/token pair.

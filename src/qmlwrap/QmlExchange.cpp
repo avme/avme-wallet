@@ -7,24 +7,24 @@
 void QmlSystem::getAllowances() {
   QtConcurrent::run([=](){
     std::string exchangeAllowance = Pangolin::allowance(
-      Pangolin::tokenContracts["AVME"],
+      Pangolin::contracts["AVME"],
       this->w.getCurrentAccount().first,
-      Pangolin::routerContract
+      Pangolin::contracts["router"]
     );
     std::string liquidityAllowance = Pangolin::allowance(
-      Pangolin::getPair("AVAX", "AVME"),
+      Pangolin::contracts["AVAX-AVME"],
       this->w.getCurrentAccount().first,
-      Pangolin::routerContract
+      Pangolin::contracts["router"]
     );
     std::string stakingAllowance = Pangolin::allowance(
-      Pangolin::getPair("AVAX", "AVME"),
+      Pangolin::contracts["AVAX-AVME"],
       this->w.getCurrentAccount().first,
-      Pangolin::stakingContract
+      Pangolin::contracts["staking"]
     );
     std::string compoundAllowance = Pangolin::allowance(
-      Pangolin::getPair("AVAX", "AVME"),
+      Pangolin::contracts["AVAX-AVME"],
       this->w.getCurrentAccount().first,
-      Pangolin::compoundContract
+      Pangolin::contracts["compound"]
     );
     emit allowancesUpdated(
       QString::fromStdString(exchangeAllowance),
