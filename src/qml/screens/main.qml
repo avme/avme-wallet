@@ -81,6 +81,8 @@ ApplicationWindow {
   // Dynamic screen loader (used in setScreen(id, screenpath))
   Loader {
     id: content
+    antialiasing: true
+    smooth: true
     anchors {
       right: parent.right
       top: parent.top

@@ -28,6 +28,7 @@
         <file>qml/popups/AVMEPopupQRCode.qml</file>
 
         <file>qml/panels/AVMEPanelAccountSelect.qml</file>
+        <file>qml/panels/AVMEPanelOverview.qml</file>
 
         <file>qml/components/AVMEButton.qml</file>
         <file>qml/components/AVMEInput.qml</file>
@@ -45,6 +46,8 @@
         <file>qml/components/AVMETokenList.qml</file>
         <file>qml/components/AVMETokenGrid.qml</file>
         <file>qml/components/AVMEAccountQRCode.qml</file>
+        <file>qml/components/AVMEOverviewBalance.qml</file>
+        <file>qml/components/AVMEAssetList.qml</file>
 
         <file>img/Welcome_Logo_AVME.png</file>
 
