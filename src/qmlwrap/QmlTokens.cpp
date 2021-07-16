@@ -23,6 +23,30 @@ QVariantList QmlSystem::getARC20Tokens() {
   return ret;
 }
 
+void QmlSystem::downloadARC20TokenImage(QString address) {
+  std::string addressStr = address.toStdString();
+  boost::filesystem::path filePath = Utils::walletFolderPath.string()
+    + "/wallet/c-avax/tokens/icons";
+  if (!boost::filesystem::exists(filePath)) {
+    boost::filesystem::create_directories(filePath);
+  }
+  API::httpGetFile(
+    "raw.githubusercontent.com",
+    "/ava-labs/bridge-tokens/main/avalanche-tokens/" + addressStr + "/logo.png",
+    filePath.string() + "/" + addressStr + ".png"
+  );
+}
+
+QString QmlSystem::getARC20TokenImage(QString address) {
+  boost::filesystem::path filePath = Utils::walletFolderPath.string()
+    + "/wallet/c-avax/tokens/icons/" + address.toStdString() + ".png";
+  if (boost::filesystem::exists(filePath)) {
+    return QString::fromStdString(filePath.string());
+  } else {
+    return "";
+  }
+}
+
 bool QmlSystem::addARC20Token(
   QString address, QString symbol, QString name, int decimals, QString avaxPairContract
 ) {
@@ -36,7 +60,6 @@ bool QmlSystem::removeARC20Token(QString address) {
   return QmlSystem::w.removeARC20Token(address.toStdString());
 }
 
-// TODO: image
 QVariantMap QmlSystem::getAVMEData() {
   QVariantMap tokenObj;
   tokenObj.insert("address", QString::fromStdString(Pangolin::contracts["AVME"]));
@@ -51,7 +74,6 @@ bool QmlSystem::ARC20TokenExists(QString address) {
   return API::isARC20Token(address.toStdString());
 }
 
-// TODO: image
 QVariantMap QmlSystem::getARC20TokenData(QString address) {
   ARC20Token token = API::getARC20TokenData(address.toStdString());
   QVariantMap tokenObj;

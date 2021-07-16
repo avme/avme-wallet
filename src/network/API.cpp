@@ -82,6 +82,74 @@ std::string API::httpGetRequest(std::string reqBody) {
   return result;
 }
 
+void API::httpGetFile(std::string host, std::string get, std::string target) {
+  using boost::asio::ip::tcp;
+  namespace ssl = boost::asio::ssl;
+  typedef ssl::stream<tcp::socket> ssl_socket;
+  boost::system::error_code error;
+
+  // Create a context that uses the default paths for finding CA certificates.
+  ssl::context ctx(ssl::context::sslv23);
+  ctx.set_default_verify_paths();
+
+  // Open a socket and connect it to the remote host.
+  boost::asio::io_context io_context;
+  ssl_socket socket(io_context, ctx);
+  tcp::resolver resolver(io_context);
+  tcp::resolver::query query(host, API::port);
+  boost::asio::connect(socket.lowest_layer(), resolver.resolve(query));
+  socket.lowest_layer().set_option(tcp::no_delay(true));
+
+  // Perform SSL handshake and verify the remote host's certificate.
+  socket.set_verify_mode(ssl::verify_none);
+  socket.handshake(ssl_socket::client);
+
+  // Make and send the request.
+  boost::asio::streambuf request;
+  std::ostream request_stream(&request);
+  request_stream << "GET " << get << " HTTP/1.0\r\n";
+  request_stream << "Host: " << host << "\r\n";
+  request_stream << "Accept: */*\r\n";
+  request_stream << "Connection: close\r\n\r\n";
+  //std::string out {buffers_begin(request.data()), buffers_end(request.data())};
+  //std::cout << out << std::endl;
+  boost::asio::write(socket, request);
+
+  // Read the response status line.
+  boost::asio::streambuf response;
+  boost::asio::read_until(socket, response, "\r\n");
+  //std::string out2 {buffers_begin(response.data()), buffers_end(response.data())};
+  //std::cout << out2 << std::endl;
+
+  // Check that response is OK.
+  std::istream response_stream(&response);
+  std::string http_version;
+  response_stream >> http_version;
+  unsigned int status_code;
+  response_stream >> status_code;
+  if (status_code == 404) { return; } // Abort if file is not found
+  std::string status_message;
+  std::getline(response_stream, status_message);
+  //std::cout << host << get << std::endl;
+  //std::cout << status_code << status_message << std::endl;
+
+  // Read and process the response headers, which are terminated by a blank line.
+  boost::asio::read_until(socket, response, "\r\n\r\n");
+  std::string header;
+  while (std::getline(response_stream, header) && header != "\r") {}
+
+  // Write whatever content we already have to output, and read until EOF,
+  // writing data to output as we go.
+  std::ofstream outFile(target, std::ofstream::out | std::ofstream::binary);
+  if (response.size() > 0) {
+    outFile << &response;
+  }
+  while (boost::asio::read(socket, response, boost::asio::transfer_at_least(1), error)) {
+    outFile << &response;
+  }
+  outFile.close();
+}
+
 std::string API::buildRequest(Request req) {
   json_spirit::mObject reqObj;
   json_spirit::mArray paramsArr;

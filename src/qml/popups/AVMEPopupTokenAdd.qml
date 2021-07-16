@@ -108,6 +108,7 @@ AVMEPopup {
             tokenData.address, tokenData.symbol, tokenData.name,
             tokenData.decimals, tokenData.avaxPairContract
           )
+          QmlSystem.downloadARC20TokenImage(tokenData.address)
           addTokenPopup.clean()
           addTokenPopup.close()
           reloadTokens()  // Parent call

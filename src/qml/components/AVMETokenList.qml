@@ -1,6 +1,6 @@
 /* Copyright (c) 2020-2021 AVME Developers
-	 Distributed under the MIT/X11 software license, see the accompanying
-	 file LICENSE or http://www.opensource.org/licenses/mit-license.php. */
+   Distributed under the MIT/X11 software license, see the accompanying
+   file LICENSE or http://www.opensource.org/licenses/mit-license.php. */
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
@@ -32,8 +32,8 @@ ListView {
     height: parent.parent.height * 0.15
     color: "#201E2B"
     z: 2
-    anchors.horizontalCenter: parent.horizontalCenter 
-      Rectangle {
+    anchors.horizontalCenter: parent.horizontalCenter
+    Rectangle {
       id: listHeaderBg
       width: parent.width
       height: parent.height * 0.666
@@ -49,23 +49,23 @@ ListView {
           id: headerSymbol
           anchors.verticalCenter: parent.verticalCenter
           width: (parent.width * 0.2)
+          x: 48
           color: "white"
           font.pixelSize: 14.0
           padding: 5
           text: "Symbol"
         }
-    
         Text {
           id: headerName
           anchors.verticalCenter: parent.verticalCenter
           width: (parent.width * 0.8)
-          x: headerSymbol.width
+          x: headerSymbol.width + headerSymbol.x
           color: "white"
           font.pixelSize: 14.0
           padding: 5
           text: "Name"
         }
-        // TODO: image and balance(?)
+        // TODO: balance(?)
       }
     }
   }
@@ -96,10 +96,29 @@ ListView {
         radius: 5
         height: parent.height
         width: parent.width * 0.9
+        Image {
+          id: delegateImage
+          anchors.verticalCenter: parent.verticalCenter
+          width: 48
+          height: 48
+          antialiasing: true
+          smooth: true
+          fillMode: Image.PreserveAspectFit
+          source: {
+            var avme = QmlSystem.getAVMEData()
+            if (itemAddress == avme.address) {
+              source: "qrc:/img/avme_logo.png"
+            } else {
+              var img = QmlSystem.getARC20TokenImage(itemAddress)
+              source: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
+            }
+          }
+        }
         Text {
           id: delegateSymbol
           anchors.verticalCenter: parent.verticalCenter
           width: (parent.width * 0.2)
+          x: delegateImage.width
           color: "white"
           font.pixelSize: 14.0
           padding: 5
@@ -110,14 +129,14 @@ ListView {
           id: delegateName
           anchors.verticalCenter: parent.verticalCenter
           width: (parent.width * 0.8)
-          x: delegateSymbol.width
+          x: delegateImage.width + delegateSymbol.width
           color: "white"
           font.pixelSize: 14.0
           padding: 5
           elide: Text.ElideRight
           text: itemName
         }
-        // TODO: image and balance(?)
+        // TODO: balance(?)
       }
       MouseArea {
         id: delegateMouseArea

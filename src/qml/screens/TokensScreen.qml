@@ -100,7 +100,27 @@ Item {
       anchors.centerIn: parent
       spacing: 20
 
-      // TODO: image
+      Image {
+        id: tokenImage
+        height: 128
+        anchors.horizontalCenter: parent.horizontalCenter
+        antialiasing: true
+        smooth: true
+        fillMode: Image.PreserveAspectFit
+        source: {
+          if (selectedToken != null) {
+            var avme = QmlSystem.getAVMEData()
+            if (selectedToken.itemAddress == avme.address) {
+              source: "qrc:/img/avme_logo.png"
+            } else {
+              var img = QmlSystem.getARC20TokenImage(selectedToken.itemAddress)
+              source: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
+            }
+          } else {
+            source: ""
+          }
+        }
+      }
       Text {
         id: tokenSymbol
         anchors.horizontalCenter: parent.horizontalCenter

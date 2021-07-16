@@ -24,7 +24,6 @@ GridView {
     id: gridDelegate
     Item {
       id: gridItem
-      // TODO: image
       readonly property string itemAddress: address
       readonly property string itemSymbol: symbol
       readonly property string itemName: name
@@ -43,7 +42,16 @@ GridView {
           anchors.horizontalCenter: parent.horizontalCenter
           antialiasing: true
           smooth: true
-          source: ""  // TODO: image
+          fillMode: Image.PreserveAspectFit
+          source: {
+            var avme = QmlSystem.getAVMEData()
+            if (itemAddress == avme.address) {
+              source: "qrc:/img/avme_logo.png"
+            } else {
+              var img = QmlSystem.getARC20TokenImage(itemAddress)
+              source: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
+            }
+          }
         }
         Text {
           id: tokenSymbol

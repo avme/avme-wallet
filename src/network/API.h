@@ -45,6 +45,12 @@ class API {
     static std::string httpGetRequest(std::string reqBody);
 
     /**
+     * Downloads a file from a given host URL and a given path (e.g. "/file.txt")
+     * to a given target path in the filesystem.
+     */
+    static void httpGetFile(std::string host, std::string get, std::string target);
+
+    /**
      * Build one or multiple JSON requests to be sent to the API, respectively.
      * Returns the streamlined JSON string.
      */
