@@ -23,10 +23,10 @@ int main(int argc, char *argv[]) {
   engine.rootContext()->setContextProperty("QmlSystem", &qmlsystem);
 
   // Set the app's text font and icon
-  QFontDatabase::addApplicationFont(":/fonts/RobotoMono-Bold.ttf");
-  QFontDatabase::addApplicationFont(":/fonts/RobotoMono-Italic.ttf");
-  QFontDatabase::addApplicationFont(":/fonts/RobotoMono-Regular.ttf");
-  QFont font("Roboto Mono");
+  QFontDatabase::addApplicationFont(":/fonts/IBMPlexMono-Bold.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/IBMPlexMono-Italic.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/IBMPlexMono-Regular.ttf");
+  QFont font("IBM Plex Mono");
   font.setStyleHint(QFont::Monospace);
   QApplication::setFont(font);
   app.setWindowIcon(QIcon(":/img/avme_logo.png"));

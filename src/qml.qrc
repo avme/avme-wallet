@@ -98,9 +98,8 @@
         <file>img/icons/qrcode.png</file>
         <file>img/icons/qrcodeSelect.png</file>
 
-
-        <file>fonts/RobotoMono-Bold.ttf</file>
-        <file>fonts/RobotoMono-Italic.ttf</file>
-        <file>fonts/RobotoMono-Regular.ttf</file>
+        <file>fonts/IBMPlexMono-Bold.ttf</file>
+        <file>fonts/IBMPlexMono-Italic.ttf</file>
+        <file>fonts/IBMPlexMono-Regular.ttf</file>
     </qresource>
 </RCC>
