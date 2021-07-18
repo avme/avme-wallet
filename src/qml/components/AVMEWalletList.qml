@@ -51,12 +51,12 @@ ListView {
         property string backgroundGradientStart
         property string backgroundGradientEnd
         property var gradientStart: [
-          "#9300F5", "#5600F5", "#9300F5", "#E44A41",
-          "#00B5F4", "#DB4285", "#00F4DB", "#BB3FCE"
+          "#7100D3", "#3400D3", "#7100D3", "#C22820",
+          "#0093D2", "#B92063", "#00D2B9", "#991DAC"
         ]
         property var gradientEnd: [
-          "#3BC5F4", "#3BC5F4", "#483BF4", "#5239F2",
-          "#00CC61", "#DB4285", "#5E34BA", "#007CF7"
+          "#19A3D2", "#19A3D2", "#2619D2", "#3017D0",
+          "#00AA40", "#B92063", "#3C1298", "#005AD5"
         ]
 
         Component.onCompleted: {

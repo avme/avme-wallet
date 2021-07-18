@@ -88,35 +88,38 @@ Item {
 
   Timer { id: ledgerRetryTimer; interval: 250; onTriggered: parent.checkLedger() }
 
-  // Header logo
-  Image {
-    id: logo
-    width: 256
-    anchors {
-      top: parent.top
-      horizontalCenter: parent.horizontalCenter
-      topMargin: 30
-    }
-    antialiasing: true
-    smooth: true
-    source: "qrc:/img/Welcome_Logo_AVME.png"
-    fillMode: Image.PreserveAspectFit
-  }
-
   AVMEPanel {
     id: startPanel
     title: "Welcome to the AVME Wallet"
     width: (parent.width * 0.4)
-    height: (parent.height * 0.5)
+    height: (parent.height * 0.7)
     anchors {
       horizontalCenter: parent.horizontalCenter
       verticalCenter: parent.verticalCenter
     }
 
+    Image {
+      id: logo
+      width: 256
+      anchors {
+        top: parent.top
+        horizontalCenter: parent.horizontalCenter
+        topMargin: 80
+      }
+      antialiasing: true
+      smooth: true
+      source: "qrc:/img/Welcome_Logo_AVME.png"
+      fillMode: Image.PreserveAspectFit
+    }
+
     Column {
       width: (parent.width * 0.9)
       height: (parent.height * 0.5)
-      anchors.centerIn: parent
+      anchors {
+        top: logo.bottom
+        horizontalCenter: parent.horizontalCenter
+        topMargin: 40
+      }
       spacing: 20
 
       AVMEButton {
