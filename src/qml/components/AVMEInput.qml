@@ -43,8 +43,9 @@ TextField {
     color: inputLabelColor
     anchors.bottom: input.top
     anchors.left: input.left
-    anchors.bottomMargin: 5
+    anchors.bottomMargin: 2
     font.pixelSize: 12.0
+    font.capitalization: Font.AllUppercase
     text: label
   }
 

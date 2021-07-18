@@ -9,8 +9,8 @@ Button {
   id: btn
   property color btnColor: "#AD00FA"
   property color btnTextColor: "#FFFFFF"
-  property color btnPressedColor: "#BB4AE3"
-  property color btnHoveredColor: "#7E18A6"
+  property color btnPressedColor: "#CC5BF4"
+  property color btnHoveredColor: "#6D0795"
   property color btnDisabledColor: "#1D1827"
   property color btnBorderColor: "#AD00FA"
 
@@ -43,7 +43,9 @@ Button {
     horizontalAlignment: Text.AlignHCenter
     verticalAlignment: Text.AlignVCenter
     color: btnTextColor
-    font.pixelSize: 14.0
+    font.pixelSize: 12.0
+    font.bold: true
+    font.capitalization: Font.AllUppercase
     elide: Text.ElideRight
   }
 }

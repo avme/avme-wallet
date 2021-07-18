@@ -24,7 +24,8 @@ Rectangle {
       margins: 20
     }
     color: "#FFFFFF"
-    font.pixelSize: 16.0
+    font.pixelSize: 18.0
+    font.bold: true
     font.capitalization: Font.AllUppercase
     text: "Title"
 

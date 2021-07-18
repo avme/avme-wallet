@@ -57,9 +57,9 @@ Item {
         font.pixelSize: 18.0
         horizontalAlignment: Text.AlignHCenter
         textFormat: Text.RichText
-        text: "Copyright (c) 2020-2021 AVME Developers<br>
-        Distributed under the MIT/X11 software license,<br>
-        see the accompanying file LICENSE or<br>
+        text: "COPYRIGHT © 2020-2021 AVME DEVELOPERS<br>
+        DISTRIBUTED UNDER THE MIT/X11 SOFTWARE LICENSE<br>
+        SEE THE ACCOMPANYING LICENSE FILE OR<br>
         <a style=\"text-decoration-color: #368097\" href=\"http://www.opensource.org/licenses/mit-license.php\">
         http://www.opensource.org/licenses/mit-license.php</a>."
         onLinkActivated: Qt.openUrlExternally(link)
