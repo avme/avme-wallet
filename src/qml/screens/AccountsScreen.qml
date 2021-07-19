@@ -28,6 +28,18 @@ Item {
       importAccountPopup.close()
       accountFailPopup.open()
     }
+    function onAccountAVAXBalancesUpdated(address, avaxBalance, avaxValue) {
+      for (var i = 0; i < accountSelectPanel.accountModel.count; i++) {
+        if (accountSelectPanel.accountModel.get(i).address == address) {
+          accountSelectPanel.accountModel.setProperty(
+            i, "coinAmount", avaxBalance + " AVAX"
+          )
+          accountSelectPanel.accountModel.setProperty(
+            i, "coinValue", "$" + avaxValue
+          )
+        }
+      }
+    }
   }
 
   Component.onCompleted: {
@@ -37,25 +49,15 @@ Item {
   function fetchAccounts() {
     accountSelectPanel.accountModel.clear()
     var accList = QmlSystem.listAccounts()
+    var addList = []
     for (var i = 0; i < accList.length; i++) {
-      accountSelectPanel.accountModel.set(i, JSON.parse(accList[i]))
+      var accJson = JSON.parse(accList[i])
+      accountSelectPanel.accountModel.set(i, accJson)
+      accountSelectPanel.accountModel.setProperty(i, "coinAmount", "Loading...")
+      accountSelectPanel.accountModel.setProperty(i, "coinValue", "Loading...")
+      addList.push(accJson.address)
     }
-    fetchBalances()
-  }
-
-  function fetchBalances() {
-    var addressList = []
-    for (var i = 0; i < accountSelectPanel.accountModel.count; i++) {
-      addressList.push(accountSelectPanel.accountModel.get(i).address)
-    }
-    var balancesList = QmlSystem.getAVAXBalances(addressList)
-    for (var i = 0; i < accountSelectPanel.accountModel.count; i++) {
-      accountSelectPanel.accountModel.setProperty(i, "coinAmount", balancesList[i] + " AVAX")
-    }
-    var valuesList = QmlSystem.getAVAXValues(balancesList)
-    for (var i = 0; i < accountSelectPanel.accountModel.count; i++) {
-      accountSelectPanel.accountModel.setProperty(i, "coinValue", "$" + valuesList[i])
-    }
+    QmlSystem.getAllAVAXBalances(addList)
   }
 
   function useSeed() {
@@ -86,7 +88,7 @@ Item {
     btnErase.onClicked: confirmErasePopup.open()
   }
 
-  // Popups for waiting for a new Account to be created/imported, respectively
+  // Popups for waiting for Accounts to be created/imported/erased, respectively
   // TODO: unify those into one
   AVMEPopup {
     id: createAccountPopup

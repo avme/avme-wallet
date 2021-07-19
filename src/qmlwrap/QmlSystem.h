@@ -61,6 +61,7 @@ class QmlSystem : public QObject {
     void ledgerAccountGenerated(QVariantMap data);
     void accountCreated(QVariantMap data);
     void accountCreationFailed();
+    void accountAVAXBalancesUpdated(QString address, QString avaxBalance, QString avaxValue);
 
     // Overview screen signals
     void accountBalancesUpdated(QVariantMap data);
@@ -226,14 +227,11 @@ class QmlSystem : public QObject {
     // Get an Account's private keys
     Q_INVOKABLE QString getPrivateKeys(QString account, QString pass);
 
-    // TODO: use signals in those four functions
-    // Get the AVAX balance for one or multiple Accounts, respectively.
-    Q_INVOKABLE QString getAVAXBalance(QString address);
-    Q_INVOKABLE QStringList getAVAXBalances(QStringList addresses);
-
-    // Get the AVAX price (in USD, 2 decimals) for one or multiple amounts, respectively.
-    Q_INVOKABLE QString getAVAXValue(QString amount);
-    Q_INVOKABLE QStringList getAVAXValues(QStringList amounts);
+    // Get the AVAX balance and price (in USD, 2 decimals) for one or multiple
+    // Accounts, respectively.
+    // Emits accountAVAXBalancesUpdated() for each Account
+    Q_INVOKABLE void getAccountAVAXBalances(QString address);
+    Q_INVOKABLE void getAllAVAXBalances(QStringList addresses);
 
     // (Re)Load the token and tx history databases, respectively.
     Q_INVOKABLE bool loadTokenDB();

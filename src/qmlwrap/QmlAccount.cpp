@@ -133,45 +133,42 @@ QString QmlSystem::getPrivateKeys(QString account, QString pass) {
   return QString::fromStdString(key);
 }
 
-QString QmlSystem::getAVAXBalance(QString address) {
-  return QString::fromStdString(API::getAVAXBalance(address.toStdString()));
-}
-
-QStringList QmlSystem::getAVAXBalances(QStringList addresses) {
-  QStringList ret;
-  std::vector<std::string> addressesVec, balancesVec;
-  for (int i = 0; i < addresses.size(); i++) {
-    addressesVec.push_back(addresses.at(i).toStdString());
-  }
-  balancesVec = API::getAVAXBalances(addressesVec);
-  for (std::string balance : balancesVec) {
-    ret << QString::fromStdString(balance);
-  }
-  return ret;
-}
-
-QString QmlSystem::getAVAXValue(QString amount) {
-  bigfloat avaxUSDPrice = boost::lexical_cast<bigfloat>(Graph::getAVAXPriceUSD());
-  bigfloat avaxBal = boost::lexical_cast<bigfloat>(amount.toStdString());
-  bigfloat avaxUSDValueFloat = avaxUSDPrice * avaxBal;
-  std::stringstream ss;
-  ss << std::setprecision(2) << std::fixed << avaxUSDValueFloat;
-  std::string avaxUSDValue = ss.str();
-  return QString::fromStdString(avaxUSDValue);
-}
-
-QStringList QmlSystem::getAVAXValues(QStringList amounts) {
-  QStringList ret;
-  bigfloat avaxUSDPrice = boost::lexical_cast<bigfloat>(Graph::getAVAXPriceUSD());
-  for (int i = 0; i < amounts.size(); i++) {
-    bigfloat avaxBal = boost::lexical_cast<bigfloat>(amounts.at(i).toStdString());
-    bigfloat avaxUSDValueFloat = avaxUSDPrice * avaxBal;
+void QmlSystem::getAccountAVAXBalances(QString address) {
+  QtConcurrent::run([=](){
+    std::string avaxBal = API::getAVAXBalance(address.toStdString());
+    bigfloat avaxUSDPrice = boost::lexical_cast<bigfloat>(Graph::getAVAXPriceUSD());
+    bigfloat avaxBalFloat = boost::lexical_cast<bigfloat>(avaxBal);
+    bigfloat avaxUSDValueFloat = avaxUSDPrice * avaxBalFloat;
     std::stringstream ss;
     ss << std::setprecision(2) << std::fixed << avaxUSDValueFloat;
     std::string avaxUSDValue = ss.str();
-    ret << QString::fromStdString(avaxUSDValue);
-  }
-  return ret;
+    emit accountAVAXBalancesUpdated(
+      address, QString::fromStdString(avaxBal), QString::fromStdString(avaxUSDValue)
+    );
+  });
+}
+
+void QmlSystem::getAllAVAXBalances(QStringList addresses) {
+  QtConcurrent::run([=](){
+    std::vector<std::string> addressesVec, balancesVec;
+    for (int i = 0; i < addresses.size(); i++) {
+      addressesVec.push_back(addresses.at(i).toStdString());
+    }
+    balancesVec = API::getAVAXBalances(addressesVec);
+    bigfloat avaxUSDPrice = boost::lexical_cast<bigfloat>(Graph::getAVAXPriceUSD());
+    for (int i = 0; i < balancesVec.size(); i++) {
+      bigfloat avaxBalFloat = boost::lexical_cast<bigfloat>(balancesVec[i]);
+      bigfloat avaxUSDValueFloat = avaxUSDPrice * avaxBalFloat;
+      std::stringstream ss;
+      ss << std::setprecision(2) << std::fixed << avaxUSDValueFloat;
+      std::string avaxUSDValue = ss.str();
+      emit accountAVAXBalancesUpdated(
+        QString::fromStdString(addressesVec[i]),
+        QString::fromStdString(balancesVec[i]),
+        QString::fromStdString(avaxUSDValue)
+      );
+    }
+  });
 }
 
 bool QmlSystem::loadTokenDB() {
