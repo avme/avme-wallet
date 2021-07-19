@@ -26,6 +26,7 @@ Item {
     for (var i = 0; i < tokens.length; i++) {
       tokenList.append(tokens[i]);
     }
+    tokenList.sortBySymbol()
   }
 
   AVMEAccountHeader {
@@ -43,7 +44,6 @@ Item {
       margins: 10
     }
 
-    // TODO: sort alphabetically by ticker (currently it's sorted by address)
     AVMETokenGrid {
       id: tokenGrid
       width: (parent.width * 0.9)
@@ -54,7 +54,16 @@ Item {
         topMargin: 80
         bottomMargin: 20
       }
-      model: ListModel { id: tokenList }
+      model: ListModel {
+        id: tokenList
+        function sortBySymbol() {
+          for (var i = 0; i < count; i++) {
+            for (var j = 0; j < i; j++) {
+              if (get(i).symbol < get(j).symbol) { move(i, j, 1) }
+            }
+          }
+        }
+      }
     }
 
     Row {
@@ -184,7 +193,6 @@ Item {
     icon: "qrc:/img/warn.png"
     info: "Are you sure you want to remove this token?"
     yesBtn.onClicked: {
-      // TODO: error handling and info popup(?)
       QmlSystem.removeARC20Token(selectedToken.itemAddress);
       confirmEraseTokenPopup.close()
       reloadTokens()

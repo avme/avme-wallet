@@ -57,6 +57,7 @@ Item {
       accountSelectPanel.accountModel.setProperty(i, "coinValue", "Loading...")
       addList.push(accJson.address)
     }
+    accountSelectPanel.accountModel.sortByAddress()
     QmlSystem.getAllAVAXBalances(addList)
   }
 

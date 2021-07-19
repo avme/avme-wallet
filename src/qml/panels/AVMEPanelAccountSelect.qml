@@ -30,7 +30,16 @@ AVMEPanel {
     AVMEWalletList {
       id: walletList
       anchors.fill: parent
-      model: ListModel { id: walletModel }
+      model: ListModel {
+        id: walletModel
+        function sortByAddress() {
+          for (var i = 0; i < count; i++) {
+            for (var j = 0; j < i; j++) {
+              if (get(i).address < get(j).address) { move(i, j, 1) }
+            }
+          }
+        }
+      }
     }
   }
 

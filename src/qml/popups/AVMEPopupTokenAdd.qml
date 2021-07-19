@@ -103,7 +103,6 @@ AVMEPopup {
           tokenData.symbol = symbolInput.text
           tokenData.name = nameInput.text
           tokenData.decimals = decimalsInput.text
-          // TODO: error handling and info popup(?)
           QmlSystem.addARC20Token(
             tokenData.address, tokenData.symbol, tokenData.name,
             tokenData.decimals, tokenData.avaxPairContract
