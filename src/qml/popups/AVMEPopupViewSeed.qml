@@ -10,7 +10,7 @@ import "qrc:/qml/components"
 AVMEPopup {
   id: viewSeedPopup
   widthPct: 0.7
-  heightPct: 0.5
+  heightPct: 0.6
   property string newWalletPass
   property string newWalletSeed
   property color popupBgColor: "#1C2029"
@@ -38,100 +38,97 @@ AVMEPopup {
     btnCopy.enabled = false
   }
 
-  Text {
-    id: warningText
-    anchors {
-      top: parent.top
-      horizontalCenter: parent.horizontalCenter
-      topMargin: 20
-    }
-    horizontalAlignment: Text.AlignHCenter
-    color: "#FFFFFF"
-    font.pixelSize: 14.0
-    text: "Please authenticate to view the seed for this Wallet.<br>"
-    + "<br><br><b>YOU ARE FULLY RESPONSIBLE FOR GUARDING YOUR SEED."
-    + "<br>KEEP IT AWAY FROM PRYING EYES AND DO NOT SHARE IT WITH ANYONE."
-    + "<br>WE ARE NOT HELD LIABLE FOR ANY POTENTIAL FUND LOSSES CAUSED BY THIS."
-    + "<br>PROCEED AT YOUR OWN RISK.</b>"
-  }
+  Column {
+    id: items
+    width: parent.width
+    anchors.verticalCenter: parent.verticalCenter
+    spacing: 30
 
-  AVMEInput {
-    id: passInput
-    anchors {
-      top: warningText.bottom
-      horizontalCenter: parent.horizontalCenter
-      margins: 20
-    }
-    width: parent.width / 3
-    echoMode: TextInput.Password
-    passwordCharacter: "*"
-    label: "Passphrase"
-    placeholder: "Your Wallet's passphrase"
-  }
-
-  TextArea {
-    id: seedText
-    property alias timer: seedTextTimer
-    width: parent.width - 100
-    height: 50
-    anchors {
-      top: passInput.bottom
-      left: parent.left
-      right: parent.right
-      bottom: btnRow.top
-      margins: 20
-    }
-    horizontalAlignment: Text.AlignHCenter
-    verticalAlignment: Text.AlignVCenter
-    readOnly: true
-    selectByMouse: true
-    selectionColor: popupSelectionColor
-    color: "#FFFFFF"
-    font.pixelSize: 14.0
-    background: Rectangle {
-      width: parent.width
-      height: parent.height
-      color: popupSeedBgColor
-      radius: 10
-    }
-    Timer { id: seedTextTimer; interval: 2000; onTriggered: seedText.text = "" }
-  }
-
-  Row {
-    id: btnRow
-    anchors {
-      bottom: parent.bottom
-      horizontalCenter: parent.horizontalCenter
-      bottomMargin: 20
-    }
-    spacing: 20
-
-    AVMEButton {
-      id: btnClose
-      text: "Close"
-      onClicked: {
-        viewSeedPopup.clean()
-        viewSeedPopup.close()
+    // Enter/Numpad enter key override
+    Keys.onPressed: {
+      if ((event.key == Qt.Key_Return) || (event.key == Qt.Key_Enter)) {
+        if (btnShow.enabled) { btnShow.checkPass() }
       }
     }
-    AVMEButton {
-      id: btnCopy
-      text: (!copyTimer.running) ? "Copy" : "Copied!"
-      Timer { id: copyTimer; interval: 2000 }
-      onClicked: {
-        QmlSystem.copyToClipboard(seedText.text)
-        copyTimer.start()
-      }
+
+    Text {
+      id: warningText
+      anchors.horizontalCenter: parent.horizontalCenter
+      horizontalAlignment: Text.AlignHCenter
+      color: "#FFFFFF"
+      font.pixelSize: 14.0
+      text: "Please authenticate to view the seed for this Wallet.<br>"
+      + "<br><br><b>YOU ARE FULLY RESPONSIBLE FOR GUARDING YOUR SEED."
+      + "<br>KEEP IT AWAY FROM PRYING EYES AND DO NOT SHARE IT WITH ANYONE."
+      + "<br>WE ARE NOT HELD LIABLE FOR ANY POTENTIAL FUND LOSSES CAUSED BY THIS."
+      + "<br>PROCEED AT YOUR OWN RISK.</b>"
     }
-    AVMEButton {
-      id: btnShow
-      text: "Show"
-      enabled: (passInput.text !== "")
-      onClicked: {
-        if (QmlSystem.checkWalletPass(passInput.text)) {
-          showSeed()
-        } else {
-          showErrorMsg()
+
+    AVMEInput {
+      id: passInput
+      anchors.horizontalCenter: parent.horizontalCenter
+      width: parent.width / 3
+      echoMode: TextInput.Password
+      passwordCharacter: "*"
+      label: "Passphrase"
+      placeholder: "Your Wallet's passphrase"
+    }
+
+    TextArea {
+      id: seedText
+      property alias timer: seedTextTimer
+      width: (parent.width * 0.9)
+      height: 50
+      anchors.horizontalCenter: parent.horizontalCenter
+      horizontalAlignment: Text.AlignHCenter
+      verticalAlignment: Text.AlignVCenter
+      readOnly: true
+      selectByMouse: true
+      selectionColor: popupSelectionColor
+      color: "#FFFFFF"
+      font.pixelSize: 14.0
+      background: Rectangle {
+        width: parent.width
+        height: parent.height
+        color: popupSeedBgColor
+        radius: 10
+      }
+      Timer { id: seedTextTimer; interval: 2000; onTriggered: seedText.text = "" }
+    }
+
+    Row {
+      id: btnRow
+      anchors.horizontalCenter: parent.horizontalCenter
+      spacing: 10
+
+      AVMEButton {
+        id: btnClose
+        text: "Close"
+        onClicked: {
+          viewSeedPopup.clean()
+          viewSeedPopup.close()
+        }
+      }
+      AVMEButton {
+        id: btnCopy
+        text: (!copyTimer.running) ? "Copy" : "Copied!"
+        Timer { id: copyTimer; interval: 2000 }
+        onClicked: {
+          QmlSystem.copyToClipboard(seedText.text)
+          copyTimer.start()
+        }
+      }
+      AVMEButton {
+        id: btnShow
+        text: "Show"
+        enabled: (passInput.text !== "")
+        onClicked: checkPass()
+        function checkPass() {
+          if (QmlSystem.checkWalletPass(passInput.text)) {
+            showSeed()
+          } else {
+            showErrorMsg()
+          }
         }
       }
     }

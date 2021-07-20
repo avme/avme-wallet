@@ -194,7 +194,6 @@ Address Wallet::userToAddress(std::string const& input) {
   return Address();
 }
 
-// TODO: fix this, it's broken for some reason
 Secret Wallet::getSecret(std::string const& address, std::string pass) {
   if (h128 u = fromUUID(address)) {
     return Secret(this->km.store().secret(u, [&](){ return pass; }, false));
@@ -210,7 +209,7 @@ Secret Wallet::getSecret(std::string const& address, std::string pass) {
       }
     }
   }
-  if (a && accountExists(boost::lexical_cast<std::string>(a))) {
+  if (a && accountExists("0x" + boost::lexical_cast<std::string>(a))) {
     return this->km.secret(a, [&](){ return pass; }, false);
   } else {
     std::cerr << "Bad file, UUID or address: " << address << std::endl;
