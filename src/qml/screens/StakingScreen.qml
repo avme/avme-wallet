@@ -80,9 +80,7 @@ Item {
     id: reloadLiquidityDataTimer
     interval: 5000
     repeat: true
-    onTriggered: {
-      QmlSystem.updateLiquidityData("AVAX", "Token")  // TODO: token name here
-    }
+    onTriggered: QmlSystem.updateLiquidityData("AVAX", "AVME")
   }
 
   Component.onCompleted: {
@@ -165,7 +163,7 @@ Item {
         color: "#FFFFFF"
         font.bold: true
         font.pixelSize: 24.0
-        text: (isStaking) ? "Stake LP" : "Unstake LP"
+        text: ((isStaking) ? "Stake" : "Unstake") + " AVAX/AVME LP"
       }
 
       Image {
@@ -275,25 +273,21 @@ Item {
         id: classicLPReturns
         width: parent.width
         height: classicLPReturnsText.height
-        anchors {
-          horizontalCenter: parent.horizontalCenter
-          left: parent.left
-          leftMargin: 10
-        }
+        anchors.horizontalCenter: parent.horizontalCenter
         color: "#3E4653"
         radius: 10
         Text {
           id: classicLPReturnsText
-          width: parent.width
-          verticalAlignment: Text.AlignVCenter
+          anchors.horizontalCenter: parent.horizontalCenter
+          horizontalAlignment: Text.AlignHCenter
           color: "#FFFFFF"
           text: "Locked LP Estimates:"
             + "<br><b>" + QmlSystem.weiToFixedPoint(
               (("AVAX" == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves), 18
             ) + " AVAX"
             + "<br>" + QmlSystem.weiToFixedPoint(
-              (("Token" == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves), 18
-            ) + " " + "Token" + "</b>"  // TODO: token name AND decimals here
+              (("AVME" == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves), 18
+            ) + " AVME" + "</b>"
         }
       }
     }
@@ -349,7 +343,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.pixelSize: 18.0
-        text: "Unharvested " + "Token" + ":<br><b>" + reward + "</b>" // TODO: token name here
+        text: "Unharvested AVME:<br><b>" + reward + "</b>"
       }
 
       AVMEButton {
@@ -359,13 +353,11 @@ Item {
         enabled: {
           var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
           enabled: (
-            reward != "" && !QmlSystem.balanceIsZero(reward, 18) && // TODO: token decimals here
+            reward != "" && !QmlSystem.balanceIsZero(reward, 18) &&
             !QmlSystem.balanceIsZero(acc.balanceLPLocked, 18)
           )
         }
-        text: (reward != "")
-          ? "Harvest " + "Token" + " & Unstake LP"
-          : "Querying reward..."  // TODO: token name here
+        text: (reward != "") ? "Harvest AVME & Unstake LP" : "Querying reward..."
         onClicked: {
           QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
           QmlSystem.operationOverride("Exit Staking", "", "", "")
@@ -376,10 +368,8 @@ Item {
         id: btnHarvest
         width: (parent.width * 0.75)
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (reward != "" && !QmlSystem.balanceIsZero(reward, 18)) // TODO: token decimals here
-        text: (reward != "")
-          ? "Harvest " + "Token"
-          : "Querying reward..."  // TODO: token name here
+        enabled: (reward != "" && !QmlSystem.balanceIsZero(reward, 18))
+        text: (reward != "") ? "Harvest AVME" : "Querying reward..."
         onClicked: {
           QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
           QmlSystem.operationOverride("Harvest AVME", "", "", "")
@@ -421,7 +411,7 @@ Item {
         color: "#FFFFFF"
         font.bold: true
         font.pixelSize: 24.0
-        text: (isyyCompound) ? "Stake LP" : "Unstake LP"
+        text: ((isyyCompound) ? "Stake" : "Unstake") + " AVAX/AVME LP"
       }
 
       Image {
@@ -533,24 +523,20 @@ Item {
         width: parent.width
         height: compoundLPReturnsText.height
         anchors.horizontalCenter: parent.horizontalCenter
-        color: "#3e4653"
+        color: "#3E4653"
         radius: 10
         Text {
           id: compoundLPReturnsText
-          width: parent.width
-          anchors {
-            left: parent.left
-            leftMargin: 10
-          }
-          verticalAlignment: Text.AlignVCenter
+          anchors.horizontalCenter: parent.horizontalCenter
+          horizontalAlignment: Text.AlignHCenter
           color: "#FFFFFF"
           text: "Locked LP Estimates:"
             + "<br><b>" + QmlSystem.weiToFixedPoint(
               (("AVAX" == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves), 18
             ) + " AVAX"
             + "<br>" + QmlSystem.weiToFixedPoint(
-              (("Token" == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves), 18
-            ) + " " + "Token" + "</b>"  // TODO: token name AND decimals here
+              (("AVME" == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves), 18
+            ) + " AVME" + "</b>"
         }
       }
     }
@@ -606,17 +592,15 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.pixelSize: 18.0
-        text: "Unreinvested " + "Token" + ":<br><b>" + reinvestreward + "</b>"  // TODO: token name here
+        text: "Unreinvested AVME:<br><b>" + reinvestreward + "</b>"
       }
 
       AVMEButton {
         id: btnreinvest
         width: (parent.width * 0.75)
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (reinvestreward != "" && !QmlSystem.balanceIsZero(reinvestreward, 18)) // TODO: token decimals here
-        text: (reinvestreward != "")
-          ? "Reinvest " + "Token"
-          : "Querying Reinvest..."  // TODO: token name here
+        enabled: (reinvestreward != "" && !QmlSystem.balanceIsZero(reinvestreward, 18))
+        text: (reinvestreward != "") ? "Reinvest AVME" : "Querying Reinvest..."
         onClicked: {
           QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
           QmlSystem.operationOverride("Reinvest AVME", "", "", "")
@@ -630,7 +614,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.pixelSize: 18.0
-        text: "Reinvest Reward " + "Token" + ":<br><b>" + (reinvestreward * 0.05) + "</b>"  // TODO: token name here
+        text: "Reinvest Reward AVME:<br><b>" + (reinvestreward * 0.05) + "</b>"
       }
     }
 
