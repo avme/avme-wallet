@@ -175,6 +175,30 @@ Item {
         text: "<b>AVAX Pair Contract:</b><br>"
         + ((selectedToken != null) ? selectedToken.itemAVAXPairContract : "")
       }
+      AVMEButton {
+        id: btnCopyToken
+        width: (parent.width * 0.9)
+        anchors.horizontalCenter: parent.horizontalCenter
+        enabled: (!tokenTimer.running)
+        text: (!tokenTimer.running) ? "Copy Token Address" : "Copied!"
+        onClicked: {
+          QmlSystem.copyToClipboard(selectedToken.itemAddress)
+          tokenTimer.start()
+        }
+        Timer { id: tokenTimer; interval: 2000 }
+      }
+      AVMEButton {
+        id: btnCopyPair
+        width: (parent.width * 0.9)
+        anchors.horizontalCenter: parent.horizontalCenter
+        enabled: (!pairTimer.running)
+        text: (!pairTimer.running) ? "Copy Pair Address" : "Copied!"
+        onClicked: {
+          QmlSystem.copyToClipboard(selectedToken.itemAVAXPairContract)
+          pairTimer.start()
+        }
+        Timer { id: pairTimer; interval: 2000 }
+      }
     }
   }
 
