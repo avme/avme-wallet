@@ -99,7 +99,7 @@ Rectangle {
       text: "Send"
       onClicked: {
         itemSelection.y = items.y + y
-        changeScreen("Transaction")
+        changeScreen("Send")
       }
     }
 

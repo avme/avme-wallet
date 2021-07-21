@@ -5,10 +5,10 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 /**
- * List of ARC20 tokens to be selected.
+ * List of coins to be selected.
  */
 ListView {
-  id: tokenSelectList
+  id: coinSelectList
   property color listHighlightColor: "#9400F6"
   property color listBgColor: "#16141F"
   property color listHoverColor: "#2E2C3D"
@@ -28,15 +28,13 @@ ListView {
   boundsBehavior: Flickable.StopAtBounds
 
   delegate: Component {
-    id: tokenSelectDelegate
+    id: coinSelectDelegate
     Item {
-      id: tokenSelectItem
-      readonly property string itemAddress: address
+      id: coinSelectItem
       readonly property string itemSymbol: symbol
       readonly property string itemName: name
       readonly property string itemDecimals: decimals
-      readonly property string itemAVAXPairContract: avaxPairContract
-      width: tokenSelectList.width
+      width: coinSelectList.width
       height: 50
 
       Rectangle {
@@ -44,7 +42,7 @@ ListView {
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
         color: {
-          if (tokenSelectList.currentIndex == index) {
+          if (coinSelectList.currentIndex == index) {
             color: "#9400F6"
           } else {
             color: "#2E2C3D"
@@ -61,15 +59,7 @@ ListView {
           antialiasing: true
           smooth: true
           fillMode: Image.PreserveAspectFit
-          source: {
-            var avme = QmlSystem.getAVMEData()
-            if (itemAddress == avme.address) {
-              source: "qrc:/img/avme_logo.png"
-            } else {
-              var img = QmlSystem.getARC20TokenImage(itemAddress)
-              source: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
-            }
-          }
+          source: (itemSymbol == "AVAX") ? "qrc:/img/avax_logo.png" : "qrc:/img/unknown_token.png"
         }
         Text {
           id: delegateSymbol
@@ -88,7 +78,7 @@ ListView {
         id: delegateMouseArea
         anchors.fill: parent
         onClicked: {
-          tokenSelectList.currentIndex = index
+          coinSelectList.currentIndex = index
           grabFocus()
         }
       }

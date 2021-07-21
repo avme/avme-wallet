@@ -101,7 +101,7 @@ Rectangle {
         width: parent.width * 0.45
         height: parent.height * 0.95
         spacing: parent.height * 0.02
-        AVMEAssetList {
+        AVMEOverviewAssetList {
             model: assetModel
             width: parent.width
             height: parent.height
