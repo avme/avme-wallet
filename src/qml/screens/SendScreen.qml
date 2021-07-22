@@ -190,7 +190,6 @@ Item {
         Image {
           id: assetImage
           anchors.verticalCenter: parent.verticalCenter
-          width: 48
           height: 48
           antialiasing: true
           smooth: true
