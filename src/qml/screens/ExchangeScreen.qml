@@ -3,32 +3,17 @@
    file LICENSE or http://www.opensource.org/licenses/mit-license.php. */
 import QtQuick 2.9
 import QtQuick.Controls 2.2
-import Qt.labs.platform 1.0
 
 import "qrc:/qml/components"
+import "qrc:/qml/popups"
 
 // Screen for exchanging coins/tokens in a given Account
 Item {
   id: exchangeScreen
-  property bool coinToToken: true
-  property bool addToPool: true
   property string allowance
-  property string addAllowance
-  property string removeAllowance
-  property string lowerToken
-  property string lowerReserves
-  property string higherToken
-  property string higherReserves
   property string swapEstimate
   property double swapImpact
-  property string liquidity
-  property string userLowerReserves
-  property string userHigherReserves
-  property string userLPSharePercentage
-  property string removeLowerEstimate
-  property string removeHigherEstimate
-  property string removeLPEstimate
-
+  /*
   Connections {
     target: QmlSystem
     function onAllowancesUpdated(
@@ -162,18 +147,18 @@ Item {
     reloadExchangeDataTimer.start()
     reloadLiquidityDataTimer.start()
   }
+  */
 
   AVMEAccountHeader {
     id: accountHeader
   }
 
-  // Panel for the exchange operations
   AVMEPanel {
     id: exchangePanel
-    width: (parent.width * 0.5) - (anchors.margins * 2)
+    width: (parent.width * 0.5)
     anchors {
       top: accountHeader.bottom
-      left: parent.left
+      horizontalCenter: parent.horizontalCenter
       bottom: parent.bottom
       margins: 10
     }
@@ -198,9 +183,9 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
-        font.bold: true
-        font.pixelSize: 24.0
-        text: (coinToToken) ? "Swap AVAX -> AVME" : "Swap AVME -> AVAX"
+        font.pixelSize: 14.0
+        text: "You will swap from <b>" + fromAssetPopup.chosenAssetSymbol
+        + "</b> to <b>" + toAssetPopup.chosenAssetSymbol + "</b>"
       }
 
       Row {
@@ -210,14 +195,24 @@ Item {
         anchors.margins: 20
 
         Image {
-          id: coinLogo
-          width: 64
-          height: 64
+          id: fromLogo
+          height: 48
           antialiasing: true
           smooth: true
+          anchors.verticalCenter: parent.verticalCenter
           anchors.margins: 20
-          source: (coinToToken) ? "qrc:/img/avax_logo.png" : "qrc:/img/avme_logo.png"
           fillMode: Image.PreserveAspectFit
+          source: {
+            var avme = QmlSystem.getAVMEData()
+            if (fromAssetPopup.chosenAssetSymbol == "AVAX") {
+              source: "qrc:/img/avax_logo.png"
+            } else if (fromAssetPopup.chosenAssetAddress == avme.address) {
+              source: "qrc:/img/avme_logo.png"
+            } else {
+              var img = QmlSystem.getARC20TokenImage(fromAssetPopup.chosenAssetAddress)
+              source: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
+            }
+          }
         }
 
         Text {
@@ -229,28 +224,42 @@ Item {
         }
 
         Image {
-          id: tokenLogo
-          width: 64
-          height: 64
+          id: toLogo
+          height: 48
           antialiasing: true
           smooth: true
+          anchors.verticalCenter: parent.verticalCenter
           anchors.margins: 20
-          source: (!coinToToken) ? "qrc:/img/avax_logo.png" : "qrc:/img/avme_logo.png"
           fillMode: Image.PreserveAspectFit
+          source: {
+            var avme = QmlSystem.getAVMEData()
+            if (toAssetPopup.chosenAssetSymbol == "AVAX") {
+              source: "qrc:/img/avax_logo.png"
+            } else if (toAssetPopup.chosenAssetAddress == avme.address) {
+              source: "qrc:/img/avme_logo.png"
+            } else {
+              var img = QmlSystem.getARC20TokenImage(toAssetPopup.chosenAssetAddress)
+              source: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
+            }
+          }
         }
       }
 
-      AVMEButton {
-        id: swapSwitchBtn
-        width: (exchangeDetailsColumn.width * 0.5)
+      Row {
         anchors.horizontalCenter: parent.horizontalCenter
-        text: "Switch Order"
-        onClicked: {
-          coinToToken = !coinToToken
-          swapInput.text = ""
-          swapEstimate = ""
-          swapImpact = 0
-          calculateExchangeAmountOut()
+        spacing: 10
+
+        AVMEButton {
+          id: btnChangeFrom
+          width: (parent.parent.width * 0.5) - (parent.spacing / 2)
+          text: "Change From Asset"
+          onClicked: fromAssetPopup.open()
+        }
+        AVMEButton {
+          id: btnChangeTo
+          width: (parent.parent.width * 0.5) - (parent.spacing / 2)
+          text: "Change To Asset"
+          onClicked: toAssetPopup.open()
         }
       }
 
@@ -259,14 +268,12 @@ Item {
         width: (parent.width * 0.8)
         enabled: (allowance != "")
         validator: RegExpValidator {
-          regExp: (coinToToken)
-            ? QmlSystem.createTxRegExp(18)
-            : QmlSystem.createTxRegExp(18) // TODO: token decimals here
+          regExp: QmlSystem.createTxRegExp(fromAssetPopup.chosenAssetDecimals)
         }
-        label: "Amount of " + (
-          (coinToToken) ? "AVAX" : "Token" // TODO: token name here
-        ) + " to swap"
+        label: fromAssetPopup.chosenAssetSymbol + " Amount"
         placeholder: "Fixed point amount (e.g. 0.5)"
+        /*
+        // TODO: this
         onTextEdited: {
           calculateExchangeAmountOut()
           if (coinToToken) {
@@ -281,16 +288,19 @@ Item {
             )
           }
         }
+        */
 
         AVMEButton {
-          id: swapAllBtn
-          width: (exchangeDetailsColumn.width * 0.2) - anchors.leftMargin
+          id: swapMaxBtn
+          width: (parent.parent.width * 0.2) - anchors.leftMargin
           anchors {
             left: parent.right
             leftMargin: 10
           }
           text: "Max"
           enabled: (allowance != "")
+          /*
+          // TODO: this
           onClicked: {
             var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
             swapInput.text = (coinToToken)
@@ -309,6 +319,7 @@ Item {
               )
             }
           }
+          */
         }
       }
 
@@ -319,12 +330,19 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
         color: "#FFFFFF"
-        font.pixelSize: 18.0
-        text: "Estimated return in " + (
-          (!coinToToken) ? "AVAX" : "Token" // TODO: token name here
-        ) + ":<br><b>" + swapEstimate + "</b>"
+        font.pixelSize: 14.0
+        text: "Estimated " + toAssetPopup.chosenAssetSymbol + " return:"
+        + "<br><b>" + swapEstimate + "</b> "
       }
 
+      /**
+       * Impact color metrics are as follows:
+       * White  = 0%
+       * Green  = 0.01~5%
+       * Yellow = 5.01~7.5%
+       * Orange = 7.51~10%
+       * Red    = 10.01+%
+       */
       Text {
         id: swapImpactText
         width: parent.width
@@ -332,19 +350,19 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         elide: Text.ElideRight
         color: {
-          if (swapImpact == 0.0) {  // 0% -> white
+          if (swapImpact == 0.0) {
             color: "#FFFFFF"
-          } else if (swapImpact > 0.0 && swapImpact <= 5.0) {  // 0.01-5% -> green
+          } else if (swapImpact > 0.0 && swapImpact <= 5.0) {
             color: "#44FF44"
-          } else if (swapImpact > 5.0 && swapImpact <= 7.5) {  // 5.01-7.5% -> yellow
+          } else if (swapImpact > 5.0 && swapImpact <= 7.5) {
             color: "#FFFF44"
-          } else if (swapImpact > 7.5 && swapImpact <= 10.0) { // 7.51%-10.0% -> orange
+          } else if (swapImpact > 7.5 && swapImpact <= 10.0) {
             color: "#FF8844"
-          } else if (swapImpact > 10.0) {  // 10.1+% -> red
+          } else if (swapImpact > 10.0) {
             color: "#FF4444"
           }
         }
-        font.pixelSize: 18.0
+        font.pixelSize: 14.0
         text: "Price impact: <b>" + swapImpact + "%</b>"
       }
 
@@ -355,7 +373,7 @@ Item {
         text: "Ignore price impact"
         contentItem: Text {
           text: parent.text
-          font.pointSize: 14.0
+          font.pixelSize: 14.0
           color: parent.checked ? "#FFFFFF" : "#888888"
           verticalAlignment: Text.AlignVCenter
           leftPadding: parent.indicator.width + parent.spacing
@@ -364,7 +382,7 @@ Item {
 
       AVMEButton {
         id: swapBtn
-        width: (parent.width * 0.5)
+        width: parent.width
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: allowance != "" && (
           !QmlSystem.isApproved(swapInput.text, allowance) || swapInput.acceptableInput
@@ -379,6 +397,8 @@ Item {
             text: "Approve"
           }
         }
+        /*
+        // TODO: this
         onClicked: {
           if (!QmlSystem.isApproved(swapInput.text, allowance)) {
             QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
@@ -410,279 +430,15 @@ Item {
             }
           }
         }
+        */
       }
     }
   }
 
-  // Panel for the liquidity operations
-  AVMEPanel {
-    id: liquidityPanel
-    width: (parent.width * 0.5) - (anchors.margins * 2)
-    anchors {
-      top: accountHeader.bottom
-      right: parent.right
-      bottom: parent.bottom
-      margins: 10
-    }
-    title: "Liquidity Pool Details"
-
-    Column {
-      id: liquidityDetailsColumn
-      anchors {
-        top: parent.top
-        bottom: parent.bottom
-        left: parent.left
-        right: parent.right
-        topMargin: 80
-        bottomMargin: 20
-        leftMargin: 40
-        rightMargin: 40
-      }
-      spacing: 30
-
-      Text {
-        id: liquidityHeader
-        anchors.horizontalCenter: parent.horizontalCenter
-        horizontalAlignment: Text.AlignHCenter
-        color: "#FFFFFF"
-        font.bold: true
-        font.pixelSize: 24.0
-        text: (addToPool) ? "Add Liquidity" : "Remove Liquidity"
-      }
-
-      Row {
-        id: liquidityLogos
-        height: 64
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.margins: 20
-
-        Image {
-          id: liquidityCoinLogo
-          width: 64
-          height: 64
-          antialiasing: true
-          smooth: true
-          anchors.margins: 20
-          source: "qrc:/img/avax_logo.png"
-        }
-
-        Text {
-          id: liquidityCoinArrow
-          anchors.verticalCenter: parent.verticalCenter
-          color: "#FFFFFF"
-          font.pixelSize: 48.0
-          text: (addToPool) ? " -> " : " <- "
-        }
-
-        Image {
-          id: liquidityLPLogo
-          width: 64
-          height: 64
-          antialiasing: true
-          smooth: true
-          anchors.margins: 20
-          source: "qrc:/img/pangolin.png"
-        }
-
-        Text {
-          id: liquidityTokenArrow
-          anchors.verticalCenter: parent.verticalCenter
-          color: "#FFFFFF"
-          font.pixelSize: 48.0
-          text: (addToPool) ? " <- " : " -> "
-        }
-
-        Image {
-          id: liquidityTokenLogo
-          width: 64
-          height: 64
-          antialiasing: true
-          smooth: true
-          anchors.margins: 20
-          source: "qrc:/img/avme_logo.png"
-        }
-      }
-
-      AVMEButton {
-        id: liquiditySwitchBtn
-        width: parent.width * 0.5
-        anchors.horizontalCenter: parent.horizontalCenter
-        text: (addToPool) ? "Switch to Remove" : "Switch to Add"
-        onClicked: addToPool = !addToPool
-      }
-
-      AVMEInput {
-        id: liquidityCoinInput
-        width: parent.width
-        enabled: (addAllowance != "")
-        visible: (addToPool)
-        validator: RegExpValidator { regExp: QmlSystem.createTxRegExp(18) }
-        label: "Amount of AVAX to add"
-        placeholder: "Fixed point amount (e.g. 0.5)"
-        onTextEdited: calculateAddLiquidityAmount(true)
-      }
-
-      AVMEInput {
-        id: liquidityTokenInput
-        width: parent.width
-        enabled: (addAllowance != "")
-        visible: (addToPool)
-        validator: RegExpValidator { regExp: QmlSystem.createTxRegExp(18) } // TODO: token decimals here
-        label: "Amount of " + "Token" + " to add" // TODO: token name here
-        placeholder: "Fixed point amount (e.g. 0.5)"
-        onTextEdited: calculateAddLiquidityAmount(false)
-      }
-
-      AVMEButton {
-        id: liquidityMaxAddBtn
-        width: (parent.width * 0.5)
-        anchors.horizontalCenter: parent.horizontalCenter
-        text: "Max Amounts"
-        enabled: (addAllowance != "")
-        visible: (addToPool)
-        onClicked: calculateMaxAddLiquidityAmount()
-      }
-
-      Slider {
-        id: liquidityLPSlider
-        visible: (!addToPool)
-        from: 0
-        value: 0
-        to: 100
-        stepSize: 1
-        snapMode: Slider.SnapAlways
-        width: parent.width * 0.8
-        anchors.left: parent.left
-        anchors.margins: 20
-        enabled: (removeAllowance != "" && lowerReserves != "" && higherReserves != "" && liquidity != "")
-        onMoved: {
-          var estimates = QmlSystem.calculateRemoveLiquidityAmount(
-            userLowerReserves, userHigherReserves, value
-          )
-          removeLowerEstimate = estimates.lower
-          removeHigherEstimate = estimates.higher
-          removeLPEstimate = estimates.lp
-        }
-        Text {
-          id: sliderText
-          anchors.left: parent.right
-          anchors.leftMargin: 10
-          anchors.verticalCenter: parent.verticalCenter
-          color: (parent.enabled) ? "#FFFFFF" : "#444444"
-          font.pixelSize: 24.0
-          text: parent.value + "%"
-        }
-      }
-
-      // TODO: "advanced" mode (manual input instead of a slider)
-      Row {
-        id: sliderBtnRow
-        visible: (!addToPool)
-        anchors.horizontalCenter: parent.horizontalCenter
-        spacing: 20
-
-        AVMEButton {
-          id: sliderBtn25
-          enabled: (removeAllowance != "" && lowerReserves != "" && higherReserves != "" && liquidity != "")
-          width: (liquidityDetailsColumn.width * 0.2)
-          text: "25%"
-          onClicked: { liquidityLPSlider.value = 25; liquidityLPSlider.moved(); }
-        }
-
-        AVMEButton {
-          id: sliderBtn50
-          enabled: (removeAllowance != "" && lowerReserves != "" && higherReserves != "" && liquidity != "")
-          width: (liquidityDetailsColumn.width * 0.2)
-          text: "50%"
-          onClicked: { liquidityLPSlider.value = 50; liquidityLPSlider.moved(); }
-        }
-
-        AVMEButton {
-          id: sliderBtn75
-          enabled: (removeAllowance != "" && lowerReserves != "" && higherReserves != "" && liquidity != "")
-          width: (liquidityDetailsColumn.width * 0.2)
-          text: "75%"
-          onClicked: { liquidityLPSlider.value = 75; liquidityLPSlider.moved(); }
-        }
-
-        AVMEButton {
-          id: sliderBtn100
-          enabled: (removeAllowance != "" && lowerReserves != "" && higherReserves != "" && liquidity != "")
-          width: (liquidityDetailsColumn.width * 0.2)
-          text: "100%"
-          onClicked: { liquidityLPSlider.value = 100; liquidityLPSlider.moved(); }
-        }
-      }
-
-      Text {
-        id: removeEstimate
-        visible: (!addToPool)
-        anchors.horizontalCenter: parent.horizontalCenter
-        horizontalAlignment: Text.AlignHCenter
-        color: "#FFFFFF"
-        font.pixelSize: 18.0
-        text: "Estimated returns:"
-        + "<br><b>" + ((removeLPEstimate) ? removeLPEstimate : "0") + " LP"
-        + "<br>" + QmlSystem.weiToFixedPoint(
-          (("AVAX" == lowerToken) ? removeLowerEstimate : removeHigherEstimate), 18
-        ) + " AVAX"
-        + "<br>" + QmlSystem.weiToFixedPoint(
-          (("Token" == lowerToken) ? removeLowerEstimate : removeHigherEstimate), 18
-        ) + " " + "Token" + "</b>"  // TODO: token name AND decimals here
-      }
-
-      AVMEButton {
-        id: liquidityBtn
-        width: (parent.width * 0.5)
-        anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (addToPool && addAllowance != "" && (
-          !QmlSystem.isApproved(liquidityTokenInput.text, addAllowance) ||
-          (liquidityCoinInput.acceptableInput && liquidityTokenInput.acceptableInput)
-        )) || (!addToPool && removeAllowance != "" && (
-          !QmlSystem.isApproved(liquidityTokenInput.text, removeAllowance) ||
-          liquidityLPSlider.value > 0
-        ))
-        text: {
-          if (addAllowance == "" || removeAllowance == "") {
-            text: "Checking approval..."
-          } else if (addToPool && QmlSystem.isApproved(liquidityTokenInput.text, addAllowance)) {
-            text: "Add to the pool"
-          } else if (!addToPool && QmlSystem.isApproved(liquidityTokenInput.text, removeAllowance)) {
-            text: "Remove from the pool"
-          } else {
-            text: "Approve"
-          }
-        }
-        onClicked: {
-          var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
-          if (addToPool) {
-            if (!QmlSystem.isApproved(liquidityTokenInput.text, addAllowance)) {
-              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              QmlSystem.operationOverride("Approve Exchange", "", "", "")
-            } else if (
-              QmlSystem.hasInsufficientFunds(
-                "Coin", QmlSystem.getRealMaxAVAXAmount("250000", QmlSystem.getAutomaticFee()),
-                liquidityCoinInput.text
-              ) || QmlSystem.hasInsufficientFunds("Token", acc.balanceAVME, liquidityTokenInput.text)
-            ) {
-              fundsPopup.open()
-            } else {
-              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              QmlSystem.operationOverride("Add Liquidity", liquidityCoinInput.text, liquidityTokenInput.text, "")
-            }
-          } else {
-            if (!QmlSystem.isApproved(removeLPEstimate, removeAllowance)) {
-              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              QmlSystem.operationOverride("Approve Liquidity", "", "", "")
-            } else {
-              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              QmlSystem.operationOverride("Remove Liquidity", "", "", removeLPEstimate)
-            }
-          }
-        }
-      }
-    }
-  }
+  // Popups for choosing the asset going "in"/"out".
+  // Defaults to "from AVAX to AVME".
+  AVMEPopupAssetSelect { id: fromAssetPopup; defaultToAVME: false }
+  AVMEPopupAssetSelect { id: toAssetPopup; defaultToAVME: true }
 
   // Popup for insufficient funds
   AVMEPopupInfo {

@@ -10,7 +10,7 @@ import "qrc:/qml/components"
 Rectangle {
   id: sideMenu
   property string currentScreen
-  width: 240
+  width: 200
   height: parent.height
   color: "#1C2029"
 
@@ -41,7 +41,7 @@ Rectangle {
 
   Image {
     id: logo
-    height: 60
+    height: 50
     anchors {
       top: parent.top
       horizontalCenter: parent.horizontalCenter
@@ -57,7 +57,7 @@ Rectangle {
     id: items
     width: parent.width
     anchors.verticalCenter: parent.verticalCenter
-    spacing: 20
+    spacing: 10
 
     AVMEButton {
       id: itemOverview
@@ -107,10 +107,21 @@ Rectangle {
       id: itemExchange
       width: (parent.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
-      text: "Exchange/Liquidity"
+      text: "Exchange"
       onClicked: {
         itemSelection.y = items.y + y
         changeScreen("Exchange")
+      }
+    }
+
+    AVMEButton {
+      id: itemLiquidity
+      width: (parent.width * 0.8)
+      anchors.horizontalCenter: parent.horizontalCenter
+      text: "Liquidity"
+      onClicked: {
+        itemSelection.y = items.y + y
+        changeScreen("Liquidity")
       }
     }
 
@@ -141,7 +152,7 @@ Rectangle {
       horizontalCenter: parent.horizontalCenter
       bottomMargin: 20
     }
-    spacing: 40
+    spacing: 20
 
     Image {
       id: itemSettings

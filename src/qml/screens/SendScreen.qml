@@ -172,7 +172,7 @@ Item {
         leftMargin: 40
         rightMargin: 40
       }
-      spacing: 40
+      spacing: 30
 
       Row {
         id: assetRow
@@ -185,7 +185,7 @@ Item {
           verticalAlignment: Text.AlignVCenter
           color: "#FFFFFF"
           font.pixelSize: 14.0
-          text: "You will send:"
+          text: "You will send"
         }
         Image {
           id: assetImage
@@ -405,7 +405,6 @@ Item {
     id: chooseAssetPopup
     onAboutToHide: updateTxCost()
   }
-
 
   // Popup for confirming transaction
   // TODO: rewrite this into a generic popup

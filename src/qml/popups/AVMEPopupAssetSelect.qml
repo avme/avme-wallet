@@ -7,14 +7,15 @@ import QtQuick.Controls 2.2
 import "qrc:/qml/components"
 
 /**
- * Popup for choosing an ARC20 token to be operated on.
- * The selected token's info is stored in the popup itself, so it's possible to
+ * Popup for choosing an asset (coin/token) to be operated on.
+ * The selected asset's info is stored in the popup itself, so it's possible to
  * have multiple instances of the popup at the same time in the same screen.
  */
 AVMEPopup {
   id: chooseAssetPopup
   widthPct: 0.4
   heightPct: 0.95
+  property bool defaultToAVME: false
   property alias selectedCoin: coinSelectList.currentItem
   property alias selectedToken: tokenSelectList.currentItem
   property string chosenAssetAddress
@@ -23,14 +24,7 @@ AVMEPopup {
   property int chosenAssetDecimals
   property string chosenAssetAVAXPairContract
 
-  // Always default to AVAX when popup is ready
   Component.onCompleted: {
-    coinSelectList.grabFocus()
-    coinSelectList.currentIndex = 0
-    chooseAsset()
-  }
-
-  onAboutToShow: {
     // AVME is hardcoded here and always shows up
     tokenList.clear()
     var avme = QmlSystem.getAVMEData()
@@ -42,8 +36,14 @@ AVMEPopup {
     }
     coinList.sortBySymbol()
     tokenList.sortBySymbol()
-    coinSelectList.grabFocus()
-    coinSelectList.currentIndex = 0
+    if (defaultToAVME) {
+      tokenSelectList.grabFocus()
+      tokenSelectList.currentIndex = 0
+    } else {
+      coinSelectList.grabFocus()
+      coinSelectList.currentIndex = 0
+    }
+    chooseAsset()
   }
 
   function chooseAsset() {
