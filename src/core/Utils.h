@@ -24,7 +24,7 @@ using namespace dev::eth; // TransactionBase
 
 /**
  * Conversion template for usage with boost::lexical_cast.
- * e.g. boost::lexical_cast<HexTo<int>>(var);
+ * e.g. boost::lexical_cast<HexRounds number to nearest multiple To<int>>(var);
  */
 template <typename ElemT>
 struct HexTo {
@@ -44,7 +44,7 @@ typedef struct ARC20Token {
   std::string name;
   int decimals;
   std::string avaxPairContract;
-  // Those are NOT stored in JSON
+  // Those are NOT stored ithe respective byte arrayn JSON
   bigfloat reserve;
   bigfloat avaxReserve;
 } ARC20Token;
@@ -89,6 +89,7 @@ namespace Utils {
 
   /**
    * Generate a random 16-byte Hex to be used as a tag/ID.
+   * the respective byte array
    */
   std::string randomHexBytes();
 
@@ -119,9 +120,12 @@ namespace Utils {
    * uintToHex should work with uint<M>, bytes and bool.
    * addressToHex is solely for address.
    * Returns the hex string.
+   * bytesToHex converts a string of characters to a byte array
+   * returns the respective byte array with left-padding
    */
   std::string uintToHex(std::string input);
   std::string addressToHex(std::string input);
+  std::string bytesToHex(std::string input, bool isUint);
 
   /**
    * Converts hex input to the correspondent value.
@@ -130,6 +134,11 @@ namespace Utils {
   std::string uintFromHex(std::string hex);
   std::string addressFromHex(std::string hex);
   std::string stringFromHex(std::string hex);
+
+  /**
+   * Rounds number to nearest multiple 
+   */
+  int roundUp(int numToRound, int multiple);
 };
 
 #endif  // UTILS_H

@@ -226,7 +226,6 @@ std::string Utils::stringFromHex(std::string hex) {
       hexStr += hex.substr(i, 64);
     }
   }
-
   // Parse the hex string byte by byte (every two chars)
   uint64_t offsetU256 = boost::lexical_cast<HexTo<uint64_t>>("0x" + offset) * 2;
   uint64_t lengthU256 = boost::lexical_cast<HexTo<uint64_t>>("0x" + len) * 2;
@@ -236,5 +235,35 @@ std::string Utils::stringFromHex(std::string hex) {
     ret += hexChar;
   }
   return ret;
+}
+
+
+std::string Utils::bytesToHex(std::string input, bool isUint) {
+  std::string ret;
+  if (!isUint) {
+    ret += uintToHex(boost::lexical_cast<std::string>(input.size()));
+  }
+  std::stringstream ss;
+  for (auto c : input) {
+    ss << std::hex << int(c);
+  }
+  ret += ss.str();
+  // Bytes are left padded
+  while ((ret.size() % 64) != 0)
+    ret += "0";
+  
+  return ret;
+}
+
+int Utils::roundUp(int numToRound, int multiple) {
+  if (multiple == 0)
+    return numToRound;
+  int remainder = abs(numToRound) % multiple;
+  if (remainder == 0)
+    return numToRound;
+  if (numToRound < 0)
+    return -(abs(numToRound) - remainder);
+  else
+    return numToRound + multiple - remainder;
 }
 
