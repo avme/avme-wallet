@@ -6,6 +6,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <lib/json_spirit/JsonSpiritHeaders.h>
+#include <lib/devcore/SHA3.h>
 
 #include "JSON.h"
 #include "Utils.h"
@@ -18,4 +19,4 @@ namespace ABI {
 
 };
 
-#endif ABI_H
+#endif // ABI_H

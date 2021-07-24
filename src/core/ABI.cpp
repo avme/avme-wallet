@@ -48,6 +48,9 @@ namespace ABI {
         // Read types and arguments from JSON.
         json_spirit::mValue json_arguments = JSON::objectItem(json, "args");
         json_spirit::mValue json_types = JSON::objectItem(json, "types");
+        std::string functionNameABI = dev::toHex(dev::sha3(JSON::objectItem(json, "function").get_str(), false)).substr(0,8);
+        ret += functionNameABI;
+
         int array_start = 32 * json_arguments.get_array().size();
         for (int i = 0; i < json_arguments.get_array().size(); ++i) {
           std::vector<std::string> arguments;
