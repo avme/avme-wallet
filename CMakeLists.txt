@@ -141,6 +141,14 @@ add_custom_command(
           -o "${CMAKE_SOURCE_DIR}/build/moc_QmlSystem.cpp"
   DEPENDS always_rebuild
 )
+
+add_custom_command(
+  OUTPUT "${CMAKE_SOURCE_DIR}/build/moc_QmlApi.cpp"
+  COMMAND "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/native/bin/moc"
+          "${CMAKE_SOURCE_DIR}/src/qmlwrap/QmlApi.h"
+          -o "${CMAKE_SOURCE_DIR}/build/moc_QmlApi.cpp"
+  DEPENDS always_rebuild
+)
 add_custom_command(
   OUTPUT "${CMAKE_SOURCE_DIR}/build/qml.cpp"
   COMMAND "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/native/bin/rcc"
@@ -160,7 +168,7 @@ if("${TOOLCHAIN_PREFIX}" STREQUAL "x86_64-w64-mingw32")
   add_executable(avme-gui WIN32
     src/version.h src/main-gui.h src/main-gui.cpp
     ${AVME_QMLWRAP_HEADERS} ${AVME_QMLWRAP_SOURCES}
-    build/moc_QmlSystem.cpp build/qml.cpp
+    build/moc_QmlSystem.cpp build/qml.cpp build/moc_QmlApi.cpp
     ${APP_ICON_RESOURCE_WINDOWS}
   )
 else()
