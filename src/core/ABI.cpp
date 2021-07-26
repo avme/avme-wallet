@@ -22,7 +22,7 @@ std::string ABI::encodeABI(std::string type, std::vector<std::string> arguments,
     } else if (type == "string") { // bytes and strings are encoded in the same way
       ret += Utils::bytesToHex(argument, false);
     } else if (type == "bool") {
-      ret += (argument == "true") ? Utils::uintToHex("1") : Utils::uintToHex("0");
+      ret += Utils::uintToHex(argument);
     }
   }
   return ret;
@@ -30,7 +30,7 @@ std::string ABI::encodeABI(std::string type, std::vector<std::string> arguments,
 
 std::string ABI::encodeABIfromJson(std::string jsonStr) {
   json abiJson;
-  std::string ret;
+  std::string ret = "0x";
   std::string arrays;
 
   try {
@@ -48,14 +48,16 @@ std::string ABI::encodeABIfromJson(std::string jsonStr) {
       bool isArray = false;
       std::string type = json_types[i].get<std::string>();
 
-      // Remove any remaining quote marks
       if (json_arguments[i].is_array()) {
         isArray = true;
+        // [] needs to be removed from type string.
+        boost::replace_all(type, "]", "");
+        boost::replace_all(type, "[", "");
         for (auto element : json_arguments[i]) {
-          arguments.push_back(element.get<std::string>());
+          arguments.push_back(Utils::jsonToStr(element));
         }
       } else {
-        arguments.push_back(json_arguments[i].get<std::string>());
+        arguments.push_back(Utils::jsonToStr(json_arguments[i]));
       }
 
       /**

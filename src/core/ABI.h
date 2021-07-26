@@ -26,15 +26,13 @@ namespace ABI {
 
   /**
    * Encode a whole ABI call from a single JSON string.
-   * Be aware that "args" should be always provided with string type
-   * regardless of type, it will be properly treated later.
    * Example:
    *   {
    *     "function": "GithubWikiTest(uint256,uint256[],bytes10[],bytes)",
    *     "args": [
    *       291,
-   *       ["1110,"1929"],
-   *       ["1234567890","1234567890"],
+   *       [1110,1929],
+   *       [1234567890,1234567890],
    *       "Hello, world!"
    *     ],
    *     "types": [
@@ -45,7 +43,7 @@ namespace ABI {
    *     ]
    *   }
    * will return
-   *   8f008840 // Function Name
+   *   0x8f008840 // Function Name
    *   0000000000000000000000000000000000000000000000000000000000000123 // uint*
    *   0000000000000000000000000000000000000000000000000000000000000080 // uint*[]    start
    *   00000000000000000000000000000000000000000000000000000000000000e0 // bytes*[]   start
