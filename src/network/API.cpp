@@ -197,7 +197,7 @@ std::string API::getAVAXBalance(std::string address) {
 std::vector<std::string> API::getAVAXBalances(std::vector<std::string> addresses) {
   std::vector<Request> reqs;
   std::vector<std::string> ret;
-  for (int i = 0; i < addresses.size(); i++) {
+  for (uint64_t i = 0; i < addresses.size(); i++) {
     json params = json::array();
     params.push_back(addresses[i]);
     params.push_back("latest");
