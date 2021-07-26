@@ -18,13 +18,17 @@
 #include <core/Utils.h>
 #include <network/Pangolin.h>
 #include <network/root_certificates.hpp>
+#include <lib/nlohmann_json/json.hpp>
+
+// For convenience.
+using json = nlohmann::json;
 
 // Struct for a JSON request.
 typedef struct Request {
-  int id;
+  uint64_t id;
   std::string jsonrpc;
   std::string method;
-  std::vector<std::string> params;
+  json params;
 } Request;
 
 /**

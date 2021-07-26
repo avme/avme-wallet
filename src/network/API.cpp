@@ -151,14 +151,13 @@ void API::httpGetFile(std::string host, std::string get, std::string target) {
 }
 
 std::string API::buildRequest(Request req) {
-  json_spirit::mObject reqObj;
-  json_spirit::mArray paramsArr;
-  for (std::string param : req.params) { paramsArr.push_back(param); }
-  reqObj["id"] = req.id;
-  reqObj["jsonrpc"] = req.jsonrpc;
-  reqObj["method"] = req.method;
-  reqObj["params"] = paramsArr;
-  std::string reqStr = json_spirit::write_string(json_spirit::mValue(reqObj), false);
+  json request;
+
+  request["id"] = req.id;
+  request["jsonrpc"] = req.jsonrpc;
+  request["method"] = req.method;
+  request["params"] = req.params;
+  std::string reqStr = request.dump();
   int pos;
   while ((pos = reqStr.find("\\")) != std::string::npos) { reqStr.erase(pos, 1); }
   while ((pos = reqStr.find("\"{")) != std::string::npos) { reqStr.erase(pos, 1); }
@@ -167,22 +166,17 @@ std::string API::buildRequest(Request req) {
 }
 
 std::string API::buildMultiRequest(std::vector<Request> reqs) {
-  json_spirit::mArray reqArr;
+  json reqArr;
   for (Request req : reqs) {
-    json_spirit::mObject reqObj;
-    json_spirit::mArray paramsArr;
-    for (std::string param : req.params) { paramsArr.push_back(param); }
-    reqObj["id"] = req.id;
-    reqObj["jsonrpc"] = req.jsonrpc;
-    reqObj["method"] = req.method;
-    reqObj["params"] = paramsArr;
-    reqArr.push_back(reqObj);
+    json request;
+
+    request["id"] = req.id;
+    request["jsonrpc"] = req.jsonrpc;
+    request["method"] = req.method;
+    request["params"] = req.params;
+    reqArr.push_back(request);
   }
-  std::string reqStr = json_spirit::write_string(json_spirit::mValue(reqArr), false);
-  int pos;
-  while ((pos = reqStr.find("\\")) != std::string::npos) { reqStr.erase(pos, 1); }
-  while ((pos = reqStr.find("\"{")) != std::string::npos) { reqStr.erase(pos, 1); }
-  while ((pos = reqStr.find("}\"")) != std::string::npos) { reqStr.erase(pos+1, 1); }
+  std::string reqStr = reqArr.dump();
   return reqStr;
 }
 
@@ -205,7 +199,11 @@ std::vector<std::string> API::getAVAXBalances(std::vector<std::string> addresses
   std::vector<Request> reqs;
   std::vector<std::string> ret;
   for (int i = 0; i < addresses.size(); i++) {
-    Request req{i+1, "2.0", "eth_getBalance", {addresses[i], "latest"}};
+    json params = json::array();
+    params.push_back(addresses[i]);
+    params.push_back("latest");
+
+    Request req{i+1, "2.0", "eth_getBalance", params};
     reqs.push_back(req);
   }
   std::string query = buildMultiRequest(reqs);
@@ -260,16 +258,16 @@ std::string API::getCompoundLPBalance(std::string address, std::string contractA
 
 // TODO: convert to multi request
 bool API::isARC20Token(std::string address) {
-  json_spirit::mObject supplyJson, balanceJson;
+  json supplyJson, balanceJson;
   supplyJson["to"] = balanceJson["to"] = address;
   supplyJson["data"] = Pangolin::ERC20Funcs["totalSupply"];
   balanceJson["data"] = Pangolin::ERC20Funcs["balanceOf"] + Utils::addressToHex(address);
-  Request supplyReq{1, "2.0", "eth_call", {
-    json_spirit::write_string(json_spirit::mValue(supplyJson), false), "latest"
-  }};
-  Request balanceReq{1, "2.0", "eth_call", {
-    json_spirit::write_string(json_spirit::mValue(balanceJson), false), "latest"
-  }};
+  json supplyJsonArr = json::array(); json balanceJsonArr = json::array();
+  supplyJsonArr.push_back(supplyJson); supplyJsonArr.push_back("latest");
+  balanceJsonArr.push_back(supplyJson); balanceJsonArr.push_back("latest");
+
+  Request supplyReq{1, "2.0", "eth_call", supplyJsonArr};
+  Request balanceReq{1, "2.0", "eth_call", balanceJsonArr};
   std::string supplyQuery, supplyResp, supplyHex, balanceQuery, balanceResp, balanceHex;
   supplyQuery = buildRequest(supplyReq);
   balanceQuery = buildRequest(balanceReq);
@@ -284,20 +282,17 @@ bool API::isARC20Token(std::string address) {
 
 // TODO: convert to multi request
 ARC20Token API::getARC20TokenData(std::string address) {
-  json_spirit::mObject nameJson, symbolJson, decimalsJson;
+  json nameJson, symbolJson, decimalsJson;
   nameJson["to"] = symbolJson["to"] = decimalsJson["to"] = address;
   nameJson["data"] = Pangolin::ERC20Funcs["name"];
   symbolJson["data"] = Pangolin::ERC20Funcs["symbol"];
   decimalsJson["data"] = Pangolin::ERC20Funcs["decimals"];
-  Request nameReq{1, "2.0", "eth_call", {
-    json_spirit::write_string(json_spirit::mValue(nameJson), false), "latest"
-  }};
-  Request symbolReq{1, "2.0", "eth_call", {
-    json_spirit::write_string(json_spirit::mValue(symbolJson), false), "latest"
-  }};
-  Request decimalsReq{1, "2.0", "eth_call", {
-    json_spirit::write_string(json_spirit::mValue(decimalsJson), false), "latest"
-  }};
+  json nameJsonArr = json::array(); json symbolJsonArr = json::array(); json decimalsJsonArr = json::array();
+  nameJsonArr.push_back(nameJson); symbolJsonArr.push_back(symbolJson); decimalsJsonArr.push_back(decimalsJson);
+  
+  Request nameReq{1, "2.0", "eth_call", nameJsonArr};
+  Request symbolReq{1, "2.0", "eth_call", symbolJsonArr};
+  Request decimalsReq{1, "2.0", "eth_call", decimalsJsonArr};
   std::string nameQuery, nameResp, nameHex, symbolQuery, symbolResp, symbolHex,
     decimalsQuery, decimalsResp, decimalsHex;
   nameQuery = buildRequest(nameReq);

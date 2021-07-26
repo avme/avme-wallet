@@ -82,14 +82,14 @@ std::vector<std::string> Pangolin::parseHex(std::string hexStr, std::vector<std:
 }
 
 std::string Pangolin::getPair(std::string tokenAddressA, std::string tokenAddressB) {
-  json_spirit::mObject reqJson;
+  json reqJson;
   std::string query, resp, hex;
   reqJson["to"] = Pangolin::contracts["factory"];
-  reqJson["data"] = Pangolin::factoryFuncs["getPair"]
-    + Utils::addressToHex(tokenAddressA) + Utils::addressToHex(tokenAddressB);
-  Request req{1, "2.0", "eth_call", {
-    json_spirit::write_string(json_spirit::mValue(reqJson), false), "latest"
-  }};
+  reqJson["data"] = Pangolin::factoryFuncs["getPair"] + Utils::addressToHex(tokenAddressA) + Utils::addressToHex(tokenAddressB);
+  json reqJsonArr = json::array();
+  reqJsonArr.push_back(reqJson);
+
+  Request req{1, "2.0", "eth_call", reqJsonArr};
   query = API::buildRequest(req);
   resp = API::httpGetRequest(query);
   hex = JSON::getString(resp, "result");

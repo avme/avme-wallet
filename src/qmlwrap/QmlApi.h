@@ -17,6 +17,10 @@
 #include <core/ABI.h>
 #include <core/Utils.h>
 #include <core/Wallet.h>
+#include <lib/nlohmann_json/json.hpp>
+
+// For convenience.
+using json = nlohmann::json;
 
 class QmlApi : public QObject {
   Q_OBJECT
