@@ -223,35 +223,45 @@ std::vector<std::string> API::getAVAXBalances(std::vector<std::string> addresses
 
 // TODO: use nlohmann/json
 std::string API::getAVMEBalance(std::string address, std::string contractAddress) {
-  std::stringstream query;
+  json params;
+  json paramsArr;
   std::string add = (address.substr(0,2) == "0x") ? address.substr(2) : address;
-  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\",\"params\": [{\"to\": \""
-        << contractAddress
-        << "\",\"data\": \"0x70a08231000000000000000000000000" << add
-        << "\"},\"latest\"]}";
-  std::string resp = httpGetRequest(query.str());
+
+  params["to"] = contractAddress;
+  params["data"] = std::string("0x70a08231000000000000000000000000") + add; 
+  paramsArr.push_back(params);
+  paramsArr.push_back("latest");
+
+  Request request{1, "2.0", "eth_call", paramsArr};
+
+  std::string resp = httpGetRequest(buildRequest(request));
   json respJson = json::parse(resp);
   return respJson["result"].get<std::string>();
 }
 
 // TODO: use nlohmann/json
 std::string API::getCompoundLPBalance(std::string address, std::string contractAddress) {
-  std::stringstream query;
+  json params;
+  json paramsArr;
   std::string add = (address.substr(0,2) == "0x") ? address.substr(2) : address;
-  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\",\"params\": [{\"to\": \""
-        << contractAddress
-        << "\",\"data\": \"0x70a08231000000000000000000000000" << add
-        << "\"},\"latest\"]}";
-  std::string resp = httpGetRequest(query.str());
+  params["to"] = contractAddress;
+  params["data"] = std::string("0x70a08231000000000000000000000000") + add;
+  paramsArr.push_back(params);
+  paramsArr.push_back("latest");
+  Request request{1, "2.0", "eth_call", paramsArr};
+
+  std::string resp = httpGetRequest(buildRequest(request));
   json respJson = json::parse(resp);
   u256 contractBalance = boost::lexical_cast<HexTo<u256>>(respJson["result"].get<std::string>());
   std::string contractBalanceStr = boost::lexical_cast<std::string>(contractBalance);
-  std::stringstream secondQuery;
-  secondQuery << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\",\"params\": [{\"to\": \""
-        << contractAddress
-        << "\",\"data\": \"0xeab89a5a" << Utils::uintToHex(contractBalanceStr)
-        << "\"},\"latest\"]}";
-  resp = httpGetRequest(secondQuery.str());
+  json secondParams;
+  json secondParamsArr;
+  secondParams["to"] = contractAddress;
+  secondParams["data"] = std::string("0xeab89a5a") + Utils::uintToHex(contractBalanceStr);
+  secondParamsArr.push_back(secondParams);
+  secondParamsArr.push_back("latest");
+  Request secondRequest{1, "2.0", "eth_call", paramsArr};
+  resp = httpGetRequest(buildRequest(secondRequest));
   respJson = json::parse(resp);
   return respJson["result"].get<std::string>();
 }
