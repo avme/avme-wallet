@@ -92,13 +92,16 @@ std::string Graph::getAVAXPriceUSD() {
         << "{token0 {symbol} token1 {symbol} token0Price token1Price}"
         << "}\"}";
   std::string resp = httpGetRequest(query.str());
-  std::string token0Label = JSON::getString(resp, "data/pair/token0/symbol", "/");
-  std::string token1Label = JSON::getString(resp, "data/pair/token1/symbol", "/");
-  std::string token0Price = JSON::getString(resp, "data/pair/token0Price", "/");
-  std::string token1Price = JSON::getString(resp, "data/pair/token1Price", "/");
+  json respJson = json::parse(resp);
+  std::string token0Label, token1Label, token0Price, token1Price;
+  token0Label = respJson["data"]["pair"]["token0"]["symbol"].get<std::string>();
+  token1Label = respJson["data"]["pair"]["token1"]["symbol"].get<std::string>();
+  token0Price = respJson["data"]["pair"]["token0Price"].get<std::string>();
+  token1Price = respJson["data"]["pair"]["token1Price"].get<std::string>();
   return (token0Label == "WAVAX") ? token1Price : token0Price;
 }
 
+// TODO: use nlohmann/json
 std::string Graph::getAVMEPriceUSD(std::string AVAXUnitPriceUSD) {
   std::stringstream query;
   query << "{\"query\": \"{"
@@ -106,7 +109,8 @@ std::string Graph::getAVMEPriceUSD(std::string AVAXUnitPriceUSD) {
         << "{symbol derivedETH}"
         << "}\"}";
   std::string resp = httpGetRequest(query.str());
-  std::string derivedETH = JSON::getString(resp, "data/token/derivedETH", "/");
+  json respJson = json::parse(resp);
+  std::string derivedETH = respJson["data"]["token"]["derivedETH"].get<std::string>();
   bigfloat AVAXPriceFloat = boost::lexical_cast<double>(AVAXUnitPriceUSD);
   bigfloat derivedETHFloat = boost::lexical_cast<double>(derivedETH);
   bigfloat AVMEPriceFloat = derivedETHFloat * AVAXPriceFloat;
@@ -114,29 +118,29 @@ std::string Graph::getAVMEPriceUSD(std::string AVAXUnitPriceUSD) {
   return AVMEPriceUSD;
 }
 
-std::vector<std::map<std::string, std::string>> Graph::getUSDTPriceHistory(int days) {
+// TODO: use nlohmann/json
+json Graph::getUSDTPriceHistory(int days) {
   std::stringstream query;
   query << "{\"query\": \"{"
         << "tokenDayDatas(first: " << days << ", orderBy: date, orderDirection: desc, where: {"
         << "token: \\\"0xde3a24028580884448a5397872046a019649b084\\\""
         << "} ) { date priceUSD } }\"}";
   std::string resp = httpGetRequest(query.str());
-  std::vector<std::map<std::string, std::string>> arr = JSON::getObjectArray(
-    resp, "data/tokenDayDatas", "/"
-  );
+  json respJson = json::parse(resp);
+  json arr = respJson["data"]["tokenDayDatas"];
   return arr;
 }
 
-std::vector<std::map<std::string, std::string>> Graph::getAVMEPriceHistory(int days) {
+// TODO: use nlohmann/json
+json Graph::getAVMEPriceHistory(int days) {
   std::stringstream query;
   query << "{\"query\": \"{"
         << "tokenDayDatas(first: " << days << ", orderBy: date, orderDirection: desc, where: {"
         << "token: \\\"0x1ecd47ff4d9598f89721a2866bfeb99505a413ed\\\""
         << "} ) { date priceUSD } }\"}";
   std::string resp = httpGetRequest(query.str());
-  std::vector<std::map<std::string, std::string>> arr = JSON::getObjectArray(
-    resp, "data/tokenDayDatas", "/"
-  );
+  json respJson = json::parse(resp);
+  json arr = respJson["data"]["tokenDayDatas"];
   return arr;
 }
 

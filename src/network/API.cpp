@@ -152,7 +152,6 @@ void API::httpGetFile(std::string host, std::string get, std::string target) {
 
 std::string API::buildRequest(Request req) {
   json request;
-
   request["id"] = req.id;
   request["jsonrpc"] = req.jsonrpc;
   request["method"] = req.method;
@@ -169,7 +168,6 @@ std::string API::buildMultiRequest(std::vector<Request> reqs) {
   json reqArr;
   for (Request req : reqs) {
     json request;
-
     request["id"] = req.id;
     request["jsonrpc"] = req.jsonrpc;
     request["method"] = req.method;
@@ -184,7 +182,8 @@ std::string API::getAVAXBalance(std::string address) {
   Request req{1, "2.0", "eth_getBalance", {address, "latest"}};
   std::string query = buildRequest(req);
   std::string resp = httpGetRequest(query);
-  std::string hexBal = JSON::getString(resp, "result");
+  json respJson = json::parse(resp);
+  std::string hexBal = respJson["result"].get<std::string>();
   u256 avaxWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
   bigfloat avaxPointBalFloat = bigfloat(Utils::weiToFixedPoint(
     boost::lexical_cast<std::string>(avaxWeiBal), 18
@@ -202,16 +201,14 @@ std::vector<std::string> API::getAVAXBalances(std::vector<std::string> addresses
     json params = json::array();
     params.push_back(addresses[i]);
     params.push_back("latest");
-
     Request req{i+1, "2.0", "eth_getBalance", params};
     reqs.push_back(req);
   }
   std::string query = buildMultiRequest(reqs);
   std::string resp = httpGetRequest(query);
-  json_spirit::mValue resultArr;
-  json_spirit::read_string(resp, resultArr);
-  for (auto value : resultArr.get_array()) {
-    std::string hexBal = JSON::objectItem(value, "result").get_str();
+  json resultArr = json::parse(resp);
+  for (auto value : resultArr) {
+    std::string hexBal = value["result"].get<std::string>();
     u256 avaxWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
     bigfloat avaxPointBalFloat = bigfloat(Utils::weiToFixedPoint(
       boost::lexical_cast<std::string>(avaxWeiBal), 18
@@ -224,7 +221,7 @@ std::vector<std::string> API::getAVAXBalances(std::vector<std::string> addresses
   return ret;
 }
 
-// TODO: use json_spirit
+// TODO: use nlohmann/json
 std::string API::getAVMEBalance(std::string address, std::string contractAddress) {
   std::stringstream query;
   std::string add = (address.substr(0,2) == "0x") ? address.substr(2) : address;
@@ -233,10 +230,11 @@ std::string API::getAVMEBalance(std::string address, std::string contractAddress
         << "\",\"data\": \"0x70a08231000000000000000000000000" << add
         << "\"},\"latest\"]}";
   std::string resp = httpGetRequest(query.str());
-  return JSON::getString(resp, "result");
+  json respJson = json::parse(resp);
+  return respJson["result"].get<std::string>();
 }
 
-// TODO: use json_spirit
+// TODO: use nlohmann/json
 std::string API::getCompoundLPBalance(std::string address, std::string contractAddress) {
   std::stringstream query;
   std::string add = (address.substr(0,2) == "0x") ? address.substr(2) : address;
@@ -245,7 +243,8 @@ std::string API::getCompoundLPBalance(std::string address, std::string contractA
         << "\",\"data\": \"0x70a08231000000000000000000000000" << add
         << "\"},\"latest\"]}";
   std::string resp = httpGetRequest(query.str());
-  u256 contractBalance = boost::lexical_cast<HexTo<u256>>(JSON::getString(resp, "result"));
+  json respJson = json::parse(resp);
+  u256 contractBalance = boost::lexical_cast<HexTo<u256>>(respJson["result"].get<std::string>());
   std::string contractBalanceStr = boost::lexical_cast<std::string>(contractBalance);
   std::stringstream secondQuery;
   secondQuery << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\",\"params\": [{\"to\": \""
@@ -253,7 +252,8 @@ std::string API::getCompoundLPBalance(std::string address, std::string contractA
         << "\",\"data\": \"0xeab89a5a" << Utils::uintToHex(contractBalanceStr)
         << "\"},\"latest\"]}";
   resp = httpGetRequest(secondQuery.str());
-  return JSON::getString(resp, "result");
+  respJson = json::parse(resp);
+  return respJson["result"].get<std::string>();
 }
 
 // TODO: convert to multi request
@@ -273,8 +273,10 @@ bool API::isARC20Token(std::string address) {
   balanceQuery = buildRequest(balanceReq);
   supplyResp = httpGetRequest(supplyQuery);
   balanceResp = httpGetRequest(balanceQuery);
-  supplyHex = JSON::getString(supplyResp, "result");
-  balanceHex = JSON::getString(balanceResp, "result");
+  json supplyRespJson = json::parse(supplyResp);
+  json balanceRespJson = json::parse(balanceResp);
+  supplyHex = supplyRespJson["result"].get<std::string>();
+  balanceHex = balanceRespJson["result"].get<std::string>();
   if (supplyHex == "0x" || supplyHex == "") { return false; }
   if (balanceHex == "0x" || balanceHex == "") { return false; }
   return true;
@@ -289,7 +291,7 @@ ARC20Token API::getARC20TokenData(std::string address) {
   decimalsJson["data"] = Pangolin::ERC20Funcs["decimals"];
   json nameJsonArr = json::array(); json symbolJsonArr = json::array(); json decimalsJsonArr = json::array();
   nameJsonArr.push_back(nameJson); symbolJsonArr.push_back(symbolJson); decimalsJsonArr.push_back(decimalsJson);
-  
+
   Request nameReq{1, "2.0", "eth_call", nameJsonArr};
   Request symbolReq{1, "2.0", "eth_call", symbolJsonArr};
   Request decimalsReq{1, "2.0", "eth_call", decimalsJsonArr};
@@ -301,9 +303,12 @@ ARC20Token API::getARC20TokenData(std::string address) {
   nameResp = httpGetRequest(nameQuery);
   symbolResp = httpGetRequest(symbolQuery);
   decimalsResp = httpGetRequest(decimalsQuery);
-  nameHex = JSON::getString(nameResp, "result");
-  symbolHex = JSON::getString(symbolResp, "result");
-  decimalsHex = JSON::getString(decimalsResp, "result");
+  json nameRespJson = json::parse(nameResp);
+  json symbolRespJson = json::parse(symbolResp);
+  json decimalsRespJson = json::parse(decimalsResp);
+  nameHex = nameRespJson["result"].get<std::string>();
+  symbolHex = symbolRespJson["result"].get<std::string>();
+  decimalsHex = decimalsRespJson["result"].get<std::string>();
   ARC20Token ret;
   ret.address = address;
   ret.name = Utils::stringFromHex(nameHex);
@@ -317,56 +322,42 @@ std::string API::getAutomaticFee() {
   return "225"; // AVAX fees are fixed
 }
 
-// TODO: use json_spirit
 std::string API::getNonce(std::string address) {
-  std::stringstream query;
-  query << "{\"jsonrpc\": \"2.0\",\"method\": \"eth_getTransactionCount\",\"params\": [\""
-        << address
-        << "\",\"latest\"],\"id\": 1}";
-  std::string resp = httpGetRequest(query.str());
-  return JSON::getString(resp, "result");
+  Request req{1, "2.0", "eth_getTransactionCount", {address}};
+  std::string query = buildRequest(req);
+  std::string resp = httpGetRequest(query);
+  json respJson = json::parse(resp);
+  return respJson["result"].get<std::string>();
 }
 
-// TODO: use json_spirit
 std::string API::broadcastTx(std::string txidHex) {
-  std::stringstream query;
-  std::string ApitxidHex = "0x";
-  ApitxidHex += txidHex;
-  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_sendRawTransaction\",\"params\": [\""
-        << ApitxidHex
-        << "\"]}";
-  std::string resp = httpGetRequest(query.str());
-  return JSON::getString(resp, "result");
+  Request req{1, "2.0", "eth_sendRawTransaction", {"0x" + txidHex}};
+  std::string query = buildRequest(req);
+  std::string resp = httpGetRequest(query);
+  json respJson = json::parse(resp);
+  return respJson["result"].get<std::string>();
 }
 
-// TODO: use json_spirit
 std::string API::getCurrentBlock() {
-  std::stringstream query;
-  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_blockNumber\",\"params\": []}";
-  std::string resp = httpGetRequest(query.str());
-  return JSON::getString(resp, "result");
+  Request req{1, "2.0", "eth_blockNumber", {}};
+  std::string query = buildRequest(req);
+  std::string resp = httpGetRequest(query);
+  json respJson = json::parse(resp);
+  return respJson["result"].get<std::string>();
 }
 
-// TODO: use json_spirit
 std::string API::getTxStatus(std::string txidHex) {
-  std::stringstream query;
-  std::string ApitxidHex = "0x";
-  ApitxidHex += txidHex;
-  query << "{\"jsonrpc\": \"2.0\",\"method\": \"eth_getTransactionReceipt\",\"params\": [\""
-        << ApitxidHex
-        << "\"],\"id\": 1}";
-  std::string resp = httpGetRequest(query.str());
-  return JSON::getString(resp, "result/status", "/");
+  Request req{1, "2.0", "eth_getTransactionReceipt", {"0x" + txidHex}};
+  std::string query = buildRequest(req);
+  std::string resp = httpGetRequest(query);
+  json respJson = json::parse(resp);
+  return respJson["result"]["status"].get<std::string>();
 }
 
-// TODO: use json_spirit
 std::string API::getTxBlock(std::string txidHex) {
-  std::stringstream query;
-  std::string ApitxidHex = "0x";
-  ApitxidHex += txidHex;
-  query << "{\"jsonrpc\": \"2.0\",\"method\": \"eth_getTransactionReceipt\",\"params\": [\""
-        << ApitxidHex
-        << "\"],\"id\": 1}";
-  std::string resp = httpGetRequest(query.str());
-  return JSON::getString(resp, "result/blockNumber", "/");
+  Request req{1, "2.0", "eth_getTransactionReceipt", {"0x" + txidHex}};
+  std::string query = buildRequest(req);
+  std::string resp = httpGetRequest(query);
+  json respJson = json::parse(resp);
+  return respJson["result"]["blockNumber"].get<std::string>();
 }

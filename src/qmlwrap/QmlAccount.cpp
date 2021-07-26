@@ -20,7 +20,7 @@ QVariantList QmlSystem::listAccounts() {
   QVariantList ret;
   for (std::pair<std::string, std::string> a : this->w.getAccounts()) {
     std::string obj;
-    // TODO: Use json_spirit
+    // TODO: Use nlohmann/json
     obj += "{\"address\": \"" + a.first;
     obj += "\", \"name\": \"" + a.second;
     obj += "\"}";

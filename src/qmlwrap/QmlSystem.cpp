@@ -25,7 +25,7 @@ QStringList QmlSystem::copySeedFromClipboard() {
 }
 
 QString QmlSystem::getDefaultWalletPath() {
-  return QString::fromStdString(JSON::getDataDir().string());
+  return QString::fromStdString(Utils::getDataDir().string());
 }
 
 QString QmlSystem::cleanPath(QString path) {

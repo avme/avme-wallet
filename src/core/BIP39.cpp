@@ -41,7 +41,7 @@ std::pair<bool,std::string> BIP39::saveEncryptedMnemonic(
   boost::filesystem::path seedPath = Utils::walletFolderPath.string() + "/wallet/c-avax/seed.json";
 
   // Initialize the seed json and cipher, then create the salt
-  json_spirit::mObject seedJson;
+  json seedJson;
   Cipher cipher("aes-256-cbc", "sha256");
   unsigned char saltBytes[32];
   RAND_bytes(saltBytes, sizeof(saltBytes));
@@ -66,21 +66,17 @@ std::pair<bool,std::string> BIP39::saveEncryptedMnemonic(
   // Add information to JSON object and write it in a file
   seedJson["seed"] = encryptedPhrase;
   seedJson["salt"] = salt;
-  json_spirit::mValue success = JSON::writeFile(seedJson, seedPath);
-  try {
-    std::string error = success.get_obj().at("ERROR").get_str();
-    result.first = false;
-    result.second = "Error happened when writing JSON file: " + error;
-    Utils::logToDebug(result.second);
-    return result;
-  } catch (std::exception &e) {
+  std::string success = Utils::writeJSONFile(seedJson, seedPath);
+  if (success.empty()) {
     result.first = true;
     result.second = "";
-    return result;
+  } else {
+    json jsonErr = json::parse(success);
+    result.first = false;
+    result.second = "Error happened when writing JSON file: "
+      + jsonErr["ERROR"].get<std::string>();
+    Utils::logToDebug(result.second);
   }
-  result.first = false;
-  result.second = "Unknown Error";
-  Utils::logToDebug(result.second);
   return result;
 }
 
@@ -92,23 +88,22 @@ std::pair<bool,std::string> BIP39::loadEncryptedMnemonic(
 
   // Initialize the cipher, read the JSON file and check for errors
   Cipher cipher("aes-256-cbc", "sha256");
-  json_spirit::mValue seedJson = JSON::readFile(seedPath);
+  json seedJson = json::parse(Utils::readJSONFile(seedPath));
   try {
-    std::string error = seedJson.get_obj().at("ERROR").get_str();
+    // This is the error block, the logic is inverted here
+    std::string error = seedJson["ERROR"].get<std::string>();
     result.first = false;
     result.second = "Error happened when reading JSON file: " + error;
     Utils::logToDebug(result.second);
     return result;
-  } catch (std::exception &e) {
-    ;
-  }
+  } catch (std::exception &e) {}
 
   // Read JSON to string and check for errors
   std::string encryptedPhrase;
   std::string salt;
   try {
-    encryptedPhrase = JSON::objectItem(seedJson, "seed").get_str();
-    salt = JSON::objectItem(seedJson, "salt").get_str();
+    encryptedPhrase = seedJson["seed"].get<std::string>();
+    salt = seedJson["salt"].get<std::string>();
     // Replace spaces with newlines, cipher only accepts newlines since it's base64
     boost::replace_all(encryptedPhrase, " ", "\n");
   } catch (std::exception &e) {

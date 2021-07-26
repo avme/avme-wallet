@@ -5,9 +5,8 @@
 
 boost::filesystem::path Utils::walletFolderPath;
 std::mutex Utils::debugFileLock;
-u256 Utils::MAX_U256_VALUE() {
-  return (raiseToPow(2, 256) - 1);
-}
+std::mutex Utils::storageThreadLock;
+u256 Utils::MAX_U256_VALUE() { return (raiseToPow(2, 256) - 1); }
 
 void Utils::logToDebug(std::string debug) {
   boost::filesystem::path debugFilePath = walletFolderPath / "debug.log";
@@ -265,5 +264,87 @@ int Utils::roundUp(int numToRound, int multiple) {
     return -(abs(numToRound) - remainder);
   else
     return numToRound + multiple - remainder;
+}
+
+#ifdef __MINGW32__
+boost::filesystem::path Utils::GetSpecialFolderPath(int nFolder, bool fCreate) {
+  WCHAR pszPath[MAX_PATH] = L"";
+  if (SHGetSpecialFolderPathW(nullptr, pszPath, nFolder, fCreate)) {
+    return boost::filesystem::path(pszPath);
+  }
+  return boost::filesystem::path("");
+}
+#endif
+
+boost::filesystem::path Utils::getDefaultDataDir() {
+  namespace fs = boost::filesystem;
+  #ifdef __MINGW32__
+    // Windows: C:\Users\Username\AppData\Roaming\AVME
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "AVME";
+  #else
+    // Unix: ~/.avme
+    fs::path pathRet;
+    char* pszHome = getenv("HOME");
+    if (pszHome == NULL || strlen(pszHome) == 0)
+      pathRet = fs::path("/");
+    else
+      pathRet = fs::path(pszHome);
+  #ifdef __APPLE__
+    return pathRet / "Library/Application Support/AVME";
+  #else
+    return pathRet / ".avme";
+  #endif
+  #endif
+}
+
+boost::filesystem::path Utils::getDataDir() {
+  boost::filesystem::path dataPath = getDefaultDataDir();
+  try {
+    if (!boost::filesystem::exists(dataPath))
+      boost::filesystem::create_directory(dataPath);
+    } catch (...) {}
+  return dataPath;
+}
+
+std::string Utils::readJSONFile(boost::filesystem::path filePath) {
+  json returnData;
+  storageThreadLock.lock();
+
+  if (!boost::filesystem::exists(filePath)) {
+    json errorData;
+    errorData["ERROR"] = "FILE DOES NOT EXIST";
+    storageThreadLock.unlock();
+    return errorData.dump();
+  }
+  try {
+    std::ifstream jsonFile(filePath.c_str());
+    jsonFile >> returnData;
+  } catch (std::exception &e) {
+    json errorData;
+    errorData["ERROR"] = e.what();
+    storageThreadLock.unlock();
+    return errorData.dump();
+  }
+
+  storageThreadLock.unlock();
+  return returnData.dump();
+}
+
+std::string Utils::writeJSONFile(json obj, boost::filesystem::path filePath) {
+  json returnData;
+  storageThreadLock.lock();
+
+  try {
+    std::ofstream os(filePath.c_str());
+    os << std::setw(2) << obj << std::endl;
+    os.close();
+  } catch (std::exception &e) {
+    returnData["ERROR"] = e.what();
+    storageThreadLock.unlock();
+    return returnData.dump();
+  }
+
+  storageThreadLock.unlock();
+  return "";
 }
 

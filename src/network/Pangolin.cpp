@@ -92,7 +92,8 @@ std::string Pangolin::getPair(std::string tokenAddressA, std::string tokenAddres
   Request req{1, "2.0", "eth_call", reqJsonArr};
   query = API::buildRequest(req);
   resp = API::httpGetRequest(query);
-  hex = JSON::getString(resp, "result");
+  json respJson = json::parse(resp);
+  hex = respJson["result"].get<std::string>();
   return Utils::addressFromHex(hex);
 }
 
@@ -106,18 +107,16 @@ std::string Pangolin::getFirstFromPair(std::string tokenAddressA, std::string to
   return (valueA < valueB) ? tokenAddressA : tokenAddressB;
 }
 
-// TODO: use json_spirit
+// TODO: use nlohmann/json
 std::string Pangolin::totalSupply(std::string tokenNameA, std::string tokenNameB) {
-  std::string result;
   std::stringstream query;
-
-  // Query and get the result, returning if empty
   query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
         << "[{\"to\": \"" << Pangolin::getPair(tokenNameA, tokenNameB)
         << "\",\"data\": \"" << pairFuncs["totalSupply"]
         << "\"},\"latest\"]}";
-  std::string str = API::httpGetRequest(query.str());
-  result = JSON::getString(str, "result");
+  std::string resp = API::httpGetRequest(query.str());
+  json respJson = json::parse(resp);
+  std::string result = respJson["result"].get<std::string>();
   if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
 
@@ -125,18 +124,16 @@ std::string Pangolin::totalSupply(std::string tokenNameA, std::string tokenNameB
   return parseHex(result, {"uint"})[0];
 }
 
-// TODO: use json_spirit
+// TODO: use nlohmann/json
 std::vector<std::string> Pangolin::getReserves(std::string tokenNameA, std::string tokenNameB) {
-  std::string result;
   std::stringstream query;
-
-  // Query and get the result, returning if empty
   query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
         << "[{\"to\": \"" << Pangolin::getPair(tokenNameA, tokenNameB)
         << "\",\"data\": \"" << pairFuncs["getReserves"]
         << "\"},\"latest\"]}";
-  std::string str = API::httpGetRequest(query.str());
-  result = JSON::getString(str, "result");
+  std::string resp = API::httpGetRequest(query.str());
+  json respJson = json::parse(resp);
+  std::string result = respJson["result"].get<std::string>();
   if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
 
@@ -187,22 +184,20 @@ std::string Pangolin::approve(std::string spender) {
   return dataHex;
 }
 
-// TODO: use json_spirit
+// TODO: use nlohmann/json
 std::string Pangolin::allowance(
   std::string receiver, std::string owner, std::string spender
 ) {
-  std::string result;
   std::stringstream query;
-
-  // Query and get the result, returning if empty
   query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
         << "[{\"to\": \"" << receiver
         << "\",\"data\": \"" << Pangolin::ERC20Funcs["allowance"]
                              << Utils::addressToHex(owner)
                              << Utils::addressToHex(spender)
         << "\"},\"latest\"]}";
-  std::string str = API::httpGetRequest(query.str());
-  result = JSON::getString(str, "result");
+  std::string resp = API::httpGetRequest(query.str());
+  json respJson = json::parse(resp);
+  std::string result = respJson["result"].get<std::string>();
   if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
 

@@ -18,11 +18,9 @@
  */
 class Staking {
   public:
-    // Array for the supported IDs for ABI functions.
+    // Arrays for the supported IDs for ABI functions (classic and YY Compound, respectively).
     static std::map<std::string, std::string> funcs;
-	
-	// Array for the supported IDs for ABI functions (YY Compoound).
-	static std::map<std::string, std::string> YYfuncs;
+    static std::map<std::string, std::string> YYfuncs;
 
     /**
      * (ABI) Get the total LP supply in the staking contract.

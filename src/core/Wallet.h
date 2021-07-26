@@ -31,7 +31,6 @@
 #include <network/API.h>
 #include <core/BIP39.h>
 #include <core/Database.h>
-#include <core/JSON.h>
 #include <core/Utils.h>
 
 using namespace dev;  // u256
@@ -244,7 +243,7 @@ class Wallet {
     /**
      * Convert the transaction history from the current Account to a JSON array.
      */
-    json_spirit::mArray txDataToJSON();
+    json txDataToJSON();
 
     /**
      * (Re)Load the transaction history for the current Account.

@@ -8,6 +8,7 @@
 #include <string>
 
 #include <boost/chrono.hpp>
+#include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <qrencode.h>
 
@@ -18,9 +19,11 @@
 #include <lib/devcore/SHA3.h>
 #include <lib/ethcore/KeyManager.h>
 #include <lib/ethcore/TransactionBase.h>
+#include <lib/nlohmann_json/json.hpp>
 
 using namespace dev;  // u256
 using namespace dev::eth; // TransactionBase
+using namespace nlohmann; // json
 
 /**
  * Conversion template for usage with boost::lexical_cast.
@@ -79,7 +82,8 @@ typedef struct TxData {
  */
 namespace Utils {
   extern boost::filesystem::path walletFolderPath; // Top folder where the Wallet is.
-  extern std::mutex debugFileLock;  // Mutex for the deug log file.
+  extern std::mutex debugFileLock;  // Mutex for the debug log file.
+  extern std::mutex storageThreadLock;  // Mutex for the JSON read/write threads.
   u256 MAX_U256_VALUE();  // Maximum 256-bit unsigned int value (for error handling).
 
   /**
@@ -136,9 +140,31 @@ namespace Utils {
   std::string stringFromHex(std::string hex);
 
   /**
-   * Rounds number to nearest multiple 
+   * Rounds a number to the nearest multiple.
    */
   int roundUp(int numToRound, int multiple);
+
+  /**
+   * Handle the transaction history storage directory.
+   * Default data dir paths are as follows:
+   *   Windows: C:\Users\Username\AppData\Roaming\AVME
+   *   Unix: ~/.avme
+   */
+  #ifdef __MINGW32__
+  boost::filesystem::path GetSpecialFolderPath(int nFolder, bool fCreate = true);
+  #endif
+  boost::filesystem::path getDefaultDataDir();
+  boost::filesystem::path getDataDir();
+
+  /**
+   * Read from/write to a JSON file, respectively.
+   * Read returns the stringified JSON with the file's contents on success,
+   * or a stringified JSON with an error message on failure.
+   * Write returns an empty string on success, or a stringified JSON with
+   * an error message on failure.
+   */
+  std::string readJSONFile(boost::filesystem::path filePath);
+  std::string writeJSONFile(json obj, boost::filesystem::path filePath);
 };
 
 #endif  // UTILS_H

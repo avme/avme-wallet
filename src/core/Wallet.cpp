@@ -83,13 +83,12 @@ void Wallet::loadARC20Tokens() {
   std::vector<std::string> tokenJsonList = this->db.getAllTokenDBValues();
   for (std::string tokenJson : tokenJsonList) {
     ARC20Token token;
-    json_spirit::mValue tokenData;
-    json_spirit::read_string(tokenJson, tokenData);
-    token.address = JSON::objectItem(tokenData, "address").get_str();
-    token.symbol = JSON::objectItem(tokenData, "symbol").get_str();
-    token.name = JSON::objectItem(tokenData, "name").get_str();
-    token.decimals = JSON::objectItem(tokenData, "decimals").get_int();
-    token.avaxPairContract = JSON::objectItem(tokenData, "avaxPairContract").get_str();
+    json tokenData = json::parse(tokenJson);
+    token.address = tokenData["address"].get<std::string>();
+    token.symbol = tokenData["symbol"].get<std::string>();
+    token.name = tokenData["name"].get<std::string>();
+    token.decimals = tokenData["decimals"].get<int>();
+    token.avaxPairContract = tokenData["avaxPairContract"].get<std::string>();
     this->ARC20Tokens.push_back(token);
   }
 }
@@ -98,15 +97,13 @@ bool Wallet::addARC20Token(
   std::string address, std::string symbol, std::string name,
   int decimals, std::string avaxPairContract
 ) {
-  json_spirit::mObject token;
-  std::string tokenJsonStr;
+  json token;
   token["address"] = address;
   token["symbol"] = symbol;
   token["name"] = name;
   token["decimals"] = decimals;
   token["avaxPairContract"] = avaxPairContract;
-  tokenJsonStr = json_spirit::write_string(json_spirit::mValue(token), false);
-  bool success = this->db.putTokenDBValue(address, tokenJsonStr);
+  bool success = this->db.putTokenDBValue(address, token.dump());
   if (success) { loadARC20Tokens(); }
   return success;
 }
@@ -294,10 +291,10 @@ std::string Wallet::sendTransaction(std::string txidHex, std::string operation) 
   return txLink;
 }
 
-json_spirit::mArray Wallet::txDataToJSON() {
-  json_spirit::mArray transactionsArray;
+json Wallet::txDataToJSON() {
+  json transactionsArray;
   for (TxData savedTxData : this->currentAccountHistory) {
-    json_spirit::mObject savedTransaction;
+    json savedTransaction;
     savedTransaction["txlink"] = savedTxData.txlink;
     savedTransaction["operation"] = savedTxData.operation;
     savedTransaction["hex"] = savedTxData.hex;
@@ -325,54 +322,50 @@ json_spirit::mArray Wallet::txDataToJSON() {
 }
 
 void Wallet::loadTxHistory() {
-  json_spirit::mValue txData, txArray;
   boost::filesystem::path txFilePath = Utils::walletFolderPath.string()
     + "/wallet/c-avax/accounts/transactions/" + this->currentAccount.first.c_str();
-
-  txData = JSON::readFile(txFilePath);
+  json txData = Utils::readJSONFile(txFilePath);
   try {
-    txArray = JSON::objectItem(txData, "transactions");
-    json_spirit::mValue txArray = JSON::objectItem(txData, "transactions");
+    json txArray = txData["transactions"];
     this->currentAccountHistory.clear();
-    for (int i = 0; i < txArray.get_array().size(); ++i) {
+    for (auto& tx : txArray) {
       TxData txData;
-      txData.txlink = JSON::objectItem(JSON::arrayItem(txArray, i), "txlink").get_str();
-      txData.operation = JSON::objectItem(JSON::arrayItem(txArray, i), "operation").get_str();
-      txData.hex = JSON::objectItem(JSON::arrayItem(txArray, i), "hex").get_str();
-      txData.type = JSON::objectItem(JSON::arrayItem(txArray, i), "type").get_str();
-      txData.code = JSON::objectItem(JSON::arrayItem(txArray, i), "code").get_str();
-      txData.to = JSON::objectItem(JSON::arrayItem(txArray, i), "to").get_str();
-      txData.from = JSON::objectItem(JSON::arrayItem(txArray, i), "from").get_str();
-      txData.data = JSON::objectItem(JSON::arrayItem(txArray, i), "data").get_str();
-      txData.creates = JSON::objectItem(JSON::arrayItem(txArray, i), "creates").get_str();
-      txData.value = JSON::objectItem(JSON::arrayItem(txArray, i), "value").get_str();
-      txData.nonce = JSON::objectItem(JSON::arrayItem(txArray, i), "nonce").get_str();
-      txData.gas = JSON::objectItem(JSON::arrayItem(txArray, i), "gas").get_str();
-      txData.price = JSON::objectItem(JSON::arrayItem(txArray, i), "price").get_str();
-      txData.hash = JSON::objectItem(JSON::arrayItem(txArray, i), "hash").get_str();
-      txData.v = JSON::objectItem(JSON::arrayItem(txArray, i), "v").get_str();
-      txData.r = JSON::objectItem(JSON::arrayItem(txArray, i), "r").get_str();
-      txData.s = JSON::objectItem(JSON::arrayItem(txArray, i), "s").get_str();
-      txData.humanDate = JSON::objectItem(JSON::arrayItem(txArray, i), "humanDate").get_str();
-      txData.unixDate = JSON::objectItem(JSON::arrayItem(txArray, i), "unixDate").get_uint64();
-      txData.confirmed = JSON::objectItem(JSON::arrayItem(txArray, i), "confirmed").get_bool();
-      txData.invalid = JSON::objectItem(JSON::arrayItem(txArray, i), "invalid").get_bool();
+      txData.txlink = tx["txlink"].get<std::string>();
+      txData.operation = tx["operation"].get<std::string>();
+      txData.hex = tx["hex"].get<std::string>();
+      txData.type = tx["type"].get<std::string>();
+      txData.code = tx["code"].get<std::string>();
+      txData.to = tx["to"].get<std::string>();
+      txData.from = tx["from"].get<std::string>();
+      txData.data = tx["data"].get<std::string>();
+      txData.creates = tx["creates"].get<std::string>();
+      txData.value = tx["value"].get<std::string>();
+      txData.nonce = tx["nonce"].get<std::string>();
+      txData.gas = tx["gas"].get<std::string>();
+      txData.price = tx["price"].get<std::string>();
+      txData.hash = tx["hash"].get<std::string>();
+      txData.v = tx["v"].get<std::string>();
+      txData.r = tx["r"].get<std::string>();
+      txData.s = tx["s"].get<std::string>();
+      txData.humanDate = tx["humanDate"].get<std::string>();
+      txData.unixDate = tx["unixDate"].get<uint64_t>();
+      txData.confirmed = tx["confirmed"].get<bool>();
+      txData.invalid = tx["invalid"].get<bool>();
       this->currentAccountHistory.push_back(txData);
     }
   } catch (std::exception &e) {
     Utils::logToDebug(std::string("Couldn't load history for account ")
-      + this->currentAccount.first + " : " + JSON::objectItem(txData, "ERROR").get_str());
+      + this->currentAccount.first + " : " + txData["ERROR"].get<std::string>());
     // Uncomment to see output
     //std::cout << "Couldn't load history for Account " << this->currentAccount.first
-    //          << ": " << JSON::objectItem(txData, "ERROR").get_str() << std::endl;
+    //          << ": " << txData["ERROR"].get<std::string>() << std::endl;
   }
 }
 
 bool Wallet::saveTxToHistory(TxData TxData) {
   loadTxHistory();
-  json_spirit::mObject transactionsRoot;
-  json_spirit::mArray transactionsArray = txDataToJSON();
-  json_spirit::mObject transaction;
+  json transactionsRoot, transactionsArray, transaction;
+  transactionsArray = txDataToJSON();
   boost::filesystem::path txFilePath = Utils::walletFolderPath.string()
     + "/wallet/c-avax/accounts/transactions/" + this->currentAccount.first.c_str();
 
@@ -400,13 +393,14 @@ bool Wallet::saveTxToHistory(TxData TxData) {
   transactionsArray.push_back(transaction);
 
   transactionsRoot["transactions"] = transactionsArray;
-  json_spirit::mValue success = JSON::writeFile(transactionsRoot, txFilePath);
+  std::string success = Utils::writeJSONFile(transactionsRoot, txFilePath);
 
-  // Try/Catch are "inverted"
-  // Error happens when trying to find the error.
-  // If there is no "error" on the JSON, it will throw, meaning that it was successfull
+  // Try/Catch logic is "inverted" - if there's no error it will throw,
+  // meaning that it was successful.
   try {
-    Utils::logToDebug("Error happened when writing JSON file: " + success.get_obj().at("ERROR").get_str());
+    json err = json::parse(success);
+    std::string errMsg = err["ERROR"].get<std::string>();
+    Utils::logToDebug("Error happened when writing JSON file: " + errMsg);
   } catch (std::exception &e) {
     loadTxHistory();
     return true;
@@ -438,13 +432,15 @@ bool Wallet::updateAllTxStatus() {
   } catch (std::exception &e) {
     Utils::logToDebug(std::string("Error when updating AllTxStatus: ") + e.what());
   }
-  json_spirit::mObject transactionsRoot;
-  json_spirit::mArray transactionsArray = txDataToJSON();
+  json transactionsRoot, transactionsArray;
+  transactionsArray = txDataToJSON();
   transactionsRoot["transactions"] = transactionsArray;
-  json_spirit::mValue success = JSON::writeFile(transactionsRoot, txFilePath);
-
+  std::string success = Utils::writeJSONFile(transactionsRoot, txFilePath);
+  // Try/Catch logic is "inverted" - if there's no error it will throw,
+  // meaning that it was successful.
   try {
-    std::string error = success.get_obj().at("ERROR").get_str();
+    json err = json::parse(success);
+    std::string error = err["ERROR"].get<std::string>();
     Utils::logToDebug(std::string("Error happened when writing JSON file: ") + error);
   } catch (std::exception &e) {
     loadTxHistory();

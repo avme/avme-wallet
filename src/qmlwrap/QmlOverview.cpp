@@ -283,6 +283,8 @@ void QmlSystem::calculateRewardCurrentROI() {
   });
 }
 
+// TODO: use nlohmann/json
+/*
 void QmlSystem::getMarketData(int days) {
   QtConcurrent::run([=](){
     std::string AVAXUnitPrice, AVMEUnitPrice;
@@ -321,6 +323,7 @@ void QmlSystem::getMarketData(int days) {
     );
   });
 }
+*/
 
 
 qreal QmlSystem::getQRCodeSize(QString address) {

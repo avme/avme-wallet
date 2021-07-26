@@ -18,7 +18,6 @@
 
 #include <network/API.h>
 #include <core/BIP39.h>
-#include <core/JSON.h>
 #include <core/Utils.h>
 #include <core/Wallet.h>
 #include <network/Graph.h>
@@ -261,7 +260,8 @@ class QmlSystem : public QObject {
 
     // Get data for the market chart for the last X days (most to least recent).
     // Emits marketDataUpdated()
-    Q_INVOKABLE void getMarketData(int days);
+    // TODO: check this later
+    //Q_INVOKABLE void getMarketData(int days);
 
     // ======================================================================
     // TOKENS SCREEN FUNCTIONS

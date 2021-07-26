@@ -14,7 +14,6 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 
-#include <core/JSON.h>
 #include <core/Utils.h>
 #include <network/Pangolin.h>
 #include <network/root_certificates.hpp>

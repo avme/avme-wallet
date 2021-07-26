@@ -14,7 +14,6 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 
-#include <core/JSON.h>
 #include <core/Utils.h>
 #include <network/root_certificates.hpp>
 
@@ -48,12 +47,13 @@ class Graph {
      * Get the HISTORICAL token prices in fiat (USD), from the last X days (starting from today).
      * Data might span more than X days (e.g. skipping days w/ no price action),
      * so "days" is really just the number of registered dates in history.
-     * Returns a string/string map vector with the UNIX timestamps and
+     * TODO: fix this JSON stuff when calling it for real
+     * Returns a JSON array with the UNIX timestamps and
      * prices in fixed point (e.g. "12.34").
      * TODO: do this for AVAX when Pangolin fixes their priceUSD logic in graph
      */
-    static std::vector<std::map<std::string, std::string>> getUSDTPriceHistory(int days);
-    static std::vector<std::map<std::string, std::string>> getAVMEPriceHistory(int days);
+    static json getUSDTPriceHistory(int days);
+    static json getAVMEPriceHistory(int days);
 };
 
 #endif // GRAPH_H
