@@ -348,3 +348,25 @@ std::string Utils::writeJSONFile(json obj, boost::filesystem::path filePath) {
   return "";
 }
 
+std::string Utils::jsonToStr(json& obj) {
+  std::string ret;
+
+  if (obj.type() == json::value_t::null) {
+    ret = "null";
+  } else if (obj.type() == json::value_t::boolean) {
+    ret = boost::lexical_cast<std::string>(obj.get<bool>());
+  } else if (obj.type() == json::value_t::number_integer) {
+    ret = boost::lexical_cast<std::string>(obj.get<int64_t>());
+  } else if (obj.type() == json::value_t::number_unsigned) {
+    ret = boost::lexical_cast<std::string>(obj.get<uint64_t>());
+  } else if (obj.type() == json::value_t::number_float) {
+    ret = boost::lexical_cast<std::string>(obj.get<float>());
+  } else if (obj.type() == json::value_t::object) {
+    throw std::runtime_error("Invalid JSON conversion json::object -> std::string");
+  } else if (obj.type() == json::value_t::array) {
+    throw std::runtime_error("Invalid JSON conversion json::array -> std::string");
+  } else if (obj.type() == json::value_t::string) {
+    ret = obj.get<std::string>();
+  }
+  return ret;
+}

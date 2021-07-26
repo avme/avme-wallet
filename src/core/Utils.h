@@ -20,6 +20,7 @@
 #include <lib/ethcore/KeyManager.h>
 #include <lib/ethcore/TransactionBase.h>
 #include <lib/nlohmann_json/json.hpp>
+#include <stdexcept>
 
 using namespace dev;  // u256
 using namespace dev::eth; // TransactionBase
@@ -165,6 +166,13 @@ namespace Utils {
    */
   std::string readJSONFile(boost::filesystem::path filePath);
   std::string writeJSONFile(json obj, boost::filesystem::path filePath);
+
+  /**
+   * Properly convert any json type when using json::get() to std::string
+   * *not* to be confused with json::dump()
+   */ 
+  std::string jsonToStr(json& obj);
+
 };
 
 #endif  // UTILS_H
