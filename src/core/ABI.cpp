@@ -39,38 +39,30 @@ namespace ABI {
     return ret;
   }
   std::string encodeABIfromJson(std::string jsonStr) {
-    json_spirit::mValue json;
+    json abiJson;
     std::string ret;
     std::string arrays;
   
     try {
-      if(json_spirit::read_string(jsonStr, json)) {
+        abiJson = json::parse(jsonStr);
         // Read types and arguments from JSON.
-        json_spirit::mValue json_arguments = JSON::objectItem(json, "args");
-        json_spirit::mValue json_types = JSON::objectItem(json, "types");
-        std::string functionNameABI = dev::toHex(dev::sha3(JSON::objectItem(json, "function").get_str(), false)).substr(0,8);
+        json json_arguments = abiJson["args"];
+        json json_types = abiJson["types"];
+        std::string functionNameABI = dev::toHex(dev::sha3(abiJson["function"].get<std::string>())).substr(0,8);
         ret += functionNameABI;
 
-        int array_start = 32 * json_arguments.get_array().size();
-        for (int i = 0; i < json_arguments.get_array().size(); ++i) {
+        int array_start = 32 * json_arguments.size();
+        for (int i = 0; i < json_arguments.size(); ++i) {
           std::vector<std::string> arguments;
           bool isArray = false;
-          std::string type = json_spirit::write_string(JSON::arrayItem(json_types, i), false);
-          std::string argument = json_spirit::write_string(JSON::arrayItem(json_arguments, i), false);
+          std::string type = json_types[i].get<std::string>();
           // Remove any remainings quote marks
-          boost::replace_all(type, "\"", "");
-          boost::replace_all(argument, "\"", "");
-          if (type.find("[]") != std::string::npos) {
+          if (json_arguments[i].is_array()) {
             isArray = true;
-            // Remove any [] from the type string
-            boost::replace_all(type, "[", "");
-            boost::replace_all(type, "]", "");
-            // Remove any [] from the argument string
-            boost::replace_all(argument, "]", "");
-            boost::replace_all(argument, "[", "");
-            boost::split(arguments, argument, boost::is_any_of(","));
+            for (auto element : json_arguments[i])
+              arguments.push_back(element.get<std::string>());
           } else {
-            arguments.push_back(argument);
+            arguments.push_back(json_arguments[i].get<std::string>());
           }
           
           // Arrays need proper treatment.
@@ -90,8 +82,8 @@ namespace ABI {
             ret += encodeABI(type, arguments, isArray);
           }
         }
-      }
     } catch (std::exception &e) {
+      std::cout << e.what() << std::endl;
       Utils::logToDebug(std::string(e.what()));
     }
     ret += arrays;

@@ -11,6 +11,11 @@
 #include "JSON.h"
 #include "Utils.h"
 
+#include <lib/nlohmann_json/json.hpp>
+
+// For convenience.
+using json = nlohmann::json;
+
 namespace ABI {
   
   /** Encode a single ABI
@@ -24,13 +29,15 @@ namespace ABI {
 
   /**
    * Encode the whole ABI from a single JSON
+   * Be aware that "args" should be always provided with string type
+   * regardless of type, it will be properly treated later.
    * Example:
    * {
    *  "function": "GithubWikiTest(uint256,uint256[],bytes10[],bytes)",
    *  "args": [
    *    291,
-   *    [1110,1929],
-   *    [1234567890,1234567890],
+   *    ["1110,"1929"],
+   *    ["1234567890","1234567890"],
    *    "Hello, world!"
    *    ], 
    *    "types": [
