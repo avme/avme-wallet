@@ -20,7 +20,9 @@ int main(int argc, char *argv[]) {
   QApplication app(argc, argv);
   QQmlApplicationEngine engine;
   QmlSystem qmlsystem;
+  QmlApi qmlapi;
   engine.rootContext()->setContextProperty("QmlSystem", &qmlsystem);
+  engine.rootContext()->setContextProperty("QmlApi", &qmlapi);
 
   // Set the app's text font and icon
   QFontDatabase::addApplicationFont(":/fonts/IBMPlexMono-Bold.ttf");

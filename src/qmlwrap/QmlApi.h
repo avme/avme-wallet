@@ -21,8 +21,6 @@
 #include <core/Wallet.h>
 #include <lib/nlohmann_json/json.hpp>
 
-// TODO: maybe a function that clears the requestList if something goes wrong?
-
 class QmlApi : public QObject {
   Q_OBJECT
 
@@ -32,16 +30,51 @@ class QmlApi : public QObject {
   public:
     /**
      * Call every request under requestList in a single connection.
+     * Automatically clears the requestList when done.
      */
     Q_INVOKABLE QString doAPIRequests();
 
     /**
-     * Functions that will append the respective call to the requestList vector.
+     * Manually clear the requestList if necessary.
+     */
+    Q_INVOKABLE void clearAPIRequests();
+
+    /**
+     * Build requests for getting the AVAX and a given token's balance, respectively.
      */
     Q_INVOKABLE void buildGetBalanceReq(QString address);
-    Q_INVOKABLE void buildBlockNumberReq();
-    Q_INVOKABLE void buildCustomEthCallReq(QString contract, QString ABI);
     Q_INVOKABLE void buildGetTokenBalanceReq(QString contract, QString address);
+
+    /**
+     * Build request for getting the current block number.
+     */
+    Q_INVOKABLE void buildGetCurrentBlockNumberReq();
+
+    /**
+     * Build request for getting the highest available nonce for the given address.
+     */
+    Q_INVOKABLE void buildGetNonceReq(std::string address);
+
+    /**
+     * Build request for getting the receipt (details) of a transaction.
+     * e.g. blockNumber, status, etc.
+     */
+    Q_INVOKABLE void buildGetTxReceiptReq(std::string txidHex);
+
+    /**
+     * Build request for getting the estimated gas limit.
+     */
+    Q_INVOKABLE void buildGetEstimateGasLimitReq();
+
+    /**
+     * Get an ARC20 token's data.
+     */
+    Q_INVOKABLE void buildGetARC20TokenDataReq(std::string address);
+
+    /**
+     * Functions for appending custom ABI calls.
+     */
+    Q_INVOKABLE void buildCustomEthCallReq(QString contract, QString ABI);
     Q_INVOKABLE QString buildCustomABI(QString input);
 };
 

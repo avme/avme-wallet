@@ -61,28 +61,10 @@ class API {
     static std::string buildMultiRequest(std::vector<Request> reqs);
 
     /**
-     * Get coin/token balances from one or multiple addresses in the API, respectively.
-     * Returns balances in fixed point, or empty strings on failure.
-     * TODO: maybe rename to getCoinBalance / getTokenBalance?
+     * Broadcast a signed transaction to the blockchain.
+     * Returns a link to the successful transaction, or an empty string on failure.
      */
-    static std::string getAVAXBalance(std::string address);
-    static std::vector<std::string> getAVAXBalances(std::vector<std::string> addresses);
-    static std::string getAVMEBalance(std::string address, std::string contractAddress);
-
-    /**
-     * Get Locked LP Balance inside YY Contract
-     */
-    static std::string getCompoundLPBalance(std::string address, std::string contractAddress);
-
-    /**
-     * Check if a given address is an ARC20 token.
-     */
-    static bool isARC20Token(std::string address);
-
-    /**
-     * Get an ARC20 token's data.
-     */
-    static ARC20Token getARC20TokenData(std::string address);
+    static std::string broadcastTx(std::string txidHex);
 
     /**
      * Get the recommended gas price for a transaction.
@@ -90,29 +72,6 @@ class API {
      * when building a transaction (1 Gwei = 10^9 Wei).
      */
     static std::string getAutomaticFee();
-
-    /**
-     * Get the highest available nonce for an address from the blockchain API.
-     * Returns the nonce, or an empty string on failure.
-     */
-    static std::string getNonce(std::string address);
-
-    /**
-     * Broadcast a signed transaction to the blockchain.
-     * Returns a link to the successful transaction, or an empty string on failure.
-     */
-    static std::string broadcastTx(std::string txidHex);
-
-    static std::string getCurrentBlock();
-
-    /**
-     * Get the transaction status from the API to check if it has been confirmed.
-     * Returns the confirmation status in Hex ("0x1 true, 0x0 false"),
-     * or an empty string on failure.
-     */
-    static std::string getTxStatus(std::string txidHex);
-
-    static std::string getTxBlock(std::string txidHex);
 };
 
 #endif // API_H

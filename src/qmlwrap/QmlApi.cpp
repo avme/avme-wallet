@@ -4,47 +4,101 @@
 
 #include "QmlApi.h"
 
-Q_INVOKABLE QString QmlApi::doAPIRequests() {
+QString QmlApi::doAPIRequests() {
   std::string requests = API::buildMultiRequest(this->requestList);
-  return QString::fromStdString(API::httpGetRequest(requests));
+  std::string response = API::httpGetRequest(requests);
+  this->requestList.clear()
+  return QString::fromStdString(response);
 }
 
-Q_INVOKABLE void QmlApi::buildBlockNumberReq() {
-  Request req{this->requestList.size() + size_t(1), "2.0", "eth_blockNumber", json::array()};
+void QmlApi::clearAPIRequests() {
+  this->requestList.clear();
+}
+
+void QmlApi::buildGetBalanceReq(QString address) {
+  Request req{
+    this->requestList.size() + size_t(1), "2.0", "eth_getBalance",
+    {address.toStdString(), "latest"}
+  };
   this->requestList.push_back(req);
-  return;
 }
 
-Q_INVOKABLE void QmlApi::buildCustomEthCallReq(QString contract, QString ABI) {
+void QmlApi::buildGetTokenBalanceReq(QString contract, QString address) {
+  std::string addressStr = address.toStdString();
+  if (addressStr.substr(0,2) == "0x") { addressStr = addressStr.substr(2); }
   json params;
+  json array = json::array();
+  params["to"] = contract.toStdString();
+  params["data"] = "0x70a08231000000000000000000000000" + addressStr;
+  array.push_back(params);
+  array.push_back("latest");
+  Request req{this->requestList.size() + size_t(1), "2.0", "eth_getBalance", array};
+  this->requestList.push_back(req);
+}
+
+void QmlApi::buildGetCurrentBlockNumberReq() {
+  Request req{
+    this->requestList.size() + size_t(1), "2.0", "eth_blockNumber", json::array()
+  };
+  this->requestList.push_back(req);
+}
+
+void QmlApi::buildGetNonceReq(std::string address) {
+  Request req{
+    this->requestList.size() + size_t(1), "2.0", "eth_getTransactionCount", {address}
+  };
+  this->requestList.push_back(req);
+}
+
+void QmlApi::buildGetTxReceiptReq(std::string txidHex) {
+  Request req{
+    this->requestList.size() + size_t(1), "2.0", "eth_getTransactionReceipt",
+    {"0x" + txidHex}
+  };
+  this->requestList.push_back(req);
+}
+
+// TODO: implement this
+void QmlApi::buildGetEstimateGasLimitReq() {
+  ;
+}
+
+void QmlApi::buildGetARC20TokenDataReq(std::string address) {
+  json nameJson, symbolJson, decimalsJson;
+  json nameJsonArr, symbolJsonArr, decimalsJsonArr;
+  nameJson["to"] = symbolJson["to"] = decimalsJson["to"] = address;
+  nameJson["data"] = Pangolin::ERC20Funcs["name"];
+  symbolJson["data"] = Pangolin::ERC20Funcs["symbol"];
+  decimalsJson["data"] = Pangolin::ERC20Funcs["decimals"];
+  nameJsonArr = symbolJsonArr = decimalsJsonArr = json::array();
+  nameJsonArr.push_back(nameJson);
+  symbolJsonArr.push_back(symbolJson);
+  decimalsJsonArr.push_back(decimalsJson);
+  Request nameReq{
+    this->requestList.size() + size_t(1), "2.0", "eth_call", nameJsonArr
+  };
+  this->requestList.push_back(nameReq);
+  Request symbolReq{
+    this->requestList.size() + size_t(1), "2.0", "eth_call", symbolJsonArr
+  };
+  this->requestList.push_back(symbolReq);
+  Request decimalsReq{
+    this->requestList.size() + size_t(1), "2.0", "eth_call", decimalsJsonArr
+  };
+  this->requestList.push_back(decimalsReq);
+}
+
+void QmlApi::buildCustomEthCallReq(QString contract, QString ABI) {
+  json params;
+  json array = json::array();
   params["to"] = contract.toStdString();
   params["data"] = ABI.toStdString();
-  json array = json::array();
   array.push_back(params);
   array.push_back("latest");
-
-  Request req{this->requestList.size() + size_t(1), "2.0", "eth_getBalance", array};
-  this->requestList.push_back(req);
-  return;
-}
-
-Q_INVOKABLE void QmlApi::buildGetTokenBalanceReq(QString contract, QString address) {
-  std::string tmp_address = address.toStdString();
-  if (tmp_address.substr(0,2) == "0x") {
-    tmp_address = tmp_address.substr(2);
-  }
-
-  json params;
-  params["to"] = contract.toStdString();
-  params["data"] = std::string("0x70a08231000000000000000000000000") + tmp_address;
-  json array = json::array();
-  array.push_back(params);
-  array.push_back("latest");
-
   Request req{this->requestList.size() + size_t(1), "2.0", "eth_getBalance", array};
   this->requestList.push_back(req);
 }
 
-Q_INVOKABLE QString QmlApi::buildCustomABI(QString input) {
+QString QmlApi::buildCustomABI(QString input) {
   return QString::fromStdString(ABI::encodeABIfromJson(input.toStdString()));
 }
