@@ -72,6 +72,31 @@ class API {
      * when building a transaction (1 Gwei = 10^9 Wei).
      */
     static std::string getAutomaticFee();
+
+    /**
+     * Get the highest available nonce for an address from the blockchain API.
+     * Returns the nonce, or an empty string on failure.
+     */
+    static std::string getNonce(std::string address);
+
+    /**
+     * Get the current block number in the blockchain.
+     * Returns the number.
+     */
+    static std::string getCurrentBlock();
+
+    /**
+     * Get the transaction status from the API to check if it has been confirmed.
+     * Returns the confirmation status in Hex ("0x1 true, 0x0 false"),
+     * or an empty string on failure.
+     */
+    static std::string getTxStatus(std::string txidHex);
+
+    /**
+     * Get the block number for the given transaction.
+     * Returns the number.
+     */
+    static std::string getTxBlock(std::string txidHex);
 };
 
 #endif // API_H

@@ -51,11 +51,6 @@ class QmlApi : public QObject {
     Q_INVOKABLE void buildGetCurrentBlockNumberReq();
 
     /**
-     * Build request for getting the highest available nonce for the given address.
-     */
-    Q_INVOKABLE void buildGetNonceReq(std::string address);
-
-    /**
      * Build request for getting the receipt (details) of a transaction.
      * e.g. blockNumber, status, etc.
      */
@@ -65,6 +60,11 @@ class QmlApi : public QObject {
      * Build request for getting the estimated gas limit.
      */
     Q_INVOKABLE void buildGetEstimateGasLimitReq();
+
+    /**
+     * Build request for querying if an ARC20 token exists.
+     */
+    Q_INVOKABLE void buildARC20TokenExistsReq(std::string address);
 
     /**
      * Get an ARC20 token's data.

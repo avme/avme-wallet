@@ -187,7 +187,39 @@ std::string API::broadcastTx(std::string txidHex) {
 }
 
 // TODO: migrate to QmlApi when dynamic fees are implemented
-std::string QmlApi::getAutomaticFee() {
+std::string API::getAutomaticFee() {
   return "225"; // AVAX fees are fixed
+}
+
+std::string API::getNonce(std::string address) {
+  Request req{1, "2.0", "eth_getTransactionCount", {address}};
+  std::string query = buildRequest(req);
+  std::string resp = httpGetRequest(query);
+  json respJson = json::parse(resp);
+  return respJson["result"].get<std::string>();
+}
+
+std::string API::getCurrentBlock() {
+  Request req{1, "2.0", "eth_blockNumber", {}};
+  std::string query = buildRequest(req);
+  std::string resp = httpGetRequest(query);
+  json respJson = json::parse(resp);
+  return respJson["result"].get<std::string>();
+}
+
+std::string API::getTxStatus(std::string txidHex) {
+  Request req{1, "2.0", "eth_getTransactionReceipt", {"0x" + txidHex}};
+  std::string query = buildRequest(req);
+  std::string resp = httpGetRequest(query);
+  json respJson = json::parse(resp);
+  return respJson["result"]["status"].get<std::string>();
+}
+
+std::string API::getTxBlock(std::string txidHex) {
+  Request req{1, "2.0", "eth_getTransactionReceipt", {"0x" + txidHex}};
+  std::string query = buildRequest(req);
+  std::string resp = httpGetRequest(query);
+  json respJson = json::parse(resp);
+  return respJson["result"]["blockNumber"].get<std::string>();
 }
 

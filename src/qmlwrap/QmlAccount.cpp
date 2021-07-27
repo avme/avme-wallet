@@ -78,10 +78,15 @@ void QmlSystem::generateLedgerAccounts(QString path, int idx) {
       std::string fullPath = path.toStdString() + boost::lexical_cast<std::string>(i);
       this->ledgerDevice.generateBip32Account(fullPath);
     }
+    // TODO: convert to multirequest
     for (ledger::account acc : this->ledgerDevice.getAccountList()) {
       QVariantMap obj;
       std::string idxStr = acc.index.substr(acc.index.find_last_of("/") + 1);
-      std::string bal = API::getAVAXBalance(acc.address);
+      Request req{1, "2.0", "eth_getBalance", {acc.address, "latest"}};
+      std::string query = API::buildRequest(req);
+      std::string resp = API::httpGetRequest(query);
+      json respJson = json::parse(resp);
+      std::string bal = respJson["result"].get<std::string>();
       u256 AVAXbalance = boost::lexical_cast<HexTo<u256>>(bal);
       obj["idx"] = QVariant(QString::fromStdString(idxStr));
       obj["account"] = QVariant(QString::fromStdString(acc.address));
@@ -135,15 +140,28 @@ QString QmlSystem::getPrivateKeys(QString account, QString pass) {
 
 void QmlSystem::getAccountAVAXBalances(QString address) {
   QtConcurrent::run([=](){
-    std::string avaxBal = API::getAVAXBalance(address.toStdString());
+    // Get the AVAX balance in Hex, convert it to Wei and fixed point
+    Request req{1, "2.0", "eth_getBalance", {address.toStdString(), "latest"}};
+    std::string query = API::buildRequest(req);
+    std::string resp = API::httpGetRequest(query);
+    json respJson = json::parse(resp);
+    std::string hexBal = respJson["result"].get<std::string>();
+    u256 avaxWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
+    bigfloat avaxBal = bigfloat(Utils::weiToFixedPoint(
+      boost::lexical_cast<std::string>(avaxWeiBal), 18
+    ));
+    std::string avaxBalStr = boost::lexical_cast<std::string>(avaxBal);
+
+    // Get the AVAX USD price and calculate the balance in fiat
     bigfloat avaxUSDPrice = boost::lexical_cast<bigfloat>(Graph::getAVAXPriceUSD());
-    bigfloat avaxBalFloat = boost::lexical_cast<bigfloat>(avaxBal);
-    bigfloat avaxUSDValueFloat = avaxUSDPrice * avaxBalFloat;
+    bigfloat avaxUSDValueFloat = avaxUSDPrice * avaxBal;
     std::stringstream ss;
     ss << std::setprecision(2) << std::fixed << avaxUSDValueFloat;
-    std::string avaxUSDValue = ss.str();
+    std::string avaxUSDValueStr = ss.str();
+
+    // Return the values
     emit accountAVAXBalancesUpdated(
-      address, QString::fromStdString(avaxBal), QString::fromStdString(avaxUSDValue)
+      address, QString::fromStdString(avaxBalStr), QString::fromStdString(avaxUSDValueStr)
     );
   });
 }
@@ -151,20 +169,38 @@ void QmlSystem::getAccountAVAXBalances(QString address) {
 void QmlSystem::getAllAVAXBalances(QStringList addresses) {
   QtConcurrent::run([=](){
     std::vector<std::string> addressesVec, balancesVec;
+    std::vector<Request> requestsVec;
+
+    // Build the balance request for each address
     for (int i = 0; i < addresses.size(); i++) {
-      addressesVec.push_back(addresses.at(i).toStdString());
+      std::string addressStr = addresses.at(i).toStdString();
+      Request req{i + size_t(1), "2.0", "eth_getBalance", {addressStr, "latest"}};
+      addressesVec.push_back(addressStr);
+      requestsVec.push_back(req);
     }
-    balancesVec = API::getAVAXBalances(addressesVec);
+
+    // Make the request and get the AVAX price in USD
+    std::string query = API::buildMultiRequest(requestsVec);
+    std::string resp = API::httpGetRequest(query);
+    json resultArr = json::parse(resp);
     bigfloat avaxUSDPrice = boost::lexical_cast<bigfloat>(Graph::getAVAXPriceUSD());
-    for (int i = 0; i < balancesVec.size(); i++) {
-      bigfloat avaxBalFloat = boost::lexical_cast<bigfloat>(balancesVec[i]);
-      bigfloat avaxUSDValueFloat = avaxUSDPrice * avaxBalFloat;
+
+    // Get each AVAX fixed point amount and calculate the fiat value
+    int ct = 0;
+    for (auto value : resultArr) {
+      std::string hexBal = value["result"].get<std::string>();
+      u256 avaxWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
+      bigfloat avaxBal = bigfloat(Utils::weiToFixedPoint(
+        boost::lexical_cast<std::string>(avaxWeiBal), 18
+      ));
+      bigfloat avaxUSDValueFloat = avaxUSDPrice * avaxBal;
       std::stringstream ss;
       ss << std::setprecision(2) << std::fixed << avaxUSDValueFloat;
       std::string avaxUSDValue = ss.str();
+      std::string avaxBalStr = boost::lexical_cast<std::string>(avaxBal);
       emit accountAVAXBalancesUpdated(
-        QString::fromStdString(addressesVec[i]),
-        QString::fromStdString(balancesVec[i]),
+        QString::fromStdString(addressesVec[ct++]),
+        QString::fromStdString(avaxBalStr),
         QString::fromStdString(avaxUSDValue)
       );
     }

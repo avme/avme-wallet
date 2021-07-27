@@ -53,6 +53,7 @@ Q_IMPORT_PLUGIN(QtChartsQml2Plugin)
 #include <network/Staking.h>
 
 #include <qmlwrap/QmlSystem.h>
+#include <qmlwrap/QmlApi.h>
 
 #include <hidapi/hidapi.h>
 

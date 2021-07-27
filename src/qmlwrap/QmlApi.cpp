@@ -7,7 +7,7 @@
 QString QmlApi::doAPIRequests() {
   std::string requests = API::buildMultiRequest(this->requestList);
   std::string response = API::httpGetRequest(requests);
-  this->requestList.clear()
+  this->requestList.clear();
   return QString::fromStdString(response);
 }
 
@@ -43,13 +43,6 @@ void QmlApi::buildGetCurrentBlockNumberReq() {
   this->requestList.push_back(req);
 }
 
-void QmlApi::buildGetNonceReq(std::string address) {
-  Request req{
-    this->requestList.size() + size_t(1), "2.0", "eth_getTransactionCount", {address}
-  };
-  this->requestList.push_back(req);
-}
-
 void QmlApi::buildGetTxReceiptReq(std::string txidHex) {
   Request req{
     this->requestList.size() + size_t(1), "2.0", "eth_getTransactionReceipt",
@@ -61,6 +54,23 @@ void QmlApi::buildGetTxReceiptReq(std::string txidHex) {
 // TODO: implement this
 void QmlApi::buildGetEstimateGasLimitReq() {
   ;
+}
+
+void QmlApi::buildARC20TokenExistsReq(std::string address) {
+  json supplyJson, balanceJson;
+  json supplyJsonArr = json::array();
+  json balanceJsonArr = json::array();
+  supplyJson["to"] = balanceJson["to"] = address;
+  supplyJson["data"] = Pangolin::ERC20Funcs["totalSupply"];
+  balanceJson["data"] = Pangolin::ERC20Funcs["balanceOf"] + Utils::addressToHex(address);
+  supplyJsonArr.push_back(supplyJson);
+  supplyJsonArr.push_back("latest");
+  balanceJsonArr.push_back(supplyJson);
+  balanceJsonArr.push_back("latest");
+  Request supplyReq{this->requestList.size() + size_t(1), "2.0", "eth_call", supplyJsonArr};
+  this->requestList.push_back(supplyReq);
+  Request balanceReq{this->requestList.size() + size_t(1), "2.0", "eth_call", balanceJsonArr};
+  this->requestList.push_back(balanceReq);
 }
 
 void QmlApi::buildGetARC20TokenDataReq(std::string address) {
