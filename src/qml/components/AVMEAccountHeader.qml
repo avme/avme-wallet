@@ -76,11 +76,96 @@ Rectangle {
     }
   }
 
+  Rectangle {
+    id: qrCodeRect
+    anchors {
+      top: parent.top
+      left: parent.left
+      leftMargin: 10
+      verticalCenter: parent.verticalCenter
+    }
+    color: "transparent"
+    radius: 5
+    height: addressText.height
+    width: height
+
+    Image {
+      id: qrCodeImage
+      anchors.centerIn: parent
+      height: parent.height * 0.8
+      width: parent.width * 0.8
+      fillMode: Image.PreserveAspectFit
+      antialiasing: true
+      smooth: true
+      source: "qrc:/img/icons/qrcode.png"
+    }
+    MouseArea {
+      id: qrCodeMouseArea
+      anchors.fill: parent
+      hoverEnabled: true
+      onEntered: {
+        parent.color = "#3F434C"
+        qrCodeImage.source = "qrc:/img/icons/qrcodeSelect.png"
+      }
+      onExited: {
+        parent.color = "transparent"
+        qrCodeImage.source = "qrc:/img/icons/qrcode.png"
+      }
+      onClicked: {
+        qrEncode()
+        qrcodePopup.open()
+      }
+    }
+  }
+
+  Rectangle {
+    id: copyClipRect
+    anchors {
+      top: parent.top
+      left: qrCodeRect.right
+      leftMargin: 10
+      verticalCenter: parent.verticalCenter
+    }
+    enabled: (!addressTimer.running)
+    color: "transparent"
+    radius: 5
+    height: addressText.height
+    width: height
+
+    Image {
+      id: copyClipImage
+      anchors.centerIn: parent
+      height: parent.height * 0.8
+      width: parent.width * 0.8
+      fillMode: Image.PreserveAspectFit
+      antialiasing: true
+      smooth: true
+      source: "qrc:/img/icons/Icon_Clipboard.png"
+    }
+    MouseArea {
+      id: copyClipMouseArea
+      anchors.fill: parent
+      hoverEnabled: true
+      onEntered: {
+        parent.color = "#3F434C"
+        copyClipImage.source = "qrc:/img/icons/Icon_Clipboard_On.png"
+      }
+      onExited: {
+        parent.color = "transparent"
+        copyClipImage.source = "qrc:/img/icons/Icon_Clipboard.png"
+      }
+      onClicked: {
+        QmlSystem.copyToClipboard(currentAddress)
+        addressTimer.start()
+      }
+    }
+  }
+
   Text {
     id: addressText
     anchors {
       verticalCenter: parent.verticalCenter
-      left: parent.left
+      left: copyClipRect.right
       leftMargin: 10
     }
     color: "#FFFFFF"
@@ -108,63 +193,6 @@ Rectangle {
           addressTimer.start()
         }
       }
-    }
-  }
-
-  Rectangle {
-    id: qrCodeRect
-    anchors {
-      top: parent.top
-      right: btnCopyToClipboard.left
-      rightMargin: 10
-      verticalCenter: parent.verticalCenter
-    }
-    color: "transparent"
-    radius: 5
-    height: addressText.height
-    width: height
-
-    Image {
-      id: qrCodeImage
-      anchors.verticalCenter: parent.verticalCenter
-      anchors.horizontalCenter: parent.horizontalCenter
-      height: parent.height * 0.8
-      width: parent.width * 0.8
-      mipmap: true
-      source: "qrc:/img/icons/qrcode.png"
-    }
-    MouseArea {
-      id: qrCodeMouseArea
-      anchors.fill: parent
-      hoverEnabled: true
-      onEntered: {
-        parent.color = "#3F434C"
-        qrCodeImage.source = "qrc:/img/icons/qrcodeSelect.png"
-      }
-      onExited: {
-        parent.color = "transparent"
-        qrCodeImage.source = "qrc:/img/icons/qrcode.png"
-      }
-      onClicked: {
-        qrEncode()
-        qrcodePopup.open()
-      }
-    }
-  }
-
-  AVMEButton {
-    id: btnCopyToClipboard
-    width: parent.width * 0.15
-    anchors {
-      verticalCenter: parent.verticalCenter
-      right: btnChangeAccount.left
-      rightMargin: 10
-    }
-    enabled: (!addressTimer.running)
-    text: (!addressTimer.running) ? "Copy To Clipboard" : "Copied!"
-    onClicked: {
-      QmlSystem.copyToClipboard(currentAddress)
-      addressTimer.start()
     }
   }
 
