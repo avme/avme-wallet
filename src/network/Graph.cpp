@@ -104,6 +104,7 @@ std::string Graph::getAVAXPriceUSD() {
 // TODO: use nlohmann/json
 std::string Graph::getTokenPriceUSD(std::string address, std::string AVAXUnitPriceUSD) {
   std::stringstream query;
+  std::transform(address.begin(), address.end(), address.begin(), ::tolower);
   query << "{\"query\": \"{"
         << "token(id: \\\"" + address + "\\\")"
         << "{symbol derivedETH}"

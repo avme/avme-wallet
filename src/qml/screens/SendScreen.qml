@@ -144,16 +144,12 @@ Item {
     }
   }
 
-  AVMEAccountHeader {
-    id: accountHeader
-  }
-
   // Panel for the transaction inputs
   AVMEPanel {
     id: txDetailsPanel
     width: (parent.width * 0.5)
     anchors {
-      top: accountHeader.bottom
+      top: parent.top
       horizontalCenter: parent.horizontalCenter
       bottom: parent.bottom
       margins: 10

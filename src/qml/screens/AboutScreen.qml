@@ -11,14 +11,10 @@ import "qrc:/qml/components"
 Item {
   id: aboutScreen
 
-  AVMEAccountHeader {
-    id: accountHeader
-  }
-
   AVMEPanel {
     id: aboutPanel
     anchors {
-      top: accountHeader.bottom
+      top: parent.top
       bottom: parent.bottom
       left: parent.left
       right: parent.right

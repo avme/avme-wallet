@@ -31,7 +31,7 @@ GridView {
     Item {
       id: gridItem
       Rectangle {
-        height: parent.parent.parent.height / qrCodeGridView.squareSize
+        height: qrCodeGridView.height / qrCodeGridView.squareSize
         width: height
         antialiasing: true
         color: (squareColor) ? "black" : "white";

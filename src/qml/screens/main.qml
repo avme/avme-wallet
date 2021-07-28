@@ -33,12 +33,30 @@ ApplicationWindow {
       State {
         name: "menuHide"; when: !menuToggle
         PropertyChanges { target: sideMenu; visible: false }
-        AnchorChanges { target: content; anchors.left: parent.left }
+        PropertyChanges { target: accountHeader; visible: false }
+        AnchorChanges {
+          target: content;
+          anchors {
+            left: parent.left
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
+          }
+        }
       },
       State {
         name: "menuShow"; when: menuToggle
         PropertyChanges { target: sideMenu; visible: true }
-        AnchorChanges { target: content; anchors.left: sideMenu.right }
+        PropertyChanges { target: accountHeader; visible: true }
+        AnchorChanges {
+          target: content;
+          anchors {
+            left: sideMenu.right
+            right: parent.right
+            top: accountHeader.bottom
+            bottom: parent.bottom
+          }
+        }
       }
     ]
   }
@@ -69,6 +87,7 @@ ApplicationWindow {
     }
   }
 
+  // Side menu
   AVMESideMenu {
     id: sideMenu
     anchors {
@@ -78,16 +97,22 @@ ApplicationWindow {
     }
   }
 
+  // Account header
+  AVMEAccountHeader {
+    id: accountHeader
+    anchors {
+      top: parent.top
+      left: sideMenu.right
+      right: parent.right
+      margins: 10
+    }
+  }
+
   // Dynamic screen loader (used in setScreen(id, screenpath))
   Loader {
     id: content
     antialiasing: true
     smooth: true
-    anchors {
-      right: parent.right
-      top: parent.top
-      bottom: parent.bottom
-    }
     source: "qrc:/qml/screens/StartScreen.qml"
   }
 }

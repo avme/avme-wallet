@@ -12,18 +12,10 @@ import "qrc:/qml/panels"
 Item {
   antialiasing: true
   id: overviewScreen
-  AVMEAccountHeader {
-    smooth: true
-    id: accountHeader
-  }
 
   AVMEPanelOverview {
     id: accountOverviewPanel
-    anchors.top: accountHeader.bottom
-    anchors.left: parent.left
-    anchors.topMargin: parent.height * 0.025
-    anchors.leftMargin: parent.width * 0.025
-    height: parent.height * 0.875
-    width: parent.width * 0.95
+    anchors.fill: parent
+    anchors.margins: 10
   }
 }

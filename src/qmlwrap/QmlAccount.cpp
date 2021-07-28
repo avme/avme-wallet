@@ -216,9 +216,10 @@ void QmlSystem::getAccountTokenBalances(QString address) {
     // Calculate the fiat value for each token
     int ct = 0;
     for (auto value : resultArr) {
-      bigfloat tokenUSDPrice = boost::lexical_cast<bigfloat>(Graph::getTokenPriceUSD(
+      std::string tokenUSDPriceStr = Graph::getTokenPriceUSD(
         tokenList[ct].address, boost::lexical_cast<std::string>(avaxUSDPrice)
-      ));
+      );
+      bigfloat tokenUSDPrice = boost::lexical_cast<bigfloat>(tokenUSDPriceStr);
       std::string hexBal = value["result"].get<std::string>();
       u256 tokenWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
       bigfloat tokenBal = bigfloat(Utils::weiToFixedPoint(

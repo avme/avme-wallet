@@ -83,6 +83,7 @@ Item {
       QmlSystem.loadTokenDB()
       QmlSystem.loadHistoryDB(QmlSystem.getCurrentAccount())
       QmlSystem.loadARC20Tokens()
+      accountHeader.getAddress()
       QmlSystem.goToOverview()
       QmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
     }

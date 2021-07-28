@@ -90,10 +90,6 @@ Item {
     reloadLiquidityDataTimer.start()
   }
 
-  AVMEAccountHeader {
-    id: accountHeader
-  }
-
   // Panel for selecting Classic x Compound
   AVMEPanel {
     id: stakingSelectPanel
@@ -101,8 +97,8 @@ Item {
     height: (parent.height * 0.075)
     title: ""
     anchors {
-      top: accountHeader.bottom
-      left: parent.left
+      top: parent.top
+      horizontalCenter: parent.horizontalCenter
       margins: 10
     }
 

@@ -29,16 +29,12 @@ Item {
     tokenList.sortBySymbol()
   }
 
-  AVMEAccountHeader {
-    id: accountHeader
-  }
-
   AVMEPanel {
     id: tokensPanel
     width: (parent.width * 0.6)
     title: "Token List"
     anchors {
-      top: accountHeader.bottom
+      top: parent.top
       bottom: parent.bottom
       left: parent.left
       margins: 10
@@ -99,7 +95,7 @@ Item {
     width: (parent.width * 0.4)
     title: "Token Details"
     anchors {
-      top: accountHeader.bottom
+      top: parent.top
       bottom: parent.bottom
       right: parent.right
       margins: 10

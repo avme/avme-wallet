@@ -7,30 +7,53 @@ import QtQuick.Controls 2.2
 import "qrc:/qml/components"
 import "qrc:/qml/popups"
 
-// Header that shows the current Account and options for changing it
+/**
+ * Header that shows the current Account and stores details about it
+ * (e.g. balances, QR code, buttons for changing Account/Wallet, etc.)
+ */
 Rectangle {
-  function qrEncode() {
-    qrcodePopup.qrModel.clear()
-    var qrData = QmlSystem.getQRCodeFromAddress(QmlSystem.getCurrentAccount())
-    for (var i = 0; i < qrData.length; i++) {
-      qrcodePopup.qrModel.set(i, JSON.parse(qrData[i]))
-    }
-  }
   id: accountHeader
-  property var tokenList
-  property var selectedToken
-  anchors {
-    top: parent.top
-    left: parent.left
-    right: parent.right
-    margins: 10
-  }
+  property string currentAddress
+  property var coinBalance
+  property var coinValue
+  property var tokenBalances
+  property var tokenValues
   height: 50
   color: "transparent"
   radius: 10
 
   Timer { id: addressTimer; interval: 2000 }
+  Timer { id: balancesTimer; interval: 5000; repeat: true; onTriggered: refreshBalances() }
   Timer { id: ledgerRetryTimer; interval: 250; onTriggered: checkLedger() }
+
+  Connections {
+    target: QmlSystem
+    function onAccountAVAXBalancesUpdated(address, avaxBalance, avaxValue) {
+      if (address == currentAddress) {
+        coinBalance = avaxBalance
+        coinValue = avaxValue
+        console.log("got coin: " + coinBalance + " - " + coinValue)
+      }
+    }
+    function onAccountTokenBalancesUpdated(address, tokenSymbol, tokenBalance, tokenValue) {
+      if (address == currentAddress) {
+        tokenBalances[tokenSymbol] = tokenBalance
+        tokenValues[tokenSymbol] = tokenValue
+        console.log("got token: " + tokenSymbol + " - " +  tokenBalance + " - " + tokenValue)
+      }
+    }
+  }
+
+  function getAddress() {
+    currentAddress = QmlSystem.getCurrentAccount()
+    refreshBalances()
+    balancesTimer.start()
+  }
+
+  function refreshBalances() {
+    QmlSystem.getAccountAVAXBalances(currentAddress)
+    QmlSystem.getAccountTokenBalances(currentAddress)
+  }
 
   function checkLedger() {
     var data = QmlSystem.checkForLedger()
@@ -45,8 +68,12 @@ Rectangle {
     }
   }
 
-  function refreshTokenList() {
-    tokenList = QmlSystem.getARC20Tokens()
+  function qrEncode() {
+    qrcodePopup.qrModel.clear()
+    var qrData = QmlSystem.getQRCodeFromAddress(currentAddress)
+    for (var i = 0; i < qrData.length; i++) {
+      qrcodePopup.qrModel.set(i, JSON.parse(qrData[i]))
+    }
   }
 
   Text {
@@ -57,7 +84,7 @@ Rectangle {
       leftMargin: 10
     }
     color: "#FFFFFF"
-    text: (!addressTimer.running) ? QmlSystem.getCurrentAccount() : "Copied to clipboard!"
+    text: (!addressTimer.running) ? currentAddress : "Copied to clipboard!"
     font.bold: true
     font.pixelSize: 17.0
 
@@ -77,7 +104,7 @@ Rectangle {
         onExited: parent.color = "transparent"
         onClicked: {
           parent.color = "transparent"
-          QmlSystem.copyToClipboard(QmlSystem.getCurrentAccount())
+          QmlSystem.copyToClipboard(currentAddress)
           addressTimer.start()
         }
       }
@@ -86,14 +113,17 @@ Rectangle {
 
   Rectangle {
     id: qrCodeRect
-    anchors.top: parent.top
-    anchors.left: addressText.right
-    anchors.leftMargin: height / 2
-    anchors.verticalCenter: parent.verticalCenter
+    anchors {
+      top: parent.top
+      right: btnCopyToClipboard.left
+      rightMargin: 10
+      verticalCenter: parent.verticalCenter
+    }
     color: "transparent"
     radius: 5
     height: addressText.height
     width: height
+
     Image {
       id: qrCodeImage
       anchors.verticalCenter: parent.verticalCenter
@@ -133,7 +163,7 @@ Rectangle {
     enabled: (!addressTimer.running)
     text: (!addressTimer.running) ? "Copy To Clipboard" : "Copied!"
     onClicked: {
-      QmlSystem.copyToClipboard(QmlSystem.getCurrentAccount())
+      QmlSystem.copyToClipboard(currentAddress)
       addressTimer.start()
     }
   }
@@ -185,10 +215,11 @@ Rectangle {
     onAboutToHide: ledgerRetryTimer.stop()
     okBtn.text: "Close"
   }
-  
+
+  // "qrcodeWidth = 0" makes the program not even open, so leave it at 1
   AVMEPopupQRCode {
     id: qrcodePopup
-    qrcodeWidth: QmlSystem.getQRCodeSize(QmlSystem.getCurrentAccount())
-    textAddress.text: QmlSystem.getCurrentAccount()
+    qrcodeWidth: (currentAddress != "") ? QmlSystem.getQRCodeSize(currentAddress) : 1
+    textAddress.text: currentAddress
   }
 }

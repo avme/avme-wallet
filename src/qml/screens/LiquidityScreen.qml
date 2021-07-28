@@ -26,15 +26,11 @@ Item {
   property string removeLowerEstimate
   */
 
-  AVMEAccountHeader {
-    id: accountHeader
-  }
-
   AVMEPanel {
     id: addLiquidityPanel
     width: (parent.width * 0.5) - (anchors.margins / 2)
     anchors {
-      top: accountHeader.bottom
+      top: parent.top
       left: parent.left
       bottom: parent.bottom
       margins: 10
@@ -241,7 +237,7 @@ Item {
     id: removeLiquidityPanel
     width: (parent.width * 0.5) - (anchors.margins / 2)
     anchors {
-      top: accountHeader.bottom
+      top: parent.top
       right: parent.right
       bottom: parent.bottom
       margins: 10

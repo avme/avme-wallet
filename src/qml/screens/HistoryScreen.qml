@@ -45,16 +45,12 @@ Item {
     QmlSystem.listAccountTransactions(QmlSystem.getCurrentAccount())
   }
 
-  AVMEAccountHeader {
-    id: accountHeader
-  }
-
   // Transaction list
   Row {
     id: listBtnRow
     width: (parent.width * 0.4) - (anchors.margins * 2)
     anchors {
-      top: accountHeader.bottom
+      top: parent.top
       left: parent.left
       margins: 10
     }
@@ -103,7 +99,7 @@ Item {
     id: historyPanel
     width: (parent.width * 0.6) - (anchors.margins * 2)
     anchors {
-      top: accountHeader.bottom
+      top: parent.top
       bottom: parent.bottom
       right: parent.right
       margins: 10
