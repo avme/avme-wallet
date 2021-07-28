@@ -203,7 +203,7 @@ void QmlSystem::getAccountTokenBalances(QString address) {
       params["data"] = "0x70a08231000000000000000000000000" + addressStr;
       array.push_back(params);
       array.push_back("latest");
-      Request req{reqs.size() + size_t(1), "2.0", "eth_getBalance", array};
+      Request req{reqs.size() + size_t(1), "2.0", "eth_call", array};
       reqs.push_back(req);
     }
 
@@ -216,16 +216,16 @@ void QmlSystem::getAccountTokenBalances(QString address) {
     // Calculate the fiat value for each token
     int ct = 0;
     for (auto value : resultArr) {
-      std::string tokenUSDPriceStr = Graph::getTokenPriceUSD(
-        tokenList[ct].address, boost::lexical_cast<std::string>(avaxUSDPrice)
+      std::string tokenDerivedPriceStr = Graph::getTokenPriceDerived(
+        tokenList[ct].address
       );
-      bigfloat tokenUSDPrice = boost::lexical_cast<bigfloat>(tokenUSDPriceStr);
+      bigfloat tokenDerivedPrice = boost::lexical_cast<bigfloat>(tokenDerivedPriceStr);
       std::string hexBal = value["result"].get<std::string>();
       u256 tokenWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
       bigfloat tokenBal = bigfloat(Utils::weiToFixedPoint(
         boost::lexical_cast<std::string>(tokenWeiBal), tokenList[ct].decimals
       ));
-      bigfloat tokenUSDValueFloat = tokenUSDPrice * tokenBal;
+      bigfloat tokenUSDValueFloat = (tokenDerivedPrice * avaxUSDPrice) * tokenBal;
       std::stringstream ss;
       ss << std::setprecision(2) << std::fixed << tokenUSDValueFloat;
       std::string tokenUSDValue = ss.str();
@@ -234,7 +234,8 @@ void QmlSystem::getAccountTokenBalances(QString address) {
         address,
         QString::fromStdString(tokenList[ct].symbol),
         QString::fromStdString(tokenBalStr),
-        QString::fromStdString(tokenUSDValue)
+        QString::fromStdString(tokenUSDValue),
+        QString::fromStdString(tokenDerivedPriceStr)
       );
       ct++;
     }

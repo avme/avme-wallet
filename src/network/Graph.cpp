@@ -102,7 +102,7 @@ std::string Graph::getAVAXPriceUSD() {
 }
 
 // TODO: use nlohmann/json
-std::string Graph::getTokenPriceUSD(std::string address, std::string AVAXUnitPriceUSD) {
+std::string Graph::getTokenPriceDerived(std::string address) {
   std::stringstream query;
   std::transform(address.begin(), address.end(), address.begin(), ::tolower);
   query << "{\"query\": \"{"
@@ -112,11 +112,7 @@ std::string Graph::getTokenPriceUSD(std::string address, std::string AVAXUnitPri
   std::string resp = httpGetRequest(query.str());
   json respJson = json::parse(resp);
   std::string derivedETH = respJson["data"]["token"]["derivedETH"].get<std::string>();
-  bigfloat AVAXPriceFloat = boost::lexical_cast<double>(AVAXUnitPriceUSD);
-  bigfloat derivedETHFloat = boost::lexical_cast<double>(derivedETH);
-  bigfloat tokenPriceFloat = derivedETHFloat * AVAXPriceFloat;
-  std::string tokenPriceUSD = boost::lexical_cast<std::string>(tokenPriceFloat);
-  return tokenPriceUSD;
+  return derivedETH;
 }
 
 // TODO: use nlohmann/json

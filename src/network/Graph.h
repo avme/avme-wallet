@@ -42,7 +42,7 @@ class Graph {
      * Returns a string with the price in fixed point (e.g. "12.34").
      */
     static std::string getAVAXPriceUSD();
-    static std::string getTokenPriceUSD(std::string address, std::string AVAXUnitPriceUSD);
+    static std::string getTokenPriceDerived(std::string address);
 
     /**
      * Get the HISTORICAL token prices in fiat (USD), from the last X days (starting from today).

@@ -35,11 +35,11 @@ Rectangle {
         console.log("got coin: " + coinBalance + " - " + coinValue)
       }
     }
-    function onAccountTokenBalancesUpdated(address, tokenSymbol, tokenBalance, tokenValue) {
+    function onAccountTokenBalancesUpdated(address, tokenSymbol, tokenBalance, tokenValue, tokenDerivedValue) {
       if (address == currentAddress) {
+        console.log("got token: " + tokenSymbol + " - " +  tokenBalance + " - " + tokenValue + " - " + tokenDerivedValue)
         tokenBalances[tokenSymbol] = tokenBalance
         tokenValues[tokenSymbol] = tokenValue
-        console.log("got token: " + tokenSymbol + " - " +  tokenBalance + " - " + tokenValue)
       }
     }
   }
