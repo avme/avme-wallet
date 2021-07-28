@@ -29,25 +29,6 @@ QVariantList QmlSystem::listAccounts() {
   return ret;
 }
 
-/*
-bool QmlSystem::accountHasBalances(QString address) {
-  bool hasBalances = false;
-  for (Account &a : this->w.accounts) {
-    if (a.address == address.toStdString()) {
-      a.balancesThreadLock.lock();
-      hasBalances = (
-        a.balanceAVAX != "" && a.balanceAVME != "" &&
-        a.balanceLPFree != "" && a.balanceLPLocked != "" &&
-        a.balanceLockedCompoundLP != ""
-      );
-      a.balancesThreadLock.unlock();
-      break;
-    }
-  }
-  return hasBalances;
-}
-*/
-
 void QmlSystem::generateAccounts(QString seed, int idx) {
   QtConcurrent::run([=](){
     QVariantList ret;
@@ -203,6 +184,58 @@ void QmlSystem::getAllAVAXBalances(QStringList addresses) {
         QString::fromStdString(avaxBalStr),
         QString::fromStdString(avaxUSDValue)
       );
+    }
+  });
+}
+
+void QmlSystem::getAccountTokenBalances(QString address) {
+  QtConcurrent::run([=](){
+    std::vector<Request> reqs;
+    std::string addressStr = address.toStdString();
+    if (addressStr.substr(0,2) == "0x") { addressStr = addressStr.substr(2); }
+
+    // Build the balance request for every registered token in the Wallet
+    std::vector<ARC20Token> tokenList = QmlSystem::w.getARC20Tokens();
+    for (ARC20Token token : tokenList) {
+      json params;
+      json array = json::array();
+      params["to"] = token.address;
+      params["data"] = "0x70a08231000000000000000000000000" + addressStr;
+      array.push_back(params);
+      array.push_back("latest");
+      Request req{reqs.size() + size_t(1), "2.0", "eth_getBalance", array};
+      reqs.push_back(req);
+    }
+
+    // Make the request and get the AVAX price in USD
+    std::string query = API::buildMultiRequest(reqs);
+    std::string resp = API::httpGetRequest(query);
+    json resultArr = json::parse(resp);
+    bigfloat avaxUSDPrice = boost::lexical_cast<bigfloat>(Graph::getAVAXPriceUSD());
+
+    // Calculate the fiat value for each token
+    int ct = 0;
+    for (auto value : resultArr) {
+      bigfloat tokenUSDPrice = boost::lexical_cast<bigfloat>(Graph::getTokenPriceUSD(
+        tokenList[ct].address, boost::lexical_cast<std::string>(avaxUSDPrice)
+      ));
+      std::string hexBal = value["result"].get<std::string>();
+      u256 tokenWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
+      bigfloat tokenBal = bigfloat(Utils::weiToFixedPoint(
+        boost::lexical_cast<std::string>(tokenWeiBal), tokenList[ct].decimals
+      ));
+      bigfloat tokenUSDValueFloat = tokenUSDPrice * tokenBal;
+      std::stringstream ss;
+      ss << std::setprecision(2) << std::fixed << tokenUSDValueFloat;
+      std::string tokenUSDValue = ss.str();
+      std::string tokenBalStr = boost::lexical_cast<std::string>(tokenBal);
+      emit accountTokenBalancesUpdated(
+        address,
+        QString::fromStdString(tokenList[ct].symbol),
+        QString::fromStdString(tokenBalStr),
+        QString::fromStdString(tokenUSDValue)
+      );
+      ct++;
     }
   });
 }

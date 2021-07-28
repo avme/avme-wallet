@@ -37,11 +37,12 @@ class Graph {
     static std::string httpGetRequest(std::string reqBody);
 
     /**
-     * Get the CURRENT price in fiat (USD) for 1 AVAX and 1 AVME, respectively.
+     * Get the CURRENT price in fiat (USD) for 1 unit (fixed point) of AVAX
+     * and a given token, respectively.
      * Returns a string with the price in fixed point (e.g. "12.34").
      */
     static std::string getAVAXPriceUSD();
-    static std::string getAVMEPriceUSD(std::string AVAXUnitPriceUSD);
+    static std::string getTokenPriceUSD(std::string address, std::string AVAXUnitPriceUSD);
 
     /**
      * Get the HISTORICAL token prices in fiat (USD), from the last X days (starting from today).

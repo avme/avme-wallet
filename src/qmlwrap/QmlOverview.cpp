@@ -4,6 +4,31 @@
 
 #include <qmlwrap/QmlSystem.h>
 
+qreal QmlSystem::getQRCodeSize(QString address) {
+  qreal width = 0;
+  QRcode *qrcode = QRcode_encodeString(
+    address.toStdString().c_str(), 0, QR_ECLEVEL_L, QR_MODE_8, 1
+  );
+  width = qrcode->width;
+  return width;
+}
+
+QVariantList QmlSystem::getQRCodeFromAddress(QString address) {
+  QVariantList ret;
+  QRcode *qrcode = QRcode_encodeString(
+    address.toStdString().c_str(), 0, QR_ECLEVEL_L, QR_MODE_8, 1
+  );
+  size_t qrCodeSize = strlen((char*)qrcode->data);
+  for (int i = 0; i < qrCodeSize; i++) {
+    std::string obj;
+    std::string color = (qrcode->data[i] & 1) ? "true" : "false";
+    obj += "{\"squareColor\": " + color;
+    obj += "}";
+    ret << QString::fromStdString(obj);
+  }
+  return ret;
+}
+
 /*
 void QmlSystem::getAccountBalancesOverview(QString address) {
   QtConcurrent::run([=](){
@@ -219,6 +244,7 @@ void QmlSystem::getAllAccountFiatBalancesOverview() {
 }
 */
 
+/*
 void QmlSystem::calculateRewardCurrentROI() {
   QtConcurrent::run([=](){
     // Get the prices in USD for both AVAX and AVME
@@ -267,11 +293,9 @@ void QmlSystem::calculateRewardCurrentROI() {
       boost::lexical_cast<std::string>(u256(rewardPerDuration)), 18)
     );
 
-    /**
-     * Calculate the ROI, based on the following formula:
-     * A = AVAXUnitPrice, B = AVMEUnitPrice, C = LPamount, D = rewardPerDuration, E = LPsupply
-     * ROI = ((((C / E) * D) * 365) * B) / (A * 2) * 100
-     */
+    // Calculate the ROI, based on the following formula:
+    // A = AVAXUnitPrice, B = AVMEUnitPrice, C = LPamount, D = rewardPerDuration, E = LPsupply
+    // ROI = ((((C / E) * D) * 365) * B) / (A * 2) * 100
     bigfloat ROI = (
       ((((LPamount / LPsupply) * rewardPerDuration) * 365) * AVMEUnitPrice) / (AVAXUnitPrice * 2)
     ) * 100;
@@ -282,6 +306,7 @@ void QmlSystem::calculateRewardCurrentROI() {
     emit roiCalculated(QString::fromStdString(ROIss.str()));
   });
 }
+*/
 
 // TODO: use nlohmann/json
 /*
@@ -325,28 +350,3 @@ void QmlSystem::getMarketData(int days) {
 }
 */
 
-
-qreal QmlSystem::getQRCodeSize(QString address) {
-  qreal width = 0;
-  QRcode *qrcode = QRcode_encodeString(address.toStdString().c_str(), 0, QR_ECLEVEL_L, QR_MODE_8, 1);
-  width = qrcode->width;
-  return width;
-}
-
-QVariantList QmlSystem::getQRCodeFromAddress(QString address) {
-  QVariantList ret;
-
-  QRcode *qrcode = QRcode_encodeString(address.toStdString().c_str(), 0, QR_ECLEVEL_L, QR_MODE_8, 1);
-  size_t qrCodeSize = strlen((char*)qrcode->data);
-
-  for (int i = 0; i < qrCodeSize; i++)
-    {
-      std::string obj;
-      std::string color = (qrcode->data[i] & 1) ? "true" : "false";
-      obj += "{\"squareColor\": " + color;
-      obj += "}";
-      ret << QString::fromStdString(obj);
-    }
-
-  return ret;
-}

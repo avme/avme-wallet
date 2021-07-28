@@ -60,7 +60,12 @@ class QmlSystem : public QObject {
     void ledgerAccountGenerated(QVariantMap data);
     void accountCreated(QVariantMap data);
     void accountCreationFailed();
-    void accountAVAXBalancesUpdated(QString address, QString avaxBalance, QString avaxValue);
+    void accountAVAXBalancesUpdated(
+      QString address, QString avaxBalance, QString avaxValue
+    );
+    void accountTokenBalancesUpdated(
+      QString address, QString tokenSymbol, QString tokenBalance, QString tokenValue
+    );
 
     // Overview screen signals
     void accountBalancesUpdated(QVariantMap data);
@@ -195,10 +200,6 @@ class QmlSystem : public QObject {
     // List the Wallet's Accounts
     Q_INVOKABLE QVariantList listAccounts();
 
-    // Check if an Account has loaded the balances
-    // TODO: check this later
-    //Q_INVOKABLE bool accountHasBalances(QString address);
-
     // Generate an Account list from a given seed, starting from a given index.
     // Emits accountGenerated() for each generated Account
     Q_INVOKABLE void generateAccounts(QString seed, int idx);
@@ -232,6 +233,9 @@ class QmlSystem : public QObject {
     Q_INVOKABLE void getAccountAVAXBalances(QString address);
     Q_INVOKABLE void getAllAVAXBalances(QStringList addresses);
 
+    // Get the balances of all registered tokens for a specific Account
+    Q_INVOKABLE void getAccountTokenBalances(QString address);
+
     // (Re)Load the token and tx history databases, respectively.
     Q_INVOKABLE bool loadTokenDB();
     Q_INVOKABLE bool loadHistoryDB(QString address);
@@ -256,11 +260,10 @@ class QmlSystem : public QObject {
 
     // Get the current ROI for the staking reward.
     // Emits roiCalculated()
-    Q_INVOKABLE void calculateRewardCurrentROI();
+    //Q_INVOKABLE void calculateRewardCurrentROI();
 
     // Get data for the market chart for the last X days (most to least recent).
     // Emits marketDataUpdated()
-    // TODO: check this later
     //Q_INVOKABLE void getMarketData(int days);
 
     // ======================================================================
