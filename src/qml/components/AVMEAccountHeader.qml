@@ -16,11 +16,7 @@ Rectangle {
   property string currentAddress
   property var coinBalance
   property var coinValue
-  property var tokenAddresses: ([])
-  property var tokenBalances: ({})
-  property var tokenValues: ({})
-  property var tokenDerivedValues: ({})
-  property var tokenSymbols: ({})
+  property var tokenList: ({})
   height: 50
   color: "transparent"
   radius: 10
@@ -40,12 +36,21 @@ Rectangle {
     }
     function onAccountTokenBalancesUpdated(address, tokenAddress, tokenSymbol, tokenBalance, tokenValue, tokenDerivedValue) {
       if (address == currentAddress) {
-        tokenAddresses.push(tokenAddress)
-        tokenBalances[tokenAddress] = tokenBalance
-        tokenValues[tokenAddress] = tokenValue
-        tokenDerivedValues[tokenAddress] = tokenDerivedValue
-        tokenSymbols[tokenAddress] = tokenSymbol
-        console.log("got token: " + tokenSymbol + " - " + tokenAddress + " - " +  tokenBalance + " - " + tokenValue + " - " + tokenDerivedValue)
+        var tokenInformation = ({})
+        
+        tokenInformation["balance"] = tokenBalance
+        tokenInformation["value"] = tokenValue
+        tokenInformation["derivedValue"] = tokenDerivedValue
+        tokenInformation["symbol"] = tokenSymbol
+        tokenList[tokenAddress] = tokenInformation
+        for (var token in tokenList) {
+          console.log("Token")
+          console.log("Address: ", token)
+          console.log("Symbol: ", tokenList[token]["symbol"])
+          console.log("Balance: ", tokenList[token]["balance"])
+          console.log("USD Value: ", tokenList[token]["value"])
+          console.log("Derived Value: ", tokenList[token]["derivedValue"])
+        }
       }
     }
   }
