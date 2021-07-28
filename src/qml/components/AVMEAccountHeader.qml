@@ -16,8 +16,11 @@ Rectangle {
   property string currentAddress
   property var coinBalance
   property var coinValue
+  property var tokenAddresses: ([])
   property var tokenBalances: ({})
   property var tokenValues: ({})
+  property var tokenDerivedValues: ({})
+  property var tokenSymbols: ({})
   height: 50
   color: "transparent"
   radius: 10
@@ -35,11 +38,14 @@ Rectangle {
         console.log("got coin: " + coinBalance + " - " + coinValue)
       }
     }
-    function onAccountTokenBalancesUpdated(address, tokenSymbol, tokenBalance, tokenValue, tokenDerivedValue) {
+    function onAccountTokenBalancesUpdated(address, tokenAddress, tokenSymbol, tokenBalance, tokenValue, tokenDerivedValue) {
       if (address == currentAddress) {
-        tokenBalances[tokenSymbol] = tokenBalance
-        tokenValues[tokenSymbol] = tokenValue
-        console.log("got token: " + tokenSymbol + " - " +  tokenBalance + " - " + tokenValue + " - " + tokenDerivedValue)
+        tokenAddresses.push(tokenAddress)
+        tokenBalances[tokenAddress] = tokenBalance
+        tokenValues[tokenAddress] = tokenValue
+        tokenDerivedValues[tokenAddress] = tokenDerivedValue
+        tokenSymbols[tokenAddress] = tokenSymbol
+        console.log("got token: " + tokenSymbol + " - " + tokenAddress + " - " +  tokenBalance + " - " + tokenValue + " - " + tokenDerivedValue)
       }
     }
   }

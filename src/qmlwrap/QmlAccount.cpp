@@ -232,6 +232,7 @@ void QmlSystem::getAccountTokenBalances(QString address) {
       std::string tokenBalStr = boost::lexical_cast<std::string>(tokenBal);
       emit accountTokenBalancesUpdated(
         address,
+        QString::fromStdString(tokenList[ct].address),
         QString::fromStdString(tokenList[ct].symbol),
         QString::fromStdString(tokenBalStr),
         QString::fromStdString(tokenUSDValue),
