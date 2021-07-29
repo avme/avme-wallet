@@ -101,6 +101,15 @@ std::string Graph::getAVAXPriceUSD() {
   return (token0Label == "WAVAX") ? token1Price : token0Price;
 }
 
+std::string Graph::parseAVAXPriceUSD(json input) {
+  std::string token0Label, token1Label, token0Price, token1Price;
+  token0Label = input["data"]["USDAVAX"]["token0"]["symbol"].get<std::string>();
+  token1Label = input["data"]["USDAVAX"]["token1"]["symbol"].get<std::string>();
+  token0Price = input["data"]["USDAVAX"]["token0Price"].get<std::string>();
+  token1Price = input["data"]["USDAVAX"]["token1Price"].get<std::string>();
+  return (token0Label == "WAVAX") ? token1Price : token0Price;
+}
+
 // TODO: use nlohmann/json
 std::string Graph::getTokenPriceDerived(std::string address) {
   std::stringstream query;
@@ -139,5 +148,27 @@ json Graph::getAVMEPriceHistory(int days) {
   json respJson = json::parse(resp);
   json arr = respJson["data"]["tokenDayDatas"];
   return arr;
+}
+
+json Graph::getAccountPrices(std::vector<ARC20Token> tokenList) {
+  std::stringstream query;
+  json ret;
+  // Get USD AVAX price with ID USDAVAX.
+  query << "{\"query\": \"{"
+      << "USDAVAX: pair(id: \\\"0x9ee0a4e21bd333a6bb2ab298194320b8daa26516\\\")"
+      << "{token0 {symbol} token1 {symbol} token0Price token1Price}";
+      
+  // Request USD Price for each token. Using token_contract as ID
+
+  for (auto token : tokenList) {
+    std::transform(token.address.begin(), token.address.end(), token.address.begin(), ::tolower);
+    query << "token_" << token.address << ": token(id: \\\"" << token.address << "\\\")"
+    << "{symbol derivedETH}";
+  }
+  // Close the query
+  query << "}\"}";
+  std::string resp = httpGetRequest(query.str());
+  ret = json::parse(resp);
+  return ret;
 }
 

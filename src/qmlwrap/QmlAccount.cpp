@@ -196,6 +196,8 @@ void QmlSystem::getAccountTokenBalances(QString address) {
 
     // Build the balance request for every registered token in the Wallet
     std::vector<ARC20Token> tokenList = QmlSystem::w.getARC20Tokens();
+    // The API can eventually return unordered ID's, we need to properly treat iqt
+    std::map<uint64_t, std::string> idList;
     for (ARC20Token token : tokenList) {
       json params;
       json array = json::array();
@@ -204,6 +206,8 @@ void QmlSystem::getAccountTokenBalances(QString address) {
       array.push_back(params);
       array.push_back("latest");
       Request req{reqs.size() + size_t(1), "2.0", "eth_call", array};
+      // Due to GraphQL limitations, we need to add "token_" as prefix
+      idList[reqs.size() + size_t(1)] = std::string("token_") + token.address;
       reqs.push_back(req);
     }
 
@@ -211,34 +215,45 @@ void QmlSystem::getAccountTokenBalances(QString address) {
     std::string query = API::buildMultiRequest(reqs);
     std::string resp = API::httpGetRequest(query);
     json resultArr = json::parse(resp);
-    bigfloat avaxUSDPrice = boost::lexical_cast<bigfloat>(Graph::getAVAXPriceUSD());
+    // Request the prices of all the tokens to the GraphQL API
+    auto tokensPrices = Graph::getAccountPrices(tokenList);
 
+    bigfloat avaxUSDPrice = boost::lexical_cast<bigfloat>(Graph::parseAVAXPriceUSD(tokensPrices));
     // Calculate the fiat value for each token
-    int ct = 0;
-    for (auto value : resultArr) {
-      std::string tokenDerivedPriceStr = Graph::getTokenPriceDerived(
-        tokenList[ct].address
-      );
-      bigfloat tokenDerivedPrice = boost::lexical_cast<bigfloat>(tokenDerivedPriceStr);
-      std::string hexBal = value["result"].get<std::string>();
-      u256 tokenWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
-      bigfloat tokenBal = bigfloat(Utils::weiToFixedPoint(
-        boost::lexical_cast<std::string>(tokenWeiBal), tokenList[ct].decimals
-      ));
-      bigfloat tokenUSDValueFloat = (tokenDerivedPrice * avaxUSDPrice) * tokenBal;
-      std::stringstream ss;
-      ss << std::setprecision(2) << std::fixed << tokenUSDValueFloat;
-      std::string tokenUSDValue = ss.str();
-      std::string tokenBalStr = boost::lexical_cast<std::string>(tokenBal);
-      emit accountTokenBalancesUpdated(
-        address,
-        QString::fromStdString(tokenList[ct].address),
-        QString::fromStdString(tokenList[ct].symbol),
-        QString::fromStdString(tokenBalStr),
-        QString::fromStdString(tokenUSDValue),
-        QString::fromStdString(tokenDerivedPriceStr)
-      );
-      ct++;
+    for (auto id : idList) {
+      for (auto balance : resultArr) {
+        if (balance["id"].get<int>() == id.first) {
+          // Get token position in the tokenList
+          int pos = 0;
+          for (auto token : tokenList) {
+            if (id.second.find(token.address) != std::string::npos)
+              break;
+            ++pos;
+          }
+          // Due to GraphQL limitations, we need to add "token_" as prefix
+          std::transform(id.second.begin(), id.second.end(), id.second.begin(), ::tolower);
+          std::string tokenDerivedPriceStr = tokensPrices["data"][id.second]["derivedETH"].get<std::string>();
+          bigfloat tokenDerivedPrice = boost::lexical_cast<bigfloat>(tokenDerivedPriceStr);
+          std::string hexBal = balance["result"].get<std::string>();
+          u256 tokenWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
+          bigfloat tokenBal = bigfloat(Utils::weiToFixedPoint(
+            boost::lexical_cast<std::string>(tokenWeiBal), tokenList[pos].decimals
+          ));
+          bigfloat tokenUSDValueFloat = (tokenDerivedPrice * avaxUSDPrice) * tokenBal;
+          std::stringstream ss;
+          ss << std::setprecision(2) << std::fixed << tokenUSDValueFloat;
+          std::string tokenUSDValue = ss.str();
+          std::string tokenBalStr = boost::lexical_cast<std::string>(tokenBal);
+          emit accountTokenBalancesUpdated(
+            address,
+            QString::fromStdString(tokenList[pos].address),
+            QString::fromStdString(tokenList[pos].symbol),
+            QString::fromStdString(tokenBalStr),
+            QString::fromStdString(tokenUSDValue),
+            QString::fromStdString(tokenDerivedPriceStr)
+          );
+        }
+      }
     }
   });
 }

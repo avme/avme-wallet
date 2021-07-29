@@ -43,6 +43,15 @@ class Graph {
      */
     static std::string getAVAXPriceUSD();
     static std::string getTokenPriceDerived(std::string address);
+    /**
+     * Get the intire account prices for all both AVAX and Tokens
+     */
+    static json getAccountPrices(std::vector<ARC20Token> tokenList);
+
+    /**
+     * Parse a json which already contains the data to calculate AVAX value
+     */
+    static std::string parseAVAXPriceUSD(json input);
 
     /**
      * Get the HISTORICAL token prices in fiat (USD), from the last X days (starting from today).
