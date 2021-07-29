@@ -61,7 +61,7 @@ class QmlSystem : public QObject {
     void accountCreated(QVariantMap data);
     void accountCreationFailed();
     void accountAVAXBalancesUpdated(
-      QString address, QString avaxBalance, QString avaxValue
+      QString address, QString avaxBalance, QString avaxValue, QString avaxPrice
     );
     void accountTokenBalancesUpdated(
       QString address, QString tokenAddress, QString tokenSymbol, QString tokenBalance, QString tokenValue, QString tokenDerivedValue

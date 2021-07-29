@@ -16,6 +16,7 @@ Rectangle {
   property string currentAddress
   property var coinBalance
   property var coinValue
+  property var coinPrice
   property var tokenList: ({})
   height: 50
   color: "transparent"
@@ -27,10 +28,11 @@ Rectangle {
 
   Connections {
     target: QmlSystem
-    function onAccountAVAXBalancesUpdated(address, avaxBalance, avaxValue) {
+    function onAccountAVAXBalancesUpdated(address, avaxBalance, avaxValue, avaxPrice) {
       if (address == currentAddress) {
         coinBalance = avaxBalance
         coinValue = avaxValue
+        coinPrice = avaxPrice
         // Uncomment to see data
         //console.log("Coin")
         //console.log("Balance: " + coinBalance)
