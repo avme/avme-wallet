@@ -29,7 +29,6 @@
         <file>qml/popups/AVMEPopupQRCode.qml</file>
 
         <file>qml/panels/AVMEPanelAccountSelect.qml</file>
-        <file>qml/panels/AVMEPanelOverview.qml</file>
 
         <file>qml/components/AVMEButton.qml</file>
         <file>qml/components/AVMEInput.qml</file>

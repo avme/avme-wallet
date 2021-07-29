@@ -1,11 +1,10 @@
 /* Copyright (c) 2020-2021 AVME Developers
    Distributed under the MIT/X11 software license, see the accompanying
    file LICENSE or http://www.opensource.org/licenses/mit-license.php. */
-import QtQuick 2.15
-// Version 2.15 required for Gradient.orientation
+import QtQuick 2.15 // Gradient.orientation requires QtQuick 2.15
 import QtQuick.Controls 2.2
 
-// Panel template for basic info/data/etc.
+// Template for basic info/data/etc.
 Rectangle {
   id: overviewBalance
   property alias totalFiatBalance: fiatBalance.text
@@ -16,71 +15,67 @@ Rectangle {
   implicitHeight: 120
   gradient: Gradient {
     orientation: Gradient.Horizontal
-  	GradientStop { position: 0.0; color: "#9300f5" }
-  	GradientStop { position: 1.0; color: "#00d6f6" }
+    GradientStop { position: 0.0; color: "#9300f5" }
+    GradientStop { position: 1.0; color: "#00d6f6" }
   }
   radius: 10
-  Text {
-      id: title
-      anchors.top: parent.top
-      anchors.left: parent.left
-      anchors.topMargin: parent.height * 0.05
-      anchors.leftMargin: parent.height * 0.1
-      color: "white"
-      font.pixelSize: 18.0
-      font.bold: true
-      text: "Total balance"
-  }
-  Text {
+
+  Column {
+    anchors {
+      left: parent.left
+      right: parent.right
+      verticalCenter: parent.verticalCenter
+      margins: 10
+    }
+    spacing: 10
+
+    Text {
       id: fiatBalance
-      anchors.top: title.bottom
-      anchors.left: parent.left
-      anchors.topMargin: parent.height * 0.01
-      anchors.leftMargin: parent.height * 0.1
       color: "white"
       font.pixelSize: 24.0
       font.bold: true
-      text: if (accountHeader.coinBalance) {
-        var totalFiatBalance = +accountHeader.coinValue
-        for (var token in accountHeader.tokenList) {
-          totalFiatBalance += +accountHeader.tokenList[token]["value"]
+      text: {
+        if (accountHeader.coinBalance) {
+          var totalFiatBalance = +accountHeader.coinValue
+          for (var token in accountHeader.tokenList) {
+            totalFiatBalance += +accountHeader.tokenList[token]["value"]
+          }
+          text: "$" + totalFiatBalance
+        } else {
+          text: "Loading..."
         }
-        text: totalFiatBalance
-      } else {
-        text: "Loading..."
       }
-  }
-  Text {
+    }
+
+    Text {
       id: coinBalance
-      anchors.top: fiatBalance.bottom
-      anchors.left: parent.left
-      anchors.topMargin: parent.height * 0.01
-      anchors.leftMargin: parent.height * 0.1
       color: "white"
       font.pixelSize: 18.0
       font.bold: true
-      text: accountHeader.coinBalance ? accountHeader.coinBalance + " AVAX" : "Loading..."
-  }
-   Text {
+      text: (accountHeader.coinBalance)
+      ? accountHeader.coinBalance + " AVAX" : "Loading..."
+    }
+
+    Text {
       id: tokenBalance
-      anchors.top: coinBalance.bottom
-      anchors.left: parent.left
-      anchors.topMargin: parent.height * 0.01
-      anchors.leftMargin: parent.height * 0.1
       color: "white"
       font.pixelSize: 18.0
       font.bold: true
       // Using the own tokenList object makes the own ff to fail
-      text: if (accountHeader.coinBalance) {
-        var totalTokenWorth = 0.000000000000000000
-        for (var token in accountHeader.tokenList) {
-          totalTokenWorth += +accountHeader.tokenList[token]["balance"] *
-                              +accountHeader.tokenList[token]["derivedValue"]
-          console.log(totalTokenWorth)
+      text: {
+        if (accountHeader.coinBalance) {
+          var totalTokenWorth = 0.0
+          for (var token in accountHeader.tokenList) {
+            totalTokenWorth += (
+              +accountHeader.tokenList[token]["balance"] *
+              +accountHeader.tokenList[token]["derivedValue"]
+            )
+          }
+          text: totalTokenWorth + " AVAX (Tokens)"
+        } else {
+          text: "Loading..."
         }
-        text: totalTokenWorth + " AVAX (Tokens)"
-      } else {
-        text: "Loading..."
       }
-  } 
+    }
+  }
 }
