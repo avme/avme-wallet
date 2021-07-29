@@ -199,10 +199,10 @@ Item {
           anchors.margins: 20
           fillMode: Image.PreserveAspectFit
           source: {
-            var avme = QmlSystem.getAVMEData()
+            var avmeAddress = QmlSystem.getAVMEAddress()
             if (fromAssetPopup.chosenAssetSymbol == "AVAX") {
               source: "qrc:/img/avax_logo.png"
-            } else if (fromAssetPopup.chosenAssetAddress == avme.address) {
+            } else if (fromAssetPopup.chosenAssetAddress == avmeAddress) {
               source: "qrc:/img/avme_logo.png"
             } else {
               var img = QmlSystem.getARC20TokenImage(fromAssetPopup.chosenAssetAddress)
@@ -228,10 +228,10 @@ Item {
           anchors.margins: 20
           fillMode: Image.PreserveAspectFit
           source: {
-            var avme = QmlSystem.getAVMEData()
+            var avmeAddress = QmlSystem.getAVMEAddress()
             if (toAssetPopup.chosenAssetSymbol == "AVAX") {
               source: "qrc:/img/avax_logo.png"
-            } else if (toAssetPopup.chosenAssetAddress == avme.address) {
+            } else if (toAssetPopup.chosenAssetAddress == avmeAddress) {
               source: "qrc:/img/avme_logo.png"
             } else {
               var img = QmlSystem.getARC20TokenImage(toAssetPopup.chosenAssetAddress)

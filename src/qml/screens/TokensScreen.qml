@@ -10,17 +10,13 @@ import "qrc:/qml/popups"
 // Screen for managing the Wallet's registered tokens.
 Item {
   id: tokensScreen
-  property string avmeAddress
+  property string avmeAddress: QmlSystem.getAVMEAddress()
   property alias selectedToken: tokenGrid.currentItem
 
   Component.onCompleted: reloadTokens()
 
   function reloadTokens() {
-    // AVME is hardcoded here and always shows up
     tokenList.clear()
-    var avme = QmlSystem.getAVMEData()
-    tokenList.append(avme)
-    avmeAddress = avme.address
     QmlSystem.loadARC20Tokens()
     var tokens = QmlSystem.getARC20Tokens()
     for (var i = 0; i < tokens.length; i++) {
@@ -80,10 +76,7 @@ Item {
       AVMEButton {
         id: btnRemove
         width: (tokensPanel.width * 0.3)
-        enabled: (
-          selectedToken != null && avmeAddress != "" &&
-          selectedToken.itemAddress != avmeAddress
-        )
+        enabled: (selectedToken != null && selectedToken.itemAddress != avmeAddress)
         text: (enabled) ? "Remove this token" : "Can't remove"
         onClicked: confirmEraseTokenPopup.open()
       }
@@ -114,8 +107,7 @@ Item {
         fillMode: Image.PreserveAspectFit
         source: {
           if (selectedToken != null) {
-            var avme = QmlSystem.getAVMEData()
-            if (selectedToken.itemAddress == avme.address) {
+            if (selectedToken.itemAddress == avmeAddress) {
               source: "qrc:/img/avme_logo.png"
             } else {
               var img = QmlSystem.getARC20TokenImage(selectedToken.itemAddress)

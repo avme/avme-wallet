@@ -77,10 +77,10 @@ Item {
           anchors.margins: 20
           fillMode: Image.PreserveAspectFit
           source: {
-            var avme = QmlSystem.getAVMEData()
+            var avmeAddress = QmlSystem.getAVMEAddress()
             if (addAsset1Popup.chosenAssetSymbol == "AVAX") {
               source: "qrc:/img/avax_logo.png"
-            } else if (addAsset1Popup.chosenAssetAddress == avme.address) {
+            } else if (addAsset1Popup.chosenAssetAddress == avmeAddress) {
               source: "qrc:/img/avme_logo.png"
             } else {
               var img = QmlSystem.getARC20TokenImage(addAsset1Popup.chosenAssetAddress)
@@ -98,10 +98,10 @@ Item {
           anchors.margins: 20
           fillMode: Image.PreserveAspectFit
           source: {
-            var avme = QmlSystem.getAVMEData()
+            var avmeAddress = QmlSystem.getAVMEAddress()
             if (addAsset2Popup.chosenAssetSymbol == "AVAX") {
               source: "qrc:/img/avax_logo.png"
-            } else if (addAsset2Popup.chosenAssetAddress == avme.address) {
+            } else if (addAsset2Popup.chosenAssetAddress == avmeAddress) {
               source: "qrc:/img/avme_logo.png"
             } else {
               var img = QmlSystem.getARC20TokenImage(addAsset2Popup.chosenAssetAddress)
@@ -303,10 +303,10 @@ Item {
           anchors.margins: 20
           fillMode: Image.PreserveAspectFit
           source: {
-            var avme = QmlSystem.getAVMEData()
+            var avmeAddress = QmlSystem.getAVMEAddress()
             if (removeAsset1Popup.chosenAssetSymbol == "AVAX") {
               source: "qrc:/img/avax_logo.png"
-            } else if (removeAsset1Popup.chosenAssetAddress == avme.address) {
+            } else if (removeAsset1Popup.chosenAssetAddress == avmeAddress) {
               source: "qrc:/img/avme_logo.png"
             } else {
               var img = QmlSystem.getARC20TokenImage(removeAsset1Popup.chosenAssetAddress)
@@ -324,10 +324,10 @@ Item {
           anchors.margins: 20
           fillMode: Image.PreserveAspectFit
           source: {
-            var avme = QmlSystem.getAVMEData()
+            var avmeAddress = QmlSystem.getAVMEAddress()
             if (removeAsset2Popup.chosenAssetSymbol == "AVAX") {
               source: "qrc:/img/avax_logo.png"
-            } else if (removeAsset2Popup.chosenAssetAddress == avme.address) {
+            } else if (removeAsset2Popup.chosenAssetAddress == avmeAddress) {
               source: "qrc:/img/avme_logo.png"
             } else {
               var img = QmlSystem.getARC20TokenImage(removeAsset2Popup.chosenAssetAddress)

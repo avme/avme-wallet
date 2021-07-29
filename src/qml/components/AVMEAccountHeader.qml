@@ -31,26 +31,29 @@ Rectangle {
       if (address == currentAddress) {
         coinBalance = avaxBalance
         coinValue = avaxValue
-        console.log("got coin: " + coinBalance + " - " + coinValue)
+        // Uncomment to see data
+        //console.log("Coin")
+        //console.log("Balance: " + coinBalance)
+        //console.log("USD Value: " + coinValue)
       }
     }
     function onAccountTokenBalancesUpdated(address, tokenAddress, tokenSymbol, tokenBalance, tokenValue, tokenDerivedValue) {
       if (address == currentAddress) {
         var tokenInformation = ({})
-        
         tokenInformation["balance"] = tokenBalance
         tokenInformation["value"] = tokenValue
         tokenInformation["derivedValue"] = tokenDerivedValue
         tokenInformation["symbol"] = tokenSymbol
         tokenList[tokenAddress] = tokenInformation
-        for (var token in tokenList) {
-          console.log("Token")
-          console.log("Address: ", token)
-          console.log("Symbol: ", tokenList[token]["symbol"])
-          console.log("Balance: ", tokenList[token]["balance"])
-          console.log("USD Value: ", tokenList[token]["value"])
-          console.log("Derived Value: ", tokenList[token]["derivedValue"])
-        }
+        // Uncomment to see data
+        //for (var token in tokenList) {
+        //  console.log("Token")
+        //  console.log("Address: ", token)
+        //  console.log("Symbol: ", tokenList[token]["symbol"])
+        //  console.log("Balance: ", tokenList[token]["balance"])
+        //  console.log("USD Value: ", tokenList[token]["value"])
+        //  console.log("Derived Value: ", tokenList[token]["derivedValue"])
+        //}
       }
     }
   }

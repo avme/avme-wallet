@@ -191,10 +191,10 @@ Item {
           smooth: true
           fillMode: Image.PreserveAspectFit
           source: {
-            var avme = QmlSystem.getAVMEData()
+            var avmeAddress = QmlSystem.getAVMEAddress()
             if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {
               source: "qrc:/img/avax_logo.png"
-            } else if (chooseAssetPopup.chosenAssetAddress == avme.address) {
+            } else if (chooseAssetPopup.chosenAssetAddress == avmeAddress) {
               source: "qrc:/img/avme_logo.png"
             } else {
               var img = QmlSystem.getARC20TokenImage(chooseAssetPopup.chosenAssetAddress)

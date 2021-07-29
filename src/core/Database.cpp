@@ -12,17 +12,16 @@ bool Database::openTokenDB() {
   if (!exists(path)) { create_directories(path); }
   this->tokenStatus = leveldb::DB::Open(this->tokenOpts, path, &this->tokenDB);
   std::vector<std::string> tokenJsonList = this->getAllTokenDBValues();
-  // Add AVME to the Database.
   if (tokenJsonList.size() == 0) {
+    // AVME is hardcoded at database creation
     json avme;
-    avme["address"] = "0x1ECd47FF4d9598f89721A2866BFEb99505a413Ed";
+    avme["address"] = Pangolin::contracts["AVME"];
     avme["symbol"] = "AVME";
     avme["name"] = "AVME";
     avme["decimals"] = 18;
-    avme["avaxPairContract"] = "0x381cc7bcba0afd3aeb0eaec3cb05d7796ddfd860";
-    this->putTokenDBValue("0x1ECd47FF4d9598f89721A2866BFEb99505a413Ed", avme.dump());
+    avme["avaxPairContract"] = Pangolin::contracts["AVAX-AVME"];
+    this->putTokenDBValue(Pangolin::contracts["AVME"], avme.dump());
   }
-
   return this->tokenStatus.ok();
 }
 

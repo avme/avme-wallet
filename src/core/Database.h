@@ -6,6 +6,7 @@
 
 #include <string>
 
+#include <network/Pangolin.h>
 #include <core/Utils.h>
 
 #include <lib/nlohmann_json/json.hpp>
@@ -13,9 +14,6 @@
 #include <leveldb/db.h>
 
 using namespace boost::filesystem;
-
-// For convenience.
-using json = nlohmann::json;
 
 /**
  * Class for abstracting LevelDB operations.

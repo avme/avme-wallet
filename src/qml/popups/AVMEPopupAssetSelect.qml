@@ -25,10 +25,7 @@ AVMEPopup {
   property string chosenAssetAVAXPairContract
 
   Component.onCompleted: {
-    // AVME is hardcoded here and always shows up
     tokenList.clear()
-    var avme = QmlSystem.getAVMEData()
-    tokenList.append(avme)
     QmlSystem.loadARC20Tokens()
     var tokens = QmlSystem.getARC20Tokens()
     for (var i = 0; i < tokens.length; i++) {
@@ -38,7 +35,11 @@ AVMEPopup {
     tokenList.sortBySymbol()
     if (defaultToAVME) {
       tokenSelectList.grabFocus()
-      tokenSelectList.currentIndex = 0
+      for (var i = 0; i < tokenList.count; i++) {
+        if (tokenList.get(i).address == QmlSystem.getAVMEAddress()) {
+          tokenSelectList.currentIndex = i;
+        }
+      }
     } else {
       coinSelectList.grabFocus()
       coinSelectList.currentIndex = 0

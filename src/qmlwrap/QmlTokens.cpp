@@ -60,14 +60,8 @@ bool QmlSystem::removeARC20Token(QString address) {
   return QmlSystem::w.removeARC20Token(address.toStdString());
 }
 
-QVariantMap QmlSystem::getAVMEData() {
-  QVariantMap tokenObj;
-  tokenObj.insert("address", QString::fromStdString(Pangolin::contracts["AVME"]));
-  tokenObj.insert("symbol", QString::fromStdString("AVME"));
-  tokenObj.insert("name", QString::fromStdString("AV Me"));
-  tokenObj.insert("decimals", 18);
-  tokenObj.insert("avaxPairContract", QString::fromStdString(Pangolin::contracts["AVAX-AVME"]));
-  return tokenObj;
+QString QmlSystem::getAVMEAddress() {
+  return QString::fromStdString(Pangolin::contracts["AVME"]);
 }
 
 bool QmlSystem::ARC20TokenExists(QString address) {
@@ -101,19 +95,13 @@ bool QmlSystem::ARC20TokenExists(QString address) {
 QVariantMap QmlSystem::getARC20TokenData(QString address) {
   std::string addressStr = address.toStdString();
   json nameJson, symbolJson, decimalsJson;
-  json nameJsonArr = json::array();
-  json symbolJsonArr = json::array();
-  json decimalsJsonArr = json::array();
   nameJson["to"] = symbolJson["to"] = decimalsJson["to"] = addressStr;
   nameJson["data"] = Pangolin::ERC20Funcs["name"];
   symbolJson["data"] = Pangolin::ERC20Funcs["symbol"];
   decimalsJson["data"] = Pangolin::ERC20Funcs["decimals"];
-  nameJsonArr.push_back(nameJson);
-  symbolJsonArr.push_back(symbolJson);
-  decimalsJsonArr.push_back(decimalsJson);
-  Request nameReq{1, "2.0", "eth_call", nameJsonArr};
-  Request symbolReq{1, "2.0", "eth_call", symbolJsonArr};
-  Request decimalsReq{1, "2.0", "eth_call", decimalsJsonArr};
+  Request nameReq{1, "2.0", "eth_call", {nameJson, "latest"}};
+  Request symbolReq{1, "2.0", "eth_call", {symbolJson, "latest"}};
+  Request decimalsReq{1, "2.0", "eth_call", {decimalsJson, "latest"}};
   std::string nameQuery, nameResp, nameHex, symbolQuery, symbolResp, symbolHex,
     decimalsQuery, decimalsResp, decimalsHex;
   nameQuery = API::buildRequest(nameReq);
