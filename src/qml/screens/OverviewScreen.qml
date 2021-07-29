@@ -35,6 +35,7 @@ Item {
       margins: 10
     }
     title: "Your Account"
+    rightRadius: false
 
     Column {
       id: overviewColumn
@@ -72,6 +73,7 @@ Item {
       margins: 10
     }
     title: "Your Assets"
+    leftRadius: false
 
     Column {
       id: assetsColumn

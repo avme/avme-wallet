@@ -8,13 +8,30 @@ import QtQuick.Controls 2.2
 Rectangle {
   id: panel
   property alias title: titleText.text
-
-  implicitWidth: 300
-  implicitHeight: 300
+  property bool leftRadius: true
+  property bool rightRadius: true
   color: "#0F0C18"
   radius: 5
   border.color: "#1D1827"
   border.width: 10
+
+  Rectangle {
+    id: leftRadiusRect
+    visible: !leftRadius
+    width: parent.border.width
+    height: parent.height
+    anchors.left: parent.left
+    color: parent.border.color
+  }
+
+  Rectangle {
+    id: rightRadiusRect
+    visible: !rightRadius
+    width: parent.border.width
+    height: parent.height
+    anchors.right: parent.right
+    color: parent.border.color
+  }
 
   Text {
     id: titleText

@@ -129,7 +129,7 @@ Item {
   // Panel for staking/unstaking LP
   AVMEPanel {
     id: stakingPanel
-    width: (parent.width * 0.5) - (anchors.margins * 2)
+    width: (parent.width * 0.5) - (anchors.margins / 2)
     visible: isClassic
     anchors {
       top: stakingSelectPanel.bottom
@@ -293,7 +293,7 @@ Item {
   AVMEPanel {
     id: harvestPanel
     visible: isClassic
-    width: (parent.width * 0.5) - (anchors.margins * 2)
+    width: (parent.width * 0.5) - (anchors.margins / 2)
     anchors {
       top: stakingSelectPanel.bottom
       right: parent.right
