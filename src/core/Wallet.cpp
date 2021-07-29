@@ -324,7 +324,7 @@ json Wallet::txDataToJSON() {
 void Wallet::loadTxHistory() {
   boost::filesystem::path txFilePath = Utils::walletFolderPath.string()
     + "/wallet/c-avax/accounts/transactions/" + this->currentAccount.first.c_str();
-  json txData = Utils::readJSONFile(txFilePath);
+  json txData = json::parse(Utils::readJSONFile(txFilePath));
   try {
     json txArray = txData["transactions"];
     this->currentAccountHistory.clear();
