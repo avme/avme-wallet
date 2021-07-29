@@ -40,7 +40,15 @@ Rectangle {
       color: "white"
       font.pixelSize: 24.0
       font.bold: true
-      text: "$0.00"
+      text: if (accountHeader.coinBalance) {
+        var totalFiatBalance = +accountHeader.coinValue
+        for (var token in accountHeader.tokenList) {
+          totalFiatBalance += +accountHeader.tokenList[token]["value"]
+        }
+        text: totalFiatBalance
+      } else {
+        text: "Loading..."
+      }
   }
   Text {
       id: coinBalance
@@ -51,7 +59,7 @@ Rectangle {
       color: "white"
       font.pixelSize: 18.0
       font.bold: true
-      text: "0.000000000000000000" + " AVAX"
+      text: accountHeader.coinBalance ? accountHeader.coinBalance + " AVAX" : "Loading..."
   }
    Text {
       id: tokenBalance
@@ -62,6 +70,17 @@ Rectangle {
       color: "white"
       font.pixelSize: 18.0
       font.bold: true
-      text: "0.000000000000000000" + " AVAX (Tokens)"
+      // Using the own tokenList object makes the own ff to fail
+      text: if (accountHeader.coinBalance) {
+        var totalTokenWorth = 0.000000000000000000
+        for (var token in accountHeader.tokenList) {
+          totalTokenWorth += +accountHeader.tokenList[token]["balance"] *
+                              +accountHeader.tokenList[token]["derivedValue"]
+          console.log(totalTokenWorth)
+        }
+        text: totalTokenWorth + " AVAX (Tokens)"
+      } else {
+        text: "Loading..."
+      }
   } 
 }
