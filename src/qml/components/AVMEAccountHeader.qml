@@ -17,6 +17,9 @@ Rectangle {
   property var coinBalance
   property var coinValue
   property var coinPrice
+  // We cannot use tokenList as a object in a if condition.
+  // So we need a variable that can tell that tokenList was updated
+  property var tokensLoading
   property var tokenList: ({})
   height: 50
   color: "transparent"
@@ -47,6 +50,7 @@ Rectangle {
         tokenInformation["derivedValue"] = tokenDerivedValue
         tokenInformation["symbol"] = tokenSymbol
         tokenList[tokenAddress] = tokenInformation
+        tokensLoading = "loaded"
         // Uncomment to see data
         //for (var token in tokenList) {
         //  console.log("Token")

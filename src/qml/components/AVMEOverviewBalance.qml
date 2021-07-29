@@ -61,9 +61,9 @@ Rectangle {
       color: "white"
       font.pixelSize: 18.0
       font.bold: true
-      // Using the own tokenList object makes the own ff to fail
+      // Using the own tokenList object makes the own if to fail
       text: {
-        if (accountHeader.coinBalance) {
+        if (accountHeader.tokensLoading) {
           var totalTokenWorth = 0.0
           for (var token in accountHeader.tokenList) {
             totalTokenWorth += (
