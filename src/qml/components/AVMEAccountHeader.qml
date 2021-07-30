@@ -24,6 +24,7 @@ Rectangle {
   height: 50
   color: "transparent"
   radius: 10
+  signal updatedBalances()
 
   Timer { id: addressTimer; interval: 2000 }
   Timer { id: balancesTimer; interval: 5000; repeat: true; onTriggered: refreshBalances() }
@@ -40,6 +41,7 @@ Rectangle {
         //console.log("Coin")
         //console.log("Balance: " + coinBalance)
         //console.log("USD Value: " + coinValue)
+        updatedBalances()
       }
     }
     function onAccountTokenBalancesUpdated(address, tokenAddress, tokenSymbol, tokenBalance, tokenValue, tokenDerivedValue, coinWorth) {
@@ -61,6 +63,7 @@ Rectangle {
         //  console.log("USD Value: ", tokenList[token]["value"])
         //  console.log("Derived Value: ", tokenList[token]["derivedValue"])
         //}
+        updatedBalances()
       }
     }
   }
