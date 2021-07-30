@@ -243,6 +243,7 @@ void QmlSystem::getAccountTokenBalances(QString address) {
             boost::lexical_cast<std::string>(tokenWeiBal), tokenList[pos].decimals
           ));
           bigfloat tokenUSDValueFloat = (tokenDerivedPrice * avaxUSDPrice) * tokenBal;
+          std::string coinWorth = boost::lexical_cast<std::string>(tokenDerivedPrice * tokenBal);
           std::stringstream ss;
           ss << std::setprecision(2) << std::fixed << tokenUSDValueFloat;
           std::string tokenUSDValue = ss.str();
@@ -253,7 +254,8 @@ void QmlSystem::getAccountTokenBalances(QString address) {
             QString::fromStdString(tokenList[pos].symbol),
             QString::fromStdString(tokenBalStr),
             QString::fromStdString(tokenUSDValue),
-            QString::fromStdString(tokenDerivedPriceStr)
+            QString::fromStdString(tokenDerivedPriceStr),
+            QString::fromStdString(coinWorth)
           );
         }
       }

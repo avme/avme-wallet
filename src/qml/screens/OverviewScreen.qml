@@ -93,26 +93,6 @@ Item {
         id: assetList
         width: parent.width
         height: parent.height
-        model: ListModel {
-          id: assetModel
-          // TODO: real token data here
-          ListElement {
-            assetName: "AVAX"
-            coinAmount: "0.000000000000000000"
-            tokenAmount: "0.000000000000000000"
-            isToken: false
-            fiatAmount: "$0.00"
-            imagePath: "qrc:/img/avax_logo.png"
-          }
-          ListElement {
-            assetName: "AVME"
-            coinAmount: "0.000000000000000000"
-            tokenAmount: "0.000000000000000000"
-            isToken: true
-            fiatAmount: "$0.00"
-            imagePath: "qrc:img/avme_logo.png"
-          }
-        }
       }
     }
   }

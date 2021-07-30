@@ -14,9 +14,9 @@ import "qrc:/qml/popups"
 Rectangle {
   id: accountHeader
   property string currentAddress
-  property var coinBalance
-  property var coinValue
-  property var coinPrice
+  property string coinBalance
+  property string coinValue
+  property string coinPrice
   // We cannot use tokenList as a object in a if condition.
   // So we need a variable that can tell that tokenList was updated
   property var tokensLoading
@@ -42,13 +42,14 @@ Rectangle {
         //console.log("USD Value: " + coinValue)
       }
     }
-    function onAccountTokenBalancesUpdated(address, tokenAddress, tokenSymbol, tokenBalance, tokenValue, tokenDerivedValue) {
+    function onAccountTokenBalancesUpdated(address, tokenAddress, tokenSymbol, tokenBalance, tokenValue, tokenDerivedValue, coinWorth) {
       if (address == currentAddress) {
         var tokenInformation = ({})
         tokenInformation["balance"] = tokenBalance
         tokenInformation["value"] = tokenValue
         tokenInformation["derivedValue"] = tokenDerivedValue
         tokenInformation["symbol"] = tokenSymbol
+        tokenInformation["coinWorth"] = coinWorth
         tokenList[tokenAddress] = tokenInformation
         tokensLoading = "loaded"
         // Uncomment to see data

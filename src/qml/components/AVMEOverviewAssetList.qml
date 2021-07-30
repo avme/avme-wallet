@@ -17,13 +17,58 @@ import QtQuick.Controls 2.2
  */
 ListView {
   id: assetList
+
+  Component.onCompleted: reloadAssets()
+
+  function reloadAssets() {
+    assetListModel.clear()
+    var tokens = accountHeader.tokenList
+    if (tokens == ({})) {
+      console.log("equals")
+    }
+    // AVAX is a obligatory asset, but it is not inside tokenList
+    var avax = ({})
+      if (accountHeader.coinBalance) {
+        avax["assetName"] = "AVAX"
+        avax["coinAmount"] = accountHeader.coinBalance
+        avax["tokenAmount"] = "0"
+        avax["isToken"] = false
+        avax["fiatAmount"] = "$" + accountHeader.coinValue
+        avax["imagePath"] = "qrc:/img/avax_logo.png"
+        assetListModel.append(avax)
+      }
+    for (var token in tokens) {
+      var asset = ({})
+      asset["assetName"] = tokens[token]["symbol"]
+      asset["coinAmount"] = tokens[token]["coinWorth"]
+      asset["tokenAmount"] = tokens[token]["balance"]
+      asset["isToken"] = true
+      asset["fiatAmount"] = "$" + tokens[token]["value"]
+      // AVME image is stored in the binary.
+      if (tokens[token]["symbol"] == "AVME") {
+        asset["imagePath"] = "qrc:/img/avme_logo.png"
+      } else {
+        asset["imagePath"] = "file:" + QmlSystem.getARC20TokenImage(token)
+      }
+      assetListModel.append(asset)
+    }
+  }
+
+  Connections {
+    target: QmlSystem
+      function onAccountTokenBalancesUpdated() {
+        reloadAssets()
+      }
+  }
   implicitWidth: 550
   implicitHeight: 600
   focus: true
   clip: true
   spacing: 10
   boundsBehavior: Flickable.StopAtBounds
-
+  model: ListModel {
+        id: assetListModel
+  }
   // Delegate (structure for each item in the list)
   delegate: Component {
     id: listDelegate
