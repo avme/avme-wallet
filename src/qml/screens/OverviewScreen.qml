@@ -68,10 +68,10 @@ Item {
           holeSize: 0.65
           function refresh() {
             clear()
-            append("AVAX", accountHeader.coinBalance)
+            append("AVAX", accountHeader.coinValue)
             for (var token in accountHeader.tokenList) {
               var sym = accountHeader.tokenList[token].symbol
-              var bal = accountHeader.tokenList[token].balance
+              var bal = accountHeader.tokenList[token].value
               append(sym, bal)
             }
             var baseColor = "#AD00FA"
@@ -84,8 +84,19 @@ Item {
           }
         }
         Text {
-          id: accountPieText
-          anchors.centerIn: parent
+          id: accountPiePercentageText
+          anchors.top: parent.top
+          anchors.topMargin: parent.height * 0.35
+          anchors.horizontalCenter: parent.horizontalCenter
+          font.pixelSize: 18.0
+          font.bold: true
+          color: "transparent"
+        }
+        Text {
+          id: accountPieValueText
+          anchors.bottom: parent.bottom
+          anchors.bottomMargin: parent.height * 0.35
+          anchors.horizontalCenter: parent.horizontalCenter
           font.pixelSize: 18.0
           font.bold: true
           color: "transparent"
@@ -138,13 +149,17 @@ Item {
             onEntered: {
               accountPie.at(itemId).exploded = true
               aCLMAR.color = "#22FFFFFF"
-              accountPieText.text = (+accountPie.at(itemId).percentage * 100).toFixed(2) + "%"
-              accountPieText.color = accountPie.at(itemId).color.toString()
+              accountPiePercentageText.text = (+accountPie.at(itemId).percentage * 100).toFixed(2) + "%"
+              accountPiePercentageText.color = accountPie.at(itemId).color.toString()
+              accountPieValueText.text = "$" + accountPie.at(itemId).value
+              accountPieValueText.color = accountPie.at(itemId).color.toString()
             }
             onExited: {
               accountPie.at(itemId).exploded = false
               aCLMAR.color = "transparent"
-              accountPieText.text = ""
+              accountPiePercentageText.text = ""
+              accountPieValueText.text = ""
+              accountPieValueText.color = "transparent"
             }
             Rectangle { id: aCLMAR; color: "transparent"; anchors.fill: parent; radius: 5 }
           }
