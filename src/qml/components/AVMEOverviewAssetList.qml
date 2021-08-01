@@ -5,6 +5,8 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 import QtCharts 2.9
 
+import "qrc:/qml/popups"
+
 /**
  * Custom list for a wallet's assets and amounts.
  * Requires a ListModel with the following items:
@@ -28,7 +30,7 @@ ListView {
     var avax = ({})
     // Don't fill the list if there is missing information
     if (!accountHeader.coinPriceChart || !accountHeader.tokensLoading) { return }
-    
+
     avax["assetAddress"] = "null"
     avax["assetName"] = "AVAX"
     avax["coinAmount"] = accountHeader.coinBalance
@@ -156,12 +158,12 @@ ListView {
           width: parent.width * 0.4
           visible: true
           antialiasing: true
-          backgroundColor: "#881D212A"
+          backgroundColor: "white"
           legend.visible: false
           margins { right: 0; bottom: 0; left: 0; top: 0 }
-          plotArea { 
-            height: assetMarketChart.height * 1
-            width: assetMarketChart.width * 0.9
+          plotArea {
+            width: assetMarketChart.width * 0.999
+            height: assetMarketChart.height * 0.99
           }
           SplineSeries {
             id: marketLine
@@ -212,7 +214,22 @@ ListView {
               listDelegateItem.visible = true
               assetMarketChart.visible = true
             }
-          }            
+          }
+          MouseArea {
+            id: assetChartMouseArea
+            width: parent.width
+            height: parent.height
+            hoverEnabled: true
+            z: parent.z - 1
+            Rectangle {
+              id: assetChartMouseAreaRect
+              anchors.fill: parent
+              visible: false
+              color: "#2E2938"
+            }
+            onEntered: assetChartMouseAreaRect.visible = true
+            onExited: assetChartMouseAreaRect.visible = false
+          }
         }
       }
     }
