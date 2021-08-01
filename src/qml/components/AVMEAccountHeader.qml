@@ -17,7 +17,7 @@ Rectangle {
   property string coinBalance
   property string coinValue
   property string coinPrice
-  property var coinPriceChart
+  property string coinPriceChart
   // We cannot use tokenList as a object in a if condition.
   // So we need a variable that can tell that tokenList was updated
   property var tokensLoading
@@ -26,6 +26,7 @@ Rectangle {
   color: "transparent"
   radius: 10
   signal updatedBalances()
+  signal tokensLoaded()
 
   Timer { id: addressTimer; interval: 2000 }
   Timer { id: balancesTimer; interval: 5000; repeat: true; onTriggered: refreshBalances() }
@@ -72,6 +73,7 @@ Rectangle {
         //  console.log("Derived Value: ", tokenList[token]["derivedValue"])
         //}
         updatedBalances()
+        tokensLoaded()
       }
     }
   }

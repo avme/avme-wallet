@@ -27,7 +27,7 @@ ListView {
     // AVAX is a obligatory asset, but it is not inside tokenList
     var avax = ({})
     // Don't fill the list if there is missing information
-    if (!accountHeader.coinBalance || !accountHeader.tokensLoading) { return }
+    if (!accountHeader.coinPriceChart || !accountHeader.tokensLoading) { return }
     
     avax["assetAddress"] = "null"
     avax["assetName"] = "AVAX"
@@ -58,15 +58,28 @@ ListView {
       }
       assetList.push(asset)
     }
-    assetListModel.clear()
-    assetListModel.append(assetList)
+    // If it is the first time loading the list, append
+    // Otherwise, update directly the items
+    if (assetListModel.count == 0) {
+      assetListModel.append(assetList)
+    } else {
+      for (var i = 0; i < assetListModel.count; ++i) {
+        var listObject = assetListModel.get(i);
+        for (var token in assetList) {
+          if (assetList[token]["assetAddress"] == listObject.assetAddress) {
+            listObject.coinAmount = assetList[token]["coinAmount"]
+            listObject.tokenAmount = assetList[token]["tokenAmount"]
+            listObject.fiatAmount = assetList[token]["fiatAmount"]
+            listObject.USDPrice = assetList[token]["USDprice"]
+          }
+        }
+      }
+    }
   }
 
   Connections {
-    target: QmlSystem
-      function onAccountTokenBalancesUpdated() {
-        reloadAssets()
-      }
+    target: accountHeader
+      function onTokensLoaded() { reloadAssets() }
   }
   implicitWidth: 550
   implicitHeight: 600
