@@ -199,6 +199,8 @@ void QmlSystem::getAllAVAXBalances(QStringList addresses) {
 
 void QmlSystem::getAccountTokenBalances(QString address) {
   QtConcurrent::run([=](){
+    json ret = json::array();
+
     std::vector<Request> reqs;
     std::string addressStr = address.toStdString();
     if (addressStr.substr(0,2) == "0x") { addressStr = addressStr.substr(2); }
@@ -261,20 +263,23 @@ void QmlSystem::getAccountTokenBalances(QString address) {
           // Again, we need to convert to lowercase and append chart_ as prefix
           std::transform(chartAddress.begin(), chartAddress.end(), chartAddress.begin(), ::tolower);
           std::string tokenChartData = tokensPrices["data"][chartAddress].dump();
-          emit accountTokenBalancesUpdated(
-            address,
-            QString::fromStdString(tokenList[pos].address),
-            QString::fromStdString(tokenList[pos].symbol),
-            QString::fromStdString(tokenBalStr),
-            QString::fromStdString(tokenUSDValue),
-            QString::fromStdString(tokenDerivedPriceStr),
-            QString::fromStdString(coinWorth),
-            QString::fromStdString(tokenChartData),
-            QString::fromStdString(boost::lexical_cast<std::string>(tokenUSDPrice))
-          );
+          json tokenInformation;
+          tokenInformation["tokenAddress"] = tokenList[pos].address;
+          tokenInformation["tokenSymbol"] = tokenList[pos].symbol;
+          tokenInformation["tokenBalance"] = tokenBalStr;
+          tokenInformation["tokenValue"] = tokenUSDValue;
+          tokenInformation["tokenDerivedValue"] = tokenDerivedPriceStr;
+          tokenInformation["coinWorth"] = coinWorth;
+          tokenInformation["tokenChartData"] = tokenChartData;
+          tokenInformation["tokenUSDPrice"] = boost::lexical_cast<std::string>(tokenUSDPrice);
+          ret.push_back(tokenInformation);
         }
       }
     }
+    emit accountTokenBalancesUpdated(
+      address,
+      QString::fromStdString(ret.dump())
+    );
   });
 }
 

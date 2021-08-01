@@ -46,17 +46,20 @@ Rectangle {
         updatedBalances()
       }
     }
-    function onAccountTokenBalancesUpdated(address, tokenAddress, tokenSymbol, tokenBalance, tokenValue, tokenDerivedValue, coinWorth, tokenChartData, tokenUSDPrice) {
+    function onAccountTokenBalancesUpdated(address, tokenJsonListStr) {
       if (address == currentAddress) {
-        var tokenInformation = ({})
-        tokenInformation["balance"] = tokenBalance
-        tokenInformation["value"] = tokenValue
-        tokenInformation["derivedValue"] = tokenDerivedValue
-        tokenInformation["symbol"] = tokenSymbol
-        tokenInformation["coinWorth"] = coinWorth
-        tokenInformation["chartData"] = tokenChartData
-        tokenInformation["USDprice"] = tokenUSDPrice
-        tokenList[tokenAddress] = tokenInformation
+        var tokenJsonList = JSON.parse(tokenJsonListStr)
+        for (var i = 0; i < tokenJsonList.length; ++i) {
+          var tokenInformation = ({})
+          tokenInformation["balance"] = tokenJsonList[i]["tokenBalance"]
+          tokenInformation["value"] = tokenJsonList[i]["tokenValue"]
+          tokenInformation["derivedValue"] = tokenJsonList[i]["tokenDerivedValue"]
+          tokenInformation["symbol"] = tokenJsonList[i]["tokenSymbol"]
+          tokenInformation["coinWorth"] = tokenJsonList[i]["coinWorth"]
+          tokenInformation["chartData"] = tokenJsonList[i]["tokenChartData"]
+          tokenInformation["USDprice"] = tokenJsonList[i]["tokenUSDPrice"]
+          tokenList[tokenJsonList[i]["tokenAddress"]] = tokenInformation
+        }
         tokensLoading = "loaded"
         // Uncomment to see data
         //for (var token in tokenList) {

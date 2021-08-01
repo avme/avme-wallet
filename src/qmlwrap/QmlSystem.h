@@ -64,7 +64,7 @@ class QmlSystem : public QObject {
       QString address, QString avaxBalance, QString avaxValue, QString avaxPrice, QString avaxPriceData
     );
     void accountTokenBalancesUpdated(
-      QString address, QString tokenAddress, QString tokenSymbol, QString tokenBalance, QString tokenValue, QString tokenDerivedValue, QString coinWorth, QString tokenChartData, QString tokenUSDPrice
+      QString address, QString tokenJsonListStr
     );
 
     // Overview screen signals
