@@ -41,7 +41,9 @@ Item {
     }
     title: "Your Account"
     rightRadius: false
-    Component.onCompleted: accountPie.refresh()
+    // Only load chart if everything is loaded
+    // TODO: Add loading animation
+    Component.onCompleted: if (accountHeader.tokensLoading) { accountPie.refresh() }
 
     Rectangle {
       id: accountChartRect

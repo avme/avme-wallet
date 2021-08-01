@@ -61,10 +61,10 @@ class QmlSystem : public QObject {
     void accountCreated(QVariantMap data);
     void accountCreationFailed();
     void accountAVAXBalancesUpdated(
-      QString address, QString avaxBalance, QString avaxValue, QString avaxPrice
+      QString address, QString avaxBalance, QString avaxValue, QString avaxPrice, QString avaxPriceData
     );
     void accountTokenBalancesUpdated(
-      QString address, QString tokenAddress, QString tokenSymbol, QString tokenBalance, QString tokenValue, QString tokenDerivedValue, QString coinWorth
+      QString address, QString tokenAddress, QString tokenSymbol, QString tokenBalance, QString tokenValue, QString tokenDerivedValue, QString coinWorth, QString tokenChartData, QString tokenUSDPrice
     );
 
     // Overview screen signals

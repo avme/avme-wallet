@@ -110,6 +110,21 @@ std::string Graph::parseAVAXPriceUSD(json input) {
   return (token0Label == "WAVAX") ? token1Price : token0Price;
 }
 
+json Graph::avaxUSDData(int days) {
+  std::stringstream query;
+  // Get USD AVAX price with ID USDAVAX.
+  query << "{\"query\": \"{"
+      << "USDAVAX: pair(id: \\\"0x9ee0a4e21bd333a6bb2ab298194320b8daa26516\\\")"
+      << "{token0 {symbol} token1 {symbol} token0Price token1Price}"
+  // Put the chart data into AVAXUSDCHART:
+      << "AVAXUSDCHART: tokenDayDatas(first: " << days << ", orderBy: date, orderDirection: desc, where: {"
+      << "token: \\\"0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7\\\""
+      << "} ) { date priceUSD } }\"}";
+  std::string resp = httpGetRequest(query.str());
+  json respJson = json::parse(resp);
+  return respJson;
+}
+
 // TODO: use nlohmann/json
 std::string Graph::getTokenPriceDerived(std::string address) {
   std::stringstream query;
@@ -164,6 +179,8 @@ json Graph::getAccountPrices(std::vector<ARC20Token> tokenList) {
     std::transform(token.address.begin(), token.address.end(), token.address.begin(), ::tolower);
     query << "token_" << token.address << ": token(id: \\\"" << token.address << "\\\")"
     << "{symbol derivedETH}";
+    query << "chart_" << token.address << ": tokenDayDatas(first: 31, orderBy: date, orderDirection: desc, where: {";
+    query << "token: \\\"" << token.address << "\\\"" << "} ) { date priceUSD id }";
   }
   // Close the query
   query << "}\"}";

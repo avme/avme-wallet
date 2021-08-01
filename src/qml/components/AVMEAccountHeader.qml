@@ -17,6 +17,7 @@ Rectangle {
   property string coinBalance
   property string coinValue
   property string coinPrice
+  property var coinPriceChart
   // We cannot use tokenList as a object in a if condition.
   // So we need a variable that can tell that tokenList was updated
   property var tokensLoading
@@ -32,11 +33,12 @@ Rectangle {
 
   Connections {
     target: QmlSystem
-    function onAccountAVAXBalancesUpdated(address, avaxBalance, avaxValue, avaxPrice) {
+    function onAccountAVAXBalancesUpdated(address, avaxBalance, avaxValue, avaxPrice, avaxPriceData) {
       if (address == currentAddress) {
         coinBalance = avaxBalance
         coinValue = avaxValue
         coinPrice = avaxPrice
+        coinPriceChart = avaxPriceData
         // Uncomment to see data
         //console.log("Coin")
         //console.log("Balance: " + coinBalance)
@@ -44,7 +46,7 @@ Rectangle {
         updatedBalances()
       }
     }
-    function onAccountTokenBalancesUpdated(address, tokenAddress, tokenSymbol, tokenBalance, tokenValue, tokenDerivedValue, coinWorth) {
+    function onAccountTokenBalancesUpdated(address, tokenAddress, tokenSymbol, tokenBalance, tokenValue, tokenDerivedValue, coinWorth, tokenChartData, tokenUSDPrice) {
       if (address == currentAddress) {
         var tokenInformation = ({})
         tokenInformation["balance"] = tokenBalance
@@ -52,6 +54,8 @@ Rectangle {
         tokenInformation["derivedValue"] = tokenDerivedValue
         tokenInformation["symbol"] = tokenSymbol
         tokenInformation["coinWorth"] = coinWorth
+        tokenInformation["chartData"] = tokenChartData
+        tokenInformation["USDprice"] = tokenUSDPrice
         tokenList[tokenAddress] = tokenInformation
         tokensLoading = "loaded"
         // Uncomment to see data

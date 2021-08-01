@@ -3,6 +3,7 @@
    file LICENSE or http://www.opensource.org/licenses/mit-license.php. */
 import QtQuick 2.9
 import QtQuick.Controls 2.2
+import QtCharts 2.9
 
 /**
  * Custom list for a wallet's assets and amounts.
@@ -21,11 +22,8 @@ ListView {
   Component.onCompleted: reloadAssets()
 
   function reloadAssets() {
-    assetListModel.clear()
+    var assetList = ([])
     var tokens = accountHeader.tokenList
-    if (tokens == ({})) {
-      console.log("equals")
-    }
     // AVAX is a obligatory asset, but it is not inside tokenList
     var avax = ({})
       if (accountHeader.coinBalance) {
@@ -35,7 +33,9 @@ ListView {
         avax["isToken"] = false
         avax["fiatAmount"] = "$" + accountHeader.coinValue
         avax["imagePath"] = "qrc:/img/avax_logo.png"
-        assetListModel.append(avax)
+        avax["priceChart"] = accountHeader.coinPriceChart
+        avax["USDPrice"] = accountHeader.coinPrice
+        assetList.push(avax)
       }
     for (var token in tokens) {
       var asset = ({})
@@ -44,14 +44,18 @@ ListView {
       asset["tokenAmount"] = tokens[token]["balance"]
       asset["isToken"] = true
       asset["fiatAmount"] = "$" + tokens[token]["value"]
+      asset["priceChart"] = tokens[token]["chartData"]
+      asset["USDPrice"] = tokens[token]["USDprice"]
       // AVME image is stored in the binary.
       if (tokens[token]["symbol"] == "AVME") {
         asset["imagePath"] = "qrc:/img/avme_logo.png"
       } else {
         asset["imagePath"] = "file:" + QmlSystem.getARC20TokenImage(token)
       }
-      assetListModel.append(asset)
+      assetList.push(asset)
     }
+    assetListModel.clear()
+    assetListModel.append(assetList)
   }
 
   Connections {
@@ -73,13 +77,14 @@ ListView {
   delegate: Component {
     id: listDelegate
     Item {
-      id: listItem
       readonly property string itemAssetName: assetName
       readonly property string itemCoinAmount: coinAmount
       readonly property string itemTokenAmount: tokenAmount
       readonly property bool itemIsToken: isToken
       readonly property string itemFiatAmount: fiatAmount
       readonly property string itemImagePath: imagePath
+      readonly property var itemPriceChart: priceChart
+      readonly property string itemUSDPrice: USDPrice
       width: assetList.width
       height: assetList.height * 0.3
 
@@ -123,6 +128,72 @@ ListView {
           }
         }
         // TODO: Clickable chart
+        ChartView {
+          id: assetMarketChart
+          anchors.right: parent.right
+          anchors.rightMargin: parent.width * 0.05
+          anchors.verticalCenter: parent.verticalCenter
+          height: parent.height * 0.8
+          width: parent.width * 0.4
+          visible: true
+          antialiasing: true
+          backgroundColor: "#881D212A"
+          legend.visible: false
+          margins { right: 0; bottom: 0; left: 0; top: 0 }
+          plotArea { 
+            height: assetMarketChart.height * 1
+            width: assetMarketChart.width * 0.9
+          }
+          SplineSeries {
+            id: marketLine
+            property int countX: 1
+            property alias minX: marketAxisX.min
+            property alias maxX: marketAxisX.max
+            property alias minY: marketAxisY.min
+            property alias maxY: marketAxisY.max
+            axisX: ValueAxis {
+              id: marketAxisX
+              labelsColor: "#FFFFFF"
+              gridLineColor: "#22FFFFFF"
+              tickCount: marketLine.countX
+              labelsVisible: false
+              lineVisible: false
+              visible: true
+            }
+            axisY: ValueAxis {
+              id: marketAxisY
+              labelsColor: "#FFFFFF"
+              gridLineColor: "#22FFFFFF"
+              labelsVisible: false
+              lineVisible: false
+              visible: true
+            }
+            Component.onCompleted: refresh()
+            function refresh() {
+              clear()
+              var jsonPriceChart = JSON.parse(itemPriceChart)
+              var start = 0
+              for (var priceData in jsonPriceChart) {
+                minY = -1
+                maxY = -1
+                if (start == 0) {
+                  marketLine.maxX = +jsonPriceChart[start]["date"]
+                }
+                if (start == (jsonPriceChart.length - 1)) {
+                  marketLine.minX = +jsonPriceChart[start]["date"]
+                }
+                minY = (minY == -1 || +jsonPriceChart[start]["priceUSD"] < minY) ? +jsonPriceChart[start]["priceUSD"] : minY
+                maxY = (maxY == -1 || +jsonPriceChart[start]["priceUSD"] > maxY) ? +jsonPriceChart[start]["priceUSD"] : maxY
+                marketLine.append(+jsonPriceChart[start]["date"], +jsonPriceChart[start]["priceUSD"])
+                ++start
+              }
+              marketLine.minY = (minY - 1 > 0) ? (minY - minY * 0.2) : 0
+              marketLine.maxY = maxY + (maxY * 0.3)
+              maxY = (+itemUSDPrice > maxY) ? (+itemUSDPrice + (+itemUSDPrice * 0.3)) : maxY
+              assetMarketChart.visible = true
+            }
+          }            
+        }
       }
     }
   }

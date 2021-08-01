@@ -42,6 +42,7 @@ class Graph {
      * Returns a string with the price in fixed point (e.g. "12.34").
      */
     static std::string getAVAXPriceUSD();
+    static json avaxUSDData(int days);
     static std::string getTokenPriceDerived(std::string address);
     /**
      * Get the intire account prices for all both AVAX and Tokens

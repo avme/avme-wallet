@@ -134,8 +134,10 @@ void QmlSystem::getAccountAVAXBalances(QString address) {
     std::string avaxBalStr = boost::lexical_cast<std::string>(avaxBal);
 
     // Get the AVAX USD price and calculate the balance in fiat
-    std::string avaxUSDPriceStr = Graph::getAVAXPriceUSD();
+    auto avaxUSDData = Graph::avaxUSDData(31);
+    std::string avaxUSDPriceStr = Graph::parseAVAXPriceUSD(avaxUSDData);
     bigfloat avaxUSDPrice = boost::lexical_cast<bigfloat>(avaxUSDPriceStr);
+
     bigfloat avaxUSDValueFloat = avaxUSDPrice * avaxBal;
     std::stringstream ss;
     ss << std::setprecision(2) << std::fixed << avaxUSDValueFloat;
@@ -143,7 +145,10 @@ void QmlSystem::getAccountAVAXBalances(QString address) {
 
     // Return the values
     emit accountAVAXBalancesUpdated(
-      address, QString::fromStdString(avaxBalStr), QString::fromStdString(avaxUSDValueStr), QString::fromStdString(avaxUSDPriceStr)
+      address, QString::fromStdString(avaxBalStr), 
+      QString::fromStdString(avaxUSDValueStr), 
+      QString::fromStdString(avaxUSDPriceStr), 
+      QString::fromStdString(avaxUSDData["data"]["AVAXUSDCHART"].dump())
     );
   });
 }
@@ -185,7 +190,8 @@ void QmlSystem::getAllAVAXBalances(QStringList addresses) {
         QString::fromStdString(addressesVec[ct++]),
         QString::fromStdString(avaxBalStr),
         QString::fromStdString(avaxUSDValue),
-        QString::fromStdString(avaxUSDValueStr)
+        QString::fromStdString(avaxUSDValueStr),
+        QString::fromStdString("")
       );
     }
   });
@@ -233,7 +239,7 @@ void QmlSystem::getAccountTokenBalances(QString address) {
               break;
             ++pos;
           }
-          // Due to GraphQL limitations, we need to add "token_" as prefix
+          // Due to GraphQL limitations, we need convert everything to lowercase
           std::transform(id.second.begin(), id.second.end(), id.second.begin(), ::tolower);
           std::string tokenDerivedPriceStr = tokensPrices["data"][id.second]["derivedETH"].get<std::string>();
           bigfloat tokenDerivedPrice = boost::lexical_cast<bigfloat>(tokenDerivedPriceStr);
@@ -242,12 +248,19 @@ void QmlSystem::getAccountTokenBalances(QString address) {
           bigfloat tokenBal = bigfloat(Utils::weiToFixedPoint(
             boost::lexical_cast<std::string>(tokenWeiBal), tokenList[pos].decimals
           ));
+          bigfloat tokenUSDPrice = tokenDerivedPrice * avaxUSDPrice;
           bigfloat tokenUSDValueFloat = (tokenDerivedPrice * avaxUSDPrice) * tokenBal;
           std::string coinWorth = boost::lexical_cast<std::string>(tokenDerivedPrice * tokenBal);
           std::stringstream ss;
           ss << std::setprecision(2) << std::fixed << tokenUSDValueFloat;
           std::string tokenUSDValue = ss.str();
           std::string tokenBalStr = boost::lexical_cast<std::string>(tokenBal);
+
+          std::string chartAddress = "chart_" + tokenList[pos].address;
+
+          // Again, we need to convert to lowercase and append chart_ as prefix
+          std::transform(chartAddress.begin(), chartAddress.end(), chartAddress.begin(), ::tolower);
+          std::string tokenChartData = tokensPrices["data"][chartAddress].dump();
           emit accountTokenBalancesUpdated(
             address,
             QString::fromStdString(tokenList[pos].address),
@@ -255,7 +268,9 @@ void QmlSystem::getAccountTokenBalances(QString address) {
             QString::fromStdString(tokenBalStr),
             QString::fromStdString(tokenUSDValue),
             QString::fromStdString(tokenDerivedPriceStr),
-            QString::fromStdString(coinWorth)
+            QString::fromStdString(coinWorth),
+            QString::fromStdString(tokenChartData),
+            QString::fromStdString(boost::lexical_cast<std::string>(tokenUSDPrice))
           );
         }
       }
