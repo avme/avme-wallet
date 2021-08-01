@@ -47,6 +47,7 @@ Rectangle {
       }
     }
     function onAccountTokenBalancesUpdated(address, tokenJsonListStr) {
+      tokenList = ({})
       if (address == currentAddress) {
         var tokenJsonList = JSON.parse(tokenJsonListStr)
         for (var i = 0; i < tokenJsonList.length; ++i) {
