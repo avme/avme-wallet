@@ -70,6 +70,8 @@ Item {
           holeSize: 0.65
           function refresh() {
             clear()
+            // Don't fill the chart ist if there is missing information
+            if (!accountHeader.coinBalance || !accountHeader.tokensLoading) { return }
             append("AVAX", accountHeader.coinValue)
             for (var token in accountHeader.tokenList) {
               var sym = accountHeader.tokenList[token].symbol
@@ -171,6 +173,8 @@ Item {
         id: accountChartLegendModel
         function refresh() {
           clear()
+          // Don't fill the chart ist if there is missing information
+          if (!accountHeader.coinBalance || !accountHeader.tokensLoading) { return }
           for (var i = 0; i < accountPie.count; i++) {
             append({
               id: i, label: accountPie.at(i).label,

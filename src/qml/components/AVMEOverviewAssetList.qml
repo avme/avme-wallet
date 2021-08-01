@@ -26,19 +26,23 @@ ListView {
     var tokens = accountHeader.tokenList
     // AVAX is a obligatory asset, but it is not inside tokenList
     var avax = ({})
-      if (accountHeader.coinBalance) {
-        avax["assetName"] = "AVAX"
-        avax["coinAmount"] = accountHeader.coinBalance
-        avax["tokenAmount"] = "0"
-        avax["isToken"] = false
-        avax["fiatAmount"] = "$" + accountHeader.coinValue
-        avax["imagePath"] = "qrc:/img/avax_logo.png"
-        avax["priceChart"] = accountHeader.coinPriceChart
-        avax["USDPrice"] = accountHeader.coinPrice
-        assetList.push(avax)
-      }
+    // Don't fill the list if there is missing information
+    if (!accountHeader.coinBalance || !accountHeader.tokensLoading) { return }
+    
+    avax["assetAddress"] = "null"
+    avax["assetName"] = "AVAX"
+    avax["coinAmount"] = accountHeader.coinBalance
+    avax["tokenAmount"] = "0"
+    avax["isToken"] = false
+    avax["fiatAmount"] = "$" + accountHeader.coinValue
+    avax["imagePath"] = "qrc:/img/avax_logo.png"
+    avax["priceChart"] = accountHeader.coinPriceChart
+    avax["USDPrice"] = accountHeader.coinPrice
+    assetList.push(avax)
+
     for (var token in tokens) {
       var asset = ({})
+      asset["assetAddress"] = token
       asset["assetName"] = tokens[token]["symbol"]
       asset["coinAmount"] = tokens[token]["coinWorth"]
       asset["tokenAmount"] = tokens[token]["balance"]
@@ -77,6 +81,8 @@ ListView {
   delegate: Component {
     id: listDelegate
     Item {
+      id: listDelegateItem
+      readonly property string itemAssetAddress: assetAddress
       readonly property string itemAssetName: assetName
       readonly property string itemCoinAmount: coinAmount
       readonly property string itemTokenAmount: tokenAmount
@@ -87,7 +93,7 @@ ListView {
       readonly property string itemUSDPrice: USDPrice
       width: assetList.width
       height: assetList.height * 0.3
-
+      visible: false
       Rectangle {
         id: assetRectangle
         width: parent.width
@@ -190,6 +196,7 @@ ListView {
               marketLine.minY = (minY - 1 > 0) ? (minY - minY * 0.2) : 0
               marketLine.maxY = maxY + (maxY * 0.3)
               maxY = (+itemUSDPrice > maxY) ? (+itemUSDPrice + (+itemUSDPrice * 0.3)) : maxY
+              listDelegateItem.visible = true
               assetMarketChart.visible = true
             }
           }            
