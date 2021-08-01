@@ -168,7 +168,7 @@ Item {
         leftMargin: 40
         rightMargin: 40
       }
-      spacing: 30
+      spacing: 25
 
       Row {
         id: assetRow
@@ -217,6 +217,19 @@ Item {
           text: "Change Asset"
           onClicked: chooseAssetPopup.open()
         }
+      }
+
+      Text {
+        id: assetBalance
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        text: "Total amount: <br><b>"
+        + ((chooseAssetPopup.chosenAssetSymbol == "AVAX")
+        ? accountHeader.coinBalance
+        : +accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]["balance"])
+        + " " + chooseAssetPopup.chosenAssetSymbol + "</b>"
       }
 
       AVMEInput {

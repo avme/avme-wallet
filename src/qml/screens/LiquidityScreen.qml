@@ -49,7 +49,7 @@ Item {
         leftMargin: 40
         rightMargin: 40
       }
-      spacing: 30
+      spacing: 25
 
       Text {
         id: addLiquidityHeader
@@ -146,6 +146,23 @@ Item {
           text: "Change Asset 2"
           onClicked: addAsset2Popup.open()
         }
+      }
+
+      Text {
+        id: assetBalance
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        text: "Total amounts: <br><b>"
+        + ((addAsset1Popup.chosenAssetSymbol == "AVAX")
+        ? accountHeader.coinBalance
+        : +accountHeader.tokenList[addAsset1Popup.chosenAssetAddress]["balance"])
+        + " " + addAsset1Popup.chosenAssetSymbol + "<br>"
+        + ((addAsset2Popup.chosenAssetSymbol == "AVAX")
+        ? accountHeader.coinBalance
+        : +accountHeader.tokenList[addAsset2Popup.chosenAssetAddress]["balance"])
+        + " " + addAsset2Popup.chosenAssetSymbol + "</b>"
       }
 
       AVMEInput {
@@ -256,7 +273,7 @@ Item {
         leftMargin: 40
         rightMargin: 40
       }
-      spacing: 30
+      spacing: 25
 
       Text {
         id: removeLiquidityHeader
@@ -354,6 +371,8 @@ Item {
           onClicked: removeAsset2Popup.open()
         }
       }
+
+      // TODO: total LP amount here
 
       Slider {
         id: liquidityLPSlider
