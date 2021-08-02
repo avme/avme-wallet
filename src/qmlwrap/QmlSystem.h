@@ -319,7 +319,9 @@ class QmlSystem : public QObject {
     Q_INVOKABLE QRegExp createTxRegExp(int decimals);
 
     // Calculate the real amount of a max AVAX transaction (minus gas costs)
-    Q_INVOKABLE QString getRealMaxAVAXAmount(QString gasLimit, QString gasPrice);
+    Q_INVOKABLE QString getRealMaxAVAXAmount(
+      QString totalBalance, QString gasLimit, QString gasPrice
+    );
 
     /**
      * Calculate the total cost of a transaction.

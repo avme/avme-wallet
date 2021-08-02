@@ -14,17 +14,16 @@ QRegExp QmlSystem::createTxRegExp(int decimals) {
   return rx;
 }
 
-QString QmlSystem::getRealMaxAVAXAmount(QString gasLimit, QString gasPrice) {
+QString QmlSystem::getRealMaxAVAXAmount(
+  QString totalBalance, QString gasLimit, QString gasPrice
+) {
   // Gas limit is in Wei, gas price is in Gwei (10^9 Wei)
   std::string gasLimitStr = gasLimit.toStdString();
   std::string gasPriceStr = Utils::fixedPointToWei(gasPrice.toStdString(), 9);
   u256 gasLimitU256 = u256(gasLimitStr);
   u256 gasPriceU256 = u256(gasPriceStr);
 
-  // TODO: check this later
-  std::string balanceAVAXStr;
-  //balanceAVAXStr = this->w.getCurrentAccount().first.balanceAVAX;
-  u256 totalU256 = u256(Utils::fixedPointToWei(balanceAVAXStr, 18));
+  u256 totalU256 = u256(Utils::fixedPointToWei(totalBalance.toStdString(), 18));
   if ((gasLimitU256 * gasPriceU256) > totalU256) {
     return QString::fromStdString(Utils::weiToFixedPoint(
       boost::lexical_cast<std::string>(u256(0)), 18

@@ -109,7 +109,12 @@ Item {
   }
   */
 
-  Component.onCompleted: updateTxCost()
+  Connections {
+    target: accountHeader
+    function onUpdatedBalances() { assetBalance.refresh() }
+  }
+
+  Component.onCompleted: { updateTxCost(); assetBalance.refresh() }
 
   function updateTxCost() {
     if (autoGasCheck.checked) { txGasPriceInput.text = QmlSystem.getAutomaticFee() }
@@ -126,20 +131,24 @@ Item {
     }
   }
 
-  // TODO: revise this when balances are working
   function checkTransactionFunds() {
-    var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
-    var hasCoinFunds = !QmlSystem.hasInsufficientFunds(
-      "Coin", acc.balanceAVAX, QmlSystem.calculateTransactionCost(
-        txTotalCoinStr.text, txGasLimitInput.text, txGasPriceInput.text
+    if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {  // Coin
+      var hasCoinFunds = !QmlSystem.hasInsufficientFunds(
+        accountHeader.coinBalance, QmlSystem.calculateTransactionCost(
+          txAmountInput.text, txGasLimitInput.text, txGasPriceInput.text
+        ), 18
       )
-    )
-    var hasTokenFunds = !QmlSystem.hasInsufficientFunds(
-      "Token", acc.balanceAVME, txTotalTokenStr.text
-    )
-    if (chooseAssetPopup.chosenAssetAddress == "") { // Coin
       return hasCoinFunds
-    } else {  // Token
+    } else { // Token
+      var hasCoinFunds = !QmlSystem.hasInsufficientFunds(
+        accountHeader.coinBalance, QmlSystem.calculateTransactionCost(
+          "0", txGasLimitInput.text, txGasPriceInput.text
+        ), 18
+      )
+      var hasTokenFunds = !QmlSystem.hasInsufficientFunds(
+        accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]["balance"],
+        txAmountInput.text, chooseAssetPopup.chosenAssetDecimals
+      )
       return (hasCoinFunds && hasTokenFunds)
     }
   }
@@ -225,11 +234,19 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.pixelSize: 14.0
-        text: "Total amount: <br><b>"
-        + ((chooseAssetPopup.chosenAssetSymbol == "AVAX")
-        ? accountHeader.coinBalance
-        : +accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]["balance"])
-        + " " + chooseAssetPopup.chosenAssetSymbol + "</b>"
+        function refresh() {
+          if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {
+            text = (accountHeader.coinBalance != "")
+            ? "Total amount: <b>" + accountHeader.coinBalance + " AVAX</b>"
+            : "Loading asset balance..."
+          } else {
+            var asset = accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]
+            text = (asset != undefined)
+            ? "Total amount: <b>" + asset["balance"]
+            + " " + chooseAssetPopup.chosenAssetSymbol + "</b>"
+            : "Loading asset balance..."
+          }
+        }
       }
 
       AVMEInput {
@@ -261,16 +278,11 @@ Item {
           }
           text: "Max"
           onClicked: {
-            if (chooseAssetPopup.chosenAssetAddress == "") { // Coin
-              // TODO: fix balances to test this
-              txAmountInput.text = QmlSystem.getRealMaxAVAXAmount(
-                txGasLimitInput.text, txGasPriceInput.text
-              )
-            } else {  // Token
-              // TODO: real token balances here
-              var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
-              txAmountTokenInput.text = acc.balanceAVME
-            }
+            txAmountInput.text = (chooseAssetPopup.chosenAssetSymbol == "AVAX")
+            ? QmlSystem.getRealMaxAVAXAmount(
+              accountHeader.coinBalance, txGasLimitInput.text, txGasPriceInput.text
+            )
+            : (+accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]["balance"])
             updateTxCost()
           }
         }
@@ -368,9 +380,22 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         text: "Make Transaction"
         Timer { id: ledgerRetryTimer; interval: 250; onTriggered: btnMakeTx.checkLedger() }
-        onClicked: confirmTxPopup.open()
+        onClicked: {
+          if (!checkTransactionFunds()) {
+            fundsPopup.open()
+          } else if (txToInput.text.length != 42) {
+            incorrectInputPopup.open()
+          } else {
+            // TODO: fix Ledger
+            //if (QmlSystem.getLedgerFlag()) {
+            //  checkLedger()
+            //} else {
+            //  confirmTxPopup.open()
+            //}
+            confirmTxPopup.open()
+          }
+        }
         /*
-        // TODO: this
         function checkLedger() {
           var data = QmlSystem.checkForLedger()
           if (data.state) {
@@ -388,22 +413,6 @@ Item {
             ledgerRetryTimer.start()
           }
         }
-        onClicked: {
-          if (!checkTransactionFunds()) {
-            fundsPopup.open()
-          } else {
-            if (!(txToInput.text.length === 42) && txToInput.visible) {
-              incorrectInputPopup.open()
-            } else {
-              confirmTxPopup.isSameAddress = (txFromInput.text === txToInput.text)
-              if (QmlSystem.getLedgerFlag()) {
-                checkLedger()
-              } else {
-                confirmTxPopup.open()
-              }
-            }
-          }
-        }
         */
       }
     }
@@ -412,14 +421,22 @@ Item {
   // Popup for choosing an asset to send
   AVMEPopupAssetSelect {
     id: chooseAssetPopup
-    onAboutToHide: updateTxCost()
+    onAboutToHide: { updateTxCost(); assetBalance.refresh() }
   }
 
   // Popup for confirming transaction
-  // TODO: rewrite this into a generic popup
-  /*
   AVMEPopupConfirmTx {
     id: confirmTxPopup
+    isSameAddress: (txToInput.text == accountHeader.currentAddress)
+    info: "You will send "
+    + "<b>" + txAmountInput.text + " " + chooseAssetPopup.chosenAssetSymbol + "</b>"
+    + " to the address<br><b>" + txToInput.text + "</b>"
+    + "<br>Gas Limit: <b>"
+    + QmlSystem.weiToFixedPoint(txGasLimitInput.text, 18) + " AVAX</b>"
+    + "<br>Gas Price: <b>"
+    + QmlSystem.weiToFixedPoint(txGasPriceInput.text, 9) + " AVAX</b>"
+    okBtn.onClicked: {} // TODO
+    /*
     function confirmPass() {
       if (!QmlSystem.checkWalletPass(pass)) {
         timer.start()
@@ -441,24 +458,11 @@ Item {
         if (confirmTxPopup.passFocus) { confirmTxPopup.confirmPass() }
       }
     }
-  }
-  */
-
-  // Popup for confirming transaction
-  AVMEPopupConfirmTx {
-    id: confirmTxPopup
-    isSameAddress: (txToInput.text == accountHeader.currentAddress)
-    info: "You will send "
-    + "<b>" + txAmountInput.text + " " + chooseAssetPopup.chosenAssetSymbol + "</b>"
-    + " to the address<br><b>" + txToInput.text + "</b>"
-    + "<br>Gas Limit: <b>"
-    + QmlSystem.weiToFixedPoint(txGasLimitInput.text, 18) + " AVAX</b>"
-    + "<br>Gas Price: <b>"
-    + QmlSystem.weiToFixedPoint(txGasPriceInput.text, 9) + " AVAX</b>"
-    okBtn.onClicked: {} // TODO
+    */
   }
 
   // Popup for insufficient funds
+  // TODO: fix this popup type's centering
   AVMEPopupInfo {
     id: fundsPopup
     icon: "qrc:/img/warn.png"
