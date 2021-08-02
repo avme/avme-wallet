@@ -10,7 +10,7 @@ QString QmlSystem::getAutomaticFee() {
 
 QRegExp QmlSystem::createTxRegExp(int decimals) {
   QRegExp rx;
-  rx.setPattern("[0-9]{0,99}(?:\\.[0-9]{1," + QString::number(decimals) + "})?");
+  rx.setPattern("[0-9]{1,99}(?:\\.[0-9]{1," + QString::number(decimals) + "})?");
   return rx;
 }
 

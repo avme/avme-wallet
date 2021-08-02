@@ -380,6 +380,10 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         text: "Make Transaction"
         Timer { id: ledgerRetryTimer; interval: 250; onTriggered: btnMakeTx.checkLedger() }
+        enabled: (
+          txToInput.acceptableInput && txAmountInput.acceptableInput &&
+          txGasLimitInput.acceptableInput && txGasPriceInput.acceptableInput
+        )
         onClicked: {
           if (!checkTransactionFunds()) {
             fundsPopup.open()
