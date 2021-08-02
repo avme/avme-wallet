@@ -4,28 +4,22 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
+import "qrc:/qml/components"
+
 /**
  * Popup for info.
  * Requires the following items:
  * "icon": the image that will be shown
  * "info": the text that will be shown
  */
-Popup {
+AVMEPopup {
   id: infoPopup
+  widthPct: 0.5
+  heightPct: 0.25
   property string icon
   property string info
   property alias okBtn: btnOk
   property color popupBgColor: "#1C2029"
-
-  width: window.width / 2
-  height: window.height / 4
-  x: (window.width / 2) - (width / 2)
-  y: (window.height / 2) - (height / 2)
-  background: Rectangle { anchors.fill: parent; color: popupBgColor; radius: 10 }
-  modal: true
-  focus: true
-  padding: 0  // Remove white borders
-  closePolicy: Popup.NoAutoClose
 
   Row {
     id: infoContent

@@ -16,6 +16,7 @@
         <file>qml/screens/SettingsScreen.qml</file>
         <file>qml/screens/AboutScreen.qml</file>
 
+        <file>qml/popups/AVMEPopupInfo.qml</file>
         <file>qml/popups/AVMEPopupYesNo.qml</file>
         <file>qml/popups/AVMEPopupCreateWallet.qml</file>
         <file>qml/popups/AVMEPopupLoadWallet.qml</file>
@@ -41,7 +42,6 @@
         <file>qml/components/AVMEAccountSeedList.qml</file>
         <file>qml/components/AVMETxHistoryList.qml</file>
         <file>qml/components/AVMEPopup.qml</file>
-        <file>qml/components/AVMEPopupInfo.qml</file>
         <file>qml/components/AVMEPopupLedger.qml</file>
         <file>qml/components/AVMEPopupTxProgress.qml</file>
         <file>qml/components/AVMECoinList.qml</file>
