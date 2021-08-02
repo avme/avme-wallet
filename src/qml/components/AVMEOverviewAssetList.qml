@@ -81,7 +81,9 @@ ListView {
 
   Connections {
     target: accountHeader
+      // Whatever happens first.
       function onTokensLoaded() { reloadAssets() }
+      function onUpdatedBalances() { reloadAssets() }
   }
   implicitWidth: 550
   implicitHeight: 600
@@ -194,9 +196,9 @@ ListView {
               clear()
               var jsonPriceChart = JSON.parse(itemPriceChart)
               var start = 0
+              minY = -1
+              maxY = -1
               for (var priceData in jsonPriceChart) {
-                minY = -1
-                maxY = -1
                 if (start == 0) {
                   marketLine.maxX = +jsonPriceChart[start]["date"]
                 }
@@ -204,13 +206,15 @@ ListView {
                   marketLine.minX = +jsonPriceChart[start]["date"]
                 }
                 minY = (minY == -1 || +jsonPriceChart[start]["priceUSD"] < minY) ? +jsonPriceChart[start]["priceUSD"] : minY
+                console.log("maxY: " + maxY)
+                console.log("priceUSD: " + +jsonPriceChart[start]["priceUSD"])
                 maxY = (maxY == -1 || +jsonPriceChart[start]["priceUSD"] > maxY) ? +jsonPriceChart[start]["priceUSD"] : maxY
                 marketLine.append(+jsonPriceChart[start]["date"], +jsonPriceChart[start]["priceUSD"])
                 ++start
               }
               marketLine.minY = (minY - 1 > 0) ? (minY - minY * 0.2) : 0
-              marketLine.maxY = maxY + (maxY * 0.3)
-              maxY = (+itemUSDPrice > maxY) ? (+itemUSDPrice + (+itemUSDPrice * 0.3)) : maxY
+              marketLine.maxY = maxY + (maxY * 0.2)
+              maxY = (+itemUSDPrice > maxY) ? (+itemUSDPrice + (+itemUSDPrice * 0.2)) : maxY
               listDelegateItem.visible = true
               assetMarketChart.visible = true
             }
@@ -233,6 +237,11 @@ ListView {
         }
       }
     }
+  }
+  AVMEPopupPriceChart {
+    id: pricechartPopup
+
+
   }
 }
 
