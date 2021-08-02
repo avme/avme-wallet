@@ -8,9 +8,10 @@ import "qrc:/qml/components"
 import "qrc:/qml/panels"
 import "qrc:/qml/popups"
 
-// Screen for listing Accounts and their general operations
-// TODO: back button that closes the Wallet
-
+/**
+ * Screen for listing and managing Accounts in the Wallet.
+ * TODO: merge Ledger popup into this
+ */
 Item {
   id: accountsScreen
 
@@ -19,13 +20,11 @@ Item {
     function onAccountCreated(data) {
       chooseAccountPopup.clean()
       chooseAccountPopup.close()
-      createAccountPopup.close()
-      importAccountPopup.close()
+      accountInfoPopup.close()
       fetchAccounts()
     }
     function onAccountCreationFailed() {
-      createAccountPopup.close()
-      importAccountPopup.close()
+      accountInfoPopup.close()
       accountFailPopup.open()
     }
     function onAccountAVAXBalancesUpdated(address, avaxBalance, avaxValue) {
@@ -42,9 +41,7 @@ Item {
     }
   }
 
-  Component.onCompleted: {
-    fetchAccounts()
-  }
+  Component.onCompleted: fetchAccounts()
 
   function fetchAccounts() {
     accountSelectPanel.accountModel.clear()
@@ -90,44 +87,18 @@ Item {
     btnErase.onClicked: confirmErasePopup.open()
   }
 
-  // Popups for waiting for Accounts to be created/imported/erased, respectively
-  // TODO: unify those into one
+  // Popup for waiting for Accounts to be created/imported/erased, respectively
   AVMEPopup {
-    id: createAccountPopup
+    id: accountInfoPopup
+    property alias text: accountInfoText.text
     widthPct: 0.2
     heightPct: 0.1
     Text {
+      id: accountInfoText
       color: "#FFFFFF"
       horizontalAlignment: Text.AlignHCenter
       anchors.centerIn: parent
       font.pixelSize: 14.0
-      text: "Creating Account..."
-    }
-  }
-
-  AVMEPopup {
-    id: importAccountPopup
-    widthPct: 0.2
-    heightPct: 0.1
-    Text {
-      color: "#FFFFFF"
-      horizontalAlignment: Text.AlignHCenter
-      anchors.centerIn: parent
-      font.pixelSize: 14.0
-      text: "Importing Account..."
-    }
-  }
-
-  AVMEPopup {
-    id: eraseAccountPopup
-    widthPct: 0.2
-    heightPct: 0.1
-    Text {
-      color: "#FFFFFF"
-      horizontalAlignment: Text.AlignHCenter
-      anchors.centerIn: parent
-      font.pixelSize: 14.0
-      text: "Erasing Account..."
     }
   }
 
@@ -152,12 +123,13 @@ Item {
     info: "Are you sure you want to erase this Account?"
     yesBtn.onClicked: {
       confirmErasePopup.close()
-      eraseAccountPopup.open()
+      accountInfoPopup.text = "Erasing Account..."
+      accountInfoPopup.open()
       if (QmlSystem.eraseAccount(accountSelectPanel.accountList.currentItem.itemAddress)) {
-        eraseAccountPopup.close()
+        accountInfoPopup.close()
         fetchAccounts()
       } else {
-        eraseAccountPopup.close()
+        accountInfoPopup.close()
         eraseFailPopup.open()
       }
     }

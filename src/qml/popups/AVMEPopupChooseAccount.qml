@@ -147,11 +147,9 @@ AVMEPopup {
           } else if (!QmlSystem.checkWalletPass(pass)) {
             infoTimer.start()
           } else {
-            if (foreignSeed == "") {
-              createAccountPopup.open()
-            } else {
-              importAccountPopup.open()
-            }
+            accountInfoPopup.text = (foreignSeed == "")
+              ? "Creating Account..." : "Importing Account..."
+            accountInfoPopup.open()
             QmlSystem.createAccount(foreignSeed, index, name, pass)
           }
         }

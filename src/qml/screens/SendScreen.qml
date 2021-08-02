@@ -466,7 +466,6 @@ Item {
   }
 
   // Popup for insufficient funds
-  // TODO: fix this popup type's centering
   AVMEPopupInfo {
     id: fundsPopup
     icon: "qrc:/img/warn.png"
