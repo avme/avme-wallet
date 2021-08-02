@@ -15,6 +15,7 @@
 #include <QtWidgets/QApplication>
 
 #include <network/API.h>
+#include <network/Graph.h>
 #include <core/BIP39.h>
 #include <core/ABI.h>
 #include <core/Utils.h>
@@ -76,6 +77,11 @@ class QmlApi : public QObject {
      */
     Q_INVOKABLE void buildCustomEthCallReq(QString contract, QString ABI);
     Q_INVOKABLE QString buildCustomABI(QString input);
+
+    /**
+     * 
+     */
+    Q_INVOKABLE QString getTokenPriceHistory(QString address, int days);
 };
 
 #endif // QMLAPI_H

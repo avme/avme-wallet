@@ -112,3 +112,7 @@ void QmlApi::buildCustomEthCallReq(QString contract, QString ABI) {
 QString QmlApi::buildCustomABI(QString input) {
   return QString::fromStdString(ABI::encodeABIfromJson(input.toStdString()));
 }
+
+QString QmlApi::getTokenPriceHistory(QString address, int days) {
+  return QString::fromStdString(Graph::getTokenPriceHistory(address.toStdString(), days).dump());
+}

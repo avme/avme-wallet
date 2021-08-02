@@ -63,6 +63,7 @@ class Graph {
      * prices in fixed point (e.g. "12.34").
      * TODO: do this for AVAX when Pangolin fixes their priceUSD logic in graph
      */
+    static json getTokenPriceHistory(std::string address, int days);
     static json getUSDTPriceHistory(int days);
     static json getAVMEPriceHistory(int days);
 };

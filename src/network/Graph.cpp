@@ -139,6 +139,19 @@ std::string Graph::getTokenPriceDerived(std::string address) {
   return derivedETH;
 }
 
+json Graph::getTokenPriceHistory(std::string address, int days) {
+  std::stringstream query;
+  std::transform(address.begin(), address.end(), address.begin(), ::tolower);
+  query << "{\"query\": \"{"
+        << "tokenDayDatas(first: " << days << ", orderBy: date, orderDirection: desc, where: {"
+        << "token: \\\"" << address << "\\\""
+        << "} ) { date priceUSD } }\"}";
+  std::string resp = httpGetRequest(query.str());
+  json respJson = json::parse(resp);
+  json arr = respJson["data"]["tokenDayDatas"];
+  return arr;
+}
+
 // TODO: use nlohmann/json
 json Graph::getUSDTPriceHistory(int days) {
   std::stringstream query;

@@ -31,7 +31,7 @@ ListView {
     // Don't fill the list if there is missing information
     if (!accountHeader.coinPriceChart || !accountHeader.tokensLoading) { return }
 
-    avax["assetAddress"] = "null"
+    avax["assetAddress"] = "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7" // WAVAX, for price history
     avax["assetName"] = "AVAX"
     avax["coinAmount"] = accountHeader.coinBalance
     avax["tokenAmount"] = "0"
@@ -206,8 +206,6 @@ ListView {
                   marketLine.minX = +jsonPriceChart[start]["date"]
                 }
                 minY = (minY == -1 || +jsonPriceChart[start]["priceUSD"] < minY) ? +jsonPriceChart[start]["priceUSD"] : minY
-                console.log("maxY: " + maxY)
-                console.log("priceUSD: " + +jsonPriceChart[start]["priceUSD"])
                 maxY = (maxY == -1 || +jsonPriceChart[start]["priceUSD"] > maxY) ? +jsonPriceChart[start]["priceUSD"] : maxY
                 marketLine.append(+jsonPriceChart[start]["date"], +jsonPriceChart[start]["priceUSD"])
                 ++start
@@ -233,6 +231,12 @@ ListView {
             }
             onEntered: assetChartMouseAreaRect.visible = true
             onExited: assetChartMouseAreaRect.visible = false
+            onClicked: {
+              pricechartPopup.contractAddress = itemAssetAddress
+              pricechartPopup.nameAsset = itemAssetName
+              pricechartPopup.currentAssetPrice = itemUSDPrice
+              pricechartPopup.open()
+            }
           }
         }
       }
@@ -240,8 +244,8 @@ ListView {
   }
   AVMEPopupPriceChart {
     id: pricechartPopup
-
-
+    contractAddress: ""
+    nameAsset: ""
   }
 }
 
