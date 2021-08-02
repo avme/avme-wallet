@@ -368,6 +368,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         text: "Make Transaction"
         Timer { id: ledgerRetryTimer; interval: 250; onTriggered: btnMakeTx.checkLedger() }
+        onClicked: confirmTxPopup.open()
         /*
         // TODO: this
         function checkLedger() {
@@ -442,6 +443,20 @@ Item {
     }
   }
   */
+
+  // Popup for confirming transaction
+  AVMEPopupConfirmTx {
+    id: confirmTxPopup
+    isSameAddress: (txToInput.text == accountHeader.currentAddress)
+    info: "You will send "
+    + "<b>" + txAmountInput.text + " " + chooseAssetPopup.chosenAssetSymbol + "</b>"
+    + " to the address<br><b>" + txToInput.text + "</b>"
+    + "<br>Gas Limit: <b>"
+    + QmlSystem.weiToFixedPoint(txGasLimitInput.text, 18) + " AVAX</b>"
+    + "<br>Gas Price: <b>"
+    + QmlSystem.weiToFixedPoint(txGasPriceInput.text, 9) + " AVAX</b>"
+    okBtn.onClicked: {} // TODO
+  }
 
   // Popup for insufficient funds
   AVMEPopupInfo {

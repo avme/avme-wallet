@@ -27,6 +27,7 @@
         <file>qml/popups/AVMEPopupAssetSelect.qml</file>
         <file>qml/popups/AVMEPopupTokenAdd.qml</file>
         <file>qml/popups/AVMEPopupQRCode.qml</file>
+        <file>qml/popups/AVMEPopupConfirmTx.qml</file>
 
         <file>qml/panels/AVMEPanelAccountSelect.qml</file>
 
@@ -41,7 +42,6 @@
         <file>qml/components/AVMEPopup.qml</file>
         <file>qml/components/AVMEPopupInfo.qml</file>
         <file>qml/components/AVMEPopupLedger.qml</file>
-        <file>qml/components/AVMEPopupConfirmTx.qml</file>
         <file>qml/components/AVMEPopupTxProgress.qml</file>
         <file>qml/components/AVMECoinList.qml</file>
         <file>qml/components/AVMETokenList.qml</file>
