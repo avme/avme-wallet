@@ -13,8 +13,8 @@ import "qrc:/qml/components"
  */
 AVMEPopup {
   id: chooseAssetPopup
-  widthPct: 0.4
-  heightPct: 0.95
+  widthPct: 0.3
+  heightPct: 0.7
   property bool defaultToAVME: false
   property alias selectedCoin: coinSelectList.currentItem
   property alias selectedToken: tokenSelectList.currentItem
@@ -82,7 +82,7 @@ AVMEPopup {
       id: listRect
       anchors.horizontalCenter: parent.horizontalCenter
       width: (parent.width * 0.9)
-      height: (parent.height * 0.75)
+      height: (parent.height * 0.65)
       radius: 5
       color: "#16141F"
 
@@ -92,7 +92,7 @@ AVMEPopup {
         AVMECoinList {
           id: coinSelectList
           width: (parent.width * 0.9)
-          height: (parent.height * 0.15)
+          height: (parent.height * 0.25)
           anchors.horizontalCenter: parent.horizontalCenter
           onGrabFocus: tokenSelectList.currentIndex = -1
           model: ListModel {
@@ -110,7 +110,7 @@ AVMEPopup {
         AVMETokenList {
           id: tokenSelectList
           width: (parent.width * 0.9)
-          height: (parent.height * 0.85)
+          height: (parent.height * 0.75)
           anchors.horizontalCenter: parent.horizontalCenter
           onGrabFocus: coinSelectList.currentIndex = -1
           model: ListModel {
