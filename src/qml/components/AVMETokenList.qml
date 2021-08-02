@@ -82,7 +82,6 @@ ListView {
           elide: Text.ElideRight
           text: itemSymbol
         }
-        // TODO: balance(?)
       }
       MouseArea {
         id: delegateMouseArea

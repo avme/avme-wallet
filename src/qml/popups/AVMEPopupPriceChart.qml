@@ -8,12 +8,30 @@ import QtCharts 2.2
 import "qrc:/qml/components"
 
 AVMEPopup {
-  function updateChart (index) { 
-    console.log(index)
+  id: pricechartPopup
+  widthPct: 0.8
+  heightPct: 0.75
+  property string contractAddress
+  property string nameAsset
+  property string currentAssetPrice
+
+  Connections {
+    target: chartPeriod
+    function onActivated(index) { updateChart(index) }
+  }
+
+  Connections {
+    // Change index to select 1 Month and reload the chart
+    target: pricechartPopup
+    function onOpened() { chartPeriod.currentIndex = 1; updateChart(1) }
+  }
+
+  function updateChart(index) {
+    //console.log(index)
     var days = 0
-    if (index == 0) { days = 8}
-    if (index == 1) { days = 31}
-    if (index == 2) { days = 91}
+    if (index == 0) { days = 8 }
+    else if (index == 1) { days = 31 }
+    else if (index == 2) { days = 91 }
     var marketHistory = JSON.parse(QmlApi.getTokenPriceHistory(contractAddress, days))
     marketGraph.clear()
     var minY = -1
@@ -78,194 +96,158 @@ AVMEPopup {
     }
   }
 
-
-
-  Connections {
-    target: chartPeriod
-      function onActivated(index) { updateChart(index) }
-  }
-
-  Connections {
-    // Change index to select 1 Month and reload the chart
-    target: pricechartPopup 
-      function onOpened() {
-        chartPeriod.currentIndex = 1
-        updateChart(1)
+  ChartView {
+    id: popupMarketChart
+    width: parent.width * 0.9
+    height: parent.height * 0.9
+    anchors {
+      top: parent.top
+      horizontalCenter: parent.horizontalCenter
+      margins: 10
+    }
+    backgroundColor: "#881D212A"
+    title: "<b>Historical " + nameAsset + " Prices</b>"
+    titleColor: "#FFFFFF"
+    titleFont.pixelSize: 14.0
+    legend {
+      color: "#FFFFFF"
+      labelColor: "#FFFFFF"
+      alignment: Qt.AlignBottom
+      font.pixelSize: 14.0
+    }
+    margins { right: 0; bottom: 0; left: 0; top: 0 }
+    MouseArea {
+      id: chartArea
+      x: parent.plotArea.x
+      y: parent.plotArea.y
+      width: parent.plotArea.width
+      height: parent.plotArea.height
+      hoverEnabled: true
+      onEntered: {
+        mouseRectX.visible = mouseRectY.visible = true
+        mouseLineX.visible = mouseLineY.visible = true
       }
-  }
+      onExited: {
+        mouseRectX.visible = mouseRectY.visible = false
+        mouseLineX.visible = mouseLineY.visible = false
+      }
+      onPositionChanged: {
+        var valueXPerPixel = (marketGraph.maxX.getTime() - marketGraph.minX.getTime()) / width
+        var valueYPerPixel = (marketGraph.maxY - marketGraph.minY) / height
+        var valueX = new Date(marketGraph.minX.getTime() + (mouse.x * valueXPerPixel))
+        var valueY = marketGraph.maxY - (mouse.y * valueYPerPixel)
+        mouseRectX.info = Qt.formatDate(valueX, "dd/MM")
+        mouseRectY.info = valueY.toFixed(3)
+        mouseLineX.x = parent.plotArea.x + mouse.x
+        mouseLineY.y = parent.plotArea.y + mouse.y
+        mouseRectX.x = mouseLineX.x - (mouseRectX.width / 2)
+        mouseRectY.y = mouseLineY.y - (mouseRectY.height / 2)
+      }
+    }
 
-  id: pricechartPopup
-  widthPct: 0.725
-  heightPct: 0.5
-  property string contractAddress
-  property string nameAsset
-  property string currentAssetPrice
-
-  Rectangle {
-    id: chartRectangle
-    anchors.top: parent.top
-    anchors.left: parent.left
-    anchors.topMargin: parent.height * 0.05
-    anchors.leftMargin: parent.height * 0.05
-    width: parent.width * 0.55
-    height: parent.height * 0.75
-    color: "transparent"
-    ChartView {
-      id: popupMarketChat
-      anchors.fill: parent
-      anchors.margins: 5
-      backgroundColor: "#881D212A"
-      title: "<b> Historical " + nameAsset + " Prices</b>"
-      titleColor: "#FFFFFF"
-      titleFont.pixelSize: 14.0
-      legend {
+    Rectangle {
+      id: mouseRectX
+      property string info
+      visible: false
+      width: 60
+      height: 30
+      anchors.top: chartArea.bottom
+      radius: 5
+      color: "#3E4653"
+      Text {
         color: "#FFFFFF"
-        labelColor: "#FFFFFF"
-        alignment: Qt.AlignBottom
-        font.pixelSize: 14.0
+        font.pixelSize: 12.0
+        anchors.centerIn: parent
+        text: parent.info
       }
-      margins { right: 0; bottom: 0; left: 0; top: 0 }
-      MouseArea {
-        id: chartArea
-        x: parent.plotArea.x
-        y: parent.plotArea.y
-        width: parent.plotArea.width
-        height: parent.plotArea.height
-        hoverEnabled: true
-        onEntered: {
-          mouseRectX.visible = mouseRectY.visible = true
-          mouseLineX.visible = mouseLineY.visible = true
-        }
-        onExited: {
-          mouseRectX.visible = mouseRectY.visible = false
-          mouseLineX.visible = mouseLineY.visible = false
-        }
-        onPositionChanged: {
-          var valueXPerPixel = (marketGraph.maxX.getTime() - marketGraph.minX.getTime()) / width
-          var valueYPerPixel = (marketGraph.maxY - marketGraph.minY) / height
-          var valueX = new Date(marketGraph.minX.getTime() + (mouse.x * valueXPerPixel))
-          var valueY = marketGraph.maxY - (mouse.y * valueYPerPixel)
-          mouseRectX.info = Qt.formatDate(valueX, "dd/MM")
-          mouseRectY.info = valueY.toFixed(3)
-          mouseLineX.x = parent.plotArea.x + mouse.x
-          mouseLineY.y = parent.plotArea.y + mouse.y
-          mouseRectX.x = mouseLineX.x - (mouseRectX.width / 2)
-          mouseRectY.y = mouseLineY.y - (mouseRectY.height / 2)
-        }
-      }
+    }
 
-      Rectangle {
-        id: mouseRectX
-        property string info
-        visible: false
-        width: 60
-        height: 30
-        anchors.top: chartArea.bottom
-        radius: 5
-        color: "#3E4653"
-        Text {
-          color: "#FFFFFF"
-          font.pixelSize: 12.0
-          anchors.centerIn: parent
-          text: parent.info
-        }
-      }
-
-      Rectangle {
-        id: mouseRectY
-        property string info
-        visible: false
-        width: 60
-        height: 30
-        anchors.right: chartArea.left
-        radius: 5
-        color: "#3E4653"
-        Text {
-          color: "#FFFFFF"
-          font.pixelSize: 12.0
-          anchors.centerIn: parent
-          text: parent.info
-        }
-      }
-
-      Rectangle {
-        id: mouseLineX
-        visible: false
-        width: 1
+    Rectangle {
+      id: mouseRectY
+      property string info
+      visible: false
+      width: 60
+      height: 30
+      anchors.right: chartArea.left
+      radius: 5
+      color: "#3E4653"
+      Text {
         color: "#FFFFFF"
-        anchors {
-          top: chartArea.top
-          bottom: chartArea.bottom
-        }
+        font.pixelSize: 12.0
+        anchors.centerIn: parent
+        text: parent.info
       }
+    }
 
-      Rectangle {
-        id: mouseLineY
-        visible: false
-        height: 1
-        color: "#FFFFFF"
-        anchors {
-          left: chartArea.left
-          right: chartArea.right
-        }
+    Rectangle {
+      id: mouseLineX
+      visible: false
+      width: 1
+      color: "#FFFFFF"
+      anchors {
+        top: chartArea.top
+        bottom: chartArea.bottom
       }
+    }
 
-      CandlestickSeries {
-        id: marketGraph
-        property int countX: 0
-        property alias minX: marketAxisX.min
-        property alias maxX: marketAxisX.max
-        property alias minY: marketAxisY.min
-        property alias maxY: marketAxisY.max
-        name: "<b>" + nameAsset + " Price (USD)</b>"
-        increasingColor: "green"
-        decreasingColor: "red"
-        bodyOutlineVisible: false
-        minimumColumnWidth: 10
-        axisX: DateTimeAxis {
-          id: marketAxisX
-          labelsColor: "#FFFFFF"
-          labelsFont.pixelSize: 12.0
-          gridLineColor: "#22FFFFFF"
-          tickCount: marketGraph.countX
-          format: "dd/MM"
-        }
-        axisY: ValueAxis {
-          id: marketAxisY
-          labelsColor: "#FFFFFF"
-          labelsFont.pixelSize: 12.0
-          gridLineColor: "#22FFFFFF"
-        }
+    Rectangle {
+      id: mouseLineY
+      visible: false
+      height: 1
+      color: "#FFFFFF"
+      anchors {
+        left: chartArea.left
+        right: chartArea.right
+      }
+    }
+
+    CandlestickSeries {
+      id: marketGraph
+      property int countX: 0
+      property alias minX: marketAxisX.min
+      property alias maxX: marketAxisX.max
+      property alias minY: marketAxisY.min
+      property alias maxY: marketAxisY.max
+      name: "<b>" + nameAsset + " Price (USD)</b>"
+      increasingColor: "green"
+      decreasingColor: "red"
+      bodyOutlineVisible: false
+      minimumColumnWidth: 10
+      axisX: DateTimeAxis {
+        id: marketAxisX
+        labelsColor: "#FFFFFF"
+        labelsFont.pixelSize: 12.0
+        gridLineColor: "#22FFFFFF"
+        tickCount: marketGraph.countX
+        format: "dd/MM"
+      }
+      axisY: ValueAxis {
+        id: marketAxisY
+        labelsColor: "#FFFFFF"
+        labelsFont.pixelSize: 12.0
+        gridLineColor: "#22FFFFFF"
       }
     }
   }
 
   ComboBox {
     id: chartPeriod
-    anchors.bottom: parent.bottom
-    anchors.bottomMargin: parent.height * 0.05
-    anchors.left: parent.left
-    anchors.leftMargin: parent.height * 0.05
-    width: parent.width * 0.2
-    height: parent.height * 0.1
-    model: [
-      "1 Week",
-      "1 Month",
-      "3 Months",
-    ]
+    anchors {
+      bottom: parent.bottom
+      left: parent.left
+      margins: 20
+    }
+    model: ["1 Week", "1 Month", "3 Months"]
   }
 
   AVMEButton {
     id: closeBtn
-    anchors.bottom: parent.bottom
-    anchors.bottomMargin: parent.height * 0.05
-    anchors.left: parent.left
-    anchors.leftMargin: ((parent.height * 0.05) + (parent.width * 0.55)) - (parent.width * 0.2) 
-    height: parent.height * 0.1
-    width: parent.width * 0.2
-    text: "Close"
-    onClicked: {
-      pricechartPopup.close()
+    anchors {
+      bottom: parent.bottom
+      right: parent.right
+      margins: 20
     }
+    text: "Close"
+    onClicked: pricechartPopup.close()
   }
 }

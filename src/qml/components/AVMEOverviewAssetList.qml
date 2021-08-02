@@ -21,17 +21,26 @@ import "qrc:/qml/popups"
 ListView {
   id: assetList
 
+  Connections {
+    target: accountHeader
+    // Whatever happens first.
+    function onTokensLoaded() { reloadAssets() }
+    function onUpdatedBalances() { reloadAssets() }
+  }
+
   Component.onCompleted: reloadAssets()
 
   function reloadAssets() {
-    var assetList = ([])
-    var tokens = accountHeader.tokenList
-    // AVAX is a obligatory asset, but it is not inside tokenList
-    var avax = ({})
     // Don't fill the list if there is missing information
     if (!accountHeader.coinPriceChart || !accountHeader.tokensLoading) { return }
 
-    avax["assetAddress"] = "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7" // WAVAX, for price history
+    // AVAX is obligatory but not a token so it's not in tokenList
+    var assetList = ([])
+    var tokens = accountHeader.tokenList
+    var avax = ({})
+
+    // Address here is WAVAX, for price history
+    avax["assetAddress"] = "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7"
     avax["assetName"] = "AVAX"
     avax["coinAmount"] = accountHeader.coinBalance
     avax["tokenAmount"] = "0"
@@ -42,6 +51,7 @@ ListView {
     avax["USDPrice"] = accountHeader.coinPrice
     assetList.push(avax)
 
+    // Populate the token list
     for (var token in tokens) {
       var asset = ({})
       asset["assetAddress"] = token
@@ -52,16 +62,13 @@ ListView {
       asset["fiatAmount"] = "$" + tokens[token]["value"]
       asset["priceChart"] = tokens[token]["chartData"]
       asset["USDPrice"] = tokens[token]["USDprice"]
-      // AVME image is stored in the binary.
-      if (tokens[token]["symbol"] == "AVME") {
-        asset["imagePath"] = "qrc:/img/avme_logo.png"
-      } else {
-        asset["imagePath"] = "file:" + QmlSystem.getARC20TokenImage(token)
-      }
+      asset["imagePath"] = (tokens[token]["symbol"] == "AVME")
+      ? "qrc:/img/avme_logo.png"
+      : "file:" + QmlSystem.getARC20TokenImage(token)
       assetList.push(asset)
     }
-    // If it is the first time loading the list, append
-    // Otherwise, update directly the items
+
+    // Append if loading the list for the first time, update otherwise.
     if (assetListModel.count == 0) {
       assetListModel.append(assetList)
     } else {
@@ -79,21 +86,14 @@ ListView {
     }
   }
 
-  Connections {
-    target: accountHeader
-      // Whatever happens first.
-      function onTokensLoaded() { reloadAssets() }
-      function onUpdatedBalances() { reloadAssets() }
-  }
   implicitWidth: 550
   implicitHeight: 600
   focus: true
   clip: true
   spacing: 10
   boundsBehavior: Flickable.StopAtBounds
-  model: ListModel {
-        id: assetListModel
-  }
+  model: ListModel { id: assetListModel }
+
   // Delegate (structure for each item in the list)
   delegate: Component {
     id: listDelegate
@@ -111,12 +111,14 @@ ListView {
       width: assetList.width
       height: assetList.height * 0.3
       visible: false
+
       Rectangle {
         id: assetRectangle
         width: parent.width
         height: parent.height
         radius: 5
         color: "#1D1827"
+
         Column {
           anchors.fill: parent
           anchors.margins: 10
@@ -150,7 +152,7 @@ ListView {
             text: (isToken) ? itemCoinAmount + " AVAX" : ""
           }
         }
-        // TODO: Clickable chart
+
         ChartView {
           id: assetMarketChart
           anchors.right: parent.right
@@ -246,6 +248,9 @@ ListView {
     id: pricechartPopup
     contractAddress: ""
     nameAsset: ""
+    currentAssetPrice: ""
+    x: -(window.width / 2)
+    y: -(window.height / 16)
   }
 }
 
