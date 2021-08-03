@@ -58,3 +58,7 @@ bool QmlSystem::firstHigherThanSecond(QString first, QString second) {
   bigfloat secondFloat = boost::lexical_cast<bigfloat>(second.toStdString());
   return (firstFloat > secondFloat);
 }
+
+QString QmlSystem::getContract(QString name) {
+  return QString::fromStdString(Pangolin::contracts[name.toStdString()]);
+}

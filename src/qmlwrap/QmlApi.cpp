@@ -15,6 +15,15 @@ void QmlApi::clearAPIRequests() {
   this->requestList.clear();
 }
 
+QStringList QmlApi::parseHex(QString hexStr, QStringList types) {
+  std::vector<std::string> typesVec, parsed;
+  QStringList ret;
+  for (QString type : types) { typesVec.push_back(type.toStdString()); }
+  parsed = Pangolin::parseHex(hexStr.toStdString(), typesVec);
+  for (std::string value : parsed) { ret << QString::fromStdString(value); }
+  return ret;
+}
+
 void QmlApi::buildGetBalanceReq(QString address) {
   Request req{
     this->requestList.size() + size_t(1), "2.0", "eth_getBalance",
@@ -98,6 +107,22 @@ void QmlApi::buildGetARC20TokenDataReq(std::string address) {
   this->requestList.push_back(decimalsReq);
 }
 
+QString QmlApi::getTokenPriceHistory(QString address, int days) {
+  return QString::fromStdString(Graph::getTokenPriceHistory(address.toStdString(), days).dump());
+}
+
+void QmlApi::buildGetAllowanceReq(QString receiver, QString owner, QString spender) {
+  json params;
+  json array = json::array();
+  params["to"] = receiver.toStdString();
+  params["data"] = Pangolin::ERC20Funcs["allowance"]
+    + Utils::addressToHex(owner.toStdString()) + Utils::addressToHex(spender.toStdString());
+  array.push_back(params);
+  array.push_back("latest");
+  Request req{this->requestList.size() + size_t(1), "2.0", "eth_call", array};
+  this->requestList.push_back(req);
+}
+
 void QmlApi::buildCustomEthCallReq(QString contract, QString ABI) {
   json params;
   json array = json::array();
@@ -113,6 +138,3 @@ QString QmlApi::buildCustomABI(QString input) {
   return QString::fromStdString(ABI::encodeABIfromJson(input.toStdString()));
 }
 
-QString QmlApi::getTokenPriceHistory(QString address, int days) {
-  return QString::fromStdString(Graph::getTokenPriceHistory(address.toStdString(), days).dump());
-}

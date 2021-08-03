@@ -41,6 +41,12 @@ class QmlApi : public QObject {
     Q_INVOKABLE void clearAPIRequests();
 
     /**
+     * Parse a given hex string according to the values given.
+     * Accepted values are: uint, bool, address.
+     */
+    Q_INVOKABLE QStringList parseHex(QString hexStr, QStringList types);
+
+    /**
      * Build requests for getting the AVAX and a given token's balance, respectively.
      */
     Q_INVOKABLE void buildGetBalanceReq(QString address);
@@ -73,15 +79,21 @@ class QmlApi : public QObject {
     Q_INVOKABLE void buildGetARC20TokenDataReq(std::string address);
 
     /**
+     * Get the fiat price history of the last X days for a given ARC20 token.
+     */
+    Q_INVOKABLE QString getTokenPriceHistory(QString address, int days);
+
+    /**
+     * Get the allowance amount between owner and spender addresses
+     * in the given receiver address.
+     */
+    Q_INVOKABLE void buildGetAllowanceReq(QString receiver, QString owner, QString spender);
+
+    /**
      * Functions for appending custom ABI calls.
      */
     Q_INVOKABLE void buildCustomEthCallReq(QString contract, QString ABI);
     Q_INVOKABLE QString buildCustomABI(QString input);
-
-    /**
-     * 
-     */
-    Q_INVOKABLE QString getTokenPriceHistory(QString address, int days);
 };
 
 #endif // QMLAPI_H

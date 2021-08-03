@@ -138,16 +138,33 @@ Item {
       )
     }
   }
-
-  Component.onCompleted: {
-    QmlSystem.getAllowances()
-    QmlSystem.updateExchangeData("AVAX", "Token") // TODO: token name here
-    QmlSystem.updateLiquidityData("AVAX", "Token") // TODO: token name here
-    calculateExchangeAmountOut()
-    reloadExchangeDataTimer.start()
-    reloadLiquidityDataTimer.start()
-  }
   */
+
+  Connections {
+    target: accountHeader
+    function onUpdatedBalances() { assetBalance.refresh() }
+  }
+
+  function fetchAllowance() {
+    // AVAX doesn't need approval, tokens do (and individually)
+    if (fromAssetPopup.chosenAssetSymbol == "AVAX") {
+      exchangeDetailsColumn.visible = true
+    } else {
+      QmlApi.clearAPIRequests()
+      QmlApi.buildGetAllowanceReq(
+        fromAssetPopup.chosenAssetAddress,
+        QmlSystem.getCurrentAccount(),
+        QmlSystem.getContract("router")
+      )
+      var resp = JSON.parse(QmlApi.doAPIRequests())
+      allowance = QmlApi.parseHex(resp[0].result, ["uint"])
+      var asset = accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]
+      exchangeDetailsColumn.visible = (+allowance >= +QmlSystem.fixedPointToWei(
+        asset["balance"], fromAssetPopup.chosenAssetDecimals
+      ))
+    }
+    assetBalance.refresh()
+  }
 
   AVMEPanel {
     id: exchangePanel
@@ -161,18 +178,17 @@ Item {
     title: "Exchange Details"
 
     Column {
-      id: exchangeDetailsColumn
+      id: exchangeHeaderColumn
+      height: (parent.height * 0.5) - anchors.topMargin
       anchors {
         top: parent.top
-        bottom: parent.bottom
         left: parent.left
         right: parent.right
         topMargin: 80
-        bottomMargin: 20
         leftMargin: 40
         rightMargin: 40
       }
-      spacing: 25
+      spacing: 20
 
       Text {
         id: exchangeHeader
@@ -241,6 +257,28 @@ Item {
         }
       }
 
+      Text {
+        id: assetBalance
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        text: "Loading asset balance..."
+        function refresh() {
+          if (fromAssetPopup.chosenAssetSymbol == "AVAX") {
+            text = (accountHeader.coinBalance != "")
+            ? "Total amount: <b>" + accountHeader.coinBalance + " AVAX</b>"
+            : "Loading asset balance..."
+          } else {
+            var asset = accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]
+            text = (asset != undefined)
+            ? "Total amount: <b>" + asset["balance"]
+            + " " + fromAssetPopup.chosenAssetSymbol + "</b>"
+            : "Loading asset balance..."
+          }
+        }
+      }
+
       Row {
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: 10
@@ -258,19 +296,57 @@ Item {
           onClicked: toAssetPopup.open()
         }
       }
+    }
+
+    Column {
+      id: exchangeApprovalColumn
+      visible: !exchangeDetailsColumn.visible
+      anchors {
+        top: exchangeHeaderColumn.bottom
+        bottom: parent.bottom
+        left: parent.left
+        right: parent.right
+        topMargin: 20
+        bottomMargin: 20
+        leftMargin: 40
+        rightMargin: 40
+      }
+      spacing: 20
 
       Text {
-        id: assetBalance
+        id: exchangeApprovalText
+        width: parent.width
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
+        elide: Text.ElideRight
         color: "#FFFFFF"
         font.pixelSize: 14.0
-        text: "Total amount: <br><b>"
-        + ((fromAssetPopup.chosenAssetSymbol == "AVAX")
-        ? accountHeader.coinBalance
-        : +accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]["balance"])
-        + " " + fromAssetPopup.chosenAssetSymbol + "</b>"
+        text: "You need to approve your Account in order to swap <b>"
+        + fromAssetPopup.chosenAssetSymbol + "</b>."
       }
+
+      AVMEButton {
+        id: approveBtn
+        width: parent.width
+        anchors.horizontalCenter: parent.horizontalCenter
+        text: "Approve"
+        onClicked: {} // TODO
+      }
+    }
+
+    Column {
+      id: exchangeDetailsColumn
+      anchors {
+        top: exchangeHeaderColumn.bottom
+        bottom: parent.bottom
+        left: parent.left
+        right: parent.right
+        topMargin: 20
+        bottomMargin: 20
+        leftMargin: 40
+        rightMargin: 40
+      }
+      spacing: 20
 
       AVMEInput {
         id: swapInput
@@ -393,6 +469,7 @@ Item {
         id: swapBtn
         width: parent.width
         anchors.horizontalCenter: parent.horizontalCenter
+        /*
         enabled: allowance != "" && (
           !QmlSystem.isApproved(swapInput.text, allowance) || swapInput.acceptableInput
         ) && (swapImpact <= 10.0 || ignoreImpactCheck.checked)
@@ -446,8 +523,17 @@ Item {
 
   // Popups for choosing the asset going "in"/"out".
   // Defaults to "from AVAX to AVME".
-  AVMEPopupAssetSelect { id: fromAssetPopup; defaultToAVME: false }
-  AVMEPopupAssetSelect { id: toAssetPopup; defaultToAVME: true }
+  // TODO: force "to" asset to change when both are the same
+  AVMEPopupAssetSelect {
+    id: fromAssetPopup
+    defaultToAVME: false
+    onAboutToHide: fetchAllowance()
+    Component.onCompleted: fetchAllowance()
+  }
+  AVMEPopupAssetSelect {
+    id: toAssetPopup
+    defaultToAVME: true
+  }
 
   // Popup for insufficient funds
   AVMEPopupInfo {

@@ -234,6 +234,7 @@ Item {
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
         font.pixelSize: 14.0
+        text: "Loading asset balance..."
         function refresh() {
           if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {
             text = (accountHeader.coinBalance != "")

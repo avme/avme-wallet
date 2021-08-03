@@ -153,6 +153,9 @@ class QmlSystem : public QObject {
     Q_INVOKABLE bool balanceIsZero(QString amount, int decimals);
     Q_INVOKABLE bool firstHigherThanSecond(QString first, QString second);
 
+    // Get the given hardcoded contract address
+    Q_INVOKABLE QString getContract(QString name);
+
     // ======================================================================
     // START/WALLET SCREEN FUNCTIONS
     // ======================================================================
