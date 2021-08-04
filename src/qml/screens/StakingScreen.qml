@@ -84,7 +84,19 @@ Item {
   }
 
   Component.onCompleted: {
-    QmlSystem.getAllowances()
+    // TODO: get staking/compound allowances
+    /*
+    std::string stakingAllowance = Pangolin::allowance(
+      Pangolin::contracts["AVAX-AVME"],
+      this->w.getCurrentAccount().first,
+      Pangolin::contracts["staking"]
+    );
+    std::string compoundAllowance = Pangolin::allowance(
+      Pangolin::contracts["AVAX-AVME"],
+      this->w.getCurrentAccount().first,
+      Pangolin::contracts["compound"]
+    );
+    */
     reloadRewardTimer.start()
     reloadCompoundTimer.start()
     reloadLiquidityDataTimer.start()

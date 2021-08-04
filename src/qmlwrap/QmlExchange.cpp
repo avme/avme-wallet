@@ -4,35 +4,10 @@
 
 #include <qmlwrap/QmlSystem.h>
 
-void QmlSystem::getAllowances() {
-  QtConcurrent::run([=](){
-    std::string exchangeAllowance = Pangolin::allowance(
-      Pangolin::contracts["AVME"],
-      this->w.getCurrentAccount().first,
-      Pangolin::contracts["router"]
-    );
-    std::string liquidityAllowance = Pangolin::allowance(
-      Pangolin::contracts["AVAX-AVME"],
-      this->w.getCurrentAccount().first,
-      Pangolin::contracts["router"]
-    );
-    std::string stakingAllowance = Pangolin::allowance(
-      Pangolin::contracts["AVAX-AVME"],
-      this->w.getCurrentAccount().first,
-      Pangolin::contracts["staking"]
-    );
-    std::string compoundAllowance = Pangolin::allowance(
-      Pangolin::contracts["AVAX-AVME"],
-      this->w.getCurrentAccount().first,
-      Pangolin::contracts["compound"]
-    );
-    emit allowancesUpdated(
-      QString::fromStdString(exchangeAllowance),
-      QString::fromStdString(liquidityAllowance),
-      QString::fromStdString(stakingAllowance),
-      QString::fromStdString(compoundAllowance)
-    );
-  });
+QString QmlSystem::getFirstFromPair(QString assetAddressA, QString assetAddressB) {
+  return QString::fromStdString(
+    Pangolin::getFirstFromPair(assetAddressA.toStdString(), assetAddressB.toStdString())
+  );
 }
 
 bool QmlSystem::isApproved(QString amount, QString allowed) {

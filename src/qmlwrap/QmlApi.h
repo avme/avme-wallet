@@ -84,10 +84,20 @@ class QmlApi : public QObject {
     Q_INVOKABLE QString getTokenPriceHistory(QString address, int days);
 
     /**
-     * Get the allowance amount between owner and spender addresses
-     * in the given receiver address.
+     * Build request for getting the allowance amount between owner and spender
+     * addresses in the given receiver address.
      */
     Q_INVOKABLE void buildGetAllowanceReq(QString receiver, QString owner, QString spender);
+
+    /**
+     * Build request for getting the pair address for two given assets.
+     */
+    Q_INVOKABLE void buildGetPairReq(QString assetAddress1, QString assetAddress2);
+
+    /**
+     * Build request for getting the reserves for the given pair address.
+     */
+    Q_INVOKABLE void buildGetReservesReq(QString pairAddress);
 
     /**
      * Functions for appending custom ABI calls.

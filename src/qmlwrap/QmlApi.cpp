@@ -123,6 +123,30 @@ void QmlApi::buildGetAllowanceReq(QString receiver, QString owner, QString spend
   this->requestList.push_back(req);
 }
 
+void QmlApi::buildGetPairReq(QString assetAddress1, QString assetAddress2) {
+  json params;
+  json array = json::array();
+  params["to"] = Pangolin::contracts["factory"];
+  params["data"] = Pangolin::factoryFuncs["getPair"]
+    + Utils::addressToHex(assetAddress1.toStdString())
+    + Utils::addressToHex(assetAddress2.toStdString());
+  array.push_back(params);
+  array.push_back("latest");
+  Request req{this->requestList.size() + size_t(1), "2.0", "eth_call", array};
+  this->requestList.push_back(req);
+}
+
+void QmlApi::buildGetReservesReq(QString pairAddress) {
+  json params;
+  json array = json::array();
+  params["to"] = pairAddress.toStdString();
+  params["data"] = Pangolin::pairFuncs["getReserves"];
+  array.push_back(params);
+  array.push_back("latest");
+  Request req{this->requestList.size() + size_t(1), "2.0", "eth_call", array};
+  this->requestList.push_back(req);
+}
+
 void QmlApi::buildCustomEthCallReq(QString contract, QString ABI) {
   json params;
   json array = json::array();

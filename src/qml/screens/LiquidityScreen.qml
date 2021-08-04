@@ -26,6 +26,15 @@ Item {
   property string removeLowerEstimate
   */
 
+  // TODO: get liquidity allowances
+  /*
+  std::string liquidityAllowance = Pangolin::allowance(
+    Pangolin::contracts["AVAX-AVME"],
+    this->w.getCurrentAccount().first,
+    Pangolin::contracts["router"]
+  );
+  */
+
   AVMEPanel {
     id: addLiquidityPanel
     width: (parent.width * 0.5) - (anchors.margins / 2)

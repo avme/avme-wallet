@@ -289,6 +289,7 @@ class QmlSystem : public QObject {
     Q_INVOKABLE bool removeARC20Token(QString address);
 
     // Get the AVME address.
+    // TODO: replace this with getContract("AVME")
     Q_INVOKABLE QString getAVMEAddress();
 
     // Check if a token exists in the network.
@@ -358,9 +359,8 @@ class QmlSystem : public QObject {
     // EXCHANGE SCREEN FUNCTIONS
     // ======================================================================
 
-    // Get approval amounts for exchange and liquidity.
-    // Emits allowancesUpdated()
-    Q_INVOKABLE void getAllowances();
+    // Get the first (lower) address from a pair
+    Q_INVOKABLE QString getFirstFromPair(QString assetAddressA, QString assetAddressB);
 
     // Check if approval needs to be refreshed
     Q_INVOKABLE bool isApproved(QString amount, QString allowed);

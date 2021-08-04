@@ -184,29 +184,6 @@ std::string Pangolin::approve(std::string spender) {
   return dataHex;
 }
 
-// TODO: use nlohmann/json
-std::string Pangolin::allowance(
-  std::string receiver, std::string owner, std::string spender
-) {
-  std::stringstream query;
-  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << receiver
-        << "\",\"data\": \"" << Pangolin::ERC20Funcs["allowance"]
-                             << Utils::addressToHex(owner)
-                             << Utils::addressToHex(spender)
-        << "\"},\"latest\"]}";
-  std::string resp = API::httpGetRequest(query.str());
-  json respJson = json::parse(resp);
-  std::string result = respJson["result"].get<std::string>();
-  if (result == "0x" || result == "") { return {}; }
-  result = result.substr(2); // Remove the "0x"
-
-  // Parse the result back into normal values
-  u256 resultValue = boost::lexical_cast<u256>(Pangolin::parseHex(result, {"uint"})[0]);
-  std::string resultStr = boost::lexical_cast<std::string>(resultValue);
-  return resultStr;
-}
-
 std::string Pangolin::transfer(std::string to, std::string value) {
   std::string dataHex = Pangolin::ERC20Funcs["transfer"]
     + Utils::addressToHex(to) + Utils::uintToHex(value);

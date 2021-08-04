@@ -89,12 +89,6 @@ class Pangolin {
     static std::string approve(std::string spender);
 
     /**
-     * (ABI) Check the allowance between owner and spender Accounts.
-     * Returns the amount in Wei allowed for spending.
-     */
-    static std::string allowance(std::string receiver, std::string owner, std::string spender);
-
-    /**
      * (TX) Transfer a token amount directly to the given Account.
      * Returns the data hex string.
      */

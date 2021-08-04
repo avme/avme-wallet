@@ -11,6 +11,9 @@ import "qrc:/qml/popups"
 Item {
   id: exchangeScreen
   property string allowance
+  property string pairAddress
+  property string inReserves
+  property string outReserves
   property string swapEstimate
   property double swapImpact
   /*
@@ -65,18 +68,6 @@ Item {
     onTriggered: {
       QmlSystem.updateLiquidityData("AVAX", "Token") // TODO: token name here
     }
-  }
-
-  function calculateExchangeAmountOut() {
-    var amountIn = swapInput.text
-    var amountName = (coinToToken) ? "AVAX" : "Token" // TODO: token name here
-    var amountOut = ""
-    if (amountName == lowerToken) {
-      amountOut = QmlSystem.calculateExchangeAmount(amountIn, lowerReserves, higherReserves)
-    } else if (amountName == higherToken) {
-      amountOut = QmlSystem.calculateExchangeAmount(amountIn, higherReserves, lowerReserves)
-    }
-    swapEstimate = amountOut
   }
 
   // For manual input
@@ -146,24 +137,70 @@ Item {
   }
 
   function fetchAllowance() {
+    QmlApi.clearAPIRequests()
+    QmlApi.buildGetAllowanceReq(
+      fromAssetPopup.chosenAssetAddress,
+      QmlSystem.getCurrentAccount(),
+      QmlSystem.getContract("router")
+    )
+    QmlApi.buildGetPairReq(
+      fromAssetPopup.chosenAssetAddress,
+      toAssetPopup.chosenAssetAddress
+    )
+    var resp = JSON.parse(QmlApi.doAPIRequests())
+    allowance = QmlApi.parseHex(resp[0].result, ["uint"])
+    pairAddress = QmlApi.parseHex(resp[1].result, ["address"])
     // AVAX doesn't need approval, tokens do (and individually)
     if (fromAssetPopup.chosenAssetSymbol == "AVAX") {
       exchangeDetailsColumn.visible = true
     } else {
-      QmlApi.clearAPIRequests()
-      QmlApi.buildGetAllowanceReq(
-        fromAssetPopup.chosenAssetAddress,
-        QmlSystem.getCurrentAccount(),
-        QmlSystem.getContract("router")
-      )
-      var resp = JSON.parse(QmlApi.doAPIRequests())
-      allowance = QmlApi.parseHex(resp[0].result, ["uint"])
       var asset = accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]
       exchangeDetailsColumn.visible = (+allowance >= +QmlSystem.fixedPointToWei(
         asset["balance"], fromAssetPopup.chosenAssetDecimals
       ))
+      exchangeDetailsColumn.visible = true
     }
     assetBalance.refresh()
+    refreshReserves()
+  }
+
+  function refreshReserves() {
+    QmlApi.clearAPIRequests()
+    QmlApi.buildGetReservesReq(pairAddress)
+    var resp = JSON.parse(QmlApi.doAPIRequests())
+    var reserves = QmlApi.parseHex(resp[0].result, ["uint", "uint", "uint"])
+    var lowerAddress = QmlSystem.getFirstFromPair(
+      fromAssetPopup.chosenAssetAddress, toAssetPopup.chosenAssetAddress
+    )
+    if (lowerAddress == fromAssetPopup.chosenAssetAddress) {
+      inReserves = reserves[0]
+      outReserves = reserves[1]
+    } else if (lowerAddress == toAssetPopup.chosenAssetAddress) {
+      inReserves = reserves[1]
+      outReserves = reserves[0]
+    }
+  }
+
+  function checkTransactionFunds() {
+    if (fromAssetPopup.chosenAssetSymbol == "AVAX") {  // Coin
+      var hasCoinFunds = !QmlSystem.hasInsufficientFunds(
+        accountHeader.coinBalance, QmlSystem.calculateTransactionCost(
+          swapInput.text, "180000", QmlSystem.getAutomaticFee()
+        ), 18
+      )
+      return hasCoinFunds
+    } else { // Token
+      var hasCoinFunds = !QmlSystem.hasInsufficientFunds(
+        accountHeader.coinBalance, QmlSystem.calculateTransactionCost(
+          "0", "180000", QmlSystem.getAutomaticFee()
+        ), 18
+      )
+      var hasTokenFunds = !QmlSystem.hasInsufficientFunds(
+        accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]["balance"],
+        swapInput.text, fromAssetPopup.chosenAssetDecimals
+      )
+      return (hasCoinFunds && hasTokenFunds)
+    }
   }
 
   AVMEPanel {
@@ -323,14 +360,20 @@ Item {
         font.pixelSize: 14.0
         text: "You need to approve your Account in order to swap <b>"
         + fromAssetPopup.chosenAssetSymbol + "</b>."
+        + "<br>This operation will have a total gas cost of:<br><b>"
+        + QmlSystem.calculateTransactionCost("0", "180000", QmlSystem.getAutomaticFee())
+        + " AVAX</b>"
       }
 
       AVMEButton {
         id: approveBtn
         width: parent.width
+        enabled: (+accountHeader.coinBalance >=
+          +QmlSystem.calculateTransactionCost("0", "180000", QmlSystem.getAutomaticFee())
+        )
         anchors.horizontalCenter: parent.horizontalCenter
-        text: "Approve"
-        onClicked: {} // TODO
+        text: (enabled) ? "Approve" : "Not enough funds"
+        onClicked: confirmApprovalPopup.open()
       }
     }
 
@@ -351,29 +394,19 @@ Item {
       AVMEInput {
         id: swapInput
         width: (parent.width * 0.8)
-        enabled: (allowance != "")
         validator: RegExpValidator {
           regExp: QmlSystem.createTxRegExp(fromAssetPopup.chosenAssetDecimals)
         }
         label: fromAssetPopup.chosenAssetSymbol + " Amount"
         placeholder: "Fixed point amount (e.g. 0.5)"
-        /*
-        // TODO: this
         onTextEdited: {
-          calculateExchangeAmountOut()
-          if (coinToToken) {
-            swapImpact = QmlSystem.calculateExchangePriceImpact(
-              (("AVAX" == lowerToken) ? lowerReserves : higherReserves),
-              swapInput.text, 18
-            )
-          } else {
-            swapImpact = QmlSystem.calculateExchangePriceImpact(
-              (("Token" == lowerToken) ? lowerReserves : higherReserves),
-              swapInput.text, 18  // TODO: token name AND decimals here
-            )
-          }
+          swapEstimate = QmlSystem.calculateExchangeAmount(
+            swapInput.text, inReserves, outReserves
+          )
+          swapImpact = QmlSystem.calculateExchangePriceImpact(
+            inReserves, swapInput.text, 18
+          )
         }
-        */
 
         AVMEButton {
           id: swapMaxBtn
@@ -383,28 +416,19 @@ Item {
             leftMargin: 10
           }
           text: "Max"
-          enabled: (allowance != "")
-          /*
-          // TODO: this
           onClicked: {
-            var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
-            swapInput.text = (coinToToken)
-              ? QmlSystem.getRealMaxAVAXAmount("180000", QmlSystem.getAutomaticFee())
-              : acc.balanceAVME
-            calculateExchangeAmountOut()
-            if (coinToToken) {
-              swapImpact = QmlSystem.calculateExchangePriceImpact(
-                (("AVAX" == lowerToken) ? lowerReserves : higherReserves),
-                swapInput.text, 18
+            swapInput.text = (fromAssetPopup.chosenAssetSymbol == "AVAX")
+              ? QmlSystem.getRealMaxAVAXAmount(
+                accountHeader.coinBalance, "180000", QmlSystem.getAutomaticFee()
               )
-            } else {
-              swapImpact = QmlSystem.calculateExchangePriceImpact(
-                (("Token" == lowerToken) ? lowerReserves : higherReserves),
-                swapInput.text, 18  // TODO: token name AND decimals here
-              )
-            }
+              : accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]["balance"]
+            swapEstimate = QmlSystem.calculateExchangeAmount(
+              swapInput.text, inReserves, outReserves
+            )
+            swapImpact = QmlSystem.calculateExchangePriceImpact(
+              inReserves, swapInput.text, 18
+            )
           }
-          */
         }
       }
 
@@ -416,8 +440,8 @@ Item {
         elide: Text.ElideRight
         color: "#FFFFFF"
         font.pixelSize: 14.0
-        text: "Estimated " + toAssetPopup.chosenAssetSymbol + " return:"
-        + "<br><b>" + swapEstimate + "</b> "
+        text: "Estimated return: <b>"
+        + swapEstimate + " " + toAssetPopup.chosenAssetSymbol + "</b> "
       }
 
       /**
@@ -469,22 +493,25 @@ Item {
         id: swapBtn
         width: parent.width
         anchors.horizontalCenter: parent.horizontalCenter
-        /*
-        enabled: allowance != "" && (
-          !QmlSystem.isApproved(swapInput.text, allowance) || swapInput.acceptableInput
-        ) && (swapImpact <= 10.0 || ignoreImpactCheck.checked)
-        text: {
-          if (allowance == "") {
-            text: "Checking approval..."
-          } else if (QmlSystem.isApproved(swapInput.text, allowance)) {
-            text: (swapImpact <= 10.0 || ignoreImpactCheck.checked)
-            ? "Make Swap" : "Price impact too high"
+        enabled: (
+          swapInput.acceptableInput && (swapImpact <= 10.0 || ignoreImpactCheck.checked)
+        )
+        text: (swapImpact <= 10.0 || ignoreImpactCheck.checked)
+        ? "Make Swap" : "Price impact too high"
+        onClicked: {
+          if (!checkTransactionFunds()) {
+            fundsPopup.open()
           } else {
-            text: "Approve"
+            // TODO: fix Ledger
+            //if (QmlSystem.getLedgerFlag()) {
+            //  checkLedger()
+            //} else {
+            //  confirmExchangePopup.open()
+            //}
+            confirmExchangePopup.open()
           }
         }
         /*
-        // TODO: this
         onClicked: {
           if (!QmlSystem.isApproved(swapInput.text, allowance)) {
             QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
@@ -523,16 +550,34 @@ Item {
 
   // Popups for choosing the asset going "in"/"out".
   // Defaults to "from AVAX to AVME".
-  // TODO: force "to" asset to change when both are the same
   AVMEPopupAssetSelect {
     id: fromAssetPopup
     defaultToAVME: false
-    onAboutToHide: fetchAllowance()
     Component.onCompleted: fetchAllowance()
+    onAboutToHide: {
+      if (chosenAssetAddress == toAssetPopup.chosenAssetAddress) {
+        if (chosenAssetAddress == QmlSystem.getContract("AVAX")) {
+          toAssetPopup.forceAVME()
+        } else {
+          toAssetPopup.forceAVAX()
+        }
+      }
+      fetchAllowance()
+    }
   }
   AVMEPopupAssetSelect {
     id: toAssetPopup
     defaultToAVME: true
+    onAboutToHide: {
+      if (chosenAssetAddress == fromAssetPopup.chosenAssetAddress) {
+        if (chosenAssetAddress == QmlSystem.getContract("AVAX")) {
+          fromAssetPopup.forceAVME()
+        } else {
+          fromAssetPopup.forceAVAX()
+        }
+      }
+      fetchAllowance()
+    }
   }
 
   // Popup for insufficient funds
@@ -545,5 +590,29 @@ Item {
     id: zeroSwapPopup
     icon: "qrc:/img/warn.png"
     info: "Cannot send swap for 0 value"
+  }
+
+  // Popups for confirming approval and swap, respectively
+  AVMEPopupConfirmTx {
+    id: confirmApprovalPopup
+    info: "You will approve "
+    + "<b>" + fromAssetPopup.chosenAssetSymbol + "</b>"
+    + " swapping to the current address<br>"
+    + "<br>Gas Limit: <b>"
+    + QmlSystem.weiToFixedPoint("180000", 18) + " AVAX</b>"
+    + "<br>Gas Price: <b>"
+    + QmlSystem.weiToFixedPoint(QmlSystem.getAutomaticFee(), 9) + " AVAX</b>"
+    okBtn.onClicked: {} // TODO
+  }
+  AVMEPopupConfirmTx {
+    id: confirmExchangePopup
+    info: "You will swap "
+    + "<b>" + swapInput.text + " " + fromAssetPopup.chosenAssetSymbol + "</b><br>"
+    + "for <b>" + swapEstimate + " " + toAssetPopup.chosenAssetSymbol + "</b>"
+    + "<br>Gas Limit: <b>"
+    + QmlSystem.weiToFixedPoint("180000", 18) + " AVAX</b>"
+    + "<br>Gas Price: <b>"
+    + QmlSystem.weiToFixedPoint(QmlSystem.getAutomaticFee(), 9) + " AVAX</b>"
+    okBtn.onClicked: {} // TODO
   }
 }

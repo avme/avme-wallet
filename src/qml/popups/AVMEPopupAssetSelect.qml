@@ -31,25 +31,35 @@ AVMEPopup {
     for (var i = 0; i < tokens.length; i++) {
       tokenList.append(tokens[i])
     }
-    coinList.sortBySymbol()
     tokenList.sortBySymbol()
     if (defaultToAVME) {
-      tokenSelectList.grabFocus()
-      for (var i = 0; i < tokenList.count; i++) {
-        if (tokenList.get(i).address == QmlSystem.getAVMEAddress()) {
-          tokenSelectList.currentIndex = i;
-        }
-      }
+      forceAVME()
     } else {
-      coinSelectList.grabFocus()
-      coinSelectList.currentIndex = 0
+      forceAVAX()
     }
+  }
+
+  function forceAVAX() {
+    coinSelectList.grabFocus()
+    coinSelectList.currentIndex = 0
     chooseAsset()
+  }
+
+  function forceAVME() {
+    tokenSelectList.grabFocus()
+    for (var i = 0; i < tokenList.count; i++) {
+      if (tokenList.get(i).address == QmlSystem.getAVMEAddress()) {
+        tokenSelectList.currentIndex = i;
+        chooseAsset()
+      }
+    }
   }
 
   function chooseAsset() {
     if (coinSelectList.currentIndex > -1) {
-      chosenAssetAddress = ""
+      if (selectedCoin.itemSymbol == "AVAX") {
+        chosenAssetAddress = QmlSystem.getContract("AVAX")
+      }
       chosenAssetSymbol = selectedCoin.itemSymbol
       chosenAssetName = selectedCoin.itemName
       chosenAssetDecimals = selectedCoin.itemDecimals
@@ -98,13 +108,6 @@ AVMEPopup {
           model: ListModel {
             id: coinList
             ListElement { symbol: "AVAX"; name: "Avalanche"; decimals: 18 }
-            function sortBySymbol() {
-              for (var i = 0; i < count; i++) {
-                for (var j = 0; j < i; j++) {
-                  if (get(i).symbol < get(j).symbol) { move(i, j, 1) }
-                }
-              }
-            }
           }
         }
         AVMETokenList {
