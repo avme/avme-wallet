@@ -32,6 +32,12 @@
         <file>qml/popups/AVMEPopupPriceChart.qml</file>
 
         <file>qml/panels/AVMEPanelAccountSelect.qml</file>
+        <file>qml/panels/AVMEPanelOverview.qml</file>
+        <file>qml/panels/AVMEPanelOverviewAssets.qml</file>
+        <file>qml/panels/AVMEPanelTokens.qml</file>
+        <file>qml/panels/AVMEPanelTokenDetails.qml</file>
+        <file>qml/panels/AVMEPanelSend.qml</file>
+        <file>qml/panels/AVMEPanelExchange.qml</file>
 
         <file>qml/components/AVMEButton.qml</file>
         <file>qml/components/AVMEInput.qml</file>

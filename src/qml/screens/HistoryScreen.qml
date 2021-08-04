@@ -7,6 +7,7 @@ import QtQuick.Controls 2.2
 import "qrc:/qml/components"
 
 // Screen for showing the transaction history for the Account
+// TODO: maybe separate the panels here too?
 Item {
   id: historyScreen
   property bool sortByNew: true
