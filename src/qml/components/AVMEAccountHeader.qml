@@ -18,6 +18,7 @@ Rectangle {
   property string coinValue
   property string coinPrice
   property string coinPriceChart
+  property string totalFiatBalance
   // We cannot use tokenList as a object in a if condition.
   // So we need a variable that can tell that tokenList was updated
   property var tokensLoading
@@ -34,20 +35,14 @@ Rectangle {
 
   Connections {
     target: QmlSystem
-    function onAccountAVAXBalancesUpdated(address, avaxBalance, avaxValue, avaxPrice, avaxPriceData) {
-      if (address == currentAddress) {
-        coinBalance = avaxBalance
-        coinValue = avaxValue
-        coinPrice = avaxPrice
-        coinPriceChart = avaxPriceData
-        // Uncomment to see data
-        //console.log("Coin")
-        //console.log("Balance: " + coinBalance)
-        //console.log("USD Value: " + coinValue)
-        updatedBalances()
-      }
-    }
-    function onAccountTokenBalancesUpdated(address, tokenJsonListStr) {
+    function onAccountAllBalancesUpdated(address, tokenJsonListStr, coinInformationJsonStr) {
+      var coinInformation = JSON.parse(coinInformationJsonStr)
+      coinBalance = coinInformation["coinBalance"]
+      coinValue = coinInformation["coinFiatBalance"]
+      coinPrice = coinInformation["coinFiatPrice"]
+      coinPriceChart = coinInformation["coinPriceChart"]
+
+      totalFiatBalance = coinInformation["coinFiatBalance"]
       tokenList = ({})
       if (address == currentAddress) {
         var tokenJsonList = JSON.parse(tokenJsonListStr)
@@ -61,6 +56,7 @@ Rectangle {
           tokenInformation["chartData"] = tokenJsonList[i]["tokenChartData"]
           tokenInformation["USDprice"] = tokenJsonList[i]["tokenUSDPrice"]
           tokenList[tokenJsonList[i]["tokenAddress"]] = tokenInformation
+          totalFiatBalance = +totalFiatBalance + +tokenInformation["value"]
         }
         tokensLoading = "loaded"
         // Uncomment to see data
@@ -85,8 +81,7 @@ Rectangle {
   }
 
   function refreshBalances() {
-    QmlSystem.getAccountAVAXBalances(currentAddress)
-    QmlSystem.getAccountTokenBalances(currentAddress)
+    QmlSystem.getAccountAllBalances(currentAddress)
   }
 
   function checkLedger() {

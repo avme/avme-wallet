@@ -195,6 +195,10 @@ json Graph::getAccountPrices(std::vector<ARC20Token> tokenList) {
     query << "chart_" << token.address << ": tokenDayDatas(first: 31, orderBy: date, orderDirection: desc, where: {";
     query << "token: \\\"" << token.address << "\\\"" << "} ) { date priceUSD id }";
   }
+  // Add AVAX Price chart to the query
+  query << "AVAXUSDCHART: tokenDayDatas(first: 31, orderBy: date, orderDirection: desc, where: {"
+      << "token: \\\"0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7\\\""
+      << "} ) { date priceUSD }";
   // Close the query
   query << "}\"}";
   std::string resp = httpGetRequest(query.str());

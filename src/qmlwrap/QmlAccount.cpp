@@ -197,17 +197,19 @@ void QmlSystem::getAllAVAXBalances(QStringList addresses) {
   });
 }
 
-void QmlSystem::getAccountTokenBalances(QString address) {
+void QmlSystem::getAccountAllBalances(QString address) {
   QtConcurrent::run([=](){
-    json ret = json::array();
-
+    json tokensInformation = json::array();
+    json coinInformation; 
     std::vector<Request> reqs;
     std::string addressStr = address.toStdString();
     if (addressStr.substr(0,2) == "0x") { addressStr = addressStr.substr(2); }
+    // Add AVAX balance as request [1] 
+    reqs.push_back({1, "2.0", "eth_getBalance", {address.toStdString(), "latest"}});
 
     // Build the balance request for every registered token in the Wallet
     std::vector<ARC20Token> tokenList = QmlSystem::w.getARC20Tokens();
-    // The API can eventually return unordered ID's, we need to properly treat iqt
+    // The API can eventually return unordered ID's, we need to properly treat it
     std::map<uint64_t, std::string> idList;
     for (ARC20Token token : tokenList) {
       json params;
@@ -221,7 +223,6 @@ void QmlSystem::getAccountTokenBalances(QString address) {
       idList[reqs.size() + size_t(1)] = std::string("token_") + token.address;
       reqs.push_back(req);
     }
-
     // Make the request and get the AVAX price in USD
     std::string query = API::buildMultiRequest(reqs);
     std::string resp = API::httpGetRequest(query);
@@ -257,7 +258,6 @@ void QmlSystem::getAccountTokenBalances(QString address) {
           ss << std::setprecision(2) << std::fixed << tokenUSDValueFloat;
           std::string tokenUSDValue = ss.str();
           std::string tokenBalStr = boost::lexical_cast<std::string>(tokenBal);
-
           std::string chartAddress = "chart_" + tokenList[pos].address;
 
           // Again, we need to convert to lowercase and append chart_ as prefix
@@ -272,13 +272,38 @@ void QmlSystem::getAccountTokenBalances(QString address) {
           tokenInformation["coinWorth"] = coinWorth;
           tokenInformation["tokenChartData"] = tokenChartData;
           tokenInformation["tokenUSDPrice"] = boost::lexical_cast<std::string>(tokenUSDPrice);
-          ret.push_back(tokenInformation);
+          tokensInformation.push_back(tokenInformation);
         }
       }
     }
-    emit accountTokenBalancesUpdated(
+    // Parse AVAX information, using the ID 1 from the API as enforced previously
+    for (auto arrItem : resultArr) {
+      // As mentioned previously, the array might return unordered from the API, we need to loop it.
+      if (arrItem["id"].get<int>() == 1) {
+        std::string hexBal = arrItem["result"].get<std::string>();
+        u256 avaxWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
+        bigfloat avaxBal = bigfloat(Utils::weiToFixedPoint(
+          boost::lexical_cast<std::string>(avaxWeiBal), 18
+        ));
+        bigfloat avaxUSDBal = avaxUSDPrice * avaxBal;
+        std::stringstream avaxUSDBalPrec2;
+        avaxUSDBalPrec2 << std::setprecision(2) << std::fixed << avaxUSDBal;
+        std::stringstream avaxUSDPricePrec2;
+        avaxUSDPricePrec2 << std::setprecision(2) << std::fixed << avaxUSDPrice;
+
+        coinInformation["coinBalance"] = boost::lexical_cast<std::string>(avaxBal);
+        coinInformation["coinFiatBalance"] = avaxUSDBalPrec2.str();
+        coinInformation["coinFiatPrice"] = avaxUSDPricePrec2.str();
+        coinInformation["coinPriceChart"] = tokensPrices["data"]["AVAXUSDCHART"].dump();
+        // Avoid looping more than needed
+        break;
+      }
+    }
+
+    emit accountAllBalancesUpdated(
       address,
-      QString::fromStdString(ret.dump())
+      QString::fromStdString(tokensInformation.dump()),
+      QString::fromStdString(coinInformation.dump())
     );
   });
 }

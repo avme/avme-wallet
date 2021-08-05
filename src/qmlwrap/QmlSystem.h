@@ -63,8 +63,8 @@ class QmlSystem : public QObject {
     void accountAVAXBalancesUpdated(
       QString address, QString avaxBalance, QString avaxValue, QString avaxPrice, QString avaxPriceData
     );
-    void accountTokenBalancesUpdated(
-      QString address, QString tokenJsonListStr
+    void accountAllBalancesUpdated(
+      QString address, QString tokenJsonListStr, QString CoinData
     );
 
     // Overview screen signals
@@ -237,7 +237,7 @@ class QmlSystem : public QObject {
     Q_INVOKABLE void getAllAVAXBalances(QStringList addresses);
 
     // Get the balances of all registered tokens for a specific Account
-    Q_INVOKABLE void getAccountTokenBalances(QString address);
+    Q_INVOKABLE void getAccountAllBalances(QString address);
 
     // (Re)Load the token and tx history databases, respectively.
     Q_INVOKABLE bool loadTokenDB();

@@ -35,12 +35,8 @@ Rectangle {
       font.pixelSize: 24.0
       font.bold: true
       text: {
-        if (accountHeader.coinBalance) {
-          var totalFiatBalance = +accountHeader.coinValue
-          for (var token in accountHeader.tokenList) {
-            totalFiatBalance += +accountHeader.tokenList[token]["value"]
-          }
-          text: "$" + totalFiatBalance
+        if (accountHeader.totalFiatBalance) {
+          text: "$" + accountHeader.totalFiatBalance
         } else {
           text: "Loading..."
         }
