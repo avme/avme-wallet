@@ -24,16 +24,13 @@ ListView {
   Connections {
     target: accountHeader
     // Whatever happens first.
-    function onTokensLoaded() { reloadAssets() }
     function onUpdatedBalances() { reloadAssets() }
   }
 
-  Component.onCompleted: reloadAssets()
+  // TODO: Using this if condition is a workaround, find a better solution
+  Component.onCompleted: if (accountHeader.coinRawBalance) reloadAssets()
 
   function reloadAssets() {
-    // Don't fill the list if there is missing information
-    if (!accountHeader.coinUSDPriceChart || !accountHeader.tokensLoading) { return }
-
     // AVAX is obligatory but not a token so it's not in tokenList
     var assetList = ([])
     var tokens = accountHeader.tokenList

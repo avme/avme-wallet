@@ -59,7 +59,7 @@ Rectangle {
       font.bold: true
       // Using the own tokenList object makes the own if to fail
       text: {
-        if (accountHeader.tokensLoading) {
+        if (accountHeader.coinRawBalance) {
           var totalTokenWorth = 0.0
           for (var token in accountHeader.tokenList) {
             totalTokenWorth += (

@@ -19,15 +19,12 @@ Rectangle {
   property string coinUSDPrice
   property string coinUSDPriceChart
   property string totalFiatBalance
-  // We cannot use tokenList as a object in a if condition.
-  // So we need a variable that can tell that tokenList was updated
-  property var tokensLoading
+
   property var tokenList: ({})
   height: 50
   color: "transparent"
   radius: 10
   signal updatedBalances()
-  signal tokensLoaded()
 
   Timer { id: addressTimer; interval: 2000 }
   Timer { id: balancesTimer; interval: 5000; repeat: true; onTriggered: refreshBalances() }
@@ -43,7 +40,6 @@ Rectangle {
       coinUSDPriceChart = coinInformation["coinPriceChart"]
 
       totalFiatBalance = coinInformation["coinFiatBalance"]
-      console.log(totalFiatBalance)
       tokenList = ({})
       if (address == currentAddress) {
         var tokenJsonList = JSON.parse(tokenJsonListStr)
@@ -54,13 +50,13 @@ Rectangle {
           tokenInformation["derivedValue"] = tokenJsonList[i]["tokenDerivedValue"]
           tokenInformation["symbol"] = tokenJsonList[i]["tokenSymbol"]
           tokenInformation["coinWorth"] = tokenJsonList[i]["coinWorth"]
+          console.log(tokenJsonList[i]["tokenChartData"])
           tokenInformation["chartData"] = tokenJsonList[i]["tokenChartData"]
           tokenInformation["USDprice"] = tokenJsonList[i]["tokenUSDPrice"]
           tokenList[tokenJsonList[i]["tokenAddress"]] = tokenInformation
           // Use only two digits precision.
           totalFiatBalance = Math.round((+totalFiatBalance + +tokenInformation["fiatValue"]) * 100) / 100
         }
-        tokensLoading = "loaded"
         // Uncomment to see data
         //for (var token in tokenList) {
         //  console.log("Token")
@@ -72,7 +68,6 @@ Rectangle {
         //}
         console.log("Loaded")
         updatedBalances()
-        tokensLoaded()
       }
     }
   }

@@ -20,7 +20,8 @@ AVMEPanel {
 
   // Only load chart if everything is loaded
   // TODO: Add loading animation
-  Component.onCompleted: if (accountHeader.tokensLoading) { accountPie.refresh() }
+  // TODO: Using this if condition is a workaround, find a better solution
+  Component.onCompleted: if (accountHeader.coinRawBalance) { accountPie.refresh() }
 
   Rectangle {
     id: accountChartRect
@@ -47,8 +48,6 @@ AVMEPanel {
         holeSize: 0.65
         function refresh() {
           clear()
-          // Don't fill the chart if there's missing information
-          if (!accountHeader.coinRawBalance || !accountHeader.tokensLoading) { return }
           append("AVAX", accountHeader.coinFiatValue)
           for (var token in accountHeader.tokenList) {
             var sym = accountHeader.tokenList[token].symbol
@@ -154,8 +153,6 @@ AVMEPanel {
       id: accountChartLegendModel
       function refresh() {
         clear()
-        // Don't fill the chart if there's missing information
-        if (!accountHeader.coinRawBalance || !accountHeader.tokensLoading) { return }
         for (var i = 0; i < accountPie.count; i++) {
           append({
             id: i, label: accountPie.at(i).label,
