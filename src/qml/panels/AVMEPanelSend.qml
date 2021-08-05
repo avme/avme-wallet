@@ -41,13 +41,13 @@ AVMEPanel {
 
   function refreshAssetBalance() {
     if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {
-      assetBalance.text = (accountHeader.coinBalance != "")
-      ? "Total amount: <b>" + accountHeader.coinBalance + " AVAX</b>"
+      assetBalance.text = (accountHeader.coinRawBalance != "")
+      ? "Total amount: <b>" + accountHeader.coinRawBalance + " AVAX</b>"
       : "Loading asset balance..."
     } else {
       var asset = accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]
       assetBalance.text = (asset != undefined)
-      ? "Total amount: <b>" + asset["balance"]
+      ? "Total amount: <b>" + asset["rawBalance"]
       + " " + chooseAssetPopup.chosenAssetSymbol + "</b>"
       : "Loading asset balance..."
     }
@@ -156,7 +156,7 @@ AVMEPanel {
         onClicked: {
           txAmountInput.text = (chooseAssetPopup.chosenAssetSymbol == "AVAX")
           ? QmlSystem.getRealMaxAVAXAmount(
-            accountHeader.coinBalance, txGasLimitInput.text, txGasPriceInput.text
+            accountHeader.coinRawBalance, txGasLimitInput.text, txGasPriceInput.text
           )
           : (+accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]["balance"])
           updateTxCost()

@@ -14,10 +14,10 @@ import "qrc:/qml/popups"
 Rectangle {
   id: accountHeader
   property string currentAddress
-  property string coinBalance
-  property string coinValue
-  property string coinPrice
-  property string coinPriceChart
+  property string coinRawBalance
+  property string coinFiatValue
+  property string coinUSDPrice
+  property string coinUSDPriceChart
   property string totalFiatBalance
   // We cannot use tokenList as a object in a if condition.
   // So we need a variable that can tell that tokenList was updated
@@ -37,26 +37,28 @@ Rectangle {
     target: QmlSystem
     function onAccountAllBalancesUpdated(address, tokenJsonListStr, coinInformationJsonStr) {
       var coinInformation = JSON.parse(coinInformationJsonStr)
-      coinBalance = coinInformation["coinBalance"]
-      coinValue = coinInformation["coinFiatBalance"]
-      coinPrice = coinInformation["coinFiatPrice"]
-      coinPriceChart = coinInformation["coinPriceChart"]
+      coinRawBalance = coinInformation["coinBalance"]
+      coinFiatValue = coinInformation["coinFiatBalance"]
+      coinUSDPrice = coinInformation["coinFiatPrice"]
+      coinUSDPriceChart = coinInformation["coinPriceChart"]
 
       totalFiatBalance = coinInformation["coinFiatBalance"]
+      console.log(totalFiatBalance)
       tokenList = ({})
       if (address == currentAddress) {
         var tokenJsonList = JSON.parse(tokenJsonListStr)
         for (var i = 0; i < tokenJsonList.length; ++i) {
           var tokenInformation = ({})
-          tokenInformation["balance"] = tokenJsonList[i]["tokenBalance"]
-          tokenInformation["value"] = tokenJsonList[i]["tokenValue"]
+          tokenInformation["rawBalance"] = tokenJsonList[i]["tokenRawBalance"]
+          tokenInformation["fiatValue"] = tokenJsonList[i]["tokenFiatValue"]
           tokenInformation["derivedValue"] = tokenJsonList[i]["tokenDerivedValue"]
           tokenInformation["symbol"] = tokenJsonList[i]["tokenSymbol"]
           tokenInformation["coinWorth"] = tokenJsonList[i]["coinWorth"]
           tokenInformation["chartData"] = tokenJsonList[i]["tokenChartData"]
           tokenInformation["USDprice"] = tokenJsonList[i]["tokenUSDPrice"]
           tokenList[tokenJsonList[i]["tokenAddress"]] = tokenInformation
-          totalFiatBalance = +totalFiatBalance + +tokenInformation["value"]
+          // Use only two digits precision.
+          totalFiatBalance = Math.round((+totalFiatBalance + +tokenInformation["fiatValue"]) * 100) / 100
         }
         tokensLoading = "loaded"
         // Uncomment to see data
@@ -68,6 +70,7 @@ Rectangle {
         //  console.log("USD Value: ", tokenList[token]["value"])
         //  console.log("Derived Value: ", tokenList[token]["derivedValue"])
         //}
+        console.log("Loaded")
         updatedBalances()
         tokensLoaded()
       }

@@ -44,7 +44,7 @@ AVMEPanel {
     } else {
       var asset = accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]
       exchangeDetailsColumn.visible = (+allowance >= +QmlSystem.fixedPointToWei(
-        asset["balance"], fromAssetPopup.chosenAssetDecimals
+        asset["rawBalance"], fromAssetPopup.chosenAssetDecimals
       ))
       exchangeDetailsColumn.visible = true
     }
@@ -71,13 +71,13 @@ AVMEPanel {
 
   function refreshAssetBalance() {
     if (fromAssetPopup.chosenAssetSymbol == "AVAX") {
-      assetBalance.text = (accountHeader.coinBalance != "")
-      ? "Total amount: <b>" + accountHeader.coinBalance + " AVAX</b>"
+      assetBalance.text = (accountHeader.coinRawBalance != "")
+      ? "Total amount: <b>" + accountHeader.coinRawBalance + " AVAX</b>"
       : "Loading asset balance..."
     } else {
       var asset = accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]
       assetBalance.text = (asset != undefined)
-      ? "Total amount: <b>" + asset["balance"]
+      ? "Total amount: <b>" + asset["rawBalance"]
       + " " + fromAssetPopup.chosenAssetSymbol + "</b>"
       : "Loading asset balance..."
     }
@@ -224,7 +224,7 @@ AVMEPanel {
     AVMEButton {
       id: approveBtn
       width: parent.width
-      enabled: (+accountHeader.coinBalance >=
+      enabled: (+accountHeader.coinRawBalance >=
         +QmlSystem.calculateTransactionCost("0", "180000", QmlSystem.getAutomaticFee())
       )
       anchors.horizontalCenter: parent.horizontalCenter
@@ -275,9 +275,9 @@ AVMEPanel {
         onClicked: {
           swapInput.text = (fromAssetPopup.chosenAssetSymbol == "AVAX")
             ? QmlSystem.getRealMaxAVAXAmount(
-              accountHeader.coinBalance, "180000", QmlSystem.getAutomaticFee()
+              accountHeader.coinRawBalance, "180000", QmlSystem.getAutomaticFee()
             )
-            : accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]["balance"]
+            : accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]["rawBalance"]
           swapEstimate = QmlSystem.calculateExchangeAmount(
             swapInput.text, inReserves, outReserves
           )

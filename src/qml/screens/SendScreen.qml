@@ -110,19 +110,19 @@ Item {
   function checkTransactionFunds() {
     if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {  // Coin
       var hasCoinFunds = !QmlSystem.hasInsufficientFunds(
-        accountHeader.coinBalance, QmlSystem.calculateTransactionCost(
+        accountHeader.coinRawBalance, QmlSystem.calculateTransactionCost(
           sendPanel.amount, sendPanel.gasLimit, sendPanel.gasPrice
         ), 18
       )
       return hasCoinFunds
     } else { // Token
       var hasCoinFunds = !QmlSystem.hasInsufficientFunds(
-        accountHeader.coinBalance, QmlSystem.calculateTransactionCost(
+        accountHeader.coinRawBalance, QmlSystem.calculateTransactionCost(
           "0", sendPanel.gasLimit, sendPanel.gasPrice
         ), 18
       )
       var hasTokenFunds = !QmlSystem.hasInsufficientFunds(
-        accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]["balance"],
+        accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]["rawBalance"],
         sendPanel.amount, chooseAssetPopup.chosenAssetDecimals
       )
       return (hasCoinFunds && hasTokenFunds)

@@ -32,7 +32,7 @@ ListView {
 
   function reloadAssets() {
     // Don't fill the list if there is missing information
-    if (!accountHeader.coinPriceChart || !accountHeader.tokensLoading) { return }
+    if (!accountHeader.coinUSDPriceChart || !accountHeader.tokensLoading) { return }
 
     // AVAX is obligatory but not a token so it's not in tokenList
     var assetList = ([])
@@ -42,13 +42,13 @@ ListView {
     // Address here is WAVAX, for price history
     avax["assetAddress"] = "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7"
     avax["assetName"] = "AVAX"
-    avax["coinAmount"] = accountHeader.coinBalance
+    avax["coinAmount"] = accountHeader.coinRawBalance
     avax["tokenAmount"] = "0"
     avax["isToken"] = false
-    avax["fiatAmount"] = "$" + accountHeader.coinValue
+    avax["fiatAmount"] = "$" + accountHeader.coinFiatValue
     avax["imagePath"] = "qrc:/img/avax_logo.png"
-    avax["priceChart"] = accountHeader.coinPriceChart
-    avax["USDPrice"] = accountHeader.coinPrice
+    avax["priceChart"] = accountHeader.coinUSDPriceChart
+    avax["USDPrice"] = accountHeader.coinUSDPrice
     assetList.push(avax)
 
     // Populate the token list
@@ -57,9 +57,9 @@ ListView {
       asset["assetAddress"] = token
       asset["assetName"] = tokens[token]["symbol"]
       asset["coinAmount"] = tokens[token]["coinWorth"]
-      asset["tokenAmount"] = tokens[token]["balance"]
+      asset["tokenAmount"] = tokens[token]["rawBalance"]
       asset["isToken"] = true
-      asset["fiatAmount"] = "$" + tokens[token]["value"]
+      asset["fiatAmount"] = "$" + tokens[token]["fiatValue"]
       asset["priceChart"] = tokens[token]["chartData"]
       asset["USDPrice"] = tokens[token]["USDprice"]
       asset["imagePath"] = (tokens[token]["symbol"] == "AVME")

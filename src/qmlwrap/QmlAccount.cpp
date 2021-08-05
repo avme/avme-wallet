@@ -266,8 +266,8 @@ void QmlSystem::getAccountAllBalances(QString address) {
           json tokenInformation;
           tokenInformation["tokenAddress"] = tokenList[pos].address;
           tokenInformation["tokenSymbol"] = tokenList[pos].symbol;
-          tokenInformation["tokenBalance"] = tokenBalStr;
-          tokenInformation["tokenValue"] = tokenUSDValue;
+          tokenInformation["tokenRawBalance"] = tokenBalStr;
+          tokenInformation["tokenFiatValue"] = tokenUSDValue;
           tokenInformation["tokenDerivedValue"] = tokenDerivedPriceStr;
           tokenInformation["coinWorth"] = coinWorth;
           tokenInformation["tokenChartData"] = tokenChartData;

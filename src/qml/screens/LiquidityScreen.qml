@@ -165,12 +165,12 @@ Item {
         font.pixelSize: 14.0
         text: "Total amounts: <br><b>"
         + ((addAsset1Popup.chosenAssetSymbol == "AVAX")
-        ? accountHeader.coinBalance
-        : +accountHeader.tokenList[addAsset1Popup.chosenAssetAddress]["balance"])
+        ? accountHeader.coinRawBalance
+        : +accountHeader.tokenList[addAsset1Popup.chosenAssetAddress]["rawBalance"])
         + " " + addAsset1Popup.chosenAssetSymbol + "<br>"
         + ((addAsset2Popup.chosenAssetSymbol == "AVAX")
-        ? accountHeader.coinBalance
-        : +accountHeader.tokenList[addAsset2Popup.chosenAssetAddress]["balance"])
+        ? accountHeader.coinRawBalance
+        : +accountHeader.tokenList[addAsset2Popup.chosenAssetAddress]["rawBalance"])
         + " " + addAsset2Popup.chosenAssetSymbol + "</b>"
       }
 

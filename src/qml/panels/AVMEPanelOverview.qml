@@ -48,11 +48,11 @@ AVMEPanel {
         function refresh() {
           clear()
           // Don't fill the chart if there's missing information
-          if (!accountHeader.coinBalance || !accountHeader.tokensLoading) { return }
-          append("AVAX", accountHeader.coinValue)
+          if (!accountHeader.coinRawBalance || !accountHeader.tokensLoading) { return }
+          append("AVAX", accountHeader.coinFiatValue)
           for (var token in accountHeader.tokenList) {
             var sym = accountHeader.tokenList[token].symbol
-            var bal = accountHeader.tokenList[token].value
+            var bal = accountHeader.tokenList[token].fiatValue
             append(sym, bal)
           }
           var baseColor = "#AD00FA"
@@ -155,7 +155,7 @@ AVMEPanel {
       function refresh() {
         clear()
         // Don't fill the chart if there's missing information
-        if (!accountHeader.coinBalance || !accountHeader.tokensLoading) { return }
+        if (!accountHeader.coinRawBalance || !accountHeader.tokensLoading) { return }
         for (var i = 0; i < accountPie.count; i++) {
           append({
             id: i, label: accountPie.at(i).label,

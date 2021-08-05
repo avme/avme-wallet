@@ -48,8 +48,8 @@ Rectangle {
       color: "white"
       font.pixelSize: 18.0
       font.bold: true
-      text: (accountHeader.coinBalance)
-      ? accountHeader.coinBalance + " AVAX" : "Loading..."
+      text: (accountHeader.coinRawBalance)
+      ? accountHeader.coinRawBalance + " AVAX" : "Loading..."
     }
 
     Text {
@@ -63,7 +63,7 @@ Rectangle {
           var totalTokenWorth = 0.0
           for (var token in accountHeader.tokenList) {
             totalTokenWorth += (
-              +accountHeader.tokenList[token]["balance"] *
+              +accountHeader.tokenList[token]["rawBalance"] *
               +accountHeader.tokenList[token]["derivedValue"]
             )
           }
