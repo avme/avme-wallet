@@ -15,13 +15,13 @@ AVMEPanel {
 
   Connections {
     target: accountHeader
-    function onUpdatedBalances() { accountPie.refresh() }
+    function onUpdatedBalances() { accountPie.refresh(); loadingPng.visible = false }
   }
 
   // Only load chart if everything is loaded
   // TODO: Add loading animation
   // TODO: Using this if condition is a workaround, find a better solution
-  Component.onCompleted: if (accountHeader.coinRawBalance) { accountPie.refresh() }
+  Component.onCompleted: if (accountHeader.coinRawBalance) { accountPie.refresh(); loadingPng.visible = false }
 
   Rectangle {
     id: accountChartRect
@@ -160,6 +160,24 @@ AVMEPanel {
           })
         }
       }
+    }
+  }
+  Image {
+    id: loadingPng
+    height: parent.width / 3
+    width: height
+    anchors.verticalCenter: parent.verticalCenter
+    anchors.horizontalCenter: parent.horizontalCenter
+    fillMode: Image.PreserveAspectFit
+    source: "qrc:/img/icons/loading.png"
+    RotationAnimator {
+      target: loadingPng
+      from: 0
+      to: 360
+      duration: 1000
+      loops: Animation.Infinite
+      easing.type: Easing.InOutQuad
+      running: true
     }
   }
 }

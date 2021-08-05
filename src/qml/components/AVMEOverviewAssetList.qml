@@ -24,11 +24,11 @@ ListView {
   Connections {
     target: accountHeader
     // Whatever happens first.
-    function onUpdatedBalances() { reloadAssets() }
+    function onUpdatedBalances() { reloadAssets(); loadingPng.visible = false }
   }
 
   // TODO: Using this if condition is a workaround, find a better solution
-  Component.onCompleted: if (accountHeader.coinRawBalance) reloadAssets()
+  Component.onCompleted: if (accountHeader.coinRawBalance) { reloadAssets(); loadingPng.visible = false }
 
   function reloadAssets() {
     // AVAX is obligatory but not a token so it's not in tokenList

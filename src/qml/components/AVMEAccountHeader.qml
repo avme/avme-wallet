@@ -50,7 +50,6 @@ Rectangle {
           tokenInformation["derivedValue"] = tokenJsonList[i]["tokenDerivedValue"]
           tokenInformation["symbol"] = tokenJsonList[i]["tokenSymbol"]
           tokenInformation["coinWorth"] = tokenJsonList[i]["coinWorth"]
-          console.log(tokenJsonList[i]["tokenChartData"])
           tokenInformation["chartData"] = tokenJsonList[i]["tokenChartData"]
           tokenInformation["USDprice"] = tokenJsonList[i]["tokenUSDPrice"]
           tokenList[tokenJsonList[i]["tokenAddress"]] = tokenInformation
@@ -66,7 +65,6 @@ Rectangle {
         //  console.log("USD Value: ", tokenList[token]["value"])
         //  console.log("Derived Value: ", tokenList[token]["derivedValue"])
         //}
-        console.log("Loaded")
         updatedBalances()
       }
     }

@@ -33,4 +33,22 @@ AVMEPanel {
       height: parent.height
     }
   }
+  Image {
+    id: loadingPng
+    height: parent.width / 3
+    width: height
+    anchors.verticalCenter: parent.verticalCenter
+    anchors.horizontalCenter: parent.horizontalCenter
+    fillMode: Image.PreserveAspectFit
+    source: "qrc:/img/icons/loading.png"
+    RotationAnimator {
+      target: loadingPng
+      from: 0
+      to: 360
+      duration: 1000
+      loops: Animation.Infinite
+      easing.type: Easing.InOutQuad
+      running: true
+    }
+  }
 }
