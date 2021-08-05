@@ -28,12 +28,26 @@ class QmlApi : public QObject {
   private:
     std::vector<Request> requestList;
 
+  signals:
+    /**
+     * When calling without a signal, it causes the GUI interface to freeze
+     * in order to prevent such problem, we have to use signals
+     * and filter the requests appropriately through QML
+     * in order to not have something writting where it shouldn't
+     */
+
+    void APIRequestAnswered(QString answer, QString requestID);
+
+    // The same goes for graph requests.
+
+    void tokenPriceHistoryAnswered(QString answer, QString requestID, int days);
+
   public:
     /**
      * Call every request under requestList in a single connection.
      * Automatically clears the requestList when done.
      */
-    Q_INVOKABLE QString doAPIRequests();
+    Q_INVOKABLE void doAPIRequests(QString requestID);
 
     /**
      * Manually clear the requestList if necessary.
@@ -81,7 +95,7 @@ class QmlApi : public QObject {
     /**
      * Get the fiat price history of the last X days for a given ARC20 token.
      */
-    Q_INVOKABLE QString getTokenPriceHistory(QString address, int days);
+    Q_INVOKABLE void getTokenPriceHistory(QString address, int days, QString requestID);
 
     /**
      * Build request for getting the allowance amount between owner and spender

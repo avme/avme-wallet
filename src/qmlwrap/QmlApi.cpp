@@ -4,11 +4,13 @@
 
 #include "QmlApi.h"
 
-QString QmlApi::doAPIRequests() {
-  std::string requests = API::buildMultiRequest(this->requestList);
-  std::string response = API::httpGetRequest(requests);
-  this->requestList.clear();
-  return QString::fromStdString(response);
+void QmlApi::doAPIRequests(QString requestID) {
+  QtConcurrent::run([=](){
+    std::string requests = API::buildMultiRequest(this->requestList);
+    std::string response = API::httpGetRequest(requests);
+    this->requestList.clear();
+    emit APIRequestAnswered(QString::fromStdString(response), requestID);
+  });
 }
 
 void QmlApi::clearAPIRequests() {
@@ -107,8 +109,10 @@ void QmlApi::buildGetARC20TokenDataReq(std::string address) {
   this->requestList.push_back(decimalsReq);
 }
 
-QString QmlApi::getTokenPriceHistory(QString address, int days) {
-  return QString::fromStdString(Graph::getTokenPriceHistory(address.toStdString(), days).dump());
+void QmlApi::getTokenPriceHistory(QString address, int days, QString requestID) {
+  QtConcurrent::run([=](){
+    emit tokenPriceHistoryAnswered(QString::fromStdString(Graph::getTokenPriceHistory(address.toStdString(), days).dump()), requestID, days);
+  });
 }
 
 void QmlApi::buildGetAllowanceReq(QString receiver, QString owner, QString spender) {

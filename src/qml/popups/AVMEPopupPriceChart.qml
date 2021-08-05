@@ -17,22 +17,42 @@ AVMEPopup {
 
   Connections {
     target: chartPeriod
-    function onActivated(index) { updateChart(index) }
+    function onActivated(index) { 
+      callGraphApi(index) 
+      }
   }
 
   Connections {
     // Change index to select 1 Month and reload the chart
     target: pricechartPopup
-    function onOpened() { chartPeriod.currentIndex = 1; updateChart(1) }
+      function onOpened() { 
+        chartPeriod.currentIndex = 1; 
+        callGraphApi(1);
+      }
   }
 
-  function updateChart(index) {
-    //console.log(index)
+  Connections {
+    // Change index to select 1 Month and reload the chart
+    target: QmlApi
+      function onTokenPriceHistoryAnswered(answer, requestID, days) { 
+        if (requestID == "AssetListPopupChart")
+          updateChart(answer, days);
+      }
+  }
+
+  function callGraphApi(index) {
+    loadingPng.visible = true;
+    loadingPngRotate.start()
+    popupMarketChart.visible = false;
+    marketGraph.clear();
     var days = 0
     if (index == 0) { days = 8 }
     else if (index == 1) { days = 31 }
     else if (index == 2) { days = 91 }
-    var marketHistory = JSON.parse(QmlApi.getTokenPriceHistory(contractAddress, days))
+    QmlApi.getTokenPriceHistory(contractAddress, days, "AssetListPopupChart")
+  }
+  function updateChart(tokenPriceHistory, days) {
+    var marketHistory = JSON.parse(tokenPriceHistory)
     marketGraph.clear()
     var minY = -1
     var maxY = -1
@@ -94,6 +114,8 @@ AVMEPopup {
       // Insert the candlestick into the graph
       marketGraph.append(candlestick)
     }
+    loadingPng.visible = false
+    popupMarketChart.visible = true;
   }
 
   ChartView {
@@ -249,5 +271,24 @@ AVMEPopup {
     }
     text: "Close"
     onClicked: pricechartPopup.close()
+  }
+  Image {
+    id: loadingPng
+    height: parent.width / 3
+    width: height
+    anchors.verticalCenter: parent.verticalCenter
+    anchors.horizontalCenter: parent.horizontalCenter
+    fillMode: Image.PreserveAspectFit
+    source: "qrc:/img/icons/loading.png"
+    RotationAnimator {
+      id: loadingPngRotate
+      target: loadingPng
+      from: 0
+      to: 360
+      duration: 1000
+      loops: Animation.Infinite
+      easing.type: Easing.InOutQuad
+      running: true
+    }
   }
 }
