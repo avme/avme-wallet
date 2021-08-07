@@ -52,6 +52,8 @@ Rectangle {
           tokenInformation["coinWorth"] = tokenJsonList[i]["coinWorth"]
           tokenInformation["chartData"] = tokenJsonList[i]["tokenChartData"]
           tokenInformation["USDprice"] = tokenJsonList[i]["tokenUSDPrice"]
+          tokenInformation["decimals"] = tokenJsonList[i]["tokenDecimals"]
+          tokenInformation["name"] = tokenJsonList[i]["tokenName"]
           tokenList[tokenJsonList[i]["tokenAddress"]] = tokenInformation
           // Use only two digits precision.
           totalFiatBalance = Math.round((+totalFiatBalance + +tokenInformation["fiatValue"]) * 100) / 100

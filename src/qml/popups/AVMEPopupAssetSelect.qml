@@ -26,10 +26,15 @@ AVMEPopup {
 
   Component.onCompleted: {
     tokenList.clear()
-    QmlSystem.loadARC20Tokens()
-    var tokens = QmlSystem.getARC20Tokens()
-    for (var i = 0; i < tokens.length; i++) {
-      tokenList.append(tokens[i])
+    var tokens = accountHeader.tokenList
+    for (var token in tokens) {
+      var tmpTokenList = ({})
+      tmpTokenList["address"] = token
+      tmpTokenList["name"] = tokens[token]["name"]
+      tmpTokenList["symbol"] = tokens[token]["symbol"]
+      tmpTokenList["decimals"] = tokens[token]["decimals"]
+      tmpTokenList["balance"] = tokens[token]["rawBalance"]
+      tokenList.append(tmpTokenList)
     }
     tokenList.sortBySymbol()
     if (defaultToAVME) {
@@ -69,7 +74,6 @@ AVMEPopup {
       chosenAssetSymbol = selectedToken.itemSymbol
       chosenAssetName = selectedToken.itemName
       chosenAssetDecimals = selectedToken.itemDecimals
-      chosenAssetAVAXPairContract = selectedToken.itemAVAXPairContract
     }
   }
 
@@ -98,7 +102,7 @@ AVMEPopup {
 
       Column {
         anchors.fill: parent
-        spacing: 10
+        spacing: 0
         AVMECoinList {
           id: coinSelectList
           width: (parent.width * 0.9)
@@ -107,7 +111,7 @@ AVMEPopup {
           onGrabFocus: tokenSelectList.currentIndex = -1
           model: ListModel {
             id: coinList
-            ListElement { symbol: "AVAX"; name: "Avalanche"; decimals: 18 }
+            ListElement { symbol: "AVAX"; name: "Avalanche"; decimals: 18;}
           }
         }
         AVMETokenList {

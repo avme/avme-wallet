@@ -34,6 +34,7 @@ ListView {
       readonly property string itemSymbol: symbol
       readonly property string itemName: name
       readonly property string itemDecimals: decimals
+      readonly property string itemBalance: balance
       width: coinSelectList.width
       height: 50
 
@@ -54,8 +55,8 @@ ListView {
         Image {
           id: delegateImage
           anchors.verticalCenter: parent.verticalCenter
-          width: 48
-          height: 48
+          width: parent.height * 0.9
+          height: width
           antialiasing: true
           smooth: true
           fillMode: Image.PreserveAspectFit
@@ -71,6 +72,17 @@ ListView {
           padding: 5
           elide: Text.ElideRight
           text: itemSymbol
+        }
+        Text {
+          id: delegateBalance
+          anchors.verticalCenter: parent.verticalCenter
+          anchors.right: parent.right
+          anchors.rightMargin: parent.width * 0.05
+          width: parent.width * 0.4
+          color: "white"
+          font.pixelSize: 14.0
+          elide: Text.ElideRight
+          text: if (itemSymbol == "AVAX") {text: accountHeader.coinRawBalance}
         }
       }
       MouseArea {
