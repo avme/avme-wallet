@@ -62,6 +62,11 @@ ListView {
       asset["imagePath"] = (tokens[token]["symbol"] == "AVME")
       ? "qrc:/img/avme_logo.png"
       : "file:" + QmlSystem.getARC20TokenImage(token)
+
+      // Account for unknown tokens image
+      if (asset["imagePath"] == "file:") 
+        asset["imagePath"] = "qrc:img/unknown_token.png"
+
       assetList.push(asset)
     }
 
