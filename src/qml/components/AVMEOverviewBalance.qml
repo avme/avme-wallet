@@ -11,6 +11,37 @@ Rectangle {
   property alias totalCoinBalance: coinBalance.text
   property alias totalTokenBalance: tokenBalance.text
 
+  // Due to usage of global variables, we can only tell the screen
+  // to read from them in the appropriate time
+  // Using a signal
+  Component.onCompleted: {
+    if (!accountHeader.coinRawBalance) {
+      totalFiatBalance = "Loading..."
+      totalCoinBalance = "Loading..."
+      totalTokenBalance = "Loading..."
+    } else { updateBalances() }
+  }
+  Connections {
+    target: accountHeader
+      function onUpdatedBalances() { updateBalances() }
+  }
+
+  function updateBalances() {
+    totalFiatBalance = "$" + accountHeader.totalFiatBalance
+    totalCoinBalance = accountHeader.coinRawBalance + " AVAX"
+    var totalTokenWorth = 0.0
+    for (var token in accountHeader.tokenList) {
+      var currentTokenWorth = (+accountHeader.tokenList[token]["rawBalance"] *
+      +accountHeader.tokenList[token]["derivedValue"])
+      // Due to some unknown reason, if you sum something to 0, it will return 0
+      // So we need to check if the currentTokenWorth is not 0
+      if (+currentTokenWorth != 0)
+        totalTokenWorth += +currentTokenWorth
+    }
+    totalTokenBalance = totalTokenWorth + " AVAX (Tokens)"
+  }
+
+
   implicitWidth: 500
   implicitHeight: 120
   gradient: Gradient {
@@ -34,13 +65,6 @@ Rectangle {
       color: "white"
       font.pixelSize: 24.0
       font.bold: true
-      text: {
-        if (accountHeader.totalFiatBalance) {
-          text: "$" + accountHeader.totalFiatBalance
-        } else {
-          text: "Loading..."
-        }
-      }
     }
 
     Text {
@@ -48,8 +72,6 @@ Rectangle {
       color: "white"
       font.pixelSize: 18.0
       font.bold: true
-      text: (accountHeader.coinRawBalance)
-      ? accountHeader.coinRawBalance + " AVAX" : "Loading..."
     }
 
     Text {
@@ -57,21 +79,6 @@ Rectangle {
       color: "white"
       font.pixelSize: 18.0
       font.bold: true
-      // Using the own tokenList object makes the own if to fail
-      text: {
-        if (accountHeader.coinRawBalance) {
-          var totalTokenWorth = 0.0
-          for (var token in accountHeader.tokenList) {
-            totalTokenWorth += (
-              +accountHeader.tokenList[token]["rawBalance"] *
-              +accountHeader.tokenList[token]["derivedValue"]
-            )
-          }
-          text: totalTokenWorth + " AVAX (Tokens)"
-        } else {
-          text: "Loading..."
-        }
-      }
     }
   }
 }
