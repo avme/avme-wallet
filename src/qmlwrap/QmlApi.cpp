@@ -9,7 +9,7 @@ void QmlApi::doAPIRequests(QString requestID) {
     std::string requests = API::buildMultiRequest(this->requestList);
     std::string response = API::httpGetRequest(requests);
     this->requestList.clear();
-    emit APIRequestAnswered(QString::fromStdString(response), requestID);
+    emit apiRequestAnswered(QString::fromStdString(response), requestID);
   });
 }
 

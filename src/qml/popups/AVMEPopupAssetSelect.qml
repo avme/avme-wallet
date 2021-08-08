@@ -25,6 +25,13 @@ AVMEPopup {
   property string chosenAssetAVAXPairContract
 
   Component.onCompleted: {
+    coinList.clear()
+    coinList.append({
+      symbol: "AVAX",
+      name: "Avalanche",
+      decimals: 18,
+      balance: accountHeader.coinRawBalance
+    })
     tokenList.clear()
     var tokens = accountHeader.tokenList
     for (var token in tokens) {
@@ -109,10 +116,7 @@ AVMEPopup {
           height: (parent.height * 0.25)
           anchors.horizontalCenter: parent.horizontalCenter
           onGrabFocus: tokenSelectList.currentIndex = -1
-          model: ListModel {
-            id: coinList
-            ListElement { symbol: "AVAX"; name: "Avalanche"; decimals: 18;}
-          }
+          model: ListModel { id: coinList }
         }
         AVMETokenList {
           id: tokenSelectList

@@ -24,7 +24,46 @@ AVMEPanel {
     function onUpdatedBalances() { refreshAssetBalance() }
   }
 
+  Connections {
+    target: QmlApi
+    function onApiRequestAnswered(answer, requestID) {
+      if (requestID == "QmlExchange_fetchAllowance") {
+        var resp = JSON.parse(answer)
+        allowance = QmlApi.parseHex(resp[0].result, ["uint"])
+        pairAddress = QmlApi.parseHex(resp[1].result, ["address"])
+        // AVAX doesn't need approval, tokens do (and individually)
+        if (fromAssetPopup.chosenAssetSymbol == "AVAX") {
+          exchangeDetailsColumn.visible = true
+        } else {
+          var asset = accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]
+          exchangeDetailsColumn.visible = (+allowance >= +QmlSystem.fixedPointToWei(
+            asset["rawBalance"], fromAssetPopup.chosenAssetDecimals
+          ))
+          exchangeDetailsColumn.visible = true
+        }
+        QmlApi.clearAPIRequests()
+        QmlApi.buildGetReservesReq(pairAddress)
+        QmlApi.doAPIRequests("QmlExchange_refreshReserves")
+      } else if (requestID == "QmlExchange_refreshReserves") {
+        var resp = JSON.parse(answer)
+        var reserves = QmlApi.parseHex(resp[0].result, ["uint", "uint", "uint"])
+        var lowerAddress = QmlSystem.getFirstFromPair(
+          fromAssetPopup.chosenAssetAddress, toAssetPopup.chosenAssetAddress
+        )
+        if (lowerAddress == fromAssetPopup.chosenAssetAddress) {
+          inReserves = reserves[0]
+          outReserves = reserves[1]
+        } else if (lowerAddress == toAssetPopup.chosenAssetAddress) {
+          inReserves = reserves[1]
+          outReserves = reserves[0]
+        }
+      }
+    }
+  }
+
   function fetchAllowance() {
+    refreshAssetBalance()
+    swapInput.text = swapEstimate = swapImpact = inReserves = outReserves = ""
     QmlApi.clearAPIRequests()
     QmlApi.buildGetAllowanceReq(
       fromAssetPopup.chosenAssetAddress,
@@ -35,38 +74,7 @@ AVMEPanel {
       fromAssetPopup.chosenAssetAddress,
       toAssetPopup.chosenAssetAddress
     )
-    var resp = JSON.parse(QmlApi.doAPIRequests())
-    allowance = QmlApi.parseHex(resp[0].result, ["uint"])
-    pairAddress = QmlApi.parseHex(resp[1].result, ["address"])
-    // AVAX doesn't need approval, tokens do (and individually)
-    if (fromAssetPopup.chosenAssetSymbol == "AVAX") {
-      exchangeDetailsColumn.visible = true
-    } else {
-      var asset = accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]
-      exchangeDetailsColumn.visible = (+allowance >= +QmlSystem.fixedPointToWei(
-        asset["rawBalance"], fromAssetPopup.chosenAssetDecimals
-      ))
-      exchangeDetailsColumn.visible = true
-    }
-    refreshAssetBalance()
-    refreshReserves()
-  }
-
-  function refreshReserves() {
-    QmlApi.clearAPIRequests()
-    QmlApi.buildGetReservesReq(pairAddress)
-    var resp = JSON.parse(QmlApi.doAPIRequests())
-    var reserves = QmlApi.parseHex(resp[0].result, ["uint", "uint", "uint"])
-    var lowerAddress = QmlSystem.getFirstFromPair(
-      fromAssetPopup.chosenAssetAddress, toAssetPopup.chosenAssetAddress
-    )
-    if (lowerAddress == fromAssetPopup.chosenAssetAddress) {
-      inReserves = reserves[0]
-      outReserves = reserves[1]
-    } else if (lowerAddress == toAssetPopup.chosenAssetAddress) {
-      inReserves = reserves[1]
-      outReserves = reserves[0]
-    }
+    QmlApi.doAPIRequests("QmlExchange_fetchAllowance")
   }
 
   function refreshAssetBalance() {
@@ -253,8 +261,9 @@ AVMEPanel {
       validator: RegExpValidator {
         regExp: QmlSystem.createTxRegExp(fromAssetPopup.chosenAssetDecimals)
       }
+      enabled: (inReserves != "" && outReserves != "")
       label: fromAssetPopup.chosenAssetSymbol + " Amount"
-      placeholder: "Fixed point amount (e.g. 0.5)"
+      placeholder: (enabled) ? "Fixed point amount (e.g. 0.5)" : "Loading reserves..."
       onTextEdited: {
         swapEstimate = QmlSystem.calculateExchangeAmount(
           swapInput.text, inReserves, outReserves

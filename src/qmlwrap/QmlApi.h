@@ -30,16 +30,14 @@ class QmlApi : public QObject {
 
   signals:
     /**
-     * When calling without a signal, it causes the GUI interface to freeze
-     * in order to prevent such problem, we have to use signals
-     * and filter the requests appropriately through QML
-     * in order to not have something writting where it shouldn't
+     * When calling a function on Qt without a signal or other multithreading
+     * teechnique, it causes the GUI interface to freeze.
+     * So we have to use signals to prevent that and filter the requests
+     * appropriately through QML to avoid writing in the wrong places.
      */
-
-    void APIRequestAnswered(QString answer, QString requestID);
+    void apiRequestAnswered(QString answer, QString requestID);
 
     // The same goes for graph requests.
-
     void tokenPriceHistoryAnswered(QString answer, QString requestID, int days);
 
   public:
