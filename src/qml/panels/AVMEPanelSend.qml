@@ -42,12 +42,12 @@ AVMEPanel {
   function refreshAssetBalance() {
     if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {
       assetBalance.text = (accountHeader.coinRawBalance != "")
-      ? "Total amount: <b>" + accountHeader.coinRawBalance + " AVAX</b>"
+      ? "Balance: <b>" + accountHeader.coinRawBalance + " AVAX</b>"
       : "Loading asset balance..."
     } else {
       var asset = accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]
       assetBalance.text = (asset != undefined)
-      ? "Total amount: <b>" + asset["rawBalance"]
+      ? "Balance: <b>" + asset["rawBalance"]
       + " " + chooseAssetPopup.chosenAssetSymbol + "</b>"
       : "Loading asset balance..."
     }
