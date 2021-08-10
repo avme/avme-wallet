@@ -16,8 +16,8 @@ AVMEPanel {
 
   function reloadTokens() {
     tokenList.clear()
-    QmlSystem.loadARC20Tokens()
-    var tokens = QmlSystem.getARC20Tokens()
+    qmlSystem.loadARC20Tokens()
+    var tokens = qmlSystem.getARC20Tokens()
     for (var i = 0; i < tokens.length; i++) {
       tokenList.append(tokens[i]);
     }
@@ -67,7 +67,7 @@ AVMEPanel {
       width: (tokensPanel.width * 0.3)
       enabled: (
         tokenGrid.currentItem != null &&
-        tokenGrid.currentItem.itemAddress != QmlSystem.getAVMEAddress()
+        tokenGrid.currentItem.itemAddress != qmlSystem.getAVMEAddress()
       )
       text: (enabled) ? "Remove this token" : "Can't remove"
     }

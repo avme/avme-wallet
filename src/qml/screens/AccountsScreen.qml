@@ -16,7 +16,7 @@ Item {
   id: accountsScreen
 
   Connections {
-    target: QmlSystem
+    target: qmlSystem
     function onAccountCreated(data) {
       chooseAccountPopup.clean()
       chooseAccountPopup.close()
@@ -45,7 +45,7 @@ Item {
 
   function fetchAccounts() {
     accountSelectPanel.accountModel.clear()
-    var accList = QmlSystem.listAccounts()
+    var accList = qmlSystem.listAccounts()
     var addList = []
     for (var i = 0; i < accList.length; i++) {
       var accJson = JSON.parse(accList[i])
@@ -55,7 +55,7 @@ Item {
       addList.push(accJson.address)
     }
     accountSelectPanel.accountModel.sortByAddress()
-    QmlSystem.getAllAVAXBalances(addList)
+    qmlSystem.getAllAVAXBalances(addList)
   }
 
   function useSeed() {
@@ -76,13 +76,13 @@ Item {
     btnCreate.onClicked: chooseAccountPopup.open()
     btnImport.onClicked: seedPopup.open()
     btnSelect.onClicked: {
-      QmlSystem.setCurrentAccount(accountList.currentItem.itemAddress)
-      QmlSystem.loadTokenDB()
-      QmlSystem.loadHistoryDB(QmlSystem.getCurrentAccount())
-      QmlSystem.loadARC20Tokens()
+      qmlSystem.setCurrentAccount(accountList.currentItem.itemAddress)
+      qmlSystem.loadTokenDB()
+      qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
+      qmlSystem.loadARC20Tokens()
       accountHeader.getAddress()
-      QmlSystem.goToOverview()
-      QmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
+      qmlSystem.goToOverview()
+      qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
     }
     btnErase.onClicked: confirmErasePopup.open()
   }
@@ -125,7 +125,7 @@ Item {
       confirmErasePopup.close()
       accountInfoPopup.text = "Erasing Account..."
       accountInfoPopup.open()
-      if (QmlSystem.eraseAccount(accountSelectPanel.accountList.currentItem.itemAddress)) {
+      if (qmlSystem.eraseAccount(accountSelectPanel.accountList.currentItem.itemAddress)) {
         accountInfoPopup.close()
         fetchAccounts()
       } else {

@@ -21,7 +21,7 @@ AVMEPopup {
 
   function showSeed() {
     if (seedText.timer.running) { seedText.timer.stop() }
-    seedText.text = QmlSystem.getWalletSeed(passInput.text)
+    seedText.text = qmlSystem.getWalletSeed(passInput.text)
     newWalletSeed = seedText.text
     btnCopy.enabled = true
   }
@@ -114,7 +114,7 @@ AVMEPopup {
         text: (!copyTimer.running) ? "Copy" : "Copied!"
         Timer { id: copyTimer; interval: 2000 }
         onClicked: {
-          QmlSystem.copyToClipboard(seedText.text)
+          qmlSystem.copyToClipboard(seedText.text)
           copyTimer.start()
         }
       }
@@ -124,7 +124,7 @@ AVMEPopup {
         enabled: (passInput.text !== "")
         onClicked: checkPass()
         function checkPass() {
-          if (QmlSystem.checkWalletPass(passInput.text)) {
+          if (qmlSystem.checkWalletPass(passInput.text)) {
             showSeed()
           } else {
             showErrorMsg()

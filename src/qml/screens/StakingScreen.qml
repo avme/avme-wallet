@@ -6,6 +6,7 @@ import QtQuick.Controls 2.2
 import Qt.labs.platform 1.0
 
 import "qrc:/qml/components"
+import "qrc:/qml/popups"
 
 // Screen for staking tokens with a given Account
 Item {
@@ -31,7 +32,7 @@ Item {
   property string removeLPEstimate
 
   Connections {
-    target: QmlSystem
+    target: qmlSystem
     function onAllowancesUpdated(
       exchangeAllowance, liquidityAllowance, stakingAllowance, compoundAllowance
     ) {
@@ -48,11 +49,11 @@ Item {
       higherToken = higherTokenName
       higherReserves = higherTokenReserves
       liquidity = totalLiquidity
-      var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
-      var userClassicShares = QmlSystem.calculatePoolSharesForTokenValue(
+      var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
+      var userClassicShares = qmlSystem.calculatePoolSharesForTokenValue(
         lowerReserves, higherReserves, liquidity, acc.balanceLPLocked
       )
-      var userCompoundShares = QmlSystem.calculatePoolSharesForTokenValue(
+      var userCompoundShares = qmlSystem.calculatePoolSharesForTokenValue(
         lowerReserves, higherReserves, liquidity, acc.balanceLockedCompoundLP
       )
       userClassicLowerReserves = userClassicShares.lower
@@ -66,21 +67,21 @@ Item {
     id: reloadRewardTimer
     interval: 1000
     repeat: true
-    onTriggered: QmlSystem.getPoolReward()
+    onTriggered: qmlSystem.getPoolReward()
   }
 
   Timer {
     id: reloadCompoundTimer
     interval: 1000
     repeat: true
-    onTriggered: QmlSystem.getCompoundReward()
+    onTriggered: qmlSystem.getCompoundReward()
   }
 
   Timer {
     id: reloadLiquidityDataTimer
     interval: 5000
     repeat: true
-    onTriggered: QmlSystem.updateLiquidityData("AVAX", "AVME")
+    onTriggered: qmlSystem.updateLiquidityData("AVAX", "AVME")
   }
 
   Component.onCompleted: {
@@ -206,7 +207,7 @@ Item {
         color: "#FFFFFF"
         font.pixelSize: 18.0
         text: {
-          var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
           text: (isStaking)
           ? "Free (unstaked) LP:<br><b>" + acc.balanceLPFree + "</b>"
           : "Locked (staked) LP:<br><b>" + acc.balanceLPLocked + "</b>"
@@ -231,7 +232,7 @@ Item {
           }
           text: "Max"
           onClicked: {
-            var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
+            var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
             stakeInput.text = (isStaking) ? acc.balanceLPFree : acc.balanceLPLocked
           }
         }
@@ -244,10 +245,10 @@ Item {
         color: "#FFFFFF"
         font.pixelSize: 14.0
         text: "Locked LP Estimates:"
-          + "<br><b>" + QmlSystem.weiToFixedPoint(
+          + "<br><b>" + qmlSystem.weiToFixedPoint(
             (("AVAX" == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves), 18
           ) + " AVAX"
-          + "<br>" + QmlSystem.weiToFixedPoint(
+          + "<br>" + qmlSystem.weiToFixedPoint(
             (("AVME" == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves), 18
           ) + " AVME" + "</b>"
       }
@@ -256,18 +257,18 @@ Item {
         id: btnStake
         width: parent.width
         enabled: {
-          var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
           enabled: allowance != "" && (
-            !QmlSystem.isApproved(acc.balanceLPFree, allowance) || stakeInput.acceptableInput
+            !qmlSystem.isApproved(acc.balanceLPFree, allowance) || stakeInput.acceptableInput
           )
         }
         text: {
-          var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
           if (allowance == "") {
             text: "Checking approval..."
-          } else if (isStaking && QmlSystem.isApproved(acc.balanceLPFree, allowance)) {
+          } else if (isStaking && qmlSystem.isApproved(acc.balanceLPFree, allowance)) {
             text: "Stake"
-          } else if (!isStaking && QmlSystem.isApproved(acc.balanceLPLocked, allowance)) {
+          } else if (!isStaking && qmlSystem.isApproved(acc.balanceLPLocked, allowance)) {
             text: "Unstake"
           } else {
             text: "Approve"
@@ -276,23 +277,23 @@ Item {
         /*
         // TODO: this
         onClicked: {
-          var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
-          if (!QmlSystem.isApproved(acc.balanceLPFree, allowance)) {
-            QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-            QmlSystem.operationOverride("Approve Staking", "", "", "")
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
+          if (!qmlSystem.isApproved(acc.balanceLPFree, allowance)) {
+            qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+            qmlSystem.operationOverride("Approve Staking", "", "", "")
           } else if (isStaking) {
-            if (QmlSystem.hasInsufficientFunds("LP", acc.balanceLPFree, stakeInput.text)) {
+            if (qmlSystem.hasInsufficientFunds("LP", acc.balanceLPFree, stakeInput.text)) {
               fundsPopup.open()
             } else {
-              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              QmlSystem.operationOverride("Stake LP", "", "", stakeInput.text)
+              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              qmlSystem.operationOverride("Stake LP", "", "", stakeInput.text)
             }
           } else {
-            if (QmlSystem.hasInsufficientFunds("LP", acc.balanceLPLocked, stakeInput.text)) {
+            if (qmlSystem.hasInsufficientFunds("LP", acc.balanceLPLocked, stakeInput.text)) {
               fundsPopup.open()
             } else {
-              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              QmlSystem.operationOverride("Unstake LP", "", "", stakeInput.text)
+              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              qmlSystem.operationOverride("Unstake LP", "", "", stakeInput.text)
             }
           }
         }
@@ -360,16 +361,16 @@ Item {
         width: parent.width
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: {
-          var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
           enabled: (
-            reward != "" && !QmlSystem.balanceIsZero(reward, 18) &&
-            !QmlSystem.balanceIsZero(acc.balanceLPLocked, 18)
+            reward != "" && !qmlSystem.balanceIsZero(reward, 18) &&
+            !qmlSystem.balanceIsZero(acc.balanceLPLocked, 18)
           )
         }
         text: (reward != "") ? "Harvest AVME & Unstake LP" : "Querying reward..."
         onClicked: {
-          QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-          QmlSystem.operationOverride("Exit Staking", "", "", "")
+          qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+          qmlSystem.operationOverride("Exit Staking", "", "", "")
         }
       }
 
@@ -377,11 +378,11 @@ Item {
         id: btnHarvest
         width: parent.width
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (reward != "" && !QmlSystem.balanceIsZero(reward, 18))
+        enabled: (reward != "" && !qmlSystem.balanceIsZero(reward, 18))
         text: (reward != "") ? "Harvest AVME" : "Querying reward..."
         onClicked: {
-          QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-          QmlSystem.operationOverride("Harvest AVME", "", "", "")
+          qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+          qmlSystem.operationOverride("Harvest AVME", "", "", "")
         }
       }
     }
@@ -454,7 +455,7 @@ Item {
         color: "#FFFFFF"
         font.pixelSize: 18.0
         text: {
-          var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
           text: (isyyCompound)
             ? "Free (unstaked) LP:<br><b>" + acc.balanceLPFree + "</b>"
             : "Locked (staked) LP:<br><b>" + acc.balanceLockedCompoundLP + "</b>"
@@ -479,7 +480,7 @@ Item {
           }
           text: "Max"
           onClicked: {
-            var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
+            var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
             compoundInput.text = (isyyCompound) ? acc.balanceLPFree : acc.balanceLockedCompoundLP
           }
         }
@@ -492,10 +493,10 @@ Item {
         color: "#FFFFFF"
         font.pixelSize: 14.0
         text: "Locked LP Estimates:"
-          + "<br><b>" + QmlSystem.weiToFixedPoint(
+          + "<br><b>" + qmlSystem.weiToFixedPoint(
             (("AVAX" == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves), 18
           ) + " AVAX"
-          + "<br>" + QmlSystem.weiToFixedPoint(
+          + "<br>" + qmlSystem.weiToFixedPoint(
             (("AVME" == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves), 18
           ) + " AVME" + "</b>"
       }
@@ -504,41 +505,41 @@ Item {
         id: btnDepositCompound
         width: parent.width
         enabled: {
-          var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
           enabled: compoundallowance != "" && (
-            !QmlSystem.isApproved(acc.balanceLPFree, compoundallowance) || compoundInput.acceptableInput
+            !qmlSystem.isApproved(acc.balanceLPFree, compoundallowance) || compoundInput.acceptableInput
           )
         }
         text: {
-          var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
           if (compoundallowance == "") {
             text: "Checking approval..."
-          } else if (isyyCompound && QmlSystem.isApproved(acc.balanceLPFree, compoundallowance)) {
+          } else if (isyyCompound && qmlSystem.isApproved(acc.balanceLPFree, compoundallowance)) {
             text: "Stake"
-          } else if (!isyyCompound && QmlSystem.isApproved(acc.balanceLockedCompoundLP, compoundallowance)) {
+          } else if (!isyyCompound && qmlSystem.isApproved(acc.balanceLockedCompoundLP, compoundallowance)) {
             text: "Unstake"
           } else {
             text: "Approve"
           }
         }
         onClicked: {
-          var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
-          if (!QmlSystem.isApproved(acc.balanceLPFree, compoundallowance)) {
-            QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-            QmlSystem.operationOverride("Approve Compound", "", "", "")
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
+          if (!qmlSystem.isApproved(acc.balanceLPFree, compoundallowance)) {
+            qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+            qmlSystem.operationOverride("Approve Compound", "", "", "")
           } else if (isyyCompound) {
-            if (QmlSystem.hasInsufficientFunds("LP", acc.balanceLPFree, compoundInput.text)) {
+            if (qmlSystem.hasInsufficientFunds("LP", acc.balanceLPFree, compoundInput.text)) {
               fundsPopup.open()
             } else {
-              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              QmlSystem.operationOverride("Stake Compound LP", "", "", compoundInput.text)
+              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              qmlSystem.operationOverride("Stake Compound LP", "", "", compoundInput.text)
             }
           } else {
-            if (QmlSystem.hasInsufficientFunds("LP", acc.balanceLockedCompoundLP, compoundInput.text)) {
+            if (qmlSystem.hasInsufficientFunds("LP", acc.balanceLockedCompoundLP, compoundInput.text)) {
               fundsPopup.open()
             } else {
-              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              QmlSystem.operationOverride("Unstake Compound LP", "", "", compoundInput.text)
+              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              qmlSystem.operationOverride("Unstake Compound LP", "", "", compoundInput.text)
             }
           }
         }
@@ -614,11 +615,11 @@ Item {
         id: btnreinvest
         width: parent.width
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (reinvestreward != "" && !QmlSystem.balanceIsZero(reinvestreward, 18))
+        enabled: (reinvestreward != "" && !qmlSystem.balanceIsZero(reinvestreward, 18))
         text: (reinvestreward != "") ? "Reinvest AVME" : "Querying Reinvest..."
         onClicked: {
-          QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-          QmlSystem.operationOverride("Reinvest AVME", "", "", "")
+          qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+          qmlSystem.operationOverride("Reinvest AVME", "", "", "")
         }
       }
     }

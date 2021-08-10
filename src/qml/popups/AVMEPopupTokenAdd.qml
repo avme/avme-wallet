@@ -97,24 +97,24 @@ AVMEPopup {
       text: (tokenFound) ? "Add this token" : "Search for token"
       onClicked: handleToken()
       function handleToken() {
-        if (QmlSystem.ARC20TokenWasAdded(addressInput.text)) {
+        if (qmlSystem.ARC20TokenWasAdded(addressInput.text)) {
           existsTimer.start()
         } else if (tokenFound) {
           tokenData.symbol = symbolInput.text
           tokenData.name = nameInput.text
           tokenData.decimals = decimalsInput.text
-          QmlSystem.addARC20Token(
+          qmlSystem.addARC20Token(
             tokenData.address, tokenData.symbol, tokenData.name,
             tokenData.decimals, tokenData.avaxPairContract
           )
-          QmlSystem.downloadARC20TokenImage(tokenData.address)
+          qmlSystem.downloadARC20TokenImage(tokenData.address)
           addTokenPopup.clean()
           addTokenPopup.close()
           reloadTokens()  // Parent call
         } else if (!tokenFound) {
-          if (QmlSystem.ARC20TokenExists(addressInput.text)) {
+          if (qmlSystem.ARC20TokenExists(addressInput.text)) {
             tokenFound = true
-            tokenData = QmlSystem.getARC20TokenData(addressInput.text)
+            tokenData = qmlSystem.getARC20TokenData(addressInput.text)
             symbolInput.text = tokenData.symbol
             nameInput.text = tokenData.name
             decimalsInput.text = tokenData.decimals

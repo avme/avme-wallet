@@ -23,8 +23,8 @@ AVMEPopup {
   property alias loadBtn: btnLoad
 
   onAboutToShow: {
-    loadFolderInput.text = QmlSystem.getDefaultWalletPath()
-    walletExists = QmlSystem.checkFolderForWallet(loadFolderInput.text)
+    loadFolderInput.text = qmlSystem.getDefaultWalletPath()
+    walletExists = qmlSystem.checkFolderForWallet(loadFolderInput.text)
   }
 
   function clean() {
@@ -86,8 +86,8 @@ AVMEPopup {
         id: loadFolderDialog
         title: "Choose your Wallet folder"
         onAccepted: {
-          loadFolderInput.text = QmlSystem.cleanPath(loadFolderDialog.folder)
-          walletExists = QmlSystem.checkFolderForWallet(loadFolderInput.text)
+          loadFolderInput.text = qmlSystem.cleanPath(loadFolderDialog.folder)
+          walletExists = qmlSystem.checkFolderForWallet(loadFolderInput.text)
         }
       }
     }

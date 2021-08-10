@@ -31,7 +31,7 @@ Rectangle {
   Timer { id: ledgerRetryTimer; interval: 250; onTriggered: checkLedger() }
 
   Connections {
-    target: QmlSystem
+    target: qmlSystem
     function onAccountAllBalancesUpdated(address, tokenJsonListStr, coinInformationJsonStr) {
       var coinInformation = JSON.parse(coinInformationJsonStr)
       coinRawBalance = coinInformation["coinBalance"]
@@ -73,17 +73,17 @@ Rectangle {
   }
 
   function getAddress() {
-    currentAddress = QmlSystem.getCurrentAccount()
+    currentAddress = qmlSystem.getCurrentAccount()
     refreshBalances()
     balancesTimer.start()
   }
 
   function refreshBalances() {
-    QmlSystem.getAccountAllBalances(currentAddress)
+    qmlSystem.getAccountAllBalances(currentAddress)
   }
 
   function checkLedger() {
-    var data = QmlSystem.checkForLedger()
+    var data = qmlSystem.checkForLedger()
     if (data.state) {
       ledgerFailPopup.close()
       ledgerRetryTimer.stop()
@@ -97,7 +97,7 @@ Rectangle {
 
   function qrEncode() {
     qrcodePopup.qrModel.clear()
-    var qrData = QmlSystem.getQRCodeFromAddress(currentAddress)
+    var qrData = qmlSystem.getQRCodeFromAddress(currentAddress)
     for (var i = 0; i < qrData.length; i++) {
       qrcodePopup.qrModel.set(i, JSON.parse(qrData[i]))
     }
@@ -182,7 +182,7 @@ Rectangle {
         copyClipImage.source = "qrc:/img/icons/Icon_Clipboard.png"
       }
       onClicked: {
-        QmlSystem.copyToClipboard(currentAddress)
+        qmlSystem.copyToClipboard(currentAddress)
         addressTimer.start()
       }
     }
@@ -216,7 +216,7 @@ Rectangle {
         onExited: parent.color = "transparent"
         onClicked: {
           parent.color = "transparent"
-          QmlSystem.copyToClipboard(currentAddress)
+          qmlSystem.copyToClipboard(currentAddress)
           addressTimer.start()
         }
       }
@@ -233,11 +233,11 @@ Rectangle {
     }
     text: "Change Account"
     onClicked: {
-      if (QmlSystem.getLedgerFlag()) {
+      if (qmlSystem.getLedgerFlag()) {
         checkLedger()
       } else {
-        QmlSystem.hideMenu()
-        QmlSystem.setScreen(content, "qml/screens/AccountsScreen.qml")
+        qmlSystem.hideMenu()
+        qmlSystem.setScreen(content, "qml/screens/AccountsScreen.qml")
       }
     }
   }
@@ -252,9 +252,9 @@ Rectangle {
     }
     text: "Change Wallet"
     onClicked: {
-      QmlSystem.setLedgerFlag(false)
-      QmlSystem.hideMenu()
-      QmlSystem.setScreen(content, "qml/screens/StartScreen.qml")
+      qmlSystem.setLedgerFlag(false)
+      qmlSystem.hideMenu()
+      qmlSystem.setScreen(content, "qml/screens/StartScreen.qml")
     }
   }
 
@@ -274,7 +274,7 @@ Rectangle {
   // "qrcodeWidth = 0" makes the program not even open, so leave it at 1
   AVMEPopupQRCode {
     id: qrcodePopup
-    qrcodeWidth: (currentAddress != "") ? QmlSystem.getQRCodeSize(currentAddress) : 1
+    qrcodeWidth: (currentAddress != "") ? qmlSystem.getQRCodeSize(currentAddress) : 1
     textAddress.text: currentAddress
   }
 }

@@ -52,7 +52,7 @@ Item {
           }
           text: "View Private Key"
           onClicked: {
-            viewPrivKeyPopup.account = QmlSystem.getCurrentAccount()
+            viewPrivKeyPopup.account = accountHeader.currentAddress
             viewPrivKeyPopup.open()
           }
         }

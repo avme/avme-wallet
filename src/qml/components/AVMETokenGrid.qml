@@ -44,11 +44,11 @@ GridView {
           smooth: true
           fillMode: Image.PreserveAspectFit
           source: {
-            var avmeAddress = QmlSystem.getAVMEAddress()
+            var avmeAddress = qmlSystem.getAVMEAddress()
             if (itemAddress == avmeAddress) {
               source: "qrc:/img/avme_logo.png"
             } else {
-              var img = QmlSystem.getARC20TokenImage(itemAddress)
+              var img = qmlSystem.getARC20TokenImage(itemAddress)
               source: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
             }
           }

@@ -17,7 +17,7 @@ Item {
   property string txTotalTokenStr
   property string txTotalLPStr
   Connections {
-    target: QmlSystem
+    target: qmlSystem
     function onOperationOverride(op, amountCoin, amountToken, amountLP) {
       changeOperation(op)
       txAmountCoinInput.text = amountCoin
@@ -31,7 +31,7 @@ Item {
       updateTxCost()
       switch (op) {
         case "Swap AVME -> AVAX":
-          txTotalCoinStr = QmlSystem.calculateTransactionCost(
+          txTotalCoinStr = qmlSystem.calculateTransactionCost(
             "0", txGasLimitInput.text, txGasPriceInput.text
           )
           break;
@@ -54,7 +54,7 @@ Item {
     } else {
       txGasLimitInput.text = "250000"
     }
-    txGasPriceInput.text = QmlSystem.getAutomaticFee()
+    txGasPriceInput.text = qmlSystem.getAutomaticFee()
     updateTxCost()
     switch (op) {
       // AVAX only
@@ -109,19 +109,19 @@ Item {
 
   function checkTransactionFunds() {
     if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {  // Coin
-      var hasCoinFunds = !QmlSystem.hasInsufficientFunds(
-        accountHeader.coinRawBalance, QmlSystem.calculateTransactionCost(
+      var hasCoinFunds = !qmlSystem.hasInsufficientFunds(
+        accountHeader.coinRawBalance, qmlSystem.calculateTransactionCost(
           sendPanel.amount, sendPanel.gasLimit, sendPanel.gasPrice
         ), 18
       )
       return hasCoinFunds
     } else { // Token
-      var hasCoinFunds = !QmlSystem.hasInsufficientFunds(
-        accountHeader.coinRawBalance, QmlSystem.calculateTransactionCost(
+      var hasCoinFunds = !qmlSystem.hasInsufficientFunds(
+        accountHeader.coinRawBalance, qmlSystem.calculateTransactionCost(
           "0", sendPanel.gasLimit, sendPanel.gasPrice
         ), 18
       )
-      var hasTokenFunds = !QmlSystem.hasInsufficientFunds(
+      var hasTokenFunds = !qmlSystem.hasInsufficientFunds(
         accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]["rawBalance"],
         sendPanel.amount, chooseAssetPopup.chosenAssetDecimals
       )
@@ -146,7 +146,7 @@ Item {
         incorrectInputPopup.open()
       } else {
         // TODO: fix Ledger
-        //if (QmlSystem.getLedgerFlag()) {
+        //if (qmlSystem.getLedgerFlag()) {
         //  checkLedger()
         //} else {
         //  confirmTxPopup.open()
@@ -170,18 +170,18 @@ Item {
     + "<b>" + sendPanel.amount + " " + chooseAssetPopup.chosenAssetSymbol + "</b>"
     + " to the address<br><b>" + sendPanel.to + "</b>"
     + "<br>Gas Limit: <b>"
-    + QmlSystem.weiToFixedPoint(sendPanel.gasLimit, 18) + " AVAX</b>"
+    + qmlSystem.weiToFixedPoint(sendPanel.gasLimit, 18) + " AVAX</b>"
     + "<br>Gas Price: <b>"
-    + QmlSystem.weiToFixedPoint(sendPanel.gasPrice, 9) + " AVAX</b>"
+    + qmlSystem.weiToFixedPoint(sendPanel.gasPrice, 9) + " AVAX</b>"
     okBtn.onClicked: {} // TODO
     /*
     function confirmPass() {
-      if (!QmlSystem.checkWalletPass(pass)) {
+      if (!qmlSystem.checkWalletPass(pass)) {
         timer.start()
       } else {
         confirmTxPopup.close()
         txProgressPopup.open()
-        QmlSystem.txStart(
+        qmlSystem.txStart(
           txOperationStr, txToInput.text,
           txAmountCoinInput.text, txAmountTokenInput.text, txAmountLPInput.text,
           txGasLimitInput.text, txGasPriceInput.text, pass
@@ -213,6 +213,7 @@ Item {
   }
 
   // Popup for transaction progress
+  // TODO: this
   AVMEPopupTxProgress {
     id: txProgressPopup
   }

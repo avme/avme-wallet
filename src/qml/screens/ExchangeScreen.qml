@@ -13,7 +13,7 @@ Item {
   id: exchangeScreen
   /*
   Connections {
-    target: QmlSystem
+    target: qmlSystem
     function onAllowancesUpdated(
       exchangeAllowance, liquidityAllowance, stakingAllowance
     ) {
@@ -37,7 +37,7 @@ Item {
       higherToken = higherTokenName
       higherReserves = higherTokenReserves
       liquidity = totalLiquidity
-      var userShares = QmlSystem.calculatePoolShares(
+      var userShares = qmlSystem.calculatePoolShares(
         lowerReserves, higherReserves, liquidity
       )
       userLowerReserves = userShares.lower
@@ -51,7 +51,7 @@ Item {
     interval: 5000
     repeat: true
     onTriggered: {
-      QmlSystem.updateExchangeData("AVAX", "Token") // TODO: token name here
+      qmlSystem.updateExchangeData("AVAX", "Token") // TODO: token name here
       calculateExchangeAmountOut()
     }
   }
@@ -61,7 +61,7 @@ Item {
     interval: 5000
     repeat: true
     onTriggered: {
-      QmlSystem.updateLiquidityData("AVAX", "Token") // TODO: token name here
+      qmlSystem.updateLiquidityData("AVAX", "Token") // TODO: token name here
     }
   }
 
@@ -69,15 +69,15 @@ Item {
   function calculateAddLiquidityAmount(fromCoin) {
     var amountIn = (fromCoin) ? liquidityCoinInput.text : liquidityTokenInput.text
     var amountName = (fromCoin) ? "AVAX" : "Token"  // TODO: token name here
-    var maxAmountAVAX = QmlSystem.getRealMaxAVAXAmount("250000", QmlSystem.getAutomaticFee())
-    var maxAmountAVME = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount()).balanceAVME
+    var maxAmountAVAX = qmlSystem.getRealMaxAVAXAmount("250000", qmlSystem.getAutomaticFee())
+    var maxAmountAVME = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount()).balanceAVME
     var amountOut, coinAmount, tokenAmount
 
     // Set the values accordingly
     if (amountName == lowerToken) {
-      amountOut = QmlSystem.calculateAddLiquidityAmount(amountIn, lowerReserves, higherReserves)
+      amountOut = qmlSystem.calculateAddLiquidityAmount(amountIn, lowerReserves, higherReserves)
     } else if (amountName == higherToken) {
-      amountOut = QmlSystem.calculateAddLiquidityAmount(amountIn, higherReserves, lowerReserves)
+      amountOut = qmlSystem.calculateAddLiquidityAmount(amountIn, higherReserves, lowerReserves)
     }
     if (fromCoin) {
       liquidityTokenInput.text = amountOut
@@ -88,38 +88,38 @@ Item {
 
   // For the Max Amounts button
   function calculateMaxAddLiquidityAmount() {
-    var maxAmountAVAX = QmlSystem.getRealMaxAVAXAmount("250000", QmlSystem.getAutomaticFee())
-    var maxAmountAVME = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount()).balanceAVME
+    var maxAmountAVAX = qmlSystem.getRealMaxAVAXAmount("250000", qmlSystem.getAutomaticFee())
+    var maxAmountAVME = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount()).balanceAVME
     var coinAmount, tokenAmount
 
     // Get the expected amounts for maxed values
     if (lowerToken == "AVAX") {
-      tokenAmount = QmlSystem.calculateAddLiquidityAmount(maxAmountAVAX, lowerReserves, higherReserves)
-      coinAmount = QmlSystem.calculateAddLiquidityAmount(maxAmountAVME, higherReserves, lowerReserves)
+      tokenAmount = qmlSystem.calculateAddLiquidityAmount(maxAmountAVAX, lowerReserves, higherReserves)
+      coinAmount = qmlSystem.calculateAddLiquidityAmount(maxAmountAVME, higherReserves, lowerReserves)
     } else if (lowerToken == "Token") { // TODO: token name here
-      coinAmount = QmlSystem.calculateAddLiquidityAmount(maxAmountAVME, lowerReserves, higherReserves)
-      tokenAmount = QmlSystem.calculateAddLiquidityAmount(maxAmountAVAX, higherReserves, lowerReserves)
+      coinAmount = qmlSystem.calculateAddLiquidityAmount(maxAmountAVME, lowerReserves, higherReserves)
+      tokenAmount = qmlSystem.calculateAddLiquidityAmount(maxAmountAVAX, higherReserves, lowerReserves)
     }
 
     // Limit the max amount to the lowest the user has.
     // If coinAmount is higher than the user's AVAX balance,
     // then the AVAX user balance is limiting. Same with tokenAmount and AVME.
-    if (QmlSystem.firstHigherThanSecond(coinAmount, maxAmountAVAX)) {
+    if (qmlSystem.firstHigherThanSecond(coinAmount, maxAmountAVAX)) {
       maxAmountAVME = tokenAmount
     }
-    if (QmlSystem.firstHigherThanSecond(tokenAmount, maxAmountAVME)) {
+    if (qmlSystem.firstHigherThanSecond(tokenAmount, maxAmountAVME)) {
       maxAmountAVAX = coinAmount
     }
 
     // Set the values accordingly
     if (lowerToken == "AVAX") {
       liquidityCoinInput.text = maxAmountAVAX
-      liquidityTokenInput.text = QmlSystem.calculateAddLiquidityAmount(
+      liquidityTokenInput.text = qmlSystem.calculateAddLiquidityAmount(
         maxAmountAVAX, lowerReserves, higherReserves
       )
     } else if (lowerToken == "Token") { // TODO: token name here
       liquidityTokenInput.text = maxAmountAVME
-      liquidityCoinInput.text = QmlSystem.calculateAddLiquidityAmount(
+      liquidityCoinInput.text = qmlSystem.calculateAddLiquidityAmount(
         maxAmountAVME, lowerReserves, higherReserves
       )
     }
@@ -128,19 +128,19 @@ Item {
 
   function checkTransactionFunds() {
     if (fromAssetPopup.chosenAssetSymbol == "AVAX") {  // Coin
-      var hasCoinFunds = !QmlSystem.hasInsufficientFunds(
-        accountHeader.coinRawBalance, QmlSystem.calculateTransactionCost(
-          exchangePanel.amount, "180000", QmlSystem.getAutomaticFee()
+      var hasCoinFunds = !qmlSystem.hasInsufficientFunds(
+        accountHeader.coinRawBalance, qmlSystem.calculateTransactionCost(
+          exchangePanel.amount, "180000", qmlSystem.getAutomaticFee()
         ), 18
       )
       return hasCoinFunds
     } else { // Token
-      var hasCoinFunds = !QmlSystem.hasInsufficientFunds(
-        accountHeader.coinRawBalance, QmlSystem.calculateTransactionCost(
-          "0", "180000", QmlSystem.getAutomaticFee()
+      var hasCoinFunds = !qmlSystem.hasInsufficientFunds(
+        accountHeader.coinRawBalance, qmlSystem.calculateTransactionCost(
+          "0", "180000", qmlSystem.getAutomaticFee()
         ), 18
       )
-      var hasTokenFunds = !QmlSystem.hasInsufficientFunds(
+      var hasTokenFunds = !qmlSystem.hasInsufficientFunds(
         accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]["rawBalance"],
         exchangePanel.amount, fromAssetPopup.chosenAssetDecimals
       )
@@ -162,7 +162,7 @@ Item {
         fundsPopup.open()
       } else {
         // TODO: fix Ledger
-        //if (QmlSystem.getLedgerFlag()) {
+        //if (qmlSystem.getLedgerFlag()) {
         //  checkLedger()
         //} else {
         //  confirmExchangePopup.open()
@@ -180,7 +180,7 @@ Item {
     Component.onCompleted: exchangePanel.fetchAllowance()
     onAboutToHide: {
       if (chosenAssetAddress == toAssetPopup.chosenAssetAddress) {
-        if (chosenAssetAddress == QmlSystem.getContract("AVAX")) {
+        if (chosenAssetAddress == qmlSystem.getContract("AVAX")) {
           toAssetPopup.forceAVME()
         } else {
           toAssetPopup.forceAVAX()
@@ -194,7 +194,7 @@ Item {
     defaultToAVME: true
     onAboutToHide: {
       if (chosenAssetAddress == fromAssetPopup.chosenAssetAddress) {
-        if (chosenAssetAddress == QmlSystem.getContract("AVAX")) {
+        if (chosenAssetAddress == qmlSystem.getContract("AVAX")) {
           fromAssetPopup.forceAVME()
         } else {
           fromAssetPopup.forceAVAX()
@@ -223,9 +223,9 @@ Item {
     + "<b>" + fromAssetPopup.chosenAssetSymbol + "</b>"
     + " swapping for the current address<br>"
     + "<br>Gas Limit: <b>"
-    + QmlSystem.weiToFixedPoint("180000", 18) + " AVAX</b>"
+    + qmlSystem.weiToFixedPoint("180000", 18) + " AVAX</b>"
     + "<br>Gas Price: <b>"
-    + QmlSystem.weiToFixedPoint(QmlSystem.getAutomaticFee(), 9) + " AVAX</b>"
+    + qmlSystem.weiToFixedPoint(qmlSystem.getAutomaticFee(), 9) + " AVAX</b>"
     okBtn.onClicked: {} // TODO
   }
   AVMEPopupConfirmTx {
@@ -234,9 +234,9 @@ Item {
     + "<b>" + exchangePanel.amount + " " + fromAssetPopup.chosenAssetSymbol + "</b><br>"
     + "for <b>" + exchangePanel.swapEstimate + " " + toAssetPopup.chosenAssetSymbol + "</b>"
     + "<br>Gas Limit: <b>"
-    + QmlSystem.weiToFixedPoint("180000", 18) + " AVAX</b>"
+    + qmlSystem.weiToFixedPoint("180000", 18) + " AVAX</b>"
     + "<br>Gas Price: <b>"
-    + QmlSystem.weiToFixedPoint(QmlSystem.getAutomaticFee(), 9) + " AVAX</b>"
+    + qmlSystem.weiToFixedPoint(qmlSystem.getAutomaticFee(), 9) + " AVAX</b>"
     okBtn.onClicked: {} // TODO
   }
 }

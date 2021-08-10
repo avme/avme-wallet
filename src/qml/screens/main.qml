@@ -5,6 +5,8 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 import QtQuick.Window 2.2
 
+import QmlSystem 1.0
+
 import "qrc:/qml/components"
 
 // The main window
@@ -13,7 +15,9 @@ ApplicationWindow {
   property bool menuToggle: false
   property alias menuSize: sideMenu.width
 
-  title: "AVME Wallet " + QmlSystem.getProjectVersion()
+  QmlSystem { id: qmlSystem }
+
+  title: "AVME Wallet " + qmlSystem.getProjectVersion()
   width: 1280
   height: 720
   minimumWidth: 1280
@@ -21,7 +25,7 @@ ApplicationWindow {
   visible: true
 
   Connections {
-    target: QmlSystem
+    target: qmlSystem
     function onHideMenu() { menuToggle = false }
     function onGoToOverview() { menuToggle = true }
   }

@@ -25,15 +25,15 @@ AVMEPanel {
   Component.onCompleted: { updateTxCost(); refreshAssetBalance() }
 
   function updateTxCost() {
-    if (autoGasCheck.checked) { txGasPriceInput.text = QmlSystem.getAutomaticFee() }
+    if (autoGasCheck.checked) { txGasPriceInput.text = qmlSystem.getAutomaticFee() }
     if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {  // Coin
       if (autoLimitCheck.checked) { txGasLimitInput.text = "21000" }
-      txTotalCoinStr = QmlSystem.calculateTransactionCost(
+      txTotalCoinStr = qmlSystem.calculateTransactionCost(
         sendPanel.amount, sendPanel.gasLimit, sendPanel.gasPrice
       )
     } else {  // Token
       if (autoLimitCheck.checked) { txGasLimitInput.text = "70000" }
-      txTotalCoinStr = QmlSystem.calculateTransactionCost(
+      txTotalCoinStr = qmlSystem.calculateTransactionCost(
         "0", sendPanel.gasLimit, sendPanel.gasPrice
       )
     }
@@ -88,13 +88,13 @@ AVMEPanel {
         smooth: true
         fillMode: Image.PreserveAspectFit
         source: {
-          var avmeAddress = QmlSystem.getAVMEAddress()
+          var avmeAddress = qmlSystem.getAVMEAddress()
           if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {
             source: "qrc:/img/avax_logo.png"
           } else if (chooseAssetPopup.chosenAssetAddress == avmeAddress) {
             source: "qrc:/img/avme_logo.png"
           } else {
-            var img = QmlSystem.getARC20TokenImage(chooseAssetPopup.chosenAssetAddress)
+            var img = qmlSystem.getARC20TokenImage(chooseAssetPopup.chosenAssetAddress)
             source: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
           }
         }
@@ -139,7 +139,7 @@ AVMEPanel {
       width: (parent.width * 0.8)
       anchors.left: parent.left
       validator: RegExpValidator {
-        regExp: QmlSystem.createTxRegExp(chooseAssetPopup.chosenAssetDecimals)
+        regExp: qmlSystem.createTxRegExp(chooseAssetPopup.chosenAssetDecimals)
       }
       label: "Amount"
       placeholder: "Fixed point amount (e.g. 0.5)"
@@ -155,7 +155,7 @@ AVMEPanel {
         text: "Max"
         onClicked: {
           txAmountInput.text = (chooseAssetPopup.chosenAssetSymbol == "AVAX")
-          ? QmlSystem.getRealMaxAVAXAmount(
+          ? qmlSystem.getRealMaxAVAXAmount(
             accountHeader.coinRawBalance, txGasLimitInput.text, txGasPriceInput.text
           )
           : (+accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]["balance"])
@@ -263,12 +263,12 @@ AVMEPanel {
       // TODO: fix Ledger
       /*
       function checkLedger() {
-        var data = QmlSystem.checkForLedger()
+        var data = qmlSystem.checkForLedger()
         if (data.state) {
           ledgerFailPopup.close()
           ledgerRetryTimer.stop()
           txProgressPopup.open()
-          QmlSystem.txStart(
+          qmlSystem.txStart(
             txOperationStr, txToInput.text,
             txAmountCoinInput.text, txAmountTokenInput.text, txAmountLPInput.text,
             txGasLimitInput.text, txGasPriceInput.text, ""

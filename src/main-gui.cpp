@@ -15,14 +15,11 @@ int main(int argc, char *argv[]) {
     qputenv("QT_SCALE_FACTOR", QByteArray::number(scaleFactor));
   #endif
 
-  // Create the actual application and register our custom class into it
-  // TODO: use qmlRegisterType() here
+  // Create the actual application and register our custom classes into it
   QApplication app(argc, argv);
   QQmlApplicationEngine engine;
-  QmlSystem qmlsystem;
-  QmlApi qmlapi;
-  engine.rootContext()->setContextProperty("QmlSystem", &qmlsystem);
-  engine.rootContext()->setContextProperty("QmlApi", &qmlapi);
+  qmlRegisterType<QmlSystem>("QmlSystem", 1, 0, "QmlSystem");
+  qmlRegisterType<QmlApi>("QmlApi", 1, 0, "QmlApi");
 
   // Set the app's text font and icon
   QFontDatabase::addApplicationFont(":/fonts/IBMPlexMono-Bold.ttf");
@@ -33,9 +30,10 @@ int main(int argc, char *argv[]) {
   QApplication::setFont(font);
   app.setWindowIcon(QIcon(":/img/avme_logo.png"));
 
-  // Load the main screen and start the app
+  // Load the main screen, link the required signals/slots and start the app
   engine.load(QUrl(QStringLiteral("qrc:/qml/screens/main.qml")));
   if (engine.rootObjects().isEmpty()) return -1;
+  QmlSystem qmlsystem;
   QObject::connect(&app, SIGNAL(aboutToQuit()), &qmlsystem, SLOT(cleanAndClose()));
   return app.exec();
 }

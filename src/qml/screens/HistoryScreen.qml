@@ -13,7 +13,7 @@ Item {
   property bool sortByNew: true
 
   Connections {
-    target: QmlSystem
+    target: qmlSystem
     function onHistoryLoaded(data) {
       if (data != null) {
         if (sortByNew) {
@@ -41,8 +41,8 @@ Item {
     historyModel.clear()
     infoText.text = "Loading transactions..."
     infoText.visible = true
-    QmlSystem.updateTransactionStatus()
-    QmlSystem.listAccountTransactions(QmlSystem.getCurrentAccount())
+    qmlSystem.updateTransactionStatus()
+    qmlSystem.listAccountTransactions(qmlSystem.getCurrentAccount())
   }
 
   // Transaction list

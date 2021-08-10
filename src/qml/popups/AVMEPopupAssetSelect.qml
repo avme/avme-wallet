@@ -60,7 +60,7 @@ AVMEPopup {
   function forceAVME() {
     tokenSelectList.grabFocus()
     for (var i = 0; i < tokenList.count; i++) {
-      if (tokenList.get(i).address == QmlSystem.getAVMEAddress()) {
+      if (tokenList.get(i).address == qmlSystem.getAVMEAddress()) {
         tokenSelectList.currentIndex = i;
         chooseAsset()
       }
@@ -70,7 +70,7 @@ AVMEPopup {
   function chooseAsset() {
     if (coinSelectList.currentIndex > -1) {
       if (selectedCoin.itemSymbol == "AVAX") {
-        chosenAssetAddress = QmlSystem.getContract("AVAX")
+        chosenAssetAddress = qmlSystem.getContract("AVAX")
       }
       chosenAssetSymbol = selectedCoin.itemSymbol
       chosenAssetName = selectedCoin.itemName

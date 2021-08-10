@@ -22,7 +22,7 @@ AVMEPopup {
 
   function showPrivKey() {
     if (keyText.timer.running) { keyText.timer.stop() }
-    keyText.text = QmlSystem.getPrivateKeys(account, keyPassInput.text)
+    keyText.text = qmlSystem.getPrivateKeys(account, keyPassInput.text)
     btnCopy.enabled = true
   }
 
@@ -116,7 +116,7 @@ AVMEPopup {
         text: (!copyTimer.running) ? "Copy" : "Copied!"
         Timer { id: copyTimer; interval: 2000 }
         onClicked: {
-          QmlSystem.copyToClipboard(keyText.text)
+          qmlSystem.copyToClipboard(keyText.text)
           copyTimer.start()
         }
       }
@@ -126,7 +126,7 @@ AVMEPopup {
         enabled: (keyPassInput.text !== "")
         onClicked: checkPass()
         function checkPass() {
-          if (QmlSystem.checkWalletPass(pass)) {
+          if (qmlSystem.checkWalletPass(pass)) {
             showPrivKey()
           } else {
             showErrorMsg()

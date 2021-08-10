@@ -86,13 +86,13 @@ Item {
           anchors.margins: 20
           fillMode: Image.PreserveAspectFit
           source: {
-            var avmeAddress = QmlSystem.getAVMEAddress()
+            var avmeAddress = qmlSystem.getAVMEAddress()
             if (addAsset1Popup.chosenAssetSymbol == "AVAX") {
               source: "qrc:/img/avax_logo.png"
             } else if (addAsset1Popup.chosenAssetAddress == avmeAddress) {
               source: "qrc:/img/avme_logo.png"
             } else {
-              var img = QmlSystem.getARC20TokenImage(addAsset1Popup.chosenAssetAddress)
+              var img = qmlSystem.getARC20TokenImage(addAsset1Popup.chosenAssetAddress)
               source: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
             }
           }
@@ -107,13 +107,13 @@ Item {
           anchors.margins: 20
           fillMode: Image.PreserveAspectFit
           source: {
-            var avmeAddress = QmlSystem.getAVMEAddress()
+            var avmeAddress = qmlSystem.getAVMEAddress()
             if (addAsset2Popup.chosenAssetSymbol == "AVAX") {
               source: "qrc:/img/avax_logo.png"
             } else if (addAsset2Popup.chosenAssetAddress == avmeAddress) {
               source: "qrc:/img/avme_logo.png"
             } else {
-              var img = QmlSystem.getARC20TokenImage(addAsset2Popup.chosenAssetAddress)
+              var img = qmlSystem.getARC20TokenImage(addAsset2Popup.chosenAssetAddress)
               source: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
             }
           }
@@ -179,7 +179,7 @@ Item {
         width: parent.width
         enabled: (addAllowance != "")
         validator: RegExpValidator {
-          regExp: QmlSystem.createTxRegExp(addAsset1Popup.chosenAssetDecimals)
+          regExp: qmlSystem.createTxRegExp(addAsset1Popup.chosenAssetDecimals)
         }
         label: addAsset1Popup.chosenAssetSymbol + " Amount"
         placeholder: "Fixed point amount (e.g. 0.5)"
@@ -191,7 +191,7 @@ Item {
         width: parent.width
         enabled: (addAllowance != "")
         validator: RegExpValidator {
-          regExp: QmlSystem.createTxRegExp(addAsset2Popup.chosenAssetDecimals)
+          regExp: qmlSystem.createTxRegExp(addAsset2Popup.chosenAssetDecimals)
         }
         label: addAsset2Popup.chosenAssetSymbol + " Amount"
         placeholder: "Fixed point amount (e.g. 0.5)"
@@ -213,13 +213,13 @@ Item {
         width: parent.width
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: (addAllowance != "" && (
-          !QmlSystem.isApproved(addAsset2Input.text, addAllowance) ||
+          !qmlSystem.isApproved(addAsset2Input.text, addAllowance) ||
           (addAsset1Input.acceptableInput && addAsset2Input.acceptableInput)
         ))
         text: {
           if (addAllowance == "") {
             text: "Checking approval..."
-          } else if (QmlSystem.isApproved(addAsset2Input.text, addAllowance)) {
+          } else if (qmlSystem.isApproved(addAsset2Input.text, addAllowance)) {
             text: "Add to the pool"
           } else {
             text: "Approve"
@@ -228,29 +228,29 @@ Item {
         /*
         // TODO: this
         onClicked: {
-          var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
           if (addToPool) {
-            if (!QmlSystem.isApproved(liquidityTokenInput.text, addAllowance)) {
-              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              QmlSystem.operationOverride("Approve Exchange", "", "", "")
+            if (!qmlSystem.isApproved(liquidityTokenInput.text, addAllowance)) {
+              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              qmlSystem.operationOverride("Approve Exchange", "", "", "")
             } else if (
-              QmlSystem.hasInsufficientFunds(
-                "Coin", QmlSystem.getRealMaxAVAXAmount("250000", QmlSystem.getAutomaticFee()),
+              qmlSystem.hasInsufficientFunds(
+                "Coin", qmlSystem.getRealMaxAVAXAmount("250000", qmlSystem.getAutomaticFee()),
                 liquidityCoinInput.text
-              ) || QmlSystem.hasInsufficientFunds("Token", acc.balanceAVME, liquidityTokenInput.text)
+              ) || qmlSystem.hasInsufficientFunds("Token", acc.balanceAVME, liquidityTokenInput.text)
             ) {
               fundsPopup.open()
             } else {
-              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              QmlSystem.operationOverride("Add Liquidity", liquidityCoinInput.text, liquidityTokenInput.text, "")
+              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              qmlSystem.operationOverride("Add Liquidity", liquidityCoinInput.text, liquidityTokenInput.text, "")
             }
           } else {
-            if (!QmlSystem.isApproved(removeLPEstimate, removeAllowance)) {
-              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              QmlSystem.operationOverride("Approve Liquidity", "", "", "")
+            if (!qmlSystem.isApproved(removeLPEstimate, removeAllowance)) {
+              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              qmlSystem.operationOverride("Approve Liquidity", "", "", "")
             } else {
-              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              QmlSystem.operationOverride("Remove Liquidity", "", "", removeLPEstimate)
+              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              qmlSystem.operationOverride("Remove Liquidity", "", "", removeLPEstimate)
             }
           }
         }
@@ -329,13 +329,13 @@ Item {
           anchors.margins: 20
           fillMode: Image.PreserveAspectFit
           source: {
-            var avmeAddress = QmlSystem.getAVMEAddress()
+            var avmeAddress = qmlSystem.getAVMEAddress()
             if (removeAsset1Popup.chosenAssetSymbol == "AVAX") {
               source: "qrc:/img/avax_logo.png"
             } else if (removeAsset1Popup.chosenAssetAddress == avmeAddress) {
               source: "qrc:/img/avme_logo.png"
             } else {
-              var img = QmlSystem.getARC20TokenImage(removeAsset1Popup.chosenAssetAddress)
+              var img = qmlSystem.getARC20TokenImage(removeAsset1Popup.chosenAssetAddress)
               source: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
             }
           }
@@ -350,13 +350,13 @@ Item {
           anchors.margins: 20
           fillMode: Image.PreserveAspectFit
           source: {
-            var avmeAddress = QmlSystem.getAVMEAddress()
+            var avmeAddress = qmlSystem.getAVMEAddress()
             if (removeAsset2Popup.chosenAssetSymbol == "AVAX") {
               source: "qrc:/img/avax_logo.png"
             } else if (removeAsset2Popup.chosenAssetAddress == avmeAddress) {
               source: "qrc:/img/avme_logo.png"
             } else {
-              var img = QmlSystem.getARC20TokenImage(removeAsset2Popup.chosenAssetAddress)
+              var img = qmlSystem.getARC20TokenImage(removeAsset2Popup.chosenAssetAddress)
               source: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
             }
           }
@@ -395,7 +395,7 @@ Item {
         anchors.margins: 20
         enabled: (removeAllowance != "" && lowerReserves != "" && higherReserves != "" && liquidity != "")
         onMoved: {
-          var estimates = QmlSystem.calculateRemoveLiquidityAmount(
+          var estimates = qmlSystem.calculateRemoveLiquidityAmount(
             userLowerReserves, userHigherReserves, value
           )
           removeLowerEstimate = estimates.lower
@@ -460,11 +460,11 @@ Item {
         font.pixelSize: 14.0
         text: "<b>" + ((removeLPEstimate) ? removeLPEstimate : "0") + " LP</b>"
         + "<br><br>Estimated returns:<br>"
-        + "<b>" + QmlSystem.weiToFixedPoint(
+        + "<b>" + qmlSystem.weiToFixedPoint(
           ((removeAsset1Popup.chosenAssetSymbol == lowerToken)
           ? removeLowerEstimate : removeHigherEstimate), removeAsset1Popup.chosenAssetDecimals)
         + " " + removeAsset1Popup.chosenAssetSymbol
-        + "<br>" + QmlSystem.weiToFixedPoint(
+        + "<br>" + qmlSystem.weiToFixedPoint(
           ((removeAsset2Popup.chosenAssetSymbol == lowerToken)
           ? removeLowerEstimate : removeHigherEstimate), removeAsset2Popup.chosenAssetDecimals)
         + " " + removeAsset2Popup.chosenAssetSymbol + "</b>"
@@ -475,13 +475,13 @@ Item {
         width: parent.width
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: (removeAllowance != "" && (
-          !QmlSystem.isApproved(removeAsset2Input.text, removeAllowance) ||
+          !qmlSystem.isApproved(removeAsset2Input.text, removeAllowance) ||
           liquidityLPSlider.value > 0
         ))
         text: {
           if (removeAllowance == "") {
             text: "Checking approval..."
-          } else if (QmlSystem.isApproved(removeAsset2Input.text, removeAllowance)) {
+          } else if (qmlSystem.isApproved(removeAsset2Input.text, removeAllowance)) {
             text: "Remove from the pool"
           } else {
             text: "Approve"
@@ -490,29 +490,29 @@ Item {
         /*
         // TODO: this
         onClicked: {
-          var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
           if (addToPool) {
-            if (!QmlSystem.isApproved(liquidityTokenInput.text, addAllowance)) {
-              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              QmlSystem.operationOverride("Approve Exchange", "", "", "")
+            if (!qmlSystem.isApproved(liquidityTokenInput.text, addAllowance)) {
+              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              qmlSystem.operationOverride("Approve Exchange", "", "", "")
             } else if (
-              QmlSystem.hasInsufficientFunds(
-                "Coin", QmlSystem.getRealMaxAVAXAmount("250000", QmlSystem.getAutomaticFee()),
+              qmlSystem.hasInsufficientFunds(
+                "Coin", qmlSystem.getRealMaxAVAXAmount("250000", qmlSystem.getAutomaticFee()),
                 liquidityCoinInput.text
-              ) || QmlSystem.hasInsufficientFunds("Token", acc.balanceAVME, liquidityTokenInput.text)
+              ) || qmlSystem.hasInsufficientFunds("Token", acc.balanceAVME, liquidityTokenInput.text)
             ) {
               fundsPopup.open()
             } else {
-              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              QmlSystem.operationOverride("Add Liquidity", liquidityCoinInput.text, liquidityTokenInput.text, "")
+              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              qmlSystem.operationOverride("Add Liquidity", liquidityCoinInput.text, liquidityTokenInput.text, "")
             }
           } else {
-            if (!QmlSystem.isApproved(removeLPEstimate, removeAllowance)) {
-              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              QmlSystem.operationOverride("Approve Liquidity", "", "", "")
+            if (!qmlSystem.isApproved(removeLPEstimate, removeAllowance)) {
+              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              qmlSystem.operationOverride("Approve Liquidity", "", "", "")
             } else {
-              QmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              QmlSystem.operationOverride("Remove Liquidity", "", "", removeLPEstimate)
+              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              qmlSystem.operationOverride("Remove Liquidity", "", "", removeLPEstimate)
             }
           }
         }

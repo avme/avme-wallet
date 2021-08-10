@@ -5,6 +5,8 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 import QtCharts 2.2
 
+import QmlApi 1.0
+
 import "qrc:/qml/components"
 
 AVMEPopup {
@@ -15,29 +17,28 @@ AVMEPopup {
   property string nameAsset
   property string currentAssetPrice
 
+  QmlApi { id: qmlApi }
+
   Connections {
     target: chartPeriod
-    function onActivated(index) { 
-      callGraphApi(index) 
-      }
+    function onActivated(index) { callGraphApi(index) }
   }
 
   Connections {
     // Change index to select 1 Month and reload the chart
     target: pricechartPopup
-      function onOpened() { 
-        chartPeriod.currentIndex = 1; 
-        callGraphApi(1);
-      }
+    function onOpened() {
+      chartPeriod.currentIndex = 1;
+      callGraphApi(1);
+    }
   }
 
   Connections {
     // Change index to select 1 Month and reload the chart
-    target: QmlApi
-      function onTokenPriceHistoryAnswered(answer, requestID, days) { 
-        if (requestID == "AssetListPopupChart")
-          updateChart(answer, days);
-      }
+    target: qmlApi
+    function onTokenPriceHistoryAnswered(answer, requestID, days) {
+      if (requestID == "AssetListPopupChart") { updateChart(answer, days); }
+    }
   }
 
   function callGraphApi(index) {
@@ -49,8 +50,9 @@ AVMEPopup {
     if (index == 0) { days = 8 }
     else if (index == 1) { days = 31 }
     else if (index == 2) { days = 91 }
-    QmlApi.getTokenPriceHistory(contractAddress, days, "AssetListPopupChart")
+    qmlApi.getTokenPriceHistory(contractAddress, days, "AssetListPopupChart")
   }
+
   function updateChart(tokenPriceHistory, days) {
     var marketHistory = JSON.parse(tokenPriceHistory)
     marketGraph.clear()

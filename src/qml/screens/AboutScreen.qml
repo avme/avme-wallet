@@ -43,7 +43,7 @@ Item {
         color: "#FFFFFF"
         horizontalAlignment: Text.AlignHCenter
         font.bold: true
-        text: "AVME WALLET " + QmlSystem.getProjectVersion()
+        text: "AVME WALLET " + qmlSystem.getProjectVersion()
       }
 
       Text {
@@ -65,7 +65,7 @@ Item {
         id: btnAboutQt
         anchors.horizontalCenter: parent.horizontalCenter
         text: "About Qt"
-        onClicked: QmlSystem.openQtAbout()
+        onClicked: qmlSystem.openQtAbout()
       }
     }
   }

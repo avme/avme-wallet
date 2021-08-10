@@ -19,7 +19,7 @@ Popup {
   property color popupBgColor: "#1C2029"
 
   Connections {
-    target: QmlSystem
+    target: qmlSystem
     function onTxStart(
       operation, to, coinAmount, tokenAmount, lpAmount, gasLimit, gasPrice, pass
     ) {
@@ -39,7 +39,7 @@ Popup {
       gasLimitStr = gasLimit
       gasPriceStr = gasPrice
       resetStatuses()
-      QmlSystem.makeTransaction(
+      qmlSystem.makeTransaction(
         operation, to, coinAmount, tokenAmount, lpAmount, gasLimit, gasPrice, pass
       )
     }
@@ -139,63 +139,63 @@ Popup {
     text: {
       switch (opStr) {
         case "Send AVAX":
-          text: "Sending <b>" + coinAmountStr + " " + QmlSystem.getCurrentCoin() + "</b>"
-          + "<br>to the address <b>" + toStr + "</b>...";
-          break;
+        text: "Sending <b>" + coinAmountStr + " " + qmlSystem.getCurrentCoin() + "</b>"
+        + "<br>to the address <b>" + toStr + "</b>...";
+        break;
         case "Send AVME":
-          text: "Sending <b>" + tokenAmountStr + " " + QmlSystem.getCurrentToken() + "</b>"
-          + "<br>to the address <b>" + toStr + "</b>...";
-          break;
+        text: "Sending <b>" + tokenAmountStr + " " + qmlSystem.getCurrentToken() + "</b>"
+        + "<br>to the address <b>" + toStr + "</b>...";
+        break;
         case "Approve Exchange":
-          text: "Sending approval for exchanging/adding liquidity...";
-          break;
+        text: "Sending approval for exchanging/adding liquidity...";
+        break;
         case "Approve Liquidity":
-          text: "Sending approval for removing liquidity...";
-          break;
+        text: "Sending approval for removing liquidity...";
+        break;
         case "Approve Staking":
-          text: "Sending approval for staking...";
-          break;
-		case "Approve Compound":
-          text: "Sending approval for staking...";
-          break;
+        text: "Sending approval for staking...";
+        break;
+        case "Approve Compound":
+        text: "Sending approval for staking...";
+        break;
         case "Swap AVAX -> AVME":
-          text: "Swapping <b>" + coinAmountStr + " " + QmlSystem.getCurrentCoin() + "</b>..."
-          break;
+        text: "Swapping <b>" + coinAmountStr + " " + qmlSystem.getCurrentCoin() + "</b>..."
+        break;
         case "Swap AVME -> AVAX":
-          text: "Swapping <b>" + tokenAmountStr + " " + QmlSystem.getCurrentToken() + "</b>..."
-          break;
+        text: "Swapping <b>" + tokenAmountStr + " " + qmlSystem.getCurrentToken() + "</b>..."
+        break;
         case "Add Liquidity":
-          text: "Adding <b>" + coinAmountStr + " " + QmlSystem.getCurrentCoin() + "</b>"
-          + "<br>and <b>" + tokenAmountStr + " " + QmlSystem.getCurrentToken() + "</b>"
-          + "<br>to the pool...";
-          break;
+        text: "Adding <b>" + coinAmountStr + " " + qmlSystem.getCurrentCoin() + "</b>"
+        + "<br>and <b>" + tokenAmountStr + " " + qmlSystem.getCurrentToken() + "</b>"
+        + "<br>to the pool...";
+        break;
         case "Remove Liquidity":
-          text: "Removing <b>" + lpAmountStr + " LP</b><br>from the pool...";
-          break;
+        text: "Removing <b>" + lpAmountStr + " LP</b><br>from the pool...";
+        break;
         case "Stake LP":
-          text: "Staking <b>" + lpAmountStr + " LP</b>...";
-          break;
-		case "Stake Compound LP":
-          text: "Compound Staking <b>" + lpAmountStr + " LP</b>...";
-          break;
+        text: "Staking <b>" + lpAmountStr + " LP</b>...";
+        break;
+        case "Stake Compound LP":
+        text: "Compound Staking <b>" + lpAmountStr + " LP</b>...";
+        break;
         case "Unstake LP":
-          text: "Withdrawing <b>" + lpAmountStr + " LP</b>...";
-          break;
-		case "Unstake Compound LP":
-          text: "Withdrawing <b>" + lpAmountStr + " LP</b>...";
-          break;
+        text: "Withdrawing <b>" + lpAmountStr + " LP</b>...";
+        break;
+        case "Unstake Compound LP":
+        text: "Withdrawing <b>" + lpAmountStr + " LP</b>...";
+        break;
         case "Harvest AVME":
-          text: "Requesting rewards from the staking pool..."
-          break;
-		case "Reinvest AVME":
-          text: "Requesting reinvest rewards from the compound pool..."
-          break;
+        text: "Requesting rewards from the staking pool..."
+        break;
+        case "Reinvest AVME":
+        text: "Requesting reinvest rewards from the compound pool..."
+        break;
         case "Exit Staking":
-          text: "Exiting the staking pool..."
-          break;
+        text: "Exiting the staking pool..."
+        break;
         default:
-          text: "";
-          break;
+        text: "";
+        break;
       }
     }
   }
@@ -329,8 +329,8 @@ Popup {
     onClicked: {
       txProgressPopup.clean()
       txProgressPopup.close()
-      QmlSystem.goToOverview()
-      QmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
+      qmlSystem.goToOverview()
+      qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
     }
   }
 }

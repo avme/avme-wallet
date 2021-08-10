@@ -54,7 +54,7 @@ Item {
     icon: "qrc:/img/warn.png"
     info: "Are you sure you want to remove this token?"
     yesBtn.onClicked: {
-      QmlSystem.removeARC20Token(selectedToken.itemAddress);
+      qmlSystem.removeARC20Token(selectedToken.itemAddress);
       confirmEraseTokenPopup.close()
       tokensPanel.reloadTokens()
     }

@@ -15,7 +15,7 @@ Rectangle {
   color: "#1C2029"
 
   Connections {
-    target: QmlSystem
+    target: qmlSystem
     function onGoToOverview() {
       itemSelection.y = items.y + itemOverview.y
       changeScreen("Overview")
@@ -25,7 +25,7 @@ Rectangle {
   function changeScreen(name) {
     content.active = false
     currentScreen = name
-    QmlSystem.setScreen(content, "qml/screens/" + name + "Screen.qml")
+    qmlSystem.setScreen(content, "qml/screens/" + name + "Screen.qml")
     content.active = true
   }
 
@@ -175,7 +175,7 @@ Rectangle {
       color: "#FFFFFF"
       font.pixelSize: 14.0
       anchors.verticalCenter: parent.verticalCenter
-      text: "v" + QmlSystem.getProjectVersion()
+      text: "v" + qmlSystem.getProjectVersion()
     }
 
     Image {

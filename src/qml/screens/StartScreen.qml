@@ -17,13 +17,13 @@ Item {
   property bool createAndLoad
 
   Connections {
-    target: QmlSystem
+    target: qmlSystem
     function onWalletCreated(success) {
       createAndLoad = true
       if (success) {
         infoPopup.info = "Loading Wallet,<br>please wait..."
-        if (QmlSystem.isWalletLoaded()) { QmlSystem.closeWallet() }
-        QmlSystem.loadWallet(createWalletPopup.folder, createWalletPopup.pass)
+        if (qmlSystem.isWalletLoaded()) { qmlSystem.closeWallet() }
+        qmlSystem.loadWallet(createWalletPopup.folder, createWalletPopup.pass)
       } else {
         infoPopup.close()
         walletFailPopup.info = "Error on Wallet "
@@ -35,13 +35,13 @@ Item {
       if (success) {
         if (createAndLoad) {
           infoPopup.info = "Creating an Account<br>for the new Wallet..."
-          QmlSystem.createAccount(
+          qmlSystem.createAccount(
             createWalletPopup.seed, 0, "default", createWalletPopup.pass
           )
         } else {
           infoPopup.close()
-          QmlSystem.loadAccounts()
-          QmlSystem.setScreen(content, "qml/screens/AccountsScreen.qml")
+          qmlSystem.loadAccounts()
+          qmlSystem.setScreen(content, "qml/screens/AccountsScreen.qml")
         }
       } else {
         infoPopup.close()
@@ -52,8 +52,8 @@ Item {
     // TODO: merge those two
     function onAccountCreated(obj) {
       infoPopup.close()
-      QmlSystem.setCurrentAccount(obj.accAddress)
-      QmlSystem.setFirstLoad(true)
+      qmlSystem.setCurrentAccount(obj.accAddress)
+      qmlSystem.setFirstLoad(true)
       newWalletSeedPopup.showSeed(createWalletPopup.pass)
       newWalletSeedPopup.open()
       createWalletPopup.clean()
@@ -67,7 +67,7 @@ Item {
   }
 
   function checkLedger() {
-    var data = QmlSystem.checkForLedger()
+    var data = qmlSystem.checkForLedger()
     if (data.state) {
       ledgerFailPopup.close()
       ledgerRetryTimer.stop()
@@ -165,7 +165,7 @@ Item {
     function createWallet() {
       infoPopup.info = ((seed) ? "Importing" : "Creating") + " Wallet,<br>please wait..."
       infoPopup.open()
-      QmlSystem.createWallet(folder, pass, seed)
+      qmlSystem.createWallet(folder, pass, seed)
     }
   }
 
@@ -179,8 +179,8 @@ Item {
       createAndLoad = false
       infoPopup.info = "Loading Wallet,<br>please wait..."
       infoPopup.open()
-      if (QmlSystem.isWalletLoaded()) { QmlSystem.closeWallet() }
-      QmlSystem.loadWallet(folder, pass)
+      if (qmlSystem.isWalletLoaded()) { qmlSystem.closeWallet() }
+      qmlSystem.loadWallet(folder, pass)
     }
   }
 
@@ -240,8 +240,8 @@ Item {
     okBtn.onClicked: {
       newWalletSeedPopup.clean()
       newWalletSeedPopup.close()
-      QmlSystem.goToOverview()
-      QmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
+      qmlSystem.goToOverview()
+      qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
     }
   }
 }

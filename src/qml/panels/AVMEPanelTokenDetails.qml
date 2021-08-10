@@ -24,10 +24,10 @@ AVMEPanel {
       fillMode: Image.PreserveAspectFit
       source: {
         if (tokensPanel.selectedToken != null) {
-          if (tokensPanel.selectedToken.itemAddress == QmlSystem.getAVMEAddress()) {
+          if (tokensPanel.selectedToken.itemAddress == qmlSystem.getAVMEAddress()) {
             source: "qrc:/img/avme_logo.png"
           } else {
-            var img = QmlSystem.getARC20TokenImage(tokensPanel.selectedToken.itemAddress)
+            var img = qmlSystem.getARC20TokenImage(tokensPanel.selectedToken.itemAddress)
             source: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
           }
         } else {
@@ -87,7 +87,7 @@ AVMEPanel {
       enabled: (!tokenTimer.running)
       text: (!tokenTimer.running) ? "Copy Token Address" : "Copied!"
       onClicked: {
-        QmlSystem.copyToClipboard(tokensPanel.selectedToken.itemAddress)
+        qmlSystem.copyToClipboard(tokensPanel.selectedToken.itemAddress)
         tokenTimer.start()
       }
       Timer { id: tokenTimer; interval: 2000 }
@@ -99,7 +99,7 @@ AVMEPanel {
       enabled: (!pairTimer.running)
       text: (!pairTimer.running) ? "Copy Pair Address" : "Copied!"
       onClicked: {
-        QmlSystem.copyToClipboard(tokensPanel.selectedToken.itemAVAXPairContract)
+        qmlSystem.copyToClipboard(tokensPanel.selectedToken.itemAVAXPairContract)
         pairTimer.start()
       }
       Timer { id: pairTimer; interval: 2000 }

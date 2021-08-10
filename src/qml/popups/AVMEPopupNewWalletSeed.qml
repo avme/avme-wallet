@@ -17,7 +17,7 @@ AVMEPopup {
   property color popupSelectionColor: "#58A0B9"
 
   function showSeed(pass) {
-    seedText.text = QmlSystem.getWalletSeed(pass)
+    seedText.text = qmlSystem.getWalletSeed(pass)
     newWalletSeed = seedText.text
   }
 
@@ -74,7 +74,7 @@ AVMEPopup {
         enabled: (!copyTimer.running)
         text: (!copyTimer.running) ? "Copy To Clipboard" : "Copied!"
         onClicked: {
-          QmlSystem.copyToClipboard(seedText.text)
+          qmlSystem.copyToClipboard(seedText.text)
           copyTimer.start()
         }
         Timer { id: copyTimer; interval: 2000 }

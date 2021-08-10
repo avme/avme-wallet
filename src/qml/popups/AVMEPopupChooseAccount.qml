@@ -37,7 +37,7 @@ AVMEPopup {
   property color popupBgColor: "#1C2029"
 
   Connections {
-    target: QmlSystem
+    target: qmlSystem
     function onAccountGenerated(data) {
       accountList.append(data)
       isWaiting = false
@@ -46,8 +46,8 @@ AVMEPopup {
 
   function refreshList() {
     if (startingIndex == -1) { startingIndex = 0 }
-    QmlSystem.generateAccounts(
-      ((foreignSeed != "") ? foreignSeed : QmlSystem.getWalletSeed(passInput.text)),
+    qmlSystem.generateAccounts(
+      ((foreignSeed != "") ? foreignSeed : qmlSystem.getWalletSeed(passInput.text)),
       startingIndex
     );
     isWaiting = true
@@ -142,15 +142,15 @@ AVMEPopup {
         enabled: (!isWaiting && passInput.text != "" && chooseAccountList.currentIndex > -1)
         text: "Choose this Account"
         onClicked: {
-          if (QmlSystem.accountExists(item.itemAccount)) {
+          if (qmlSystem.accountExists(item.itemAccount)) {
             addressTimer.start()
-          } else if (!QmlSystem.checkWalletPass(pass)) {
+          } else if (!qmlSystem.checkWalletPass(pass)) {
             infoTimer.start()
           } else {
             accountInfoPopup.text = (foreignSeed == "")
               ? "Creating Account..." : "Importing Account..."
             accountInfoPopup.open()
-            QmlSystem.createAccount(foreignSeed, index, name, pass)
+            qmlSystem.createAccount(foreignSeed, index, name, pass)
           }
         }
       }
@@ -161,9 +161,9 @@ AVMEPopup {
         enabled: (!isWaiting && passInput.text != "")
         text: "Generate +10 Accounts"
         onClicked: {
-          if (foreignSeed != "" && !QmlSystem.seedIsValid(foreignSeed)) {
+          if (foreignSeed != "" && !qmlSystem.seedIsValid(foreignSeed)) {
             infoSeedTimer.start()
-          } else if (!QmlSystem.checkWalletPass(passInput.text)) {
+          } else if (!qmlSystem.checkWalletPass(passInput.text)) {
             infoPassTimer.start()
           } else {
             if (startingIndex != -1) { startingIndex += 10 }

@@ -32,7 +32,7 @@ Popup {
   property color popupBgColor: "#1C2029"
 
   Connections {
-    target: QmlSystem
+    target: qmlSystem
     function onLedgerAccountGenerated(data) {
       accountList.append(data)
       isWaiting = false
@@ -40,13 +40,13 @@ Popup {
   }
 
   function refreshList() {
-    QmlSystem.generateLedgerAccounts(chosenPath, startingIndex)
+    qmlSystem.generateLedgerAccounts(chosenPath, startingIndex)
     isWaiting = true
   }
 
   function clean() {
     accountList.clear()
-    QmlSystem.cleanLedgerAccounts()
+    qmlSystem.cleanLedgerAccounts()
     startingIndex = -1
     isWaiting = false
     chosenPath = ""
@@ -143,20 +143,20 @@ Popup {
       text: "Choose this Account"
       onClicked: {
         // Always default to AVAX & AVME on first load
-        if (QmlSystem.getCurrentCoin() == "") {
-          QmlSystem.setCurrentCoin("AVAX")
-          QmlSystem.setCurrentCoinDecimals(18)
+        if (qmlSystem.getCurrentCoin() == "") {
+          qmlSystem.setCurrentCoin("AVAX")
+          qmlSystem.setCurrentCoinDecimals(18)
         }
-        if (QmlSystem.getCurrentToken() == "") {
-          QmlSystem.setCurrentToken("AVME")
-          QmlSystem.setCurrentTokenDecimals(18)
+        if (qmlSystem.getCurrentToken() == "") {
+          qmlSystem.setCurrentToken("AVME")
+          qmlSystem.setCurrentTokenDecimals(18)
         }
-        QmlSystem.setLedgerFlag(true);
-        QmlSystem.setCurrentAccount(ledgerList.currentItem.itemAccount)
-        QmlSystem.setCurrentAccountPath(ledgerPopup.pathValue + ledgerPopup.index)
-        QmlSystem.importLedgerAccount(QmlSystem.getCurrentAccount(), QmlSystem.getCurrentAccountPath());
-        QmlSystem.goToOverview();
-        QmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
+        qmlSystem.setLedgerFlag(true);
+        qmlSystem.setCurrentAccount(ledgerList.currentItem.itemAccount)
+        qmlSystem.setCurrentAccountPath(ledgerPopup.pathValue + ledgerPopup.index)
+        qmlSystem.importLedgerAccount(qmlSystem.getCurrentAccount(), qmlSystem.getCurrentAccountPath());
+        qmlSystem.goToOverview();
+        qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
       }
     }
     AVMEButton {

@@ -21,7 +21,7 @@ AVMEPopup {
 
   function handlePaste(event) {
     if ((event.key == Qt.Key_V) && (event.modifiers & Qt.ControlModifier)) {
-      var clip = QmlSystem.copySeedFromClipboard()
+      var clip = qmlSystem.copySeedFromClipboard()
       var leftCol = seedColLeft.children
       var rightCol = seedColRight.children
       for (var i = 0; i < 12; i++) {
@@ -47,7 +47,7 @@ AVMEPopup {
       fullSeed += seedColRight.children[i].text
       if (i != 5) { fullSeed += " " }
     }
-    if (QmlSystem.seedIsValid(fullSeed)) {
+    if (qmlSystem.seedIsValid(fullSeed)) {
       useSeed()
     } else {
       fullSeed = ""

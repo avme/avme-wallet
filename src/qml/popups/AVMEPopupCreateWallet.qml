@@ -25,8 +25,8 @@ AVMEPopup {
   property alias createBtn: btnCreate
 
   onAboutToShow: {
-    createFolderInput.text = QmlSystem.getDefaultWalletPath()
-    walletExists = QmlSystem.checkFolderForWallet(createFolderInput.text)
+    createFolderInput.text = qmlSystem.getDefaultWalletPath()
+    walletExists = qmlSystem.checkFolderForWallet(createFolderInput.text)
   }
 
   function clean() {
@@ -90,8 +90,8 @@ AVMEPopup {
         id: createFolderDialog
         title: "Choose your Wallet folder"
         onAccepted: {
-          createFolderInput.text = QmlSystem.cleanPath(createFolderDialog.folder)
-          walletExists = QmlSystem.checkFolderForWallet(createFolderInput.text)
+          createFolderInput.text = qmlSystem.cleanPath(createFolderDialog.folder)
+          walletExists = qmlSystem.checkFolderForWallet(createFolderInput.text)
         }
       }
     }
