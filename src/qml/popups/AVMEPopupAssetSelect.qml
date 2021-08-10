@@ -22,6 +22,7 @@ AVMEPopup {
   property string chosenAssetSymbol
   property string chosenAssetName
   property int chosenAssetDecimals
+  property bool isToken
   property string chosenAssetAVAXPairContract
 
   Component.onCompleted: {
@@ -76,11 +77,13 @@ AVMEPopup {
       chosenAssetName = selectedCoin.itemName
       chosenAssetDecimals = selectedCoin.itemDecimals
       chosenAssetAVAXPairContract = ""
+      isToken = false
     } else if (tokenSelectList.currentIndex > -1) {
       chosenAssetAddress = selectedToken.itemAddress
       chosenAssetSymbol = selectedToken.itemSymbol
       chosenAssetName = selectedToken.itemName
       chosenAssetDecimals = selectedToken.itemDecimals
+      isToken = true
     }
   }
 

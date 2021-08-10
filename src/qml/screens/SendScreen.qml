@@ -3,6 +3,7 @@
    file LICENSE or http://www.opensource.org/licenses/mit-license.php. */
 import QtQuick 2.9
 import QtQuick.Controls 2.2
+import QmlApi 1.0
 
 import "qrc:/qml/components"
 import "qrc:/qml/panels"
@@ -11,6 +12,7 @@ import "qrc:/qml/popups"
 // Screen for sending AVAX and ARC20 token transactions.
 Item {
   id: sendScreen
+  QmlApi { id: qmlApi }
   /*
   // TODO: delete this after the operation side is rewritten
   property string txOperationStr
@@ -111,7 +113,7 @@ Item {
     if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {  // Coin
       var hasCoinFunds = !qmlSystem.hasInsufficientFunds(
         accountHeader.coinRawBalance, qmlSystem.calculateTransactionCost(
-          sendPanel.amount, sendPanel.gasLimit, sendPanel.gasPrice
+          sendPanel.coinValue, sendPanel.gasLimit, sendPanel.gasPrice
         ), 18
       )
       return hasCoinFunds
@@ -123,7 +125,7 @@ Item {
       )
       var hasTokenFunds = !qmlSystem.hasInsufficientFunds(
         accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]["rawBalance"],
-        sendPanel.amount, chooseAssetPopup.chosenAssetDecimals
+        sendPanel.tokenValue, chooseAssetPopup.chosenAssetDecimals
       )
       return (hasCoinFunds && hasTokenFunds)
     }
@@ -145,6 +147,7 @@ Item {
       } else if (to.length != 42) {
         incorrectInputPopup.open()
       } else {
+        sendPanel.updateTxCost()
         // TODO: fix Ledger
         //if (qmlSystem.getLedgerFlag()) {
         //  checkLedger()

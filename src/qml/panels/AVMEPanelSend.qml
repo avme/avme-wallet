@@ -10,16 +10,35 @@ import "qrc:/qml/components"
 AVMEPanel {
   id: sendPanel
   title: "Transaction Details"
+  function buildTokenTransferData(to, value, decimals) {
+    var ethCallJson = ({})
+    var weiValue = qmlApi.fixedPointToWei(value, decimals)
+    ethCallJson["function"] = "transfer(address,uint256)"
+    ethCallJson["args"] = []
+    ethCallJson["args"].push(to)
+    ethCallJson["args"].push(weiValue)
+    ethCallJson["types"] = []
+    ethCallJson["types"].push("address")
+    ethCallJson["types"].push("uint*")
+    var ethCallString = JSON.stringify(ethCallJson)
+    var ABI = qmlApi.buildCustomABI(ethCallString)
+    console.log(ABI)
+    return ABI
+  }
+
   property string txTotalCoinStr
-  property alias to: txToInput.text
-  property alias amount: txAmountInput.text
-  property alias gasLimit: txGasLimitInput.text
-  property alias gasPrice: txGasPriceInput.text
+  property string to: (chooseAssetPopup.isToken) ? chooseAssetPopup.chosenAssetAddress : txToInput.text
+  property string coinValue: (chooseAssetPopup.isToken) ? "0.000000000000000000" : txAmountInput.text
+  property string tokenValue: (chooseAssetPopup.isToken) ? txAmountInput.text : "0.000000000000000000"
+  property string txData: (chooseAssetPopup.isToken) ? buildTokenTransferData(txToInput.text, txAmountInput.text, chooseAssetPopup.chosenAssetDecimals) : ""
+  property string gas: txGasLimitInput.text
+  property string gasPrice: txGasPriceInput.text
+  property bool automaticGas: autoLimitCheck.checked
   property alias sendBtn: btnMakeTx
 
   Connections {
     target: accountHeader
-    function onUpdatedBalances() { refreshAssetBalance() }
+      function onUpdatedBalances() { refreshAssetBalance() }
   }
 
   Component.onCompleted: { updateTxCost(); refreshAssetBalance() }
