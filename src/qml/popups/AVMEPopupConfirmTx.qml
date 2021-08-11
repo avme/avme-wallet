@@ -24,6 +24,7 @@ AVMEPopup {
   property string txData
   property string gas // gasLimit
   property string gasPrice // GWEI value, 225
+  property bool loadingFees
   property bool automaticGas 
   property bool isSameAddress: false
   onAboutToShow: passInput.focus = true
@@ -35,6 +36,7 @@ AVMEPopup {
         if (requestID == "PopupConfirmTxGas") {
           var answerJson = JSON.parse(answer)
           gas = Math.round(+qmlApi.uintFromHex(answerJson[0]["result"]) * 1.1)
+          loadingFees = false
         }
       }
   }
@@ -48,6 +50,7 @@ AVMEPopup {
     info = inputInfo
     historyInfo = inputHistoryInfo
     if (automaticGas) {
+      loadingFees = true
       var Params = ({})
       Params["from"] = from
       Params["to"] = inputTo
@@ -89,6 +92,25 @@ AVMEPopup {
       text: fullInfo
     }
 
+    Image {
+      id: loadingPng
+      height: 50
+      width: 50
+      anchors.horizontalCenter: parent.horizontalCenter
+      fillMode: Image.PreserveAspectFit
+      visible: loadingFees
+      source: "qrc:/img/icons/loading.png"
+      RotationAnimator {
+        target: loadingPng
+        from: 0
+        to: 360
+        duration: 1000
+        loops: Animation.Infinite
+        easing.type: Easing.InOutQuad
+        running: loadingFees
+      }
+    }
+
     Text {
       id: passInfo
       anchors.horizontalCenter: parent.horizontalCenter
@@ -124,7 +146,7 @@ AVMEPopup {
       AVMEButton {
         id: btnOk
         text: "OK"
-        enabled: (passInput.text !== "")
+        enabled: (passInput.text !== "" && !loadingFees)
       }
     }
   }
