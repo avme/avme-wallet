@@ -58,13 +58,13 @@ AVMEPanel {
       automaticGas = false;
       if (autoLimitCheck.checked) { txGasLimitInput.text = "21000" }
       txTotalCoinStr = qmlSystem.calculateTransactionCost(
-        sendPanel.amount, sendPanel.gasLimit, sendPanel.gasPrice
+        sendPanel.amount, sendPanel.gas, sendPanel.gasPrice
       )
     } else {  // Token
       automaticGas = true;
       if (autoLimitCheck.checked) { txGasLimitInput.text = "70000" }
       txTotalCoinStr = qmlSystem.calculateTransactionCost(
-        "0", sendPanel.gasLimit, sendPanel.gasPrice
+        "0", sendPanel.gas, sendPanel.gasPrice
       )
     }
   }
@@ -188,7 +188,7 @@ AVMEPanel {
           ? qmlSystem.getRealMaxAVAXAmount(
             accountHeader.coinRawBalance, txGasLimitInput.text, txGasPriceInput.text
           )
-          : (+accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]["balance"])
+          : (+accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]["rawBalance"])
           updateTxCost()
         }
       }
