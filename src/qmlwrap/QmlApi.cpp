@@ -166,3 +166,10 @@ QString QmlApi::buildCustomABI(QString input) {
   return QString::fromStdString(ABI::encodeABIfromJson(input.toStdString()));
 }
 
+QString QmlApi::weiToFixedPoint(QString amount, int digits) {
+  return QString::fromStdString(Utils::weiToFixedPoint(amount.toStdString(), digits));
+}
+QString QmlApi::fixedPointToWei(QString amount, int decimals) {
+  return QString::fromStdString(Utils::fixedPointToWei(amount.toStdString(), decimals));
+}
+

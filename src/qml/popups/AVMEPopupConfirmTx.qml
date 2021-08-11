@@ -16,6 +16,12 @@ AVMEPopup {
   property alias passFocus: passInput.focus
   property alias timer: infoTimer
   property alias okBtn: btnOk
+  property string to
+  property string value // Not WEI value!
+  property string data
+  property string gas // gasLimit, 225
+  property string gasPrice // GWEI value
+  property bool automaticGas 
   property bool isSameAddress: false
   onAboutToShow: passInput.focus = true
   onAboutToHide: confirmTxPopup.clean()

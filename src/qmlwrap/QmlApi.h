@@ -116,6 +116,12 @@ class QmlApi : public QObject {
      */
     Q_INVOKABLE void buildCustomEthCallReq(QString contract, QString ABI);
     Q_INVOKABLE QString buildCustomABI(QString input);
+
+    /**
+     * Wrappers for utils functions
+     */
+    Q_INVOKABLE QString weiToFixedPoint(QString amount, int digits);
+    Q_INVOKABLE QString fixedPointToWei(QString amount, int decimals);
 };
 
 #endif // QMLAPI_H
