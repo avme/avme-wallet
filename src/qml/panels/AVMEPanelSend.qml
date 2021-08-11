@@ -27,13 +27,15 @@ AVMEPanel {
   }
 
   property string txTotalCoinStr
+  property string info
+  property string historyInfo
   property string to: (chooseAssetPopup.isToken) ? chooseAssetPopup.chosenAssetAddress : txToInput.text
   property string coinValue: (chooseAssetPopup.isToken) ? "0.000000000000000000" : txAmountInput.text
   property string tokenValue: (chooseAssetPopup.isToken) ? txAmountInput.text : "0.000000000000000000"
   property string txData: (chooseAssetPopup.isToken) ? buildTokenTransferData(txToInput.text, txAmountInput.text, chooseAssetPopup.chosenAssetDecimals) : ""
   property string gas: txGasLimitInput.text
   property string gasPrice: txGasPriceInput.text
-  property bool automaticGas: autoLimitCheck.checked
+  property bool automaticGas
   property alias sendBtn: btnMakeTx
 
   Connections {
@@ -43,14 +45,23 @@ AVMEPanel {
 
   Component.onCompleted: { updateTxCost(); refreshAssetBalance() }
 
+  function updateInfo() {
+    info = "You will send "
+    chooseAssetPopup.isToken ? info += "<b>" + tokenValue : info += "<b>" + coinValue
+    info += " " + chooseAssetPopup.chosenAssetSymbol + "</b><br>to the address <b>" + to + "</b>"
+    historyInfo = "Sent " + chooseAssetPopup.chosenAssetSymbol
+
+  }
   function updateTxCost() {
     if (autoGasCheck.checked) { txGasPriceInput.text = qmlSystem.getAutomaticFee() }
     if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {  // Coin
+      automaticGas = false;
       if (autoLimitCheck.checked) { txGasLimitInput.text = "21000" }
       txTotalCoinStr = qmlSystem.calculateTransactionCost(
         sendPanel.amount, sendPanel.gasLimit, sendPanel.gasPrice
       )
     } else {  // Token
+      automaticGas = true;
       if (autoLimitCheck.checked) { txGasLimitInput.text = "70000" }
       txTotalCoinStr = qmlSystem.calculateTransactionCost(
         "0", sendPanel.gasLimit, sendPanel.gasPrice

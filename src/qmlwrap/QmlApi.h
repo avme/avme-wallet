@@ -77,8 +77,18 @@ class QmlApi : public QObject {
 
     /**
      * Build request for getting the estimated gas limit.
+     * requires JSON:
+     * {
+     *  from: ADDRESS
+     *  to: ADDRESS
+     *  gas: HEX_INT
+     *  gasPrice: HEX_INT
+     *  value: HEX_INT
+     *  data: ETH_CALL
+     * }
      */
-    Q_INVOKABLE void buildGetEstimateGasLimitReq();
+
+    Q_INVOKABLE void buildGetEstimateGasLimitReq(QString jsonStr);
 
     /**
      * Build request for querying if an ARC20 token exists.
@@ -122,6 +132,10 @@ class QmlApi : public QObject {
      */
     Q_INVOKABLE QString weiToFixedPoint(QString amount, int digits);
     Q_INVOKABLE QString fixedPointToWei(QString amount, int decimals);
+    Q_INVOKABLE QString uintToHex(QString input);
+    Q_INVOKABLE QString uintFromHex(QString hex);
+
+
 };
 
 #endif // QMLAPI_H

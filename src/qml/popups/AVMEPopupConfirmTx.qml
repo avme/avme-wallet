@@ -11,20 +11,54 @@ AVMEPopup {
   id: confirmTxPopup
   widthPct: 0.6
   heightPct: 0.6
-  property alias info: summaryInfo.text
+  property string info
+  property string fullInfo: info + "<br>Gas Limit: <b> " + gas + " AVAX </b>" + "<br> Gas Price: <b>" + gasPrice + "<\b>"
   property alias pass: passInput.text
   property alias passFocus: passInput.focus
   property alias timer: infoTimer
   property alias okBtn: btnOk
+  property string from: qmlSystem.getCurrentAccount()
+  property string historyInfo
   property string to
   property string value // Not WEI value!
-  property string data
-  property string gas // gasLimit, 225
-  property string gasPrice // GWEI value
+  property string txData
+  property string gas // gasLimit
+  property string gasPrice // GWEI value, 225
   property bool automaticGas 
   property bool isSameAddress: false
   onAboutToShow: passInput.focus = true
   onAboutToHide: confirmTxPopup.clean()
+
+  Connections {
+    target: qmlApi
+      function onApiRequestAnswered(answer, requestID) {
+        if (requestID == "PopupConfirmTxGas") {
+          var answerJson = JSON.parse(answer)
+          gas = Math.round(+qmlApi.uintFromHex(answerJson[0]["result"]) * 1.1)
+        }
+      }
+  }
+
+  function setData(inputTo, inputValue, inputTxData, inputGas, inputGasPrice, automaticGas, inputInfo, inputHistoryInfo) {
+    to = inputTo
+    value = inputValue
+    txData = inputTxData
+    gas = inputGas
+    gasPrice = inputGasPrice
+    info = inputInfo
+    historyInfo = inputHistoryInfo
+    if (automaticGas) {
+      var Params = ({})
+      Params["from"] = from
+      Params["to"] = inputTo
+      Params["gas"] = "0x" + qmlApi.uintToHex(inputGas)
+      Params["gasPrice"] = "0x" + qmlApi.uintToHex(+inputGasPrice * 10 * 9)
+      Params["value"] = "0x" + qmlApi.uintToHex(qmlApi.fixedPointToWei(inputValue, 18))
+      Params["data"] = inputTxData
+      qmlApi.buildGetEstimateGasLimitReq(JSON.stringify(Params))
+      qmlApi.doAPIRequests("PopupConfirmTxGas")
+    }
+  }
 
   function clean() {
     passInput.text = ""
@@ -52,6 +86,7 @@ AVMEPopup {
       horizontalAlignment: Text.AlignHCenter
       color: "#FFFFFF"
       font.pixelSize: 14.0
+      text: fullInfo
     }
 
     Text {

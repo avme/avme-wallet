@@ -149,7 +149,7 @@ std::string Utils::fixedPointToWei(std::string amount, int decimals) {
   return valuestr;
 }
 
-std::string Utils::uintToHex(std::string input) {
+std::string Utils::uintToHex(std::string input, bool isPadded) {
   // Padding is 32 bytes
   std::string padding = "0000000000000000000000000000000000000000000000000000000000000000";
   std::stringstream ss;
@@ -165,6 +165,9 @@ std::string Utils::uintToHex(std::string input) {
       c = std::tolower(c);
     }
   }
+
+  if (!isPadded)
+    return valueHex;
 
   // Insert value into padding from right to left
   for (size_t i = (valueHex.size() - 1), x = (padding.size() - 1),

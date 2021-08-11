@@ -63,8 +63,16 @@ void QmlApi::buildGetTxReceiptReq(std::string txidHex) {
 }
 
 // TODO: implement this
-void QmlApi::buildGetEstimateGasLimitReq() {
-  ;
+void QmlApi::buildGetEstimateGasLimitReq(QString jsonStr) {
+  json inputParams = json::parse(jsonStr.toStdString());
+  json paramsArr = json::array();
+  paramsArr.push_back(inputParams);
+  Request req{
+    this->requestList.size() + size_t(1), "2.0", "eth_estimateGas",
+    paramsArr
+  };
+  this->requestList.push_back(req);
+  return;
 }
 
 void QmlApi::buildARC20TokenExistsReq(std::string address) {
@@ -173,3 +181,10 @@ QString QmlApi::fixedPointToWei(QString amount, int decimals) {
   return QString::fromStdString(Utils::fixedPointToWei(amount.toStdString(), decimals));
 }
 
+QString QmlApi::uintToHex(QString input) {
+  return QString::fromStdString(Utils::uintToHex(input.toStdString(), false));
+}
+
+QString QmlApi::uintFromHex(QString hex) {
+  return QString::fromStdString(Utils::uintFromHex(hex.toStdString()));
+}

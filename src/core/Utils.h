@@ -128,7 +128,7 @@ namespace Utils {
    * bytesToHex converts a string of characters to a byte array
    * returns the respective byte array with left-padding
    */
-  std::string uintToHex(std::string input);
+  std::string uintToHex(std::string input, bool isPadded = true);
   std::string addressToHex(std::string input);
   std::string bytesToHex(std::string input, bool isUint);
 

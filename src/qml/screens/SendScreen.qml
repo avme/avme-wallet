@@ -148,6 +148,8 @@ Item {
         incorrectInputPopup.open()
       } else {
         sendPanel.updateTxCost()
+        sendPanel.updateInfo()
+        confirmTxPopup.setData(sendPanel.to, sendPanel.coinValue, sendPanel.txData, sendPanel.gas, sendPanel.gasPrice, sendPanel.automaticGas, sendPanel.info, sendPanel.historyInfo)
         // TODO: fix Ledger
         //if (qmlSystem.getLedgerFlag()) {
         //  checkLedger()
@@ -169,13 +171,6 @@ Item {
   AVMEPopupConfirmTx {
     id: confirmTxPopup
     isSameAddress: (sendPanel.to == accountHeader.currentAddress)
-    info: "You will send "
-    + "<b>" + sendPanel.amount + " " + chooseAssetPopup.chosenAssetSymbol + "</b>"
-    + " to the address<br><b>" + sendPanel.to + "</b>"
-    + "<br>Gas Limit: <b>"
-    + qmlSystem.weiToFixedPoint(sendPanel.gasLimit, 18) + " AVAX</b>"
-    + "<br>Gas Price: <b>"
-    + qmlSystem.weiToFixedPoint(sendPanel.gasPrice, 9) + " AVAX</b>"
     okBtn.onClicked: {} // TODO
     /*
     function confirmPass() {
