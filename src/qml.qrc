@@ -39,6 +39,8 @@
         <file>qml/panels/AVMEPanelTokenDetails.qml</file>
         <file>qml/panels/AVMEPanelSend.qml</file>
         <file>qml/panels/AVMEPanelExchange.qml</file>
+        <file>qml/panels/AVMEPanelAddLiquidity.qml</file>
+        <file>qml/panels/AVMEPanelRemoveLiquidity.qml</file>
 
         <file>qml/components/AVMEButton.qml</file>
         <file>qml/components/AVMEInput.qml</file>

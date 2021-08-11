@@ -43,7 +43,6 @@ AVMEPanel {
           exchangeDetailsColumn.visible = (+allowance >= +qmlSystem.fixedPointToWei(
             asset["rawBalance"], fromAssetPopup.chosenAssetDecimals
           ))
-          exchangeDetailsColumn.visible = true
         }
         qmlApi.clearAPIRequests()
         qmlApi.buildGetReservesReq(pairAddress)
@@ -241,7 +240,7 @@ AVMEPanel {
       )
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve" : "Not enough funds"
-      onClicked: confirmApprovalPopup.open()
+      onClicked: confirmAddApprovalPopup.open()
     }
   }
 
