@@ -155,19 +155,15 @@ AVMEPopup {
         enabled: (passInput.text !== "" && !loadingFees)
         onClicked: {
           if (!qmlSystem.checkWalletPass(passInput.text)) {
-            walletWrongPassphrase.open();
+            infoTimer.start()
           } else {
-          txProgressPopup.open();
-          qmlSystem.txStart(operation, from, to, value, txData, gas, gasPrice, passInput.text)
-
+            txProgressPopup.open();
+            qmlSystem.txStart(
+              operation, from, to, value, txData, gas, gasPrice, passInput.text
+            )
           }
         }
       }
     }
-  }
-  AVMEPopupInfo {
-    id: walletWrongPassphrase
-    icon: "qrc:/img/warn.png"
-    info: "Wrong password!"
   }
 }
