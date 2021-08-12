@@ -34,13 +34,14 @@ AVMEPanel {
         pairAddress = qmlApi.parseHex(resp[0].result, ["address"])
         asset1Reserves = qmlApi.parseHex(resp[1].result, ["uint"])
         asset2Reserves = qmlApi.parseHex(resp[2].result, ["uint"])
-        qmlApi.clearAPIRequests()
+        qmlApi.clearAPIRequests("QmlRemoveLiquidity_fetchAllowanceAndBalance")
         qmlApi.buildGetAllowanceReq(
           pairAddress,
           qmlSystem.getCurrentAccount(),
-          qmlSystem.getContract("router")
+          qmlSystem.getContract("router"),
+          "QmlRemoveLiquidity_fetchAllowanceAndBalance"
         )
-        qmlApi.buildGetReservesReq(pairAddress)
+        qmlApi.buildGetReservesReq(pairAddress, "QmlRemoveLiquidity_fetchAllowanceAndBalance")
         qmlApi.doAPIRequests("QmlRemoveLiquidity_fetchAllowanceAndBalance")
       } else if (requestID == "QmlRemoveLiquidity_fetchAllowanceAndBalance") {
         var resp = JSON.parse(answer)
@@ -61,13 +62,14 @@ AVMEPanel {
 
   function fetchPairAndReserves() {
     pairAddress = allowance = liquidity = asset1Reserves = asset2Reserves = ""
-    qmlApi.clearAPIRequests()
+    qmlApi.clearAPIRequests("QmlRemoveLiquidity_fetchPairAndReserves")
     qmlApi.buildGetPairReq(
       removeAsset1Popup.chosenAssetAddress,
-      removeAsset2Popup.chosenAssetAddress
+      removeAsset2Popup.chosenAssetAddress,
+      "QmlRemoveLiquidity_fetchPairAndReserves"
     )
-    qmlApi.buildGetReservesReq(removeAsset1Popup.chosenAssetAddress)
-    qmlApi.buildGetReservesReq(removeAsset2Popup.chosenAssetAddress)
+    qmlApi.buildGetReservesReq(removeAsset1Popup.chosenAssetAddress, "QmlRemoveLiquidity_fetchPairAndReserves")
+    qmlApi.buildGetReservesReq(removeAsset2Popup.chosenAssetAddress, "QmlRemoveLiquidity_fetchPairAndReserves")
     qmlApi.doAPIRequests("QmlRemoveLiquidity_fetchPairAndReserves")
   }
 

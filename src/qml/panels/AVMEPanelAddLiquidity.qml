@@ -56,8 +56,8 @@ AVMEPanel {
             asset2["rawBalance"], addAsset2Popup.chosenAssetDecimals
           ))
         }
-        qmlApi.clearAPIRequests()
-        qmlApi.buildGetReservesReq(pairAddress)
+        qmlApi.clearAPIRequests("QmlExchange_refreshReserves")
+        qmlApi.buildGetReservesReq(pairAddress, "QmlExchange_refreshReserves")
         qmlApi.doAPIRequests("QmlExchange_refreshReserves")
       } else if (requestID == "QmlExchange_refreshReserves") {
         var resp = JSON.parse(answer)
@@ -79,20 +79,23 @@ AVMEPanel {
   function fetchAllowance() {
     refreshAssetBalance()
     addAsset1Input.text = addAsset2Input.text = asset1Reserves = asset2Reserves = ""
-    qmlApi.clearAPIRequests()
+    qmlApi.clearAPIRequests("QmlAddLiquidity_fetchAllowance")
     qmlApi.buildGetAllowanceReq(
       addAsset1Popup.chosenAssetAddress,
       qmlSystem.getCurrentAccount(),
-      qmlSystem.getContract("router")
+      qmlSystem.getContract("router"),
+      "QmlAddLiquidity_fetchAllowance"
     )
     qmlApi.buildGetAllowanceReq(
       addAsset2Popup.chosenAssetAddress,
       qmlSystem.getCurrentAccount(),
-      qmlSystem.getContract("router")
+      qmlSystem.getContract("router"),
+      "QmlAddLiquidity_fetchAllowance"
     )
     qmlApi.buildGetPairReq(
       addAsset1Popup.chosenAssetAddress,
-      addAsset2Popup.chosenAssetAddress
+      addAsset2Popup.chosenAssetAddress,
+      "QmlAddLiquidity_fetchAllowance"
     )
     qmlApi.doAPIRequests("QmlAddLiquidity_fetchAllowance")
   }

@@ -58,7 +58,7 @@ AVMEPopup {
       Params["gasPrice"] = "0x" + qmlApi.uintToHex(+inputGasPrice * 10 * 9)
       Params["value"] = "0x" + qmlApi.uintToHex(qmlApi.fixedPointToWei(inputValue, 18))
       Params["data"] = inputTxData
-      qmlApi.buildGetEstimateGasLimitReq(JSON.stringify(Params))
+      qmlApi.buildGetEstimateGasLimitReq(JSON.stringify(Params), "PopupConfirmTxGas")
       qmlApi.doAPIRequests("PopupConfirmTxGas")
     }
   }

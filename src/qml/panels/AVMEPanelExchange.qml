@@ -44,8 +44,8 @@ AVMEPanel {
             asset["rawBalance"], fromAssetPopup.chosenAssetDecimals
           ))
         }
-        qmlApi.clearAPIRequests()
-        qmlApi.buildGetReservesReq(pairAddress)
+        qmlApi.clearAPIRequests("QmlExchange_refreshReserves")
+        qmlApi.buildGetReservesReq(pairAddress, "QmlExchange_refreshReserves")
         qmlApi.doAPIRequests("QmlExchange_refreshReserves")
       } else if (requestID == "QmlExchange_refreshReserves") {
         var resp = JSON.parse(answer)
@@ -67,15 +67,17 @@ AVMEPanel {
   function fetchAllowance() {
     refreshAssetBalance()
     swapInput.text = swapEstimate = swapImpact = inReserves = outReserves = ""
-    qmlApi.clearAPIRequests()
+    qmlApi.clearAPIRequests("QmlExchange_fetchAllowance")
     qmlApi.buildGetAllowanceReq(
       fromAssetPopup.chosenAssetAddress,
       qmlSystem.getCurrentAccount(),
-      qmlSystem.getContract("router")
+      qmlSystem.getContract("router"),
+      "QmlExchange_fetchAllowance"
     )
     qmlApi.buildGetPairReq(
       fromAssetPopup.chosenAssetAddress,
-      toAssetPopup.chosenAssetAddress
+      toAssetPopup.chosenAssetAddress,
+      "QmlExchange_fetchAllowance"
     )
     qmlApi.doAPIRequests("QmlExchange_fetchAllowance")
   }
