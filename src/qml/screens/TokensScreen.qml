@@ -43,7 +43,8 @@ Item {
   AVMEPopupTokenAdd {
     id: addTokenPopup
     widthPct: 0.4
-    heightPct: 0.7
+    heightPct: 0.4
+    onAboutToHide: tokensPanel.reloadTokens()
   }
 
   // Popup for confirming token removal

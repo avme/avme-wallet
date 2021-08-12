@@ -11,13 +11,9 @@ import "qrc:/qml/components"
  */
 AVMEPopup {
   id: addTokenPopup
-  property bool tokenFound: false
-  property var tokenData: null
 
   function clean() {
-    tokenFound = false
-    tokenData = null
-    addressInput.text = symbolInput.text = nameInput.text = decimalsInput.text = ""
+    addressInput.text = ""
   }
 
   Column {
@@ -44,8 +40,6 @@ AVMEPopup {
           text: "Token was already added, please try another."
         } else if (notFoundTimer.running) {
           text: "Token not found, please try another."
-        } else if (tokenFound) {
-          text: "Token found! Please check if details are correct."
         } else {
           text: "Enter the address for your desired token."
         }
@@ -58,35 +52,9 @@ AVMEPopup {
       id: addressInput
       width: (parent.width * 0.9)
       anchors.horizontalCenter: parent.horizontalCenter
-      enabled: !tokenFound
       label: "Token address"
       validator: RegExpValidator { regExp: /0x[0-9a-fA-F]{40}/ }
       placeholder: "e.g. 0x1234567890ABCDEF..."
-    }
-
-    AVMEInput {
-      id: symbolInput
-      width: (parent.width * 0.9)
-      anchors.horizontalCenter: parent.horizontalCenter
-      enabled: tokenFound
-      label: "Token symbol"
-    }
-
-    AVMEInput {
-      id: nameInput
-      width: (parent.width * 0.9)
-      anchors.horizontalCenter: parent.horizontalCenter
-      enabled: tokenFound
-      label: "Token name"
-    }
-
-    AVMEInput {
-      id: decimalsInput
-      width: (parent.width * 0.9)
-      anchors.horizontalCenter: parent.horizontalCenter
-      enabled: tokenFound
-      validator: RegExpValidator { regExp: /[0-9]{1,}/ }
-      label: "Token decimals"
     }
 
     AVMEButton {
@@ -94,15 +62,15 @@ AVMEPopup {
       width: (parent.width * 0.9)
       anchors.horizontalCenter: parent.horizontalCenter
       enabled: (addressInput.acceptableInput)
-      text: (tokenFound) ? "Add this token" : "Search for token"
+      text: "Add token"
       onClicked: handleToken()
       function handleToken() {
         if (qmlSystem.ARC20TokenWasAdded(addressInput.text)) {
           existsTimer.start()
-        } else if (tokenFound) {
-          tokenData.symbol = symbolInput.text
-          tokenData.name = nameInput.text
-          tokenData.decimals = decimalsInput.text
+        } else if (!qmlSystem.ARC20TokenExists(addressInput.text)) {
+          notFoundTimer.start()
+        } else {
+          var tokenData = qmlSystem.getARC20TokenData(addressInput.text)
           qmlSystem.addARC20Token(
             tokenData.address, tokenData.symbol, tokenData.name,
             tokenData.decimals, tokenData.avaxPairContract
@@ -110,17 +78,6 @@ AVMEPopup {
           qmlSystem.downloadARC20TokenImage(tokenData.address)
           addTokenPopup.clean()
           addTokenPopup.close()
-          reloadTokens()  // Parent call
-        } else if (!tokenFound) {
-          if (qmlSystem.ARC20TokenExists(addressInput.text)) {
-            tokenFound = true
-            tokenData = qmlSystem.getARC20TokenData(addressInput.text)
-            symbolInput.text = tokenData.symbol
-            nameInput.text = tokenData.name
-            decimalsInput.text = tokenData.decimals
-          } else {
-            notFoundTimer.start()
-          }
         }
       }
     }
