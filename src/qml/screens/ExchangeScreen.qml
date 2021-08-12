@@ -107,11 +107,7 @@ Item {
     id: confirmApprovalPopup
     info: "You will approve "
     + "<b>" + fromAssetPopup.chosenAssetSymbol + "</b>"
-    + " swapping for the current address<br>"
-    + "<br>Gas Limit: <b>"
-    + qmlSystem.weiToFixedPoint("180000", 18) + " AVAX</b>"
-    + "<br>Gas Price: <b>"
-    + qmlSystem.weiToFixedPoint(qmlSystem.getAutomaticFee(), 9) + " AVAX</b>"
+    + " swapping for the current address"
     okBtn.onClicked: {} // TODO
   }
   AVMEPopupConfirmTx {
@@ -119,10 +115,6 @@ Item {
     info: "You will swap "
     + "<b>" + exchangePanel.amount + " " + fromAssetPopup.chosenAssetSymbol + "</b><br>"
     + "for <b>" + exchangePanel.swapEstimate + " " + toAssetPopup.chosenAssetSymbol + "</b>"
-    + "<br>Gas Limit: <b>"
-    + qmlSystem.weiToFixedPoint("180000", 18) + " AVAX</b>"
-    + "<br>Gas Price: <b>"
-    + qmlSystem.weiToFixedPoint(qmlSystem.getAutomaticFee(), 9) + " AVAX</b>"
     okBtn.onClicked: {} // TODO
   }
 }

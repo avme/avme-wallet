@@ -108,13 +108,13 @@ AVMEPanel {
       asset1Balance = accountHeader.coinRawBalance
     } else {
       var asset1 = accountHeader.tokenList[addAsset1Popup.chosenAssetAddress]
-      asset1Balance = (asset != undefined) ? asset1["rawBalance"] : ""
+      asset1Balance = (asset1 != undefined) ? asset1["rawBalance"] : ""
     }
     if (asset2Symbol == "AVAX") {
       asset2Balance = accountHeader.coinRawBalance
     } else {
       var asset2 = accountHeader.tokenList[addAsset2Popup.chosenAssetAddress]
-      asset2Balance = (asset != undefined) ? asset2["rawBalance"] : ""
+      asset2Balance = (asset2 != undefined) ? asset2["rawBalance"] : ""
     }
     assetBalance.text = (asset1Balance != "" && asset2Balance != "")
       ? "Balances:<br><b>"
@@ -356,11 +356,11 @@ AVMEPanel {
     id: addLiquidityDetailsColumn
     enabled: (asset1Approved && asset2Approved)
     anchors {
-      top: parent.top
+      top: addLiquidityHeaderColumn.bottom
       bottom: parent.bottom
       left: parent.left
       right: parent.right
-      topMargin: 80
+      topMargin: 40
       bottomMargin: 20
       leftMargin: 40
       rightMargin: 40

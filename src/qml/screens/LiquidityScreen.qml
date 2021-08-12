@@ -109,14 +109,7 @@ Item {
     + (!addLiquidityPanel.asset1Approved) ? addAsset1Popup.chosenAssetSymbol : ""
     + (!addLiquidityPanel.asset1Approved && !addLiquidityPanel.asset2Approved) ? " and " : ""
     + (!addLiquidityPanel.asset2Approved) ? addAsset2Popup.chosenAssetSymbol : ""
-    + " to be added to the pool for the current address<br>"
-    + "<br>Gas Limit: <b>"
-    + qmlSystem.weiToFixedPoint(
-      (!addLiquidityPanel.asset1Approved && !addLiquidityPanel.asset2Approved)
-      ? "320000" : "180000", 18
-    ) + " AVAX</b>"
-    + "<br>Gas Price: <b>"
-    + qmlSystem.weiToFixedPoint(qmlSystem.getAutomaticFee(), 9) + " AVAX</b>"
+    + " to be added to the pool for the current address"
     okBtn.onClicked: {} // TODO
   }
   AVMEPopupConfirmTx {
@@ -124,22 +117,16 @@ Item {
     info: "You will approve "
     + "<b>" + removeAsset1Popup.chosenAssetSymbol + "/"
     + removeAsset2Popup.chosenAssetSymbol + " LP</b>"
-    + " to be removed from the pool for the current address<br>"
-    + "<br>Gas Limit: <b>"
-    + qmlSystem.weiToFixedPoint("180000", 18) + " AVAX</b>"
-    + "<br>Gas Price: <b>"
-    + qmlSystem.weiToFixedPoint(qmlSystem.getAutomaticFee(), 9) + " AVAX</b>"
+    + " to be removed from the pool for the current address"
     okBtn.onClicked: {} // TODO
   }
   AVMEPopupConfirmTx {
     id: confirmAddLiquidityPopup
     info: "You will add "
-    + "<b>" + addLiquidityPanel.add1Amount + " " + addAsset1Popup.chosenAssetSymbol + "</b><br>and <b>"
-    + addLiquidityPanel.add2Amount + " " + addAsset2Popup.chosenAssetSymbol + "</b> to the pool"
-    + "<br>Gas Limit: <b>"
-    + qmlSystem.weiToFixedPoint("250000", 18) + " AVAX</b>"
-    + "<br>Gas Price: <b>"
-    + qmlSystem.weiToFixedPoint(qmlSystem.getAutomaticFee(), 9) + " AVAX</b>"
+    + "<b>" + addLiquidityPanel.add1Amount + " " + addAsset1Popup.chosenAssetSymbol
+    + "</b><br>and <b>"
+    + addLiquidityPanel.add2Amount + " " + addAsset2Popup.chosenAssetSymbol
+    + "</b> to the pool"
     okBtn.onClicked: {} // TODO
   }
   AVMEPopupConfirmTx {
@@ -148,10 +135,6 @@ Item {
     + "<b>" + removeLiquidityPanel.removeLPEstimate + " "
     + removeAsset1Popup.chosenAssetSymbol + "/" + removeAsset2Popup.chosenAssetSymbol
     + " LP</b> from the pool"
-    + "<br>Gas Limit: <b>"
-    + qmlSystem.weiToFixedPoint("250000", 18) + " AVAX</b>"
-    + "<br>Gas Price: <b>"
-    + qmlSystem.weiToFixedPoint(qmlSystem.getAutomaticFee(), 9) + " AVAX</b>"
     okBtn.onClicked: {} // TODO
   }
 }

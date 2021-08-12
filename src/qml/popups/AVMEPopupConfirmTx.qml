@@ -6,13 +6,17 @@ import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
 
+import QmlApi 1.0
+
 // Popup for confirming a transaction with user input.
 AVMEPopup {
   id: confirmTxPopup
   widthPct: 0.6
   heightPct: 0.6
   property string info
-  property string fullInfo: info + "<br>Gas Limit: <b> " + gas + " AVAX </b>" + "<br> Gas Price: <b>" + gasPrice + "<\b>"
+  property string fullInfo: info
+    + "<br>Gas Limit: <b> " + gas + " AVAX</b>"
+    + "<br>Gas Price: <b>" + gasPrice + "</b>"
   property alias pass: passInput.text
   property alias passFocus: passInput.focus
   property alias timer: infoTimer
@@ -25,20 +29,22 @@ AVMEPopup {
   property string gas // gasLimit
   property string gasPrice // GWEI value, 225
   property bool loadingFees
-  property bool automaticGas 
+  property bool automaticGas
   property bool isSameAddress: false
   onAboutToShow: passInput.focus = true
   onAboutToHide: confirmTxPopup.clean()
 
+  QmlApi { id: qmlApi }
+
   Connections {
     target: qmlApi
-      function onApiRequestAnswered(answer, requestID) {
-        if (requestID == "PopupConfirmTxGas") {
-          var answerJson = JSON.parse(answer)
-          gas = Math.round(+qmlApi.uintFromHex(answerJson[0]["result"]) * 1.1)
-          loadingFees = false
-        }
+    function onApiRequestAnswered(answer, requestID) {
+      if (requestID == "PopupConfirmTxGas") {
+        var answerJson = JSON.parse(answer)
+        gas = Math.round(+qmlApi.uintFromHex(answerJson[0]["result"]) * 1.1)
+        loadingFees = false
       }
+    }
   }
 
   function setData(inputTo, inputValue, inputTxData, inputGas, inputGasPrice, automaticGas, inputInfo, inputHistoryInfo) {

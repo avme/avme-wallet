@@ -20,8 +20,8 @@ AVMEPanel {
   property string userAsset1Reserves
   property string userAsset2Reserves
   property string userLPSharePercentage // TODO: find out where this should be used
-  property string removeLowerEstimate
-  property string removeHigherEstimate
+  property string removeAsset1Estimate
+  property string removeAsset2Estimate
   property string removeLPEstimate
 
   QmlApi { id: qmlApi }
@@ -221,7 +221,7 @@ AVMEPanel {
       font.pixelSize: 14.0
       text: "You need to approve your Account in order to remove <b>"
       + removeAsset1Popup.chosenAssetSymbol + "/"
-      + removeAssetPopup2.chosenAssetSymbol + " LP</b> from the pool."
+      + removeAsset2Popup.chosenAssetSymbol + " LP</b> from the pool."
       + "<br>This operation will have a total gas cost of:<br><b>"
       + qmlSystem.calculateTransactionCost("0", "180000", qmlSystem.getAutomaticFee())
       + " AVAX</b>"
@@ -242,11 +242,11 @@ AVMEPanel {
   Column {
     id: removeLiquidityDetailsColumn
     anchors {
-      top: parent.top
+      top: removeLiquidityHeaderColumn.bottom
       bottom: parent.bottom
       left: parent.left
       right: parent.right
-      topMargin: 80
+      topMargin: 0
       bottomMargin: 20
       leftMargin: 40
       rightMargin: 40
@@ -268,8 +268,8 @@ AVMEPanel {
         var estimates = qmlSystem.calculateRemoveLiquidityAmount(
           userAsset1Reserves, userAsset2Reserves, value
         )
-        removeLowerEstimate = estimates.lower
-        removeHigherEstimate = estimates.higher
+        removeAsset1Estimate = estimates.lower
+        removeAsset2Estimate = estimates.higher
         removeLPEstimate = estimates.lp
       }
       Text {
@@ -330,12 +330,12 @@ AVMEPanel {
       text: "<b>" + ((removeLPEstimate) ? removeLPEstimate : "0") + " LP</b>"
       + "<br><br>Estimated returns:<br>"
       + "<b>" + qmlSystem.weiToFixedPoint(
-        ((removeAsset1Popup.chosenAssetSymbol == lowerToken)
-        ? removeLowerEstimate : removeHigherEstimate), removeAsset1Popup.chosenAssetDecimals)
+        removeAsset1Estimate, removeAsset1Popup.chosenAssetDecimals
+      )
       + " " + removeAsset1Popup.chosenAssetSymbol
       + "<br>" + qmlSystem.weiToFixedPoint(
-        ((removeAsset2Popup.chosenAssetSymbol == lowerToken)
-        ? removeLowerEstimate : removeHigherEstimate), removeAsset2Popup.chosenAssetDecimals)
+        removeAsset2Estimate, removeAsset2Popup.chosenAssetDecimals
+      )
       + " " + removeAsset2Popup.chosenAssetSymbol + "</b>"
     }
 
