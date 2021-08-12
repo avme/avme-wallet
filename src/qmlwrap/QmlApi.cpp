@@ -6,15 +6,26 @@
 
 void QmlApi::doAPIRequests(QString requestID) {
   QtConcurrent::run([=](){
-    std::string requests = API::buildMultiRequest(this->requestList);
+    std::string requests; 
+    try {
+      requestListLock.lock();
+      requests = API::buildMultiRequest(this->requestList[requestID]);
+    } catch (std::exception &e) {
+      requestListLock.unlock();
+      emit apiRequestAnswered(QString::fromStdString(std::string("{ \"ERROR\": \"") + e.what() + "\"}"), requestID);
+      return;
+    }
+    this->requestList[requestID].clear();
+    requestListLock.unlock();
     std::string response = API::httpGetRequest(requests);
-    this->requestList.clear();
     emit apiRequestAnswered(QString::fromStdString(response), requestID);
   });
 }
 
-void QmlApi::clearAPIRequests() {
-  this->requestList.clear();
+void QmlApi::clearAPIRequests(QString requestID) {
+  requestListLock.lock();
+    this->requestList[requestID].clear();
+  requestListLock.unlock();
 }
 
 QStringList QmlApi::parseHex(QString hexStr, QStringList types) {
@@ -26,15 +37,17 @@ QStringList QmlApi::parseHex(QString hexStr, QStringList types) {
   return ret;
 }
 
-void QmlApi::buildGetBalanceReq(QString address) {
+void QmlApi::buildGetBalanceReq(QString address, QString requestID) {
+  requestListLock.lock();
   Request req{
-    this->requestList.size() + size_t(1), "2.0", "eth_getBalance",
+    this->requestList[requestID].size() + size_t(1), "2.0", "eth_getBalance",
     {address.toStdString(), "latest"}
   };
-  this->requestList.push_back(req);
+  this->requestList[requestID].push_back(req);
+  requestListLock.unlock();
 }
 
-void QmlApi::buildGetTokenBalanceReq(QString contract, QString address) {
+void QmlApi::buildGetTokenBalanceReq(QString contract, QString address, QString requestID) {
   std::string addressStr = address.toStdString();
   if (addressStr.substr(0,2) == "0x") { addressStr = addressStr.substr(2); }
   json params;
@@ -43,39 +56,47 @@ void QmlApi::buildGetTokenBalanceReq(QString contract, QString address) {
   params["data"] = "0x70a08231000000000000000000000000" + addressStr;
   array.push_back(params);
   array.push_back("latest");
-  Request req{this->requestList.size() + size_t(1), "2.0", "eth_getBalance", array};
-  this->requestList.push_back(req);
+  requestListLock.lock();
+  Request req{this->requestList[requestID].size() + size_t(1), "2.0", "eth_getBalance", array};
+  this->requestList[requestID].push_back(req);
+  requestListLock.unlock();
 }
 
-void QmlApi::buildGetCurrentBlockNumberReq() {
+void QmlApi::buildGetCurrentBlockNumberReq(QString requestID) {
+  requestListLock.lock();
   Request req{
-    this->requestList.size() + size_t(1), "2.0", "eth_blockNumber", json::array()
+    this->requestList[requestID].size() + size_t(1), "2.0", "eth_blockNumber", json::array()
   };
-  this->requestList.push_back(req);
+  this->requestList[requestID].push_back(req);
+  requestListLock.unlock();
 }
 
-void QmlApi::buildGetTxReceiptReq(std::string txidHex) {
+void QmlApi::buildGetTxReceiptReq(std::string txidHex, QString requestID) {
+  requestListLock.lock();
   Request req{
-    this->requestList.size() + size_t(1), "2.0", "eth_getTransactionReceipt",
+    this->requestList[requestID].size() + size_t(1), "2.0", "eth_getTransactionReceipt",
     {"0x" + txidHex}
   };
-  this->requestList.push_back(req);
+  this->requestList[requestID].push_back(req);
+  requestListLock.unlock();
 }
 
 // TODO: implement this
-void QmlApi::buildGetEstimateGasLimitReq(QString jsonStr) {
+void QmlApi::buildGetEstimateGasLimitReq(QString jsonStr, QString requestID) {
   json inputParams = json::parse(jsonStr.toStdString());
   json paramsArr = json::array();
   paramsArr.push_back(inputParams);
+  requestListLock.lock();
   Request req{
-    this->requestList.size() + size_t(1), "2.0", "eth_estimateGas",
+    this->requestList[requestID].size() + size_t(1), "2.0", "eth_estimateGas",
     paramsArr
   };
-  this->requestList.push_back(req);
+  this->requestList[requestID].push_back(req);
+  requestListLock.unlock();
   return;
 }
 
-void QmlApi::buildARC20TokenExistsReq(std::string address) {
+void QmlApi::buildARC20TokenExistsReq(std::string address, QString requestID) {
   json supplyJson, balanceJson;
   json supplyJsonArr = json::array();
   json balanceJsonArr = json::array();
@@ -86,13 +107,15 @@ void QmlApi::buildARC20TokenExistsReq(std::string address) {
   supplyJsonArr.push_back("latest");
   balanceJsonArr.push_back(supplyJson);
   balanceJsonArr.push_back("latest");
-  Request supplyReq{this->requestList.size() + size_t(1), "2.0", "eth_call", supplyJsonArr};
-  this->requestList.push_back(supplyReq);
-  Request balanceReq{this->requestList.size() + size_t(1), "2.0", "eth_call", balanceJsonArr};
-  this->requestList.push_back(balanceReq);
+  requestListLock.lock();
+  Request supplyReq{this->requestList[requestID].size() + size_t(1), "2.0", "eth_call", supplyJsonArr};
+  Request balanceReq{this->requestList[requestID].size() + size_t(1), "2.0", "eth_call", balanceJsonArr};
+  this->requestList[requestID].push_back(supplyReq);
+  this->requestList[requestID].push_back(balanceReq);
+  requestListLock.unlock();
 }
 
-void QmlApi::buildGetARC20TokenDataReq(std::string address) {
+void QmlApi::buildGetARC20TokenDataReq(std::string address, QString requestID) {
   json nameJson, symbolJson, decimalsJson;
   json nameJsonArr, symbolJsonArr, decimalsJsonArr;
   nameJson["to"] = symbolJson["to"] = decimalsJson["to"] = address;
@@ -103,18 +126,20 @@ void QmlApi::buildGetARC20TokenDataReq(std::string address) {
   nameJsonArr.push_back(nameJson);
   symbolJsonArr.push_back(symbolJson);
   decimalsJsonArr.push_back(decimalsJson);
+  requestListLock.lock();
   Request nameReq{
-    this->requestList.size() + size_t(1), "2.0", "eth_call", nameJsonArr
+    this->requestList[requestID].size() + size_t(1), "2.0", "eth_call", nameJsonArr
   };
-  this->requestList.push_back(nameReq);
   Request symbolReq{
-    this->requestList.size() + size_t(1), "2.0", "eth_call", symbolJsonArr
+    this->requestList[requestID].size() + size_t(1), "2.0", "eth_call", symbolJsonArr
   };
-  this->requestList.push_back(symbolReq);
   Request decimalsReq{
-    this->requestList.size() + size_t(1), "2.0", "eth_call", decimalsJsonArr
+    this->requestList[requestID].size() + size_t(1), "2.0", "eth_call", decimalsJsonArr
   };
-  this->requestList.push_back(decimalsReq);
+  this->requestList[requestID].push_back(nameReq);
+  this->requestList[requestID].push_back(symbolReq);
+  this->requestList[requestID].push_back(decimalsReq);
+  requestListLock.unlock();
 }
 
 void QmlApi::getTokenPriceHistory(QString address, int days, QString requestID) {
@@ -123,7 +148,7 @@ void QmlApi::getTokenPriceHistory(QString address, int days, QString requestID) 
   });
 }
 
-void QmlApi::buildGetAllowanceReq(QString receiver, QString owner, QString spender) {
+void QmlApi::buildGetAllowanceReq(QString receiver, QString owner, QString spender, QString requestID) {
   json params;
   json array = json::array();
   params["to"] = receiver.toStdString();
@@ -131,11 +156,13 @@ void QmlApi::buildGetAllowanceReq(QString receiver, QString owner, QString spend
     + Utils::addressToHex(owner.toStdString()) + Utils::addressToHex(spender.toStdString());
   array.push_back(params);
   array.push_back("latest");
-  Request req{this->requestList.size() + size_t(1), "2.0", "eth_call", array};
-  this->requestList.push_back(req);
+  requestListLock.lock();
+  Request req{this->requestList[requestID].size() + size_t(1), "2.0", "eth_call", array};
+  this->requestList[requestID].push_back(req);
+  requestListLock.unlock();
 }
 
-void QmlApi::buildGetPairReq(QString assetAddress1, QString assetAddress2) {
+void QmlApi::buildGetPairReq(QString assetAddress1, QString assetAddress2, QString requestID) {
   json params;
   json array = json::array();
   params["to"] = Pangolin::contracts["factory"];
@@ -144,30 +171,36 @@ void QmlApi::buildGetPairReq(QString assetAddress1, QString assetAddress2) {
     + Utils::addressToHex(assetAddress2.toStdString());
   array.push_back(params);
   array.push_back("latest");
-  Request req{this->requestList.size() + size_t(1), "2.0", "eth_call", array};
-  this->requestList.push_back(req);
+  requestListLock.lock();
+  Request req{this->requestList[requestID].size() + size_t(1), "2.0", "eth_call", array};
+  this->requestList[requestID].push_back(req);
+  requestListLock.unlock();
 }
 
-void QmlApi::buildGetReservesReq(QString pairAddress) {
+void QmlApi::buildGetReservesReq(QString pairAddress, QString requestID) {
   json params;
   json array = json::array();
   params["to"] = pairAddress.toStdString();
   params["data"] = Pangolin::pairFuncs["getReserves"];
   array.push_back(params);
   array.push_back("latest");
-  Request req{this->requestList.size() + size_t(1), "2.0", "eth_call", array};
-  this->requestList.push_back(req);
+  requestListLock.lock();
+  Request req{this->requestList[requestID].size() + size_t(1), "2.0", "eth_call", array};
+  this->requestList[requestID].push_back(req);
+  requestListLock.unlock();
 }
 
-void QmlApi::buildCustomEthCallReq(QString contract, QString ABI) {
+void QmlApi::buildCustomEthCallReq(QString contract, QString ABI, QString requestID) {
   json params;
   json array = json::array();
   params["to"] = contract.toStdString();
   params["data"] = ABI.toStdString();
   array.push_back(params);
   array.push_back("latest");
-  Request req{this->requestList.size() + size_t(1), "2.0", "eth_getBalance", array};
-  this->requestList.push_back(req);
+  requestListLock.lock();
+  Request req{this->requestList[requestID].size() + size_t(1), "2.0", "eth_getBalance", array};
+  this->requestList[requestID].push_back(req);
+  requestListLock.unlock();
 }
 
 QString QmlApi::buildCustomABI(QString input) {

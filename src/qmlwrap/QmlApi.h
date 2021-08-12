@@ -26,7 +26,8 @@ class QmlApi : public QObject {
   Q_OBJECT
 
   private:
-    std::vector<Request> requestList;
+    std::map<QString, std::vector<Request>> requestList;
+    std::mutex requestListLock;
 
   signals:
     /**
@@ -50,7 +51,7 @@ class QmlApi : public QObject {
     /**
      * Manually clear the requestList if necessary.
      */
-    Q_INVOKABLE void clearAPIRequests();
+    Q_INVOKABLE void clearAPIRequests(QString requestID);
 
     /**
      * Parse a given hex string according to the values given.
@@ -61,19 +62,19 @@ class QmlApi : public QObject {
     /**
      * Build requests for getting the AVAX and a given token's balance, respectively.
      */
-    Q_INVOKABLE void buildGetBalanceReq(QString address);
-    Q_INVOKABLE void buildGetTokenBalanceReq(QString contract, QString address);
+    Q_INVOKABLE void buildGetBalanceReq(QString address, QString requestID);
+    Q_INVOKABLE void buildGetTokenBalanceReq(QString contract, QString address, QString requestID);
 
     /**
      * Build request for getting the current block number.
      */
-    Q_INVOKABLE void buildGetCurrentBlockNumberReq();
+    Q_INVOKABLE void buildGetCurrentBlockNumberReq(QString requestID);
 
     /**
      * Build request for getting the receipt (details) of a transaction.
      * e.g. blockNumber, status, etc.
      */
-    Q_INVOKABLE void buildGetTxReceiptReq(std::string txidHex);
+    Q_INVOKABLE void buildGetTxReceiptReq(std::string txidHex, QString requestID);
 
     /**
      * Build request for getting the estimated gas limit.
@@ -88,17 +89,17 @@ class QmlApi : public QObject {
      * }
      */
 
-    Q_INVOKABLE void buildGetEstimateGasLimitReq(QString jsonStr);
+    Q_INVOKABLE void buildGetEstimateGasLimitReq(QString jsonStr, QString requestID);
 
     /**
      * Build request for querying if an ARC20 token exists.
      */
-    Q_INVOKABLE void buildARC20TokenExistsReq(std::string address);
+    Q_INVOKABLE void buildARC20TokenExistsReq(std::string address, QString requestID);
 
     /**
      * Get an ARC20 token's data.
      */
-    Q_INVOKABLE void buildGetARC20TokenDataReq(std::string address);
+    Q_INVOKABLE void buildGetARC20TokenDataReq(std::string address, QString requestID);
 
     /**
      * Get the fiat price history of the last X days for a given ARC20 token.
@@ -109,22 +110,22 @@ class QmlApi : public QObject {
      * Build request for getting the allowance amount between owner and spender
      * addresses in the given receiver address.
      */
-    Q_INVOKABLE void buildGetAllowanceReq(QString receiver, QString owner, QString spender);
+    Q_INVOKABLE void buildGetAllowanceReq(QString receiver, QString owner, QString spender, QString requestID);
 
     /**
      * Build request for getting the pair address for two given assets.
      */
-    Q_INVOKABLE void buildGetPairReq(QString assetAddress1, QString assetAddress2);
+    Q_INVOKABLE void buildGetPairReq(QString assetAddress1, QString assetAddress2, QString requestID);
 
     /**
      * Build request for getting the reserves for the given pair address.
      */
-    Q_INVOKABLE void buildGetReservesReq(QString pairAddress);
+    Q_INVOKABLE void buildGetReservesReq(QString pairAddress, QString requestID);
 
     /**
      * Functions for appending custom ABI calls.
      */
-    Q_INVOKABLE void buildCustomEthCallReq(QString contract, QString ABI);
+    Q_INVOKABLE void buildCustomEthCallReq(QString contract, QString ABI, QString requestID);
     Q_INVOKABLE QString buildCustomABI(QString input);
 
     /**
