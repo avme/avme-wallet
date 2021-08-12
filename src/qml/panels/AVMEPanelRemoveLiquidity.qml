@@ -12,12 +12,14 @@ import "qrc:/qml/components"
 AVMEPanel {
   id: removeLiquidityPanel
   title: "Remove Liquidity"
-  property string removeAllowance
-  property string lowerReserves
-  property string higherReserves
+  property string allowance
+  property string pairAddress
+  property string asset1Reserves
+  property string asset2Reserves
   property string liquidity
-  property string userLowerReserves
-  property string userHigherReserves
+  property string userAsset1Reserves
+  property string userAsset2Reserves
+  property string userLPSharePercentage // TODO: find out where this should be used
   property string removeLowerEstimate
   property string removeHigherEstimate
   property string removeLPEstimate
@@ -25,13 +27,49 @@ AVMEPanel {
   QmlApi { id: qmlApi }
 
   Connections {
-    target: accountHeader
-    function onUpdatedBalances() { refreshAssetBalance() }  // TODO
+    target: qmlApi
+    function onApiRequestAnswered(answer, requestID) {
+      if (requestID == "QmlRemoveLiquidity_fetchPairAndReserves") {
+        var resp = JSON.parse(answer)
+        pairAddress = qmlApi.parseHex(resp[0].result, ["address"])
+        asset1Reserves = qmlApi.parseHex(resp[1].result, ["uint"])
+        asset2Reserves = qmlApi.parseHex(resp[2].result, ["uint"])
+        qmlApi.clearAPIRequests()
+        qmlApi.buildGetAllowanceReq(
+          pairAddress,
+          qmlSystem.getCurrentAccount(),
+          qmlSystem.getContract("router")
+        )
+        qmlApi.buildGetReservesReq(pairAddress)
+        qmlApi.doAPIRequests("QmlRemoveLiquidity_fetchAllowanceAndBalance")
+      } else if (requestID == "QmlRemoveLiquidity_fetchAllowanceAndBalance") {
+        var resp = JSON.parse(answer)
+        allowance = qmlApi.parseHex(resp[0].result, ["uint"])
+        liquidity = qmlApi.parseHex(resp[1].result, ["uint"])
+        var userShares = qmlSystem.calculatePoolShares(
+          asset1Reserves, asset2Reserves, liquidity
+        )
+        userAsset1Reserves = userShares.lower
+        userAsset2Reserves = userShares.higher
+        userLPSharePercentage = userShares.liquidity
+        removeLiquidityDetailsColumn.visible = (+allowance >=
+          +qmlSystem.fixedPointToWei(liquidity, 18)
+        )
+      }
+    }
   }
 
-  // TODO: connections to QmlApi here
-
-  // TODO: fetchAllowance(?) here
+  function fetchPairAndReserves() {
+    pairAddress = allowance = liquidity = asset1Reserves = asset2Reserves = ""
+    qmlApi.clearAPIRequests()
+    qmlApi.buildGetPairReq(
+      removeAsset1Popup.chosenAssetAddress,
+      removeAsset2Popup.chosenAssetAddress
+    )
+    qmlApi.buildGetReservesReq(removeAsset1Popup.chosenAssetAddress)
+    qmlApi.buildGetReservesReq(removeAsset2Popup.chosenAssetAddress)
+    qmlApi.doAPIRequests("QmlRemoveLiquidity_fetchPairAndReserves")
+  }
 
   Column {
     id: removeLiquidityHeaderColumn
@@ -125,7 +163,17 @@ AVMEPanel {
       }
     }
 
-    // TODO: total LP amount here
+    Text {
+      id: assetBalance
+      anchors.horizontalCenter: parent.horizontalCenter
+      horizontalAlignment: Text.AlignHCenter
+      color: "#FFFFFF"
+      font.pixelSize: 14.0
+      text: (liquidity != "")
+      ? "Balance: <b>" + liquidity + " " + removeAsset1Popup.chosenAssetSymbol
+      + "/" + removeAsset2Popup.chosenAssetSymbol + " LP</b>"
+      : "Loading asset balance..."
+    }
 
     Row {
       anchors.horizontalCenter: parent.horizontalCenter
@@ -146,7 +194,48 @@ AVMEPanel {
     }
   }
 
-  // TODO: column for approval here
+  Column {
+    id: removeLiquidityApprovalColumn
+    visible: !removeLiquidityDetailsColumn.visible
+    anchors {
+      top: removeLiquidityHeaderColumn.bottom
+      bottom: parent.bottom
+      left: parent.left
+      right: parent.right
+      topMargin: 20
+      bottomMargin: 20
+      leftMargin: 40
+      rightMargin: 40
+    }
+    spacing: 20
+
+    Text {
+      id: removeLiquidityApprovalText
+      width: parent.width
+      anchors.horizontalCenter: parent.horizontalCenter
+      horizontalAlignment: Text.AlignHCenter
+      elide: Text.ElideRight
+      color: "#FFFFFF"
+      font.pixelSize: 14.0
+      text: "You need to approve your Account in order to remove <b>"
+      + removeAsset1Popup.chosenAssetSymbol + "/"
+      + removeAssetPopup2.chosenAssetSymbol + " LP</b> from the pool."
+      + "<br>This operation will have a total gas cost of:<br><b>"
+      + qmlSystem.calculateTransactionCost("0", "180000", qmlSystem.getAutomaticFee())
+      + " AVAX</b>"
+    }
+
+    AVMEButton {
+      id: approveBtn
+      width: parent.width
+      enabled: (+accountHeader.coinRawBalance >=
+        +qmlSystem.calculateTransactionCost("0", "180000", qmlSystem.getAutomaticFee())
+      )
+      anchors.horizontalCenter: parent.horizontalCenter
+      text: (enabled) ? "Approve" : "Not enough funds"
+      onClicked: confirmRemoveApprovalPopup.open()
+    }
+  }
 
   Column {
     id: removeLiquidityDetailsColumn
@@ -172,10 +261,10 @@ AVMEPanel {
       width: parent.width * 0.8
       anchors.left: parent.left
       anchors.margins: 20
-      enabled: (removeAllowance != "" && lowerReserves != "" && higherReserves != "" && liquidity != "")
+      enabled: (allowance != "" && asset1Reserves != "" && asset2Reserves != "" && liquidity != "")
       onMoved: {
         var estimates = qmlSystem.calculateRemoveLiquidityAmount(
-          userLowerReserves, userHigherReserves, value
+          userAsset1Reserves, userAsset2Reserves, value
         )
         removeLowerEstimate = estimates.lower
         removeHigherEstimate = estimates.higher
@@ -199,7 +288,7 @@ AVMEPanel {
 
       AVMEButton {
         id: sliderBtn25
-        enabled: (removeAllowance != "" && lowerReserves != "" && higherReserves != "" && liquidity != "")
+        enabled: (allowance != "" && asset1Reserves != "" && asset2Reserves != "" && liquidity != "")
         width: (parent.parent.width * 0.2)
         text: "25%"
         onClicked: { liquidityLPSlider.value = 25; liquidityLPSlider.moved(); }
@@ -207,7 +296,7 @@ AVMEPanel {
 
       AVMEButton {
         id: sliderBtn50
-        enabled: (removeAllowance != "" && lowerReserves != "" && higherReserves != "" && liquidity != "")
+        enabled: (allowance != "" && asset1Reserves != "" && asset2Reserves != "" && liquidity != "")
         width: (parent.parent.width * 0.2)
         text: "50%"
         onClicked: { liquidityLPSlider.value = 50; liquidityLPSlider.moved(); }
@@ -215,7 +304,7 @@ AVMEPanel {
 
       AVMEButton {
         id: sliderBtn75
-        enabled: (removeAllowance != "" && lowerReserves != "" && higherReserves != "" && liquidity != "")
+        enabled: (allowance != "" && asset1Reserves != "" && asset2Reserves != "" && liquidity != "")
         width: (parent.parent.width * 0.2)
         text: "75%"
         onClicked: { liquidityLPSlider.value = 75; liquidityLPSlider.moved(); }
@@ -223,7 +312,7 @@ AVMEPanel {
 
       AVMEButton {
         id: sliderBtn100
-        enabled: (removeAllowance != "" && lowerReserves != "" && higherReserves != "" && liquidity != "")
+        enabled: (allowance != "" && asset1Reserves != "" && asset2Reserves != "" && liquidity != "")
         width: (parent.parent.width * 0.2)
         text: "100%"
         onClicked: { liquidityLPSlider.value = 100; liquidityLPSlider.moved(); }
@@ -252,14 +341,14 @@ AVMEPanel {
       id: liquidityBtn
       width: parent.width
       anchors.horizontalCenter: parent.horizontalCenter
-      enabled: (removeAllowance != "" && (
-        !qmlSystem.isApproved(removeAsset2Input.text, removeAllowance) ||
+      enabled: (allowance != "" && (
+        !qmlSystem.isApproved(removeAsset2Input.text, allowance) ||
         liquidityLPSlider.value > 0
       ))
       text: {
-        if (removeAllowance == "") {
+        if (allowance == "") {
           text: "Checking approval..."
-        } else if (qmlSystem.isApproved(removeAsset2Input.text, removeAllowance)) {
+        } else if (qmlSystem.isApproved(removeAsset2Input.text, allowance)) {
           text: "Remove from the pool"
         } else {
           text: "Approve"
@@ -285,7 +374,7 @@ AVMEPanel {
             qmlSystem.operationOverride("Add Liquidity", liquidityCoinInput.text, liquidityTokenInput.text, "")
           }
         } else {
-          if (!qmlSystem.isApproved(removeLPEstimate, removeAllowance)) {
+          if (!qmlSystem.isApproved(removeLPEstimate, allowance)) {
             qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
             qmlSystem.operationOverride("Approve Liquidity", "", "", "")
           } else {

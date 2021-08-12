@@ -14,12 +14,15 @@ import "qrc:/qml/components"
 AVMEPanel {
   id: addLiquidityPanel
   title: "Add Liquidity"
-  property string addAllowance
   property string asset1Allowance
   property string asset2Allowance
   property string asset1Reserves
   property string asset2Reserves
+  property bool asset1Approved
+  property bool asset2Approved
   property string pairAddress
+  property alias add1Amount: addAsset1Input.text
+  property alias add2Amount: addAsset2Input.text
 
   QmlApi { id: qmlApi }
 
@@ -37,12 +40,11 @@ AVMEPanel {
         asset2Allowance = qmlApi.parseHex(resp[1].result, ["uint"])
         pairAddress = qmlApi.parseHex(resp[2].result, ["address"])
         // AVAX doesn't need approval, tokens do (and individually)
-        var asset1Approved, asset2Approved
         if (addAsset1Popup.chosenAssetSymbol == "AVAX") {
           asset1Approved = true
         } else {
           var asset1 = accountHeader.tokenList[addAsset1Popup.chosenAssetAddress]
-          asset1Approved = (+allowance >= +qmlSystem.fixedPointToWei(
+          asset1Approved = (+asset1Allowance >= +qmlSystem.fixedPointToWei(
             asset1["rawBalance"], addAsset1Popup.chosenAssetDecimals
           ))
         }
@@ -50,11 +52,10 @@ AVMEPanel {
           asset2Approved = true
         } else {
           var asset2 = accountHeader.tokenList[addAsset2Popup.chosenAssetAddress]
-          asset2Approved = (+allowance >= +qmlSystem.fixedPointToWei(
+          asset2Approved = (+asset2Allowance >= +qmlSystem.fixedPointToWei(
             asset2["rawBalance"], addAsset2Popup.chosenAssetDecimals
           ))
         }
-        addLiquidityDetailsColumn.visible = (asset1Approved && asset2Approved)
         qmlApi.clearAPIRequests()
         qmlApi.buildGetReservesReq(pairAddress)
         qmlApi.doAPIRequests("QmlExchange_refreshReserves")
@@ -324,12 +325,16 @@ AVMEPanel {
       elide: Text.ElideRight
       color: "#FFFFFF"
       font.pixelSize: 14.0
-      // TODO: this, for both assets
-      //text: "You need to approve your Account in order to swap <b>"
-      //+ fromAssetPopup.chosenAssetSymbol + "</b>."
-      //+ "<br>This operation will have a total gas cost of:<br><b>"
-      //+ qmlSystem.calculateTransactionCost("0", "180000", qmlSystem.getAutomaticFee())
-      //+ " AVAX</b>"
+      text: "You need to approve your Account in order to add<br><b>"
+      + (!asset1Approved) ? addAsset1Popup.chosenAssetSymbol : ""
+      + (!asset1Approved && !asset2Approved) ? " and " : ""
+      + (!asset2Approved) ? addAsset2Popup.chosenAssetSymbol : ""
+      + "</b> to the pool."
+      + "<br>This operation will have a total gas cost of:<br><b>"
+      + qmlSystem.calculateTransactionCost("0",
+        (!addAsset1Approved && !addAsset2Approved) ? "320000" : "180000",
+        qmlSystem.getAutomaticFee()
+      ) + " AVAX</b>"
     }
 
     AVMEButton {
@@ -340,12 +345,13 @@ AVMEPanel {
       )
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve" : "Not enough funds"
-      onClicked: confirmAddApprovalPopup.open() // TODO
+      onClicked: confirmAddApprovalPopup.open()
     }
   }
 
   Column {
     id: addLiquidityDetailsColumn
+    enabled: (asset1Approved && asset2Approved)
     anchors {
       top: parent.top
       bottom: parent.bottom
@@ -391,30 +397,18 @@ AVMEPanel {
       onClicked: calculateMaxAddLiquidityAmount()
     }
 
-    // TODO: change asset input for checks for both assets
     AVMEButton {
       id: addLiquidityBtn
       width: parent.width
       anchors.horizontalCenter: parent.horizontalCenter
-      enabled: (addAllowance != "" && (
-        !qmlSystem.isApproved(addAsset2Input.text, addAllowance) ||
-        (addAsset1Input.acceptableInput && addAsset2Input.acceptableInput)
-      ))
-      text: {
-        if (addAllowance == "") {
-          text: "Checking approval..."
-        } else if (qmlSystem.isApproved(addAsset2Input.text, addAllowance)) {
-          text: "Add to the pool"
-        } else {
-          text: "Approve"
-        }
-      }
+      enabled: (addAsset1Input.acceptableInput && addAsset2Input.acceptableInput)
+      text: "Add to the pool"
       /*
       // TODO: this
       onClicked: {
         var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
         if (addToPool) {
-          if (!qmlSystem.isApproved(liquidityTokenInput.text, addAllowance)) {
+          if (!qmlSystem.isApproved(liquidityTokenInput.text, allowance)) {
             qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
             qmlSystem.operationOverride("Approve Exchange", "", "", "")
           } else if (
