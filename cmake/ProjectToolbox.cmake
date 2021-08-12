@@ -16,6 +16,7 @@ ExternalProject_Add(
     DOWNLOAD_NO_PROGRESS 1
     URL https://github.com/edwardstock/toolbox/archive/3.1.2.tar.gz
     URL_HASH SHA256=1eeba3174a09667ad04d4df667b177eb94e2bae7d79f346d3b3e84a317289376
+    PATCH_COMMAND patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/cmake/toolbox_limit.patch
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
                -DCMAKE_POSITION_INDEPENDENT_CODE=${BUILD_SHARED_LIBS}
                -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
@@ -24,6 +25,7 @@ ExternalProject_Add(
                -DCMAKE_SYSTEM_NAME=Generic # https://github.com/commonmark/cmark/pull/300#issuecomment-496286133
                -DENABLE_CONAN=OFF
                ${_only_release_configuration}
+               -DCMAKE_INSTALL_LIBDIR=lib
     LOG_CONFIGURE 1
     BUILD_COMMAND ""
     ${_overwrite_install_command}

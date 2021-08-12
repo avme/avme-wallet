@@ -1,0 +1,132 @@
+diff --git a/src/minter/Bip39Mnemonic.cpp b/src/minter/Bip39Mnemonic.cpp
+index e181631..76ca60b 100644
+--- a/src/minter/Bip39Mnemonic.cpp
++++ b/src/minter/Bip39Mnemonic.cpp
+@@ -13,6 +13,48 @@
+ 
+ #include <openssl/rand.h>
+ 
++std::string glue_1(const std::string& glue, const std::vector<std::string>& strings) {
++    std::string out;
++
++    size_t size = strings.size();
++    size_t i = 0;
++    for (auto& s : strings) {
++        if (i == 0 || i == size) {
++            out.append(s);
++        } else {
++            out.append(glue).append(s);
++        }
++
++	i++;
++    }
++
++    return out;
++}
++
++std::vector<std::string> split_1(const std::string& source, const std::string& delimiter) {
++    if (delimiter.empty()) {
++        return std::vector<std::string>(0);
++    }
++
++    std::string src = source;
++
++    std::vector<std::string> result;
++    size_t current = 0;
++    while (current != src.npos) {
++        current = src.find(delimiter);
++        if (current != src.npos && src.substr(current, delimiter.length()) == delimiter) {
++            result.push_back(src.substr(0, current));
++            src = src.substr(current + (delimiter.length()), src.npos);
++        }
++    }
++    if (src.length() > 0) {
++        result.push_back(src);
++    }
++
++    return result;
++}
++
++
+ std::vector<std::string> bip3x::Bip39Mnemonic::getLanguages() {
+     int sz = bip39_get_languages_size();
+     if (sz <= 0) {
+@@ -72,7 +114,7 @@ bip3x::Bip39Mnemonic::MnemonicResult bip3x::Bip39Mnemonic::encodeBytes(const uin
+         return result;
+     }
+ 
+-    result.words = toolbox::strings::split(output[0], " ");
++    result.words = split_1(output[0], " ");
+     result.len = result.words.size();
+     result.raw = std::string(output[0]);
+ 
+diff --git a/src/minter/HDKeyEncoder.cpp b/src/minter/HDKeyEncoder.cpp
+index a17bed4..b448cd1 100644
+--- a/src/minter/HDKeyEncoder.cpp
++++ b/src/minter/HDKeyEncoder.cpp
+@@ -13,6 +13,47 @@
+ #include <toolbox/data/bytes_data.h>
+ #include <toolbox/strings.hpp>
+ 
++std::string glue_2(const std::string& glue, const std::vector<std::string>& strings) {
++    std::string out;
++
++    size_t size = strings.size();
++    size_t i = 0;
++    for (auto& s : strings) {
++        if (i == 0 || i == size) {
++            out.append(s);
++        } else {
++            out.append(glue).append(s);
++        }
++
++	i++;
++    }
++
++    return out;
++}
++
++std::vector<std::string> split_2(const std::string& source, const std::string& delimiter) {
++    if (delimiter.empty()) {
++        return std::vector<std::string>(0);
++    }
++
++    std::string src = source;
++
++    std::vector<std::string> result;
++    size_t current = 0;
++    while (current != src.npos) {
++        current = src.find(delimiter);
++        if (current != src.npos && src.substr(current, delimiter.length()) == delimiter) {
++            result.push_back(src.substr(0, current));
++            src = src.substr(current + (delimiter.length()), src.npos);
++        }
++    }
++    if (src.length() > 0) {
++        result.push_back(src);
++    }
++
++    return result;
++}
++
+ bip3x::bytes_64 bip3x::HDKeyEncoder::makeBip39Seed(const std::string& mnemonicWords) {
+     size_t n;
+     bytes_64 out;
+@@ -20,7 +61,7 @@ bip3x::bytes_64 bip3x::HDKeyEncoder::makeBip39Seed(const std::string& mnemonicWo
+     return out;
+ }
+ bip3x::bytes_64 bip3x::HDKeyEncoder::makeBip39Seed(const std::vector<std::string>& mnemonicWords) {
+-    return makeBip39Seed(toolbox::strings::glue(" ", mnemonicWords));
++    return makeBip39Seed(glue_2(" ", mnemonicWords));
+ }
+ 
+ bip3x::HDKey bip3x::HDKeyEncoder::makeBip32RootKey(const char* mnemonic, bip3x::BTCNetwork net) {
+@@ -115,7 +156,7 @@ void bip3x::HDKeyEncoder::derive(bip3x::HDKey& key, uint32_t index) {
+ }
+ 
+ void bip3x::HDKeyEncoder::derivePath(HDKey& key, const std::string& path, bool priv) {
+-    std::vector<std::string> pathBits = toolbox::strings::split(path, "/");
++    std::vector<std::string> pathBits = split_2(path, "/");
+     for (const auto& bit : pathBits) {
+         if (bit == "m" || bit == "'") {
+             continue;

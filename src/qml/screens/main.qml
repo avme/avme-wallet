@@ -5,14 +5,19 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 import QtQuick.Window 2.2
 
+import QmlSystem 1.0
+
 import "qrc:/qml/components"
 
 // The main window
 ApplicationWindow {
   id: window
   property bool menuToggle: false
+  property alias menuSize: sideMenu.width
 
-  title: "AVME Wallet " + System.getProjectVersion()
+  QmlSystem { id: qmlSystem }
+
+  title: "AVME Wallet " + qmlSystem.getProjectVersion()
   width: 1280
   height: 720
   minimumWidth: 1280
@@ -20,7 +25,7 @@ ApplicationWindow {
   visible: true
 
   Connections {
-    target: System
+    target: qmlSystem
     function onHideMenu() { menuToggle = false }
     function onGoToOverview() { menuToggle = true }
   }
@@ -32,12 +37,30 @@ ApplicationWindow {
       State {
         name: "menuHide"; when: !menuToggle
         PropertyChanges { target: sideMenu; visible: false }
-        AnchorChanges { target: content; anchors.left: parent.left }
+        PropertyChanges { target: accountHeader; visible: false }
+        AnchorChanges {
+          target: content;
+          anchors {
+            left: parent.left
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
+          }
+        }
       },
       State {
         name: "menuShow"; when: menuToggle
         PropertyChanges { target: sideMenu; visible: true }
-        AnchorChanges { target: content; anchors.left: sideMenu.right }
+        PropertyChanges { target: accountHeader; visible: true }
+        AnchorChanges {
+          target: content;
+          anchors {
+            left: sideMenu.right
+            right: parent.right
+            top: accountHeader.bottom
+            bottom: parent.bottom
+          }
+        }
       }
     ]
   }
@@ -46,7 +69,10 @@ ApplicationWindow {
   Rectangle {
     id: bg
     anchors.fill: parent
-    color: "#252935"
+    gradient: Gradient {
+      GradientStop { position: 0.0; color: "#0F0C18" }
+      GradientStop { position: 1.0; color: "#190B25" }
+    }
 
     Image {
       id: logoBg
@@ -65,9 +91,9 @@ ApplicationWindow {
     }
   }
 
+  // Side menu
   AVMESideMenu {
     id: sideMenu
-    width: 80
     anchors {
       left: parent.left
       top: parent.top
@@ -75,14 +101,22 @@ ApplicationWindow {
     }
   }
 
+  // Account header
+  AVMEAccountHeader {
+    id: accountHeader
+    anchors {
+      top: parent.top
+      left: sideMenu.right
+      right: parent.right
+      margins: 10
+    }
+  }
+
   // Dynamic screen loader (used in setScreen(id, screenpath))
   Loader {
     id: content
-    anchors {
-      right: parent.right
-      top: parent.top
-      bottom: parent.bottom
-    }
+    antialiasing: true
+    smooth: true
     source: "qrc:/qml/screens/StartScreen.qml"
   }
 }

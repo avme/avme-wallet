@@ -28,7 +28,7 @@ Item {
   property string txTotalLPStr
 
   Connections {
-    target: System
+    target: QmlSystem
     function onOperationOverride(op, amountCoin, amountToken, amountLP) {
       changeOperation(op)
       txAmountCoinInput.text = amountCoin
@@ -42,7 +42,7 @@ Item {
       updateTxCost()
       switch (op) {
         case "Swap AVME -> AVAX":
-          txTotalCoinStr = System.calculateTransactionCost(
+          txTotalCoinStr = QmlSystem.calculateTransactionCost(
             "0", txGasLimitInput.text, txGasPriceInput.text
           )
           break;
@@ -51,33 +51,33 @@ Item {
   }
 
   function updateTxCost() {
-    txTotalCoinStr = System.calculateTransactionCost(
+    txTotalCoinStr = QmlSystem.calculateTransactionCost(
       txAmountCoinInput.text, txGasLimitInput.text, txGasPriceInput.text
     )
-    txTotalTokenStr = System.calculateTransactionCost(
+    txTotalTokenStr = QmlSystem.calculateTransactionCost(
       txAmountTokenInput.text, "0", "0"
     )
-    txTotalLPStr = System.calculateTransactionCost(
+    txTotalLPStr = QmlSystem.calculateTransactionCost(
       txAmountLPInput.text, "0", "0"
     )
   }
 
   function checkTransactionFunds() {
-    var acc = System.getAccountBalances(System.getCurrentAccount())
+    var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
     var isFreeLP = (txOperationStr == "Remove Liquidity" || txOperationStr == "Stake LP" || txOperationStr == "Stake Compound LP")
-    var hasCoinFunds = !System.hasInsufficientFunds(
-      "Coin", acc.balanceAVAX, System.calculateTransactionCost(
+    var hasCoinFunds = !QmlSystem.hasInsufficientFunds(
+      "Coin", acc.balanceAVAX, QmlSystem.calculateTransactionCost(
         txTotalCoinStr.text, txGasLimitInput.text, txGasPriceInput.text
       )
     )
-    var hasTokenFunds = !System.hasInsufficientFunds(
+    var hasTokenFunds = !QmlSystem.hasInsufficientFunds(
       "Token", acc.balanceAVME, txTotalTokenStr.text
     )
-    var hasLPFunds = !System.hasInsufficientFunds(
+    var hasLPFunds = !QmlSystem.hasInsufficientFunds(
       "LP", ((isFreeLP) ? acc.balanceLPFree : acc.balanceLPLocked), txTotalLPStr.text
     )
 	
-	var hasCompoundLPFunds = !System.hasInsufficientFunds(
+	var hasCompoundLPFunds = !QmlSystem.hasInsufficientFunds(
       "LP", ((isFreeLP) ? acc.balanceLPFree : acc.balanceLockedCompoundLP), txTotalLPStr.text
     )
     switch (txOperationStr) {
@@ -86,9 +86,9 @@ Item {
       case "Approve Exchange":
       case "Approve Liquidity":
       case "Approve Staking":
-	  case "Approve Compound":
+      case "Approve Compound":
       case "Harvest AVME":
-	  case "Reinvest AVME":
+      case "Reinvest AVME":
       case "Exit Staking":
         return (hasCoinFunds);
         break;
@@ -99,14 +99,13 @@ Item {
         break;
       case "Remove Liquidity":
       case "Stake LP":
-	  case "Stake Compound LP":
-	  case "Stake Compound LP":
+      case "Stake Compound LP":
       case "Unstake LP":
         return (hasCoinFunds && hasLPFunds);
         break;
-	  case "Unstake Compound LP":
-		return (hasCoinFunds && hasCompoundLPFunds);
-		break;
+      case "Unstake Compound LP":
+        return (hasCoinFunds && hasCompoundLPFunds);
+        break;
     }
   }
 
@@ -125,7 +124,7 @@ Item {
     } else {
       txGasLimitInput.text = "250000"
     }
-    txGasPriceInput.text = System.getAutomaticFee()
+    txGasPriceInput.text = QmlSystem.getAutomaticFee()
     updateTxCost()
     switch (op) {
       // AVAX only
@@ -151,7 +150,7 @@ Item {
       // LP only
       case "Remove Liquidity":
       case "Stake LP":
-	  case "Stake Compound LP":
+      case "Stake Compound LP":
       case "Unstake LP":
         txAmountCoinInput.visible = false
         txAmountTokenInput.visible = false
@@ -166,9 +165,9 @@ Item {
       case "Approve Exchange":
       case "Approve Liquidity":
       case "Approve Staking":
-	  case "Approve Compound":
+      case "Approve Compound":
       case "Harvest AVME":
-	  case "Reinvest AVME":
+      case "Reinvest AVME":
       case "Exit Staking":
         txAmountCoinInput.visible = false
         txAmountTokenInput.visible = false
@@ -178,7 +177,7 @@ Item {
   }
 
   Component.onCompleted: {
-    txGasPriceInput.text = System.getAutomaticFee()
+    txGasPriceInput.text = QmlSystem.getAutomaticFee()
     changeOperation("Send AVAX")
     updateTxCost()
   }
@@ -202,11 +201,14 @@ Item {
     Column {
       id: txDetailsColumn
       anchors {
-        top: parent.header.bottom
+        top: parent.top
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        margins: 20
+        topMargin: 80
+        bottomMargin: 20
+        leftMargin: 40
+        rightMargin: 40
       }
       spacing: 40
 
@@ -227,9 +229,7 @@ Item {
             verticalCenter: parent.verticalCenter
           }
           visible: (txOperationStr == "Send AVAX" || txOperationStr == "Send AVME")
-          text: (txOperationStr == "Send AVAX")
-          ? "Switch to " + System.getCurrentToken()
-          : "Switch to " + System.getCurrentCoin()
+          text: "Switch to " + ((txOperationStr == "Send AVAX") ? "AVME" : "AVAX")
           onClicked: {
             if (txOperationStr == "Send AVAX") {
               changeOperation("Send AVME")
@@ -246,7 +246,7 @@ Item {
         width: parent.width
         readOnly: true
         label: "From"
-        text: System.getCurrentAccount()
+        text: QmlSystem.getCurrentAccount()
       }
 
       AVMEInput {
@@ -260,8 +260,8 @@ Item {
       AVMEInput {
         id: txAmountCoinInput
         width: (parent.width * 0.8)
-        validator: RegExpValidator { regExp: System.createCoinRegExp() }
-        label: System.getCurrentCoin() + " Amount"
+        validator: RegExpValidator { regExp: QmlSystem.createTxRegExp(18) }
+        label: "AVAX Amount"
         placeholder: "Fixed point amount (e.g. 0.5)"
         onTextEdited: updateTxCost()
 
@@ -274,7 +274,7 @@ Item {
           }
           text: "Max"
           onClicked: {
-            txAmountCoinInput.text = System.getRealMaxAVAXAmount(
+            txAmountCoinInput.text = QmlSystem.getRealMaxAVAXAmount(
               txGasLimitInput.text, txGasPriceInput.text
             )
             updateTxCost()
@@ -285,8 +285,8 @@ Item {
       AVMEInput {
         id: txAmountTokenInput
         width: (parent.width * 0.8)
-        validator: RegExpValidator { regExp: System.createTokenRegExp() }
-        label: System.getCurrentToken() + " Amount"
+        validator: RegExpValidator { regExp: QmlSystem.createTxRegExp(18) } // TODO: token decimal here
+        label: "Token Amount" // TODO: token name here
         placeholder: "Fixed point amount (e.g. 0.5)"
         onTextEdited: updateTxCost()
 
@@ -299,7 +299,7 @@ Item {
           }
           text: "Max"
           onClicked: {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
+            var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
             txAmountTokenInput.text = acc.balanceAVME
             updateTxCost()
           }
@@ -324,7 +324,7 @@ Item {
           text: "Max"
           onClicked: {
             // "Stake LP" = free LP, "Remove Liquidity" and "Unstake LP" = locked LP
-            var acc = System.getAccountBalances(System.getCurrentAccount())
+            var acc = QmlSystem.getAccountBalances(QmlSystem.getCurrentAccount())
             txAmountLPInput.text = (txOperationStr == "Stake LP")
               ? acc.balanceLPFree : acc.balanceLPLocked
             updateTxCost()
@@ -427,11 +427,14 @@ Item {
     Column {
       id: txSummaryColumn
       anchors {
-        top: parent.header.bottom
+        top: parent.top
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        margins: 20
+        topMargin: 80
+        bottomMargin: 20
+        leftMargin: 40
+        rightMargin: 40
       }
       spacing: 20
 
@@ -481,7 +484,7 @@ Item {
               text: "(give approval to the staking contract to use your"
               + "<br>Account's currencies for staking/harvesting rewards)";
               break;
-			case "Approve Compound":
+            case "Approve Compound":
               text: "(give approval to the compound contract to use your"
               + "<br>Account's currencies for staking/harvesting rewards)";
               break;
@@ -490,19 +493,19 @@ Item {
               text: "via Pangolin";
               break;
             case "Add Liquidity":
-              text: "to the " + System.getCurrentCoin() + "/" + System.getCurrentToken() + " pool";
+              text: "to the AVAX/" + "Token" + " pool";  // TODO: token name here
               break;
             case "Remove Liquidity":
-              text: "from the " + System.getCurrentCoin() + "/" + System.getCurrentToken() + " pool";
+              text: "from the AVAX/" + "Token" + " pool"; // TODO: token name here
               break;
             case "Stake LP":
               text: "in the staking contract";
               break;
-			case "Stake Compound LP":
-			  text: "in the compound staking contract";
-			  break;
+            case "Stake Compound LP":
+              text: "in the compound staking contract";
+              break;
             case "Unstake LP":
-			case "Unstake Compound LP":
+            case "Unstake Compound LP":
             case "Harvest AVME":
               text: "from the staking contract";
               break;
@@ -539,56 +542,56 @@ Item {
           switch (txOperationStr) {
             case "Send AVAX":
             case "Swap AVAX -> AVME":
-              text: txAmountCoinInput.text + " " + System.getCurrentCoin()
-              + "<br>Gas Limit: " + System.weiToFixedPoint(txGasLimitInput.text, 18)
-              + " " + System.getCurrentCoin()
-              + "<br>Gas Price: " + System.weiToFixedPoint(txGasPriceInput.text, 9)
-              + " " + System.getCurrentCoin();
+              text: txAmountCoinInput.text + " AVAX"
+              + "<br>Gas Limit: "
+              + QmlSystem.weiToFixedPoint(txGasLimitInput.text, 18) + " AVAX"
+              + "<br>Gas Price: "
+              + QmlSystem.weiToFixedPoint(txGasPriceInput.text, 9) + " AVAX";
               break;
             case "Send AVME":
             case "Swap AVME -> AVAX":
-              text: txAmountTokenInput.text + " " + System.getCurrentToken()
-              + "<br>Gas Limit: " + System.weiToFixedPoint(txGasLimitInput.text, 18)
-              + " " + System.getCurrentCoin()
-              + "<br>Gas Price: " + System.weiToFixedPoint(txGasPriceInput.text, 9)
-              + " " + System.getCurrentCoin();
+              text: txAmountTokenInput.text + " " + "Token" // TODO: token name here
+              + "<br>Gas Limit: "
+              + QmlSystem.weiToFixedPoint(txGasLimitInput.text, 18) + " AVAX"
+              + "<br>Gas Price: "
+              + QmlSystem.weiToFixedPoint(txGasPriceInput.text, 9) + " AVAX";
               break;
             case "Approve Exchange":
             case "Approve Liquidity":
             case "Approve Staking":
-			case "Approve Compound":
+            case "Approve Compound":
             case "Harvest AVME":
-			case "Reinvest AVME":
+            case "Reinvest AVME":
             case "Exit Staking":
-              text: "Gas Limit: " + System.weiToFixedPoint(txGasLimitInput.text, 18)
-              + " " + System.getCurrentCoin()
-              + "<br>Gas Price: " + System.weiToFixedPoint(txGasPriceInput.text, 9)
-              + " " + System.getCurrentCoin();
+              text: "Gas Limit: "
+              + QmlSystem.weiToFixedPoint(txGasLimitInput.text, 18) + " AVAX"
+              + "<br>Gas Price: "
+              + QmlSystem.weiToFixedPoint(txGasPriceInput.text, 9) + " AVAX";
               break;
             case "Add Liquidity":
-              text: txAmountCoinInput.text + " " + System.getCurrentCoin()
-              + "<br>" + txAmountTokenInput.text + " " + System.getCurrentToken()
-              + "<br>Gas Limit: " + System.weiToFixedPoint(txGasLimitInput.text, 18)
-              + " " + System.getCurrentCoin()
-              + "<br>Gas Price: " + System.weiToFixedPoint(txGasPriceInput.text, 9)
-              + " " + System.getCurrentCoin();
+              text: txAmountCoinInput.text + " AVAX"
+              + "<br>" + txAmountTokenInput.text + " " + "Token" // TODO: token name here
+              + "<br>Gas Limit: "
+              + QmlSystem.weiToFixedPoint(txGasLimitInput.text, 18) + " AVAX"
+              + "<br>Gas Price: "
+              + QmlSystem.weiToFixedPoint(txGasPriceInput.text, 9) + " AVAX";
               break;
             case "Remove Liquidity":
             case "Stake LP":
-			case "Stake Compound LP":
+            case "Stake Compound LP":
             case "Unstake LP":
               text: txAmountLPInput.text + " LP"
-              + "<br>Gas Limit: " + System.weiToFixedPoint(txGasLimitInput.text, 18)
-              + " " + System.getCurrentCoin()
-              + "<br>Gas Price: " + System.weiToFixedPoint(txGasPriceInput.text, 9)
-              + " " + System.getCurrentCoin();
+              + "<br>Gas Limit: "
+              + QmlSystem.weiToFixedPoint(txGasLimitInput.text, 18) + " AVAX"
+              + "<br>Gas Price: "
+              + QmlSystem.weiToFixedPoint(txGasPriceInput.text, 9) + " AVAX";
               break;
-			case "Unstake Compound LP":
+            case "Unstake Compound LP":
               text: txAmountLPInput.text + " LP"
-              + "<br>Gas Limit: " + System.weiToFixedPoint(txGasLimitInput.text, 18)
-              + " " + System.getCurrentCoin()
-              + "<br>Gas Price: " + System.weiToFixedPoint(txGasPriceInput.text, 9)
-              + " " + System.getCurrentCoin();
+              + "<br>Gas Limit: "
+              + QmlSystem.weiToFixedPoint(txGasLimitInput.text, 18) + " AVAX"
+              + "<br>Gas Price: "
+              + QmlSystem.weiToFixedPoint(txGasPriceInput.text, 9) + " AVAX";
               break;
           }
         }
@@ -618,28 +621,25 @@ Item {
             case "Approve Exchange":
             case "Approve Liquidity":
             case "Approve Staking":
-			case "Approve Compound":
+            case "Approve Compound":
             case "Swap AVAX -> AVME":
             case "Harvest AVME":
-			case "Reinvest AVME":
+            case "Reinvest AVME":
             case "Exit Staking":
-              text: txTotalCoinStr + " " + System.getCurrentCoin();
+              text: txTotalCoinStr + " AVAX";
               break;
             case "Send AVME":
             case "Swap AVME -> AVAX":
             case "Add Liquidity":
-              text: txTotalCoinStr + " " + System.getCurrentCoin()
-              + "<br>" + txTotalTokenStr + " " + System.getCurrentToken();
+              text: txTotalCoinStr + " AVAX"
+              + "<br>" + txTotalTokenStr + " " + "Token"; // TODO: token name here
               break;
             case "Remove Liquidity":
             case "Stake LP":
-			case "Stake Compound LP":
+            case "Stake Compound LP":
             case "Unstake LP":
-              text: txTotalCoinStr + " " + System.getCurrentCoin()
-              + "<br>" + txTotalLPStr + " LP";
             case "Unstake Compound LP":
-              text: txTotalCoinStr + " " + System.getCurrentCoin()
-              + "<br>" + txTotalLPStr + " LP";
+              text: txTotalCoinStr + " AVAX" + "<br>" + txTotalLPStr + " LP";
               break;
           }
         }
@@ -652,12 +652,12 @@ Item {
         text: "Make Transaction"
         Timer { id: ledgerRetryTimer; interval: 250; onTriggered: btnMakeTx.checkLedger() }
         function checkLedger() {
-          var data = System.checkForLedger()
+          var data = QmlSystem.checkForLedger()
           if (data.state) {
             ledgerFailPopup.close()
             ledgerRetryTimer.stop()
             txProgressPopup.open()
-            System.txStart(
+            QmlSystem.txStart(
               txOperationStr, txToInput.text,
               txAmountCoinInput.text, txAmountTokenInput.text, txAmountLPInput.text,
               txGasLimitInput.text, txGasPriceInput.text, ""
@@ -676,7 +676,7 @@ Item {
               incorrectInputPopup.open()
             } else {
               confirmTxPopup.isSameAddress = (txFromInput.text === txToInput.text)
-              if (System.isLedger()) {
+              if (QmlSystem.getLedgerFlag()) {
                 checkLedger()
               } else {
                 confirmTxPopup.open()
@@ -692,12 +692,12 @@ Item {
   AVMEPopupConfirmTx {
     id: confirmTxPopup
     function confirmPass() {
-      if (!System.checkWalletPass(pass)) {
+      if (!QmlSystem.checkWalletPass(pass)) {
         timer.start()
       } else {
         confirmTxPopup.close()
         txProgressPopup.open()
-        System.txStart(
+        QmlSystem.txStart(
           txOperationStr, txToInput.text,
           txAmountCoinInput.text, txAmountTokenInput.text, txAmountLPInput.text,
           txGasLimitInput.text, txGasPriceInput.text, pass

@@ -11,14 +11,10 @@ import "qrc:/qml/components"
 Item {
   id: aboutScreen
 
-  AVMEAccountHeader {
-    id: accountHeader
-  }
-
   AVMEPanel {
     id: aboutPanel
     anchors {
-      top: accountHeader.bottom
+      top: parent.top
       bottom: parent.bottom
       left: parent.left
       right: parent.right
@@ -27,23 +23,8 @@ Item {
     title: "About the Program"
 
     Column {
-      anchors {
-        top: parent.header.bottom
-        bottom: parent.bottom
-        left: parent.left
-        right: parent.right
-        margins: 20
-      }
-      spacing: 20
-
-      Text {
-        id: header
-        anchors.horizontalCenter: parent.horizontalCenter
-        font.pixelSize: 32.0
-        color: "#FFFFFF"
-        horizontalAlignment: Text.AlignHCenter
-        text: "AVME Wallet " + System.getProjectVersion()
-      }
+      anchors.centerIn: parent
+      spacing: 40
 
       Image {
         id: logo
@@ -56,15 +37,25 @@ Item {
       }
 
       Text {
+        id: header
+        anchors.horizontalCenter: parent.horizontalCenter
+        font.pixelSize: 18.0
+        color: "#FFFFFF"
+        horizontalAlignment: Text.AlignHCenter
+        font.bold: true
+        text: "AVME WALLET " + qmlSystem.getProjectVersion()
+      }
+
+      Text {
         id: aboutText
         anchors.horizontalCenter: parent.horizontalCenter
         color: "#FFFFFF"
         font.pixelSize: 18.0
         horizontalAlignment: Text.AlignHCenter
         textFormat: Text.RichText
-        text: "Copyright (c) 2020-2021 AVME Developers<br>
-        Distributed under the MIT/X11 software license,<br>
-        see the accompanying file LICENSE or<br>
+        text: "COPYRIGHT © 2020-2021 AVME DEVELOPERS<br>
+        DISTRIBUTED UNDER THE MIT/X11 SOFTWARE LICENSE<br>
+        SEE THE ACCOMPANYING LICENSE FILE OR<br>
         <a style=\"text-decoration-color: #368097\" href=\"http://www.opensource.org/licenses/mit-license.php\">
         http://www.opensource.org/licenses/mit-license.php</a>."
         onLinkActivated: Qt.openUrlExternally(link)
@@ -74,7 +65,7 @@ Item {
         id: btnAboutQt
         anchors.horizontalCenter: parent.horizontalCenter
         text: "About Qt"
-        onClicked: System.openQtAbout()
+        onClicked: qmlSystem.openQtAbout()
       }
     }
   }

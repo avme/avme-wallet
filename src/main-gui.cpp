@@ -2,7 +2,6 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "main-gui.h"
-#include <hidapi/hidapi.h>
 
 // Implementation of AVME Wallet as a GUI (Qt) program.
 
@@ -16,24 +15,26 @@ int main(int argc, char *argv[]) {
     qputenv("QT_SCALE_FACTOR", QByteArray::number(scaleFactor));
   #endif
 
-  // Create the actual application and register our custom class into it
+  // Create the actual application and register our custom classes into it
   QApplication app(argc, argv);
   QQmlApplicationEngine engine;
-  System sys;
-  engine.rootContext()->setContextProperty("System", &sys);
+  qmlRegisterType<QmlSystem>("QmlSystem", 1, 0, "QmlSystem");
+  qmlRegisterType<QmlApi>("QmlApi", 1, 0, "QmlApi");
 
   // Set the app's text font and icon
-  QFontDatabase::addApplicationFont(":/fonts/RobotoMono-Bold.ttf");
-  QFontDatabase::addApplicationFont(":/fonts/RobotoMono-Italic.ttf");
-  QFontDatabase::addApplicationFont(":/fonts/RobotoMono-Regular.ttf");
-  QFont font("Roboto Mono");
+  QFontDatabase::addApplicationFont(":/fonts/IBMPlexMono-Bold.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/IBMPlexMono-Italic.ttf");
+  QFontDatabase::addApplicationFont(":/fonts/IBMPlexMono-Regular.ttf");
+  QFont font("IBM Plex Mono");
   font.setStyleHint(QFont::Monospace);
   QApplication::setFont(font);
   app.setWindowIcon(QIcon(":/img/avme_logo.png"));
 
-  // Load the main screen and start the app
+  // Load the main screen, link the required signals/slots and start the app
   engine.load(QUrl(QStringLiteral("qrc:/qml/screens/main.qml")));
   if (engine.rootObjects().isEmpty()) return -1;
+  QmlSystem qmlsystem;
+  QObject::connect(&app, SIGNAL(aboutToQuit()), &qmlsystem, SLOT(cleanAndClose()));
   return app.exec();
 }
 

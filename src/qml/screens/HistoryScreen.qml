@@ -7,12 +7,13 @@ import QtQuick.Controls 2.2
 import "qrc:/qml/components"
 
 // Screen for showing the transaction history for the Account
+// TODO: maybe separate the panels here too?
 Item {
   id: historyScreen
   property bool sortByNew: true
 
   Connections {
-    target: System
+    target: qmlSystem
     function onHistoryLoaded(data) {
       if (data != null) {
         if (sortByNew) {
@@ -40,13 +41,8 @@ Item {
     historyModel.clear()
     infoText.text = "Loading transactions..."
     infoText.visible = true
-	var acc = System.getCurrentAccount()
-	System.updateTransactionStatus()
-    System.listAccountTransactions(System.getCurrentAccount())
-  }
-
-  AVMEAccountHeader {
-    id: accountHeader
+    qmlSystem.updateTransactionStatus()
+    qmlSystem.listAccountTransactions(qmlSystem.getCurrentAccount())
   }
 
   // Transaction list
@@ -54,7 +50,7 @@ Item {
     id: listBtnRow
     width: (parent.width * 0.4) - (anchors.margins * 2)
     anchors {
-      top: accountHeader.bottom
+      top: parent.top
       left: parent.left
       margins: 10
     }
@@ -103,7 +99,7 @@ Item {
     id: historyPanel
     width: (parent.width * 0.6) - (anchors.margins * 2)
     anchors {
-      top: accountHeader.bottom
+      top: parent.top
       bottom: parent.bottom
       right: parent.right
       margins: 10
@@ -113,11 +109,14 @@ Item {
     Column {
       id: historyColumn
       anchors {
-        top: parent.header.bottom
+        top: parent.top
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        margins: 20
+        topMargin: 80
+        bottomMargin: 20
+        leftMargin: 40
+        rightMargin: 40
       }
       spacing: 20
 

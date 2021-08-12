@@ -6,12 +6,14 @@ import QtQuick.Controls 2.2
 import Qt.labs.platform 1.0
 
 import "qrc:/qml/components"
+import "qrc:/qml/popups"
 
 // Screen for staking tokens with a given Account
 Item {
   id: stakingScreen
   property bool isStaking: true
   property bool isExiting: false
+  property bool isClassic: true
   property bool isyyCompound: true
   property string allowance
   property string reward
@@ -28,19 +30,17 @@ Item {
   property string userCompoundHigherReserves
   property string userLPSharePercentage
   property string removeLPEstimate
-  
-  property bool isClassic: true
 
   Connections {
-    target: System
+    target: qmlSystem
     function onAllowancesUpdated(
       exchangeAllowance, liquidityAllowance, stakingAllowance, compoundAllowance
     ) {
       allowance = stakingAllowance
-	  compoundallowance = compoundAllowance
+      compoundallowance = compoundAllowance
     }
     function onRewardUpdated(poolReward) { reward = poolReward }
-	function onCompoundUpdated(reinvestReward) { reinvestreward = reinvestReward }
+    function onCompoundUpdated(reinvestReward) { reinvestreward = reinvestReward }
     function onLiquidityDataUpdated(
       lowerTokenName, lowerTokenReserves, higherTokenName, higherTokenReserves, totalLiquidity
     ) {
@@ -49,11 +49,11 @@ Item {
       higherToken = higherTokenName
       higherReserves = higherTokenReserves
       liquidity = totalLiquidity
-	  var acc = System.getAccountBalances(System.getCurrentAccount())
-      var userClassicShares = System.calculatePoolSharesForTokenValue(
+      var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
+      var userClassicShares = qmlSystem.calculatePoolSharesForTokenValue(
         lowerReserves, higherReserves, liquidity, acc.balanceLPLocked
       )
-      var userCompoundShares = System.calculatePoolSharesForTokenValue(
+      var userCompoundShares = qmlSystem.calculatePoolSharesForTokenValue(
         lowerReserves, higherReserves, liquidity, acc.balanceLockedCompoundLP
       )
       userClassicLowerReserves = userClassicShares.lower
@@ -67,77 +67,83 @@ Item {
     id: reloadRewardTimer
     interval: 1000
     repeat: true
-    onTriggered: System.getPoolReward()
+    onTriggered: qmlSystem.getPoolReward()
   }
-  
+
   Timer {
     id: reloadCompoundTimer
     interval: 1000
     repeat: true
-    onTriggered: System.getCompoundReward()
+    onTriggered: qmlSystem.getCompoundReward()
   }
-  
+
   Timer {
     id: reloadLiquidityDataTimer
     interval: 5000
     repeat: true
-    onTriggered: {
-      System.updateLiquidityData(System.getCurrentCoin(), System.getCurrentToken())
-	}
+    onTriggered: qmlSystem.updateLiquidityData("AVAX", "AVME")
   }
 
   Component.onCompleted: {
-    System.getAllowances()
+    // TODO: get staking/compound allowances
+    /*
+    std::string stakingAllowance = Pangolin::allowance(
+      Pangolin::contracts["AVAX-AVME"],
+      this->w.getCurrentAccount().first,
+      Pangolin::contracts["staking"]
+    );
+    std::string compoundAllowance = Pangolin::allowance(
+      Pangolin::contracts["AVAX-AVME"],
+      this->w.getCurrentAccount().first,
+      Pangolin::contracts["compound"]
+    );
+    */
     reloadRewardTimer.start()
-	reloadCompoundTimer.start()
-	reloadLiquidityDataTimer.start()
-  }
-
-  AVMEAccountHeader {
-    id: accountHeader
+    reloadCompoundTimer.start()
+    reloadLiquidityDataTimer.start()
   }
 
   // Panel for selecting Classic x Compound
-    AVMEPanel {
-	  id: stakingSelectPanel
-	  color: "#1D212A"
-	  anchors {
-	  	top: accountHeader.bottom
-	  	left: parent.left
-	  	margins: 10
-	  }
-	  width: (parent.width - (anchors.margins * 2))
-	  height: (parent.height * 0.075)
-	  title: ""
-	  AVMEButton {
-        id: btnSwitchClassic
-        width: parent.width * 0.25
-		anchors.horizontalCenterOffset: -(parent.width / 4)
-        anchors.horizontalCenter: parent.horizontalCenter
-		anchors.verticalCenter: parent.verticalCenter
-        text: "Classic"
-        onClicked: {
-          isClassic = true
-        }
+  AVMEPanel {
+    id: stakingSelectPanel
+    width: (parent.width - (anchors.margins * 2))
+    height: (parent.height * 0.075)
+    title: ""
+    anchors {
+      top: parent.top
+      horizontalCenter: parent.horizontalCenter
+      margins: 10
+    }
+
+    AVMEButton {
+      id: btnSwitchClassic
+      width: parent.width * 0.25
+      anchors {
+        horizontalCenter: parent.horizontalCenter
+        verticalCenter: parent.verticalCenter
+        horizontalCenterOffset: -(parent.width / 4)
       }
-	  AVMEButton {
-        id: btnSwitchYYCompound
-        width: parent.width * 0.25
-		anchors.horizontalCenterOffset: parent.width / 4
-        anchors.horizontalCenter: parent.horizontalCenter
-		anchors.verticalCenter: parent.verticalCenter
-        text: "YieldYak Compound"
-        onClicked: {
-          isClassic = false
-        }
+      text: "Classic"
+      onClicked: isClassic = true
+    }
+    AVMEButton {
+      id: btnSwitchYYCompound
+      width: parent.width * 0.25
+      anchors {
+        horizontalCenter: parent.horizontalCenter
+        verticalCenter: parent.verticalCenter
+        horizontalCenterOffset: parent.width / 4
       }
-	}
-  
+      text: "YieldYak Compound"
+      onClicked: isClassic = false
+    }
+  }
+
   // Panel for staking/unstaking LP
   AVMEPanel {
     id: stakingPanel
-    width: (parent.width * 0.5) - (anchors.margins * 2)
-	visible: isClassic
+    width: (parent.width * 0.5) - (anchors.margins / 2)
+    visible: isClassic
     anchors {
       top: stakingSelectPanel.bottom
       left: parent.left
@@ -149,43 +155,51 @@ Item {
     Column {
       id: stakingDetailsColumn
       anchors {
-        top: parent.header.bottom
+        top: parent.top
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        margins: 20
+        topMargin: 80
+        bottomMargin: 20
+        leftMargin: 40
+        rightMargin: 40
       }
       spacing: 30
 
-      Text {
-        id: stakeTitle
+      Row {
         anchors.horizontalCenter: parent.horizontalCenter
-        color: "#FFFFFF"
-        font.bold: true
-        font.pixelSize: 24.0
-        text: (isStaking) ? "Stake LP" : "Unstake LP"
+        spacing: 20
+
+        Text {
+          id: stakeTitle
+          anchors.verticalCenter: parent.verticalCenter
+          color: "#FFFFFF"
+          font.pixelSize: 14.0
+          text: "You will <b>" + ((isStaking) ? "stake" : "unstake") + " AVAX/AVME LP</b>"
+        }
+        AVMEButton {
+          id: btnSwitchOrder
+          width: 200
+          anchors.verticalCenter: parent.verticalCenter
+          text: "Switch to " + ((isStaking) ? "Unstake" : "Stake")
+          onClicked: {
+            isStaking = !isStaking
+            stakeInput.text = ""
+          }
+        }
       }
 
       Image {
         id: stakeLogo
-        width: 64
-        height: 64
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.margins: 20
+        height: 48
+        antialiasing: true
+        smooth: true
+        fillMode: Image.PreserveAspectFit
         source: "qrc:/img/pangolin.png"
       }
 
-      AVMEButton {
-        id: btnSwitchOrder
-        width: parent.width * 0.5
-        anchors.horizontalCenter: parent.horizontalCenter
-        text: "Switch to " + ((isStaking) ? "Unstake" : "Stake")
-        onClicked: {
-          isStaking = !isStaking
-          stakeInput.text = ""
-        }
-      }
-
+      // TODO: fix balances to fix this
       Text {
         id: stakeBalance
         anchors.horizontalCenter: parent.horizontalCenter
@@ -193,7 +207,7 @@ Item {
         color: "#FFFFFF"
         font.pixelSize: 18.0
         text: {
-          var acc = System.getAccountBalances(System.getCurrentAccount())
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
           text: (isStaking)
           ? "Free (unstaked) LP:<br><b>" + acc.balanceLPFree + "</b>"
           : "Locked (staked) LP:<br><b>" + acc.balanceLPLocked + "</b>"
@@ -202,106 +216,97 @@ Item {
 
       AVMEInput {
         id: stakeInput
-        width: parent.width * 0.75
-        anchors.horizontalCenter: parent.horizontalCenter
+        width: (parent.width * 0.8)
+        anchors.left: parent.left
         enabled: (allowance != "")
         validator: RegExpValidator { regExp: /[0-9]{1,}(?:\.[0-9]{1,18})?/ }
         label: "Amount of LP to " + ((isStaking) ? "stake" : "unstake")
         placeholder: "Fixed point amount (e.g. 0.5)"
-      }
-
-      Row {
-        anchors.horizontalCenter: parent.horizontalCenter
-        spacing: 10
 
         AVMEButton {
           id: btnMaxAmount
-          width: (stakingDetailsColumn.width * 0.5) - parent.spacing
-          enabled: (allowance != "")
-          text: "Max Amount"
+          width: (parent.parent.width * 0.2) - anchors.leftMargin
+          anchors {
+            left: parent.right
+            leftMargin: 10
+          }
+          text: "Max"
           onClicked: {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
+            var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
             stakeInput.text = (isStaking) ? acc.balanceLPFree : acc.balanceLPLocked
           }
         }
+      }
 
-        AVMEButton {
-          id: btnStake
-          width: (stakingDetailsColumn.width * 0.5) - parent.spacing
-          enabled: {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
-            enabled: allowance != "" && (
-              !System.isApproved(acc.balanceLPFree, allowance) || stakeInput.acceptableInput
-            )
+      Text {
+        id: classicLPReturnsText
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        text: "Locked LP Estimates:"
+          + "<br><b>" + qmlSystem.weiToFixedPoint(
+            (("AVAX" == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves), 18
+          ) + " AVAX"
+          + "<br>" + qmlSystem.weiToFixedPoint(
+            (("AVME" == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves), 18
+          ) + " AVME" + "</b>"
+      }
+
+      AVMEButton {
+        id: btnStake
+        width: parent.width
+        enabled: {
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
+          enabled: allowance != "" && (
+            !qmlSystem.isApproved(acc.balanceLPFree, allowance) || stakeInput.acceptableInput
+          )
+        }
+        text: {
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
+          if (allowance == "") {
+            text: "Checking approval..."
+          } else if (isStaking && qmlSystem.isApproved(acc.balanceLPFree, allowance)) {
+            text: "Stake"
+          } else if (!isStaking && qmlSystem.isApproved(acc.balanceLPLocked, allowance)) {
+            text: "Unstake"
+          } else {
+            text: "Approve"
           }
-          text: {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
-            if (allowance == "") {
-              text: "Checking approval..."
-            } else if (isStaking && System.isApproved(acc.balanceLPFree, allowance)) {
-              text: "Stake"
-            } else if (!isStaking && System.isApproved(acc.balanceLPLocked, allowance)) {
-              text: "Unstake"
+        }
+        /*
+        // TODO: this
+        onClicked: {
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
+          if (!qmlSystem.isApproved(acc.balanceLPFree, allowance)) {
+            qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+            qmlSystem.operationOverride("Approve Staking", "", "", "")
+          } else if (isStaking) {
+            if (qmlSystem.hasInsufficientFunds("LP", acc.balanceLPFree, stakeInput.text)) {
+              fundsPopup.open()
             } else {
-              text: "Approve"
+              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              qmlSystem.operationOverride("Stake LP", "", "", stakeInput.text)
             }
-          }
-          onClicked: {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
-            if (!System.isApproved(acc.balanceLPFree, allowance)) {
-              System.setScreen(content, "qml/screens/TransactionScreen.qml")
-              System.operationOverride("Approve Staking", "", "", "")
-            } else if (isStaking) {
-              if (System.hasInsufficientFunds("LP", acc.balanceLPFree, stakeInput.text)) {
-                fundsPopup.open()
-              } else {
-                System.setScreen(content, "qml/screens/TransactionScreen.qml")
-                System.operationOverride("Stake LP", "", "", stakeInput.text)
-              }
+          } else {
+            if (qmlSystem.hasInsufficientFunds("LP", acc.balanceLPLocked, stakeInput.text)) {
+              fundsPopup.open()
             } else {
-              if (System.hasInsufficientFunds("LP", acc.balanceLPLocked, stakeInput.text)) {
-                fundsPopup.open()
-              } else {
-                System.setScreen(content, "qml/screens/TransactionScreen.qml")
-                System.operationOverride("Unstake LP", "", "", stakeInput.text)
-              }
+              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              qmlSystem.operationOverride("Unstake LP", "", "", stakeInput.text)
             }
           }
         }
+        */
       }
-	  Rectangle {
-	    id: classicLPReturns
-	    anchors.horizontalCenter: parent.horizontalCenter
-		width: parent.width
-		color: "#3e4653"
-		radius: 10
-	    Text {
-		  id: classicLPReturnsText
-          anchors.left: parent.left
-          anchors.leftMargin: 10
-		  width: parent.width
-		  verticalAlignment: Text.AlignVCenter
-          color: "#FFFFFF"
-		  text: "Locked LP Estimates:"
-          + "<br><b>" + System.weiToFixedPoint(
-            ((System.getCurrentCoin() == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves),
-            System.getCurrentCoinDecimals()
-          ) + " " + System.getCurrentCoin()
-          + "<br>" + System.weiToFixedPoint(
-            ((System.getCurrentToken() == lowerToken) ? userClassicLowerReserves : userClassicHigherReserves),
-            System.getCurrentTokenDecimals()
-          ) + " " + System.getCurrentToken() + "</b>"
-	    }
-		height: classicLPReturnsText.height
-	  }
     }
   }
 
   // Panel for harvesting/exiting
   AVMEPanel {
     id: harvestPanel
-	visible: isClassic
-    width: (parent.width * 0.5) - (anchors.margins * 2)
+    visible: isClassic
+    width: (parent.width * 0.5) - (anchors.margins / 2)
     anchors {
       top: stakingSelectPanel.bottom
       right: parent.right
@@ -313,11 +318,14 @@ Item {
     Column {
       id: harvestDetailsColumn
       anchors {
-        top: parent.header.bottom
+        top: parent.top
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        margins: 20
+        topMargin: 80
+        bottomMargin: 20
+        leftMargin: 40
+        rightMargin: 40
       }
       spacing: 30
 
@@ -325,16 +333,17 @@ Item {
         id: harvestTitle
         anchors.horizontalCenter: parent.horizontalCenter
         color: "#FFFFFF"
-        font.bold: true
-        font.pixelSize: 24.0
-        text: "Harvest AVME"
+        font.pixelSize: 14.0
+        text: "You will <b>harvest AVME</b> rewards"
       }
 
       Image {
         id: harvestTokenLogo
-        width: 64
-        height: 64
         anchors.horizontalCenter: parent.horizontalCenter
+        height: 48
+        antialiasing: true
+        smooth: true
+        fillMode: Image.PreserveAspectFit
         source: "qrc:/img/avme_logo.png"
       }
 
@@ -343,41 +352,37 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
-        font.pixelSize: 18.0
-        text: "Unharvested " + System.getCurrentToken() + ":<br><b>" + reward + "</b>"
+        font.pixelSize: 14.0
+        text: "Unharvested rewards:<br><b>" + reward + " AVME</b>"
       }
 
       AVMEButton {
         id: btnExitStake
-        width: (parent.width * 0.75)
+        width: parent.width
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: {
-          var acc = System.getAccountBalances(System.getCurrentAccount())
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
           enabled: (
-            reward != "" && !System.balanceIsZero(reward, System.getCurrentTokenDecimals()) &&
-            !System.balanceIsZero(acc.balanceLPLocked, 18)
+            reward != "" && !qmlSystem.balanceIsZero(reward, 18) &&
+            !qmlSystem.balanceIsZero(acc.balanceLPLocked, 18)
           )
         }
-        text: (reward != "")
-        ? "Harvest " + System.getCurrentToken() + " & Unstake LP"
-        : "Querying reward..."
+        text: (reward != "") ? "Harvest AVME & Unstake LP" : "Querying reward..."
         onClicked: {
-          System.setScreen(content, "qml/screens/TransactionScreen.qml")
-          System.operationOverride("Exit Staking", "", "", "")
+          qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+          qmlSystem.operationOverride("Exit Staking", "", "", "")
         }
       }
 
       AVMEButton {
         id: btnHarvest
-        width: (parent.width * 0.75)
+        width: parent.width
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (reward != "" && !System.balanceIsZero(reward, System.getCurrentTokenDecimals()))
-        text: (reward != "")
-        ? "Harvest " + System.getCurrentToken()
-        : "Querying reward..."
+        enabled: (reward != "" && !qmlSystem.balanceIsZero(reward, 18))
+        text: (reward != "") ? "Harvest AVME" : "Querying reward..."
         onClicked: {
-          System.setScreen(content, "qml/screens/TransactionScreen.qml")
-          System.operationOverride("Harvest AVME", "", "", "")
+          qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+          qmlSystem.operationOverride("Harvest AVME", "", "", "")
         }
       }
     }
@@ -387,7 +392,7 @@ Item {
   AVMEPanel {
     id: yyCompoundPanel
     width: (parent.width * 0.5) - (anchors.margins * 2)
-	visible: !isClassic
+    visible: !isClassic
     anchors {
       top: stakingSelectPanel.bottom
       left: parent.left
@@ -399,41 +404,48 @@ Item {
     Column {
       id: yyCompoundDetailsColumn
       anchors {
-        top: parent.header.bottom
+        top: parent.top
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        margins: 20
+        topMargin: 80
+        bottomMargin: 20
+        leftMargin: 40
+        rightMargin: 40
       }
       spacing: 30
 
-      Text {
-        id: compoundTitle
+      Row {
         anchors.horizontalCenter: parent.horizontalCenter
-        color: "#FFFFFF"
-        font.bold: true
-        font.pixelSize: 24.0
-        text: (isyyCompound) ? "Stake LP" : "Unstake LP"
+        spacing: 20
+
+        Text {
+          id: compoundTitle
+          anchors.verticalCenter: parent.verticalCenter
+          color: "#FFFFFF"
+          font.pixelSize: 14.0
+          text: "You will <b>" + ((isyyCompound) ? "stake" : "unstake") + " AVAX/AVME LP</b>"
+        }
+        AVMEButton {
+          id: btnSwitchCompoundOrder
+          width: 200
+          anchors.verticalCenter: parent.verticalCenter
+          text: "Switch to " + ((isyyCompound) ? "Unstake" : "Stake")
+          onClicked: {
+            isyyCompound = !isyyCompound
+            compoundInput.text = ""
+          }
+        }
       }
 
       Image {
         id: compoundLogo
-        width: 64
-        height: 64
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.margins: 20
+        height: 48
+        antialiasing: true
+        smooth: true
+        fillMode: Image.PreserveAspectFit
         source: "qrc:/img/pangolin.png"
-      }
-
-      AVMEButton {
-        id: btnSwitchCompoundOrder
-        width: parent.width * 0.5
-        anchors.horizontalCenter: parent.horizontalCenter
-        text: "Switch to " + ((isyyCompound) ? "Unstake" : "Stake")
-        onClicked: {
-          isyyCompound = !isyyCompound
-          compoundInput.text = ""
-        }
       }
 
       Text {
@@ -443,115 +455,102 @@ Item {
         color: "#FFFFFF"
         font.pixelSize: 18.0
         text: {
-          var acc = System.getAccountBalances(System.getCurrentAccount())
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
           text: (isyyCompound)
-          ? "Free (unstaked) LP:<br><b>" + acc.balanceLPFree + "</b>"
-          : "Locked (staked) LP:<br><b>" + acc.balanceLockedCompoundLP + "</b>"
+            ? "Free (unstaked) LP:<br><b>" + acc.balanceLPFree + "</b>"
+            : "Locked (staked) LP:<br><b>" + acc.balanceLockedCompoundLP + "</b>"
         }
       }
 
       AVMEInput {
         id: compoundInput
-        width: parent.width * 0.75
-        anchors.horizontalCenter: parent.horizontalCenter
+        width: (parent.width * 0.8)
+        anchors.left: parent.left
         enabled: (allowance != "")
         validator: RegExpValidator { regExp: /[0-9]{1,}(?:\.[0-9]{1,18})?/ }
         label: "Amount of LP to " + ((isyyCompound) ? "stake" : "unstake")
         placeholder: "Fixed point amount (e.g. 0.5)"
-      }
-
-      Row {
-	    id: yyCompoundButtonRow
-        anchors.horizontalCenter: parent.horizontalCenter
-        spacing: 10
 
         AVMEButton {
           id: btnMaxAmountCompound
-          width: (yyCompoundDetailsColumn.width * 0.5) - parent.spacing
-          enabled: (compoundallowance != "")
-          text: "Max Amount"
+          width: (parent.parent.width * 0.2) - anchors.leftMargin
+          anchors {
+            left: parent.right
+            leftMargin: 10
+          }
+          text: "Max"
           onClicked: {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
+            var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
             compoundInput.text = (isyyCompound) ? acc.balanceLPFree : acc.balanceLockedCompoundLP
           }
         }
+      }
 
-        AVMEButton {
-          id: btnDepositCompound
-          width: (yyCompoundDetailsColumn.width * 0.5) - parent.spacing
-          enabled: {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
-            enabled: compoundallowance != "" && (
-              !System.isApproved(acc.balanceLPFree, compoundallowance) || compoundInput.acceptableInput
-            )
+      Text {
+        id: compoundLPReturnsText
+        anchors.horizontalCenter: parent.horizontalCenter
+        horizontalAlignment: Text.AlignHCenter
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        text: "Locked LP Estimates:"
+          + "<br><b>" + qmlSystem.weiToFixedPoint(
+            (("AVAX" == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves), 18
+          ) + " AVAX"
+          + "<br>" + qmlSystem.weiToFixedPoint(
+            (("AVME" == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves), 18
+          ) + " AVME" + "</b>"
+      }
+
+      AVMEButton {
+        id: btnDepositCompound
+        width: parent.width
+        enabled: {
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
+          enabled: compoundallowance != "" && (
+            !qmlSystem.isApproved(acc.balanceLPFree, compoundallowance) || compoundInput.acceptableInput
+          )
+        }
+        text: {
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
+          if (compoundallowance == "") {
+            text: "Checking approval..."
+          } else if (isyyCompound && qmlSystem.isApproved(acc.balanceLPFree, compoundallowance)) {
+            text: "Stake"
+          } else if (!isyyCompound && qmlSystem.isApproved(acc.balanceLockedCompoundLP, compoundallowance)) {
+            text: "Unstake"
+          } else {
+            text: "Approve"
           }
-          text: {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
-            if (compoundallowance == "") {
-              text: "Checking approval..."
-            } else if (isyyCompound && System.isApproved(acc.balanceLPFree, compoundallowance)) {
-              text: "Stake"
-            } else if (!isyyCompound && System.isApproved(acc.balanceLockedCompoundLP, compoundallowance)) {
-              text: "Unstake"
+        }
+        onClicked: {
+          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
+          if (!qmlSystem.isApproved(acc.balanceLPFree, compoundallowance)) {
+            qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+            qmlSystem.operationOverride("Approve Compound", "", "", "")
+          } else if (isyyCompound) {
+            if (qmlSystem.hasInsufficientFunds("LP", acc.balanceLPFree, compoundInput.text)) {
+              fundsPopup.open()
             } else {
-              text: "Approve"
+              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              qmlSystem.operationOverride("Stake Compound LP", "", "", compoundInput.text)
             }
-          }
-          onClicked: {
-            var acc = System.getAccountBalances(System.getCurrentAccount())
-            if (!System.isApproved(acc.balanceLPFree, compoundallowance)) {
-              System.setScreen(content, "qml/screens/TransactionScreen.qml")
-              System.operationOverride("Approve Compound", "", "", "")
-            } else if (isyyCompound) {
-              if (System.hasInsufficientFunds("LP", acc.balanceLPFree, compoundInput.text)) {
-                fundsPopup.open()
-              } else {
-                System.setScreen(content, "qml/screens/TransactionScreen.qml")
-                System.operationOverride("Stake Compound LP", "", "", compoundInput.text)
-              }
+          } else {
+            if (qmlSystem.hasInsufficientFunds("LP", acc.balanceLockedCompoundLP, compoundInput.text)) {
+              fundsPopup.open()
             } else {
-              if (System.hasInsufficientFunds("LP", acc.balanceLockedCompoundLP, compoundInput.text)) {
-                fundsPopup.open()
-              } else {
-                System.setScreen(content, "qml/screens/TransactionScreen.qml")
-                System.operationOverride("Unstake Compound LP", "", "", compoundInput.text)
-              }
+              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+              qmlSystem.operationOverride("Unstake Compound LP", "", "", compoundInput.text)
             }
           }
         }
       }
-	  Rectangle {
-	    id: compoundLPReturns
-	    anchors.horizontalCenter: parent.horizontalCenter
-		width: parent.width
-		color: "#3e4653"
-		radius: 10
-	    Text {
-		  id: compoundLPReturnsText
-          anchors.left: parent.left
-          anchors.leftMargin: 10
-		  width: parent.width
-		  verticalAlignment: Text.AlignVCenter
-          color: "#FFFFFF"
-		  text: "Locked LP Estimates:"
-          + "<br><b>" + System.weiToFixedPoint(
-            ((System.getCurrentCoin() == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves),
-            System.getCurrentCoinDecimals()
-          ) + " " + System.getCurrentCoin()
-          + "<br>" + System.weiToFixedPoint(
-            ((System.getCurrentToken() == lowerToken) ? userCompoundLowerReserves : userCompoundHigherReserves),
-            System.getCurrentTokenDecimals()
-          ) + " " + System.getCurrentToken() + "</b>"
-	    }
-		height: compoundLPReturnsText.height
-	  }
     }
   }
 
   // Panel for reinvesting in YY
   AVMEPanel {
     id: reinvestPanel
-	visible: !isClassic
+    visible: !isClassic
     width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
       top: stakingSelectPanel.bottom
@@ -559,16 +558,19 @@ Item {
       bottom: parent.bottom
       margins: 10
     }
-    title: "Reinvesting Details"
+    title: "Reinvesting Details (Optional)"
 
     Column {
       id: reinvestDetailsColumn
       anchors {
-        top: parent.header.bottom
+        top: parent.top
         bottom: parent.bottom
         left: parent.left
         right: parent.right
-        margins: 20
+        topMargin: 80
+        bottomMargin: 20
+        leftMargin: 40
+        rightMargin: 40
       }
       spacing: 30
 
@@ -576,16 +578,17 @@ Item {
         id: reinvestTitle
         anchors.horizontalCenter: parent.horizontalCenter
         color: "#FFFFFF"
-        font.bold: true
-        font.pixelSize: 24.0
-        text: "Reinvest AVME (Optional)"
+        font.pixelSize: 14.0
+        text: "You will <b>reinvest AVME</b> rewards"
       }
 
       Image {
         id: reinvestTokenLogo
-        width: 64
-        height: 64
         anchors.horizontalCenter: parent.horizontalCenter
+        height: 48
+        antialiasing: true
+        smooth: true
+        fillMode: Image.PreserveAspectFit
         source: "qrc:/img/avme_logo.png"
       }
 
@@ -594,52 +597,56 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
-        font.pixelSize: 18.0
-        text: "Unreinvested " + System.getCurrentToken() + ":<br><b>" + reinvestreward + "</b>"
+        font.pixelSize: 14.0
+        text: "Unreinvested rewards:<br><b>" + reinvestreward + " AVME</b>"
+      }
+
+      Text {
+        id: reinvestRewardText
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: 128
+        horizontalAlignment: Text.AlignHCenter
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        text: "Reinvesting returns:<br><b>" + (reinvestreward * 0.05) + " AVME</b>"
       }
 
       AVMEButton {
         id: btnreinvest
-        width: (parent.width * 0.75)
+        width: parent.width
         anchors.horizontalCenter: parent.horizontalCenter
-        enabled: (reinvestreward != "" && !System.balanceIsZero(reinvestreward, System.getCurrentTokenDecimals()))
-        text: (reinvestreward != "")
-        ? "Reinvest " + System.getCurrentToken()
-        : "Querying Reinvest..."
+        enabled: (reinvestreward != "" && !qmlSystem.balanceIsZero(reinvestreward, 18))
+        text: (reinvestreward != "") ? "Reinvest AVME" : "Querying Reinvest..."
         onClicked: {
-          System.setScreen(content, "qml/screens/TransactionScreen.qml")
-          System.operationOverride("Reinvest AVME", "", "", "")
+          qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
+          qmlSystem.operationOverride("Reinvest AVME", "", "", "")
         }
       }
+    }
+
+    Image {
+      id: yyLogo
+      anchors {
+        bottom: parent.bottom
+        right: parent.right
+        margins: 20
+      }
+      width: 128
+      height: 64
+      source: "qrc:/img/yieldyak.png"
       Text {
-        id: reinvestRewardText
-        anchors.horizontalCenter: parent.horizontalCenter
-		width: 128
-        horizontalAlignment: Text.AlignHCenter
+        id: yyLogoText
+        anchors {
+          bottom: parent.top
+          horizontalCenter: parent.horizontalCenter
+          bottomMargin: -10
+        }
         color: "#FFFFFF"
         font.pixelSize: 18.0
-        text: "Reinvest Reward " + System.getCurrentToken() + ":<br><b>" + (reinvestreward * 0.05) + "</b>"
+        verticalAlignment: Text.AlignVCenter
+        text: "Powered by"
       }
     }
-	Image {
-	  anchors.bottom: parent.bottom
-	  anchors.right: parent.right
-	  anchors.margins: 35
-	  id: yyLogo
-	  width: 128
-	  height: 64
-	  source: "qrc:/img/yieldyak.png"
-	  Text {
-	    color: "#FFFFFF"
-        font.pixelSize: 18.0
-	    text: "Powered By"
-        anchors.bottom: parent.bottom
-        verticalAlignment: Text.AlignVCenter
-		anchors.bottomMargin: -20
-        anchors.left: parent.left
-        anchors.right: parent.right
-	  }
-	}	
   }
 
   // Popup for insufficient funds

@@ -1,0 +1,10 @@
+--- a/src/data/bytes_data.cpp
++++ b/src/data/bytes_data.cpp
+@@ -14,6 +14,7 @@
+ #include <atomic>
+ #include <cstring>
+ #include <map>
++#include <limits>
+ 
+ using namespace toolbox::data;
+ 

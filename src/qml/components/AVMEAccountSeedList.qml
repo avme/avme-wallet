@@ -13,17 +13,19 @@ import QtQuick.Controls 2.2
  */
 ListView {
   id: accountSeedList
-  property color listHighlightColor: "#887AC1EB"
-  property color listBgColor: "#58A0C9"
-  property color listHoverColor: "#7AC1DB"
+  property color listHighlightColor: "#9400F6"
+  property color listBgColor: "#16141F"
+  property color listHoverColor: "#2E2C3D"
 
-  highlight: Rectangle { color: listHighlightColor; radius: 5 }
   implicitWidth: 500
   implicitHeight: 500
   highlightMoveDuration: 0
   highlightMoveVelocity: 100000
   highlightResizeDuration: 0
   highlightResizeVelocity: 100000
+  spacing: parent.height * 0.015
+  topMargin: 10
+  bottomMargin: 10
   focus: true
   clip: true
   boundsBehavior: Flickable.StopAtBounds
@@ -32,42 +34,55 @@ ListView {
   header: Rectangle {
     id: listHeader
     width: parent.width
-    height: 30
-    radius: 5
+    height: parent.parent.height * 0.15
+    color: "#201E2B"
     z: 2
-    anchors.horizontalCenter: parent.horizontalCenter
-    color: listBgColor
-
-    Text {
-      id: headerIndex
-      anchors.verticalCenter: parent.verticalCenter
-      width: parent.width / 8
-      color: "white"
-      font.pixelSize: 14.0
-      padding: 5
-      text: "Index"
-    }
-
-    Text {
-      id: headerAccount
-      anchors.verticalCenter: parent.verticalCenter
-      width: parent.width / 2
-      x: headerIndex.width
-      color: "white"
-      font.pixelSize: 14.0
-      padding: 5
-      text: "Account"
-    }
-
-    Text {
-      id: headerBalance
-      anchors.verticalCenter: parent.verticalCenter
-      width: parent.width / 2
-      x: headerIndex.width + headerAccount.width
-      color: "white"
-      font.pixelSize: 14.0
-      padding: 5
-      text: "Coin Balance"
+    anchors.horizontalCenter: parent.horizontalCenter 
+      Rectangle {
+      id: listHeaderBg
+      width: parent.width
+      height: parent.height * 0.666
+      anchors.horizontalCenter: parent.horizontalCenter
+      color: listBgColor
+      Rectangle {
+        id: listHeaderText
+        width: parent.width * 0.9
+        height: parent.height
+        anchors.horizontalCenter: parent.horizontalCenter
+        color: "transparent"
+        Text {
+          id: headerIndex
+          anchors.verticalCenter: parent.verticalCenter
+          width: (parent.width * 0.2)
+          color: "white"
+          font.pixelSize: 14.0
+          padding: 5
+          text: "Index"
+        }
+    
+        Text {
+          id: headerAccount
+          anchors.verticalCenter: parent.verticalCenter
+          width: (parent.width * 0.5)
+          x: headerIndex.width
+          color: "white"
+          font.pixelSize: 14.0
+          padding: 5
+          text: "Account"
+        }
+    
+        Text {
+          id: headerBalance
+          anchors.verticalCenter: parent.verticalCenter
+          width: (parent.width * 0.3)
+          x: headerIndex.width + headerAccount.width
+          color: "white"
+          font.pixelSize: 14.0
+          padding: 5
+          text: "AVAX Balance"
+        }
+      }
+    // Spacing between header and list itself
     }
   }
   headerPositioning: ListView.OverlayHeader // Prevent header scrolling along
@@ -83,37 +98,52 @@ ListView {
       width: parent.width
       height: 30
 
-      Text {
-        id: delegateIndex
+      Rectangle {
+        id: delegateRectangle
         anchors.verticalCenter: parent.verticalCenter
-        width: parent.width / 8
-        color: "white"
-        font.pixelSize: 14.0
-        padding: 5
-        elide: Text.ElideRight
-        text: itemIndex
-      }
-      Text {
-        id: delegateAccount
-        anchors.verticalCenter: parent.verticalCenter
-        width: parent.width / 2
-        x: delegateIndex.width
-        color: "white"
-        font.pixelSize: 14.0
-        padding: 5
-        elide: Text.ElideRight
-        text: itemAccount
-      }
-      Text {
-        id: delegateBalance
-        anchors.verticalCenter: parent.verticalCenter
-        width: parent.width / 2
-        x: delegateIndex.width + delegateAccount.width
-        color: "white"
-        font.pixelSize: 14.0
-        padding: 5
-        elide: Text.ElideRight
-        text: itemBalance
+        anchors.horizontalCenter: parent.horizontalCenter
+        color: {
+          if (accountSeedList.currentIndex == index) {
+            color: "#9400F6"
+          } else {
+            color: "#2E2C3D"
+          }
+        }
+        radius: 5
+        height: parent.height
+        width: parent.width * 0.9
+        Text {
+          id: delegateIndex
+          anchors.verticalCenter: parent.verticalCenter
+          width: (parent.width * 0.2)
+          color: "white"
+          font.pixelSize: 14.0
+          padding: 5
+          elide: Text.ElideRight
+          text: itemIndex
+        }
+        Text {
+          id: delegateAccount
+          anchors.verticalCenter: parent.verticalCenter
+          width: (parent.width * 0.5)
+          x: delegateIndex.width
+          color: "white"
+          font.pixelSize: 14.0
+          padding: 5
+          elide: Text.ElideMiddle
+          text: itemAccount
+        }
+        Text {
+          id: delegateBalance
+          anchors.verticalCenter: parent.verticalCenter
+          width: (parent.width * 0.3)
+          x: delegateIndex.width + delegateAccount.width
+          color: "white"
+          font.pixelSize: 14.0
+          padding: 5
+          elide: Text.ElideRight
+          text: itemBalance
+        }
       }
       MouseArea {
         id: delegateMouseArea

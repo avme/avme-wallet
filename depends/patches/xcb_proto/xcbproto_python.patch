@@ -1,0 +1,53 @@
+diff --git a/xcbgen/align.py b/xcbgen/align.py
+index d4c12ee..65ccfb3 100644
+--- a/xcbgen/align.py
++++ b/xcbgen/align.py
+@@ -2,7 +2,12 @@
+ This module contains helper classes for alignment arithmetic and checks
+ '''
+ 
+-from fractions import gcd
++from sys import version_info
++if version_info[:2] >= (3, 5):
++    from math import gcd
++else:
++    from fractions import gcd
++
+ 
+ class Alignment(object):
+ 
+diff --git a/xcbgen/matcher.py b/xcbgen/matcher.py
+index 97a8b43..1c8dd20 100644
+--- a/xcbgen/matcher.py
++++ b/xcbgen/matcher.py
+@@ -7,7 +7,11 @@ we do not create a new type object, we just record the existing one under a new
+ '''
+ 
+ from os.path import join
+-from xml.etree.cElementTree import parse
++from sys import version_info
++if version_info[:2] >= (3, 9):
++    from xml.etree.ElementTree import parse
++else:
++    from xml.etree.cElementTree import parse
+ 
+ from xcbgen.xtypes import *
+ 
+diff --git a/xcbgen/state.py b/xcbgen/state.py
+index 0dbecdc..c2794d9 100644
+--- a/xcbgen/state.py
++++ b/xcbgen/state.py
+@@ -2,7 +2,12 @@
+ This module contains the namespace class and the singleton module class.
+ '''
+ from os.path import dirname, basename
+-from xml.etree.cElementTree import parse
++from sys import version_info
++if version_info[:2] >= (3, 9):
++    from xml.etree.ElementTree import parse
++else:
++    from xml.etree.cElementTree import parse
++
+ 
+ from xcbgen import matcher
+ from xcbgen.error import *

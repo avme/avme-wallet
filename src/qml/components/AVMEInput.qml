@@ -14,13 +14,12 @@ TextField {
   id: input
   property string label
   property string placeholder
-  property color inputColor: "#449CE3FD"
+  property color inputColor: "#1D1B26"
   property color inputLabelColor: "#FFFFFF"
   property color inputDisabledColor: "#44888888"
   property color inputSelectionColor: "#58A0B9"
-  property color inputLineColor: "#7AC1DB"
-  property color inputLineDisabledColor: "#888888"
   property color inputPlaceholderColor: "#88FFFFFF"
+  property color inputBorderColor: "#5C5575"
 
   implicitWidth: 320
   implicitHeight: 40
@@ -33,16 +32,9 @@ TextField {
     height: parent.height
     anchors.bottom: parent.bottom
     color: input.enabled ? inputColor : inputDisabledColor
-  }
-
-  // "Neon" line below the input field
-  Rectangle {
-    width: parent.width
-    height: 2
-    anchors.bottom: parent.bottom
-    border.width: 2
-    border.color: input.enabled ? inputLineColor : inputLineDisabledColor
-    color: "transparent"
+    border.color: inputBorderColor
+    border.width: 3
+    radius: 1
   }
 
   // Label above the input field
@@ -51,8 +43,9 @@ TextField {
     color: inputLabelColor
     anchors.bottom: input.top
     anchors.left: input.left
-    anchors.bottomMargin: 5
+    anchors.bottomMargin: 2
     font.pixelSize: 12.0
+    font.capitalization: Font.AllUppercase
     text: label
   }
 

@@ -5,270 +5,136 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
+import "qrc:/qml/panels"
+import "qrc:/qml/popups"
 
-// Screen for listing Accounts and their general operations
-
+/**
+ * Screen for listing and managing Accounts in the Wallet.
+ * TODO: merge Ledger popup into this
+ */
 Item {
   id: accountsScreen
 
   Connections {
-    target: System
+    target: qmlSystem
     function onAccountCreated(data) {
-      createAccountPopup.close()
-      reloadList()
-    }
-    function onAccountCreationFailed() {
-      createAccountPopup.close()
-      accountFailPopup.open()
-    }
-  }
-
-  Component.onCompleted: {
-    if (System.getFirstLoad()) {
-      System.setFirstLoad(false)
-      reloadList()
-    } else {
+      chooseAccountPopup.clean()
+      chooseAccountPopup.close()
+      accountInfoPopup.close()
       fetchAccounts()
     }
+    function onAccountCreationFailed() {
+      accountInfoPopup.close()
+      accountFailPopup.open()
+    }
+    function onAccountAVAXBalancesUpdated(address, avaxBalance, avaxValue) {
+      for (var i = 0; i < accountSelectPanel.accountModel.count; i++) {
+        if (accountSelectPanel.accountModel.get(i).address == address) {
+          accountSelectPanel.accountModel.setProperty(
+            i, "coinAmount", avaxBalance + " AVAX"
+          )
+          accountSelectPanel.accountModel.setProperty(
+            i, "coinValue", "$" + avaxValue
+          )
+        }
+      }
+    }
   }
 
-  // Timer for reloading the Account balances on the list
-  Timer {
-    id: listReloadTimer
-    interval: 1000
-    repeat: true
-    onTriggered: reloadBalances()
-  }
-
-  // Helpers for manipulating the Account list
-  function reloadList() {
-    console.log("Reloading list...")
-    fetchAccountsPopup.open()
-    System.stopAllBalanceThreads()
-    listReloadTimer.stop()
-    System.loadAccounts()
-    fetchAccounts()
-    System.startAllBalanceThreads()
-    listReloadTimer.start()
-    fetchAccountsPopup.close()
-  }
+  Component.onCompleted: fetchAccounts()
 
   function fetchAccounts() {
-    console.log("Fetching Accounts...")
-    accountsList.clear()
-    var accList = System.listAccounts()
+    accountSelectPanel.accountModel.clear()
+    var accList = qmlSystem.listAccounts()
+    var addList = []
     for (var i = 0; i < accList.length; i++) {
-      accountsList.append(JSON.parse(accList[i]))
+      var accJson = JSON.parse(accList[i])
+      accountSelectPanel.accountModel.set(i, accJson)
+      accountSelectPanel.accountModel.setProperty(i, "coinAmount", "Loading...")
+      accountSelectPanel.accountModel.setProperty(i, "coinValue", "Loading...")
+      addList.push(accJson.address)
     }
+    accountSelectPanel.accountModel.sortByAddress()
+    qmlSystem.getAllAVAXBalances(addList)
   }
 
-  function reloadBalances() {
-    var accList = System.listAccounts()
-    for (var i = 0; i < accList.length; i++) {
-      accountsList.set(i, JSON.parse(accList[i]))
-    }
+  function useSeed() {
+    chooseAccountPopup.foreignSeed = seedPopup.fullSeed
+    seedPopup.clean()
+    seedPopup.close()
+    chooseAccountPopup.open()
   }
 
-  // Text if there's no Accounts in the Wallet
-  Text {
-    id: noAccountsText
-    anchors {
-      top: parent.top
-      topMargin: 60
-      horizontalCenter: parent.horizontalCenter
+  AVMEPopupChooseAccount { id: chooseAccountPopup }
+  AVMEPopupSeed { id: seedPopup }
+
+  AVMEPanelAccountSelect {
+    id: accountSelectPanel
+    height: parent.height * 0.9
+    width: parent.width * 0.9
+    anchors.centerIn: parent
+    btnCreate.onClicked: chooseAccountPopup.open()
+    btnImport.onClicked: seedPopup.open()
+    btnSelect.onClicked: {
+      qmlSystem.setCurrentAccount(accountList.currentItem.itemAddress)
+      qmlSystem.loadTokenDB()
+      qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
+      qmlSystem.loadARC20Tokens()
+      accountHeader.getAddress()
+      qmlSystem.goToOverview()
+      qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
     }
-    horizontalAlignment: Text.AlignHCenter
-    color: "#FFFFFF"
-    font.pixelSize: 24.0
-    text: "No Accounts found.<br>You can create or import one using the button below."
-    visible: (accountsList.count == 0)
+    btnErase.onClicked: confirmErasePopup.open()
   }
 
-  // Account list
-  Rectangle {
-    id: listRect
-    anchors {
-      top: parent.top
-      bottom: btnBottomRow.top
-      left: parent.left
-      right: parent.right
-      margins: 10
-    }
-    visible: (accountsList.count != 0)
-    radius: 5
-    color: "#4458A0C9"
-
-    AVMEWalletList {
-      id: walletList
-      width: listRect.width
-      height: listRect.height
-      model: ListModel { id: accountsList }
-    }
-  }
-
-  // Action buttons
-  Row {
-    id: btnBottomRow
-    spacing: 10
-    anchors {
-      bottom: parent.bottom
-      left: parent.left
-      right: parent.right
-      bottomMargin: 10
-      leftMargin: 10
-    }
-
-    AVMEButton {
-      id: btnNewAccount
-      width: (parent.width / 3) - parent.spacing
-      text: "Create/Import a new Account"
-      onClicked: chooseAccountPopup.open()
-    }
-
-    AVMEButton {
-      id: btnUseAccount
-      width: (parent.width / 3) - parent.spacing
-      enabled: {
-        if (!walletList.currentItem) {
-          enabled: false
-        } else {
-          var hasCoin = (walletList.currentItem.itemCoinAmount != "")
-          var hasToken = (walletList.currentItem.itemTokenAmount != "")
-          var hasFreeLP = (walletList.currentItem.itemFreeLPAmount != "")
-          var hasLockedLP = (walletList.currentItem.itemLockedLPAmount != "")
-          enabled: (hasCoin && hasToken && hasFreeLP && hasLockedLP)
-        }
-      }
-      text: "Use this Account"
-      onClicked: {
-        System.setCurrentAccount(walletList.currentItem.itemAccount)
-        listReloadTimer.stop()
-        System.goToOverview();
-        System.setScreen(content, "qml/screens/OverviewScreen.qml")
-      }
-    }
-
-    AVMEButton {
-      id: btnEraseAccount
-      width: (parent.width / 3) - parent.spacing
-      enabled: (walletList.currentItem)
-      text: "Erase this Account"
-      onClicked: {
-        erasePopup.account = walletList.currentItem.itemAccount
-        erasePopup.open()
-      }
-    }
-  }
-
-  // Popup for choosing an Account from a generated list
-  AVMEPopupChooseAccount {
-    id: chooseAccountPopup
-    chooseBtn.onClicked: {
-      if (System.accountExists(item.itemAccount)) {
-        addressTimer.start()
-      } else if (!System.checkWalletPass(pass)) {
-        infoTimer.start()
-      } else {
-        try {
-          System.stopAllBalanceThreads()
-          listReloadTimer.stop()
-          chooseAccountPopup.close()
-          System.createAccount(foreignSeed, index, name, pass)
-          chooseAccountPopup.clean()
-          createAccountPopup.open()
-        } catch (error) {
-          chooseAccountPopup.close()
-          accountFailPopup.open()
-        }
-      }
-    }
-  }
-
-  // Popup for fetching Accounts
+  // Popup for waiting for Accounts to be created/imported/erased, respectively
   AVMEPopup {
-    id: fetchAccountsPopup
-    info: "Loading Accounts...<br>Please wait."
+    id: accountInfoPopup
+    property alias text: accountInfoText.text
+    widthPct: 0.2
+    heightPct: 0.1
+    Text {
+      id: accountInfoText
+      color: "#FFFFFF"
+      horizontalAlignment: Text.AlignHCenter
+      anchors.centerIn: parent
+      font.pixelSize: 14.0
+    }
   }
 
-  // Popup for waiting for a new Account to be created
-  AVMEPopup {
-    id: createAccountPopup
-    info: "Creating/Importing Account..."
-  }
-
-  // Info popup for if the Account creation fails
+  // Info popup for if the seed import fails
   AVMEPopupInfo {
-    id: accountFailPopup
+    id: seedFailPopup
     icon: "qrc:/img/warn.png"
-    info: "Error on Account creation/importing. Please try again."
+    info: "Seed is invalid. Please check if it's typed correctly."
   }
 
-  // Info popup for if the Account erasure fails
   AVMEPopupInfo {
     id: eraseFailPopup
     icon: "qrc:/img/warn.png"
-    info: "Error on erasing Account. Please try again."
+    info: "Failed to erase Account, please try again."
   }
 
-  // Yes/No popup for confirming Account erasure
   AVMEPopupYesNo {
-    id: erasePopup
-    property string account
-    height: window.height / 2
+    id: confirmErasePopup
+    widthPct: 0.4
+    heightPct: 0.25
     icon: "qrc:/img/warn.png"
-    info: "Are you sure you want to erase this Account?<br>"
-    + "<b>" + account + "</b>"
-    + "<br>All funds on it will be <b>PERMANENTLY LOST</b>."
-
-    Text {
-      id: erasePassInfo
-      property alias timer: erasePassInfoTimer
-      y: (parent.height / 2) - 30
-      anchors.horizontalCenter: parent.horizontalCenter
-      anchors.bottomMargin: (parent.height / 2) + 50
-      Timer { id: erasePassInfoTimer; interval: 2000 }
-      color: "#FFFFFF"
-      font.pixelSize: 14.0
-      text: (!erasePassInfoTimer.running)
-      ? "Please authenticate to confirm the action."
-      : "Wrong passphrase, please try again"
-    }
-
-    AVMEInput {
-      id: erasePassInput
-      width: parent.width / 2
-      anchors.horizontalCenter: parent.horizontalCenter
-      anchors.top: erasePassInfo.bottom
-      anchors.topMargin: 30
-      echoMode: TextInput.Password
-      passwordCharacter: "*"
-      label: "Passphrase"
-      placeholder: "Your Wallet's passphrase"
-    }
-
+    info: "Are you sure you want to erase this Account?"
     yesBtn.onClicked: {
-      if (System.checkWalletPass(erasePassInput.text)) {
-        if (System.eraseAccount(walletList.currentItem.itemAccount)) {
-          System.stopAllBalanceThreads()
-          listReloadTimer.stop()
-          erasePopup.close()
-          erasePopup.account = ""
-          erasePassInput.text = ""
-          reloadList()
-        } else {
-          erasePopup.close()
-          erasePopup.account = ""
-          erasePassInput.text = ""
-          eraseFailPopup.open()
-        }
+      confirmErasePopup.close()
+      accountInfoPopup.text = "Erasing Account..."
+      accountInfoPopup.open()
+      if (qmlSystem.eraseAccount(accountSelectPanel.accountList.currentItem.itemAddress)) {
+        accountInfoPopup.close()
+        fetchAccounts()
       } else {
-        erasePassInfoTimer.start()
+        accountInfoPopup.close()
+        eraseFailPopup.open()
       }
     }
     noBtn.onClicked: {
-      erasePopup.account = ""
-      erasePassInput.text = ""
-      erasePopup.close()
+      confirmErasePopup.close()
     }
   }
 }
