@@ -192,7 +192,7 @@ std::string API::getAutomaticFee() {
 }
 
 std::string API::getNonce(std::string address) {
-  Request req{1, "2.0", "eth_getTransactionCount", {address}};
+  Request req{1, "2.0", "eth_getTransactionCount", {address, "latest"}};
   std::string query = buildRequest(req);
   std::string resp = httpGetRequest(query);
   json respJson = json::parse(resp);

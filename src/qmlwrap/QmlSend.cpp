@@ -71,182 +71,32 @@ bool QmlSystem::hasInsufficientFunds(
 }
 
 void QmlSystem::makeTransaction(
-  QString operation, QString to,
-  QString coinAmount, int coinDecimals,
-  QString tokenAmount, int tokenDecimals,
-  QString lpAmount, int lpDecimals,
-  QString gasLimit, QString gasPrice, QString pass
+    QString operation, QString from, QString to,
+    QString value, QString txData, QString gas,
+    QString gasPrice, QString pass
 ) {
   QtConcurrent::run([=](){
     // Convert everything to std::string for easier handling
     std::string operationStr = operation.toStdString();
+    std::string fromStr = from.toStdString();
     std::string toStr = to.toStdString();
-    std::string coinAmountStr = coinAmount.toStdString();
-    std::string tokenAmountStr = tokenAmount.toStdString();
-    std::string lpAmountStr = lpAmount.toStdString();
-    std::string gasLimitStr = gasLimit.toStdString();
+    std::string valueStr = value.toStdString();
+    std::string txDataStr = txData.toStdString();
+    std::string gasStr = gas.toStdString();
     std::string gasPriceStr = gasPrice.toStdString();
     std::string passStr = pass.toStdString();
-
+    
     // Convert the values required for a transaction to their Wei formats.
     // Gas price is in Gwei (10^9 Wei) and amounts are in fixed point.
     // Gas limit is already in Wei so we skip that.
-    coinAmountStr = Utils::fixedPointToWei(coinAmountStr, coinDecimals);
-    tokenAmountStr = Utils::fixedPointToWei(tokenAmountStr, tokenDecimals);
-    lpAmountStr = Utils::fixedPointToWei(lpAmountStr, lpDecimals);
+    valueStr = Utils::fixedPointToWei(valueStr, 18);
     gasPriceStr = boost::lexical_cast<std::string>(
       boost::lexical_cast<u256>(gasPriceStr) * raiseToPow(10, 9)
     );
 
     // Build the transaction and data hex according to the operation
-    std::string dataHex;
     TransactionSkeleton txSkel;
-    if (operationStr == "Send AVAX") {
-      txSkel = this->w.buildTransaction(
-        this->w.getCurrentAccount().first, toStr, coinAmountStr, gasLimitStr, gasPriceStr
-      );
-    } else if (operationStr == "Send AVME") {
-      txSkel = this->w.buildTransaction(
-        this->w.getCurrentAccount().first, Pangolin::contracts["AVME"],
-        "0", gasLimitStr, gasPriceStr, Pangolin::transfer(toStr, tokenAmountStr)
-      );
-    } else if (operationStr == "Approve Exchange") {
-      txSkel = this->w.buildTransaction(
-        this->w.getCurrentAccount().first, Pangolin::contracts["AVME"],
-        "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::contracts["router"])
-      );
-    } else if (operationStr == "Approve Liquidity") {
-      txSkel = this->w.buildTransaction(
-        this->w.getCurrentAccount().first, Pangolin::contracts["AVAX-AVME"],
-        "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::contracts["router"])
-      );
-    } else if (operationStr == "Approve Staking") {
-      txSkel = this->w.buildTransaction(
-        this->w.getCurrentAccount().first, Pangolin::contracts["AVAX-AVME"],
-        "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::contracts["staking"])
-      );
-    } else if (operationStr == "Approve Compound") {
-      txSkel = this->w.buildTransaction(
-        this->w.getCurrentAccount().first, Pangolin::contracts["AVAX-AVME"],
-        "0", gasLimitStr, gasPriceStr, Pangolin::approve(Pangolin::contracts["compound"])
-      );
-    } else if (operationStr == "Swap AVAX -> AVME") {
-      u256 amountOutMin = boost::lexical_cast<u256>(tokenAmountStr);
-      amountOutMin -= (amountOutMin / 200); // 0.5% Slippage
-      dataHex = Pangolin::swapExactAVAXForTokens(
-        // amountOutMin, path, to, deadline
-        boost::lexical_cast<std::string>(amountOutMin),
-        { Pangolin::contracts["AVAX"], Pangolin::contracts["AVME"] },
-        this->w.getCurrentAccount().first,
-        boost::lexical_cast<std::string>(
-          std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()
-          ).count() + 300000 // + 5 minutes (300 seconds), in milliseconds
-        )
-      );
-      txSkel = this->w.buildTransaction(
-        this->w.getCurrentAccount().first, Pangolin::contracts["router"],
-        coinAmountStr, gasLimitStr, gasPriceStr, dataHex
-      );
-    } else if (operationStr == "Swap AVME -> AVAX") {
-      u256 amountOutMin = boost::lexical_cast<u256>(coinAmountStr);
-      amountOutMin -= (amountOutMin / 200); // 0.5% Slippage
-      dataHex = Pangolin::swapExactTokensForAVAX(
-        // amountIn, amountOutMin, path, to, deadline
-        tokenAmountStr,
-        boost::lexical_cast<std::string>(amountOutMin),
-        { Pangolin::contracts["AVME"], Pangolin::contracts["AVAX"] },
-        this->w.getCurrentAccount().first,
-        boost::lexical_cast<std::string>(
-          std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()
-          ).count() + 300000 // + 5 minutes (300 seconds), in milliseconds
-        )
-      );
-      txSkel = this->w.buildTransaction(
-        this->w.getCurrentAccount().first, Pangolin::contracts["router"],
-        "0", gasLimitStr, gasPriceStr, dataHex
-      );
-    } else if (operationStr == "Add Liquidity") {
-      u256 amountAVAXMin = boost::lexical_cast<u256>(coinAmountStr);
-      u256 amountTokenMin = boost::lexical_cast<u256>(tokenAmountStr);
-      amountAVAXMin -= (amountAVAXMin / 200); // 0.5%
-      amountTokenMin -= (amountTokenMin / 200); // 0.5%
-      dataHex = Pangolin::addLiquidityAVAX(
-        // tokenAddress, amountTokenDesired, amountTokenMin, amountAVAXMin, to, deadline
-        Pangolin::contracts["AVME"],
-        tokenAmountStr,
-        boost::lexical_cast<std::string>(amountTokenMin),
-        boost::lexical_cast<std::string>(amountAVAXMin),
-        this->w.getCurrentAccount().first,
-        boost::lexical_cast<std::string>(
-          std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()
-          ).count() + 300000 // + 5 minutes (300 seconds), in milliseconds
-        )
-      );
-      txSkel = this->w.buildTransaction(
-        this->w.getCurrentAccount().first, Pangolin::contracts["router"],
-        coinAmountStr, gasLimitStr, gasPriceStr, dataHex
-      );
-    } else if (operationStr == "Remove Liquidity") {
-      u256 amountAVAXMin = boost::lexical_cast<u256>(coinAmountStr);
-      u256 amountTokenMin = boost::lexical_cast<u256>(tokenAmountStr);
-      amountAVAXMin -= (amountAVAXMin / 200); // 0.5%
-      amountTokenMin -= (amountTokenMin / 200); // 0.5%
-      dataHex = Pangolin::removeLiquidityAVAX(
-        // tokenAddress, liquidity, amountTokenMin, amountAVAXMin, to, deadline
-        Pangolin::contracts["AVME"],
-        lpAmountStr,
-        boost::lexical_cast<std::string>(amountTokenMin),
-        boost::lexical_cast<std::string>(amountAVAXMin),
-        this->w.getCurrentAccount().first,
-        boost::lexical_cast<std::string>(
-          std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::system_clock::now().time_since_epoch()
-          ).count() + 300000 // + 5 minutes (300 seconds), in milliseconds
-        )
-      );
-      txSkel = this->w.buildTransaction(
-        this->w.getCurrentAccount().first, Pangolin::contracts["router"],
-        "0", gasLimitStr, gasPriceStr, dataHex
-      );
-    } else if (operationStr == "Stake LP") {
-      txSkel = this->w.buildTransaction(
-        this->w.getCurrentAccount().first, Pangolin::contracts["staking"],
-        "0", gasLimitStr, gasPriceStr, Staking::stake(lpAmountStr)
-      );
-    } else if (operationStr == "Stake Compound LP") {
-      txSkel = this->w.buildTransaction(
-        this->w.getCurrentAccount().first, Pangolin::contracts["compound"],
-        "0", gasLimitStr, gasPriceStr, Staking::stakeCompound(lpAmountStr)
-      );
-    } else if (operationStr == "Unstake LP") {
-      txSkel = this->w.buildTransaction(
-        this->w.getCurrentAccount().first, Pangolin::contracts["staking"],
-        "0", gasLimitStr, gasPriceStr, Staking::withdraw(lpAmountStr)
-      );
-    } else if (operationStr == "Unstake Compound LP") {
-      txSkel = this->w.buildTransaction(
-        this->w.getCurrentAccount().first, Pangolin::contracts["compound"],
-        "0", gasLimitStr, gasPriceStr, Staking::compoundWithdraw(lpAmountStr)
-      );
-    } else if (operationStr == "Harvest AVME") {
-      txSkel = this->w.buildTransaction(
-        this->w.getCurrentAccount().first, Pangolin::contracts["staking"],
-        "0", gasLimitStr, gasPriceStr, Staking::getReward()
-      );
-    } else if (operationStr == "Reinvest AVME") {
-      txSkel = this->w.buildTransaction(
-        this->w.getCurrentAccount().first, Pangolin::contracts["compound"],
-        "0", "500000", gasPriceStr, Staking::reinvest()
-      );
-    } else if (operationStr == "Exit Staking") {
-      txSkel = this->w.buildTransaction(
-        this->w.getCurrentAccount().first, Pangolin::contracts["staking"],
-        "0", gasLimitStr, gasPriceStr, Staking::exit()
-      );
-    }
+    txSkel = w.buildTransaction(fromStr, toStr, valueStr, gasStr, gasPriceStr, txDataStr);
     emit txBuilt(txSkel.nonce != Utils::MAX_U256_VALUE());
 
     // Sign the transaction

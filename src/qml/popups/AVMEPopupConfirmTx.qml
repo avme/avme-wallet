@@ -18,7 +18,7 @@ AVMEPopup {
   property alias timer: infoTimer
   property alias okBtn: btnOk
   property string from: qmlSystem.getCurrentAccount()
-  property string historyInfo
+  property string operation // For usage under history
   property string to
   property string value // Not WEI value!
   property string txData
@@ -48,7 +48,7 @@ AVMEPopup {
     gas = inputGas
     gasPrice = inputGasPrice
     info = inputInfo
-    historyInfo = inputHistoryInfo
+    operation = inputHistoryInfo
     if (automaticGas) {
       loadingFees = true
       var Params = ({})
@@ -147,7 +147,21 @@ AVMEPopup {
         id: btnOk
         text: "OK"
         enabled: (passInput.text !== "" && !loadingFees)
+        onClicked: {
+          if (!qmlSystem.checkWalletPass(passInput.text)) {
+            walletWrongPassphrase.open();
+          } else {
+          txProgressPopup.open();
+          qmlSystem.txStart(operation, from, to, value, txData, gas, gasPrice, passInput.text)
+
+          }
+        }
       }
     }
+  }
+  AVMEPopupInfo {
+    id: walletWrongPassphrase
+    icon: "qrc:/img/warn.png"
+    info: "Wrong password!"
   }
 }

@@ -6,41 +6,28 @@ import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
 
+// TODO: This screen needs a redesign to fit the current design
 // Popup for showing the progress of a transaction. Has to be opened manually.
 Popup {
   id: txProgressPopup
-  property string opStr
-  property string toStr
-  property string coinAmountStr
-  property string tokenAmountStr
-  property string lpAmountStr
-  property string gasLimitStr
-  property string gasPriceStr
   property color popupBgColor: "#1C2029"
 
   Connections {
     target: qmlSystem
     function onTxStart(
-      operation, to, coinAmount, tokenAmount, lpAmount, gasLimit, gasPrice, pass
+      operation, from, to, value, txData, gas, gasPrice, pass
     ) {
       // Uncomment to see the data passed to the popup
       //console.log(operation)
+      //console.log(from)
       //console.log(to)
-      //console.log(coinAmount)
-      //console.log(tokenAmount)
-      //console.log(lpAmount)
-      //console.log(gasLimit)
+      //console.log(value)
+      //console.log(txData)
+      //console.log(gas)
       //console.log(gasPrice)
-      opStr = operation
-      toStr = to
-      coinAmountStr = coinAmount
-      tokenAmountStr = tokenAmount
-      lpAmountStr = lpAmount
-      gasLimitStr = gasLimit
-      gasPriceStr = gasPrice
       resetStatuses()
       qmlSystem.makeTransaction(
-        operation, to, coinAmount, tokenAmount, lpAmount, gasLimit, gasPrice, pass
+        operation, from, to, value, txData, gas, gasPrice, pass
       )
     }
     function onTxBuilt(b) {
@@ -106,14 +93,10 @@ Popup {
     buildText.text = "Building transaction..."
     signText.text = "Signing transaction..."
     sendText.text = "Broadcasting transaction..."
-    buildPng.source = signPng.source = sendPng.source = "qrc:/img/icons/refresh.png"
+    buildPng.source = signPng.source = sendPng.source = "qrc:/img/icons/loading.png"
     buildPngRotate.start()
     btnOpenLink.visible = false
     btnClose.visible = false
-  }
-
-  function clean() {
-    opStr = toStr = coinAmountStr = tokenAmountStr = lpAmountStr = gasLimitStr = gasPriceStr = ""
   }
 
   width: parent.width * 0.9
@@ -125,80 +108,6 @@ Popup {
   padding: 0  // Remove white borders
   closePolicy: Popup.NoAutoClose
   background: Rectangle { anchors.fill: parent; color: popupBgColor; radius: 10 }
-
-  Text {
-    id: infoText
-    anchors {
-      top: parent.top
-      horizontalCenter: parent.horizontalCenter
-      margins: 30
-    }
-    font.pixelSize: 24.0
-    color: "#FFFFFF"
-    horizontalAlignment: Text.AlignHCenter
-    text: {
-      switch (opStr) {
-        case "Send AVAX":
-        text: "Sending <b>" + coinAmountStr + " " + qmlSystem.getCurrentCoin() + "</b>"
-        + "<br>to the address <b>" + toStr + "</b>...";
-        break;
-        case "Send AVME":
-        text: "Sending <b>" + tokenAmountStr + " " + qmlSystem.getCurrentToken() + "</b>"
-        + "<br>to the address <b>" + toStr + "</b>...";
-        break;
-        case "Approve Exchange":
-        text: "Sending approval for exchanging/adding liquidity...";
-        break;
-        case "Approve Liquidity":
-        text: "Sending approval for removing liquidity...";
-        break;
-        case "Approve Staking":
-        text: "Sending approval for staking...";
-        break;
-        case "Approve Compound":
-        text: "Sending approval for staking...";
-        break;
-        case "Swap AVAX -> AVME":
-        text: "Swapping <b>" + coinAmountStr + " " + qmlSystem.getCurrentCoin() + "</b>..."
-        break;
-        case "Swap AVME -> AVAX":
-        text: "Swapping <b>" + tokenAmountStr + " " + qmlSystem.getCurrentToken() + "</b>..."
-        break;
-        case "Add Liquidity":
-        text: "Adding <b>" + coinAmountStr + " " + qmlSystem.getCurrentCoin() + "</b>"
-        + "<br>and <b>" + tokenAmountStr + " " + qmlSystem.getCurrentToken() + "</b>"
-        + "<br>to the pool...";
-        break;
-        case "Remove Liquidity":
-        text: "Removing <b>" + lpAmountStr + " LP</b><br>from the pool...";
-        break;
-        case "Stake LP":
-        text: "Staking <b>" + lpAmountStr + " LP</b>...";
-        break;
-        case "Stake Compound LP":
-        text: "Compound Staking <b>" + lpAmountStr + " LP</b>...";
-        break;
-        case "Unstake LP":
-        text: "Withdrawing <b>" + lpAmountStr + " LP</b>...";
-        break;
-        case "Unstake Compound LP":
-        text: "Withdrawing <b>" + lpAmountStr + " LP</b>...";
-        break;
-        case "Harvest AVME":
-        text: "Requesting rewards from the staking pool..."
-        break;
-        case "Reinvest AVME":
-        text: "Requesting reinvest rewards from the compound pool..."
-        break;
-        case "Exit Staking":
-        text: "Exiting the staking pool..."
-        break;
-        default:
-        text: "";
-        break;
-      }
-    }
-  }
 
   Column {
     id: items
@@ -219,7 +128,7 @@ Popup {
         height: 64
         anchors.verticalCenter: buildText.verticalCenter
         fillMode: Image.PreserveAspectFit
-        source: "qrc:/img/icons/refresh.png"
+        source: "qrc:/img/icons/loading.png"
         RotationAnimator {
           id: buildPngRotate
           target: buildPng
@@ -251,7 +160,7 @@ Popup {
         height: 64
         anchors.verticalCenter: signText.verticalCenter
         fillMode: Image.PreserveAspectFit
-        source: "qrc:/img/icons/refresh.png"
+        source: "qrc:/img/icons/loading.png"
         RotationAnimator {
           id: signPngRotate
           target: signPng
@@ -283,7 +192,7 @@ Popup {
         height: 64
         anchors.verticalCenter: sendText.verticalCenter
         fillMode: Image.PreserveAspectFit
-        source: "qrc:/img/icons/refresh.png"
+        source: "qrc:/img/icons/loading.png"
         RotationAnimator {
           id: sendPngRotate
           target: sendPng
@@ -327,10 +236,7 @@ Popup {
     }
     text: "Close"
     onClicked: {
-      txProgressPopup.clean()
       txProgressPopup.close()
-      qmlSystem.goToOverview()
-      qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
     }
   }
 }

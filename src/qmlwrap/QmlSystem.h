@@ -81,14 +81,17 @@ class QmlSystem : public QObject {
     void historyLoaded(QVariantList data);
 
     // Send screen signals
+    void txStart(
+      QString operation, QString from,
+      QString to, QString value,
+      QString txData, QString gas,
+      QString gasPrice, QString pass
+    );
+
     void operationOverride(
       QString op, QString amountCoin, QString amountToken, QString amountLP
     );
-    void txStart(
-      QString operation, QString to,
-      QString coinAmount, QString tokenAmount, QString lpAmount,
-      QString gasLimit, QString gasPrice, QString pass
-    );
+    
     void txBuilt(bool b);
     void txSigned(bool b, QString msg);
     void txSent(bool b, QString linkUrl);
@@ -315,7 +318,7 @@ class QmlSystem : public QObject {
     // ======================================================================
     // SEND SCREEN FUNCTIONS
     // ======================================================================
-
+  
     // Get gas price from network
     Q_INVOKABLE QString getAutomaticFee();
 
@@ -347,12 +350,11 @@ class QmlSystem : public QObject {
 
     // Make a transaction with the collected data.
     // Emits txBuilt(), txSigned(), txSent() and txRetry()
+
     Q_INVOKABLE void makeTransaction(
-      QString operation, QString to,
-      QString coinAmount, int coinDecimals,
-      QString tokenAmount, int tokenDecimals,
-      QString lpAmount, int lpDecimals,
-      QString gasLimit, QString gasPrice, QString pass
+      QString operation, QString from, QString to,
+      QString value, QString txData, QString gas,
+      QString gasPrice, QString pass
     );
 
     // ======================================================================
