@@ -28,6 +28,26 @@ void Utils::logToDebug(std::string debug) {
   return;
 }
 
+std::string Utils::toLowerCaseAddress(std::string address) {
+  std::string ret = address;
+  std::transform(ret.begin(), ret.end(), ret.begin(), ::tolower);
+  return ret;
+}
+
+std::string Utils::toCamelCaseAddress(std::string address) {
+  // Address has to be hashed as all lower-case and without the "0x" part
+  address = toLowerCaseAddress(address);
+  if (address.substr(0, 2) == "0x") { address = address.substr(2); }
+  std::string addressHash = dev::toHex(dev::sha3(address));
+  std::string ret = "0x";
+  for (int i = 0; i < address.length(); i++) {
+    // If ith character is 8 to f then make it uppercase
+    ret += (std::stoi(addressHash.substr(i, 1), nullptr, 16) > 7)
+      ? std::toupper(address[i]) : address[i];
+  }
+  return ret;
+}
+
 std::string Utils::randomHexBytes() {
   unsigned char saltBytes[32];
   RAND_bytes(saltBytes, sizeof(saltBytes));
@@ -251,9 +271,9 @@ std::string Utils::bytesToHex(std::string input, bool isUint) {
   }
   ret += ss.str();
   // Bytes are left padded
-  while ((ret.size() % 64) != 0)
+  while ((ret.size() % 64) != 0) {
     ret += "0";
-  
+  }
   return ret;
 }
 

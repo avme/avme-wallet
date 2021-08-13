@@ -128,7 +128,7 @@ json Graph::avaxUSDData(int days) {
 // TODO: use nlohmann/json
 std::string Graph::getTokenPriceDerived(std::string address) {
   std::stringstream query;
-  std::transform(address.begin(), address.end(), address.begin(), ::tolower);
+  address = Utils::toLowerCaseAddress(address);
   query << "{\"query\": \"{"
         << "token(id: \\\"" + address + "\\\")"
         << "{symbol derivedETH}"
@@ -141,7 +141,7 @@ std::string Graph::getTokenPriceDerived(std::string address) {
 
 json Graph::getTokenPriceHistory(std::string address, int days) {
   std::stringstream query;
-  std::transform(address.begin(), address.end(), address.begin(), ::tolower);
+  address = Utils::toLowerCaseAddress(address);
   query << "{\"query\": \"{"
         << "tokenDayDatas(first: " << days << ", orderBy: date, orderDirection: desc, where: {"
         << "token: \\\"" << address << "\\\""
@@ -183,22 +183,23 @@ json Graph::getAccountPrices(std::vector<ARC20Token> tokenList) {
   json ret;
   // Get USD AVAX price with ID USDAVAX.
   query << "{\"query\": \"{"
-      << "USDAVAX: pair(id: \\\"0x9ee0a4e21bd333a6bb2ab298194320b8daa26516\\\")"
-      << "{token0 {symbol} token1 {symbol} token0Price token1Price}";
-      
-  // Request USD Price for each token. Using token_contract as ID
+        << "USDAVAX: pair(id: \\\"0x9ee0a4e21bd333a6bb2ab298194320b8daa26516\\\")"
+        << "{token0 {symbol} token1 {symbol} token0Price token1Price}";
 
+  // Request USD Price for each token. Using token_contract as ID
   for (auto token : tokenList) {
-    std::transform(token.address.begin(), token.address.end(), token.address.begin(), ::tolower);
+    token.address = Utils::toLowerCaseAddress(token.address);
     query << "token_" << token.address << ": token(id: \\\"" << token.address << "\\\")"
     << "{symbol derivedETH}";
     query << "chart_" << token.address << ": tokenDayDatas(first: 31, orderBy: date, orderDirection: desc, where: {";
     query << "token: \\\"" << token.address << "\\\"" << "} ) { date priceUSD id }";
   }
+
   // Add AVAX Price chart to the query
   query << "AVAXUSDCHART: tokenDayDatas(first: 31, orderBy: date, orderDirection: desc, where: {"
-      << "token: \\\"0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7\\\""
-      << "} ) { date priceUSD }";
+        << "token: \\\"0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7\\\""
+        << "} ) { date priceUSD }";
+
   // Close the query
   query << "}\"}";
   std::string resp = httpGetRequest(query.str());

@@ -4,6 +4,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <cctype> // toupper()
 #include <chrono>
 #include <string>
 
@@ -93,6 +94,14 @@ namespace Utils {
   void logToDebug(std::string debug);
 
   /**
+   * Convert a given address to lower/camel-case (checksum), respectively.
+   * Camel case process was adapted from Ethereum's EIP55:
+   * https://github.com/ethereum/EIPs/issues/55
+   */
+  std::string toLowerCaseAddress(std::string address);
+  std::string toCamelCaseAddress(std::string address);
+
+  /**
    * Generate a random 16-byte Hex to be used as a tag/ID.
    * the respective byte array
    */
@@ -172,7 +181,6 @@ namespace Utils {
    * *not* to be confused with json::dump()
    */ 
   std::string jsonToStr(json& obj);
-
 };
 
 #endif  // UTILS_H

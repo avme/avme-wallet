@@ -243,7 +243,7 @@ void QmlSystem::getAccountAllBalances(QString address) {
             ++pos;
           }
           // Due to GraphQL limitations, we need convert everything to lowercase
-          std::transform(id.second.begin(), id.second.end(), id.second.begin(), ::tolower);
+          id.second = Utils::toLowerCaseAddress(id.second);
           std::string tokenDerivedPriceStr = tokensPrices["data"][id.second]["derivedETH"].get<std::string>();
           bigfloat tokenDerivedPrice = boost::lexical_cast<bigfloat>(tokenDerivedPriceStr);
           std::string hexBal = balance["result"].get<std::string>();
@@ -261,7 +261,7 @@ void QmlSystem::getAccountAllBalances(QString address) {
           std::string chartAddress = "chart_" + tokenList[pos].address;
 
           // Again, we need to convert to lowercase and append chart_ as prefix
-          std::transform(chartAddress.begin(), chartAddress.end(), chartAddress.begin(), ::tolower);
+          chartAddress = Utils::toLowerCaseAddress(chartAddress);
           std::string tokenChartData = tokensPrices["data"][chartAddress].dump();
           json tokenInformation;
           tokenInformation["tokenAddress"] = tokenList[pos].address;

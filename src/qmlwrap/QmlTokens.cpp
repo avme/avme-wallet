@@ -24,7 +24,7 @@ QVariantList QmlSystem::getARC20Tokens() {
 }
 
 void QmlSystem::downloadARC20TokenImage(QString address) {
-  std::string addressStr = address.toStdString();
+  std::string addressStr = Utils::toCamelCaseAddress(address.toStdString());
   boost::filesystem::path filePath = Utils::walletFolderPath.string()
     + "/wallet/c-avax/tokens/icons";
   if (!boost::filesystem::exists(filePath)) {
@@ -65,7 +65,7 @@ QString QmlSystem::getAVMEAddress() {
 }
 
 bool QmlSystem::ARC20TokenExists(QString address) {
-  std::string addressStr = address.toStdString();
+  std::string addressStr = Utils::toCamelCaseAddress(address.toStdString());
   json supplyJson, balanceJson;
   json supplyJsonArr = json::array();
   json balanceJsonArr = json::array();
@@ -93,34 +93,44 @@ bool QmlSystem::ARC20TokenExists(QString address) {
 }
 
 QVariantMap QmlSystem::getARC20TokenData(QString address) {
-  std::string addressStr = address.toStdString();
-  json nameJson, symbolJson, decimalsJson;
+  std::string addressStr = Utils::toCamelCaseAddress(address.toStdString());
+  json nameJson, symbolJson, decimalsJson, pairJson;
   nameJson["to"] = symbolJson["to"] = decimalsJson["to"] = addressStr;
+  pairJson["to"] = Pangolin::contracts["factory"];
   nameJson["data"] = Pangolin::ERC20Funcs["name"];
   symbolJson["data"] = Pangolin::ERC20Funcs["symbol"];
   decimalsJson["data"] = Pangolin::ERC20Funcs["decimals"];
+  pairJson["data"] = Pangolin::factoryFuncs["getPair"]
+    + Utils::addressToHex(addressStr)
+    + Utils::addressToHex(Pangolin::contracts["AVAX"]);
   Request nameReq{1, "2.0", "eth_call", {nameJson, "latest"}};
   Request symbolReq{1, "2.0", "eth_call", {symbolJson, "latest"}};
   Request decimalsReq{1, "2.0", "eth_call", {decimalsJson, "latest"}};
+  Request pairReq{1, "2.0", "eth_call", {pairJson, "latest"}};
   std::string nameQuery, nameResp, nameHex, symbolQuery, symbolResp, symbolHex,
-    decimalsQuery, decimalsResp, decimalsHex;
+    decimalsQuery, decimalsResp, decimalsHex, pairQuery, pairResp, pairHex;
   nameQuery = API::buildRequest(nameReq);
   symbolQuery = API::buildRequest(symbolReq);
   decimalsQuery = API::buildRequest(decimalsReq);
+  pairQuery = API::buildRequest(pairReq);
   nameResp = API::httpGetRequest(nameQuery);
   symbolResp = API::httpGetRequest(symbolQuery);
   decimalsResp = API::httpGetRequest(decimalsQuery);
+  pairResp = API::httpGetRequest(pairQuery);
   json nameRespJson = json::parse(nameResp);
   json symbolRespJson = json::parse(symbolResp);
   json decimalsRespJson = json::parse(decimalsResp);
+  json pairRespJson = json::parse(pairResp);
   nameHex = nameRespJson["result"].get<std::string>();
   symbolHex = symbolRespJson["result"].get<std::string>();
   decimalsHex = decimalsRespJson["result"].get<std::string>();
+  pairHex = pairRespJson["result"].get<std::string>();
   ARC20Token token;
   token.address = addressStr;
   token.name = Utils::stringFromHex(nameHex);
   token.symbol = Utils::stringFromHex(symbolHex);
   token.decimals = boost::lexical_cast<int>(Utils::uintFromHex(decimalsHex));
+  token.avaxPairContract = Utils::addressFromHex(pairHex);
   QVariantMap tokenObj;
   tokenObj.insert("address", QString::fromStdString(token.address));
   tokenObj.insert("symbol", QString::fromStdString(token.symbol));
@@ -131,10 +141,8 @@ QVariantMap QmlSystem::getARC20TokenData(QString address) {
 }
 
 bool QmlSystem::ARC20TokenWasAdded(QString address) {
-  std::string addressStr = address.toStdString();
+  std::string addressStr = Utils::toCamelCaseAddress(address.toStdString());
   std::string avmeStr = Pangolin::contracts["AVME"];
-  std::transform(addressStr.begin(), addressStr.end(), addressStr.begin(), ::tolower);
-  std::transform(avmeStr.begin(), avmeStr.end(), avmeStr.begin(), ::tolower);
   if (addressStr == avmeStr) { return true; }
   return QmlSystem::w.ARC20TokenWasAdded(addressStr);
 }
