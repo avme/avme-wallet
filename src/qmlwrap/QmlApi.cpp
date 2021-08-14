@@ -32,7 +32,11 @@ QStringList QmlApi::parseHex(QString hexStr, QStringList types) {
   std::vector<std::string> typesVec, parsed;
   QStringList ret;
   for (QString type : types) { typesVec.push_back(type.toStdString()); }
-  parsed = Pangolin::parseHex(hexStr.toStdString(), typesVec);
+  try {
+    parsed = Pangolin::parseHex(hexStr.toStdString(), typesVec);
+  } catch (std::exception &e) {
+    Utils::logToDebug(std::string("parseHex: ") + e.what());
+  }
   for (std::string value : parsed) { ret << QString::fromStdString(value); }
   return ret;
 }

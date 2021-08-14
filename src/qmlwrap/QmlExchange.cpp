@@ -71,13 +71,13 @@ void QmlSystem::updateLiquidityData(QString tokenNameA, QString tokenNameB) {
 }
 
 QString QmlSystem::calculateExchangeAmount(
-  QString amountIn, QString reservesIn, QString reservesOut
+  QString amountIn, QString reservesIn, QString reservesOut, int inDecimals, int outDecimals
 ) {
-  std::string amountInWei = Utils::fixedPointToWei(amountIn.toStdString(), 18);
+  std::string amountInWei = Utils::fixedPointToWei(amountIn.toStdString(), inDecimals);
   std::string amountOut = Pangolin::calcExchangeAmountOut(
     amountInWei, reservesIn.toStdString(), reservesOut.toStdString()
   );
-  amountOut = Utils::weiToFixedPoint(amountOut, 18);
+  amountOut = Utils::weiToFixedPoint(amountOut, outDecimals);
   return QString::fromStdString(amountOut);
 }
 

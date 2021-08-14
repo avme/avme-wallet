@@ -380,7 +380,7 @@ class QmlSystem : public QObject {
      * coin/token exchange, respectively
      */
     Q_INVOKABLE QString calculateExchangeAmount(
-      QString amountIn, QString reservesIn, QString reservesOut
+      QString amountIn, QString reservesIn, QString reservesOut, int inDecimals, int outDecimals
     );
     Q_INVOKABLE double calculateExchangePriceImpact(
       QString tokenAmount, QString tokenInput, int tokenDecimals

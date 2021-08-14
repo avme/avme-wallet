@@ -14,9 +14,39 @@ AVMEPanel {
   title: "Exchange Details"
   property string allowance
   property string pairAddress
-  property string inReserves
-  property string outReserves
+  property var reservesList: {[]}
+  /**
+   * reserves example:
+   * Single token swap (e.g AVME -> AVAX)
+   * 
+   *  [
+   *    {
+   *      pair: "0xabcd..."
+   *      reservesIn: "xxx"
+   *      reservesOut: "xxx"  
+   *    }
+   *  ]
+   * 
+   *   * Multiple token swap (e.g AVME -> WAVAX -> SNOB)
+   *  [
+   *    {
+   *      pair: "0xabcd..."
+   *      reservesIn: "xxx"
+   *      reservesOut: "xxx"  
+   *    },
+   *    {
+   *      pair: "0xabcd..."
+   *      reservesIn: "xxx"
+   *      reservesOut: "xxx"  
+   *    }
+   *  ]
+   */
+  property var pairAddresses: ([])
   property string swapEstimate
+  property string pairTokenInAddress
+  property string pairTokenOutAddress
+  property bool needRoute
+  property bool isLoading
   property double swapImpact
   property alias amount: swapInput.text
   property alias swapBtn: btnSwap
@@ -32,9 +62,27 @@ AVMEPanel {
     target: qmlApi
     function onApiRequestAnswered(answer, requestID) {
       if (requestID == "QmlExchange_fetchAllowance") {
-        var resp = JSON.parse(answer)
-        allowance = qmlApi.parseHex(resp[0].result, ["uint"])
-        pairAddress = qmlApi.parseHex(resp[1].result, ["address"])
+        var respArr = JSON.parse(answer)
+        needRoute = false;
+        allowance = ""
+        pairAddress = ""
+        pairTokenInAddress = ""
+        pairTokenOutAddress = ""
+        // Loop the answer, as we know, API requests can answer unordered.
+        for (var answerItem in respArr) {
+          if (respArr[answerItem]["id"] == 1) {
+            allowance = qmlApi.parseHex(respArr[answerItem].result, ["uint"])
+          }
+          if (respArr[answerItem]["id"] == 2) {
+            pairAddress = qmlApi.parseHex(respArr[answerItem].result, ["address"])
+          }
+          if (respArr[answerItem]["id"] == 3) {
+            pairTokenInAddress = qmlApi.parseHex(respArr[answerItem].result, ["address"])
+          }
+          if (respArr[answerItem]["id"] == 4) {
+            pairTokenOutAddress = qmlApi.parseHex(respArr[answerItem].result, ["address"])
+          }
+        }
         // AVAX doesn't need approval, tokens do (and individually)
         if (fromAssetPopup.chosenAssetSymbol == "AVAX") {
           exchangeDetailsColumn.visible = true
@@ -44,30 +92,112 @@ AVMEPanel {
             asset["rawBalance"], fromAssetPopup.chosenAssetDecimals
           ))
         }
+
         qmlApi.clearAPIRequests("QmlExchange_refreshReserves")
-        qmlApi.buildGetReservesReq(pairAddress, "QmlExchange_refreshReserves")
+        // Check if reserves for optimal pair exists
+        // If not, get request for pair tokenIn/WAVAX/tokenOut
+        pairAddresses = ([])
+        if (pairAddress == "0x0000000000000000000000000000000000000000") {
+          needRoute = true;
+          // id 1 == first Pair reserves
+          // id 2 == second Pair reserves
+          qmlApi.buildGetReservesReq(pairTokenInAddress, "QmlExchange_refreshReserves")
+          qmlApi.buildGetReservesReq(pairTokenOutAddress, "QmlExchange_refreshReserves")
+          pairAddresses.push(pairTokenInAddress)
+          pairAddresses.push(pairTokenOutAddress)
+        } else {
+          // id 1 == pairAddress reserves
+          pairAddresses.push(pairAddress)
+          qmlApi.buildGetReservesReq(pairAddress, "QmlExchange_refreshReserves")
+        }
         qmlApi.doAPIRequests("QmlExchange_refreshReserves")
       } else if (requestID == "QmlExchange_refreshReserves") {
         var resp = JSON.parse(answer)
-        var reserves = qmlApi.parseHex(resp[0].result, ["uint", "uint", "uint"])
-        var lowerAddress = qmlSystem.getFirstFromPair(
-          fromAssetPopup.chosenAssetAddress, toAssetPopup.chosenAssetAddress
-        )
-        if (lowerAddress == fromAssetPopup.chosenAssetAddress) {
-          inReserves = reserves[0]
-          outReserves = reserves[1]
-        } else if (lowerAddress == toAssetPopup.chosenAssetAddress) {
-          inReserves = reserves[1]
-          outReserves = reserves[0]
+        reservesList = ([])
+        if (!needRoute) {
+          var reservesAnswer = qmlApi.parseHex(resp[0].result, ["uint", "uint", "uint"])
+          var reserves = ({})
+          var lowerAddress = qmlSystem.getFirstFromPair(
+            fromAssetPopup.chosenAssetAddress, toAssetPopup.chosenAssetAddress
+          )
+          if (lowerAddress == fromAssetPopup.chosenAssetAddress) {
+            reserves["inReserves"] = reservesAnswer[0]
+            reserves["outReserves"] = reservesAnswer[1]
+          } else if (lowerAddress == toAssetPopup.chosenAssetAddress) {
+            reserves["inReserves"] = reservesAnswer[1]
+            reserves["outReserves"] = reservesAnswer[0]
+          }
+          reserves["pair"] = pairAddress
+          reservesList.push(reserves)
+        } else {
+          // API can answer UNORDERED! we need to keep track properly
+          var reservesTokenIn = ({})
+          var reservesTokenOut = ({})
+          for (var i = 0; i < resp.length; ++i) {
+            // ID = 1 means reservesTokenIn
+            // ID = 2 means reservesTokenOut
+            if (resp[i]["id"] == 1) {
+              var reservesAnswer = qmlApi.parseHex(resp[i].result, ["uint", "uint", "uint"])
+              var reserves = ({})
+              var lowerAddress = qmlSystem.getFirstFromPair(
+                fromAssetPopup.chosenAssetAddress, qmlSystem.getContract("AVAX")
+              )
+              if (lowerAddress == fromAssetPopup.chosenAssetAddress) {
+                reserves["inReserves"] = reservesAnswer[0]
+                reserves["outReserves"] = reservesAnswer[1]
+              } else if (lowerAddress == qmlSystem.getContract("AVAX")) {
+                reserves["inReserves"] = reservesAnswer[1]
+                reserves["outReserves"] = reservesAnswer[0]
+              }
+              reserves["pair"] = pairAddresses[0]
+              reservesList.push(reserves)
+            }
+            if (resp[i]["id"] == 2) {
+              var reservesAnswer = qmlApi.parseHex(resp[i].result, ["uint", "uint", "uint"])
+              var reserves = ({})
+              var lowerAddress = qmlSystem.getFirstFromPair(
+                toAssetPopup.chosenAssetAddress, qmlSystem.getContract("AVAX")
+              )
+              if (lowerAddress == qmlSystem.getContract("AVAX")) {
+                reserves["inReserves"] = reservesAnswer[0]
+                reserves["outReserves"] = reservesAnswer[1]
+              } else if (lowerAddress == toAssetPopup.chosenAssetAddress) {
+                reserves["inReserves"] = reservesAnswer[1]
+                reserves["outReserves"] = reservesAnswer[0]
+              }
+              reserves["pair"] = pairAddresses[1]
+              reservesList.push(reserves)
+            }
+          }
         }
+        isLoading = false
       }
     }
   }
 
+  function calculateExchangeAmount(amountIn, inDecimals, outDecimals) {
+    if (!needRoute) {
+      amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[0]["inReserves"], reservesList[0]["outReserves"], inDecimals, outDecimals)
+    } else {
+      amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[0]["inReserves"], reservesList[0]["outReserves"], inDecimals, 18)
+      amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[1]["inReserves"], reservesList[1]["outReserves"], 18, outDecimals)
+    }
+    return amountIn
+  }
+
+  function calculatePriceImpact(amountIn, inDecimals, outDecimals) {
+    return qmlSystem.calculateExchangePriceImpact(reservesList[0]["inReserves"], amountIn, inDecimals)
+  }
+
   function fetchAllowance() {
     refreshAssetBalance()
-    swapInput.text = swapEstimate = swapImpact = inReserves = outReserves = ""
+    swapInput.text = swapEstimate = swapImpact = ""
+    needRoute = false
+    reservesList = ([])
+    isLoading = true
     qmlApi.clearAPIRequests("QmlExchange_fetchAllowance")
+    // Get allowance for inToken and reserves for all
+    // Including reserves for both in/out tokens agaisnt WAVAX
     qmlApi.buildGetAllowanceReq(
       fromAssetPopup.chosenAssetAddress,
       qmlSystem.getCurrentAccount(),
@@ -79,6 +209,20 @@ AVMEPanel {
       toAssetPopup.chosenAssetAddress,
       "QmlExchange_fetchAllowance"
     )
+    qmlApi.buildGetPairReq(
+      fromAssetPopup.chosenAssetAddress,
+      qmlSystem.getContract("AVAX"),
+      "QmlExchange_fetchAllowance"
+    )
+    qmlApi.buildGetPairReq(
+      qmlSystem.getContract("AVAX"),
+      toAssetPopup.chosenAssetAddress,
+      "QmlExchange_fetchAllowance"
+    )
+    // id 1: allowance for inToken
+    // id 2: Pair contract for inToken/outToken
+    // id 3: Pair contract for inToken/WAVAX
+    // id 4: Pair contract for outToken/WAVAX
     qmlApi.doAPIRequests("QmlExchange_fetchAllowance")
   }
 
@@ -266,16 +410,12 @@ AVMEPanel {
       validator: RegExpValidator {
         regExp: qmlSystem.createTxRegExp(fromAssetPopup.chosenAssetDecimals)
       }
-      enabled: (inReserves != "" && outReserves != "")
+      enabled: (!isLoading)
       label: fromAssetPopup.chosenAssetSymbol + " Amount"
       placeholder: (enabled) ? "Fixed point amount (e.g. 0.5)" : "Loading reserves..."
       onTextEdited: {
-        swapEstimate = qmlSystem.calculateExchangeAmount(
-          swapInput.text, inReserves, outReserves
-        )
-        swapImpact = qmlSystem.calculateExchangePriceImpact(
-          inReserves, swapInput.text, 18
-        )
+        swapEstimate = calculateExchangeAmount(swapInput.text, fromAssetPopup.chosenAssetDecimals, toAssetPopup.chosenAssetDecimals)
+        swapImpact = calculatePriceImpact(swapInput.text, fromAssetPopup.chosenAssetDecimals, toAssetPopup.chosenAssetDecimals)
       }
 
       AVMEButton {
@@ -292,12 +432,8 @@ AVMEPanel {
               accountHeader.coinRawBalance, "180000", qmlSystem.getAutomaticFee()
             )
             : accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]["rawBalance"]
-          swapEstimate = qmlSystem.calculateExchangeAmount(
-            swapInput.text, inReserves, outReserves
-          )
-          swapImpact = qmlSystem.calculateExchangePriceImpact(
-            inReserves, swapInput.text, 18
-          )
+          swapEstimate = calculateExchangeAmount(swapInput.text, fromAssetPopup.chosenAssetDecimals, toAssetPopup.chosenAssetDecimals)
+          swapImpact = calculatePriceImpact(swapInput.text, fromAssetPopup.chosenAssetDecimals, toAssetPopup.chosenAssetDecimals)
         }
       }
     }
