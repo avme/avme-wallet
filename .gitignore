@@ -3,3 +3,4 @@ build/
 .directory
 *.kate-swp
 src/version.h
+.vscode/*.*
