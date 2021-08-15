@@ -274,30 +274,7 @@ Item {
             text: "Approve"
           }
         }
-        /*
-        // TODO: this
-        onClicked: {
-          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
-          if (!qmlSystem.isApproved(acc.balanceLPFree, allowance)) {
-            qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-            qmlSystem.operationOverride("Approve Staking", "", "", "")
-          } else if (isStaking) {
-            if (qmlSystem.hasInsufficientFunds("LP", acc.balanceLPFree, stakeInput.text)) {
-              fundsPopup.open()
-            } else {
-              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              qmlSystem.operationOverride("Stake LP", "", "", stakeInput.text)
-            }
-          } else {
-            if (qmlSystem.hasInsufficientFunds("LP", acc.balanceLPLocked, stakeInput.text)) {
-              fundsPopup.open()
-            } else {
-              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              qmlSystem.operationOverride("Unstake LP", "", "", stakeInput.text)
-            }
-          }
-        }
-        */
+        // TODO: transaction logic
       }
     }
   }
@@ -368,10 +345,7 @@ Item {
           )
         }
         text: (reward != "") ? "Harvest AVME & Unstake LP" : "Querying reward..."
-        onClicked: {
-          qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-          qmlSystem.operationOverride("Exit Staking", "", "", "")
-        }
+        // TODO: transaction logic
       }
 
       AVMEButton {
@@ -380,10 +354,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: (reward != "" && !qmlSystem.balanceIsZero(reward, 18))
         text: (reward != "") ? "Harvest AVME" : "Querying reward..."
-        onClicked: {
-          qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-          qmlSystem.operationOverride("Harvest AVME", "", "", "")
-        }
+        // TODO: transaction logic
       }
     }
   }
@@ -522,27 +493,7 @@ Item {
             text: "Approve"
           }
         }
-        onClicked: {
-          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
-          if (!qmlSystem.isApproved(acc.balanceLPFree, compoundallowance)) {
-            qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-            qmlSystem.operationOverride("Approve Compound", "", "", "")
-          } else if (isyyCompound) {
-            if (qmlSystem.hasInsufficientFunds("LP", acc.balanceLPFree, compoundInput.text)) {
-              fundsPopup.open()
-            } else {
-              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              qmlSystem.operationOverride("Stake Compound LP", "", "", compoundInput.text)
-            }
-          } else {
-            if (qmlSystem.hasInsufficientFunds("LP", acc.balanceLockedCompoundLP, compoundInput.text)) {
-              fundsPopup.open()
-            } else {
-              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              qmlSystem.operationOverride("Unstake Compound LP", "", "", compoundInput.text)
-            }
-          }
-        }
+        // TODO: transaction logic
       }
     }
   }
@@ -617,10 +568,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         enabled: (reinvestreward != "" && !qmlSystem.balanceIsZero(reinvestreward, 18))
         text: (reinvestreward != "") ? "Reinvest AVME" : "Querying Reinvest..."
-        onClicked: {
-          qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-          qmlSystem.operationOverride("Reinvest AVME", "", "", "")
-        }
+        // TODO: transaction logic
       }
     }
 

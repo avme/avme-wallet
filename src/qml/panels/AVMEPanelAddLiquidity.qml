@@ -405,36 +405,7 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       enabled: (addAsset1Input.acceptableInput && addAsset2Input.acceptableInput)
       text: "Add to the pool"
-      /*
-      // TODO: this
-      onClicked: {
-        var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
-        if (addToPool) {
-          if (!qmlSystem.isApproved(liquidityTokenInput.text, allowance)) {
-            qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-            qmlSystem.operationOverride("Approve Exchange", "", "", "")
-          } else if (
-            qmlSystem.hasInsufficientFunds(
-              "Coin", qmlSystem.getRealMaxAVAXAmount("250000", qmlSystem.getAutomaticFee()),
-              liquidityCoinInput.text
-            ) || qmlSystem.hasInsufficientFunds("Token", acc.balanceAVME, liquidityTokenInput.text)
-          ) {
-            fundsPopup.open()
-          } else {
-            qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-            qmlSystem.operationOverride("Add Liquidity", liquidityCoinInput.text, liquidityTokenInput.text, "")
-          }
-        } else {
-          if (!qmlSystem.isApproved(removeLPEstimate, removeAllowance)) {
-            qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-            qmlSystem.operationOverride("Approve Liquidity", "", "", "")
-          } else {
-            qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-            qmlSystem.operationOverride("Remove Liquidity", "", "", removeLPEstimate)
-          }
-        }
-      }
-      */
+      // TODO: transaction logic
     }
   }
 }
