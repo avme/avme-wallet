@@ -8,39 +8,38 @@ import QmlApi 1.0
 
 import "qrc:/qml/components"
 
-// Panel for exchanging coins/tokens in a given Account
+/**
+ * Panel for exchanging coins/tokens in a given Account.
+ * Example for reserves:
+ * Single token swap (e.g AVME -> AVAX)
+ *  [
+ *    {
+ *      pair: "0xabcd..."
+ *      reservesIn: "xyz"
+ *      reservesOut: "xyz"
+ *    }
+ *  ]
+ *
+ * Multiple token swap (e.g AVME -> AVAX, then AVAX -> SNOB)
+ * [
+ *   {
+ *     pair: "0xabcd..."
+ *     reservesIn: "xyz"
+ *     reservesOut: "xyz"
+ *   },
+ *   {
+ *     pair: "0xabcd..."
+ *     reservesIn: "xyz"
+ *     reservesOut: "xyz"
+ *   }
+ * ]
+ */
 AVMEPanel {
   id: exchangePanel
   title: "Exchange Details"
   property string allowance
   property string pairAddress
   property var reservesList: {[]}
-  /**
-   * reserves example:
-   * Single token swap (e.g AVME -> AVAX)
-   * 
-   *  [
-   *    {
-   *      pair: "0xabcd..."
-   *      reservesIn: "xxx"
-   *      reservesOut: "xxx"  
-   *    }
-   *  ]
-   * 
-   *   * Multiple token swap (e.g AVME -> WAVAX -> SNOB)
-   *  [
-   *    {
-   *      pair: "0xabcd..."
-   *      reservesIn: "xxx"
-   *      reservesOut: "xxx"  
-   *    },
-   *    {
-   *      pair: "0xabcd..."
-   *      reservesIn: "xxx"
-   *      reservesOut: "xxx"  
-   *    }
-   *  ]
-   */
   property var pairAddresses: ([])
   property string swapEstimate
   property string pairTokenInAddress
@@ -500,7 +499,7 @@ AVMEPanel {
       color: "#FFFFFF"
       font.pixelSize: 14.0
       text: "You need to approve your Account in order to swap <b>"
-      + fromAssetPopup.chosenAssetSymbol + "</b>." 
+      + fromAssetPopup.chosenAssetSymbol + "</b>."
       + "<br>This operation will have a total gas cost of:<br><b>"
       + qmlSystem.calculateTransactionCost("0", "180000", qmlSystem.getAutomaticFee())
       + " AVAX</b>"
@@ -631,39 +630,6 @@ AVMEPanel {
       )
       text: (swapImpact <= 10.0 || ignoreImpactCheck.checked)
       ? "Make Swap" : "Price impact too high"
-      /*
-      onClicked: {
-        if (!qmlSystem.isApproved(swapInput.text, allowance)) {
-          qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-          qmlSystem.operationOverride("Approve Exchange", "", "", "")
-        } else if (coinToToken) {
-          if (qmlSystem.balanceIsZero(swapInput.text, 18)) {
-            zeroSwapPopup.open()
-          } else {
-            if (qmlSystem.hasInsufficientFunds(
-              "Coin", qmlSystem.getRealMaxAVAXAmount("180000", qmlSystem.getAutomaticFee()), swapInput.text
-            )) {
-              fundsPopup.open()
-            } else {
-              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              qmlSystem.operationOverride("Swap AVAX -> AVME", swapInput.text, swapEstimate, "")
-            }
-          }
-        } else {
-          var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
-          if (qmlSystem.balanceIsZero(swapInput.text, 18)) {
-            zeroSwapPopup.open()
-          } else {
-            if (qmlSystem.hasInsufficientFunds("Token", acc.balanceAVME, swapInput.text)) {
-              fundsPopup.open()
-            } else {
-              qmlSystem.setScreen(content, "qml/screens/TransactionScreen.qml")
-              qmlSystem.operationOverride("Swap AVME -> AVAX", swapEstimate, swapInput.text, "")
-            }
-          }
-        }
-      }
-      */
     }
   }
 }

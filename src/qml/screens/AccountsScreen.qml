@@ -8,10 +8,7 @@ import "qrc:/qml/components"
 import "qrc:/qml/panels"
 import "qrc:/qml/popups"
 
-/**
- * Screen for listing and managing Accounts in the Wallet.
- * TODO: merge Ledger popup into this
- */
+// Screen for listing and managing Accounts in the Wallet.
 Item {
   id: accountsScreen
 

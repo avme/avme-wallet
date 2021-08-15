@@ -157,7 +157,8 @@ AVMEPopup {
           if (!qmlSystem.checkWalletPass(passInput.text)) {
             infoTimer.start()
           } else {
-            txProgressPopup.open();
+            confirmTxPopup.close()
+            txProgressPopup.open()
             qmlSystem.txStart(
               operation, from, to, value, txData, gas, gasPrice, passInput.text
             )

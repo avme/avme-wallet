@@ -10,7 +10,6 @@ import "qrc:/qml/panels"
 import "qrc:/qml/popups"
 
 // Starting screen (for managing Wallets)
-// TODO: set Ledger flag
 
 Item {
   id: startScreen
@@ -33,6 +32,7 @@ Item {
     }
     function onWalletLoaded(success) {
       if (success) {
+        qmlSystem.setLedgerFlag(false)
         if (createAndLoad) {
           infoPopup.info = "Creating an Account<br>for the new Wallet..."
           qmlSystem.createAccount(

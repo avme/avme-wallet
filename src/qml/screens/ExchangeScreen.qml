@@ -34,6 +34,26 @@ Item {
     }
   }
 
+  // op = "approval" or "exchange"
+  function checkLedger(op) {
+    var data = qmlSystem.checkForLedger()
+    if (data.state) {
+      ledgerFailPopup.close()
+      ledgerRetryTimer.stop()
+      if (op == "approval") {
+        confirmApprovalPopup.open()
+      } else if (op == "exchange") {
+        confirmExchangePopup.open()
+      }
+    } else {
+      ledgerFailPopup.info = data.message
+      ledgerFailPopup.open()
+      ledgerRetryTimer.start()
+    }
+  }
+
+  Timer { id: ledgerRetryTimer; interval: 250; onTriggered: parent.checkLedger() }
+
   AVMEPanelExchange {
     id: exchangePanel
     width: (parent.width * 0.5)
@@ -46,20 +66,24 @@ Item {
     approveBtn.onClicked: {
       if (!checkTransactionFunds()) {
         fundsPopup.open()
+      } else {
+        exchangePanel.approveTx()
+        confirmApprovalPopup.setData(
+          exchangePanel.to,
+          exchangePanel.coinValue,
+          exchangePanel.txData,
+          exchangePanel.gas,
+          exchangePanel.gasPrice,
+          exchangePanel.automaticGas,
+          exchangePanel.info,
+          exchangePanel.historyInfo
+        )
+        if (qmlSystem.getLedgerFlag()) {
+          checkLedger("approval")
+        } else {
+          confirmApprovalPopup.open()
+        }
       }
-      exchangePanel.approveTx()
-
-      confirmApprovalPopup.setData(
-        exchangePanel.to,
-        exchangePanel.coinValue, 
-        exchangePanel.txData, 
-        exchangePanel.gas, 
-        exchangePanel.gasPrice, 
-        exchangePanel.automaticGas, 
-        exchangePanel.info, 
-        exchangePanel.historyInfo
-       )
-      confirmApprovalPopup.open()
     }
     swapBtn.onClicked: {
       if (!checkTransactionFunds()) {
@@ -68,21 +92,19 @@ Item {
         exchangePanel.swapTx(exchangePanel.amountIn, exchangePanel.swapEstimate)
         confirmExchangePopup.setData(
           exchangePanel.to,
-          exchangePanel.coinValue, 
-          exchangePanel.txData, 
-          exchangePanel.gas, 
-          exchangePanel.gasPrice, 
-          exchangePanel.automaticGas, 
-          exchangePanel.info, 
+          exchangePanel.coinValue,
+          exchangePanel.txData,
+          exchangePanel.gas,
+          exchangePanel.gasPrice,
+          exchangePanel.automaticGas,
+          exchangePanel.info,
           exchangePanel.historyInfo
         )
-        // TODO: fix Ledger
-        //if (qmlSystem.getLedgerFlag()) {
-        //  checkLedger()
-        //} else {
-        //  confirmExchangePopup.open()
-        //}
-        confirmExchangePopup.open()
+        if (qmlSystem.getLedgerFlag()) {
+          checkLedger("exchange")
+        } else {
+          confirmExchangePopup.open()
+        }
       }
     }
   }
@@ -137,16 +159,23 @@ Item {
     info: "You will approve "
     + "<b>" + fromAssetPopup.chosenAssetSymbol + "</b>"
     + " swapping for the current address"
-    okBtn.onClicked: {} // TODO
   }
   AVMEPopupConfirmTx {
     id: confirmExchangePopup
     info: "You will swap "
     + "<b>" + exchangePanel.amount + " " + fromAssetPopup.chosenAssetSymbol + "</b><br>"
     + "for <b>" + exchangePanel.swapEstimate + " " + toAssetPopup.chosenAssetSymbol + "</b>"
-    okBtn.onClicked: {} // TODO
   }
+
   AVMEPopupTxProgress {
     id: txProgressPopup
+  }
+
+  // Info popup for if communication with Ledger fails
+  AVMEPopupInfo {
+    id: ledgerFailPopup
+    icon: "qrc:/img/warn.png"
+    onAboutToHide: ledgerRetryTimer.stop()
+    okBtn.text: "Close"
   }
 }

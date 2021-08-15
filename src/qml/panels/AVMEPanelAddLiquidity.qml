@@ -8,8 +8,6 @@ import QmlApi 1.0
 
 import "qrc:/qml/components"
 
-// TODO: think about token -> WAVAX -> token swaps (those are complicated)
-
 // Panel for adding liquidity to a pool.
 AVMEPanel {
   id: addLiquidityPanel
@@ -23,6 +21,7 @@ AVMEPanel {
   property string pairAddress
   property alias add1Amount: addAsset1Input.text
   property alias add2Amount: addAsset2Input.text
+  property alias addBtn: addLiquidityBtn
 
   QmlApi { id: qmlApi }
 

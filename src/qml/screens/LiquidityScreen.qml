@@ -12,6 +12,30 @@ import "qrc:/qml/popups"
 Item {
   id: liquidityScreen
 
+  // op = "approval_add", "approval_remove", "add" or "remove"
+  function checkLedger(op) {
+    var data = qmlSystem.checkForLedger()
+    if (data.state) {
+      ledgerFailPopup.close()
+      ledgerRetryTimer.stop()
+      if (op == "approval_add") {
+        confirmAddApprovalPopup.open()
+      } else if (op == "approval_remove") {
+        confirmRemoveApprovalPopup.open()
+      } else if (op == "add") {
+        confirmAddLiquidityPopup.open()
+      } else if (op == "remove") {
+        confirmRemoveLiquidityPopup.open()
+      }
+    } else {
+      ledgerFailPopup.info = data.message
+      ledgerFailPopup.open()
+      ledgerRetryTimer.start()
+    }
+  }
+
+  Timer { id: ledgerRetryTimer; interval: 250; onTriggered: parent.checkLedger() }
+
   AVMEPanelAddLiquidity {
     id: addLiquidityPanel
     width: (parent.width * 0.5) - (anchors.margins / 2)
@@ -110,7 +134,6 @@ Item {
     + (!addLiquidityPanel.asset1Approved && !addLiquidityPanel.asset2Approved) ? " and " : ""
     + (!addLiquidityPanel.asset2Approved) ? addAsset2Popup.chosenAssetSymbol : ""
     + " to be added to the pool for the current address"
-    okBtn.onClicked: {} // TODO
   }
   AVMEPopupConfirmTx {
     id: confirmRemoveApprovalPopup
@@ -118,7 +141,6 @@ Item {
     + "<b>" + removeAsset1Popup.chosenAssetSymbol + "/"
     + removeAsset2Popup.chosenAssetSymbol + " LP</b>"
     + " to be removed from the pool for the current address"
-    okBtn.onClicked: {} // TODO
   }
   AVMEPopupConfirmTx {
     id: confirmAddLiquidityPopup
@@ -127,7 +149,6 @@ Item {
     + "</b><br>and <b>"
     + addLiquidityPanel.add2Amount + " " + addAsset2Popup.chosenAssetSymbol
     + "</b> to the pool"
-    okBtn.onClicked: {} // TODO
   }
   AVMEPopupConfirmTx {
     id: confirmRemoveLiquidityPopup
@@ -135,6 +156,17 @@ Item {
     + "<b>" + removeLiquidityPanel.removeLPEstimate + " "
     + removeAsset1Popup.chosenAssetSymbol + "/" + removeAsset2Popup.chosenAssetSymbol
     + " LP</b> from the pool"
-    okBtn.onClicked: {} // TODO
+  }
+
+  AVMEPopupTxProgress {
+    id: txProgressPopup
+  }
+
+  // Info popup for if communication with Ledger fails
+  AVMEPopupInfo {
+    id: ledgerFailPopup
+    icon: "qrc:/img/warn.png"
+    onAboutToHide: ledgerRetryTimer.stop()
+    okBtn.text: "Close"
   }
 }

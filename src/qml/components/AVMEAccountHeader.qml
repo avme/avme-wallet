@@ -58,15 +58,6 @@ Rectangle {
           // Use only two digits precision.
           totalFiatBalance = Math.round((+totalFiatBalance + +tokenInformation["fiatValue"]) * 100) / 100
         }
-        // Uncomment to see data
-        //for (var token in tokenList) {
-        //  console.log("Token")
-        //  console.log("Address: ", token)
-        //  console.log("Symbol: ", tokenList[token]["symbol"])
-        //  console.log("Balance: ", tokenList[token]["balance"])
-        //  console.log("USD Value: ", tokenList[token]["value"])
-        //  console.log("Derived Value: ", tokenList[token]["derivedValue"])
-        //}
         updatedBalances()
       }
     }

@@ -131,6 +131,21 @@ Item {
     }
   }
 
+  function checkLedger() {
+    var data = qmlSystem.checkForLedger()
+    if (data.state) {
+      ledgerFailPopup.close()
+      ledgerRetryTimer.stop()
+      confirmTxPopup.open()
+    } else {
+      ledgerFailPopup.info = data.message
+      ledgerFailPopup.open()
+      ledgerRetryTimer.start()
+    }
+  }
+
+  Timer { id: ledgerRetryTimer; interval: 250; onTriggered: parent.checkLedger() }
+
   // Panel for the transaction inputs
   AVMEPanelSend {
     id: sendPanel
@@ -150,13 +165,11 @@ Item {
         sendPanel.updateTxCost()
         sendPanel.updateInfo()
         confirmTxPopup.setData(sendPanel.to, sendPanel.coinValue, sendPanel.txData, sendPanel.gas, sendPanel.gasPrice, sendPanel.automaticGas, sendPanel.info, sendPanel.historyInfo)
-        // TODO: fix Ledger
-        //if (qmlSystem.getLedgerFlag()) {
-        //  checkLedger()
-        //} else {
-        //  confirmTxPopup.open()
-        //}
-        confirmTxPopup.open()
+        if (qmlSystem.getLedgerFlag()) {
+          checkLedger()
+        } else {
+          confirmTxPopup.open()
+        }
       }
     }
   }
@@ -171,30 +184,6 @@ Item {
   AVMEPopupConfirmTx {
     id: confirmTxPopup
     isSameAddress: (sendPanel.to == accountHeader.currentAddress)
-    okBtn.onClicked: {} // TODO
-    /*
-    function confirmPass() {
-      if (!qmlSystem.checkWalletPass(pass)) {
-        timer.start()
-      } else {
-        confirmTxPopup.close()
-        txProgressPopup.open()
-        qmlSystem.txStart(
-          txOperationStr, txToInput.text,
-          txAmountCoinInput.text, txAmountTokenInput.text, txAmountLPInput.text,
-          txGasLimitInput.text, txGasPriceInput.text, pass
-        )
-        confirmTxPopup.clean()
-      }
-    }
-    okBtn.onClicked: confirmPass()
-    Shortcut {
-      sequences: ["Enter", "Return"]
-      onActivated: {
-        if (confirmTxPopup.passFocus) { confirmTxPopup.confirmPass() }
-      }
-    }
-    */
   }
 
   // Popup for insufficient funds
@@ -211,7 +200,6 @@ Item {
   }
 
   // Popup for transaction progress
-  // TODO: this
   AVMEPopupTxProgress {
     id: txProgressPopup
   }

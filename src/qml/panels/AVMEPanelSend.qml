@@ -295,26 +295,6 @@ AVMEPanel {
         txToInput.acceptableInput && txAmountInput.acceptableInput &&
         txGasLimitInput.acceptableInput && txGasPriceInput.acceptableInput
       )
-      // TODO: fix Ledger
-      /*
-      function checkLedger() {
-        var data = qmlSystem.checkForLedger()
-        if (data.state) {
-          ledgerFailPopup.close()
-          ledgerRetryTimer.stop()
-          txProgressPopup.open()
-          qmlSystem.txStart(
-            txOperationStr, txToInput.text,
-            txAmountCoinInput.text, txAmountTokenInput.text, txAmountLPInput.text,
-            txGasLimitInput.text, txGasPriceInput.text, ""
-          )
-        } else {
-          ledgerFailPopup.info = data.message
-          ledgerFailPopup.open()
-          ledgerRetryTimer.start()
-        }
-      }
-      */
     }
   }
 }

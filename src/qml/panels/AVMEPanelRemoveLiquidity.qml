@@ -23,6 +23,7 @@ AVMEPanel {
   property string removeAsset1Estimate
   property string removeAsset2Estimate
   property string removeLPEstimate
+  property alias removeBtn: removeLiquidityBtn
 
   QmlApi { id: qmlApi }
 
@@ -340,22 +341,14 @@ AVMEPanel {
     }
 
     AVMEButton {
-      id: liquidityBtn
+      id: removeLiquidityBtn
       width: parent.width
       anchors.horizontalCenter: parent.horizontalCenter
       enabled: (allowance != "" && (
         !qmlSystem.isApproved(removeAsset2Input.text, allowance) ||
         liquidityLPSlider.value > 0
       ))
-      text: {
-        if (allowance == "") {
-          text: "Checking approval..."
-        } else if (qmlSystem.isApproved(removeAsset2Input.text, allowance)) {
-          text: "Remove from the pool"
-        } else {
-          text: "Approve"
-        }
-      }
+      text: "Remove from the pool"
       /*
       // TODO: this
       onClicked: {
