@@ -176,3 +176,14 @@ std::string API::getTxBlock(std::string txidHex) {
   std::string resp = httpGetRequest(query.str());
   return JSON::getString(resp, "result/blockNumber", "/");
 }
+
+std::string API::getAirdropBalance(std::string address) {
+  std::stringstream query;
+  std::string add = (address.substr(0,2) == "0x") ? address.substr(2) : address;
+  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\",\"params\": [{\"to\": \""
+        << "0x5929cDDE7C7715D3E42F577E5CADcf2C2D246c52"
+        << "\",\"data\": \"0x376d3b8f000000000000000000000000" << add
+        << "\"},\"latest\"]}";
+  std::string resp = httpGetRequest(query.str());
+  return JSON::getString(resp, "result");
+}

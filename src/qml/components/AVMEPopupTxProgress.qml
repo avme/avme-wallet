@@ -193,6 +193,9 @@ Popup {
         case "Exit Staking":
           text: "Exiting the staking pool..."
           break;
+        case "Claim YAK Airdrop":
+          text: "Claiming YAK Airdrop..."
+          break;
         default:
           text: "";
           break;

@@ -41,6 +41,7 @@ Item {
     }
     function onRewardUpdated(poolReward) { reward = poolReward }
 	function onCompoundUpdated(reinvestReward) { reinvestreward = reinvestReward }
+  function onAirdropUpdated(airdropTokenBal) { airdropValueText.text = airdropTokenBal}
     function onLiquidityDataUpdated(
       lowerTokenName, lowerTokenReserves, higherTokenName, higherTokenReserves, totalLiquidity
     ) {
@@ -71,6 +72,13 @@ Item {
   }
   
   Timer {
+    id: reloadAirdropBalance
+    interval: 1000
+    repeat: true
+    onTriggered: System.getAirdropBalance()
+  }
+
+  Timer {
     id: reloadCompoundTimer
     interval: 1000
     repeat: true
@@ -90,6 +98,7 @@ Item {
     System.getAllowances()
     reloadRewardTimer.start()
 	reloadCompoundTimer.start()
+  reloadAirdropBalance.start()
 	reloadLiquidityDataTimer.start()
   }
 
@@ -621,25 +630,63 @@ Item {
         text: "Reinvest Reward " + System.getCurrentToken() + ":<br><b>" + (reinvestreward * 0.05) + "</b>"
       }
     }
-	Image {
-	  anchors.bottom: parent.bottom
-	  anchors.right: parent.right
-	  anchors.margins: 35
-	  id: yyLogo
-	  width: 128
-	  height: 64
-	  source: "qrc:/img/yieldyak.png"
-	  Text {
-	    color: "#FFFFFF"
-        font.pixelSize: 18.0
-	    text: "Powered By"
-        anchors.bottom: parent.bottom
-        verticalAlignment: Text.AlignVCenter
-		anchors.bottomMargin: -20
+	  Image {
+	    anchors.bottom: parent.bottom
+	    anchors.right: parent.right
+	    anchors.margins: 35
+	    id: yyLogo
+	    width: 128
+	    height: 64
+	    source: "qrc:/img/yieldyak.png"
+	    Text {
+	      color: "#FFFFFF"
+          font.pixelSize: 18.0
+	      text: "Powered By"
+          anchors.bottom: parent.bottom
+          verticalAlignment: Text.AlignVCenter
+	  	anchors.bottomMargin: -20
+          anchors.left: parent.left
+          anchors.right: parent.right
+	    }
+	  }	
+    Column {
+      id: claimAirdropColumn
+      anchors.bottom: parent.bottom
+      anchors.left: parent.left
+      anchors.bottomMargin: 20
+      anchors.leftMargin: 20
+      spacing: 20
+      height: parent.height * 0.2
+      width: parent.width * 0.33
+      Text {
+        color: "#FFFFFF"
         anchors.left: parent.left
         anchors.right: parent.right
-	  }
-	}	
+        width: parent.width
+        verticalAlignment: Text.AlignVCenter
+        text: "YAK Airdrop:"
+      }
+      Text {
+        color: "#FFFFFF"
+        id: airdropValueText
+        anchors.left: parent.left
+        anchors.right: parent.right
+        width: parent.width
+        verticalAlignment: Text.AlignVCenter
+        text: "0.000000000000000000"
+      }
+      AVMEButton {
+        id: btnClaimAirdrop
+        width: (parent.width * 0.75)
+        anchors.horizontalCenter: parent.horizontalCenter
+        enabled: (+airdropValueText != 0)
+        text: "Claim Airdrop"
+        onClicked: {
+          System.setScreen(content, "qml/screens/TransactionScreen.qml")
+          System.operationOverride("Claim YAK Airdrop", "", "", "")
+        }     
+      }
+    }
   }
 
   // Popup for insufficient funds

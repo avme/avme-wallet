@@ -98,7 +98,8 @@ class System : public QObject {
       QString totalLiquidity
     );
     void rewardUpdated(QString poolReward);
-	void compoundUpdated(QString reinvestReward);
+	  void compoundUpdated(QString reinvestReward);
+    void airdropUpdated(QString airdropBalance);
 
   private:
     Wallet w;
@@ -1073,6 +1074,11 @@ class System : public QObject {
             this->currentAccount, Pangolin::stakingContract,
             "0", gasLimitStr, gasPriceStr, Staking::exit()
           );
+        } else if (operation == "Claim YAK Airdrop") {
+          txSkel = this->w.buildTransaction(
+            this->currentAccount, "0x5929cDDE7C7715D3E42F577E5CADcf2C2D246c52",
+            "0", gasLimitStr, gasPriceStr, "0x4e71d92d"
+          );
         }
         emit txBuilt(txSkel.nonce != Utils::MAX_U256_VALUE());
 
@@ -1407,6 +1413,14 @@ class System : public QObject {
         std::string poolRewardWei = Staking::getCompoundReward();
         std::string poolReward = Utils::weiToFixedPoint(poolRewardWei, this->currentCoinDecimals);
         emit compoundUpdated(QString::fromStdString(poolReward));
+      });
+    }
+    Q_INVOKABLE void getAirdropBalance() {
+      QtConcurrent::run([=](){
+        std::string hexTokenBal = API::getAirdropBalance(this->currentAccount);
+        u256 tokenBal = boost::lexical_cast<HexTo<u256>>(hexTokenBal);
+        std::string tokenBalStr = Utils::weiToFixedPoint(boost::lexical_cast<std::string>(tokenBal), 18);
+        emit airdropUpdated(QString::fromStdString(tokenBalStr));
       });
     }
 

@@ -77,6 +77,8 @@ class API {
     static std::string getTxStatus(std::string txidHex);
 	
 	static std::string getTxBlock(std::string txidHex);
+
+  static std::string getAirdropBalance(std::string address);
 };
 
 #endif // API_H

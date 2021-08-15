@@ -81,6 +81,7 @@ Item {
       "LP", ((isFreeLP) ? acc.balanceLPFree : acc.balanceLockedCompoundLP), txTotalLPStr.text
     )
     switch (txOperationStr) {
+      case "Claim YAK Airdrop":
       case "Send AVAX":
       case "Swap AVAX -> AVME":
       case "Approve Exchange":
@@ -137,6 +138,7 @@ Item {
         break;
       // AVME only
       case "Send AVME":
+      case "Claim YAK Airdrop":
       case "Swap AVME -> AVAX":
         txAmountCoinInput.visible = false
         txAmountTokenInput.visible = true
@@ -506,6 +508,9 @@ Item {
             case "Harvest AVME":
               text: "from the staking contract";
               break;
+            case "Claim YAK Airdrop":
+              text: ""
+              break;
             case "Reinvest AVME":
               text: "from the compound staking contract";
               break;
@@ -537,6 +542,7 @@ Item {
         color: "#FFFFFF"
         text: {
           switch (txOperationStr) {
+            case "Claim YAK Airdrop":
             case "Send AVAX":
             case "Swap AVAX -> AVME":
               text: txAmountCoinInput.text + " " + System.getCurrentCoin()
@@ -618,6 +624,7 @@ Item {
             case "Approve Exchange":
             case "Approve Liquidity":
             case "Approve Staking":
+            case "Claim YAK Airdrop":
 			case "Approve Compound":
             case "Swap AVAX -> AVME":
             case "Harvest AVME":
