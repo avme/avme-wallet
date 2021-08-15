@@ -135,8 +135,8 @@ class QmlApi : public QObject {
     Q_INVOKABLE QString fixedPointToWei(QString amount, int decimals);
     Q_INVOKABLE QString uintToHex(QString input);
     Q_INVOKABLE QString uintFromHex(QString hex);
-
-
+    Q_INVOKABLE QString MAX_U256_VALUE();
+    Q_INVOKABLE QString getCurrentUnixTime();
 };
 
 #endif // QMLAPI_H

@@ -43,10 +43,39 @@ Item {
       bottom: parent.bottom
       margins: 10
     }
+    approveBtn.onClicked: {
+      if (!checkTransactionFunds()) {
+        fundsPopup.open()
+      }
+      exchangePanel.approveTx()
+
+      confirmApprovalPopup.setData(
+        exchangePanel.to,
+        exchangePanel.coinValue, 
+        exchangePanel.txData, 
+        exchangePanel.gas, 
+        exchangePanel.gasPrice, 
+        exchangePanel.automaticGas, 
+        exchangePanel.info, 
+        exchangePanel.historyInfo
+       )
+      confirmApprovalPopup.open()
+    }
     swapBtn.onClicked: {
       if (!checkTransactionFunds()) {
         fundsPopup.open()
       } else {
+        exchangePanel.swapTx(exchangePanel.amountIn, exchangePanel.swapEstimate)
+        confirmExchangePopup.setData(
+          exchangePanel.to,
+          exchangePanel.coinValue, 
+          exchangePanel.txData, 
+          exchangePanel.gas, 
+          exchangePanel.gasPrice, 
+          exchangePanel.automaticGas, 
+          exchangePanel.info, 
+          exchangePanel.historyInfo
+        )
         // TODO: fix Ledger
         //if (qmlSystem.getLedgerFlag()) {
         //  checkLedger()
@@ -116,5 +145,8 @@ Item {
     + "<b>" + exchangePanel.amount + " " + fromAssetPopup.chosenAssetSymbol + "</b><br>"
     + "for <b>" + exchangePanel.swapEstimate + " " + toAssetPopup.chosenAssetSymbol + "</b>"
     okBtn.onClicked: {} // TODO
+  }
+  AVMEPopupTxProgress {
+    id: txProgressPopup
   }
 }

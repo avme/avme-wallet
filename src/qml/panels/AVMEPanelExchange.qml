@@ -48,8 +48,17 @@ AVMEPanel {
   property bool needRoute
   property bool isLoading
   property double swapImpact
-  property alias amount: swapInput.text
+  property alias amountIn: swapInput.text
   property alias swapBtn: btnSwap
+  property alias approveBtn: btnApprove
+  property string to
+  property string coinValue
+  property string txData
+  property string gas
+  property string gasPrice
+  property bool automaticGas
+  property string info
+  property string historyInfo
 
   QmlApi { id: qmlApi }
 
@@ -240,6 +249,125 @@ AVMEPanel {
     }
   }
 
+  function approveTx() {
+    to = fromAssetPopup.chosenAssetAddress
+    coinValue = 0
+    gas = 100000
+    gasPrice = 225
+    info = "You will Approve <b>" + fromAssetPopup.chosenAssetSymbol + "<\b> on Pangolin Router Contract"
+    historyInfo = "Approve <b>" + fromAssetPopup.chosenAssetSymbol + "<\b< on Pangolin"
+
+    var ethCallJson = ({})
+    ethCallJson["function"] = "approve(address,uint256)"
+    ethCallJson["args"] = []
+    ethCallJson["args"].push(qmlSystem.getContract("router"))
+    ethCallJson["args"].push(qmlApi.MAX_U256_VALUE())
+    ethCallJson["types"] = []
+    ethCallJson["types"].push("address")
+    ethCallJson["types"].push("uint*")
+    var ethCallString = JSON.stringify(ethCallJson)
+    var ABI = qmlApi.buildCustomABI(ethCallString)
+    txData = ABI
+  }
+
+  function swapTx(amountIn, amountOut) {
+    to = qmlSystem.getContract("router")
+    gas = 180000
+    gasPrice = 225
+    info = "You will Swap <b>" + amountIn + " " + fromAssetPopup.chosenAssetSymbol + "<\b> to <b>"
+    info += amountOut + " " + toAssetPopup.chosenAssetSymbol + "<\b> on Pangolin"
+    historyInfo = "Swap <b>" + fromAssetPopup.chosenAssetSymbol + "<\b> to <b>" + toAssetPopup.chosenAssetSymbol + "<\b>"
+    if (fromAssetPopup.chosenAssetSymbol == "AVAX") {
+      coinValue = amountIn
+      var ethCallJson = ({})
+      var routing = ([])
+      ethCallJson["function"] = "swapExactAVAXForTokens(uint256,address[],address,uint256)"
+      ethCallJson["args"] = []
+      // 1% Slippage TODO: Add setting to change slippage
+      //uint256 amountOutMin
+      ethCallJson["args"].push(Math.round(+qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals) * 0.99))
+      //address[] path
+      routing.push(qmlSystem.getContract("AVAX"))
+      routing.push(toAssetPopup.chosenAssetAddress)
+      ethCallJson["args"].push(routing)
+      //address to
+      ethCallJson["args"].push(qmlSystem.getCurrentAccount())
+      //uint256 deadline, 60 minutes deadline
+      ethCallJson["args"].push((+qmlApi.getCurrentUnixTime() + 3600) * 1000)
+      ethCallJson["types"] = []
+      ethCallJson["types"].push("uint*")
+      ethCallJson["types"].push("address[]")
+      ethCallJson["types"].push("address")
+      ethCallJson["types"].push("uint*")
+      var ethCallString = JSON.stringify(ethCallJson)
+      var ABI = qmlApi.buildCustomABI(ethCallString)
+      txData = ABI
+      return;
+    }
+    if (toAssetPopup.chosenAssetSymbol == "AVAX") {
+      coinValue = 0
+      var ethCallJson = ({})
+      var routing = ([])
+      ethCallJson["function"] = "swapExactTokensForAVAX(uint256,uint256,address[],address,uint256)"
+      ethCallJson["args"] = []
+      // uint256 amountIn
+      ethCallJson["args"].push(qmlApi.fixedPointToWei(amountIn, toAssetPopup.chosenAssetDecimals))
+      // 1% Slippage TODO: Add setting to change slippage
+      // amountOutMin
+      ethCallJson["args"].push(Math.round(+qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals) * 0.99))
+      // address[] path
+      routing.push(fromAssetPopup.chosenAssetAddress)
+      routing.push(qmlSystem.getContract("AVAX"))
+      ethCallJson["args"].push(routing)
+      // address to
+      ethCallJson["args"].push(qmlSystem.getCurrentAccount())
+      // uint256 deadline 60 minutes deadline
+      ethCallJson["args"].push((+qmlApi.getCurrentUnixTime() + 3600) * 1000)
+      ethCallJson["types"] = []
+      ethCallJson["types"].push("uint*")
+      ethCallJson["types"].push("uint*")
+      ethCallJson["types"].push("address[]")
+      ethCallJson["types"].push("address")
+      ethCallJson["types"].push("uint*")
+      var ethCallString = JSON.stringify(ethCallJson)
+      var ABI = qmlApi.buildCustomABI(ethCallString)
+      txData = ABI
+      return;
+    }
+    if (toAssetPopup.chosenAssetSymbol != "AVAX" &&  fromAssetPopup.chosenAssetSymbol != "AVAX") {
+      coinValue = 0
+      var ethCallJson = ({})
+      var routing = ([])
+      ethCallJson["function"] = "swapExactTokensForTokens(uint256,uint256,address[],address,uint256)"
+      ethCallJson["args"] = []
+      // uint256 amountIn
+      ethCallJson["args"].push(qmlApi.fixedPointToWei(amountIn, toAssetPopup.chosenAssetDecimals))
+      // 1% Slippage TODO: Add setting to change slippage
+      // amountOutMin
+      ethCallJson["args"].push(Math.round(+qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals) * 0.99))
+      // address[] path
+      routing.push(fromAssetPopup.chosenAssetAddress)
+      if (needRoute) {
+        routing.push(qmlSystem.getContract("AVAX"))
+      }
+      routing.push(toAssetPopup.chosenAssetAddress)
+      ethCallJson["args"].push(routing)
+      // address to
+      ethCallJson["args"].push(qmlSystem.getCurrentAccount())
+      // uint256 deadline 60 minutes deadline
+      ethCallJson["args"].push((+qmlApi.getCurrentUnixTime() + 3600) * 1000)
+      ethCallJson["types"] = []
+      ethCallJson["types"].push("uint*")
+      ethCallJson["types"].push("uint*")
+      ethCallJson["types"].push("address[]")
+      ethCallJson["types"].push("address")
+      ethCallJson["types"].push("uint*")
+      var ethCallString = JSON.stringify(ethCallJson)
+      var ABI = qmlApi.buildCustomABI(ethCallString)
+      txData = ABI
+      return;
+    }
+  }
   Column {
     id: exchangeHeaderColumn
     height: (parent.height * 0.5) - anchors.topMargin
@@ -372,21 +500,20 @@ AVMEPanel {
       color: "#FFFFFF"
       font.pixelSize: 14.0
       text: "You need to approve your Account in order to swap <b>"
-      + fromAssetPopup.chosenAssetSymbol + "</b>."
+      + fromAssetPopup.chosenAssetSymbol + "</b>." 
       + "<br>This operation will have a total gas cost of:<br><b>"
       + qmlSystem.calculateTransactionCost("0", "180000", qmlSystem.getAutomaticFee())
       + " AVAX</b>"
     }
 
     AVMEButton {
-      id: approveBtn
+      id: btnApprove
       width: parent.width
       enabled: (+accountHeader.coinRawBalance >=
         +qmlSystem.calculateTransactionCost("0", "180000", qmlSystem.getAutomaticFee())
       )
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve" : "Not enough funds"
-      onClicked: confirmAddApprovalPopup.open()
     }
   }
 
