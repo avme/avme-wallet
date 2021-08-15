@@ -15,8 +15,8 @@ AVMEPopup {
   heightPct: 0.6
   property string info
   property string fullInfo: info
-    + "<br>Gas Limit: <b> " + gas + " AVAX</b>"
-    + "<br>Gas Price: <b>" + gasPrice + "</b>"
+    + "<br>Gas Limit: <b> " + qmlSystem.weiToFixedPoint(gas, 18) + " AVAX</b>"
+    + "<br>Gas Price: <b>" + qmlSystem.weiToFixedPoint(gasPrice, 9) + " AVAX</b>"
   property alias pass: passInput.text
   property alias passFocus: passInput.focus
   property alias timer: infoTimer
@@ -26,7 +26,7 @@ AVMEPopup {
   property string to
   property string value // Not WEI value!
   property string txData
-  property string gas // gasLimit
+  property string gas // gasLimit in WEI
   property string gasPrice // GWEI value, 225
   property bool loadingFees
   property bool automaticGas
