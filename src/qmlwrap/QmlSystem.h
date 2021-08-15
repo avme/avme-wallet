@@ -36,7 +36,7 @@ class QmlSystem : public QObject {
     Wallet w;
     ledger::device ledgerDevice;
     bool firstLoad;
-    bool ledgerFlag;
+    bool ledgerFlag = false;
 
   public slots:
     // Clean database, threads, etc before closing the program
