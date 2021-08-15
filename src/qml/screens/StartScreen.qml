@@ -240,6 +240,10 @@ Item {
     okBtn.onClicked: {
       newWalletSeedPopup.clean()
       newWalletSeedPopup.close()
+      qmlSystem.loadTokenDB()
+      qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
+      qmlSystem.loadARC20Tokens()
+      accountHeader.getAddress()
       qmlSystem.goToOverview()
       qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
     }

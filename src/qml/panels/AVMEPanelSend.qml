@@ -63,7 +63,7 @@ AVMEPanel {
       automaticGas = false;
       if (autoLimitCheck.checked) { txGasLimitInput.text = "21000" }
       txTotalCoinStr = qmlSystem.calculateTransactionCost(
-        sendPanel.coinValue, sendPanel.gas, sendPanel.gasPrice
+        txAmountInput.text, sendPanel.gas, sendPanel.gasPrice
       )
     } else {  // Token
       automaticGas = true;
