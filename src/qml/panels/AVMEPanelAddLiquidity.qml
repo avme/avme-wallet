@@ -33,11 +33,23 @@ AVMEPanel {
   Connections {
     target: qmlApi
     function onApiRequestAnswered(answer, requestID) {
-      if (requestID == "QmlAddLiquidity_fetchAllowance") {
-        var resp = JSON.parse(answer)
-        asset1Allowance = qmlApi.parseHex(resp[0].result, ["uint"])
-        asset2Allowance = qmlApi.parseHex(resp[1].result, ["uint"])
-        pairAddress = qmlApi.parseHex(resp[2].result, ["address"])
+      var resp = JSON.parse(answer)
+      if (requestID == "QmlAddLiquidity_fetchPair") {
+        pairAddress = qmlApi.parseHex(resp[0].result, ["uint"])
+        if (pairAddress != "0x0000000000000000000000000000000000000000") {
+          fetchAllowances()
+        } else {
+          // TODO: display "no pair available" here
+        }
+      } else if (requestID == "QmlAddLiquidity_fetchAllowances") {
+        for (var item in resp) {
+          if (resp[item]["id"] == 1) {
+            asset1Allowance = qmlApi.parseHex(resp[item].result, ["uint"])
+          }
+          if (resp[item]["id"] == 2) {
+            asset2Allowance = qmlApi.parseHex(resp[item].result, ["uint"])
+          }
+        }
         // AVAX doesn't need approval, tokens do (and individually)
         if (addAsset1Popup.chosenAssetSymbol == "AVAX") {
           asset1Approved = true
@@ -55,11 +67,13 @@ AVMEPanel {
             asset2["rawBalance"], addAsset2Popup.chosenAssetDecimals
           ))
         }
-        qmlApi.clearAPIRequests("QmlExchange_refreshReserves")
-        qmlApi.buildGetReservesReq(pairAddress, "QmlExchange_refreshReserves")
-        qmlApi.doAPIRequests("QmlExchange_refreshReserves")
-      } else if (requestID == "QmlExchange_refreshReserves") {
-        var resp = JSON.parse(answer)
+        if (asset1Approved && asset2Approved) {
+          fetchReserves()
+        } else {
+          addLiquidityDetailsColumn.visible = false
+        }
+      } else if (requestID == "QmlAddLiquidity_fetchReserves") {
+        console.log(answer)
         var reserves = qmlApi.parseHex(resp[0].result, ["uint", "uint", "uint"])
         var lowerAddress = qmlSystem.getFirstFromPair(
           addAsset1Popup.chosenAssetAddress, addAsset2Popup.chosenAssetAddress
@@ -75,28 +89,43 @@ AVMEPanel {
     }
   }
 
-  function fetchAllowance() {
+  function fetchPair() {
     refreshAssetBalance()
-    addAsset1Input.text = addAsset2Input.text = asset1Reserves = asset2Reserves = ""
-    qmlApi.clearAPIRequests("QmlAddLiquidity_fetchAllowance")
-    qmlApi.buildGetAllowanceReq(
-      addAsset1Popup.chosenAssetAddress,
-      qmlSystem.getCurrentAccount(),
-      qmlSystem.getContract("router"),
-      "QmlAddLiquidity_fetchAllowance"
-    )
-    qmlApi.buildGetAllowanceReq(
-      addAsset2Popup.chosenAssetAddress,
-      qmlSystem.getCurrentAccount(),
-      qmlSystem.getContract("router"),
-      "QmlAddLiquidity_fetchAllowance"
-    )
+    pairAddress = ""
+    qmlApi.clearAPIRequests("QmlAddLiquidity_fetchPair")
     qmlApi.buildGetPairReq(
       addAsset1Popup.chosenAssetAddress,
       addAsset2Popup.chosenAssetAddress,
-      "QmlAddLiquidity_fetchAllowance"
+      "QmlAddLiquidity_fetchPair"
     )
-    qmlApi.doAPIRequests("QmlAddLiquidity_fetchAllowance")
+    qmlApi.doAPIRequests("QmlAddLiquidity_fetchPair")
+  }
+
+  function fetchAllowances() {
+    refreshAssetBalance()
+    asset1Allowance = asset2Allowance = ""
+    qmlApi.clearAPIRequests("QmlAddLiquidity_fetchAllowances")
+    qmlApi.buildGetAllowanceReq(
+      addAsset1Popup.chosenAssetAddress,
+      qmlSystem.getCurrentAccount(),
+      qmlSystem.getContract("router"),
+      "QmlAddLiquidity_fetchAllowances"
+    )
+    qmlApi.buildGetAllowanceReq(
+      addAsset2Popup.chosenAssetAddress,
+      qmlSystem.getCurrentAccount(),
+      qmlSystem.getContract("router"),
+      "QmlAddLiquidity_fetchAllowances"
+    )
+    qmlApi.doAPIRequests("QmlAddLiquidity_fetchAllowances")
+  }
+
+  function fetchReserves() {
+    refreshAssetBalance()
+    addAsset1Input.text = addAsset2Input.text = asset1Reserves = asset2Reserves = ""
+    qmlApi.clearAPIRequests("QmlAddLiquidity_fetchReserves")
+    qmlApi.buildGetReservesReq(pairAddress, "QmlAddLiquidity_fetchReserves")
+    qmlApi.doAPIRequests("QmlAddLiquidity_fetchReserves")
   }
 
   function refreshAssetBalance() {
@@ -328,13 +357,13 @@ AVMEPanel {
       color: "#FFFFFF"
       font.pixelSize: 14.0
       text: "You need to approve your Account in order to add<br><b>"
-      + (!asset1Approved) ? addAsset1Popup.chosenAssetSymbol : ""
-      + (!asset1Approved && !asset2Approved) ? " and " : ""
-      + (!asset2Approved) ? addAsset2Popup.chosenAssetSymbol : ""
+      + ((!asset1Approved) ? addAsset1Popup.chosenAssetSymbol : "")
+      + ((!asset1Approved && !asset2Approved) ? " and " : "")
+      + ((!asset2Approved) ? addAsset2Popup.chosenAssetSymbol : "")
       + "</b> to the pool."
       + "<br>This operation will have a total gas cost of:<br><b>"
       + qmlSystem.calculateTransactionCost("0",
-        (!addAsset1Approved && !addAsset2Approved) ? "320000" : "180000",
+        (!asset1Approved && !asset2Approved) ? "320000" : "180000",
         qmlSystem.getAutomaticFee()
       ) + " AVAX</b>"
     }

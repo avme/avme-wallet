@@ -6,7 +6,7 @@
 
 void QmlApi::doAPIRequests(QString requestID) {
   QtConcurrent::run([=](){
-    std::string requests; 
+    std::string requests;
     try {
       requestListLock.lock();
       requests = API::buildMultiRequest(this->requestList[requestID]);
@@ -61,7 +61,7 @@ void QmlApi::buildGetTokenBalanceReq(QString contract, QString address, QString 
   array.push_back(params);
   array.push_back("latest");
   requestListLock.lock();
-  Request req{this->requestList[requestID].size() + size_t(1), "2.0", "eth_getBalance", array};
+  Request req{this->requestList[requestID].size() + size_t(1), "2.0", "eth_call", array};
   this->requestList[requestID].push_back(req);
   requestListLock.unlock();
 }

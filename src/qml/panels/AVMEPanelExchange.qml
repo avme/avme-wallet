@@ -102,17 +102,17 @@ AVMEPanel {
         }
 
         qmlApi.clearAPIRequests("QmlExchange_refreshReserves")
-        // Check if reserves for optimal pair exists
-        // If not, get request for pair tokenIn/WAVAX/tokenOut
+        // Check if there are reserves for the optimal pair (tokenIn/tokenOut).
+        // If not, get request for pair tokenIn/WAVAX/tokenOut.
         pairAddresses = ([])
         if (pairAddress == "0x0000000000000000000000000000000000000000") {
           needRoute = true;
           // id 1 == first Pair reserves
           // id 2 == second Pair reserves
-          qmlApi.buildGetReservesReq(pairTokenInAddress, "QmlExchange_refreshReserves")
-          qmlApi.buildGetReservesReq(pairTokenOutAddress, "QmlExchange_refreshReserves")
           pairAddresses.push(pairTokenInAddress)
           pairAddresses.push(pairTokenOutAddress)
+          qmlApi.buildGetReservesReq(pairTokenInAddress, "QmlExchange_refreshReserves")
+          qmlApi.buildGetReservesReq(pairTokenOutAddress, "QmlExchange_refreshReserves")
         } else {
           // id 1 == pairAddress reserves
           pairAddresses.push(pairAddress)
@@ -205,7 +205,7 @@ AVMEPanel {
     isLoading = true
     qmlApi.clearAPIRequests("QmlExchange_fetchAllowance")
     // Get allowance for inToken and reserves for all
-    // Including reserves for both in/out tokens agaisnt WAVAX
+    // Including reserves for both in/out tokens against WAVAX
     qmlApi.buildGetAllowanceReq(
       fromAssetPopup.chosenAssetAddress,
       qmlSystem.getCurrentAccount(),

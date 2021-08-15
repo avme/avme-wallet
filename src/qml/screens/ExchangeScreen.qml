@@ -111,33 +111,42 @@ Item {
 
   // Popups for choosing the asset going "in"/"out".
   // Defaults to "from AVAX to AVME".
-  AVMEPopupAssetSelect {
-    id: fromAssetPopup
-    defaultToAVME: false
-    Component.onCompleted: exchangePanel.fetchAllowance()
-    onAboutToHide: {
-      if (chosenAssetAddress == toAssetPopup.chosenAssetAddress) {
-        if (chosenAssetAddress == qmlSystem.getContract("AVAX")) {
-          toAssetPopup.forceAVME()
-        } else {
-          toAssetPopup.forceAVAX()
-        }
-      }
-      exchangePanel.fetchAllowance()
+  Item {
+    property bool fromAssetLoaded: false
+    property bool toAssetLoaded: false
+    function checkPopups() {
+      if (fromAssetLoaded && toAssetLoaded) { exchangePanel.fetchAllowance() }
     }
-  }
-  AVMEPopupAssetSelect {
-    id: toAssetPopup
-    defaultToAVME: true
-    onAboutToHide: {
-      if (chosenAssetAddress == fromAssetPopup.chosenAssetAddress) {
-        if (chosenAssetAddress == qmlSystem.getContract("AVAX")) {
-          fromAssetPopup.forceAVME()
-        } else {
-          fromAssetPopup.forceAVAX()
+
+    AVMEPopupAssetSelect {
+      id: fromAssetPopup
+      defaultToAVME: false
+      Component.onCompleted: { parent.fromAssetLoaded = true; parent.checkPopups() }
+      onAboutToHide: {
+        if (chosenAssetAddress == toAssetPopup.chosenAssetAddress) {
+          if (chosenAssetAddress == qmlSystem.getContract("AVAX")) {
+            toAssetPopup.forceAVME()
+          } else {
+            toAssetPopup.forceAVAX()
+          }
         }
+        exchangePanel.fetchAllowance()
       }
-      exchangePanel.fetchAllowance()
+    }
+    AVMEPopupAssetSelect {
+      id: toAssetPopup
+      defaultToAVME: true
+      Component.onCompleted: { parent.toAssetLoaded = true; parent.checkPopups() }
+      onAboutToHide: {
+        if (chosenAssetAddress == fromAssetPopup.chosenAssetAddress) {
+          if (chosenAssetAddress == qmlSystem.getContract("AVAX")) {
+            fromAssetPopup.forceAVME()
+          } else {
+            fromAssetPopup.forceAVAX()
+          }
+        }
+        exchangePanel.fetchAllowance()
+      }
     }
   }
 

@@ -60,62 +60,80 @@ Item {
 
   // Popups for choosing the assets for adding/removing liquidity.
   // Defaults to the "AVAX/AVME" pool for both cases.
-  // TODO: activate fetch allowances on panels
-  // (can't use Component.onCompleted, there has to be another way)
-  AVMEPopupAssetSelect {
-    id: addAsset1Popup
-    defaultToAVME: false
-    onAboutToHide: {
-      if (chosenAssetAddress == addAsset2Popup.chosenAssetAddress) {
-        if (chosenAssetAddress == qmlSystem.getContract("AVAX")) {
-          addAsset2Popup.forceAVME()
-        } else {
-          addAsset2Popup.forceAVAX()
+  Item {
+    property bool addAsset1Loaded: false
+    property bool addAsset2Loaded: false
+    function checkPopups() {
+      if (addAsset1Loaded && addAsset2Loaded) { addLiquidityPanel.fetchAllowances() }
+    }
+
+    AVMEPopupAssetSelect {
+      id: addAsset1Popup
+      defaultToAVME: false
+      Component.onCompleted: { parent.addAsset1Loaded = true; parent.checkPopups() }
+      onAboutToHide: {
+        if (chosenAssetAddress == addAsset2Popup.chosenAssetAddress) {
+          if (chosenAssetAddress == qmlSystem.getContract("AVAX")) {
+            addAsset2Popup.forceAVME()
+          } else {
+            addAsset2Popup.forceAVAX()
+          }
         }
+        addLiquidityPanel.fetchAllowances()
       }
-      addLiquidityPanel.fetchAllowance()
+    }
+    AVMEPopupAssetSelect {
+      id: addAsset2Popup
+      defaultToAVME: true
+      Component.onCompleted: { parent.addAsset2Loaded = true; parent.checkPopups() }
+      onAboutToHide: {
+        if (chosenAssetAddress == addAsset1Popup.chosenAssetAddress) {
+          if (chosenAssetAddress == qmlSystem.getContract("AVAX")) {
+            addAsset1Popup.forceAVME()
+          } else {
+            addAsset1Popup.forceAVAX()
+          }
+        }
+        addLiquidityPanel.fetchAllowances()
+      }
     }
   }
-  AVMEPopupAssetSelect {
-    id: addAsset2Popup
-    defaultToAVME: true
-    onAboutToHide: {
-      if (chosenAssetAddress == addAsset1Popup.chosenAssetAddress) {
-        if (chosenAssetAddress == qmlSystem.getContract("AVAX")) {
-          addAsset1Popup.forceAVME()
-        } else {
-          addAsset1Popup.forceAVAX()
-        }
-      }
-      addLiquidityPanel.fetchAllowance()
+
+  Item {
+    property bool removeAsset1Loaded: false
+    property bool removeAsset2Loaded: false
+    function checkPopups() {
+      if (removeAsset1Loaded && removeAsset2Loaded) { removeLiquidityPanel.fetchPair() }
     }
-  }
-  AVMEPopupAssetSelect {
-    id: removeAsset1Popup
-    defaultToAVME: false
-    onAboutToHide: {
-      if (chosenAssetAddress == removeAsset2Popup.chosenAssetAddress) {
-        if (chosenAssetAddress == qmlSystem.getContract("AVAX")) {
-          removeAsset2Popup.forceAVME()
-        } else {
-          removeAsset2Popup.forceAVAX()
+    AVMEPopupAssetSelect {
+      id: removeAsset1Popup
+      defaultToAVME: false
+      Component.onCompleted: { parent.removeAsset1Loaded = true; parent.checkPopups() }
+      onAboutToHide: {
+        if (chosenAssetAddress == removeAsset2Popup.chosenAssetAddress) {
+          if (chosenAssetAddress == qmlSystem.getContract("AVAX")) {
+            removeAsset2Popup.forceAVME()
+          } else {
+            removeAsset2Popup.forceAVAX()
+          }
         }
+        removeLiquidityPanel.fetchPair()
       }
-      removeLiquidityPanel.fetchPairAndReserves()
     }
-  }
-  AVMEPopupAssetSelect {
-    id: removeAsset2Popup
-    defaultToAVME: true
-    onAboutToHide: {
-      if (chosenAssetAddress == removeAsset1Popup.chosenAssetAddress) {
-        if (chosenAssetAddress == qmlSystem.getContract("AVAX")) {
-          removeAsset1Popup.forceAVME()
-        } else {
-          removeAsset1Popup.forceAVAX()
+    AVMEPopupAssetSelect {
+      id: removeAsset2Popup
+      defaultToAVME: true
+      Component.onCompleted: { parent.removeAsset2Loaded = true; parent.checkPopups() }
+      onAboutToHide: {
+        if (chosenAssetAddress == removeAsset1Popup.chosenAssetAddress) {
+          if (chosenAssetAddress == qmlSystem.getContract("AVAX")) {
+            removeAsset1Popup.forceAVME()
+          } else {
+            removeAsset1Popup.forceAVAX()
+          }
         }
+        removeLiquidityPanel.fetchPair()
       }
-      removeLiquidityPanel.fetchPairAndReserves()
     }
   }
 
@@ -129,11 +147,11 @@ Item {
   // Popups for confirming approval/add/removal, respectively
   AVMEPopupConfirmTx {
     id: confirmAddApprovalPopup
-    info: "You will approve "
-    + (!addLiquidityPanel.asset1Approved) ? addAsset1Popup.chosenAssetSymbol : ""
-    + (!addLiquidityPanel.asset1Approved && !addLiquidityPanel.asset2Approved) ? " and " : ""
-    + (!addLiquidityPanel.asset2Approved) ? addAsset2Popup.chosenAssetSymbol : ""
-    + " to be added to the pool for the current address"
+    info: "You will approve <b>"
+    + ((!addLiquidityPanel.asset1Approved) ? addAsset1Popup.chosenAssetSymbol : "")
+    + ((!addLiquidityPanel.asset1Approved && !addLiquidityPanel.asset2Approved) ? " and " : "")
+    + ((!addLiquidityPanel.asset2Approved) ? addAsset2Popup.chosenAssetSymbol : "")
+    + "</b> to be added to the pool for the current address"
   }
   AVMEPopupConfirmTx {
     id: confirmRemoveApprovalPopup

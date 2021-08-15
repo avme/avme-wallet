@@ -8,15 +8,15 @@ import QmlApi 1.0
 
 import "qrc:/qml/components"
 
-// Panel for removing liquidity to a pool.
+// Panel for removing liquidity from: a pool.
 AVMEPanel {
   id: removeLiquidityPanel
   title: "Remove Liquidity"
-  property string allowance
   property string pairAddress
+  property string pairBalance
+  property string pairAllowance
   property string asset1Reserves
   property string asset2Reserves
-  property string liquidity
   property string userAsset1Reserves
   property string userAsset2Reserves
   property string userLPSharePercentage // TODO: find out where this should be used
@@ -30,48 +30,86 @@ AVMEPanel {
   Connections {
     target: qmlApi
     function onApiRequestAnswered(answer, requestID) {
-      if (requestID == "QmlRemoveLiquidity_fetchPairAndReserves") {
-        var resp = JSON.parse(answer)
+      var resp = JSON.parse(answer)
+      if (requestID == "QmlRemoveLiquidity_fetchPair") {
         pairAddress = qmlApi.parseHex(resp[0].result, ["address"])
-        asset1Reserves = qmlApi.parseHex(resp[1].result, ["uint"])
-        asset2Reserves = qmlApi.parseHex(resp[2].result, ["uint"])
-        qmlApi.clearAPIRequests("QmlRemoveLiquidity_fetchAllowanceAndBalance")
-        qmlApi.buildGetAllowanceReq(
-          pairAddress,
-          qmlSystem.getCurrentAccount(),
-          qmlSystem.getContract("router"),
-          "QmlRemoveLiquidity_fetchAllowanceAndBalance"
+        if (pairAddress != "0x0000000000000000000000000000000000000000") {
+          fetchBalance()
+        } else {
+          // TODO: display "no pair available" here
+        }
+      } else if (requestID == "QmlRemoveLiquidity_fetchBalance") {
+        pairBalance = qmlApi.parseHex(resp[0].result, ["uint"])
+        fetchAllowance()
+      } else if (requestID == "QmlRemoveLiquidity_fetchAllowance") {
+        pairAllowance = qmlApi.parseHex(resp[0].result, ["uint"])
+        if (+pairAllowance > +pairBalance) { // TODO: block if balance is zero, check with >=
+          fetchReserves()
+        } else {
+          removeLiquidityDetailsColumn.visible = false
+        }
+      } else if (requestID == "QmlRemoveLiquidity_fetchReserves") {
+        var reserves = qmlApi.parseHex(resp[0].result, ["uint", "uint", "uint"])
+        var lowerAddress = qmlSystem.getFirstFromPair(
+          removeAsset1Popup.chosenAssetAddress, removeAsset2Popup.chosenAssetAddress
         )
-        qmlApi.buildGetReservesReq(pairAddress, "QmlRemoveLiquidity_fetchAllowanceAndBalance")
-        qmlApi.doAPIRequests("QmlRemoveLiquidity_fetchAllowanceAndBalance")
-      } else if (requestID == "QmlRemoveLiquidity_fetchAllowanceAndBalance") {
-        var resp = JSON.parse(answer)
-        allowance = qmlApi.parseHex(resp[0].result, ["uint"])
-        liquidity = qmlApi.parseHex(resp[1].result, ["uint"])
+        if (lowerAddress == removeAsset1Popup.chosenAssetAddress) {
+          asset1Reserves = reserves[0]
+          asset2Reserves = reserves[1]
+        } else {
+          asset2Reserves = reserves[0]
+          asset1Reserves = reserves[1]
+        }
         var userShares = qmlSystem.calculatePoolShares(
-          asset1Reserves, asset2Reserves, liquidity
+          asset1Reserves, asset2Reserves, pairBalance
         )
         userAsset1Reserves = userShares.lower
         userAsset2Reserves = userShares.higher
         userLPSharePercentage = userShares.liquidity
-        removeLiquidityDetailsColumn.visible = (+allowance >=
-          +qmlSystem.fixedPointToWei(liquidity, 18)
-        )
+        removeLiquidityDetailsColumn.visible = (+pairAllowance >= +pairBalance)
       }
     }
   }
 
-  function fetchPairAndReserves() {
-    pairAddress = allowance = liquidity = asset1Reserves = asset2Reserves = ""
-    qmlApi.clearAPIRequests("QmlRemoveLiquidity_fetchPairAndReserves")
+  function fetchPair() {
+    pairAddress = ""
+    qmlApi.clearAPIRequests("QmlRemoveLiquidity_fetchPair")
     qmlApi.buildGetPairReq(
       removeAsset1Popup.chosenAssetAddress,
       removeAsset2Popup.chosenAssetAddress,
-      "QmlRemoveLiquidity_fetchPairAndReserves"
+      "QmlRemoveLiquidity_fetchPair"
     )
-    qmlApi.buildGetReservesReq(removeAsset1Popup.chosenAssetAddress, "QmlRemoveLiquidity_fetchPairAndReserves")
-    qmlApi.buildGetReservesReq(removeAsset2Popup.chosenAssetAddress, "QmlRemoveLiquidity_fetchPairAndReserves")
-    qmlApi.doAPIRequests("QmlRemoveLiquidity_fetchPairAndReserves")
+    qmlApi.doAPIRequests("QmlRemoveLiquidity_fetchPair")
+  }
+
+  function fetchBalance() {
+    pairBalance = ""
+    qmlApi.clearAPIRequests("QmlRemoveLiquidity_fetchBalance")
+    qmlApi.buildGetTokenBalanceReq(
+      pairAddress,
+      accountHeader.currentAddress,
+      "QmlRemoveLiquidity_fetchBalance"
+    )
+    qmlApi.doAPIRequests("QmlRemoveLiquidity_fetchBalance")
+  }
+
+  function fetchAllowance() {
+    pairAllowance = ""
+    qmlApi.clearAPIRequests("QmlRemoveLiquidity_fetchAllowance")
+    qmlApi.buildGetAllowanceReq(
+      pairAddress,
+      accountHeader.currentAddress,
+      qmlSystem.getContract("router"),
+      "QmlRemoveLiquidity_fetchAllowance"
+    )
+    qmlApi.doAPIRequests("QmlRemoveLiquidity_fetchAllowance")
+  }
+
+  function fetchReserves() {
+    asset1Reserves = asset2Reserves = ""
+    qmlApi.clearAPIRequests("QmlRemoveLiquidity_fetchReserves")
+    qmlApi.buildGetReservesReq(pairAddress, "QmlRemoveLiquidity_fetchReserves")
+    qmlApi.doAPIRequests("QmlRemoveLiquidity_fetchReserves")
   }
 
   Column {
@@ -172,8 +210,8 @@ AVMEPanel {
       horizontalAlignment: Text.AlignHCenter
       color: "#FFFFFF"
       font.pixelSize: 14.0
-      text: (liquidity != "")
-      ? "Balance: <b>" + liquidity + " " + removeAsset1Popup.chosenAssetSymbol
+      text: (pairBalance != "")
+      ? "Balance: <b>" + pairBalance + " " + removeAsset1Popup.chosenAssetSymbol
       + "/" + removeAsset2Popup.chosenAssetSymbol + " LP</b>"
       : "Loading asset balance..."
     }
@@ -220,7 +258,7 @@ AVMEPanel {
       elide: Text.ElideRight
       color: "#FFFFFF"
       font.pixelSize: 14.0
-      text: "You need to approve your Account in order to remove <b>"
+      text: "You need to approve your Account in order to remove <br><b>"
       + removeAsset1Popup.chosenAssetSymbol + "/"
       + removeAsset2Popup.chosenAssetSymbol + " LP</b> from the pool."
       + "<br>This operation will have a total gas cost of:<br><b>"
@@ -264,7 +302,7 @@ AVMEPanel {
       width: parent.width * 0.8
       anchors.left: parent.left
       anchors.margins: 20
-      enabled: (allowance != "" && asset1Reserves != "" && asset2Reserves != "" && liquidity != "")
+      enabled: (pairAllowance != "" && asset1Reserves != "" && asset2Reserves != "" && pairBalance != "")
       onMoved: {
         var estimates = qmlSystem.calculateRemoveLiquidityAmount(
           userAsset1Reserves, userAsset2Reserves, value
@@ -291,7 +329,7 @@ AVMEPanel {
 
       AVMEButton {
         id: sliderBtn25
-        enabled: (allowance != "" && asset1Reserves != "" && asset2Reserves != "" && liquidity != "")
+        enabled: (pairAllowance != "" && asset1Reserves != "" && asset2Reserves != "" && pairBalance != "")
         width: (parent.parent.width * 0.2)
         text: "25%"
         onClicked: { liquidityLPSlider.value = 25; liquidityLPSlider.moved(); }
@@ -299,7 +337,7 @@ AVMEPanel {
 
       AVMEButton {
         id: sliderBtn50
-        enabled: (allowance != "" && asset1Reserves != "" && asset2Reserves != "" && liquidity != "")
+        enabled: (pairAllowance != "" && asset1Reserves != "" && asset2Reserves != "" && pairBalance != "")
         width: (parent.parent.width * 0.2)
         text: "50%"
         onClicked: { liquidityLPSlider.value = 50; liquidityLPSlider.moved(); }
@@ -307,7 +345,7 @@ AVMEPanel {
 
       AVMEButton {
         id: sliderBtn75
-        enabled: (allowance != "" && asset1Reserves != "" && asset2Reserves != "" && liquidity != "")
+        enabled: (pairAllowance != "" && asset1Reserves != "" && asset2Reserves != "" && pairBalance != "")
         width: (parent.parent.width * 0.2)
         text: "75%"
         onClicked: { liquidityLPSlider.value = 75; liquidityLPSlider.moved(); }
@@ -315,7 +353,7 @@ AVMEPanel {
 
       AVMEButton {
         id: sliderBtn100
-        enabled: (allowance != "" && asset1Reserves != "" && asset2Reserves != "" && liquidity != "")
+        enabled: (pairAllowance != "" && asset1Reserves != "" && asset2Reserves != "" && pairBalance != "")
         width: (parent.parent.width * 0.2)
         text: "100%"
         onClicked: { liquidityLPSlider.value = 100; liquidityLPSlider.moved(); }
@@ -344,10 +382,10 @@ AVMEPanel {
       id: removeLiquidityBtn
       width: parent.width
       anchors.horizontalCenter: parent.horizontalCenter
-      enabled: (allowance != "" && (
-        !qmlSystem.isApproved(removeAsset2Input.text, allowance) ||
-        liquidityLPSlider.value > 0
-      ))
+      enabled: (
+        pairAllowance != "" && liquidityLPSlider.value > 0 &&
+        !qmlSystem.isApproved(removeLPEstimate, pairAllowance)
+      )
       text: "Remove from the pool"
       // TODO: transaction logic
     }

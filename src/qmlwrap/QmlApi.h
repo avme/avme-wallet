@@ -78,17 +78,16 @@ class QmlApi : public QObject {
 
     /**
      * Build request for getting the estimated gas limit.
-     * requires JSON:
+     * Requires a JSON string formatted like this:
      * {
-     *  from: ADDRESS
-     *  to: ADDRESS
-     *  gas: HEX_INT
-     *  gasPrice: HEX_INT
-     *  value: HEX_INT
-     *  data: ETH_CALL
+     *   from: ADDRESS
+     *   to: ADDRESS
+     *   gas: HEX_INT
+     *   gasPrice: HEX_INT
+     *   value: HEX_INT
+     *   data: ETH_CALL
      * }
      */
-
     Q_INVOKABLE void buildGetEstimateGasLimitReq(QString jsonStr, QString requestID);
 
     /**
