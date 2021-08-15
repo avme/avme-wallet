@@ -56,7 +56,7 @@ AVMEPanel {
   property string txData
   property string gas
   property string gasPrice
-  property bool automaticGas
+  property bool automaticGas: true
   property string info
   property string historyInfo
 
@@ -272,7 +272,7 @@ AVMEPanel {
 
   function swapTx(amountIn, amountOut) {
     to = qmlSystem.getContract("router")
-    gas = 180000
+    gas = 300000
     gasPrice = 225
     info = "You will Swap <b>" + amountIn + " " + fromAssetPopup.chosenAssetSymbol + "<\b> to <b>"
     info += amountOut + " " + toAssetPopup.chosenAssetSymbol + "<\b> on Pangolin"
@@ -334,7 +334,7 @@ AVMEPanel {
       txData = ABI
       return;
     }
-    if (toAssetPopup.chosenAssetSymbol != "AVAX" &&  fromAssetPopup.chosenAssetSymbol != "AVAX") {
+    if (toAssetPopup.chosenAssetSymbol != "AVAX" && fromAssetPopup.chosenAssetSymbol != "AVAX") {
       coinValue = 0
       var ethCallJson = ({})
       var routing = ([])
