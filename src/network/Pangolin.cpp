@@ -107,38 +107,38 @@ std::string Pangolin::getFirstFromPair(std::string tokenAddressA, std::string to
   return (valueA < valueB) ? tokenAddressA : tokenAddressB;
 }
 
-// TODO: use nlohmann/json
 std::string Pangolin::totalSupply(std::string tokenNameA, std::string tokenNameB) {
-  std::stringstream query;
-  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << Pangolin::getPair(tokenNameA, tokenNameB)
-        << "\",\"data\": \"" << pairFuncs["totalSupply"]
-        << "\"},\"latest\"]}";
-  std::string resp = API::httpGetRequest(query.str());
+  json params;
+  json array = json::array();
+  params["to"] = Pangolin::getPair(tokenNameA, tokenNameB);
+  params["data"] = pairFuncs["totalSupply"];
+  array.push_back(params);
+  array.push_back("latest");
+  Request req{1, "2.0", "eth_call", array};
+  std::string query = API::buildRequest(req);
+  std::string resp = API::httpGetRequest(query);
   json respJson = json::parse(resp);
   std::string result = respJson["result"].get<std::string>();
   if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
-
-  // Parse the result back into normal values
-  return parseHex(result, {"uint"})[0];
+  return Pangolin::parseHex(result, {"uint"})[0];
 }
 
-// TODO: use nlohmann/json
 std::vector<std::string> Pangolin::getReserves(std::string tokenNameA, std::string tokenNameB) {
-  std::stringstream query;
-  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << Pangolin::getPair(tokenNameA, tokenNameB)
-        << "\",\"data\": \"" << pairFuncs["getReserves"]
-        << "\"},\"latest\"]}";
-  std::string resp = API::httpGetRequest(query.str());
+  json params;
+  json array = json::array();
+  params["to"] = Pangolin::getPair(tokenNameA, tokenNameB);
+  params["data"] = pairFuncs["getReserves"];
+  array.push_back(params);
+  array.push_back("latest");
+  Request req{1, "2.0", "eth_call", array};
+  std::string query = API::buildRequest(req);
+  std::string resp = API::httpGetRequest(query);
   json respJson = json::parse(resp);
   std::string result = respJson["result"].get<std::string>();
   if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
-
-  // Parse the result back into normal values
-  return parseHex(result, {"uint", "uint", "uint"});
+  return Pangolin::parseHex(result, {"uint", "uint", "uint"});
 }
 
 std::string Pangolin::calcExchangeAmountOut(
