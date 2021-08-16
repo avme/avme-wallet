@@ -308,7 +308,6 @@ void QmlSystem::calculateRewardCurrentROI() {
 }
 */
 
-// TODO: use nlohmann/json
 /*
 void QmlSystem::getMarketData(int days) {
   QtConcurrent::run([=](){

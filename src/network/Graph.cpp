@@ -125,7 +125,6 @@ json Graph::avaxUSDData(int days) {
   return respJson;
 }
 
-// TODO: use nlohmann/json
 std::string Graph::getTokenPriceDerived(std::string address) {
   std::stringstream query;
   address = Utils::toLowerCaseAddress(address);
@@ -152,7 +151,6 @@ json Graph::getTokenPriceHistory(std::string address, int days) {
   return arr;
 }
 
-// TODO: use nlohmann/json
 json Graph::getUSDTPriceHistory(int days) {
   std::stringstream query;
   query << "{\"query\": \"{"
@@ -165,7 +163,6 @@ json Graph::getUSDTPriceHistory(int days) {
   return arr;
 }
 
-// TODO: use nlohmann/json
 json Graph::getAVMEPriceHistory(int days) {
   std::stringstream query;
   query << "{\"query\": \"{"

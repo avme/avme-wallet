@@ -24,125 +24,105 @@ std::map<std::string, std::string> Staking::YYfuncs = {
   {"getSharesForDepositTokens", "0xdd8ce4d6"}, // getSharesForDepositTokens(uint256)
 };
 
-// TODO: use nlohmann/json
 std::string Staking::totalSupply() {
-  std::string result;
-  std::stringstream query;
-
-  // Query and get the result, returning if empty
-  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << Pangolin::contracts["staking"]
-        << "\",\"data\": \"" << Staking::funcs["totalSupply"]
-        << "\"},\"latest\"]}";
-  std::string resp = API::httpGetRequest(query.str());
+  json params;
+  json array = json::array();
+  params["to"] = Pangolin::contracts["staking"];
+  params["data"] = Staking::funcs["totalSupply"];
+  array.push_back(params);
+  array.push_back("latest");
+  Request req{1, "2.0", "eth_call", array};
+  std::string query = API::buildRequest(req);
+  std::string resp = API::httpGetRequest(query);
   json respJson = json::parse(resp);
-  result = respJson["result"].get<std::string>();
+  std::string result = respJson["result"].get<std::string>();
   if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
-
-  // Parse the result back into normal values
   return Pangolin::parseHex(result, {"uint"})[0];
 }
 
-// TODO: use nlohmann/json
 std::string Staking::getRewardForDuration() {
-  std::string result;
-  std::stringstream query;
-
-  // Query and get the result, returning if empty
-  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << Pangolin::contracts["staking"]
-        << "\",\"data\": \"" << Staking::funcs["getRewardForDuration"]
-        << "\"},\"latest\"]}";
-  std::string resp = API::httpGetRequest(query.str());
+  json params;
+  json array = json::array();
+  params["to"] = Pangolin::contracts["staking"];
+  params["data"] = Staking::funcs["getRewardForDuration"];
+  array.push_back(params);
+  array.push_back("latest");
+  Request req{1, "2.0", "eth_call", array};
+  std::string query = API::buildRequest(req);
+  std::string resp = API::httpGetRequest(query);
   json respJson = json::parse(resp);
-  result = respJson["result"].get<std::string>();
+  std::string result = respJson["result"].get<std::string>();
   if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
-
-  // Parse the result back into normal values
   return Pangolin::parseHex(result, {"uint"})[0];
 }
 
-// TODO: use nlohmann/json
 std::string Staking::rewardsDuration() {
-  std::string result;
-  std::stringstream query;
-
-  // Query and get the result, returning if empty
-  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << Pangolin::contracts["staking"]
-        << "\",\"data\": \"" << Staking::funcs["rewardsDuration"]
-        << "\"},\"latest\"]}";
-  std::string resp = API::httpGetRequest(query.str());
+  json params;
+  json array = json::array();
+  params["to"] = Pangolin::contracts["staking"];
+  params["data"] = Staking::funcs["rewardsDuration"];
+  array.push_back(params);
+  array.push_back("latest");
+  Request req{1, "2.0", "eth_call", array};
+  std::string query = API::buildRequest(req);
+  std::string resp = API::httpGetRequest(query);
   json respJson = json::parse(resp);
-  result = respJson["result"].get<std::string>();
+  std::string result = respJson["result"].get<std::string>();
   if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
-
-  // Parse the result back into normal values
   return Pangolin::parseHex(result, {"uint"})[0];
 }
 
-// TODO: use nlohmann/json
 std::string Staking::balanceOf(std::string address) {
-  std::string result;
-  std::stringstream query;
-
-  // Query and get the result, returning if empty
-  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << Pangolin::contracts["staking"]
-        << "\",\"data\": \"" << Pangolin::ERC20Funcs["balanceOf"]
-                             << Utils::addressToHex(address)
-        << "\"},\"latest\"]}";
-  std::string resp = API::httpGetRequest(query.str());
+  json params;
+  json array = json::array();
+  params["to"] = Pangolin::contracts["staking"];
+  params["data"] = Pangolin::ERC20Funcs["balanceOf"] + Utils::addressToHex(address);
+  array.push_back(params);
+  array.push_back("latest");
+  Request req{1, "2.0", "eth_call", array};
+  std::string query = API::buildRequest(req);
+  std::string resp = API::httpGetRequest(query);
   json respJson = json::parse(resp);
-  result = respJson["result"].get<std::string>();
+  std::string result = respJson["result"].get<std::string>();
   if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
-
-  // Parse the result back into normal values
   return Pangolin::parseHex(result, {"uint"})[0];
 }
 
-// TODO: use nlohmann/json
 std::string Staking::earned(std::string address) {
-  std::string result;
-  std::stringstream query;
-
-  // Query and get the result, returning if empty
-  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << Pangolin::contracts["staking"]
-        << "\",\"data\": \"" << Staking::funcs["earned"]
-                             << Utils::addressToHex(address)
-        << "\"},\"latest\"]}";
-  std::string resp = API::httpGetRequest(query.str());
+  json params;
+  json array = json::array();
+  params["to"] = Pangolin::contracts["staking"];
+  params["data"] = Staking::funcs["earned"] + Utils::addressToHex(address);
+  array.push_back(params);
+  array.push_back("latest");
+  Request req{1, "2.0", "eth_call", array};
+  std::string query = API::buildRequest(req);
+  std::string resp = API::httpGetRequest(query);
   json respJson = json::parse(resp);
-  result = respJson["result"].get<std::string>();
+  std::string result = respJson["result"].get<std::string>();
   if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
-
-  // Parse the result back into normal values
   return Pangolin::parseHex(result, {"uint"})[0];
 }
 
-// TODO: use nlohmann/json
 std::string Staking::getCompoundReward() {
-  std::string result;
-  std::stringstream query;
-
-  // Query and get the result, returning if empty
-  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << Pangolin::contracts["compound"]
-        << "\",\"data\": \"" << Staking::YYfuncs["checkReward"]
-        << "\"},\"latest\"]}";
-  std::string resp = API::httpGetRequest(query.str());
+  json params;
+  json array = json::array();
+  params["to"] = Pangolin::contracts["compound"];
+  params["data"] = Staking::YYfuncs["checkReward"];
+  array.push_back(params);
+  array.push_back("latest");
+  Request req{1, "2.0", "eth_call", array};
+  std::string query = API::buildRequest(req);
+  std::string resp = API::httpGetRequest(query);
   json respJson = json::parse(resp);
-  result = respJson["result"].get<std::string>();
+  std::string result = respJson["result"].get<std::string>();
   if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
-
-  // Parse the result back into normal values
   return Pangolin::parseHex(result, {"uint"})[0];
 }
 
@@ -161,19 +141,18 @@ std::string Staking::withdraw(std::string amount) {
   return dataHex;
 }
 
-// TODO: use nlohmann/json
 std::string Staking::compoundWithdraw(std::string amount) {
-  std::string result;
-  std::stringstream query;
-
-  // Query and get the result, returning if empty
-  query << "{\"id\": 1,\"jsonrpc\": \"2.0\",\"method\": \"eth_call\", \"params\": "
-        << "[{\"to\": \"" << Pangolin::contracts["compound"]
-        << "\",\"data\": \"" << Staking::YYfuncs["getSharesForDepositTokens"] << Utils::uintToHex(amount)
-        << "\"},\"latest\"]}";
-  std::string resp = API::httpGetRequest(query.str());
+  json params;
+  json array = json::array();
+  params["to"] = Pangolin::contracts["compound"];
+  params["data"] = Staking::YYfuncs["getSharesForDepositTokens"] + Utils::uintToHex(amount);
+  array.push_back(params);
+  array.push_back("latest");
+  Request req{1, "2.0", "eth_call", array};
+  std::string query = API::buildRequest(req);
+  std::string resp = API::httpGetRequest(query);
   json respJson = json::parse(resp);
-  result = respJson["result"].get<std::string>();
+  std::string result = respJson["result"].get<std::string>();
   if (result == "0x" || result == "") { return {}; }
   result = result.substr(2); // Remove the "0x"
   std::string dataHex = Staking::YYfuncs["withdraw"] + result;
