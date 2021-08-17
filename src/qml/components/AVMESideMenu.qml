@@ -14,6 +14,9 @@ Rectangle {
   height: parent.height
   color: "#1C2029"
 
+  // TODO: Using this if condition is a workaround, find a better solution
+  property bool enableBtn: accountHeader.coinRawBalance
+
   Connections {
     target: qmlSystem
     function onGoToOverview() {
@@ -64,6 +67,7 @@ Rectangle {
       width: (parent.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
       text: "Overview"
+      enabled: enableBtn
       onClicked: {
         itemSelection.y = items.y + y
         changeScreen("Overview")
@@ -75,6 +79,7 @@ Rectangle {
       width: (parent.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
       text: "Tokens"
+      enabled: enableBtn
       onClicked: {
         itemSelection.y = items.y + y
         changeScreen("Tokens")
@@ -86,6 +91,7 @@ Rectangle {
       width: (parent.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
       text: "History"
+      enabled: enableBtn
       onClicked: {
         itemSelection.y = items.y + y
         changeScreen("History")
@@ -97,6 +103,7 @@ Rectangle {
       width: (parent.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
       text: "Send"
+      enabled: enableBtn
       onClicked: {
         itemSelection.y = items.y + y
         changeScreen("Send")
@@ -108,6 +115,7 @@ Rectangle {
       width: (parent.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
       text: "Exchange"
+      enabled: enableBtn
       onClicked: {
         itemSelection.y = items.y + y
         changeScreen("Exchange")
@@ -119,6 +127,7 @@ Rectangle {
       width: (parent.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
       text: "Liquidity"
+      enabled: enableBtn
       onClicked: {
         itemSelection.y = items.y + y
         changeScreen("Liquidity")
@@ -130,6 +139,7 @@ Rectangle {
       width: (parent.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
       text: "Staking"
+      enabled: enableBtn
       onClicked: {
         itemSelection.y = items.y + y
         changeScreen("Staking")
@@ -141,6 +151,7 @@ Rectangle {
       width: (parent.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
       text: "Applications (WIP)"
+      enabled: enableBtn
       onClicked: {} // TODO
     }
   }
