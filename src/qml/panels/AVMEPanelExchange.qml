@@ -463,12 +463,14 @@ AVMEPanel {
         width: (parent.parent.width * 0.5) - (parent.spacing / 2)
         text: "Change From Asset"
         onClicked: fromAssetPopup.open()
+        enabled: (!isLoading)
       }
       AVMEButton {
         id: btnChangeTo
         width: (parent.parent.width * 0.5) - (parent.spacing / 2)
         text: "Change To Asset"
         onClicked: toAssetPopup.open()
+        enabled: (!isLoading)
       }
     }
   }
@@ -530,7 +532,7 @@ AVMEPanel {
 
     AVMEInput {
       id: swapInput
-      width: (parent.width * 0.8)
+      width: (parent.width * 0.7)
       validator: RegExpValidator {
         regExp: qmlSystem.createTxRegExp(fromAssetPopup.chosenAssetDecimals)
       }
@@ -541,13 +543,33 @@ AVMEPanel {
         swapEstimate = calculateExchangeAmount(swapInput.text, fromAssetPopup.chosenAssetDecimals, toAssetPopup.chosenAssetDecimals)
         swapImpact = calculatePriceImpact(swapInput.text, fromAssetPopup.chosenAssetDecimals, toAssetPopup.chosenAssetDecimals)
       }
-
-      AVMEButton {
-        id: swapMaxBtn
-        width: (parent.parent.width * 0.2) - anchors.leftMargin
+      Image {
+        id: loadingPng
+        height: parent.height
+        width: height
+        visible: isLoading
         anchors {
           left: parent.right
           leftMargin: 10
+        }
+        fillMode: Image.PreserveAspectFit
+        source: "qrc:/img/icons/loading.png"
+        RotationAnimator {
+          target: loadingPng
+          from: 0
+          to: 360
+          duration: 1000
+          loops: Animation.Infinite
+          easing.type: Easing.InOutQuad
+          running: true
+        }
+      }
+      AVMEButton {
+        id: swapMaxBtn
+        width: (parent.parent.width * 0.2) - 10
+        anchors {
+          left: parent.right
+          leftMargin: (parent.parent.width * 0.1) + 10
         }
         text: "Max"
         onClicked: {
