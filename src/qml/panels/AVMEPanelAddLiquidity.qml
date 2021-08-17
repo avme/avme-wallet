@@ -23,10 +23,23 @@ AVMEPanel {
   property alias add2Amount: addAsset2Input.text
   property alias addBtn: addLiquidityBtn
   property bool loading: true
+  property string to
+  property string coinValue
+  property string txData
+  property string gas
+  property string gasPrice
+  property bool automaticGas: true
+  property string info
+  property string historyInfo
 
   Connections {
     target: accountHeader
     function onUpdatedBalances() { refreshAssetBalance() }
+  }
+
+  Connections {
+    target: txProgressPopup
+    function onClosed() { fetchAllowancesAndPair() }
   }
 
   Connections {
@@ -71,9 +84,6 @@ AVMEPanel {
         }
         if (asset1Approved && asset2Approved) {
           fetchReserves()
-          addLiquidityDetailsColumn.visible = true
-          addLiquidityApprovalColumn.visible = false
-          addLiquidityPairUnavailable.visible = false
         } else {
           addLiquidityDetailsColumn.visible = false
           addLiquidityApprovalColumn.visible = true
@@ -93,6 +103,9 @@ AVMEPanel {
           asset2Reserves = reserves[0]
         }
         loading = false;
+        addLiquidityDetailsColumn.visible = true
+        addLiquidityApprovalColumn.visible = false
+        addLiquidityPairUnavailable.visible = false
       }
     }
   }
@@ -216,6 +229,24 @@ AVMEPanel {
         maxAmountAVME, lowerReserves, higherReserves
       )
     }
+  }
+
+  function approveTx(contract) {
+    to = contract
+    coinValue = 0
+    gas = 100000
+    gasPrice = 225
+    var ethCallJson = ({})
+    ethCallJson["function"] = "approve(address,uint256)"
+    ethCallJson["args"] = []
+    ethCallJson["args"].push(qmlSystem.getContract("router"))
+    ethCallJson["args"].push(qmlApi.MAX_U256_VALUE())
+    ethCallJson["types"] = []
+    ethCallJson["types"].push("address")
+    ethCallJson["types"].push("uint*")
+    var ethCallString = JSON.stringify(ethCallJson)
+    var ABI = qmlApi.buildCustomABI(ethCallString)
+    txData = ABI
   }
 
   Column {
@@ -398,14 +429,60 @@ AVMEPanel {
     }
 
     AVMEButton {
-      id: approveBtn
+      id: approveAsset1Btn
       width: parent.width
+      visible: (!asset1Approved)
       enabled: (+accountHeader.coinRawBalance >=
         +qmlSystem.calculateTransactionCost("0", "180000", qmlSystem.getAutomaticFee())
       )
       anchors.horizontalCenter: parent.horizontalCenter
-      text: (enabled) ? "Approve" : "Not enough funds"
-      onClicked: confirmAddApprovalPopup.open()
+      text: (enabled) ? "Approve " + addAsset1Popup.chosenAssetSymbol : "Not enough funds"
+      onClicked: {
+        info = "You will approve <b>"
+        + (addAsset1Popup.chosenAssetSymbol)
+        + "</b> to be added to the pool for the current address"
+        historyInfo = "Approve " + addAsset1Popup.chosenAssetSymbol
+        approveTx(addAsset1Popup.chosenAssetAddress)
+        confirmAddApprovalAsset1Popup.setData(
+          to,
+          coinValue,
+          txData,
+          gas,
+          gasPrice,
+          automaticGas,
+          info,
+          historyInfo
+        )
+        confirmAddApprovalAsset1Popup.open()
+      }
+    }
+    AVMEButton {
+      id: approveAsset2Btn
+      width: parent.width
+      visible: (!asset2Approved)
+      enabled: (+accountHeader.coinRawBalance >=
+        +qmlSystem.calculateTransactionCost("0", "180000", qmlSystem.getAutomaticFee())
+      )
+      anchors.horizontalCenter: parent.horizontalCenter
+      text: (enabled) ? "Approve " + addAsset2Popup.chosenAssetSymbol : "Not enough funds"
+      onClicked: {
+        info = "You will approve <b>"
+        + (addAsset2Popup.chosenAssetSymbol)
+        + "</b> to be added to the pool for the current address"
+        historyInfo = "Approve " + addAsset2Popup.chosenAssetSymbol
+        approveTx(addAsset2Popup.chosenAssetAddress)
+        confirmAddApprovalAsset2Popup.setData(
+          to,
+          coinValue,
+          txData,
+          gas,
+          gasPrice,
+          automaticGas,
+          info,
+          historyInfo
+        )
+        confirmAddApprovalAsset2Popup.open()
+      }
     }
   }
 

@@ -146,13 +146,13 @@ Item {
 
   // Popups for confirming approval/add/removal, respectively
   AVMEPopupConfirmTx {
-    id: confirmAddApprovalPopup
-    info: "You will approve <b>"
-    + ((!addLiquidityPanel.asset1Approved) ? addAsset1Popup.chosenAssetSymbol : "")
-    + ((!addLiquidityPanel.asset1Approved && !addLiquidityPanel.asset2Approved) ? " and " : "")
-    + ((!addLiquidityPanel.asset2Approved) ? addAsset2Popup.chosenAssetSymbol : "")
-    + "</b> to be added to the pool for the current address"
+    id: confirmAddApprovalAsset1Popup
   }
+  AVMEPopupConfirmTx {
+    id: confirmAddApprovalAsset2Popup
+  }
+
+
   AVMEPopupConfirmTx {
     id: confirmRemoveApprovalPopup
     info: "You will approve "
