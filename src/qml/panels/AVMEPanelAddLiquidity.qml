@@ -16,6 +16,8 @@ AVMEPanel {
   property string asset2Allowance
   property string asset1Reserves
   property string asset2Reserves
+  property string asset1Balance
+  property string asset2Balance
   property bool asset1Approved
   property bool asset2Approved
   property string pairAddress
@@ -149,7 +151,6 @@ AVMEPanel {
   function refreshAssetBalance() {
     var asset1Symbol = addAsset1Popup.chosenAssetSymbol
     var asset2Symbol = addAsset2Popup.chosenAssetSymbol
-    var asset1Balance, asset2Balance
     if (asset1Symbol == "AVAX") {
       asset1Balance = accountHeader.coinRawBalance
     } else {
@@ -184,19 +185,22 @@ AVMEPanel {
       )
     }
   }
-
   // For the Max Amounts button
   function calculateMaxAddLiquidityAmount() {
     // Get the max asset amounts, check who is lower and calculate accordingly
+    console.log("1")
     var asset1Max = (addAsset1Popup.chosenAssetSymbol == "AVAX")
-      ? qmlSystem.getRealMaxAVAXAmount("250000", qmlSystem.getAutomaticFee())
+      ? qmlSystem.getRealMaxAVAXAmount(accountHeader.coinRawBalance, "250000", qmlSystem.getAutomaticFee())
       : accountHeader.tokenList[addAsset1Popup.chosenAssetAddress]["balance"]
+    console.log("2")
     var asset2Max = (addAsset1Popup.chosenAssetSymbol == "AVAX")
-      ? qmlSystem.getRealMaxAVAXAmount("250000", qmlSystem.getAutomaticFee())
+      ? qmlSystem.getRealMaxAVAXAmount(accountHeader.coinRawBalance, "250000", qmlSystem.getAutomaticFee())
       : accountHeader.tokenList[addAsset2Popup.chosenAssetAddress]["balance"]
+    console.log("3")
     var lowerAddress = qmlSystem.getFirstFromPair(
       addAsset1Popup.chosenAssetAddress, addAsset2Popup.chosenAssetAddress
     )
+    console.log("4")
     var asset1Amount, asset2Amount
     if (lowerAddress == addAsset1Popup.chosenAssetAddress) {
       asset1Amount = qmlSystem.calculateAddLiquidityAmount(asset2Max, asset2Reserves, asset1Reserves)
@@ -205,6 +209,7 @@ AVMEPanel {
       asset1Amount = qmlSystem.calculateAddLiquidityAmount(asset2Max, asset1Reserves, asset2Reserves)
       asset2Amount = qmlSystem.calculateAddLiquidityAmount(asset1Max, asset2Reserves, asset1Reserves)
     }
+    console.log("5")
     // Limit the max amount to the lowest the user has, then set the right
     // values afterwards. If asset1Amount is higher than the balance in asset1Max,
     // then that balance is limiting. Same with asset2Amount and asset2Max.
@@ -215,18 +220,14 @@ AVMEPanel {
       asset1Max = asset1Amount
     }
     if (lowerAddress == addAsset1Popup.chosenAssetAddress) {
-      asset1Input.text = asset1Max
-      asset2Input.text = qmlSystem.calculateAddLiquidityAmount(
+      addAsset1Input.text = asset1Max
+      addAsset2Input.text = qmlSystem.calculateAddLiquidityAmount(
         asset1Max, asset1Reserves, asset2Reserves
       )
     } else if (lowerAddress == addAsset2Popup.chosenAssetAddress) {
-      asset2Input.text = asset2Max
-      asset1Input.text = qmlSystem.calculateAddLiquidityAmount(
+      addAsset2Input.text = asset2Max
+      addAsset1Input.text = qmlSystem.calculateAddLiquidityAmount(
         asset2Max, asset2Reserves, asset1Reserves
-      )
-      liquidityTokenInput.text = maxAmountAVME
-      liquidityCoinInput.text = qmlSystem.calculateAddLiquidityAmount(
-        maxAmountAVME, lowerReserves, higherReserves
       )
     }
   }
@@ -556,7 +557,7 @@ AVMEPanel {
       width: parent.width
       anchors.horizontalCenter: parent.horizontalCenter
       text: "Max Amounts"
-      enabled: (asset1Reserves != "" && asset2Reserves != "")
+      enabled: (asset1Reserves != "" && asset2Reserves != "" && +asset1Balance != 0 && +asset2Balance != 0)
       onClicked: calculateMaxAddLiquidityAmount()
     }
 
