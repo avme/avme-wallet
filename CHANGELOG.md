@@ -4,13 +4,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+- Support for multiple ARC20 tokens (send, exchange, add/remove liquidity).
+- A wrapper (QmlApi) for abstracting and exposing ABI/smart contract calls.
+  - This enables developers to create their own DApps and integrate them in the wallet.
+
+### Changed
+- UI has a new design (thanks to Natalya Chavez for the work!).
+- Wallet addresses can now be displayed as QR codes.
+- Transaction history and token information are now stored in LevelDB instead of JSON files.
+  - This should make the wallet faster I/O-wise.
+- Code is now separated in a more logical way in the `src` folder.
+- OpenSSL was moved to the depends system instead of being a git submodule.
+- A new API is being used, with support for multiple requests (thanks to Markus for the work!).
+  - (Most) requests were also converted to use the nlohmann/json library instead of std::stringstream.
+- Price history for assets can now be set to 1 week, 1 month or 3 months.
+
+### Removed
+- CLI executable for testing/debugging.
+
 ## [1.2.0] - 2021-06-14
 ### Added
-- Support for compound Staking.
+- Support for compound staking (powered by YieldYak).
 - Locked LP value information.
 
 ### Fixed
-- Properly load transaction history
+- Properly load transaction history.
 
 ## [1.1.0] - 2021-06-08
 ### Added
@@ -18,8 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Default gas limit for sending AVME has increased from 21000 to 70000.
-- MacOS Display DPI support
-- MacOS Libraries
+- MacOS display DPI support.
+- MacOS libraries.
 
 ### Fixed
 - Project version should show up again at window title bar and the About screen.
