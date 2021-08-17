@@ -22,6 +22,7 @@ AVMEPanel {
   property alias add1Amount: addAsset1Input.text
   property alias add2Amount: addAsset2Input.text
   property alias addBtn: addLiquidityBtn
+  property bool loading: true
 
   Connections {
     target: accountHeader
@@ -32,28 +33,32 @@ AVMEPanel {
     target: qmlApi
     function onApiRequestAnswered(answer, requestID) {
       var resp = JSON.parse(answer)
-      if (requestID == "QmlAddLiquidity_fetchPair") {
-        pairAddress = qmlApi.parseHex(resp[0].result, ["uint"])
-        if (pairAddress != "0x0000000000000000000000000000000000000000") {
-          fetchAllowances()
-        } else {
-          // TODO: display "no pair available" here
-        }
-      } else if (requestID == "QmlAddLiquidity_fetchAllowances") {
+      if (requestID == "QmlAddLiquidity_fetchAllowancesAndPair") {
         for (var item in resp) {
           if (resp[item]["id"] == 1) {
+            pairAddress = qmlApi.parseHex(resp[item].result, ["address"])
+          }  
+          if (resp[item]["id"] == 2) {
             asset1Allowance = qmlApi.parseHex(resp[item].result, ["uint"])
           }
-          if (resp[item]["id"] == 2) {
+          if (resp[item]["id"] == 3) {
             asset2Allowance = qmlApi.parseHex(resp[item].result, ["uint"])
           }
+        }
+        console.log(pairAddress)
+        if (pairAddress == "0x0000000000000000000000000000000000000000") {
+          addLiquidityDetailsColumn.visible = false
+          addLiquidityApprovalColumn.visible = false
+          addLiquidityPairUnavailable.visible = true
+          loading = false;
+          return
         }
         // AVAX doesn't need approval, tokens do (and individually)
         if (addAsset1Popup.chosenAssetSymbol == "AVAX") {
           asset1Approved = true
         } else {
           var asset1 = accountHeader.tokenList[addAsset1Popup.chosenAssetAddress]
-          asset1Approved = (+asset1Allowance >= +qmlSystem.fixedPointToWei(
+          asset1Approved = (+asset1Allowance > +qmlSystem.fixedPointToWei(
             asset1["rawBalance"], addAsset1Popup.chosenAssetDecimals
           ))
         }
@@ -61,14 +66,20 @@ AVMEPanel {
           asset2Approved = true
         } else {
           var asset2 = accountHeader.tokenList[addAsset2Popup.chosenAssetAddress]
-          asset2Approved = (+asset2Allowance >= +qmlSystem.fixedPointToWei(
+          asset2Approved = (+asset2Allowance > +qmlSystem.fixedPointToWei(
             asset2["rawBalance"], addAsset2Popup.chosenAssetDecimals
           ))
         }
         if (asset1Approved && asset2Approved) {
           fetchReserves()
+          addLiquidityDetailsColumn.visible = true
+          addLiquidityApprovalColumn.visible = false
+          addLiquidityPairUnavailable.visible = false
         } else {
           addLiquidityDetailsColumn.visible = false
+          addLiquidityApprovalColumn.visible = true
+          addLiquidityPairUnavailable.visible = false
+          loading = false
         }
       } else if (requestID == "QmlAddLiquidity_fetchReserves") {
         console.log(answer)
@@ -83,39 +94,40 @@ AVMEPanel {
           asset1Reserves = reserves[1]
           asset2Reserves = reserves[0]
         }
+        loading = false;
       }
     }
   }
 
-  function fetchPair() {
+  function fetchAllowancesAndPair() {
+    console.log("ei gatinha")
+    addLiquidityDetailsColumn.visible = false
+    addLiquidityApprovalColumn.visible = false
+    addLiquidityPairUnavailable.visible = false
+    loading = true
     refreshAssetBalance()
-    pairAddress = ""
-    qmlApi.clearAPIRequests("QmlAddLiquidity_fetchPair")
+    asset1Allowance = asset2Allowance = ""
+    qmlApi.clearAPIRequests("QmlAddLiquidity_fetchAllowancesAndPair")
+    console.log(addAsset1Popup.chosenAssetAddress)
+    console.log(addAsset2Popup.chosenAssetAddress)
     qmlApi.buildGetPairReq(
       addAsset1Popup.chosenAssetAddress,
       addAsset2Popup.chosenAssetAddress,
-      "QmlAddLiquidity_fetchPair"
+      "QmlAddLiquidity_fetchAllowancesAndPair"
     )
-    qmlApi.doAPIRequests("QmlAddLiquidity_fetchPair")
-  }
-
-  function fetchAllowances() {
-    refreshAssetBalance()
-    asset1Allowance = asset2Allowance = ""
-    qmlApi.clearAPIRequests("QmlAddLiquidity_fetchAllowances")
     qmlApi.buildGetAllowanceReq(
       addAsset1Popup.chosenAssetAddress,
       qmlSystem.getCurrentAccount(),
       qmlSystem.getContract("router"),
-      "QmlAddLiquidity_fetchAllowances"
+      "QmlAddLiquidity_fetchAllowancesAndPair"
     )
     qmlApi.buildGetAllowanceReq(
       addAsset2Popup.chosenAssetAddress,
       qmlSystem.getCurrentAccount(),
       qmlSystem.getContract("router"),
-      "QmlAddLiquidity_fetchAllowances"
+      "QmlAddLiquidity_fetchAllowancesAndPair"
     )
-    qmlApi.doAPIRequests("QmlAddLiquidity_fetchAllowances")
+    qmlApi.doAPIRequests("QmlAddLiquidity_fetchAllowancesAndPair")
   }
 
   function fetchReserves() {
@@ -331,6 +343,30 @@ AVMEPanel {
     }
   }
 
+  Image {
+    id: addLiquidityLoadingPng
+    visible: loading
+    anchors {
+      top: addLiquidityHeaderColumn.bottom
+      bottom: parent.bottom
+      left: parent.left
+      right: parent.right
+      topMargin: parent.height * 0.1
+      bottomMargin: parent.height * 0.1
+    }
+    fillMode: Image.PreserveAspectFit
+    source: "qrc:/img/icons/loading.png"
+    RotationAnimator {
+      target: addLiquidityLoadingPng
+      from: 0
+      to: 360
+      duration: 1000
+      loops: Animation.Infinite
+      easing.type: Easing.InOutQuad
+      running: true
+    }
+  }
+
   Column {
     id: addLiquidityApprovalColumn
     visible: !addLiquidityDetailsColumn.visible
@@ -379,8 +415,34 @@ AVMEPanel {
   }
 
   Column {
+    id: addLiquidityPairUnavailable
+    visible: false
+    anchors {
+      top: addLiquidityHeaderColumn.bottom
+      bottom: parent.bottom
+      left: parent.left
+      right: parent.right
+      topMargin: 20
+      bottomMargin: 20
+      leftMargin: 40
+      rightMargin: 40
+    }
+    spacing: 20
+
+    Text {
+      id: addLiquidityPairUnavailableText
+      width: parent.width
+      anchors.horizontalCenter: parent.horizontalCenter
+      horizontalAlignment: Text.AlignHCenter
+      elide: Text.ElideRight
+      color: "#FFFFFF"
+      font.pixelSize: 18.0
+      text: "The desired pair is unavailable<br>Please select other"
+    }
+  }
+
+  Column {
     id: addLiquidityDetailsColumn
-    enabled: (asset1Approved && asset2Approved)
     anchors {
       top: addLiquidityHeaderColumn.bottom
       bottom: parent.bottom
