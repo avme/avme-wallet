@@ -130,7 +130,9 @@ ListView {
             id: listAssetImage
             height: 48
             antialiasing: true
+            asynchronous: true
             smooth: true
+            cache: true
             fillMode: Image.PreserveAspectFit
             source: imagePath
           }
