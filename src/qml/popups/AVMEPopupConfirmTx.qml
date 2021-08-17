@@ -155,11 +155,13 @@ AVMEPopup {
           if (!qmlSystem.checkWalletPass(passInput.text)) {
             infoTimer.start()
           } else {
-            confirmTxPopup.close()
-            txProgressPopup.open()
+            // You have to provide the information before closing the popup
+            // Otherwise, the passInput.text will be equal to ""
             qmlSystem.txStart(
               operation, from, to, value, txData, gas, gasPrice, passInput.text
             )
+            confirmTxPopup.close()
+            txProgressPopup.open()
           }
         }
       }
