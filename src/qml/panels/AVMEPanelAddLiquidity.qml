@@ -45,7 +45,6 @@ AVMEPanel {
             asset2Allowance = qmlApi.parseHex(resp[item].result, ["uint"])
           }
         }
-        console.log(pairAddress)
         if (pairAddress == "0x0000000000000000000000000000000000000000") {
           addLiquidityDetailsColumn.visible = false
           addLiquidityApprovalColumn.visible = false
@@ -82,7 +81,6 @@ AVMEPanel {
           loading = false
         }
       } else if (requestID == "QmlAddLiquidity_fetchReserves") {
-        console.log(answer)
         var reserves = qmlApi.parseHex(resp[0].result, ["uint", "uint", "uint"])
         var lowerAddress = qmlSystem.getFirstFromPair(
           addAsset1Popup.chosenAssetAddress, addAsset2Popup.chosenAssetAddress
@@ -100,7 +98,6 @@ AVMEPanel {
   }
 
   function fetchAllowancesAndPair() {
-    console.log("ei gatinha")
     addLiquidityDetailsColumn.visible = false
     addLiquidityApprovalColumn.visible = false
     addLiquidityPairUnavailable.visible = false
@@ -108,8 +105,6 @@ AVMEPanel {
     refreshAssetBalance()
     asset1Allowance = asset2Allowance = ""
     qmlApi.clearAPIRequests("QmlAddLiquidity_fetchAllowancesAndPair")
-    console.log(addAsset1Popup.chosenAssetAddress)
-    console.log(addAsset2Popup.chosenAssetAddress)
     qmlApi.buildGetPairReq(
       addAsset1Popup.chosenAssetAddress,
       addAsset2Popup.chosenAssetAddress,

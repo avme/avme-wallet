@@ -173,7 +173,6 @@ void QmlApi::buildGetPairReq(QString assetAddress1, QString assetAddress2, QStri
   params["data"] = Pangolin::factoryFuncs["getPair"]
     + Utils::addressToHex(assetAddress1.toStdString())
     + Utils::addressToHex(assetAddress2.toStdString());
-  std::cout << params["data"]  << std::endl;
   array.push_back(params);
   array.push_back("latest");
   requestListLock.lock();
