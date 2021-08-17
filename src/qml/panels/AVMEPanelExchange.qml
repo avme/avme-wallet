@@ -59,8 +59,6 @@ AVMEPanel {
   property string info
   property string historyInfo
 
-  QmlApi { id: qmlApi }
-
   Connections {
     target: accountHeader
     function onUpdatedBalances() { refreshAssetBalance() }

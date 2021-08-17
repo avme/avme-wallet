@@ -25,8 +25,6 @@ AVMEPanel {
   property string removeLPEstimate
   property alias removeBtn: removeLiquidityBtn
 
-  QmlApi { id: qmlApi }
-
   Connections {
     target: qmlApi
     function onApiRequestAnswered(answer, requestID) {

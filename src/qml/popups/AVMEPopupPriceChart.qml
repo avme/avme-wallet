@@ -17,8 +17,6 @@ AVMEPopup {
   property string nameAsset
   property string currentAssetPrice
 
-  QmlApi { id: qmlApi }
-
   Connections {
     target: chartPeriod
     function onActivated(index) { callGraphApi(index) }

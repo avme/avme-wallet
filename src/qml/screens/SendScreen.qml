@@ -12,7 +12,6 @@ import "qrc:/qml/popups"
 // Screen for sending AVAX and ARC20 token transactions.
 Item {
   id: sendScreen
-  QmlApi { id: qmlApi }
   /*
   // TODO: delete this after the operation side is rewritten
   property string txOperationStr

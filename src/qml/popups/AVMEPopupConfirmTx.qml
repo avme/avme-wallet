@@ -34,8 +34,6 @@ AVMEPopup {
   onAboutToShow: passInput.focus = true
   onAboutToHide: confirmTxPopup.clean()
 
-  QmlApi { id: qmlApi }
-
   Connections {
     target: qmlApi
     function onApiRequestAnswered(answer, requestID) {

@@ -23,8 +23,6 @@ AVMEPanel {
   property alias add2Amount: addAsset2Input.text
   property alias addBtn: addLiquidityBtn
 
-  QmlApi { id: qmlApi }
-
   Connections {
     target: accountHeader
     function onUpdatedBalances() { refreshAssetBalance() }
