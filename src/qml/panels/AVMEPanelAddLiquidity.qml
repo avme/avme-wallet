@@ -192,28 +192,27 @@ AVMEPanel {
   // For the Max Amounts button
   function calculateMaxAddLiquidityAmount() {
     // Get the max asset amounts, check who is lower and calculate accordingly
-    console.log("1")
     var asset1Max = (addAsset1Popup.chosenAssetSymbol == "AVAX")
       ? qmlSystem.getRealMaxAVAXAmount(accountHeader.coinRawBalance, "250000", qmlSystem.getAutomaticFee())
-      : accountHeader.tokenList[addAsset1Popup.chosenAssetAddress]["balance"]
-    console.log("2")
-    var asset2Max = (addAsset1Popup.chosenAssetSymbol == "AVAX")
+      : accountHeader.tokenList[addAsset1Popup.chosenAssetAddress]["rawBalance"]
+    var asset2Max = (addAsset2Popup.chosenAssetSymbol == "AVAX")
       ? qmlSystem.getRealMaxAVAXAmount(accountHeader.coinRawBalance, "250000", qmlSystem.getAutomaticFee())
-      : accountHeader.tokenList[addAsset2Popup.chosenAssetAddress]["balance"]
-    console.log("3")
+      : accountHeader.tokenList[addAsset2Popup.chosenAssetAddress]["rawBalance"]
     var lowerAddress = qmlSystem.getFirstFromPair(
       addAsset1Popup.chosenAssetAddress, addAsset2Popup.chosenAssetAddress
     )
-    console.log("4")
     var asset1Amount, asset2Amount
     if (lowerAddress == addAsset1Popup.chosenAssetAddress) {
       asset1Amount = qmlSystem.calculateAddLiquidityAmount(asset2Max, asset2Reserves, asset1Reserves)
       asset2Amount = qmlSystem.calculateAddLiquidityAmount(asset1Max, asset1Reserves, asset2Reserves)
     } else if (lowerAddress == addAsset2Popup.chosenAssetAddress) {
-      asset1Amount = qmlSystem.calculateAddLiquidityAmount(asset2Max, asset1Reserves, asset2Reserves)
-      asset2Amount = qmlSystem.calculateAddLiquidityAmount(asset1Max, asset2Reserves, asset1Reserves)
+      asset1Amount = qmlSystem.calculateAddLiquidityAmount(asset1Max, asset2Reserves, asset1Reserves)
+      asset2Amount = qmlSystem.calculateAddLiquidityAmount(asset2Max, asset1Reserves, asset2Reserves)
     }
-    console.log("5")
+    console.log(asset2Max)
+    console.log(asset1Max)
+    console.log(asset2Amount)
+    console.log(asset1Amount)
     // Limit the max amount to the lowest the user has, then set the right
     // values afterwards. If asset1Amount is higher than the balance in asset1Max,
     // then that balance is limiting. Same with asset2Amount and asset2Max.
