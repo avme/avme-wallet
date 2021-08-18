@@ -123,6 +123,8 @@ ListView {
 
         Column {
           anchors.fill: parent
+          width: parent.width
+          height: parent.height
           anchors.margins: 10
           spacing: 10
 
@@ -139,9 +141,19 @@ ListView {
           Text {
             id: listAssetAmount
             color: "white"
+            width: parent.width * 0.33
             font.pixelSize: 18.0
             font.bold: true
-            text: ((isToken) ? itemTokenAmount : itemCoinAmount) + " " + itemAssetName
+            elide: Text.ElideRight
+            text: (isToken) ? itemTokenAmount : itemCoinAmount
+            Text {
+              id: listAssetName
+              font.pixelSize: 18.0
+              font.bold: true
+              color: "white"
+              anchors.left: parent.right
+              text: " " + itemAssetName
+            }
           }
           Text {
             id: listAssetFiatAmount

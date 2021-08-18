@@ -256,7 +256,9 @@ void QmlSystem::getAccountAllBalances(QString address) {
           std::stringstream ss;
           ss << std::setprecision(2) << std::fixed << tokenUSDValueFloat;
           std::string tokenUSDValue = ss.str();
-          std::string tokenBalStr = boost::lexical_cast<std::string>(tokenBal);
+          std::string tokenBalStr = Utils::weiToFixedPoint(
+            boost::lexical_cast<std::string>(tokenWeiBal), tokenList[pos].decimals
+          );
           std::string chartAddress = "chart_" + tokenList[pos].address;
 
           // Again, we need to convert to lowercase and append chart_ as prefix
@@ -292,7 +294,9 @@ void QmlSystem::getAccountAllBalances(QString address) {
         std::stringstream avaxUSDPricePrec2;
         avaxUSDPricePrec2 << std::setprecision(2) << std::fixed << avaxUSDPrice;
 
-        coinInformation["coinBalance"] = boost::lexical_cast<std::string>(avaxBal);
+        coinInformation["coinBalance"] = Utils::weiToFixedPoint(
+          boost::lexical_cast<std::string>(avaxWeiBal), 18
+        );
         coinInformation["coinFiatBalance"] = avaxUSDBalPrec2.str();
         coinInformation["coinFiatPrice"] = avaxUSDPricePrec2.str();
         coinInformation["coinPriceChart"] = tokensPrices["data"]["AVAXUSDCHART"].dump();
