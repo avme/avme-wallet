@@ -171,15 +171,19 @@ AVMEPanel {
   }
 
   // For manual inputs on amounts
-  function calculateAddLiquidityAmount() {
+  function calculateAddLiquidityAmount(isFirstInput) {
     var lowerAddress = qmlSystem.getFirstFromPair(
       addAsset1Popup.chosenAssetAddress, addAsset2Popup.chosenAssetAddress
     )
-    if (lowerAddress == addAsset1Popup.chosenAssetAddress) {
+    if ((lowerAddress == addAsset1Popup.chosenAssetAddress && isFirstInput) 
+    || (lowerAddress == addAsset2Popup.chosenAssetAddress && isFirstInput))
+     {
       addAsset2Input.text = qmlSystem.calculateAddLiquidityAmount(
         addAsset1Input.text, asset1Reserves, asset2Reserves
       )
-    } else if (lowerAddress == addAsset2Popup.chosenAssetAddress) {
+    } else if ((lowerAddress == addAsset2Popup.chosenAssetAddress && !isFirstInput)
+    || (lowerAddress == addAsset1Popup.chosenAssetAddress && !isFirstInput))
+     {
       addAsset1Input.text = qmlSystem.calculateAddLiquidityAmount(
         addAsset2Input.text, asset2Reserves, asset1Reserves
       )
@@ -537,7 +541,7 @@ AVMEPanel {
       }
       label: addAsset1Popup.chosenAssetSymbol + " Amount"
       placeholder: "Fixed point amount (e.g. 0.5)"
-      onTextEdited: calculateAddLiquidityAmount()
+      onTextEdited: calculateAddLiquidityAmount(true)
     }
 
     AVMEInput {
@@ -549,7 +553,7 @@ AVMEPanel {
       }
       label: addAsset2Popup.chosenAssetSymbol + " Amount"
       placeholder: "Fixed point amount (e.g. 0.5)"
-      onTextEdited: calculateAddLiquidityAmount()
+      onTextEdited: calculateAddLiquidityAmount(false)
     }
 
     AVMEButton {
