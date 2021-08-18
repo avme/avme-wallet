@@ -15,77 +15,26 @@ Item {
   property bool isStaking: true
   property bool isClassic: true
 
-  /*
-  Connections {
-    target: qmlSystem
-    function onAllowancesUpdated(
-      exchangeAllowance, liquidityAllowance, stakingAllowance, compoundAllowance
-    ) {
-      allowance = stakingAllowance
-      compoundallowance = compoundAllowance
-    }
-    function onRewardUpdated(poolReward) { reward = poolReward }
-    function onCompoundUpdated(reinvestReward) { reinvestreward = reinvestReward }
-    function onLiquidityDataUpdated(
-      lowerTokenName, lowerTokenReserves, higherTokenName, higherTokenReserves, totalLiquidity
-    ) {
-      lowerToken = lowerTokenName
-      lowerReserves = lowerTokenReserves
-      higherToken = higherTokenName
-      higherReserves = higherTokenReserves
-      liquidity = totalLiquidity
-      var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
-      var userClassicShares = qmlSystem.calculatePoolSharesForTokenValue(
-        lowerReserves, higherReserves, liquidity, acc.balanceLPLocked
-      )
-      var userCompoundShares = qmlSystem.calculatePoolSharesForTokenValue(
-        lowerReserves, higherReserves, liquidity, acc.balanceLockedCompoundLP
-      )
-      userClassicLowerReserves = userClassicShares.lower
-      userClassicHigherReserves = userClassicShares.higher
-      userCompoundLowerReserves = userCompoundShares.lower
-      userCompoundHigherReserves = userCompoundShares.higher
+  // op = "approval" or "stake"
+  function checkLedger(op) {
+    var data = qmlSystem.checkForLedger()
+    if (data.state) {
+      ledgerFailPopup.close()
+      ledgerRetryTimer.stop()
+      if (op == "approval") {
+        confirmApprovalPopup.open()
+      } else if (op == "stake") {
+        confirmStakePopup.open()
+      }
+    } else {
+      ledgerFailPopup.info = data.message
+      ledgerFailPopup.open()
+      ledgerRetryTimer.start()
     }
   }
 
-  Timer {
-    id: reloadRewardTimer
-    interval: 1000
-    repeat: true
-    onTriggered: qmlSystem.getPoolReward()
-  }
+  Timer { id: ledgerRetryTimer; interval: 250; onTriggered: parent.checkLedger() }
 
-  Timer {
-    id: reloadCompoundTimer
-    interval: 1000
-    repeat: true
-    onTriggered: qmlSystem.getCompoundReward()
-  }
-
-  Timer {
-    id: reloadLiquidityDataTimer
-    interval: 5000
-    repeat: true
-    onTriggered: qmlSystem.updateLiquidityData("AVAX", "AVME")
-  }
-
-  Component.onCompleted: {
-    // TODO: get staking/compound allowances
-    std::string stakingAllowance = Pangolin::allowance(
-      Pangolin::contracts["AVAX-AVME"],
-      this->w.getCurrentAccount().first,
-      Pangolin::contracts["staking"]
-    );
-    std::string compoundAllowance = Pangolin::allowance(
-      Pangolin::contracts["AVAX-AVME"],
-      this->w.getCurrentAccount().first,
-      Pangolin::contracts["compound"]
-    );
-    reloadRewardTimer.start()
-    reloadCompoundTimer.start()
-    reloadLiquidityDataTimer.start()
-  }
-  */
 
   // Panel for selecting Classic x Compound
   AVMEPanel {
@@ -195,5 +144,11 @@ Item {
     id: txProgressPopup
   }
 
-  // TODO: Ledger popup here
+  // Info popup for if communication with Ledger fails
+  AVMEPopupInfo {
+    id: ledgerFailPopup
+    icon: "qrc:/img/warn.png"
+    onAboutToHide: ledgerRetryTimer.stop()
+    okBtn.text: "Close"
+  }
 }

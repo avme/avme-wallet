@@ -66,6 +66,11 @@ class QmlApi : public QObject {
     Q_INVOKABLE void buildGetTokenBalanceReq(QString contract, QString address, QString requestID);
 
     /**
+     * Build request for getting the total LP supply of a pair.
+     */
+    Q_INVOKABLE void buildGetTotalSupplyReq(QString pairAddress, QString requestID);
+
+    /**
      * Build request for getting the current block number.
      */
     Q_INVOKABLE void buildGetCurrentBlockNumberReq(QString requestID);

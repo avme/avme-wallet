@@ -9,11 +9,109 @@ import "qrc:/qml/components"
 // Panel for classic staking (AVME smart contract)
 AVMEPanel {
   id: stakingPanel
+  property string pairAddress
+  property string pairTotalBalance
+  property string pairUserBalance
   property string allowance
-  //property string lowerToken
+  property string lowerToken
   property string lowerReserves
+  property string higherToken
   property string higherReserves
+  property string userLowerShares
+  property string userHigherShares
+  property string userLPShares
+  property string lowerEstimate
+  property string higherEstimate
   title: "Classic Staking"
+
+  Connections {
+    target: qmlApi
+    function onApiRequestAnswered(answer, requestID) {
+      var resp = JSON.parse(answer)
+      if (requestID == "QmlStaking_fetchPair") {
+        pairAddress = qmlApi.parseHex(resp[0].result, ["address"])
+        fetchBalanceAndAllowance()
+      } else if (requestID == "QmlStaking_fetchBalanceAndAllowance") {
+        for (var item in resp) {
+          if (resp[item]["id"] == 1) {
+            pairTotalBalance = qmlApi.parseHex(resp[item].result, ["uint"])
+          }
+          if (resp[item]["id"] == 2) {  // Balance
+            pairUserBalance = qmlApi.parseHex(resp[item].result, ["uint"])
+          }
+          if (resp[item]["id"] == 2) { // Allowance
+            allowance = qmlApi.parseHex(resp[item].result, ["uint"])
+          }
+        }
+        // TODO: check edge case of allowance and balance both being zero
+        if (+allowance >= +pairUserBalance) {
+          stakingDetailsColumn.visible = true
+          fetchReserves()
+        } else {
+          stakingDetailsColumn.visible = false
+        }
+      } else if (requestID == "QmlStaking_fetchReserves") {
+        var reserves, lowerAddress, shares
+        reserves = qmlApi.parseHex(resp[0].result, ["uint", "uint", "uint"])
+        lowerAddress = qmlSystem.getFirstFromPair(
+          qmlSystem.getContract("AVAX"), qmlSystem.getContract("AVME")
+        )
+        lowerReserves = reserves[0]
+        higherReserves = reserves[1]
+        if (lowerAddress == qmlSystem.getContract("AVAX")) {
+          lowerToken = "AVAX"
+          higherToken = "AVME"
+        } else if (lowerAddress == qmlSystem.getContract("AVME")) {
+          lowerToken = "AVME"
+          higherToken = "AVAX"
+        }
+        shares = qmlSystem.calculatePoolShares(
+          lowerReserves, higherReserves, pairUserBalance, pairTotalBalance
+        )
+        userLowerShares = shares.lower
+        userHigherShares = shares.higher
+        userLPShares = shares.liquidity
+      }
+    }
+  }
+
+  function fetchPair() {
+    pairAddress = ""
+    qmlApi.clearAPIRequests("QmlStaking_fetchPair")
+    qmlApi.buildGetPairReq(
+      qmlSystem.getContract("AVAX"),
+      qmlSystem.getContract("AVME"),
+      "QmlStaking_fetchPair"
+    )
+    qmlApi.doAPIRequests("QmlStaking_fetchPair")
+  }
+
+  function fetchBalanceAndAllowance() {
+    pairUserBalance = pairTotalBalance = allowance = ""
+    qmlApi.clearAPIRequests("QmlStaking_fetchBalanceAndAllowance")
+    qmlApi.buildGetTotalSupplyReq(
+      pairAddress, "QmlStaking_fetchBalanceAndAllowance"
+    )
+    qmlApi.buildGetTokenBalanceReq(
+      pairAddress, accountHeader.currentAddress, "QmlStaking_fetchBalanceAndAllowance"
+    )
+    qmlApi.buildGetAllowanceReq(
+      pairAddress,
+      accountHeader.currentAddress,
+      qmlSystem.getContract("staking"),
+      "QmlStaking_fetchBalanceAndAllowance"
+    )
+    qmlApi.doAPIRequests("QmlStaking_fetchBalanceAndAllowance")
+  }
+
+  function fetchReserves() {
+    lowerReserves = higherReserves = ""
+    qmlApi.clearAPIRequests("QmlStaking_fetchReserves")
+    qmlApi.buildGetReservesReq(pairAddress, "QmlStaking_fetchReserves")
+    qmlApi.doAPIRequests("QmlStaking_fetchReserves")
+  }
+
+  Component.onCompleted: fetchPair()
 
   Column {
     id: stakingHeaderColumn
@@ -60,21 +158,15 @@ AVMEPanel {
       source: "qrc:/img/pangolin.png"
     }
 
-    // TODO: fix balances to fix this
     Text {
       id: stakeBalance
       anchors.horizontalCenter: parent.horizontalCenter
       horizontalAlignment: Text.AlignHCenter
       color: "#FFFFFF"
-      font.pixelSize: 18.0
-      /*
-      text: {
-        var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
-        text: (isStaking)
-        ? "Free (unstaked) LP:<br><b>" + acc.balanceLPFree + "</b>"
-        : "Locked (staked) LP:<br><b>" + acc.balanceLPLocked + "</b>"
-      }
-      */
+      font.pixelSize: 14.0
+      text: (pairUserBalance)
+      ? "Balance: <b>" + pairUserBalance + " AVAX/AVME LP</b>"
+      : "Loading LP balance..."
     }
   }
 
@@ -121,7 +213,6 @@ AVMEPanel {
 
   Column {
     id: stakingDetailsColumn
-    visible: false
     anchors {
       top: stakingHeaderColumn.bottom
       bottom: parent.bottom

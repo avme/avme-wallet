@@ -173,17 +173,15 @@ QString QmlSystem::queryExchangeAmount(QString amount, QString fromName, QString
 }
 
 QVariantMap QmlSystem::calculatePoolShares(
-  QString lowerReserves, QString higherReserves, QString totalLiquidity
+  QString lowerReserves, QString higherReserves,
+  QString userLiquidity, QString totalLiquidity
 ) {
   QVariantMap ret;
-  std::string balanceLPFreeStr;
-  // TODO: check this later
-  //balanceLPFreeStr = this->w.getCurrentAccount().first.balanceLPFree;
   u256 lowerReservesU256 = boost::lexical_cast<u256>(lowerReserves.toStdString());
   u256 higherReservesU256 = boost::lexical_cast<u256>(higherReserves.toStdString());
   u256 totalLiquidityU256 = boost::lexical_cast<u256>(totalLiquidity.toStdString());
   u256 userLiquidityU256 = boost::lexical_cast<u256>(
-    Utils::fixedPointToWei(balanceLPFreeStr, 18)
+    Utils::fixedPointToWei(userLiquidity.toStdString(), 18)
   );
 
   bigfloat userLPPercentage = (

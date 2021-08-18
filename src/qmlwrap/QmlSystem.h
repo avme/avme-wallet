@@ -402,7 +402,8 @@ class QmlSystem : public QObject {
 
     // Calculate the Account's share in AVAX/AVME/LP in the pool, respectively
     Q_INVOKABLE QVariantMap calculatePoolShares(
-      QString lowerReserves, QString higherReserves, QString totalLiquidity
+      QString lowerReserves, QString higherReserves,
+      QString userLiquidity, QString totalLiquidity
     );
 
     // Same as above but for advanced compound

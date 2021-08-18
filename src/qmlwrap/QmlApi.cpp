@@ -66,6 +66,19 @@ void QmlApi::buildGetTokenBalanceReq(QString contract, QString address, QString 
   requestListLock.unlock();
 }
 
+void QmlApi::buildGetTotalSupplyReq(QString pairAddress, QString requestID) {
+  json params;
+  json array = json::array();
+  params["to"] = pairAddress.toStdString();
+  params["data"] = Pangolin::ERC20Funcs["totalSupply"];
+  array.push_back(params);
+  array.push_back("latest");
+  requestListLock.lock();
+  Request req{this->requestList[requestID].size() + size_t(1), "2.0", "eth_call", array};
+  this->requestList[requestID].push_back(req);
+  requestListLock.unlock();
+}
+
 void QmlApi::buildGetCurrentBlockNumberReq(QString requestID) {
   requestListLock.lock();
   Request req{
