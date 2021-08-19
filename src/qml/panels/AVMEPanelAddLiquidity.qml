@@ -214,25 +214,23 @@ AVMEPanel {
       addAsset1Popup.chosenAssetAddress, addAsset2Popup.chosenAssetAddress
     )
     var asset1Amount, asset2Amount
-    // there is a bug here...
-    // TODO FIX THIS!!!
-    if (lowerAddress == addAsset1Popup.chosenAssetAddress) {
-      console.log("here 1")
-      asset1Amount = qmlSystem.calculateAddLiquidityAmount(asset2Max, asset2Reserves, asset1Reserves)
-      asset2Amount = qmlSystem.calculateAddLiquidityAmount(asset1Max, asset1Reserves, asset2Reserves)
-    } else if (lowerAddress == addAsset2Popup.chosenAssetAddress) {
-      console.log("here 2")
-      asset1Amount = qmlSystem.calculateAddLiquidityAmount(asset1Max, asset2Reserves, asset1Reserves)
-      asset2Amount = qmlSystem.calculateAddLiquidityAmount(asset2Max, asset1Reserves, asset2Reserves)
-    }
+    asset1Amount = qmlSystem.calculateAddLiquidityAmount(asset1Max, asset1Reserves, asset2Reserves)
+    asset2Amount = qmlSystem.calculateAddLiquidityAmount(asset2Max, asset2Reserves, asset1Reserves)
     // Limit the max amount to the lowest the user has, then set the right
     // values afterwards. If asset1Amount is higher than the balance in asset1Max,
     // then that balance is limiting. Same with asset2Amount and asset2Max.
-    if (qmlSystem.firstHigherThanSecond(asset1Amount, asset1Max)) {
-      asset2Max = asset2Amount
+    
+    var asset1MaxTmp = asset1Max
+    var asset2MaxTmp = asset2Max
+    // asset1MaxTmp = Input 1 Balance
+    // asset2MaxTmp = Input 2 Balance
+    // asset1Amount = How much 1 is worth at 2
+    // asset2Amount = How much 2 is worth at 1
+    if (+asset1MaxTmp > +asset2Amount) {
+      asset1Max = asset2Amount
     }
-    if (qmlSystem.firstHigherThanSecond(asset2Amount, asset2Max)) {
-      asset1Max = asset1Amount
+    if (+asset2MaxTmp > +asset1Amount) {
+      asset2Max = asset1Amount
     }
     if (lowerAddress == addAsset1Popup.chosenAssetAddress) {
       addAsset1Input.text = asset1Max
