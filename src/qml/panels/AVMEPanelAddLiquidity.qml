@@ -7,6 +7,7 @@ import QtQuick.Controls 2.2
 import QmlApi 1.0
 
 import "qrc:/qml/components"
+import "qrc:/qml/popups"
 
 // Panel for adding liquidity to a pool.
 AVMEPanel {
@@ -213,10 +214,14 @@ AVMEPanel {
       addAsset1Popup.chosenAssetAddress, addAsset2Popup.chosenAssetAddress
     )
     var asset1Amount, asset2Amount
+    // there is a bug here...
+    // TODO FIX THIS!!!
     if (lowerAddress == addAsset1Popup.chosenAssetAddress) {
+      console.log("here 1")
       asset1Amount = qmlSystem.calculateAddLiquidityAmount(asset2Max, asset2Reserves, asset1Reserves)
       asset2Amount = qmlSystem.calculateAddLiquidityAmount(asset1Max, asset1Reserves, asset2Reserves)
     } else if (lowerAddress == addAsset2Popup.chosenAssetAddress) {
+      console.log("here 2")
       asset1Amount = qmlSystem.calculateAddLiquidityAmount(asset1Max, asset2Reserves, asset1Reserves)
       asset2Amount = qmlSystem.calculateAddLiquidityAmount(asset2Max, asset1Reserves, asset2Reserves)
     }
@@ -241,11 +246,63 @@ AVMEPanel {
       )
     }
   }
+  function checkTransactionFunds() {
+    if (addAsset1Popup.chosenAssetSymbol == "AVAX" || addAsset2Popup.chosenAssetSymbol == "AVAX") {  // AVAX/Token liquidity
+      var Fees = +qmlApi.fixedPointToWei(gasPrice, 8) * +gas
+      var TxCost = Fees + +qmlApi.fixedPointToWei(
+        (addAsset1Popup.chosenAssetSymbol == "AVAX") ?
+        add1Amount
+        :
+        add2Amount, 18
+        )
+      if (TxCost > +qmlApi.fixedPointToWei(accountHeader.coinRawBalance, 18)) {
+        return false
+      }
+
+      var tokenBalance = +qmlApi.fixedPointToWei(
+        accountHeader.tokenList[
+          (addAsset1Popup.chosenAssetSymbol != "AVAX") ?
+          addAsset1Popup.chosenAssetAddress
+          :
+          addAsset2Popup.chosenAssetAddress
+        ]["rawBalance"],
+        (addAsset1Popup.chosenAssetSymbol != "AVAX") ?
+          addAsset1Popup.chosenAssetAddress
+          :
+          addAsset2Popup.chosenAssetAddress)
+      if (tokenBalance < +qmlApi.fixedPointToWei(
+        (addAsset1Popup.chosenAssetSymbol != "AVAX") ?
+        add1Amount
+        :
+        add2Amount),
+        (addAsset1Popup.chosenAssetSymbol != "AVAX") ?
+        addAsset1Popup.chosenAssetDecimals
+        :
+        addAsset2Popup.chosenAssetDecimals) {
+          return false
+      }
+      return true
+    } else { // Token/Token liquidity
+      var Fees = +qmlApi.fixedPointToWei(gasPrice, 8) * +gas
+      if (Fees > +qmlApi.fixedPointToWei(accountHeader.coinRawBalance, 18)) {
+        return false
+      }
+      var token1Balance = +qmlApi.fixedPointToWei(accountHeader.tokenList[addAsset1Popup.chosenAssetAddress]["rawBalance"], addAsset1Popup.chosenAssetDecimals)
+      if (token1Balance < +qmlApi.fixedPointToWei(add1Amount, addAsset1Popup.chosenAssetDecimals)) {
+        return false
+      }
+      var token2Balance = +qmlApi.fixedPointToWei(accountHeader.tokenList[addAsset2Popup.chosenAssetAddress]["rawBalance"], addAsset2Popup.chosenAssetDecimals)
+      if (token2Balance < +qmlApi.fixedPointToWei(add2Amount, addAsset2Popup.chosenAssetDecimals)) {
+        return false
+      }
+      return true
+    }
+  }
 
   function approveTx(contract) {
     to = contract
     coinValue = 0
-    gas = 500000
+    gas = 70000
     gasPrice = 225
     var ethCallJson = ({})
     ethCallJson["function"] = "approve(address,uint256)"
@@ -308,7 +365,40 @@ AVMEPanel {
       coinValue = qmlApi.weiToFixedPoint(amountAVAX, 18)
       txData = ABI
     } else {
-      // TODO
+      var ethCallJson = ({})
+      ethCallJson["function"] = "addLiquidity(address,address,uint256,uint256,uint256,uint256,address,uint256)"
+      ethCallJson["args"] = []
+      // tokenA
+      ethCallJson["args"].push(addAsset1Popup.chosenAssetAddress)
+      // tokenB
+      ethCallJson["args"].push(addAsset2Popup.chosenAssetAddress)
+      // amountADesired
+      var amountADesired = qmlApi.fixedPointToWei(add1Amount, addAsset1Popup.chosenAssetDecimals)
+      ethCallJson["args"].push(amountADesired)
+      // amountBDesired
+      var amountBDesired = qmlApi.fixedPointToWei(add2Amount, addAsset2Popup.chosenAssetDecimals)
+      ethCallJson["args"].push(amountBDesired)
+      // amountAMin
+      ethCallJson["args"].push(String(Math.round(amountADesired * 0.99))) // 1% Slippage
+      // amountBMin
+      ethCallJson["args"].push(String(Math.round(amountBDesired * 0.99))) // 1% Slippage
+      // to
+      ethCallJson["args"].push(qmlSystem.getCurrentAccount())
+      // deadline
+      ethCallJson["args"].push(String((+qmlApi.getCurrentUnixTime() + 3600) * 1000))
+      ethCallJson["types"] = []
+      ethCallJson["types"].push("address")
+      ethCallJson["types"].push("address")
+      ethCallJson["types"].push("uint*")
+      ethCallJson["types"].push("uint*")
+      ethCallJson["types"].push("uint*")
+      ethCallJson["types"].push("uint*")
+      ethCallJson["types"].push("address")
+      ethCallJson["types"].push("uint*")
+      var ethCallString = JSON.stringify(ethCallJson)
+      var ABI = qmlApi.buildCustomABI(ethCallString)
+      coinValue = "0"
+      txData = ABI
     }
   }
 
@@ -631,18 +721,27 @@ AVMEPanel {
       text: "Add to the pool"
       onClicked: {
         addLiquidityTx()
-        confirmAddLiquidityPopup.setData(
-          to,
-          coinValue,
-          txData,
-          gas,
-          gasPrice,
-          automaticGas,
-          info,
-          historyInfo
-        )
-        confirmAddLiquidityPopup.open()
+        if (!checkTransactionFunds()) {
+          fundsPopup.open()
+        } else {
+          confirmAddLiquidityPopup.setData(
+            to,
+            coinValue,
+            txData,
+            gas,
+            gasPrice,
+            automaticGas,
+            info,
+            historyInfo
+          )
+          confirmAddLiquidityPopup.open()
+        }
       }
     }
+  }
+  AVMEPopupInfo {
+    id: fundsPopup
+    icon: "qrc:/img/warn.png"
+    info: "Insufficient funds. Please check your inputs."
   }
 }
