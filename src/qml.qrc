@@ -13,6 +13,7 @@
         <file>qml/screens/ExchangeScreen.qml</file>
         <file>qml/screens/LiquidityScreen.qml</file>
         <file>qml/screens/StakingScreen.qml</file>
+        <file>qml/screens/ApplicationsScreen.qml</file>
         <file>qml/screens/SettingsScreen.qml</file>
         <file>qml/screens/AboutScreen.qml</file>
 
@@ -45,6 +46,8 @@
         <file>qml/panels/AVMEPanelStakingRewards.qml</file>
         <file>qml/panels/AVMEPanelCompound.qml</file>
         <file>qml/panels/AVMEPanelCompoundRewards.qml</file>
+        <file>qml/panels/AVMEPanelApps.qml</file>
+        <file>qml/panels/AVMEPanelAppDetails.qml</file>
 
         <file>qml/components/AVMEButton.qml</file>
         <file>qml/components/AVMEInput.qml</file>
@@ -62,6 +65,7 @@
         <file>qml/components/AVMEAccountQRCode.qml</file>
         <file>qml/components/AVMEOverviewBalance.qml</file>
         <file>qml/components/AVMEOverviewAssetList.qml</file>
+        <file>qml/components/AVMEAppList.qml</file>
 
         <file>img/Welcome_Logo_AVME.png</file>
 

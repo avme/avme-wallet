@@ -82,7 +82,7 @@ AVMEPanel {
     }
     AVMEButton {
       id: btnCopyToken
-      width: (parent.width * 0.9)
+      width: (tokenDetailsPanel.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
       enabled: (!tokenTimer.running)
       text: (!tokenTimer.running) ? "Copy Token Address" : "Copied!"
@@ -94,7 +94,7 @@ AVMEPanel {
     }
     AVMEButton {
       id: btnCopyPair
-      width: (parent.width * 0.9)
+      width: (tokenDetailsPanel.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
       enabled: (!pairTimer.running)
       text: (!pairTimer.running) ? "Copy Pair Address" : "Copied!"

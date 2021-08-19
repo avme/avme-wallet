@@ -4,15 +4,12 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
-/**
- * List of ARC20 tokens to be selected.
- */
+// ListView for DApps.
 ListView {
-  id: tokenSelectList
+  id: appList
   property color listHighlightColor: "#9400F6"
   property color listBgColor: "#16141F"
   property color listHoverColor: "#2E2C3D"
-  signal grabFocus()
 
   implicitWidth: 500
   implicitHeight: 500
@@ -28,56 +25,52 @@ ListView {
   boundsBehavior: Flickable.StopAtBounds
 
   delegate: Component {
-    id: tokenSelectDelegate
+    id: listDelegate
     Item {
-      id: tokenSelectItem
-      readonly property string itemAddress: address
-      readonly property string itemSymbol: symbol
+      id: listItem
+      readonly property string itemDevIcon: devIcon
+      readonly property string itemIcon: icon
       readonly property string itemName: name
-      readonly property string itemDecimals: decimals
-      readonly property string itemBalance: balance
-      width: tokenSelectList.width
+      readonly property string itemDescription: description
+      readonly property string itemCreator: creator
+      readonly property int itemMajor: major
+      readonly property int itemMinor: minor
+      readonly property int itemPatch: patch
+      width: appList.width
       height: 50
 
       Rectangle {
         id: delegateRectangle
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
-        color: (tokenSelectList.currentIndex == index) ? "#9400F6" : "#2E2C3D"
+        color: (appList.currentIndex == index) ? "#9400F6" : "#2E2C3D"
         radius: 5
         height: parent.height
         width: parent.width * 0.9
+
         Image {
-          id: delegateImage
+          id: delegateIcon
           anchors.verticalCenter: parent.verticalCenter
           width: parent.height * 0.9
           height: width
           antialiasing: true
           smooth: true
           fillMode: Image.PreserveAspectFit
-          source: {
-            var avmeAddress = qmlSystem.getAVMEAddress()
-            if (itemAddress == avmeAddress) {
-              source: "qrc:/img/avme_logo.png"
-            } else {
-              var img = qmlSystem.getARC20TokenImage(itemAddress)
-              source: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
-            }
-          }
+          source: itemIcon
         }
         Text {
-          id: delegateSymbol
+          id: delegateCreator
           anchors.verticalCenter: parent.verticalCenter
-          width: (parent.width * 0.2)
-          x: delegateImage.width
+          width: (parent.width * 0.4)
+          x: delegateIcon.width
           color: "white"
           font.pixelSize: 14.0
           padding: 5
           elide: Text.ElideRight
-          text: itemSymbol
+          text: itemCreator
         }
         Text {
-          id: delegateBalance
+          id: delegateName
           anchors.verticalCenter: parent.verticalCenter
           anchors.right: parent.right
           anchors.rightMargin: parent.width * 0.05
@@ -85,16 +78,13 @@ ListView {
           color: "white"
           font.pixelSize: 14.0
           elide: Text.ElideRight
-          text: itemBalance
+          text: itemName
         }
       }
       MouseArea {
         id: delegateMouseArea
         anchors.fill: parent
-        onClicked: {
-          tokenSelectList.currentIndex = index
-          grabFocus()
-        }
+        onClicked: appList.currentIndex = index
       }
     }
   }
