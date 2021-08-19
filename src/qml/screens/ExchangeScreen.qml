@@ -14,23 +14,24 @@ Item {
 
   function checkTransactionFunds() {
     if (fromAssetPopup.chosenAssetSymbol == "AVAX") {  // Coin
-      var hasCoinFunds = !qmlSystem.hasInsufficientFunds(
-        accountHeader.coinRawBalance, qmlSystem.calculateTransactionCost(
-          exchangePanel.amount, "180000", qmlSystem.getAutomaticFee()
-        ), 18
-      )
-      return hasCoinFunds
+      var Fees = +qmlApi.fixedPointToWei(exchangePanel.gasPrice, 8) * +exchangePanel.gas
+      var TxCost = Fees + +qmlApi.fixedPointToWei(exchangePanel.amountIn, 18)
+      if (TxCost > +qmlApi.fixedPointToWei(accountHeader.coinRawBalance, 18)) {
+        return false
+      }
+      return true
     } else { // Token
-      var hasCoinFunds = !qmlSystem.hasInsufficientFunds(
-        accountHeader.coinRawBalance, qmlSystem.calculateTransactionCost(
-          "0", "180000", qmlSystem.getAutomaticFee()
-        ), 18
-      )
-      var hasTokenFunds = !qmlSystem.hasInsufficientFunds(
+      var Fees = +qmlApi.fixedPointToWei(exchangePanel.gasPrice, 8) * +exchangePanel.gas
+      if (Fees > +qmlApi.fixedPointToWei(accountHeader.coinRawBalance, 18)) {
+        return false
+      }
+      var tokenBalance = +qmlApi.fixedPointToWei(
         accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]["rawBalance"],
-        exchangePanel.amount, fromAssetPopup.chosenAssetDecimals
-      )
-      return (hasCoinFunds && hasTokenFunds)
+        fromAssetPopup.chosenAssetDecimals)
+      if (tokenBalance < +qmlApi.fixedPointToWei(exchangePanel.amount, fromAssetPopup.chosenAssetDecimals)) {
+        return false
+      } 
+      return true
     }
   }
 
@@ -64,10 +65,10 @@ Item {
       margins: 10
     }
     approveBtn.onClicked: {
+      exchangePanel.approveTx()
       if (!checkTransactionFunds()) {
         fundsPopup.open()
       } else {
-        exchangePanel.approveTx()
         confirmApprovalPopup.setData(
           exchangePanel.to,
           exchangePanel.coinValue,
@@ -86,10 +87,10 @@ Item {
       }
     }
     swapBtn.onClicked: {
+      exchangePanel.swapTx(exchangePanel.amountIn, exchangePanel.swapEstimate)
       if (!checkTransactionFunds()) {
         fundsPopup.open()
       } else {
-        exchangePanel.swapTx(exchangePanel.amountIn, exchangePanel.swapEstimate)
         confirmExchangePopup.setData(
           exchangePanel.to,
           exchangePanel.coinValue,

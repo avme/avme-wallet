@@ -275,14 +275,14 @@ AVMEPanel {
     info += amountOut + " " + toAssetPopup.chosenAssetSymbol + "<\b> on Pangolin"
     historyInfo = "Swap <b>" + fromAssetPopup.chosenAssetSymbol + "<\b> to <b>" + toAssetPopup.chosenAssetSymbol + "<\b>"
     if (fromAssetPopup.chosenAssetSymbol == "AVAX") {
-      coinValue = amountIn
+      coinValue = String(amountIn)
       var ethCallJson = ({})
       var routing = ([])
       ethCallJson["function"] = "swapExactAVAXForTokens(uint256,address[],address,uint256)"
       ethCallJson["args"] = []
       // 1% Slippage TODO: Add setting to change slippage
       //uint256 amountOutMin
-      ethCallJson["args"].push(Math.round(+qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals) * 0.99))
+      ethCallJson["args"].push(String(Math.round(+qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals) * 0.99)))
       //address[] path
       routing.push(qmlSystem.getContract("AVAX"))
       routing.push(toAssetPopup.chosenAssetAddress)
@@ -290,7 +290,7 @@ AVMEPanel {
       //address to
       ethCallJson["args"].push(qmlSystem.getCurrentAccount())
       //uint256 deadline, 60 minutes deadline
-      ethCallJson["args"].push((+qmlApi.getCurrentUnixTime() + 3600) * 1000)
+      ethCallJson["args"].push(String((+qmlApi.getCurrentUnixTime() + 3600) * 1000))
       ethCallJson["types"] = []
       ethCallJson["types"].push("uint*")
       ethCallJson["types"].push("address[]")
@@ -308,10 +308,10 @@ AVMEPanel {
       ethCallJson["function"] = "swapExactTokensForAVAX(uint256,uint256,address[],address,uint256)"
       ethCallJson["args"] = []
       // uint256 amountIn
-      ethCallJson["args"].push(qmlApi.fixedPointToWei(amountIn, toAssetPopup.chosenAssetDecimals))
+      ethCallJson["args"].push(String(qmlApi.fixedPointToWei(amountIn, toAssetPopup.chosenAssetDecimals)))
       // 1% Slippage TODO: Add setting to change slippage
       // amountOutMin
-      ethCallJson["args"].push(Math.round(+qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals) * 0.99))
+      ethCallJson["args"].push(String(Math.round(+qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals) * 0.99)))
       // address[] path
       routing.push(fromAssetPopup.chosenAssetAddress)
       routing.push(qmlSystem.getContract("AVAX"))
@@ -319,7 +319,7 @@ AVMEPanel {
       // address to
       ethCallJson["args"].push(qmlSystem.getCurrentAccount())
       // uint256 deadline 60 minutes deadline
-      ethCallJson["args"].push((+qmlApi.getCurrentUnixTime() + 3600) * 1000)
+      ethCallJson["args"].push(String((+qmlApi.getCurrentUnixTime() + 3600) * 1000))
       ethCallJson["types"] = []
       ethCallJson["types"].push("uint*")
       ethCallJson["types"].push("uint*")
@@ -338,10 +338,10 @@ AVMEPanel {
       ethCallJson["function"] = "swapExactTokensForTokens(uint256,uint256,address[],address,uint256)"
       ethCallJson["args"] = []
       // uint256 amountIn
-      ethCallJson["args"].push(qmlApi.fixedPointToWei(amountIn, toAssetPopup.chosenAssetDecimals))
+      ethCallJson["args"].push(String(qmlApi.fixedPointToWei(amountIn, toAssetPopup.chosenAssetDecimals)))
       // 1% Slippage TODO: Add setting to change slippage
       // amountOutMin
-      ethCallJson["args"].push(Math.round(+qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals) * 0.99))
+      ethCallJson["args"].push(String(Math.round(+qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals) * 0.99)))
       // address[] path
       routing.push(fromAssetPopup.chosenAssetAddress)
       if (needRoute) {
@@ -352,7 +352,7 @@ AVMEPanel {
       // address to
       ethCallJson["args"].push(qmlSystem.getCurrentAccount())
       // uint256 deadline 60 minutes deadline
-      ethCallJson["args"].push((+qmlApi.getCurrentUnixTime() + 3600) * 1000)
+      ethCallJson["args"].push(String((+qmlApi.getCurrentUnixTime() + 3600) * 1000))
       ethCallJson["types"] = []
       ethCallJson["types"].push("uint*")
       ethCallJson["types"].push("uint*")
