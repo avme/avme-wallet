@@ -18,6 +18,7 @@ AVMEPanel {
   property string asset2Reserves
   property string asset1Balance
   property string asset2Balance
+  property string pglSupply
   property bool asset1Approved
   property bool asset2Approved
   property string pairAddress
@@ -93,6 +94,15 @@ AVMEPanel {
           loading = false
         }
       } else if (requestID == "QmlAddLiquidity_fetchReserves") {
+        var reserves 
+        for (var item in resp) {
+          if (resp[item]["id"] == 1) {
+            reserves = qmlApi.parseHex(resp[item].result, ["uint", "uint", "uint"])
+          }  
+          if (resp[item]["id"] == 2) {
+            pglSupply = qmlApi.parseHex(resp[item].result, ["uint"])
+          }
+        }
         var reserves = qmlApi.parseHex(resp[0].result, ["uint", "uint", "uint"])
         var lowerAddress = qmlSystem.getFirstFromPair(
           addAsset1Popup.chosenAssetAddress, addAsset2Popup.chosenAssetAddress
@@ -142,9 +152,10 @@ AVMEPanel {
 
   function fetchReserves() {
     refreshAssetBalance()
-    addAsset1Input.text = addAsset2Input.text = asset1Reserves = asset2Reserves = ""
+    addAsset1Input.text = addAsset2Input.text = asset1Reserves = asset2Reserves = pglSupply = ""
     qmlApi.clearAPIRequests("QmlAddLiquidity_fetchReserves")
     qmlApi.buildGetReservesReq(pairAddress, "QmlAddLiquidity_fetchReserves")
+    qmlApi.buildGetTotalSupplyReq(pairAddress, "QmlAddLiquidity_fetchReserves")
     qmlApi.doAPIRequests("QmlAddLiquidity_fetchReserves")
   }
 
@@ -209,10 +220,6 @@ AVMEPanel {
       asset1Amount = qmlSystem.calculateAddLiquidityAmount(asset1Max, asset2Reserves, asset1Reserves)
       asset2Amount = qmlSystem.calculateAddLiquidityAmount(asset2Max, asset1Reserves, asset2Reserves)
     }
-    console.log(asset2Max)
-    console.log(asset1Max)
-    console.log(asset2Amount)
-    console.log(asset1Amount)
     // Limit the max amount to the lowest the user has, then set the right
     // values afterwards. If asset1Amount is higher than the balance in asset1Max,
     // then that balance is limiting. Same with asset2Amount and asset2Max.
@@ -238,7 +245,7 @@ AVMEPanel {
   function approveTx(contract) {
     to = contract
     coinValue = 0
-    gas = 100000
+    gas = 500000
     gasPrice = 225
     var ethCallJson = ({})
     ethCallJson["function"] = "approve(address,uint256)"
@@ -251,6 +258,58 @@ AVMEPanel {
     var ethCallString = JSON.stringify(ethCallJson)
     var ABI = qmlApi.buildCustomABI(ethCallString)
     txData = ABI
+  }
+
+  function addLiquidityTx() {
+    to = qmlSystem.getContract("router")
+    gas = 300000
+    gasPrice = 225
+    info = "You will Add <b>" + addAsset1Input.text + " " + addAsset1Popup.symbol + "<\b> <br>and<br> <b>"
+    info += addAsset1Input.text + " " + addAsset2Popup.symbol + "<\b> on Pangolin Liquidity Pool"
+    historyInfo = "Add <b>" + addAsset1Input.text + "<\b> and <b>" + addAsset2Popup.symbol + "<\b> to Pangolin Liquidity"
+    if (addAsset1Popup.chosenAssetSymbol == "AVAX" || addAsset2Popup.chosenAssetSymbol == "AVAX") {
+      var ethCallJson = ({})
+      ethCallJson["function"] = "addLiquidityAVAX(address,uint256,uint256,uint256,address,uint256)"
+      ethCallJson["args"] = []
+      // Token
+      ethCallJson["args"].push((addAsset1Popup.chosenAssetSymbol == "AVAX") ? 
+        addAsset2Popup.chosenAssetAddress : addAsset1Popup.chosenAssetAddress)
+      // amountTokenDesired 
+      var amountTokenDesired
+      if (addAsset1Popup.chosenAssetSymbol != "AVAX") {
+        amountTokenDesired = qmlApi.fixedPointToWei(add1Amount, addAsset1Popup.chosenAssetDecimals)
+      } else {
+        amountTokenDesired = qmlApi.fixedPointToWei(add2Amount, addAsset1Popup.chosenAssetDecimals)
+      }
+      ethCallJson["args"].push(String(amountTokenDesired))
+      // amountTokenMin
+      ethCallJson["args"].push(String(Math.round(amountTokenDesired * 0.99))) // 1% Slippage
+      // amountAVAXMin
+      var amountAVAX
+      if (addAsset1Popup.chosenAssetSymbol == "AVAX") {
+        amountAVAX = qmlApi.fixedPointToWei(add1Amount, addAsset1Popup.chosenAssetDecimals)
+      } else {
+        amountAVAX = qmlApi.fixedPointToWei(add2Amount, addAsset1Popup.chosenAssetDecimals)
+      }
+      ethCallJson["args"].push(String(Math.round(+amountAVAX * 0.99)))
+      // to
+      ethCallJson["args"].push(qmlSystem.getCurrentAccount())
+      // deadline
+      ethCallJson["args"].push(String((+qmlApi.getCurrentUnixTime() + 3600) * 1000))
+      ethCallJson["types"] = []
+      ethCallJson["types"].push("address")
+      ethCallJson["types"].push("uint*")
+      ethCallJson["types"].push("uint*")
+      ethCallJson["types"].push("uint*")
+      ethCallJson["types"].push("address")
+      ethCallJson["types"].push("uint*")
+      var ethCallString = JSON.stringify(ethCallJson)
+      var ABI = qmlApi.buildCustomABI(ethCallString)
+      coinValue = qmlApi.weiToFixedPoint(amountAVAX, 18)
+      txData = ABI
+    } else {
+      // TODO
+    }
   }
 
   Column {
@@ -570,7 +629,20 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       enabled: (addAsset1Input.acceptableInput && addAsset2Input.acceptableInput)
       text: "Add to the pool"
-      // TODO: transaction logic
+      onClicked: {
+        addLiquidityTx()
+        confirmAddLiquidityPopup.setData(
+          to,
+          coinValue,
+          txData,
+          gas,
+          gasPrice,
+          automaticGas,
+          info,
+          historyInfo
+        )
+        confirmAddLiquidityPopup.open()
+      }
     }
   }
 }

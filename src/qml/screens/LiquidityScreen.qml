@@ -162,11 +162,6 @@ Item {
   }
   AVMEPopupConfirmTx {
     id: confirmAddLiquidityPopup
-    info: "You will add "
-    + "<b>" + addLiquidityPanel.add1Amount + " " + addAsset1Popup.chosenAssetSymbol
-    + "</b><br>and <b>"
-    + addLiquidityPanel.add2Amount + " " + addAsset2Popup.chosenAssetSymbol
-    + "</b> to the pool"
   }
   AVMEPopupConfirmTx {
     id: confirmRemoveLiquidityPopup
