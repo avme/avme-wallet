@@ -509,12 +509,14 @@ AVMEPanel {
         id: btnChangeAdd1
         width: (parent.parent.width * 0.5) - (parent.spacing / 2)
         text: "Change Asset 1"
+        enabled: !loading
         onClicked: addAsset1Popup.open()
       }
       AVMEButton {
         id: btnChangeAdd2
         width: (parent.parent.width * 0.5) - (parent.spacing / 2)
         text: "Change Asset 2"
+        enabled: !loading
         onClicked: addAsset2Popup.open()
       }
     }

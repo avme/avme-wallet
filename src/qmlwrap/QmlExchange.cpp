@@ -118,28 +118,27 @@ QString QmlSystem::calculateAddLiquidityAmount(
 }
 
 QVariantMap QmlSystem::calculateRemoveLiquidityAmount(
-  QString lowerReserves, QString higherReserves, QString percentage
+  QString asset1Reserves, QString asset2Reserves, QString percentage, QString pairBalance
 ) {
   QVariantMap ret;
-  std::string balanceLPFreeStr;
-  // TODO: check this later
-  //balanceLPFreeStr = this->w.getCurrentAccount().first.balanceLPFree;
-  if (lowerReserves.isEmpty()) { lowerReserves = QString("0"); }
-  if (higherReserves.isEmpty()) { higherReserves = QString("0"); }
-
-  u256 lowerReservesU256 = boost::lexical_cast<u256>(lowerReserves.toStdString());
-  u256 higherReservesU256 = boost::lexical_cast<u256>(higherReserves.toStdString());
+  if (asset1Reserves.isEmpty()) { asset1Reserves = QString("0"); }
+  if (asset2Reserves.isEmpty()) { asset2Reserves = QString("0"); }
+  std::cout << asset1Reserves.toStdString() << std::endl;
+  std::cout << asset2Reserves.toStdString() << std::endl;
+  std::cout << pairBalance.toStdString() << std::endl;
+  u256 asset1ReservesU256 = boost::lexical_cast<u256>(asset1Reserves.toStdString());
+  u256 asset2ReservesU256 = boost::lexical_cast<u256>(asset2Reserves.toStdString());
   u256 userLPWei = boost::lexical_cast<u256>(
-    Utils::fixedPointToWei(balanceLPFreeStr, 18)
-  );
+    Utils::fixedPointToWei(pairBalance.toStdString(), 18));
+
   bigfloat pc = bigfloat(boost::lexical_cast<double>(percentage.toStdString()) / 100);
 
-  u256 userLowerReservesU256 = u256(bigfloat(lowerReservesU256) * bigfloat(pc));
-  u256 userHigherReservesU256 = u256(bigfloat(higherReservesU256) * bigfloat(pc));
+  u256 userAsset1ReservesU256 = u256(bigfloat(asset1ReservesU256) * bigfloat(pc));
+  u256 userAsset2ReservesU256 = u256(bigfloat(asset2ReservesU256) * bigfloat(pc));
   u256 userLPReservesU256 = u256(bigfloat(userLPWei) * bigfloat(pc));
 
-  std::string lower = boost::lexical_cast<std::string>(userLowerReservesU256);
-  std::string higher = boost::lexical_cast<std::string>(userHigherReservesU256);
+  std::string lower = boost::lexical_cast<std::string>(userAsset1ReservesU256);
+  std::string higher = boost::lexical_cast<std::string>(userAsset2ReservesU256);
   std::string lp = Utils::weiToFixedPoint(
     boost::lexical_cast<std::string>(userLPReservesU256), 18
   );
@@ -173,12 +172,12 @@ QString QmlSystem::queryExchangeAmount(QString amount, QString fromName, QString
 }
 
 QVariantMap QmlSystem::calculatePoolShares(
-  QString lowerReserves, QString higherReserves,
+  QString asset1Reserves, QString asset2Reserves,
   QString userLiquidity, QString totalLiquidity
 ) {
   QVariantMap ret;
-  u256 lowerReservesU256 = boost::lexical_cast<u256>(lowerReserves.toStdString());
-  u256 higherReservesU256 = boost::lexical_cast<u256>(higherReserves.toStdString());
+  u256 asset1ReservesU256 = boost::lexical_cast<u256>(asset1Reserves.toStdString());
+  u256 asset2ReservesU256 = boost::lexical_cast<u256>(asset2Reserves.toStdString());
   u256 totalLiquidityU256 = boost::lexical_cast<u256>(totalLiquidity.toStdString());
   u256 userLiquidityU256 = boost::lexical_cast<u256>(
     Utils::fixedPointToWei(userLiquidity.toStdString(), 18)
@@ -187,15 +186,15 @@ QVariantMap QmlSystem::calculatePoolShares(
   bigfloat userLPPercentage = (
     bigfloat(userLiquidityU256) / bigfloat(totalLiquidityU256)
   );
-  u256 userLowerReservesU256 = u256(bigfloat(lowerReservesU256) * userLPPercentage);
-  u256 userHigherReservesU256 = u256(bigfloat(higherReservesU256) * userLPPercentage);
+  u256 userAsset1ReservesU256 = u256(bigfloat(asset1ReservesU256) * userLPPercentage);
+  u256 userAsset2ReservesU256 = u256(bigfloat(asset2ReservesU256) * userLPPercentage);
 
-  std::string lower = boost::lexical_cast<std::string>(userLowerReservesU256);
-  std::string higher = boost::lexical_cast<std::string>(userHigherReservesU256);
+  std::string asset1 = boost::lexical_cast<std::string>(userAsset1ReservesU256);
+  std::string asset2 = boost::lexical_cast<std::string>(userAsset2ReservesU256);
   std::string liquidity = boost::lexical_cast<std::string>(userLPPercentage * 100);
 
-  ret.insert("lower", QString::fromStdString(lower));
-  ret.insert("higher", QString::fromStdString(higher));
+  ret.insert("asset1", QString::fromStdString(asset1));
+  ret.insert("asset2", QString::fromStdString(asset2));
   ret.insert("liquidity", QString::fromStdString(liquidity));
   return ret;
 }

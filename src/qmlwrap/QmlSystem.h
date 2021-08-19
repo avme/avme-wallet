@@ -394,7 +394,7 @@ class QmlSystem : public QObject {
       QString amountIn, QString reservesIn, QString reservesOut
     );
     Q_INVOKABLE QVariantMap calculateRemoveLiquidityAmount(
-      QString lowerReserves, QString higherReserves, QString percentage
+      QString asset1Reserves, QString asset2Reserves, QString percentage, QString pairBalance
     );
 
     // Estimate the amount of coin/token that will be exchanged
@@ -402,7 +402,7 @@ class QmlSystem : public QObject {
 
     // Calculate the Account's share in AVAX/AVME/LP in the pool, respectively
     Q_INVOKABLE QVariantMap calculatePoolShares(
-      QString lowerReserves, QString higherReserves,
+      QString asset1Reserves, QString asset2Reserves,
       QString userLiquidity, QString totalLiquidity
     );
 

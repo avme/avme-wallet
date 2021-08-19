@@ -155,20 +155,12 @@ Item {
 
   AVMEPopupConfirmTx {
     id: confirmRemoveApprovalPopup
-    info: "You will approve "
-    + "<b>" + removeAsset1Popup.chosenAssetSymbol + "/"
-    + removeAsset2Popup.chosenAssetSymbol + " LP</b>"
-    + " to be removed from the pool for the current address"
   }
   AVMEPopupConfirmTx {
     id: confirmAddLiquidityPopup
   }
   AVMEPopupConfirmTx {
     id: confirmRemoveLiquidityPopup
-    info: "You will remove "
-    + "<b>" + removeLiquidityPanel.removeLPEstimate + " "
-    + removeAsset1Popup.chosenAssetSymbol + "/" + removeAsset2Popup.chosenAssetSymbol
-    + " LP</b> from the pool"
   }
 
   AVMEPopupTxProgress {
