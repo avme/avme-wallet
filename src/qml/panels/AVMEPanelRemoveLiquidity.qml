@@ -7,6 +7,7 @@ import QtQuick.Controls 2.2
 import QmlApi 1.0
 
 import "qrc:/qml/components"
+import "qrc:/qml/popups"
 
 // Panel for removing liquidity from: a pool.
 AVMEPanel {
@@ -125,6 +126,19 @@ AVMEPanel {
     qmlApi.buildGetReservesReq(pairAddress, "QmlRemoveLiquidity_fetchAllowanceBalanceReservesAndSupply")
     qmlApi.buildGetTotalSupplyReq(pairAddress, "QmlRemoveLiquidity_fetchAllowanceBalanceReservesAndSupply")
     qmlApi.doAPIRequests("QmlRemoveLiquidity_fetchAllowanceBalanceReservesAndSupply")
+  }
+
+  function checkTransactionFunds() {
+    var Fees = +qmlApi.fixedPointToWei(gasPrice, 8) * +gas
+    if (Fees > +qmlApi.fixedPointToWei(accountHeader.coinRawBalance, 18)) {
+      return false
+    }
+    if (pairBalance) {
+      if (+pairBalance < +removeLPEstimate) {
+        return false;
+      }
+    }
+    return true;
   }
 
   function approveTx() {
@@ -421,18 +435,22 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve" : "Not enough funds"
       onClicked: {
-        approveTx();
-        confirmRemoveApprovalPopup.setData(
-          to,
-          coinValue,
-          txData,
-          gas,
-          gasPrice,
-          automaticGas,
-          info,
-          historyInfo
-        )
-        confirmRemoveApprovalPopup.open()
+        if (checkTransactionFunds()) {
+          approveTx();
+          confirmRemoveApprovalPopup.setData(
+            to,
+            coinValue,
+            txData,
+            gas,
+            gasPrice,
+            automaticGas,
+            info,
+            historyInfo
+          )
+          confirmRemoveApprovalPopup.open()
+        } else {
+          fundsPopup.open()
+        }
       }
     }
   }
@@ -544,18 +562,22 @@ AVMEPanel {
       enabled: ((liquidityLPSlider.value > 0) && +removeLPEstimate != 0)
       text: "Remove from the pool"
       onClicked: {
-        removeLiquidityTx()
-        confirmRemoveLiquidityPopup.setData(
-          to,
-          coinValue,
-          txData,
-          gas,
-          gasPrice,
-          automaticGas,
-          info,
-          historyInfo
-        )
-        confirmRemoveLiquidityPopup.open()
+        if (checkTransactionFunds()) {
+          removeLiquidityTx()
+          confirmRemoveLiquidityPopup.setData(
+            to,
+            coinValue,
+            txData,
+            gas,
+            gasPrice,
+            automaticGas,
+            info,
+            historyInfo
+          )
+          confirmRemoveLiquidityPopup.open()
+        } else {
+          fundsPopup.open()
+        }
       }
     }
   }
@@ -584,5 +606,10 @@ AVMEPanel {
       font.pixelSize: 18.0
       text: "The desired pair is unavailable<br>Please select other"
     }
+  }
+  AVMEPopupInfo {
+    id: fundsPopup
+    icon: "qrc:/img/warn.png"
+    info: "Insufficient funds. Please check your inputs."
   }
 }

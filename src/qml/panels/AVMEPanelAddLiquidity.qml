@@ -245,6 +245,15 @@ AVMEPanel {
     }
   }
   function checkTransactionFunds() {
+    // Approval
+    if(addLiquidityApprovalColumn.visible) {
+      var Fees = +qmlApi.fixedPointToWei(gasPrice, 8) * +gas
+      if (Fees > +qmlApi.fixedPointToWei(accountHeader.coinRawBalance, 18)) {
+        return false
+      }
+      return true
+    }
+
     if (addAsset1Popup.chosenAssetSymbol == "AVAX" || addAsset2Popup.chosenAssetSymbol == "AVAX") {  // AVAX/Token liquidity
       var Fees = +qmlApi.fixedPointToWei(gasPrice, 8) * +gas
       var TxCost = Fees + +qmlApi.fixedPointToWei(
@@ -591,22 +600,26 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve " + addAsset1Popup.chosenAssetSymbol : "Not enough funds"
       onClicked: {
-        info = "You will approve <b>"
-        + (addAsset1Popup.chosenAssetSymbol)
-        + "</b> to be added to the pool for the current address"
-        historyInfo = "Approve " + addAsset1Popup.chosenAssetSymbol
-        approveTx(addAsset1Popup.chosenAssetAddress)
-        confirmAddApprovalAsset1Popup.setData(
-          to,
-          coinValue,
-          txData,
-          gas,
-          gasPrice,
-          automaticGas,
-          info,
-          historyInfo
-        )
-        confirmAddApprovalAsset1Popup.open()
+        if (checkTransactionFunds()) {
+          info = "You will approve <b>"
+          + (addAsset1Popup.chosenAssetSymbol)
+          + "</b> to be added to the pool for the current address"
+          historyInfo = "Approve " + addAsset1Popup.chosenAssetSymbol
+          approveTx(addAsset1Popup.chosenAssetAddress)
+          confirmAddApprovalAsset1Popup.setData(
+            to,
+            coinValue,
+            txData,
+            gas,
+            gasPrice,
+            automaticGas,
+            info,
+            historyInfo
+          )
+          confirmAddApprovalAsset1Popup.open()
+        } else {
+          fundsPopup.open()
+        }
       }
     }
     AVMEButton {
@@ -619,22 +632,26 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve " + addAsset2Popup.chosenAssetSymbol : "Not enough funds"
       onClicked: {
-        info = "You will approve <b>"
-        + (addAsset2Popup.chosenAssetSymbol)
-        + "</b> to be added to the pool for the current address"
-        historyInfo = "Approve " + addAsset2Popup.chosenAssetSymbol
-        approveTx(addAsset2Popup.chosenAssetAddress)
-        confirmAddApprovalAsset2Popup.setData(
-          to,
-          coinValue,
-          txData,
-          gas,
-          gasPrice,
-          automaticGas,
-          info,
-          historyInfo
-        )
-        confirmAddApprovalAsset2Popup.open()
+        if (checkTransactionFunds()) {
+          info = "You will approve <b>"
+          + (addAsset2Popup.chosenAssetSymbol)
+          + "</b> to be added to the pool for the current address"
+          historyInfo = "Approve " + addAsset2Popup.chosenAssetSymbol
+          approveTx(addAsset2Popup.chosenAssetAddress)
+          confirmAddApprovalAsset2Popup.setData(
+            to,
+            coinValue,
+            txData,
+            gas,
+            gasPrice,
+            automaticGas,
+            info,
+            historyInfo
+          )
+          confirmAddApprovalAsset2Popup.open()
+        } else {
+          fundsPopup.open()
+        }
       }
     }
   }
