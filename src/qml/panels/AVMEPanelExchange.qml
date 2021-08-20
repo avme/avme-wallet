@@ -44,8 +44,8 @@ AVMEPanel {
   property string swapEstimate
   property string pairTokenInAddress
   property string pairTokenOutAddress
+  property string randomID
   property bool needRoute
-  property bool isLoading
   property double swapImpact
   property alias amountIn: swapInput.text
   property alias swapBtn: btnSwap
@@ -58,6 +58,20 @@ AVMEPanel {
   property bool automaticGas: true
   property string info
   property string historyInfo
+
+  Timer { id: reservesTimer; interval: 1000; repeat: true; onTriggered: (refreshReserves()) }
+  Timer { id: allowanceTimer; interval: 100; repeat: true; onTriggered: (fetchAllowance(false)) }
+  // Timer is needed, because declaring on the variable itself doesn't cause it to change.
+  Timer { id: swapTimer; interval: 10; repeat: true; onTriggered: {
+      swapEstimate = calculateExchangeAmount(swapInput.text, fromAssetPopup.chosenAssetDecimals, toAssetPopup.chosenAssetDecimals)
+      swapImpact = calculatePriceImpact(swapInput.text, fromAssetPopup.chosenAssetDecimals, toAssetPopup.chosenAssetDecimals)
+    }
+  }
+  
+  Connections {
+    target: txProgressPopup
+    function onClosed() { allowanceTimer.start() }
+  }
 
   Connections {
     target: accountHeader
@@ -91,33 +105,23 @@ AVMEPanel {
         }
         // AVAX doesn't need approval, tokens do (and individually)
         if (fromAssetPopup.chosenAssetSymbol == "AVAX") {
-          exchangeDetailsColumn.visible = true
+          allowanceTimer.stop()
+          reservesTimer.start()
+          return
         } else {
           var asset = accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]
-          exchangeDetailsColumn.visible = (+allowance >= +qmlSystem.fixedPointToWei(
+          if (+allowance <= +qmlSystem.fixedPointToWei(
             asset["rawBalance"], fromAssetPopup.chosenAssetDecimals
-          ))
+          )) {
+            exchangeApprovalColumn.visible = true
+            exchangeDetailsColumn.visible = false
+            exchangeLoadingPng.visible = false
+            return
+          }
         }
-
-        qmlApi.clearAPIRequests("QmlExchange_refreshReserves")
-        // Check if there are reserves for the optimal pair (tokenIn/tokenOut).
-        // If not, get request for pair tokenIn/WAVAX/tokenOut.
-        pairAddresses = ([])
-        if (pairAddress == "0x0000000000000000000000000000000000000000") {
-          needRoute = true;
-          // id 1 == first Pair reserves
-          // id 2 == second Pair reserves
-          pairAddresses.push(pairTokenInAddress)
-          pairAddresses.push(pairTokenOutAddress)
-          qmlApi.buildGetReservesReq(pairTokenInAddress, "QmlExchange_refreshReserves")
-          qmlApi.buildGetReservesReq(pairTokenOutAddress, "QmlExchange_refreshReserves")
-        } else {
-          // id 1 == pairAddress reserves
-          pairAddresses.push(pairAddress)
-          qmlApi.buildGetReservesReq(pairAddress, "QmlExchange_refreshReserves")
-        }
-        qmlApi.doAPIRequests("QmlExchange_refreshReserves")
-      } else if (requestID == "QmlExchange_refreshReserves") {
+        allowanceTimer.stop()
+        reservesTimer.start()
+      } else if (requestID == "QmlExchange_refreshReserves_" + randomID) {
         var resp = JSON.parse(answer)
         reservesList = ([])
         if (!needRoute) {
@@ -176,7 +180,10 @@ AVMEPanel {
             }
           }
         }
-        isLoading = false
+        exchangeApprovalColumn.visible = false
+        exchangeDetailsColumn.visible = true
+        exchangeLoadingPng.visible = false
+        qmlApi.clearAPIRequests("QmlExchange_refreshReserves_" + randomID)
       }
     }
   }
@@ -191,16 +198,40 @@ AVMEPanel {
     return amountIn
   }
 
-  function calculatePriceImpact(amountIn, inDecimals, outDecimals) {
-    return qmlSystem.calculateExchangePriceImpact(reservesList[0]["inReserves"], amountIn, inDecimals)
+  function refreshReserves() {
+    qmlApi.clearAPIRequests("QmlExchange_refreshReserves_" + randomID)
+    // Check if there are reserves for the optimal pair (tokenIn/tokenOut).
+    // If not, get request for pair tokenIn/WAVAX/tokenOut.
+    pairAddresses = ([])
+    if (pairAddress == "0x0000000000000000000000000000000000000000") {
+      needRoute = true;
+      // id 1 == first Pair reserves
+      // id 2 == second Pair reserves
+      pairAddresses.push(pairTokenInAddress)
+      pairAddresses.push(pairTokenOutAddress)
+      qmlApi.buildGetReservesReq(pairTokenInAddress, "QmlExchange_refreshReserves_" + randomID)
+      qmlApi.buildGetReservesReq(pairTokenOutAddress, "QmlExchange_refreshReserves_" + randomID)
+    } else {
+      // id 1 == pairAddress reserves
+      pairAddresses.push(pairAddress)
+      qmlApi.buildGetReservesReq(pairAddress, "QmlExchange_refreshReserves_" + randomID)
+    }
+    qmlApi.doAPIRequests("QmlExchange_refreshReserves_" + randomID)
   }
 
-  function fetchAllowance() {
-    refreshAssetBalance()
-    swapInput.text = swapEstimate = swapImpact = ""
-    needRoute = false
-    reservesList = ([])
-    isLoading = true
+  function fetchAllowance(firstCall) {
+    if (firstCall) {
+      refreshAssetBalance()
+      swapTimer.stop()
+      reservesTimer.stop()
+      randomID = qmlApi.getRandomID()
+      swapInput.text = swapEstimate = swapImpact = ""
+      needRoute = false
+      exchangeApprovalColumn.visible = false
+      exchangeDetailsColumn.visible = false
+      exchangeLoadingPng.visible = true
+      reservesList = ([])
+    }
     qmlApi.clearAPIRequests("QmlExchange_fetchAllowance")
     // Get allowance for inToken and reserves for all
     // Including reserves for both in/out tokens against WAVAX
@@ -244,6 +275,9 @@ AVMEPanel {
       + " " + fromAssetPopup.chosenAssetSymbol + "</b>"
       : "Loading asset balance..."
     }
+  }
+  function calculatePriceImpact(amountIn, inDecimals, outDecimals) {
+    return qmlSystem.calculateExchangePriceImpact(reservesList[0]["inReserves"], amountIn, inDecimals)
   }
 
   function approveTx() {
@@ -463,21 +497,18 @@ AVMEPanel {
         width: (parent.parent.width * 0.5) - (parent.spacing / 2)
         text: "Change From Asset"
         onClicked: fromAssetPopup.open()
-        enabled: (!isLoading)
       }
       AVMEButton {
         id: btnChangeTo
         width: (parent.parent.width * 0.5) - (parent.spacing / 2)
         text: "Change To Asset"
         onClicked: toAssetPopup.open()
-        enabled: (!isLoading)
       }
     }
   }
 
   Column {
     id: exchangeApprovalColumn
-    visible: !exchangeDetailsColumn.visible
     anchors {
       top: exchangeHeaderColumn.bottom
       bottom: parent.bottom
@@ -516,6 +547,28 @@ AVMEPanel {
     }
   }
 
+  Image {
+    id: exchangeLoadingPng
+    anchors {
+      top: exchangeHeaderColumn.bottom
+      bottom: parent.bottom
+      left: parent.left
+      right: parent.right
+      topMargin: parent.height * 0.1
+      bottomMargin: parent.height * 0.1
+    }
+    fillMode: Image.PreserveAspectFit
+    source: "qrc:/img/icons/loading.png"
+    RotationAnimator {
+      target: exchangeLoadingPng
+      from: 0
+      to: 360
+      duration: 1000
+      loops: Animation.Infinite
+      easing.type: Easing.InOutQuad
+      running: true
+    }
+  }
   Column {
     id: exchangeDetailsColumn
     anchors {
@@ -532,44 +585,21 @@ AVMEPanel {
 
     AVMEInput {
       id: swapInput
-      width: (parent.width * 0.7)
+      width: (parent.width * 0.8)
       validator: RegExpValidator {
         regExp: qmlSystem.createTxRegExp(fromAssetPopup.chosenAssetDecimals)
       }
-      enabled: (!isLoading)
       label: fromAssetPopup.chosenAssetSymbol + " Amount"
       placeholder: (enabled) ? "Fixed point amount (e.g. 0.5)" : "Loading reserves..."
       onTextEdited: {
-        swapEstimate = calculateExchangeAmount(swapInput.text, fromAssetPopup.chosenAssetDecimals, toAssetPopup.chosenAssetDecimals)
-        swapImpact = calculatePriceImpact(swapInput.text, fromAssetPopup.chosenAssetDecimals, toAssetPopup.chosenAssetDecimals)
-      }
-      Image {
-        id: loadingPng
-        height: parent.height
-        width: height
-        visible: isLoading
-        anchors {
-          left: parent.right
-          leftMargin: 10
-        }
-        fillMode: Image.PreserveAspectFit
-        source: "qrc:/img/icons/loading.png"
-        RotationAnimator {
-          target: loadingPng
-          from: 0
-          to: 360
-          duration: 1000
-          loops: Animation.Infinite
-          easing.type: Easing.InOutQuad
-          running: true
-        }
+        swapTimer.start()
       }
       AVMEButton {
         id: swapMaxBtn
         width: (parent.parent.width * 0.2) - 10
         anchors {
           left: parent.right
-          leftMargin: (parent.parent.width * 0.1) + 10
+          leftMargin: 10
         }
         text: "Max"
         onClicked: {
@@ -578,8 +608,7 @@ AVMEPanel {
               accountHeader.coinRawBalance, "180000", qmlSystem.getAutomaticFee()
             )
             : accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]["rawBalance"]
-          swapEstimate = calculateExchangeAmount(swapInput.text, fromAssetPopup.chosenAssetDecimals, toAssetPopup.chosenAssetDecimals)
-          swapImpact = calculatePriceImpact(swapInput.text, fromAssetPopup.chosenAssetDecimals, toAssetPopup.chosenAssetDecimals)
+          swapTimer.start()
         }
       }
     }

@@ -116,7 +116,7 @@ Item {
     property bool fromAssetLoaded: false
     property bool toAssetLoaded: false
     function checkPopups() {
-      if (fromAssetLoaded && toAssetLoaded) { exchangePanel.fetchAllowance() }
+      if (fromAssetLoaded && toAssetLoaded) { exchangePanel.fetchAllowance(true) }
     }
 
     AVMEPopupAssetSelect {
@@ -131,7 +131,7 @@ Item {
             toAssetPopup.forceAVAX()
           }
         }
-        exchangePanel.fetchAllowance()
+        exchangePanel.fetchAllowance(true)
       }
     }
     AVMEPopupAssetSelect {
@@ -146,7 +146,7 @@ Item {
             fromAssetPopup.forceAVAX()
           }
         }
-        exchangePanel.fetchAllowance()
+        exchangePanel.fetchAllowance(true)
       }
     }
   }

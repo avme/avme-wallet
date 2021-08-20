@@ -24,7 +24,12 @@ void QmlApi::doAPIRequests(QString requestID) {
 
 void QmlApi::clearAPIRequests(QString requestID) {
   requestListLock.lock();
-    this->requestList[requestID].clear();
+    try {
+      this->requestList[requestID].clear();
+      this->requestList.erase(requestID);
+    } catch (std::exception &e) {
+      std::cout << e.what() << std::endl;
+    }
   requestListLock.unlock();
 }
 
@@ -246,4 +251,8 @@ QString QmlApi::MAX_U256_VALUE() {
 QString QmlApi::getCurrentUnixTime() {
   const auto p1 = std::chrono::system_clock::now();
   return QString::fromStdString(boost::lexical_cast<std::string>(std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count()));
+}
+
+QString QmlApi::getRandomID() {
+  return QString::fromStdString(Utils::randomHexBytes().substr(0, 8));
 }
