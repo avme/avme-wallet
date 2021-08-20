@@ -64,7 +64,7 @@ Item {
     property bool addAsset1Loaded: false
     property bool addAsset2Loaded: false
     function checkPopups() {
-      if (addAsset1Loaded && addAsset2Loaded) { addLiquidityPanel.fetchAllowancesAndPair() }
+      if (addAsset1Loaded && addAsset2Loaded) { addLiquidityPanel.fetchAllowancesAndPair(true) }
     }
 
     AVMEPopupAssetSelect {
@@ -79,7 +79,7 @@ Item {
             addAsset2Popup.forceAVAX()
           }
         }
-        addLiquidityPanel.fetchAllowancesAndPair()
+        addLiquidityPanel.fetchAllowancesAndPair(true)
       }
     }
     AVMEPopupAssetSelect {
@@ -94,7 +94,7 @@ Item {
             addAsset1Popup.forceAVAX()
           }
         }
-        addLiquidityPanel.fetchAllowancesAndPair()
+        addLiquidityPanel.fetchAllowancesAndPair(true)
       }
     }
   }

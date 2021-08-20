@@ -19,6 +19,7 @@ AVMEPanel {
   property string asset2Reserves
   property string asset1Balance
   property string asset2Balance
+  property string randomID
   property string pglSupply
   property bool asset1Approved
   property bool asset2Approved
@@ -36,6 +37,9 @@ AVMEPanel {
   property string info
   property string historyInfo
 
+
+  Timer { id: reservesTimer; interval: 1000; repeat: true; onTriggered: (fetchReserves()) }
+  Timer { id: allowanceTimers; interval: 1000; repeat: true; onTriggered: (fetchAllowancesAndPair(false)) }
   Connections {
     target: accountHeader
     function onUpdatedBalances() { refreshAssetBalance() }
@@ -43,7 +47,7 @@ AVMEPanel {
 
   Connections {
     target: txProgressPopup
-    function onClosed() { fetchAllowancesAndPair() }
+    function onClosed() { fetchAllowancesAndPair(false) }
   }
 
   Connections {
@@ -87,14 +91,20 @@ AVMEPanel {
           ))
         }
         if (asset1Approved && asset2Approved) {
-          fetchReserves()
+          reservesTimer.start()
+          allowanceTimers.stop()
+          loading = true
+          addLiquidityDetailsColumn.visible = false
+          addLiquidityApprovalColumn.visible = false
+          addLiquidityPairUnavailable.visible = false
         } else {
           addLiquidityDetailsColumn.visible = false
           addLiquidityApprovalColumn.visible = true
           addLiquidityPairUnavailable.visible = false
+          allowanceTimers.start()
           loading = false
         }
-      } else if (requestID == "QmlAddLiquidity_fetchReserves") {
+      } else if (requestID == "QmlAddLiquidity_fetchReserves_"+randomID) {
         var reserves 
         for (var item in resp) {
           if (resp[item]["id"] == 1) {
@@ -120,14 +130,21 @@ AVMEPanel {
         addLiquidityApprovalColumn.visible = false
         addLiquidityPairUnavailable.visible = false
       }
+      qmlApi.clearAPIRequests(requestID)
     }
   }
 
-  function fetchAllowancesAndPair() {
-    addLiquidityDetailsColumn.visible = false
-    addLiquidityApprovalColumn.visible = false
-    addLiquidityPairUnavailable.visible = false
-    loading = true
+  function fetchAllowancesAndPair(firstCall) {
+    if (firstCall) {
+      addLiquidityDetailsColumn.visible = false
+      addLiquidityApprovalColumn.visible = false
+      addLiquidityPairUnavailable.visible = false
+      loading = true
+      reservesTimer.stop()
+      allowanceTimers.stop()
+    }
+    addAsset1Input.text = addAsset2Input.text = asset1Reserves = asset2Reserves = pglSupply = ""
+    randomID = qmlApi.getRandomID()
     refreshAssetBalance()
     asset1Allowance = asset2Allowance = ""
     qmlApi.clearAPIRequests("QmlAddLiquidity_fetchAllowancesAndPair")
@@ -153,11 +170,10 @@ AVMEPanel {
 
   function fetchReserves() {
     refreshAssetBalance()
-    addAsset1Input.text = addAsset2Input.text = asset1Reserves = asset2Reserves = pglSupply = ""
-    qmlApi.clearAPIRequests("QmlAddLiquidity_fetchReserves")
-    qmlApi.buildGetReservesReq(pairAddress, "QmlAddLiquidity_fetchReserves")
-    qmlApi.buildGetTotalSupplyReq(pairAddress, "QmlAddLiquidity_fetchReserves")
-    qmlApi.doAPIRequests("QmlAddLiquidity_fetchReserves")
+    qmlApi.clearAPIRequests("QmlAddLiquidity_fetchReserves_"+randomID)
+    qmlApi.buildGetReservesReq(pairAddress, "QmlAddLiquidity_fetchReserves_"+randomID)
+    qmlApi.buildGetTotalSupplyReq(pairAddress, "QmlAddLiquidity_fetchReserves_"+randomID)
+    qmlApi.doAPIRequests("QmlAddLiquidity_fetchReserves_"+randomID)
   }
 
   function refreshAssetBalance() {
@@ -266,26 +282,14 @@ AVMEPanel {
         return false
       }
 
+      var chosenTokenAddress = (addAsset1Popup.chosenAssetSymbol != "AVAX") ? addAsset1Popup.chosenAssetAddress : addAsset2Popup.chosenAssetAddress
+      var chosenTokenDecimals = (addAsset1Popup.chosenAssetSymbol != "AVAX") ? addAsset1Popup.chosenAssetDecimals : addAsset2Popup.chosenAssetDecimals
+      var chosenTokenAdd =  (addAsset1Popup.chosenAssetSymbol != "AVAX") ? add1Amount : add2Amount
+
       var tokenBalance = +qmlApi.fixedPointToWei(
-        accountHeader.tokenList[
-          (addAsset1Popup.chosenAssetSymbol != "AVAX") ?
-          addAsset1Popup.chosenAssetAddress
-          :
-          addAsset2Popup.chosenAssetAddress
-        ]["rawBalance"],
-        (addAsset1Popup.chosenAssetSymbol != "AVAX") ?
-          addAsset1Popup.chosenAssetAddress
-          :
-          addAsset2Popup.chosenAssetAddress)
-      if (tokenBalance < +qmlApi.fixedPointToWei(
-        (addAsset1Popup.chosenAssetSymbol != "AVAX") ?
-        add1Amount
-        :
-        add2Amount),
-        (addAsset1Popup.chosenAssetSymbol != "AVAX") ?
-        addAsset1Popup.chosenAssetDecimals
-        :
-        addAsset2Popup.chosenAssetDecimals) {
+        accountHeader.tokenList[chosenTokenAddress]["rawBalance"],chosenTokenDecimals)
+        
+      if (tokenBalance < +qmlApi.fixedPointToWei(chosenTokenAdd,chosenTokenDecimals)) {
           return false
       }
       return true

@@ -183,8 +183,8 @@ AVMEPanel {
         exchangeApprovalColumn.visible = false
         exchangeDetailsColumn.visible = true
         exchangeLoadingPng.visible = false
-        qmlApi.clearAPIRequests("QmlExchange_refreshReserves_" + randomID)
       }
+      qmlApi.clearAPIRequests(requestID)
     }
   }
 

@@ -26,8 +26,8 @@ Rectangle {
   radius: 10
   signal updatedBalances()
 
-  Timer { id: addressTimer; interval: 2000 }
-  Timer { id: balancesTimer; interval: 5000; repeat: true; onTriggered: refreshBalances() }
+  Timer { id: addressTimer; interval: 1000 }
+  Timer { id: balancesTimer; interval: 1000; repeat: true; onTriggered: refreshBalances() }
   Timer { id: ledgerRetryTimer; interval: 250; onTriggered: checkLedger() }
 
   Connections {

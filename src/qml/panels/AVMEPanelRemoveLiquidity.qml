@@ -19,6 +19,7 @@ AVMEPanel {
   property string pairAllowance
   property string asset1Reserves
   property string asset2Reserves
+  property string randomID
   property string userAsset1Reserves
   property string userAsset2Reserves
   property string userLPSharePercentage // TODO: find out where this should be used
@@ -36,6 +37,9 @@ AVMEPanel {
   property string historyInfo
   property alias removeBtn: removeLiquidityBtn
 
+
+  Timer { id: requestsTimer; interval: 5000; repeat: true; onTriggered: (fetchAllowanceBalanceReservesAndSupply()) }
+
   Connections {
     target: qmlApi
     function onApiRequestAnswered(answer, requestID) {
@@ -43,13 +47,13 @@ AVMEPanel {
       if (requestID == "QmlRemoveLiquidity_fetchPair") {
         pairAddress = qmlApi.parseHex(resp[0].result, ["address"])
         if (pairAddress != "0x0000000000000000000000000000000000000000") {
-          fetchAllowanceBalanceReservesAndSupply()
+          requestsTimer.start()
         } else {
           loading = false
           removeLiquidityPairUnavailable.visible = true
           return;
         }
-      } else if (requestID == "QmlRemoveLiquidity_fetchAllowanceBalanceReservesAndSupply") {
+      } else if (requestID == "QmlRemoveLiquidity_fetchAllowanceBalanceReservesAndSupply_"+randomID) {
         var reserves
         for (var item in resp) {
           if (resp[item]["id"] == 1) {
@@ -88,14 +92,18 @@ AVMEPanel {
         userAsset1Reserves = userShares.asset1
         userAsset2Reserves = userShares.asset2
         userLPSharePercentage = userShares.liquidity
+        removeLiquidityApprovalColumn.visible = false
         removeLiquidityDetailsColumn.visible = true
         loading = false
       }
+      qmlApi.clearAPIRequests(requestID)
     }
   }
 
   function fetchPair() {
     pairAddress = ""
+    requestsTimer.stop()
+    randomID = qmlApi.getRandomID()
     loading = true
     removeLiquidityApprovalColumn.visible = false
     removeLiquidityDetailsColumn.visible = false
@@ -111,21 +119,21 @@ AVMEPanel {
 
   function fetchAllowanceBalanceReservesAndSupply() {
     pairAllowance = ""
-    qmlApi.clearAPIRequests("QmlRemoveLiquidity_fetchAllowanceBalanceReservesAndSupply")
+    qmlApi.clearAPIRequests("QmlRemoveLiquidity_fetchAllowanceBalanceReservesAndSupply_"+randomID)
     qmlApi.buildGetTokenBalanceReq(
       pairAddress,
       accountHeader.currentAddress,
-      "QmlRemoveLiquidity_fetchAllowanceBalanceReservesAndSupply"
+      "QmlRemoveLiquidity_fetchAllowanceBalanceReservesAndSupply_"+randomID
     )
     qmlApi.buildGetAllowanceReq(
       pairAddress,
       accountHeader.currentAddress,
       qmlSystem.getContract("router"),
-      "QmlRemoveLiquidity_fetchAllowanceBalanceReservesAndSupply"
+      "QmlRemoveLiquidity_fetchAllowanceBalanceReservesAndSupply_"+randomID
     )
-    qmlApi.buildGetReservesReq(pairAddress, "QmlRemoveLiquidity_fetchAllowanceBalanceReservesAndSupply")
-    qmlApi.buildGetTotalSupplyReq(pairAddress, "QmlRemoveLiquidity_fetchAllowanceBalanceReservesAndSupply")
-    qmlApi.doAPIRequests("QmlRemoveLiquidity_fetchAllowanceBalanceReservesAndSupply")
+    qmlApi.buildGetReservesReq(pairAddress, "QmlRemoveLiquidity_fetchAllowanceBalanceReservesAndSupply_"+randomID)
+    qmlApi.buildGetTotalSupplyReq(pairAddress, "QmlRemoveLiquidity_fetchAllowanceBalanceReservesAndSupply_"+randomID)
+    qmlApi.doAPIRequests("QmlRemoveLiquidity_fetchAllowanceBalanceReservesAndSupply_"+randomID)
   }
 
   function checkTransactionFunds() {

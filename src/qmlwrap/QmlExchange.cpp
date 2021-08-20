@@ -123,9 +123,6 @@ QVariantMap QmlSystem::calculateRemoveLiquidityAmount(
   QVariantMap ret;
   if (asset1Reserves.isEmpty()) { asset1Reserves = QString("0"); }
   if (asset2Reserves.isEmpty()) { asset2Reserves = QString("0"); }
-  std::cout << asset1Reserves.toStdString() << std::endl;
-  std::cout << asset2Reserves.toStdString() << std::endl;
-  std::cout << pairBalance.toStdString() << std::endl;
   u256 asset1ReservesU256 = boost::lexical_cast<u256>(asset1Reserves.toStdString());
   u256 asset2ReservesU256 = boost::lexical_cast<u256>(asset2Reserves.toStdString());
   u256 userLPWei = boost::lexical_cast<u256>(
