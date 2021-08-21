@@ -49,9 +49,7 @@ using namespace std;
 #define DBG_MADEIT       cout << DBG_PRE << "MADE IT" << endl
 #define PKV(v)           vdump(__FILE__, __LINE__, #v, v)
 
-
-/*Set to be 32 bytes large, for the refactor.*/
-#define SALTED_PREFIX    "Salted__Salted__Salted__Salted__"
+#define SALTED_PREFIX    "Salted__"
 
 namespace
 {
