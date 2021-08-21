@@ -348,6 +348,8 @@ Cipher::kv1_t Cipher::encode_cipher(const string& plaintext) const
   int ciphertext_len=0;
   EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
   const EVP_CIPHER* cipher = EVP_aes_256_cbc();
+  int pad_len=0;
+  unsigned int   pt_len;
   EVP_CIPHER_CTX_init(ctx);
   if (1 != EVP_EncryptInit_ex(ctx, cipher, NULL, m_key, m_iv)) {
     EVP_CIPHER_CTX_free(ctx);
@@ -359,14 +361,14 @@ Cipher::kv1_t Cipher::encode_cipher(const string& plaintext) const
   // It would be straightforward to chunk it but that
   // add unecesary complexity at this point.
   uchar* pt_buf = (uchar*)plaintext.c_str();
-  unsigned int   pt_len = plaintext.size();
+  pt_len = plaintext.size();
   if (1 != EVP_EncryptUpdate(ctx, ciphertext, &ciphertext_len, pt_buf, pt_len)) {
     EVP_CIPHER_CTX_free(ctx);
     throw runtime_error("EVP_EncryptUpdate() failed");
   }
 
   uchar* pad_buf = ciphertext + ciphertext_len; // pad at the end
-  int pad_len=0;
+  
   if (1 != EVP_EncryptFinal_ex(ctx, pad_buf, &pad_len)) {
     EVP_CIPHER_CTX_free(ctx);
     throw runtime_error("EVP_EncryptFinal_ex() failed");
