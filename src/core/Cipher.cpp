@@ -29,6 +29,7 @@
 #include <cstring>        // strlen
 #include <cstdlib>        // getenv
 #include <unistd.h>       // getdomainname
+#include <random> 		  // random_device
 #include <openssl/aes.h>
 #include <openssl/bio.h>
 #include <openssl/evp.h>
@@ -384,6 +385,8 @@ string Cipher::decode_cipher(uchar* ciphertext,
   const unsigned int SZ = ciphertext_len+20;
   uchar* plaintext = new uchar[SZ];
   int plaintext_len = 0;
+  int plaintext_padlen=0;
+  string ret;
   const EVP_CIPHER* cipher = EVP_aes_256_cbc();
   EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
 
@@ -400,8 +403,6 @@ string Cipher::decode_cipher(uchar* ciphertext,
     EVP_CIPHER_CTX_free(ctx);
     throw runtime_error("EVP_DecryptUpdate() failed");
   }
-
-  int plaintext_padlen=0;
   if (1 != EVP_DecryptFinal_ex(ctx, plaintext+plaintext_len, &plaintext_padlen)) {
     EVP_CIPHER_CTX_free(ctx);
     throw runtime_error("EVP_DecryptFinal_ex() failed");
@@ -409,7 +410,7 @@ string Cipher::decode_cipher(uchar* ciphertext,
   plaintext_len += plaintext_padlen;
   plaintext[plaintext_len] = 0;
 
-  string ret = (char*)plaintext;
+  ret = (char*)plaintext;
   delete [] plaintext;
   EVP_CIPHER_CTX_free(ctx);
   return ret;
@@ -422,19 +423,36 @@ void Cipher::set_salt(const string& salt)
 {
   DBG_FCT("set_salt");
   if (salt.length() == 0) {
+	/*
+		use mersenne twister on windows seeded from random_device on windows,
+		because it does not have /dev/urandom
+	*/
+#ifdef __linux__
+	/*
+		Cryptographically, /dev/urandom has the most entropy in it,
+		so it will be the most secure source of random data.
+	*/
+	std::random_device rd;  	
+#else
+
+	std::mt19937 rd(std::random_device{}());
+#endif
+  	/*
+		Seed with some pseudo-random-data.
+  	*/
     // Choose a random salt.
-    for(unsigned int i=0;i<sizeof(m_salt);++i) {
-      m_salt[i] = rand() % 256;
+    for(uint i=0;i<CIPHER_SALT_BYTES;++i) {
+      m_salt[i] = /*rand() % 256*/ rd() % 256;
     }
   }
-  else if (salt.length() == 8) {
-    memcpy(m_salt, salt.c_str(), 8);
+  else if (salt.length() == CIPHER_SALT_BYTES) {
+    memcpy(m_salt, salt.c_str(), CIPHER_SALT_BYTES);
   }
-  else if (salt.length()<8) {
-    throw underflow_error("init(): salt is too short, must be 8 characters");
+  else if (salt.length()<CIPHER_SALT_BYTES) {
+    throw underflow_error("init(): salt is too short, must be CIPHER_SALT_BYTES characters");
   }
-  else if (salt.length()>8) {
-    throw overflow_error("init(): salt is too long, must be 8 characters");
+  else if (salt.length()>CIPHER_SALT_BYTES) {
+    throw overflow_error("init(): salt is too long, must be CIPHER_SALT_BYTES characters");
   }
 }
 
