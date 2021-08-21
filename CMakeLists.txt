@@ -3,7 +3,7 @@
 # file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 
 # Pre-setup
-cmake_minimum_required(VERSION 3.19.0)
+cmake_minimum_required(VERSION 3.18.0)
 include(cmake/cable/bootstrap.cmake)
 include(CableBuildInfo)
 include(CableBuildType)
