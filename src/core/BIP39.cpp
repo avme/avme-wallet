@@ -52,7 +52,7 @@ std::pair<bool,std::string> BIP39::saveEncryptedMnemonic(
 #ifdef __linux__
 	{
 		std::random_device rd;
-		for(int i = 0; i < sizeof(saltBytes); i++){
+		for(int i = 0; i < CIPHER_SALT_BYTES; i++){
 			saltBytes[i] = rd();
 		}
 	}
@@ -60,7 +60,7 @@ std::pair<bool,std::string> BIP39::saveEncryptedMnemonic(
 #ifdef MERSENNE_TWISTER
 	{
 		std::mt19937 rd(std::random_device{}());
-		for(int i = 0; i < sizeof(saltBytes); i++){
+		for(int i = 0; i < CIPHER_SALT_BYTES; i++){
 			saltBytes[i] = rd();
 		}
 	}
@@ -68,7 +68,7 @@ std::pair<bool,std::string> BIP39::saveEncryptedMnemonic(
 	/*
 		OpenSSL fallback.
 	*/
-	RAND_bytes(saltBytes, sizeof(saltBytes));
+	RAND_bytes(saltBytes, CIPHER_SALT_BYTES);
 #endif
 #endif
   
@@ -78,16 +78,18 @@ std::pair<bool,std::string> BIP39::saveEncryptedMnemonic(
   */
 
 	
-  /*
+  /*TODO: use full entropy instead of half entropy.*/
   std::string salt = toHex(
     dev::sha3(std::string((char*)saltBytes, sizeof(saltBytes)), false)
-  ).substr(0,8);*/
-  std::string salt; /**/
+  ).substr(0,CIPHER_SALT_BYTES);
+
+  /*
+  std::string salt; 
   for(int i = 0; i < CIPHER_SALT_BYTES; i++)
-  	salt.push_back(' '); /*make it big enough to hold the salt. This also guarantees null termination.*/
+  	salt.push_back(' '); 
 
-  memcpy((char*)salt.c_str(), saltBytes, CIPHER_SALT_BYTES); /*Memcpy it in.*/
-
+  memcpy((char*)salt.c_str(), saltBytes, CIPHER_SALT_BYTES); 
+*/
   // Encrypt the mnemonic
   std::string encryptedPhrase;
   try {

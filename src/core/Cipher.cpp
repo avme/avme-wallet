@@ -49,7 +49,9 @@ using namespace std;
 #define DBG_MADEIT       cout << DBG_PRE << "MADE IT" << endl
 #define PKV(v)           vdump(__FILE__, __LINE__, #v, v)
 
-#define SALTED_PREFIX    "Salted__"
+
+/*Set to be 32 bytes large, for the refactor.*/
+#define SALTED_PREFIX    "Salted__Salted__Salted__Salted__"
 
 namespace
 {
@@ -230,7 +232,7 @@ string Cipher::decrypt(const string& mimetext,
   DBG_BDUMP(ct, ctlen);
 
   if (strncmp((const char*)ct, SALTED_PREFIX, 8) == 0) {
-    memcpy(m_salt, &ct[8], 8);
+    memcpy(m_salt, &ct[8], CIPHER_SALT_BYTES);
     ct += 16;
     ctlen -= 16;
   }
