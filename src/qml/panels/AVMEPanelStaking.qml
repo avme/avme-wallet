@@ -5,13 +5,15 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
+import "qrc:/qml/popups"
 
 // Panel for classic staking (AVME smart contract)
 AVMEPanel {
   id: stakingPanel
-  property string pairAddress
+  readonly property string pairAddress: "0x381cc7bcba0afd3aeb0eaec3cb05d7796ddfd860"
   property string pairTotalBalance
   property string pairUserBalance
+  property string pairUserLockedBalance
   property string allowance
   property string lowerToken
   property string lowerReserves
@@ -22,16 +24,25 @@ AVMEPanel {
   property string userLPShares
   property string lowerEstimate
   property string higherEstimate
+  property bool loading
+  property string to
+  property string coinValue
+  property string txData
+  property string gas
+  property string gasPrice
+  property bool automaticGas: true
+  property string info
+  property string historyInfo
   title: "Classic Staking"
 
+  Timer { id: reservesTimer; interval: 1000; repeat: true; onTriggered: (fetchBalanceAllowanceAndReserves()) } 
+
   Connections {
-    target: qmlApi
+    target: qmlApi          
     function onApiRequestAnswered(answer, requestID) {
       var resp = JSON.parse(answer)
-      if (requestID == "QmlStaking_fetchPair") {
-        pairAddress = qmlApi.parseHex(resp[0].result, ["address"])
-        fetchBalanceAndAllowance()
-      } else if (requestID == "QmlStaking_fetchBalanceAndAllowance") {
+      if (requestID == "QmlClassicStaking_fetchBalanceAllowanceAndReserves") {
+        var reserves, lowerAddress, shares
         for (var item in resp) {
           if (resp[item]["id"] == 1) {
             pairTotalBalance = qmlApi.parseHex(resp[item].result, ["uint"])
@@ -39,23 +50,28 @@ AVMEPanel {
           if (resp[item]["id"] == 2) {  // Balance
             pairUserBalance = qmlApi.parseHex(resp[item].result, ["uint"])
           }
-          if (resp[item]["id"] == 2) { // Allowance
+          if (resp[item]["id"] == 3) { // Allowance
             allowance = qmlApi.parseHex(resp[item].result, ["uint"])
+          }
+          if (resp[item]["id"] == 4) { // // Reserves
+            reserves = qmlApi.parseHex(resp[item].result, ["uint", "uint", "uint"])
+          }
+          if (resp[item]["id"] == 5) { // Locked balance in Classic Contract
+            pairUserLockedBalance = qmlApi.parseHex(resp[item].result, ["uint"])
           }
         }
         // TODO: check edge case of allowance and balance both being zero
-        if (+allowance >= +pairUserBalance) {
-          stakingDetailsColumn.visible = true
-          fetchReserves()
-        } else {
+        if (+allowance <= +pairUserBalance) {
           stakingDetailsColumn.visible = false
+          stakingApprovalColumn.visible = true
+          loading = false
+          return
         }
-      } else if (requestID == "QmlStaking_fetchReserves") {
-        var reserves, lowerAddress, shares
-        reserves = qmlApi.parseHex(resp[0].result, ["uint", "uint", "uint"])
+
         lowerAddress = qmlSystem.getFirstFromPair(
           qmlSystem.getContract("AVAX"), qmlSystem.getContract("AVME")
         )
+
         lowerReserves = reserves[0]
         higherReserves = reserves[1]
         if (lowerAddress == qmlSystem.getContract("AVAX")) {
@@ -65,54 +81,119 @@ AVMEPanel {
           lowerToken = "AVME"
           higherToken = "AVAX"
         }
+
         shares = qmlSystem.calculatePoolShares(
-          lowerReserves, higherReserves, pairUserBalance, pairTotalBalance
+          lowerReserves, higherReserves, qmlApi.weiToFixedPoint(pairUserLockedBalance, 18), pairTotalBalance
         )
-        userLowerShares = shares.lower
-        userHigherShares = shares.higher
+        userLowerShares = shares.asset1
+        userHigherShares = shares.asset2
         userLPShares = shares.liquidity
+        loading = false
+        stakingApprovalColumn.visible = false
+        stakingDetailsColumn.visible = true
       }
     }
   }
 
-  function fetchPair() {
-    pairAddress = ""
-    qmlApi.clearAPIRequests("QmlStaking_fetchPair")
-    qmlApi.buildGetPairReq(
-      qmlSystem.getContract("AVAX"),
-      qmlSystem.getContract("AVME"),
-      "QmlStaking_fetchPair"
-    )
-    qmlApi.doAPIRequests("QmlStaking_fetchPair")
-  }
-
-  function fetchBalanceAndAllowance() {
-    pairUserBalance = pairTotalBalance = allowance = ""
-    qmlApi.clearAPIRequests("QmlStaking_fetchBalanceAndAllowance")
+  function fetchBalanceAllowanceAndReserves() {
+    qmlApi.clearAPIRequests("QmlClassicStaking_fetchBalanceAllowanceAndReserves")
     qmlApi.buildGetTotalSupplyReq(
-      pairAddress, "QmlStaking_fetchBalanceAndAllowance"
+      pairAddress, "QmlClassicStaking_fetchBalanceAllowanceAndReserves"
     )
     qmlApi.buildGetTokenBalanceReq(
-      pairAddress, accountHeader.currentAddress, "QmlStaking_fetchBalanceAndAllowance"
+      pairAddress, accountHeader.currentAddress, "QmlClassicStaking_fetchBalanceAllowanceAndReserves"
     )
     qmlApi.buildGetAllowanceReq(
       pairAddress,
       accountHeader.currentAddress,
       qmlSystem.getContract("staking"),
-      "QmlStaking_fetchBalanceAndAllowance"
+      "QmlClassicStaking_fetchBalanceAllowanceAndReserves"
     )
-    qmlApi.doAPIRequests("QmlStaking_fetchBalanceAndAllowance")
+    qmlApi.buildGetReservesReq(pairAddress, "QmlClassicStaking_fetchBalanceAllowanceAndReserves")
+    qmlApi.buildGetTokenBalanceReq(qmlSystem.getContract("staking"), accountHeader.currentAddress, "QmlClassicStaking_fetchBalanceAllowanceAndReserves")
+    qmlApi.doAPIRequests("QmlClassicStaking_fetchBalanceAllowanceAndReserves")
   }
 
-  function fetchReserves() {
-    lowerReserves = higherReserves = ""
-    qmlApi.clearAPIRequests("QmlStaking_fetchReserves")
-    qmlApi.buildGetReservesReq(pairAddress, "QmlStaking_fetchReserves")
-    qmlApi.doAPIRequests("QmlStaking_fetchReserves")
+  function calculateTransactionCost() {
+    var Fees = +qmlApi.fixedPointToWei(gasPrice, 8) * +gas
+    if (Fees > +qmlApi.fixedPointToWei(accountHeader.coinRawBalance, 18)) {
+      return false
+    }
+    if (isStaking) {
+      if (pairUserBalance < stakeInput.text) {
+        return false 
+      }
+    } else {
+      if (pairUserLockedBalance < stakeInput.text) {
+        return false 
+      }
+    }
+    return true
   }
 
-  Component.onCompleted: fetchPair()
+  function approveTx() {
+    to = pairAddress
+    coinValue = 0
+    gas = 100000
+    gasPrice = 225
+    info = "You will Approve <b> AVME/AVAX LP <\b> on Classic Staking Contract"
+    historyInfo = "Approve <b> AVME/AVAX LP <\b> on Classic Staking Contract"
 
+    var ethCallJson = ({})
+    ethCallJson["function"] = "approve(address,uint256)"
+    ethCallJson["args"] = []
+    ethCallJson["args"].push(qmlSystem.getContract("staking"))
+    ethCallJson["args"].push(qmlApi.MAX_U256_VALUE())
+    ethCallJson["types"] = []
+    ethCallJson["types"].push("address")
+    ethCallJson["types"].push("uint*")
+    var ethCallString = JSON.stringify(ethCallJson)
+    var ABI = qmlApi.buildCustomABI(ethCallString)
+    txData = ABI
+  }
+
+  function stakeTx() {
+    to = qmlSystem.getContract("staking")
+    coinValue = 0
+    gas = 200000
+    gasPrice = 225
+    info = "You will stake <b> " + qmlApi.weiToFixedPoint(stakeInput.text, 18) + " AVME/AVAX LP <\b> on Classic Staking"
+    historyInfo = "Stake <b> AVME/AVAX LP <\b> on Classic Staking"
+    var ethCallJson = ({})
+    ethCallJson["function"] = "stake(uint256)"
+    ethCallJson["args"] = []
+    ethCallJson["args"].push(qmlApi.fixedPointToWei(stakeInput.text, 18))
+    ethCallJson["types"] = []
+    ethCallJson["types"].push("uint*")
+    var ethCallString = JSON.stringify(ethCallJson)
+    var ABI = qmlApi.buildCustomABI(ethCallString)
+    txData = ABI
+  }
+
+  function unstakeTx() {
+    to = qmlSystem.getContract("staking")
+    coinValue = 0
+    gas = 200000
+    gasPrice = 225
+    info = "You will unstake <b> " + qmlApi.weiToFixedPoint(stakeInput.text, 18) + " AVME/AVAX LP <\b> on Classic Staking"
+    historyInfo = "Unstake <b> AVME/AVAX LP <\b> on Classic Staking"
+    var ethCallJson = ({})
+    ethCallJson["function"] = "withdraw(uint256)"
+    ethCallJson["args"] = []
+    ethCallJson["args"].push(qmlApi.fixedPointToWei(stakeInput.text, 18))
+    ethCallJson["types"] = []
+    ethCallJson["types"].push("uint*")
+    var ethCallString = JSON.stringify(ethCallJson)
+    var ABI = qmlApi.buildCustomABI(ethCallString)
+    txData = ABI
+  }
+
+  Component.onCompleted: {
+    stakingDetailsColumn.visible = false
+    stakingApprovalColumn.visible = false
+    loading = true; 
+    reservesTimer.start()
+  }
   Column {
     id: stakingHeaderColumn
     anchors {
@@ -165,7 +246,9 @@ AVMEPanel {
       color: "#FFFFFF"
       font.pixelSize: 14.0
       text: (pairUserBalance)
-      ? "Balance: <b>" + pairUserBalance + " AVAX/AVME LP</b>"
+      ? (isStaking) 
+      ? "Balance: <b>" + qmlApi.weiToFixedPoint(pairUserBalance, 18) + " AVAX/AVME LP</b>"
+      : "Balance: <b>" + qmlApi.weiToFixedPoint(pairUserLockedBalance, 18) + " AVAX/AVME LP</b>"
       : "Loading LP balance..."
     }
   }
@@ -196,7 +279,7 @@ AVMEPanel {
       text: "You need to approve your Account in order to stake<br>"
       + "<b>AVAX/AVME LP</b> in the staking contract."
       + "<br>This operation will have a total gas cost of:<br><b>"
-      + qmlSystem.calculateTransactionCost("0", "180000", qmlSystem.getAutomaticFee())
+      + qmlSystem.calculateTransactionCost("0", "200000", qmlSystem.getAutomaticFee())
       + " AVAX</b>"
     }
 
@@ -204,10 +287,24 @@ AVMEPanel {
       id: btnApprove
       width: parent.width
       enabled: (+accountHeader.coinRawBalance >=
-        +qmlSystem.calculateTransactionCost("0", "180000", qmlSystem.getAutomaticFee())
+        +qmlSystem.calculateTransactionCost("0", "200000", qmlSystem.getAutomaticFee())
       )
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve" : "Not enough funds"
+      onClicked: {
+        approveTx()
+        confirmApprovalPopup.setData(
+            to,
+            coinValue,
+            txData,
+            gas,
+            gasPrice,
+            automaticGas,
+            info,
+            historyInfo
+        )
+        confirmApprovalPopup.open()
+      }
     }
   }
 
@@ -223,7 +320,7 @@ AVMEPanel {
       leftMargin: 40
       rightMargin: 40
     }
-    spacing: 30
+    spacing: 50
 
     AVMEInput {
       id: stakeInput
@@ -242,52 +339,91 @@ AVMEPanel {
           leftMargin: 10
         }
         text: "Max"
-        // TODO
-        //onClicked: {
-        //  var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
-        //  stakeInput.text = (isStaking) ? acc.balanceLPFree : acc.balanceLPLocked
-        //}
+        onClicked: {
+          stakeInput.text = (isStaking) ? qmlApi.weiToFixedPoint(pairUserBalance, 18) : qmlApi.weiToFixedPoint(pairUserLockedBalance, 18)
+        }
       }
-    }
-
-    Text {
-      id: classicLPReturnsText
-      anchors.horizontalCenter: parent.horizontalCenter
-      horizontalAlignment: Text.AlignHCenter
-      color: "#FFFFFF"
-      font.pixelSize: 14.0
-      // TODO
-      /*
-      text: "Locked LP Estimates:"
-        + "<br><b>" + qmlSystem.weiToFixedPoint(
-          (("AVAX" == lowerToken) ? lowerReserves : higherReserves), 18
-        ) + " AVAX"
-        + "<br>" + qmlSystem.weiToFixedPoint(
-          (("AVME" == lowerToken) ? lowerReserves : higherReserves), 18
-        ) + " AVME" + "</b>"
-      */
     }
 
     AVMEButton {
       id: btnStake
       width: parent.width
-      enabled: (allowance != "" && stakeInput.acceptableInput)
-      // TODO
-      /*
+      enabled: (stakeInput.acceptableInput)
       text: {
-        var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
-        if (allowance == "") {
-          text: "Checking approval..."
-        } else if (isStaking && qmlSystem.isApproved(acc.balanceLPFree, allowance)) {
+        if (isStaking) {
           text: "Stake"
-        } else if (!isStaking && qmlSystem.isApproved(acc.balanceLPLocked, allowance)) {
+        } else if (!isStaking) {
           text: "Unstake"
-        } else {
-          text: "Approve"
         }
       }
-      */
-      // TODO: transaction logic
+      onClicked: {
+        if (isStaking) {
+          stakeTx()
+        } else {
+          unstakeTx()
+        }
+        if (calculateTransactionCost()) {
+          confirmStakePopup.setData(
+              to,
+              coinValue,
+              txData,
+              gas,
+              gasPrice,
+              automaticGas,
+              info,
+              historyInfo
+          )
+          confirmStakePopup.open()
+        } else {
+          fundsPopup.open()
+        }
+      } 
     }
+
+    Rectangle {
+      id: estimatedClassicLockedValue
+      radius: 10
+      color: "#1d1827"
+      height: parent.height * 0.35
+      width: parent.width
+    Text {
+      id: estimatedClassicLockedValueText
+      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.verticalCenter: parent.verticalCenter
+      horizontalAlignment: Text.AlignHCenter
+      color: "#FFFFFF"
+      text: "Locked LP Estimates:"
+        + "<br><b>" + qmlSystem.weiToFixedPoint(userLowerShares, 18) + " " + lowerToken
+        + "<br><b>" + qmlSystem.weiToFixedPoint(userHigherShares, 18) + " " + higherToken
+    }
+    }
+  }
+  Image {
+    id: stakingLoadingPng
+    visible: loading
+    anchors {
+      top: stakingHeaderColumn.bottom
+      bottom: parent.bottom
+      left: parent.left
+      right: parent.right
+      topMargin: parent.height * 0.1
+      bottomMargin: parent.height * 0.1
+    }
+    fillMode: Image.PreserveAspectFit
+    source: "qrc:/img/icons/loading.png"
+    RotationAnimator {
+      target: stakingLoadingPng
+      from: 0
+      to: 360
+      duration: 1000
+      loops: Animation.Infinite
+      easing.type: Easing.InOutQuad
+      running: true
+    }
+  }
+  AVMEPopupInfo {
+    id: fundsPopup
+    icon: "qrc:/img/warn.png"
+    info: "Insufficient funds. Please check your inputs."
   }
 }

@@ -5,18 +5,82 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
+import "qrc:/qml/popups"
 
-// Panel for compound staking rewards
+// Panel for Compound staking rewards
 AVMEPanel {
-  id: compoundRewardsPanel
+  id: stakingRewardsPanel
   property string reward
+  property string lockedBalance
+  property bool loading
+  property string to
+  property string coinValue
+  property string txData
+  property string gas
+  property string gasPrice
+  property bool automaticGas: true
+  property string info
+  property string historyInfo
   title: "Compound Staking Rewards"
 
+  Timer { id: rewardsTimer; interval: 1000; repeat: true; onTriggered: (fetchRewards()) } 
+
+  Connections {
+    target: qmlApi          
+      function onApiRequestAnswered(answer, requestID) {
+        var resp = JSON.parse(answer)
+        if (requestID == "QmlCompoundStaking_fetchRewards") {
+          var rewardParsed = qmlApi.parseHex(resp[0].result, ["uint"])
+          reward = rewardParsed[0]
+          stakingLoadingPng.visible = false
+          loading = false
+        }
+      }
+  }
+
+  function fetchRewards() {
+    qmlApi.clearAPIRequests("QmlCompoundStaking_fetchRewards")
+    var ethCallJson = ({})
+    ethCallJson["function"] = "checkReward()"
+    ethCallJson["args"] = []
+    ethCallJson["args"].push(qmlSystem.getCurrentAccount())
+    ethCallJson["types"] = []
+    ethCallJson["types"].push("address")
+    var ethCallString = JSON.stringify(ethCallJson)
+    var ABI = qmlApi.buildCustomABI(ethCallString)
+    qmlApi.buildCustomEthCallReq(
+      qmlSystem.getContract("compound"), ABI, "QmlCompoundStaking_fetchRewards"
+    )
+    qmlApi.doAPIRequests("QmlCompoundStaking_fetchRewards")
+  }
+
+  function reinvestTx() {
+    to = qmlSystem.getContract("compound")
+    coinValue = 0
+    gas = 400000
+    gasPrice = 225
+    info = "You will reinvest and receive <b> " + qmlApi.weiToFixedPoint(reward, 18) + " AVME <\b>"
+    + "</b><br> on Compound Staking Contract"
+    historyInfo = "Harvest Compound Staking Contract"
+    var ethCallJson = ({})
+    ethCallJson["function"] = "reinvest()"
+    ethCallJson["args"] = []
+    ethCallJson["types"] = []
+    var ethCallString = JSON.stringify(ethCallJson)
+    var ABI = qmlApi.buildCustomABI(ethCallString)
+    txData = ABI
+  }
+
+  Component.onCompleted: {
+    loading = true
+    stakingLoadingPng.visible = true
+    rewardsTimer.start()
+  }
+
   Column {
-    id: compoundRewardsDetailsColumn
+    id: stakingRewardsDetailsColumn
     anchors {
       top: parent.top
-      bottom: parent.bottom
       left: parent.left
       right: parent.right
       topMargin: 80
@@ -27,15 +91,15 @@ AVMEPanel {
     spacing: 30
 
     Text {
-      id: reinvestTitle
+      id: harvestTitle
       anchors.horizontalCenter: parent.horizontalCenter
       color: "#FFFFFF"
       font.pixelSize: 14.0
-      text: "You will <b>reinvest AVME</b> rewards (OPTIONAL)"
+      text: "<b>Reinvest AVME</b>(optional)"
     }
 
     Image {
-      id: reinvestTokenLogo
+      id: harvestTokenLogo
       anchors.horizontalCenter: parent.horizontalCenter
       height: 48
       antialiasing: true
@@ -45,31 +109,68 @@ AVMEPanel {
     }
 
     Text {
+      id: rewardAmount
+      anchors.horizontalCenter: parent.horizontalCenter
+      horizontalAlignment: Text.AlignHCenter
+      color: "#FFFFFF"
+      font.pixelSize: 14.0
+      text: (loading) ? "Loading rewards..." : "Unreinvested AVME:<br><b>" + qmlApi.weiToFixedPoint(reward, 18) + " AVME</b>"
+    }
+
+    AVMEButton {
+      id: btnExitStake
+      width: parent.width
+      anchors.horizontalCenter: parent.horizontalCenter
+      visible: (!loading)
+      enabled: ((+reward != 0) && (+accountHeader.coinRawBalance >=
+        +qmlSystem.calculateTransactionCost("0", "70000", qmlSystem.getAutomaticFee())
+      ))
+      onClicked: {
+        reinvestTx()
+        confirmRewardPopup.setData(
+            to,
+            coinValue,
+            txData,
+            gas,
+            gasPrice,
+            automaticGas,
+            info,
+            historyInfo
+        )
+        confirmRewardPopup.open()
+      }
+      text: "Reinvest AVME"
+    }
+    Text {
       id: reinvestAmount
       anchors.horizontalCenter: parent.horizontalCenter
       horizontalAlignment: Text.AlignHCenter
       color: "#FFFFFF"
       font.pixelSize: 14.0
-      text: "Unreinvested rewards:<br><b>" + reward + " AVME</b>"
+      text: (loading) ? "Loading rewards..." : "Reinvest Reward AVME:<br><b>" + qmlApi.weiToFixedPoint((+reward * 0.02), 18) + " AVME</b>"
     }
-
-    Text {
-      id: reinvestRewardText
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: 128
-      horizontalAlignment: Text.AlignHCenter
-      color: "#FFFFFF"
-      font.pixelSize: 14.0
-      text: "Reinvesting returns:<br><b>" + (reward * 0.05) + " AVME</b>"
+  }
+  Image {
+    id: stakingLoadingPng
+    visible: loading
+    anchors {
+      top: stakingRewardsDetailsColumn.bottom
+      bottom: parent.bottom
+      left: parent.left
+      right: parent.right
+      topMargin: parent.height * 0.1
+      bottomMargin: parent.height * 0.1
     }
-
-    AVMEButton {
-      id: btnreinvest
-      width: parent.width
-      anchors.horizontalCenter: parent.horizontalCenter
-      enabled: (reward != "" && !qmlSystem.balanceIsZero(reward, 18))
-      text: (reward != "") ? "Reinvest AVME" : "Querying Reinvest..."
-      // TODO: transaction logic
+    fillMode: Image.PreserveAspectFit
+    source: "qrc:/img/icons/loading.png"
+    RotationAnimator {
+      target: stakingLoadingPng
+      from: 0
+      to: 360
+      duration: 1000
+      loops: Animation.Infinite
+      easing.type: Easing.InOutQuad
+      running: true
     }
   }
 
@@ -95,5 +196,11 @@ AVMEPanel {
       verticalAlignment: Text.AlignVCenter
       text: "Powered by"
     }
+  }
+  
+  AVMEPopupInfo {
+    id: fundsPopup
+    icon: "qrc:/img/warn.png"
+    info: "Insufficient funds. Please check your inputs."
   }
 }

@@ -220,7 +220,7 @@ void QmlApi::buildCustomEthCallReq(QString contract, QString ABI, QString reques
   array.push_back(params);
   array.push_back("latest");
   requestListLock.lock();
-  Request req{this->requestList[requestID].size() + size_t(1), "2.0", "eth_getBalance", array};
+  Request req{this->requestList[requestID].size() + size_t(1), "2.0", "eth_call", array};
   this->requestList[requestID].push_back(req);
   requestListLock.unlock();
 }

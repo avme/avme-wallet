@@ -128,16 +128,15 @@ Item {
   }
 
   // Popups for staking approval and confirmation, respectively
-  // TODO: approval and confirm button logic on both panels
   AVMEPopupConfirmTx {
     id: confirmApprovalPopup
-    info: "You will approve <b>AVAX/AVME LP</b> staking in the "
-    + ((isClassic) ? "staking" : "compound") + " contract"
   }
   AVMEPopupConfirmTx {
     id: confirmStakePopup
-    info: "You will " + ((isStaking) ? "stake" : "unstake") + " <b>AVAX/AVME LP</b>"
-    + " in the " + ((isClassic) ? "staking" : "compound") + " contract"
+  }
+
+  AVMEPopupConfirmTx {
+    id: confirmRewardPopup
   }
 
   AVMEPopupTxProgress {

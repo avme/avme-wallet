@@ -5,18 +5,100 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
+import "qrc:/qml/popups"
 
 // Panel for classic staking rewards
 AVMEPanel {
   id: stakingRewardsPanel
   property string reward
+  property string lockedBalance
+  property bool loading
+  property string to
+  property string coinValue
+  property string txData
+  property string gas
+  property string gasPrice
+  property bool automaticGas: true
+  property string info
+  property string historyInfo
   title: "Classic Staking Rewards"
+
+  Timer { id: rewardsTimer; interval: 1000; repeat: true; onTriggered: (fetchRewards()) } 
+
+  Connections {
+    target: qmlApi          
+      function onApiRequestAnswered(answer, requestID) {
+        var resp = JSON.parse(answer)
+        if (requestID == "QmlClassicStaking_fetchRewards") {
+          var rewardParsed = qmlApi.parseHex(resp[0].result, ["uint"])
+          reward = rewardParsed[0]
+          stakingLoadingPng.visible = false
+          loading = false
+        }
+      }
+  }
+
+  function fetchRewards() {
+    qmlApi.clearAPIRequests("QmlClassicStaking_fetchRewards")
+    var ethCallJson = ({})
+    ethCallJson["function"] = "earned(address)"
+    ethCallJson["args"] = []
+    ethCallJson["args"].push(qmlSystem.getCurrentAccount())
+    ethCallJson["types"] = []
+    ethCallJson["types"].push("address")
+    var ethCallString = JSON.stringify(ethCallJson)
+    var ABI = qmlApi.buildCustomABI(ethCallString)
+    qmlApi.buildCustomEthCallReq(
+      qmlSystem.getContract("staking"), ABI, "QmlClassicStaking_fetchRewards"
+    )
+    qmlApi.doAPIRequests("QmlClassicStaking_fetchRewards")
+  }
+
+  function exitTx() {
+    to = qmlSystem.getContract("staking")
+    coinValue = 0
+    gas = 200000
+    gasPrice = 225
+    info = "You will Harvest <b> " + qmlApi.weiToFixedPoint(reward, 18) + " AVME <\b> "
+    + "<br> and withdraw <b>" + qmlApi.weiToFixedPoint(lockedBalance, 18) + " AVME/AVAX LP "
+    + "</b><br> on Classic Staking Contract"
+    historyInfo = "Exit Classic Staking Contract"
+    var ethCallJson = ({})
+    ethCallJson["function"] = "exit()"
+    ethCallJson["args"] = []
+    ethCallJson["types"] = []
+    var ethCallString = JSON.stringify(ethCallJson)
+    var ABI = qmlApi.buildCustomABI(ethCallString)
+    txData = ABI
+  }
+
+  function harvestTx() {
+    to = qmlSystem.getContract("staking")
+    coinValue = 0
+    gas = 200000
+    gasPrice = 225
+    info = "You will Harvest <b> " + qmlApi.weiToFixedPoint(reward, 18) + " AVME <\b>"
+    + "</b><br> on Classic Staking Contract"
+    historyInfo = "Harves Classic Staking Contract"
+    var ethCallJson = ({})
+    ethCallJson["function"] = "getReward()"
+    ethCallJson["args"] = []
+    ethCallJson["types"] = []
+    var ethCallString = JSON.stringify(ethCallJson)
+    var ABI = qmlApi.buildCustomABI(ethCallString)
+    txData = ABI
+  }
+
+  Component.onCompleted: {
+    loading = true
+    stakingLoadingPng.visible = true
+    rewardsTimer.start()
+  }
 
   Column {
     id: stakingRewardsDetailsColumn
     anchors {
       top: parent.top
-      bottom: parent.bottom
       left: parent.left
       right: parent.right
       topMargin: 80
@@ -50,34 +132,85 @@ AVMEPanel {
       horizontalAlignment: Text.AlignHCenter
       color: "#FFFFFF"
       font.pixelSize: 14.0
-      text: "Unharvested rewards:<br><b>" + reward + " AVME</b>"
+      text: (loading) ? "Loading rewards..." : "Unharvested rewards:<br><b>" + qmlApi.weiToFixedPoint(reward, 18) + " AVME</b>"
     }
 
     AVMEButton {
       id: btnExitStake
       width: parent.width
       anchors.horizontalCenter: parent.horizontalCenter
-      // TODO
-      /*
-      enabled: {
-        var acc = qmlSystem.getAccountBalances(qmlSystem.getCurrentAccount())
-        enabled: (
-          reward != "" && !qmlSystem.balanceIsZero(reward, 18) &&
-          !qmlSystem.balanceIsZero(acc.balanceLPLocked, 18)
+      visible: (!loading)
+      enabled: ((+reward != 0) && (+accountHeader.coinRawBalance >=
+        +qmlSystem.calculateTransactionCost("0", "70000", qmlSystem.getAutomaticFee())
+      ))
+      onClicked: {
+        exitTx()
+        confirmRewardPopup.setData(
+            to,
+            coinValue,
+            txData,
+            gas,
+            gasPrice,
+            automaticGas,
+            info,
+            historyInfo
         )
+        confirmRewardPopup.open()
       }
-      */
-      text: (reward != "") ? "Harvest AVME & Unstake LP" : "Querying reward..."
-      // TODO: transaction logic
+      text: "Harvest AVME & Unstake LP"
     }
 
     AVMEButton {
       id: btnHarvest
       width: parent.width
       anchors.horizontalCenter: parent.horizontalCenter
-      enabled: (reward != "" && !qmlSystem.balanceIsZero(reward, 18))
-      text: (reward != "") ? "Harvest AVME" : "Querying reward..."
-      // TODO: transaction logic
+      visible: (!loading)
+      enabled: ((+reward != 0) &&(+accountHeader.coinRawBalance >=
+        +qmlSystem.calculateTransactionCost("0", "70000", qmlSystem.getAutomaticFee())
+      ))
+      onClicked: {
+        harvestTx()
+        confirmRewardPopup.setData(
+            to,
+            coinValue,
+            txData,
+            gas,
+            gasPrice,
+            automaticGas,
+            info,
+            historyInfo
+        )
+        confirmRewardPopup.open()
+      }
+      text: "Harvest AVME"
     }
+  }
+  Image {
+    id: stakingLoadingPng
+    visible: loading
+    anchors {
+      top: stakingRewardsDetailsColumn.bottom
+      bottom: parent.bottom
+      left: parent.left
+      right: parent.right
+      topMargin: parent.height * 0.1
+      bottomMargin: parent.height * 0.1
+    }
+    fillMode: Image.PreserveAspectFit
+    source: "qrc:/img/icons/loading.png"
+    RotationAnimator {
+      target: stakingLoadingPng
+      from: 0
+      to: 360
+      duration: 1000
+      loops: Animation.Infinite
+      easing.type: Easing.InOutQuad
+      running: true
+    }
+  }
+  AVMEPopupInfo {
+    id: fundsPopup
+    icon: "qrc:/img/warn.png"
+    info: "Insufficient funds. Please check your inputs."
   }
 }
