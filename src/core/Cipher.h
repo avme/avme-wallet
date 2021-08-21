@@ -72,6 +72,9 @@
  * @endcode
  * @author Joe Linoff
  */
+
+#define CIPHER_SALT_BYTES 8
+ 
 class Cipher
 {
 public:
@@ -79,7 +82,7 @@ public:
   typedef unsigned char uchar;
   typedef uchar aes_key_t[32];
   typedef uchar aes_iv_t[32];
-  typedef uchar aes_salt_t[8];
+  typedef uchar aes_salt_t[CIPHER_SALT_BYTES]; /*TODO: make this 32 bytes.*/
   typedef std::pair<uchar*,uint> kv1_t;
 public:
   /**

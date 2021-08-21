@@ -43,7 +43,7 @@ std::pair<bool,std::string> BIP39::saveEncryptedMnemonic(
   // Initialize the seed json and cipher, then create the salt
   json seedJson;
   Cipher cipher("aes-256-cbc", "sha256");
-  unsigned char saltBytes[32];
+  unsigned char saltBytes[CIPHER_SALT_BYTES] = {0}; /*Use exactly as many bytes for the cipher as needed.*/
 	/*
 		Use std::random_device (thin wrapper around /dev/urandom) on linux, it is the most
 		secure source of entropy on the system.
@@ -72,10 +72,21 @@ std::pair<bool,std::string> BIP39::saveEncryptedMnemonic(
 #endif
 #endif
   
-  
+   /*
+  	@GEK bugfix- you were taking your 32 bytes of perfectly good randomness, and 
+  	reducing them down to 4 (as 8 hex digits).
+  */
+
+	
+  /*
   std::string salt = toHex(
     dev::sha3(std::string((char*)saltBytes, sizeof(saltBytes)), false)
-  ).substr(0,8);
+  ).substr(0,8);*/
+  std::string salt; /**/
+  for(int i = 0; i < CIPHER_SALT_BYTES; i++)
+  	salt.push_back(' '); /*make it big enough to hold the salt. This also guarantees null termination.*/
+
+  memcpy((char*)salt.c_str(), saltBytes, CIPHER_SALT_BYTES); /*Memcpy it in.*/
 
   // Encrypt the mnemonic
   std::string encryptedPhrase;

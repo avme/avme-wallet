@@ -441,18 +441,18 @@ void Cipher::set_salt(const string& salt)
 		Seed with some pseudo-random-data.
   	*/
     // Choose a random salt.
-    for(uint i=0;i<sizeof(m_salt);++i) {
+    for(uint i=0;i<CIPHER_SALT_BYTES;++i) {
       m_salt[i] = /*rand() % 256*/ rd() % 256;
     }
   }
-  else if (salt.length() == 8) {
-    memcpy(m_salt, salt.c_str(), 8);
+  else if (salt.length() == CIPHER_SALT_BYTES) {
+    memcpy(m_salt, salt.c_str(), CIPHER_SALT_BYTES);
   }
-  else if (salt.length()<8) {
-    throw underflow_error("init(): salt is too short, must be 8 characters");
+  else if (salt.length()<CIPHER_SALT_BYTES) {
+    throw underflow_error("init(): salt is too short, must be CIPHER_SALT_BYTES characters");
   }
-  else if (salt.length()>8) {
-    throw overflow_error("init(): salt is too long, must be 8 characters");
+  else if (salt.length()>CIPHER_SALT_BYTES) {
+    throw overflow_error("init(): salt is too long, must be CIPHER_SALT_BYTES characters");
   }
 }
 
