@@ -45,7 +45,7 @@ AVMEPanel {
         var reserves, lowerAddress, shares
         for (var item in resp) {
           if (resp[item]["id"] == 1) {
-            pairTotalBalance = qmlApi.parseHex(resp[item].result, ["uint"])
+            pairTotalBalance = qmlApi.parseHex(resp[item].result, ["uint"])[0]
           }
           if (resp[item]["id"] == 2) {  // Balance
             pairUserBalance = qmlApi.parseHex(resp[item].result, ["uint"])
