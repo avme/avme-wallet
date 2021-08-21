@@ -144,7 +144,7 @@ std::pair<bool,std::string> BIP39::loadEncryptedMnemonic(
   std::string salt;
   try {
     encryptedPhrase = seedJson["seed"].get<std::string>();
-    salt = seedJson["salt"].get<std::string>();
+    salt = seedJson["salt"].get<std::string>(); /*TODO: Decode salt from base64*/
     // Replace spaces with newlines, cipher only accepts newlines since it's base64
     boost::replace_all(encryptedPhrase, " ", "\n");
   } catch (std::exception &e) {
