@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 #include <utility> // pair
+#include <random> //  random_device and mersenne twister mt19937
 
 #define CIPHER_DEFAULT_CIPHER "aes-256-cbc"
 #define CIPHER_DEFAULT_DIGEST "sha256"

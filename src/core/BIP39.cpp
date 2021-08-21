@@ -44,7 +44,35 @@ std::pair<bool,std::string> BIP39::saveEncryptedMnemonic(
   json seedJson;
   Cipher cipher("aes-256-cbc", "sha256");
   unsigned char saltBytes[32];
-  RAND_bytes(saltBytes, sizeof(saltBytes));
+	/*
+		Use std::random_device (thin wrapper around /dev/urandom) on linux, it is the most
+		secure source of entropy on the system.
+	*/
+
+#ifdef __linux__
+	{
+		std::random_device rd;
+		for(int i = 0; i < sizeof(saltBytes); i++){
+			saltBytes[i] = rd();
+		}
+	}
+#else
+#ifdef MERSENNE_TWISTER
+	{
+		std::mt19937 rd(std::random_device{}());
+		for(int i = 0; i < sizeof(saltBytes); i++){
+			saltBytes[i] = rd();
+		}
+	}
+#else
+	/*
+		OpenSSL fallback.
+	*/
+	RAND_bytes(saltBytes, sizeof(saltBytes));
+#endif
+#endif
+  
+  
   std::string salt = toHex(
     dev::sha3(std::string((char*)saltBytes, sizeof(saltBytes)), false)
   ).substr(0,8);

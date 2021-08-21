@@ -423,7 +423,20 @@ void Cipher::set_salt(const string& salt)
 {
   DBG_FCT("set_salt");
   if (salt.length() == 0) {
-  	std::random_device rd;
+	/*
+		use mersenne twister on windows seeded from random_device on windows,
+		because it does not have /dev/urandom
+	*/
+#ifdef __linux__
+	/*
+		Cryptographically, /dev/urandom has the most entropy in it,
+		so it will be the most secure source of random data.
+	*/
+	std::random_device rd;  	
+#else
+
+	std::mt19937 rd(std::random_device{}());
+#endif
   	/*
 		Seed with some pseudo-random-data.
   	*/
