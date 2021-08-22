@@ -8,6 +8,15 @@ import QmlApi 1.0
 
 import "qrc:/qml/components"
 
+/*
+	TODO FIXMEs FROM GEK:
+	1.
+		Hovering on this page causes a boost bad lexical cast error.
+		it causes a fatal throw.
+
+*/
+
+
 /**
  * Panel for exchanging coins/tokens in a given Account.
  * Example for reserves:
