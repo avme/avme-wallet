@@ -30,6 +30,3 @@ void QmlSystem::listAccountTransactions(QString address) {
   });
 }
 
-void QmlSystem::updateTransactionStatus() {
-  this->w.updateAllTxStatus();
-}

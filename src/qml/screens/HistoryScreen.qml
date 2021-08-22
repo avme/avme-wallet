@@ -40,7 +40,6 @@ Item {
     historyModel.clear()
     infoText.text = "Loading transactions..."
     infoText.visible = true
-    qmlSystem.updateTransactionStatus()
     qmlSystem.listAccountTransactions(qmlSystem.getCurrentAccount())
   }
 
