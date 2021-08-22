@@ -92,6 +92,7 @@ AVMEPanel {
     function onApiRequestAnswered(answer, requestID) {
       if (requestID == "QmlExchange_fetchAllowance") {
         var respArr = JSON.parse(answer)
+        console.log(answer)/*GEK DEBUG TODO FIXME REMOVETHIS*/
         needRoute = false;
         allowance = ""
         pairAddress = ""
@@ -100,15 +101,20 @@ AVMEPanel {
         // Loop the answer, as we know, API requests can answer unordered.
         for (var answerItem in respArr) {
           if (respArr[answerItem]["id"] == 1) {
+
+          	console.log(respArr)/*GEK DEBUG TODO FIXME REMOVETHIS*/
             allowance = qmlApi.parseHex(respArr[answerItem].result, ["uint"])
           }
           if (respArr[answerItem]["id"] == 2) {
+          console.log(respArr)/*GEK DEBUG TODO FIXME REMOVETHIS*/
             pairAddress = qmlApi.parseHex(respArr[answerItem].result, ["address"])
           }
           if (respArr[answerItem]["id"] == 3) {
+          	console.log(respArr)/*GEK DEBUG TODO FIXME REMOVETHIS*/
             pairTokenInAddress = qmlApi.parseHex(respArr[answerItem].result, ["address"])
           }
           if (respArr[answerItem]["id"] == 4) {
+          	console.log(respArr)/*GEK DEBUG TODO FIXME REMOVETHIS*/
             pairTokenOutAddress = qmlApi.parseHex(respArr[answerItem].result, ["address"])
           }
         }
@@ -131,9 +137,12 @@ AVMEPanel {
         allowanceTimer.stop()
         reservesTimer.start()
       } else if (requestID == "QmlExchange_refreshReserves_" + randomID) {
+      	console.log(answer) /*GEK TODO FIXME REMOVETHIS*/
         var resp = JSON.parse(answer)
+        console.log(resp) /*GEK TODO FIXME REMOVETHIS*/
         reservesList = ([])
         if (!needRoute) {
+        	console.log(resp)/*GEK DEBUG TODO FIXME REMOVETHIS*/
           var reservesAnswer = qmlApi.parseHex(resp[0].result, ["uint", "uint", "uint"])
           var reserves = ({})
           var lowerAddress = qmlSystem.getFirstFromPair(
@@ -156,6 +165,7 @@ AVMEPanel {
             // ID = 1 means reservesTokenIn
             // ID = 2 means reservesTokenOut
             if (resp[i]["id"] == 1) {
+            	console.log(resp) /*GEK TODO FIXME REMOVETHIS*/
               var reservesAnswer = qmlApi.parseHex(resp[i].result, ["uint", "uint", "uint"])
               var reserves = ({})
               var lowerAddress = qmlSystem.getFirstFromPair(
@@ -172,6 +182,7 @@ AVMEPanel {
               reservesList.push(reserves)
             }
             if (resp[i]["id"] == 2) {
+            	console.log(resp) /*GEK TODO FIXME REMOVETHIS*/
               var reservesAnswer = qmlApi.parseHex(resp[i].result, ["uint", "uint", "uint"])
               var reserves = ({})
               var lowerAddress = qmlSystem.getFirstFromPair(
