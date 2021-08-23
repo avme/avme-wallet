@@ -4,3 +4,4 @@ build/
 *.kate-swp
 src/version.h
 .vscode/*.*
+*.gek.sh
