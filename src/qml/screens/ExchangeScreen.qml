@@ -23,7 +23,7 @@ Item {
   id: exchangeScreen
 
   function checkTransactionFunds() {
-    if (fromAssetPopup.chosenAssetSymbol == "AVAX") {  // Coin
+    if (fromAssetPopup.chosenAssetSymbol == "AVAX" && !exchangePanel.isInverse) {  // Coin
       var Fees = +qmlApi.fixedPointToWei(exchangePanel.gasPrice, 8) * +exchangePanel.gas
       var TxCost = Fees + +qmlApi.fixedPointToWei(exchangePanel.amountIn, 18)
       if (TxCost > +qmlApi.fixedPointToWei(accountHeader.coinRawBalance, 18)) {
@@ -35,12 +35,16 @@ Item {
       if (Fees > +qmlApi.fixedPointToWei(accountHeader.coinRawBalance, 18)) {
         return false
       }
-      var tokenBalance = +qmlApi.fixedPointToWei(
-        accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]["rawBalance"],
-        fromAssetPopup.chosenAssetDecimals)
-      if (tokenBalance < +qmlApi.fixedPointToWei(exchangePanel.amount, fromAssetPopup.chosenAssetDecimals)) {
-        return false
-      } 
+      if (!exchangePanel.isInverse) {
+        if (+accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]["rawBalance"] < +exchangePanel.amountIn) {
+         return false
+        } 
+      } else {
+        if (+accountHeader.tokenList[toAssetPopup.chosenAssetAddress]["rawBalance"] < +exchangePanel.amountIn) {
+         return false
+        } 
+      }
+
       return true
     }
   }

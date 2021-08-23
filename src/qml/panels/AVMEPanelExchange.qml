@@ -8,15 +8,6 @@ import QmlApi 1.0
 
 import "qrc:/qml/components"
 
-/*
-	TODO FIXMEs FROM GEK:
-	1.
-		Hovering on this page causes a boost bad lexical cast error.
-		it causes a fatal throw.
-
-*/
-
-
 /**
  * Panel for exchanging coins/tokens in a given Account.
  * Example for reserves:
@@ -56,6 +47,7 @@ AVMEPanel {
   property string randomID
   property bool needRoute
   property double swapImpact
+  property bool isInverse: false
   property alias amountIn: swapInput.text
   property alias swapBtn: btnSwap
   property alias approveBtn: btnApprove
@@ -92,7 +84,6 @@ AVMEPanel {
     function onApiRequestAnswered(answer, requestID) {
       if (requestID == "QmlExchange_fetchAllowance") {
         var respArr = JSON.parse(answer)
-        console.log(answer)/*GEK DEBUG TODO FIXME REMOVETHIS*/
         needRoute = false;
         allowance = ""
         pairAddress = ""
@@ -101,20 +92,15 @@ AVMEPanel {
         // Loop the answer, as we know, API requests can answer unordered.
         for (var answerItem in respArr) {
           if (respArr[answerItem]["id"] == 1) {
-
-          	console.log(respArr)/*GEK DEBUG TODO FIXME REMOVETHIS*/
             allowance = qmlApi.parseHex(respArr[answerItem].result, ["uint"])
           }
           if (respArr[answerItem]["id"] == 2) {
-          console.log(respArr)/*GEK DEBUG TODO FIXME REMOVETHIS*/
             pairAddress = qmlApi.parseHex(respArr[answerItem].result, ["address"])
           }
           if (respArr[answerItem]["id"] == 3) {
-          	console.log(respArr)/*GEK DEBUG TODO FIXME REMOVETHIS*/
             pairTokenInAddress = qmlApi.parseHex(respArr[answerItem].result, ["address"])
           }
           if (respArr[answerItem]["id"] == 4) {
-          	console.log(respArr)/*GEK DEBUG TODO FIXME REMOVETHIS*/
             pairTokenOutAddress = qmlApi.parseHex(respArr[answerItem].result, ["address"])
           }
         }
@@ -137,12 +123,9 @@ AVMEPanel {
         allowanceTimer.stop()
         reservesTimer.start()
       } else if (requestID == "QmlExchange_refreshReserves_" + randomID) {
-      	console.log(answer) /*GEK TODO FIXME REMOVETHIS*/
         var resp = JSON.parse(answer)
-        console.log(resp) /*GEK TODO FIXME REMOVETHIS*/
         reservesList = ([])
         if (!needRoute) {
-        	console.log(resp)/*GEK DEBUG TODO FIXME REMOVETHIS*/
           var reservesAnswer = qmlApi.parseHex(resp[0].result, ["uint", "uint", "uint"])
           var reserves = ({})
           var lowerAddress = qmlSystem.getFirstFromPair(
@@ -165,7 +148,6 @@ AVMEPanel {
             // ID = 1 means reservesTokenIn
             // ID = 2 means reservesTokenOut
             if (resp[i]["id"] == 1) {
-            	console.log(resp) /*GEK TODO FIXME REMOVETHIS*/
               var reservesAnswer = qmlApi.parseHex(resp[i].result, ["uint", "uint", "uint"])
               var reserves = ({})
               var lowerAddress = qmlSystem.getFirstFromPair(
@@ -182,7 +164,6 @@ AVMEPanel {
               reservesList.push(reserves)
             }
             if (resp[i]["id"] == 2) {
-            	console.log(resp) /*GEK TODO FIXME REMOVETHIS*/
               var reservesAnswer = qmlApi.parseHex(resp[i].result, ["uint", "uint", "uint"])
               var reserves = ({})
               var lowerAddress = qmlSystem.getFirstFromPair(
@@ -210,10 +191,19 @@ AVMEPanel {
 
   function calculateExchangeAmount(amountIn, inDecimals, outDecimals) {
     if (!needRoute) {
+      if (!isInverse) {
       amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[0]["inReserves"], reservesList[0]["outReserves"], inDecimals, outDecimals)
+      } else {
+        amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[0]["outReserves"], reservesList[0]["inReserves"], outDecimals, inDecimals)
+      }
     } else {
-      amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[0]["inReserves"], reservesList[0]["outReserves"], inDecimals, 18)
-      amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[1]["inReserves"], reservesList[1]["outReserves"], 18, outDecimals)
+      if (!isInverse) {
+        amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[0]["inReserves"], reservesList[0]["outReserves"], inDecimals, 18)
+        amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[1]["inReserves"], reservesList[1]["outReserves"], 18, outDecimals)
+      } else {
+        amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[1]["outReserves"], reservesList[1]["inReserves"], 18, outDecimals)
+        amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[0]["outReserves"], reservesList[0]["inReserves"], inDecimals, 18)
+      }
     }
     return amountIn
   }
@@ -284,20 +274,38 @@ AVMEPanel {
   }
 
   function refreshAssetBalance() {
-    if (fromAssetPopup.chosenAssetSymbol == "AVAX") {
-      assetBalance.text = (accountHeader.coinRawBalance != "")
-      ? "Balance: <b>" + accountHeader.coinRawBalance + " AVAX</b>"
-      : "Loading asset balance..."
+    if (!isInverse) {
+      if (fromAssetPopup.chosenAssetSymbol == "AVAX") {
+        assetBalance.text = (accountHeader.coinRawBalance != "")
+        ? "Balance: <b>" + accountHeader.coinRawBalance + " AVAX</b>"
+        : "Loading asset balance..."
+      } else {
+        var asset = accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]
+        assetBalance.text = (asset != undefined)
+        ? "Balance: <b>" + asset["rawBalance"]
+        + " " + fromAssetPopup.chosenAssetSymbol + "</b>"
+        : "Loading asset balance..."
+      }
     } else {
-      var asset = accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]
-      assetBalance.text = (asset != undefined)
-      ? "Balance: <b>" + asset["rawBalance"]
-      + " " + fromAssetPopup.chosenAssetSymbol + "</b>"
-      : "Loading asset balance..."
+      if (toAssetPopup.chosenAssetSymbol == "AVAX") {
+        assetBalance.text = (accountHeader.coinRawBalance != "")
+        ? "Balance: <b>" + accountHeader.coinRawBalance + " AVAX</b>"
+        : "Loading asset balance..."
+      } else {
+        var asset = accountHeader.tokenList[toAssetPopup.chosenAssetAddress]
+        assetBalance.text = (asset != undefined)
+        ? "Balance: <b>" + asset["rawBalance"]
+        + " " + toAssetPopup.chosenAssetSymbol + "</b>"
+        : "Loading asset balance..."
+      }
     }
   }
   function calculatePriceImpact(amountIn, inDecimals, outDecimals) {
-    return qmlSystem.calculateExchangePriceImpact(reservesList[0]["inReserves"], amountIn, inDecimals)
+    if (!isInverse) {
+      return qmlSystem.calculateExchangePriceImpact(reservesList[0]["inReserves"], amountIn, inDecimals)
+    } else {
+      return qmlSystem.calculateExchangePriceImpact(reservesList[0]["outReserves"], amountIn, outDecimals)
+    }
   }
 
   function approveTx() {
@@ -328,7 +336,7 @@ AVMEPanel {
     info = "You will Swap <b>" + amountIn + " " + fromAssetPopup.chosenAssetSymbol + "<\b> to <b>"
     info += amountOut + " " + toAssetPopup.chosenAssetSymbol + "<\b> on Pangolin"
     historyInfo = "Swap <b>" + fromAssetPopup.chosenAssetSymbol + "<\b> to <b>" + toAssetPopup.chosenAssetSymbol + "<\b>"
-    if (fromAssetPopup.chosenAssetSymbol == "AVAX") {
+    if (fromAssetPopup.chosenAssetSymbol == "AVAX" || (toAssetPopup.chosenAssetSymbol == "AVAX" && isInverse)) {
       coinValue = String(amountIn)
       var ethCallJson = ({})
       var routing = ([])
@@ -355,7 +363,7 @@ AVMEPanel {
       txData = ABI
       return;
     }
-    if (toAssetPopup.chosenAssetSymbol == "AVAX") {
+    if (toAssetPopup.chosenAssetSymbol == "AVAX"|| (fromAssetPopup.chosenAssetSymbol == "AVAX" && isInverse)) {
       coinValue = 0
       var ethCallJson = ({})
       var routing = ([])
@@ -397,11 +405,19 @@ AVMEPanel {
       // amountOutMin
       ethCallJson["args"].push(String(Math.round(+qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals) * 0.99)))
       // address[] path
-      routing.push(fromAssetPopup.chosenAssetAddress)
-      if (needRoute) {
-        routing.push(qmlSystem.getContract("AVAX"))
+      if (!isInverse) {
+        routing.push(fromAssetPopup.chosenAssetAddress)
+        if (needRoute) {
+          routing.push(qmlSystem.getContract("AVAX"))
+        }
+        routing.push(toAssetPopup.chosenAssetAddress)
+      } else {
+        routing.push(toAssetPopup.chosenAssetAddress)
+        if (needRoute) {
+          routing.push(qmlSystem.getContract("AVAX"))
+        }
+        routing.push(fromAssetPopup.chosenAssetAddress)
       }
-      routing.push(toAssetPopup.chosenAssetAddress)
       ethCallJson["args"].push(routing)
       // address to
       ethCallJson["args"].push(qmlSystem.getCurrentAccount())
@@ -419,6 +435,16 @@ AVMEPanel {
       return;
     }
   }
+
+  function swapOrder() {
+    if (isInverse) {
+      isInverse = false
+    } else {
+      isInverse = true
+    }
+    refreshAssetBalance()
+  }
+
   Column {
     id: exchangeHeaderColumn
     height: (parent.height * 0.5) - anchors.topMargin
@@ -469,12 +495,37 @@ AVMEPanel {
         }
       }
 
-      Text {
-        id: swapOrder
+      Rectangle {
+        id: swapOrderRectangle
+        height: 64
+        width: 80
         anchors.verticalCenter: parent.verticalCenter
-        color: "#FFFFFF"
-        font.pixelSize: 48.0
-        text: " -> "
+        color: "transparent"
+        radius: 5
+        Image {
+          id: swapOrderImage
+          height: 48
+          width: 48
+          anchors.verticalCenter: parent.verticalCenter
+          anchors.horizontalCenter: parent.horizontalCenter
+          fillMode: Image.PreserveAspectFit
+          source: "qrc:/img/icons/arrow.png"
+        }
+        MouseArea {
+          id: swapOrderMouseArea
+          anchors.fill: parent
+          hoverEnabled: true
+          onEntered: swapOrderRectangle.color = "#1d1827"
+          onExited: swapOrderRectangle.color = "transparent"
+          onClicked: {
+            swapOrder()
+            if (swapOrderImage.source == "qrc:/img/icons/arrow.png") {
+              swapOrderImage.source = "qrc:/img/icons/backArrow.png" 
+            } else {
+              swapOrderImage.source = "qrc:/img/icons/arrow.png"
+            }
+          }
+        }
       }
 
       Image {
@@ -609,7 +660,7 @@ AVMEPanel {
       validator: RegExpValidator {
         regExp: qmlSystem.createTxRegExp(fromAssetPopup.chosenAssetDecimals)
       }
-      label: fromAssetPopup.chosenAssetSymbol + " Amount"
+      label: (!isInverse) ? fromAssetPopup.chosenAssetSymbol + " Amount" : toAssetPopup.chosenAssetSymbol + " Amount"
       placeholder: (enabled) ? "Fixed point amount (e.g. 0.5)" : "Loading reserves..."
       onTextEdited: {
         swapTimer.start()
@@ -623,11 +674,19 @@ AVMEPanel {
         }
         text: "Max"
         onClicked: {
-          swapInput.text = (fromAssetPopup.chosenAssetSymbol == "AVAX")
-            ? qmlSystem.getRealMaxAVAXAmount(
-              accountHeader.coinRawBalance, "180000", qmlSystem.getAutomaticFee()
-            )
-            : accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]["rawBalance"]
+          if (!isInverse) {
+            swapInput.text = (fromAssetPopup.chosenAssetSymbol == "AVAX")
+              ? qmlSystem.getRealMaxAVAXAmount(
+                accountHeader.coinRawBalance, "180000", qmlSystem.getAutomaticFee()
+              )
+              : accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]["rawBalance"]
+          } else {
+            swapInput.text = (toAssetPopup.chosenAssetSymbol == "AVAX")
+              ? qmlSystem.getRealMaxAVAXAmount(
+                accountHeader.coinRawBalance, "180000", qmlSystem.getAutomaticFee()
+              )
+              : accountHeader.tokenList[toAssetPopup.chosenAssetAddress]["rawBalance"]
+          }
           swapTimer.start()
         }
       }
@@ -642,7 +701,7 @@ AVMEPanel {
       color: "#FFFFFF"
       font.pixelSize: 14.0
       text: "Estimated return: <b>"
-      + swapEstimate + " " + toAssetPopup.chosenAssetSymbol + "</b> "
+      + swapEstimate + " " + ((!isInverse) ? toAssetPopup.chosenAssetSymbol : fromAssetPopup.chosenAssetSymbol)  + "</b> "
     }
 
     /**
@@ -694,9 +753,9 @@ AVMEPanel {
       id: btnSwap
       width: parent.width
       anchors.horizontalCenter: parent.horizontalCenter
-      enabled: (
+      enabled: ((
         swapInput.acceptableInput && (swapImpact <= 10.0 || ignoreImpactCheck.checked)
-      )
+      ) && +swapInput.text != 0)
       text: (swapImpact <= 10.0 || ignoreImpactCheck.checked)
       ? "Make Swap" : "Price impact too high"
     }

@@ -116,6 +116,8 @@
         <file>img/icons/uploadSelect.png</file>
         <file>img/icons/qrcode.png</file>
         <file>img/icons/qrcodeSelect.png</file>
+        <file>img/icons/arrow.png</file>
+        <file>img/icons/backArrow.png</file>
 
         <file>fonts/IBMPlexMono-Bold.ttf</file>
         <file>fonts/IBMPlexMono-Italic.ttf</file>
