@@ -54,28 +54,34 @@ std::map<std::string, std::string> Pangolin::routerFuncs = {
 
 std::vector<std::string> Pangolin::parseHex(std::string hexStr, std::vector<std::string> types) {
   std::vector<std::string> ret;
+  
+  try {
 
-  // Get rid of the "0x" before converting and lowercase all letters
-  hexStr = (hexStr.substr(0, 2) == "0x") ? hexStr.substr(2) : hexStr;
+    // Get rid of the "0x" before converting and lowercase all letters
+    hexStr = (hexStr.substr(0, 2) == "0x") ? hexStr.substr(2) : hexStr;
 
-  // Parse each type and erase it from the hex string until it is empty
-  for (std::string type : types) {
-    if (type == "uint" || type == "bool") {
-      // All uints are 32 bytes and each hex char is half a byte, so 32 bytes = 64 chars.
-      u256 value = boost::lexical_cast<HexTo<u256>>(hexStr.substr(0, 64));
-      ret.push_back(boost::lexical_cast<std::string>(value));
-    } else if (type == "bool") {
-      // Bools are treated as uints, so the same logic applies, but returning a proper bool.
-      bool value = boost::lexical_cast<HexTo<bool>>(hexStr.substr(0, 64));
-      ret.push_back(boost::lexical_cast<std::string>(value));
-    } else if (type == "address") {
-      // Addresses are always 20 bytes (40 chars) but are treated as uints, so we
-      // take all 64 chars, get rid of the first 24 chars and add "0x" at the start
-      std::string value = hexStr.substr(0, 64);
-      value.erase(0, 24);
-      ret.push_back("0x" + value);
+    // Parse each type and erase it from the hex string until it is empty
+    for (std::string type : types) {
+      if (type == "uint" || type == "bool") {
+        // All uints are 32 bytes and each hex char is half a byte, so 32 bytes = 64 chars.
+        u256 value = boost::lexical_cast<HexTo<u256>>(hexStr.substr(0, 64));
+        ret.push_back(boost::lexical_cast<std::string>(value));
+      } else if (type == "bool") {
+        // Bools are treated as uints, so the same logic applies, but returning a proper bool.
+        bool value = boost::lexical_cast<HexTo<bool>>(hexStr.substr(0, 64));
+        ret.push_back(boost::lexical_cast<std::string>(value));
+      } else if (type == "address") {
+        // Addresses are always 20 bytes (40 chars) but are treated as uints, so we
+        // take all 64 chars, get rid of the first 24 chars and add "0x" at the start
+        std::string value = hexStr.substr(0, 64);
+        value.erase(0, 24);
+        ret.push_back("0x" + value);
+      }
+      hexStr.erase(0, 64);
     }
-    hexStr.erase(0, 64);
+
+  } catch (std::exception &e) {
+    Utils::logToDebug(std::string("parseHex error: ") + e.what() + " value: " + hexStr);
   }
 
   return ret;
