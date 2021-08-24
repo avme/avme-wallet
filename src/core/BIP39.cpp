@@ -40,56 +40,43 @@ std::pair<bool,std::string> BIP39::saveEncryptedMnemonic(
   std::pair <bool,std::string> result;
   boost::filesystem::path seedPath = Utils::walletFolderPath.string() + "/wallet/c-avax/seed.json";
 
-  // Initialize the seed json and cipher, then create the salt
+  // Initialize the seed json and cipher, then create the salt.
+  // Use exactly as many bytes for the cipher as needed.
   json seedJson;
   Cipher cipher("aes-256-cbc", "sha256");
-  unsigned char saltBytes[CIPHER_SALT_BYTES] = {0}; /*Use exactly as many bytes for the cipher as needed.*/
-	/*
-		Use std::random_device (thin wrapper around /dev/urandom) on linux, it is the most
-		secure source of entropy on the system.
-	*/
+  unsigned char saltBytes[CIPHER_SALT_BYTES] = {0};
 
+  /**
+   * Use std::random_device (thin wrapper around /dev/urandom) on Linux,
+   * it is the most secure source of entropy on the system.
+   */
 #ifdef __linux__
-	{
-		std::random_device rd;
-		for(int i = 0; i < CIPHER_SALT_BYTES; i++){
-			saltBytes[i] = rd();
-		}
-	}
+  std::random_device rd;
+  for (int i = 0; i < CIPHER_SALT_BYTES; i++){ saltBytes[i] = rd(); }
 #else
 #ifdef MERSENNE_TWISTER
-	{
-		std::mt19937 rd(std::random_device{}());
-		for(int i = 0; i < CIPHER_SALT_BYTES; i++){
-			saltBytes[i] = rd();
-		}
-	}
+  std::mt19937 rd(std::random_device{}());
+  for (int i = 0; i < CIPHER_SALT_BYTES; i++){ saltBytes[i] = rd(); }
 #else
-	/*
-		OpenSSL fallback.
-	*/
-	RAND_bytes(saltBytes, CIPHER_SALT_BYTES);
-#endif
-#endif
-  
-   /*
-  	@GEK bugfix- you were taking your 32 bytes of perfectly good randomness, and 
-  	reducing them down to 4 (as 8 hex digits).
-  */
+  RAND_bytes(saltBytes, CIPHER_SALT_BYTES); // OpenSSL fallback
+#endif // MERSENNE_TWISTER
+#endif // __linux__
 
-	
-  /*TODO: use full entropy instead of half entropy.*/
+  /**
+   * TODO: use full entropy instead of half entropy.
+   * As stated by keggek:
+   * @GEK bugfix- you were taking your 32 bytes of perfectly good randomness,
+   * and reducing them down to 4 (as 8 hex digits).
+   */
   std::string salt = toHex(
     dev::sha3(std::string((char*)saltBytes, sizeof(saltBytes)), false)
-  ).substr(0,CIPHER_SALT_BYTES);
-
+  ).substr(0, CIPHER_SALT_BYTES);
   /*
-  std::string salt; 
-  for(int i = 0; i < CIPHER_SALT_BYTES; i++)
-  	salt.push_back(' '); 
+  std::string salt;
+  for(int i = 0; i < CIPHER_SALT_BYTES; i++){ salt.push_back(' '); }
+  memcpy((char*)salt.c_str(), saltBytes, CIPHER_SALT_BYTES);
+  */
 
-  memcpy((char*)salt.c_str(), saltBytes, CIPHER_SALT_BYTES); 
-*/
   // Encrypt the mnemonic
   std::string encryptedPhrase;
   try {
@@ -144,7 +131,7 @@ std::pair<bool,std::string> BIP39::loadEncryptedMnemonic(
   std::string salt;
   try {
     encryptedPhrase = seedJson["seed"].get<std::string>();
-    salt = seedJson["salt"].get<std::string>(); /*TODO: Decode salt from base64*/
+    salt = seedJson["salt"].get<std::string>(); // TODO: Decode salt from base64
     // Replace spaces with newlines, cipher only accepts newlines since it's base64
     boost::replace_all(encryptedPhrase, " ", "\n");
   } catch (std::exception &e) {
