@@ -32,7 +32,7 @@ AVMEPanel {
   property string coinValue
   property string txData
   property string gas
-  property string gasPrice
+  property string gasPrice: accountHeader.gasPrice
   property bool automaticGas: true
   property string info
   property string historyInfo
@@ -314,7 +314,6 @@ AVMEPanel {
     to = contract
     coinValue = 0
     gas = 70000
-    gasPrice = 225
     var ethCallJson = ({})
     ethCallJson["function"] = "approve(address,uint256)"
     ethCallJson["args"] = []
@@ -331,7 +330,6 @@ AVMEPanel {
   function addLiquidityTx() {
     to = qmlSystem.getContract("router")
     gas = 300000
-    gasPrice = 225
     info = "You will Add <b>" + addAsset1Input.text + " " + addAsset1Popup.symbol + "<\b> <br>and<br> <b>"
     info += addAsset1Input.text + " " + addAsset2Popup.symbol + "<\b> on Pangolin Liquidity Pool"
     historyInfo = "Add <b>" + addAsset1Input.text + "<\b> and <b>" + addAsset2Popup.symbol + "<\b> to Pangolin Liquidity"

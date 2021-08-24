@@ -29,7 +29,7 @@ AVMEPanel {
   property string coinValue
   property string txData
   property string gas
-  property string gasPrice
+  property string gasPrice: accountHeader.gasPrice
   property bool automaticGas: true
   property string info
   property string historyInfo
@@ -135,7 +135,6 @@ AVMEPanel {
     to = pairAddress
     coinValue = 0
     gas = 100000
-    gasPrice = 225
     info = "You will Approve <b> AVME/AVAX LP <\b> on Classic Staking Contract"
     historyInfo = "Approve <b> AVME/AVAX LP <\b> on Classic Staking Contract"
 
@@ -156,7 +155,6 @@ AVMEPanel {
     to = qmlSystem.getContract("staking")
     coinValue = 0
     gas = 200000
-    gasPrice = 225
     info = "You will stake <b> " + qmlApi.weiToFixedPoint(stakeInput.text, 18) + " AVME/AVAX LP <\b> on Classic Staking"
     historyInfo = "Stake <b> AVME/AVAX LP <\b> on Classic Staking"
     var ethCallJson = ({})
@@ -174,7 +172,6 @@ AVMEPanel {
     to = qmlSystem.getContract("staking")
     coinValue = 0
     gas = 200000
-    gasPrice = 225
     info = "You will unstake <b> " + qmlApi.weiToFixedPoint(stakeInput.text, 18) + " AVME/AVAX LP <\b> on Classic Staking"
     historyInfo = "Unstake <b> AVME/AVAX LP <\b> on Classic Staking"
     var ethCallJson = ({})

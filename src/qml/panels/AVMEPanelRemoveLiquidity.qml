@@ -31,7 +31,7 @@ AVMEPanel {
   property string coinValue
   property string txData
   property string gas
-  property string gasPrice
+  property string gasPrice: accountHeader.gasPrice
   property bool automaticGas: true
   property string info
   property string historyInfo
@@ -153,7 +153,6 @@ AVMEPanel {
     to = pairAddress
     coinValue = 0
     gas = 70000
-    gasPrice = 225
     var ethCallJson = ({})
     info = "You will approve <b>"
     + (removeAsset1Popup.chosenAssetSymbol) + "/" + removeAsset2Popup.chosenAssetSymbol
@@ -175,7 +174,6 @@ AVMEPanel {
     to = qmlSystem.getContract("router")
     coinValue = 0
     gas = 400000
-    gasPrice = 225
     var ethCallJson = ({})
     info = "You will remove <b><br>"
     + qmlApi.weiToFixedPoint(removeAsset1Estimate, removeAsset1Popup.chosenAssetDecimals) + " " + (removeAsset1Popup.chosenAssetSymbol) 

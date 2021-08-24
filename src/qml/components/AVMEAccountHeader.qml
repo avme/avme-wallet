@@ -19,6 +19,7 @@ Rectangle {
   property string coinUSDPrice
   property string coinUSDPriceChart
   property string totalFiatBalance
+  property string gasPrice
 
   property var tokenList: ({})
   height: 50
@@ -32,7 +33,7 @@ Rectangle {
 
   Connections {
     target: qmlSystem
-    function onAccountAllBalancesUpdated(address, tokenJsonListStr, coinInformationJsonStr) {
+    function onAccountAllBalancesUpdated(address, tokenJsonListStr, coinInformationJsonStr, gasPriceStr) {
       var coinInformation = JSON.parse(coinInformationJsonStr)
       coinRawBalance = coinInformation["coinBalance"]
       coinFiatValue = coinInformation["coinFiatBalance"]
@@ -58,6 +59,7 @@ Rectangle {
           // Use only two digits precision.
           totalFiatBalance = Math.round((+totalFiatBalance + +tokenInformation["fiatValue"]) * 100) / 100
         }
+        gasPrice = String(Math.round(+gasPriceStr))
         updatedBalances()
       }
     }

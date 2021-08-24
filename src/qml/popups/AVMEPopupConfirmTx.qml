@@ -27,7 +27,7 @@ AVMEPopup {
   property string value // Not WEI value!
   property string txData
   property string gas // gasLimit
-  property string gasPrice // GWEI value, 225
+  property string gasPrice // GWEI value, dynamic
   property bool loadingFees
   property bool automaticGas
   property bool isSameAddress: false

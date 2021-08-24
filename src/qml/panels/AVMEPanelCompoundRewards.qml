@@ -17,7 +17,7 @@ AVMEPanel {
   property string coinValue
   property string txData
   property string gas
-  property string gasPrice
+  property string gasPrice: accountHeader.gasPrice
   property bool automaticGas: true
   property string info
   property string historyInfo
@@ -58,7 +58,6 @@ AVMEPanel {
     to = qmlSystem.getContract("compound")
     coinValue = 0
     gas = 400000
-    gasPrice = 225
     info = "You will reinvest and receive <b> " + qmlApi.weiToFixedPoint(reward, 18) + " AVME <\b>"
     + "</b><br> on Compound Staking Contract"
     historyInfo = "Harvest Compound Staking Contract"

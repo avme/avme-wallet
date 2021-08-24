@@ -17,7 +17,7 @@ AVMEPanel {
   property string coinValue
   property string txData
   property string gas
-  property string gasPrice
+  property string gasPrice: accountHeader.gasPrice
   property bool automaticGas: true
   property string info
   property string historyInfo
@@ -58,7 +58,6 @@ AVMEPanel {
     to = qmlSystem.getContract("staking")
     coinValue = 0
     gas = 200000
-    gasPrice = 225
     info = "You will Harvest <b> " + qmlApi.weiToFixedPoint(reward, 18) + " AVME <\b> "
     + "<br> and withdraw <b>" + qmlApi.weiToFixedPoint(lockedBalance, 18) + " AVME/AVAX LP "
     + "</b><br> on Classic Staking Contract"
@@ -76,7 +75,6 @@ AVMEPanel {
     to = qmlSystem.getContract("staking")
     coinValue = 0
     gas = 200000
-    gasPrice = 225
     info = "You will Harvest <b> " + qmlApi.weiToFixedPoint(reward, 18) + " AVME <\b>"
     + "</b><br> on Classic Staking Contract"
     historyInfo = "Harves Classic Staking Contract"

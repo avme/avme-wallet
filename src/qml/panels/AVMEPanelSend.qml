@@ -58,7 +58,7 @@ AVMEPanel {
   }
 
   function updateTxCost() {
-    if (autoGasCheck.checked) { txGasPriceInput.text = qmlSystem.getAutomaticFee() }
+    if (autoGasCheck.checked) { txGasPriceInput.text = accountHeader.gasPrice }
     if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {  // Coin
       automaticGas = false;
       if (autoLimitCheck.checked) { txGasLimitInput.text = "21000" }

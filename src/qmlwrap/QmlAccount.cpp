@@ -200,12 +200,14 @@ void QmlSystem::getAccountAllBalances(QString address) {
   QtConcurrent::run([=](){
     json tokensInformation = json::array();
     json coinInformation; 
+    std::string gasPrice;
     std::vector<Request> reqs;
     std::string addressStr = address.toStdString();
     if (addressStr.substr(0,2) == "0x") { addressStr = addressStr.substr(2); }
     // Add AVAX balance as request [1] 
     reqs.push_back({1, "2.0", "eth_getBalance", {address.toStdString(), "latest"}});
-
+    // Add gasPrice as request [2]
+    reqs.push_back({2, "2.0", "eth_baseFee", {}});
     // Build the balance request for every registered token in the Wallet
     std::vector<ARC20Token> tokenList = QmlSystem::w.getARC20Tokens();
     // The API can eventually return unordered ID's, we need to properly treat it
@@ -300,15 +302,19 @@ void QmlSystem::getAccountAllBalances(QString address) {
         coinInformation["coinFiatBalance"] = avaxUSDBalPrec2.str();
         coinInformation["coinFiatPrice"] = avaxUSDPricePrec2.str();
         coinInformation["coinPriceChart"] = tokensPrices["data"]["AVAXUSDCHART"].dump();
-        // Avoid looping more than needed
-        break;
+      }
+      if (arrItem["id"].get<int>() == 2) {
+        // Parse gas Price as GWEI, located in request ID 2 
+        u256 gasPriceWeiU256 = boost::lexical_cast<HexTo<u256>>(Utils::jsonToStr(arrItem["result"]));
+        gasPrice = Utils::weiToFixedPoint(boost::lexical_cast<std::string>(gasPriceWeiU256), 9);
       }
     }
 
     emit accountAllBalancesUpdated(
       address,
       QString::fromStdString(tokensInformation.dump()),
-      QString::fromStdString(coinInformation.dump())
+      QString::fromStdString(coinInformation.dump()),
+      QString::fromStdString(gasPrice)
     );
   });
 }
