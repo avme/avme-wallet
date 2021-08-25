@@ -27,6 +27,7 @@ AVMEPopup {
   onAboutToShow: {
     createFolderInput.text = qmlSystem.getDefaultWalletPath()
     walletExists = qmlSystem.checkFolderForWallet(createFolderInput.text)
+    createPassInput.focus = true
   }
 
   function clean() {

@@ -18,7 +18,10 @@ AVMEPopup {
   property color popupKeyBgColor: "#2D3542"
   property color popupSelectionColor: "#58A0B9"
 
-  onAboutToShow: btnCopy.enabled = false
+  onAboutToShow: {
+    btnCopy.enabled = false
+    keyPassInput.focus = true
+  }
 
   function showPrivKey() {
     if (keyText.timer.running) { keyText.timer.stop() }

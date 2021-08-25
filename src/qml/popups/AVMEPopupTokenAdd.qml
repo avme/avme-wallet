@@ -12,6 +12,8 @@ import "qrc:/qml/components"
 AVMEPopup {
   id: addTokenPopup
 
+  onAboutToShow: addressInput.focus = true
+
   function clean() {
     addressInput.text = ""
   }

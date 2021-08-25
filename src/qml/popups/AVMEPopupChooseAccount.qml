@@ -36,6 +36,8 @@ AVMEPopup {
   property alias pass: passInput.text
   property color popupBgColor: "#1C2029"
 
+  onAboutToShow: passInput.focus = true
+
   Connections {
     target: qmlSystem
     function onAccountGenerated(data) {

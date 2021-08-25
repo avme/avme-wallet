@@ -17,7 +17,10 @@ AVMEPopup {
   property color popupSeedBgColor: "#2D3542"
   property color popupSelectionColor: "#58A0B9"
 
-  onAboutToShow: btnCopy.enabled = false
+  onAboutToShow: {
+    btnCopy.enabled = false
+    passInput.focus = true
+  }
 
   function showSeed() {
     if (seedText.timer.running) { seedText.timer.stop() }

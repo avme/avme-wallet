@@ -19,6 +19,8 @@ AVMEPopup {
   heightPct: 0.8
   property string fullSeed
 
+  onAboutToShow: seedLabel1.focus = true
+
   function handlePaste(event) {
     if ((event.key == Qt.Key_V) && (event.modifiers & Qt.ControlModifier)) {
       var clip = qmlSystem.copySeedFromClipboard()
