@@ -254,3 +254,56 @@ QString QmlApi::getCurrentUnixTime() {
 QString QmlApi::getRandomID() {
   return QString::fromStdString(Utils::randomHexBytes().substr(0, 8));
 }
+
+QString QmlApi::sum(QString a, QString b) {
+  bigfloat result;
+  bigfloat an = boost::lexical_cast<bigfloat>(a.toStdString());
+  bigfloat bn = boost::lexical_cast<bigfloat>(a.toStdString());
+  result = an + bn;
+  return QString::fromStdString(boost::lexical_cast<std::string>(result.str(256)));
+}
+
+QString QmlApi::sub(QString a, QString b) {
+  bigfloat result;
+  bigfloat an = boost::lexical_cast<bigfloat>(a.toStdString());
+  bigfloat bn = boost::lexical_cast<bigfloat>(a.toStdString());
+  result = an - bn;
+  return QString::fromStdString(boost::lexical_cast<std::string>(result.str(256)));
+}
+
+QString QmlApi::mul(QString a, QString b) {
+  bigfloat result;
+  bigfloat an = boost::lexical_cast<bigfloat>(a.toStdString());
+  bigfloat bn = boost::lexical_cast<bigfloat>(a.toStdString());
+  result = an * bn;
+  return QString::fromStdString(boost::lexical_cast<std::string>(result.str(256)));
+}
+
+QString QmlApi::div(QString a, QString b) {
+  bigfloat result;
+  bigfloat an = boost::lexical_cast<bigfloat>(a.toStdString());
+  bigfloat bn = boost::lexical_cast<bigfloat>(a.toStdString());
+  result = an / bn;
+  return QString::fromStdString(boost::lexical_cast<std::string>(result.str(256)));
+}
+
+QString QmlApi::round(QString a) {
+  bigfloat result;
+  bigfloat an = boost::lexical_cast<bigfloat>(a.toStdString());
+  result = boost::multiprecision::round(an);
+  return QString::fromStdString(boost::lexical_cast<std::string>(result.str(256)));
+}
+
+QString QmlApi::floor(QString a) {
+  bigfloat result;
+  bigfloat an = boost::lexical_cast<bigfloat>(a.toStdString());
+  result = boost::multiprecision::floor(an);
+  return QString::fromStdString(boost::lexical_cast<std::string>(result.str(256)));
+}
+
+QString QmlApi::ceil(QString a) {
+  bigfloat result;
+  bigfloat an = boost::lexical_cast<bigfloat>(a.toStdString());
+  result = boost::multiprecision::ceil(an);
+  return QString::fromStdString(boost::lexical_cast<std::string>(result.str(256)));
+}

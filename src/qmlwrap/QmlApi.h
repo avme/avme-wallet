@@ -144,6 +144,20 @@ class QmlApi : public QObject {
     // Timers that are changeable by a user, in order to avoid
     // conflits when changing asset, requires a randomID
     Q_INVOKABLE QString getRandomID();
+
+    /**
+     * Math functions to avoid scientific notation using QML JS
+     * Logic done using strings and bigfloat
+     */
+
+    Q_INVOKABLE QString sum(QString a, QString b);
+    Q_INVOKABLE QString sub(QString a, QString b);
+    Q_INVOKABLE QString mul(QString a, QString b);
+    Q_INVOKABLE QString div(QString a, QString b);
+    Q_INVOKABLE QString round(QString a);
+    Q_INVOKABLE QString floor(QString a);
+    Q_INVOKABLE QString ceil(QString a);
+
 };
 
 #endif // QMLAPI_H
