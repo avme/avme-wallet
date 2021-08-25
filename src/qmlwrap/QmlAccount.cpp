@@ -197,124 +197,128 @@ void QmlSystem::getAllAVAXBalances(QStringList addresses) {
 
 void QmlSystem::getAccountAllBalances(QString address) {
   QtConcurrent::run([=](){
-    json tokensInformation = json::array();
-    json coinInformation; 
-    std::string gasPrice;
-    std::vector<Request> reqs;
-    std::string addressStr = address.toStdString();
-    if (addressStr.substr(0,2) == "0x") { addressStr = addressStr.substr(2); }
-    // Add AVAX balance as request [1] 
-    reqs.push_back({1, "2.0", "eth_getBalance", {address.toStdString(), "latest"}});
-    // Add gasPrice as request [2]
-    reqs.push_back({2, "2.0", "eth_baseFee", {}});
-    // Build the balance request for every registered token in the Wallet
-    std::vector<ARC20Token> tokenList = QmlSystem::w.getARC20Tokens();
-    // The API can eventually return unordered ID's, we need to properly treat it
-    std::map<uint64_t, std::string> idList;
-    for (ARC20Token token : tokenList) {
-      json params;
-      json array = json::array();
-      params["to"] = token.address;
-      params["data"] = "0x70a08231000000000000000000000000" + addressStr;
-      array.push_back(params);
-      array.push_back("latest");
-      Request req{reqs.size() + size_t(1), "2.0", "eth_call", array};
-      // Due to GraphQL limitations, we need to add "token_" as prefix
-      idList[reqs.size() + size_t(1)] = std::string("token_") + token.address;
-      reqs.push_back(req);
-    }
-    // Make the request and get the AVAX price in USD
-    std::string query = API::buildMultiRequest(reqs);
-    std::string resp = API::httpGetRequest(query);
-    json resultArr = json::parse(resp);
-    // Request the prices of all the tokens to the GraphQL API
-    auto tokensPrices = Graph::getAccountPrices(tokenList);
-
-    bigfloat avaxUSDPrice = boost::lexical_cast<bigfloat>(Graph::parseAVAXPriceUSD(tokensPrices));
-    // Calculate the fiat value for each token
-    for (auto id : idList) {
-      for (auto balance : resultArr) {
-        if (balance["id"].get<int>() == id.first) {
-          // Get token position in the tokenList
-          int pos = 0;
-          for (auto token : tokenList) {
-            if (id.second.find(token.address) != std::string::npos)
-              break;
-            ++pos;
+    try {
+      json tokensInformation = json::array();
+      json coinInformation; 
+      std::string gasPrice;
+      std::vector<Request> reqs;
+      std::string addressStr = address.toStdString();
+      if (addressStr.substr(0,2) == "0x") { addressStr = addressStr.substr(2); }
+      // Add AVAX balance as request [1] 
+      reqs.push_back({1, "2.0", "eth_getBalance", {address.toStdString(), "latest"}});
+      // Add gasPrice as request [2]
+      reqs.push_back({2, "2.0", "eth_baseFee", {}});
+      // Build the balance request for every registered token in the Wallet
+      std::vector<ARC20Token> tokenList = QmlSystem::w.getARC20Tokens();
+      // The API can eventually return unordered ID's, we need to properly treat it
+      std::map<uint64_t, std::string> idList;
+      for (ARC20Token token : tokenList) {
+        json params;
+        json array = json::array();
+        params["to"] = token.address;
+        params["data"] = "0x70a08231000000000000000000000000" + addressStr;
+        array.push_back(params);
+        array.push_back("latest");
+        Request req{reqs.size() + size_t(1), "2.0", "eth_call", array};
+        // Due to GraphQL limitations, we need to add "token_" as prefix
+        idList[reqs.size() + size_t(1)] = std::string("token_") + token.address;
+        reqs.push_back(req);
+      }
+      // Make the request and get the AVAX price in USD
+      std::string query = API::buildMultiRequest(reqs);
+      std::string resp = API::httpGetRequest(query);
+      json resultArr = json::parse(resp);
+      // Request the prices of all the tokens to the GraphQL API
+      auto tokensPrices = Graph::getAccountPrices(tokenList);
+  
+      bigfloat avaxUSDPrice = boost::lexical_cast<bigfloat>(Graph::parseAVAXPriceUSD(tokensPrices));
+      // Calculate the fiat value for each token
+      for (auto id : idList) {
+        for (auto balance : resultArr) {
+          if (balance["id"].get<int>() == id.first) {
+            // Get token position in the tokenList
+            int pos = 0;
+            for (auto token : tokenList) {
+              if (id.second.find(token.address) != std::string::npos)
+                break;
+              ++pos;
+            }
+            // Due to GraphQL limitations, we need convert everything to lowercase
+            id.second = Utils::toLowerCaseAddress(id.second);
+            std::string tokenDerivedPriceStr = tokensPrices["data"][id.second]["derivedETH"].get<std::string>();
+            bigfloat tokenDerivedPrice = boost::lexical_cast<bigfloat>(tokenDerivedPriceStr);
+            std::string hexBal = balance["result"].get<std::string>();
+            u256 tokenWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
+            bigfloat tokenBal = bigfloat(Utils::weiToFixedPoint(
+              boost::lexical_cast<std::string>(tokenWeiBal), tokenList[pos].decimals
+            ));
+            bigfloat tokenUSDPrice = tokenDerivedPrice * avaxUSDPrice;
+            bigfloat tokenUSDValueFloat = (tokenDerivedPrice * avaxUSDPrice) * tokenBal;
+            std::string coinWorth = boost::lexical_cast<std::string>(tokenDerivedPrice * tokenBal);
+            std::stringstream ss;
+            ss << std::setprecision(2) << std::fixed << tokenUSDValueFloat;
+            std::string tokenUSDValue = ss.str();
+            std::string tokenBalStr = Utils::weiToFixedPoint(
+              boost::lexical_cast<std::string>(tokenWeiBal), tokenList[pos].decimals
+            );
+            std::string chartAddress = "chart_" + tokenList[pos].address;
+  
+            // Again, we need to convert to lowercase and append chart_ as prefix
+            chartAddress = Utils::toLowerCaseAddress(chartAddress);
+            std::string tokenChartData = tokensPrices["data"][chartAddress].dump();
+            json tokenInformation;
+            tokenInformation["tokenAddress"] = tokenList[pos].address;
+            tokenInformation["tokenSymbol"] = tokenList[pos].symbol;
+            tokenInformation["tokenDecimals"] = tokenList[pos].decimals;
+            tokenInformation["tokenName"] = tokenList[pos].name;
+            tokenInformation["tokenRawBalance"] = tokenBalStr;
+            tokenInformation["tokenFiatValue"] = tokenUSDValue;
+            tokenInformation["tokenDerivedValue"] = tokenDerivedPriceStr;
+            tokenInformation["coinWorth"] = coinWorth;
+            tokenInformation["tokenChartData"] = tokenChartData;
+            tokenInformation["tokenUSDPrice"] = boost::lexical_cast<std::string>(tokenUSDPrice);
+            tokensInformation.push_back(tokenInformation);
           }
-          // Due to GraphQL limitations, we need convert everything to lowercase
-          id.second = Utils::toLowerCaseAddress(id.second);
-          std::string tokenDerivedPriceStr = tokensPrices["data"][id.second]["derivedETH"].get<std::string>();
-          bigfloat tokenDerivedPrice = boost::lexical_cast<bigfloat>(tokenDerivedPriceStr);
-          std::string hexBal = balance["result"].get<std::string>();
-          u256 tokenWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
-          bigfloat tokenBal = bigfloat(Utils::weiToFixedPoint(
-            boost::lexical_cast<std::string>(tokenWeiBal), tokenList[pos].decimals
-          ));
-          bigfloat tokenUSDPrice = tokenDerivedPrice * avaxUSDPrice;
-          bigfloat tokenUSDValueFloat = (tokenDerivedPrice * avaxUSDPrice) * tokenBal;
-          std::string coinWorth = boost::lexical_cast<std::string>(tokenDerivedPrice * tokenBal);
-          std::stringstream ss;
-          ss << std::setprecision(2) << std::fixed << tokenUSDValueFloat;
-          std::string tokenUSDValue = ss.str();
-          std::string tokenBalStr = Utils::weiToFixedPoint(
-            boost::lexical_cast<std::string>(tokenWeiBal), tokenList[pos].decimals
-          );
-          std::string chartAddress = "chart_" + tokenList[pos].address;
-
-          // Again, we need to convert to lowercase and append chart_ as prefix
-          chartAddress = Utils::toLowerCaseAddress(chartAddress);
-          std::string tokenChartData = tokensPrices["data"][chartAddress].dump();
-          json tokenInformation;
-          tokenInformation["tokenAddress"] = tokenList[pos].address;
-          tokenInformation["tokenSymbol"] = tokenList[pos].symbol;
-          tokenInformation["tokenDecimals"] = tokenList[pos].decimals;
-          tokenInformation["tokenName"] = tokenList[pos].name;
-          tokenInformation["tokenRawBalance"] = tokenBalStr;
-          tokenInformation["tokenFiatValue"] = tokenUSDValue;
-          tokenInformation["tokenDerivedValue"] = tokenDerivedPriceStr;
-          tokenInformation["coinWorth"] = coinWorth;
-          tokenInformation["tokenChartData"] = tokenChartData;
-          tokenInformation["tokenUSDPrice"] = boost::lexical_cast<std::string>(tokenUSDPrice);
-          tokensInformation.push_back(tokenInformation);
         }
       }
-    }
-    // Parse AVAX information, using the ID 1 from the API as enforced previously
-    for (auto arrItem : resultArr) {
-      // As mentioned previously, the array might return unordered from the API, we need to loop it.
-      if (arrItem["id"].get<int>() == 1) {
-        std::string hexBal = arrItem["result"].get<std::string>();
-        u256 avaxWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
-        bigfloat avaxBal = bigfloat(Utils::weiToFixedPoint(
-          boost::lexical_cast<std::string>(avaxWeiBal), 18
-        ));
-        bigfloat avaxUSDBal = avaxUSDPrice * avaxBal;
-        std::stringstream avaxUSDBalPrec2;
-        avaxUSDBalPrec2 << std::setprecision(2) << std::fixed << avaxUSDBal;
-        std::stringstream avaxUSDPricePrec2;
-        avaxUSDPricePrec2 << std::setprecision(2) << std::fixed << avaxUSDPrice;
-
-        coinInformation["coinBalance"] = Utils::weiToFixedPoint(
-          boost::lexical_cast<std::string>(avaxWeiBal), 18
-        );
-        coinInformation["coinFiatBalance"] = avaxUSDBalPrec2.str();
-        coinInformation["coinFiatPrice"] = avaxUSDPricePrec2.str();
-        coinInformation["coinPriceChart"] = tokensPrices["data"]["AVAXUSDCHART"].dump();
+      // Parse AVAX information, using the ID 1 from the API as enforced previously
+      for (auto arrItem : resultArr) {
+        // As mentioned previously, the array might return unordered from the API, we need to loop it.
+        if (arrItem["id"].get<int>() == 1) {
+          std::string hexBal = arrItem["result"].get<std::string>();
+          u256 avaxWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
+          bigfloat avaxBal = bigfloat(Utils::weiToFixedPoint(
+            boost::lexical_cast<std::string>(avaxWeiBal), 18
+          ));
+          bigfloat avaxUSDBal = avaxUSDPrice * avaxBal;
+          std::stringstream avaxUSDBalPrec2;
+          avaxUSDBalPrec2 << std::setprecision(2) << std::fixed << avaxUSDBal;
+          std::stringstream avaxUSDPricePrec2;
+          avaxUSDPricePrec2 << std::setprecision(2) << std::fixed << avaxUSDPrice;
+  
+          coinInformation["coinBalance"] = Utils::weiToFixedPoint(
+            boost::lexical_cast<std::string>(avaxWeiBal), 18
+          );
+          coinInformation["coinFiatBalance"] = avaxUSDBalPrec2.str();
+          coinInformation["coinFiatPrice"] = avaxUSDPricePrec2.str();
+          coinInformation["coinPriceChart"] = tokensPrices["data"]["AVAXUSDCHART"].dump();
+        }
+        if (arrItem["id"].get<int>() == 2) {
+          // Parse gas Price as GWEI, located in request ID 2 
+          u256 gasPriceWeiU256 = boost::lexical_cast<HexTo<u256>>(Utils::jsonToStr(arrItem["result"]));
+          gasPrice = Utils::weiToFixedPoint(boost::lexical_cast<std::string>(gasPriceWeiU256), 9);
+        }
       }
-      if (arrItem["id"].get<int>() == 2) {
-        // Parse gas Price as GWEI, located in request ID 2 
-        u256 gasPriceWeiU256 = boost::lexical_cast<HexTo<u256>>(Utils::jsonToStr(arrItem["result"]));
-        gasPrice = Utils::weiToFixedPoint(boost::lexical_cast<std::string>(gasPriceWeiU256), 9);
-      }
+  
+      emit accountAllBalancesUpdated(
+        address,
+        QString::fromStdString(tokensInformation.dump()),
+        QString::fromStdString(coinInformation.dump()),
+        QString::fromStdString(gasPrice)
+      );
+    } catch (std::exception &e) {
+      Utils::logToDebug(std::string("ERROR GETTING ACCOUNT BALANCES") + e.what());
     }
-
-    emit accountAllBalancesUpdated(
-      address,
-      QString::fromStdString(tokensInformation.dump()),
-      QString::fromStdString(coinInformation.dump()),
-      QString::fromStdString(gasPrice)
-    );
   });
 }
 
