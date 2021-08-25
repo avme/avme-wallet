@@ -312,7 +312,7 @@ AVMEPanel {
     to = fromAssetPopup.chosenAssetAddress
     coinValue = 0
     gas = 100000
-    gasPrice = 225
+    gasPrice = accountHeader.gasPrice
     info = "You will Approve <b>" + fromAssetPopup.chosenAssetSymbol + "<\b> on Pangolin Router Contract"
     historyInfo = "Approve <b>" + fromAssetPopup.chosenAssetSymbol + "<\b< on Pangolin"
 
@@ -332,7 +332,7 @@ AVMEPanel {
   function swapTx(amountIn, amountOut) {
     to = qmlSystem.getContract("router")
     gas = 300000
-    gasPrice = 225
+    gasPrice = accountHeader.gasPrice
     info = "You will Swap <b>" + amountIn + " " + fromAssetPopup.chosenAssetSymbol + "<\b> to <b>"
     info += amountOut + " " + toAssetPopup.chosenAssetSymbol + "<\b> on Pangolin"
     historyInfo = "Swap <b>" + fromAssetPopup.chosenAssetSymbol + "<\b> to <b>" + toAssetPopup.chosenAssetSymbol + "<\b>"

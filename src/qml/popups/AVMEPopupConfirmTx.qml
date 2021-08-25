@@ -50,7 +50,7 @@ AVMEPopup {
     value = inputValue
     txData = inputTxData
     gas = inputGas
-    gasPrice = inputGasPrice
+    gasPrice = +inputGasPrice + 10 // Avoid err: max fee per gas less than block base fee:
     info = inputInfo
     operation = inputHistoryInfo
     if (automaticGas) {
@@ -59,7 +59,7 @@ AVMEPopup {
       Params["from"] = from
       Params["to"] = inputTo
       Params["gas"] = "0x" + qmlApi.uintToHex(inputGas)
-      Params["gasPrice"] = "0x" + qmlApi.uintToHex(+inputGasPrice * 10 * 9)
+      Params["gasPrice"] = "0x" + qmlApi.uintToHex(qmlApi.fixedPointToWei(inputGasPrice, 9))
       Params["value"] = "0x" + qmlApi.uintToHex(qmlApi.fixedPointToWei(inputValue, 18))
       Params["data"] = inputTxData
       qmlApi.buildGetEstimateGasLimitReq(JSON.stringify(Params), "PopupConfirmTxGas")
