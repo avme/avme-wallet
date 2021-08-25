@@ -35,10 +35,10 @@ AVMEPanel {
   property string historyInfo
   title: "Classic Staking"
 
-  Timer { id: reservesTimer; interval: 1000; repeat: true; onTriggered: (fetchBalanceAllowanceAndReserves()) } 
+  Timer { id: reservesTimer; interval: 1000; repeat: true; onTriggered: (fetchBalanceAllowanceAndReserves()) }
 
   Connections {
-    target: qmlApi          
+    target: qmlApi
     function onApiRequestAnswered(answer, requestID) {
       var resp = JSON.parse(answer)
       if (requestID == "QmlClassicStaking_fetchBalanceAllowanceAndReserves") {
@@ -121,11 +121,11 @@ AVMEPanel {
     }
     if (isStaking) {
       if (pairUserBalance < stakeInput.text) {
-        return false 
+        return false
       }
     } else {
       if (pairUserLockedBalance < stakeInput.text) {
-        return false 
+        return false
       }
     }
     return true
@@ -188,7 +188,7 @@ AVMEPanel {
   Component.onCompleted: {
     stakingDetailsColumn.visible = false
     stakingApprovalColumn.visible = false
-    loading = true; 
+    loading = true;
     reservesTimer.start()
   }
   Column {
@@ -243,7 +243,7 @@ AVMEPanel {
       color: "#FFFFFF"
       font.pixelSize: 14.0
       text: (pairUserBalance)
-      ? (isStaking) 
+      ? (isStaking)
       ? "Balance: <b>" + qmlApi.weiToFixedPoint(pairUserBalance, 18) + " AVAX/AVME LP</b>"
       : "Balance: <b>" + qmlApi.weiToFixedPoint(pairUserLockedBalance, 18) + " AVAX/AVME LP</b>"
       : "Loading LP balance..."
@@ -276,7 +276,7 @@ AVMEPanel {
       text: "You need to approve your Account in order to stake<br>"
       + "<b>AVAX/AVME LP</b> in the staking contract."
       + "<br>This operation will have a total gas cost of:<br><b>"
-      + qmlSystem.calculateTransactionCost("0", "200000", qmlSystem.getAutomaticFee())
+      + qmlSystem.calculateTransactionCost("0", "200000", accountHeader.gasPrice)
       + " AVAX</b>"
     }
 
@@ -284,7 +284,7 @@ AVMEPanel {
       id: btnApprove
       width: parent.width
       enabled: (+accountHeader.coinRawBalance >=
-        +qmlSystem.calculateTransactionCost("0", "200000", qmlSystem.getAutomaticFee())
+        +qmlSystem.calculateTransactionCost("0", "200000", accountHeader.gasPrice)
       )
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve" : "Not enough funds"
@@ -374,7 +374,7 @@ AVMEPanel {
         } else {
           fundsPopup.open()
         }
-      } 
+      }
     }
 
     Rectangle {

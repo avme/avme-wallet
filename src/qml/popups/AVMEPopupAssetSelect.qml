@@ -61,7 +61,7 @@ AVMEPopup {
   function forceAVME() {
     tokenSelectList.grabFocus()
     for (var i = 0; i < tokenList.count; i++) {
-      if (tokenList.get(i).address == qmlSystem.getAVMEAddress()) {
+      if (tokenList.get(i).address == qmlSystem.getContract("AVME")) {
         tokenSelectList.currentIndex = i;
         chooseAsset()
       }

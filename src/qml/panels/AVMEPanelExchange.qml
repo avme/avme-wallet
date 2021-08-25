@@ -68,7 +68,7 @@ AVMEPanel {
       swapImpact = calculatePriceImpact(swapInput.text, fromAssetPopup.chosenAssetDecimals, toAssetPopup.chosenAssetDecimals)
     }
   }
-  
+
   Connections {
     target: txProgressPopup
     function onClosed() { allowanceTimer.start() }
@@ -483,7 +483,7 @@ AVMEPanel {
         anchors.margins: 20
         fillMode: Image.PreserveAspectFit
         source: {
-          var avmeAddress = qmlSystem.getAVMEAddress()
+          var avmeAddress = qmlSystem.getContract("AVME")
           if (fromAssetPopup.chosenAssetSymbol == "AVAX") {
             source: "qrc:/img/avax_logo.png"
           } else if (fromAssetPopup.chosenAssetAddress == avmeAddress) {
@@ -520,7 +520,7 @@ AVMEPanel {
           onClicked: {
             swapOrder()
             if (swapOrderImage.source == "qrc:/img/icons/arrow.png") {
-              swapOrderImage.source = "qrc:/img/icons/backArrow.png" 
+              swapOrderImage.source = "qrc:/img/icons/backArrow.png"
             } else {
               swapOrderImage.source = "qrc:/img/icons/arrow.png"
             }
@@ -537,7 +537,7 @@ AVMEPanel {
         anchors.margins: 20
         fillMode: Image.PreserveAspectFit
         source: {
-          var avmeAddress = qmlSystem.getAVMEAddress()
+          var avmeAddress = qmlSystem.getContract("AVME")
           if (toAssetPopup.chosenAssetSymbol == "AVAX") {
             source: "qrc:/img/avax_logo.png"
           } else if (toAssetPopup.chosenAssetAddress == avmeAddress) {
@@ -603,7 +603,7 @@ AVMEPanel {
       text: "You need to approve your Account in order to swap <b>"
       + fromAssetPopup.chosenAssetSymbol + "</b>."
       + "<br>This operation will have a total gas cost of:<br><b>"
-      + qmlSystem.calculateTransactionCost("0", "180000", qmlSystem.getAutomaticFee())
+      + qmlSystem.calculateTransactionCost("0", "180000", accountHeader.gasPrice)
       + " AVAX</b>"
     }
 
@@ -611,7 +611,7 @@ AVMEPanel {
       id: btnApprove
       width: parent.width
       enabled: (+accountHeader.coinRawBalance >=
-        +qmlSystem.calculateTransactionCost("0", "180000", qmlSystem.getAutomaticFee())
+        +qmlSystem.calculateTransactionCost("0", "180000", accountHeader.gasPrice)
       )
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve" : "Not enough funds"
@@ -677,13 +677,13 @@ AVMEPanel {
           if (!isInverse) {
             swapInput.text = (fromAssetPopup.chosenAssetSymbol == "AVAX")
               ? qmlSystem.getRealMaxAVAXAmount(
-                accountHeader.coinRawBalance, "180000", qmlSystem.getAutomaticFee()
+                accountHeader.coinRawBalance, "180000", accountHeader.gasPrice
               )
               : accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]["rawBalance"]
           } else {
             swapInput.text = (toAssetPopup.chosenAssetSymbol == "AVAX")
               ? qmlSystem.getRealMaxAVAXAmount(
-                accountHeader.coinRawBalance, "180000", qmlSystem.getAutomaticFee()
+                accountHeader.coinRawBalance, "180000", accountHeader.gasPrice
               )
               : accountHeader.tokenList[toAssetPopup.chosenAssetAddress]["rawBalance"]
           }

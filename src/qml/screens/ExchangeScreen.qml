@@ -8,15 +8,10 @@ import "qrc:/qml/components"
 import "qrc:/qml/panels"
 import "qrc:/qml/popups"
 
-
-/*
-	TODO FIXMEs FROM GEK:
-	1.
-		Hovering on this page causes a boost bad lexical cast error.
-		it causes a fatal throw.
-
-*/
-
+/**
+ * TODO: bug fix from GEK:
+ * Hovering on this page causes a boost bad lexical cast error. It causes a fatal throw.
+ */
 
 // Screen for exchanging coins/tokens in a given Account
 Item {
@@ -38,11 +33,11 @@ Item {
       if (!exchangePanel.isInverse) {
         if (+accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]["rawBalance"] < +exchangePanel.amountIn) {
          return false
-        } 
+        }
       } else {
         if (+accountHeader.tokenList[toAssetPopup.chosenAssetAddress]["rawBalance"] < +exchangePanel.amountIn) {
          return false
-        } 
+        }
       }
 
       return true

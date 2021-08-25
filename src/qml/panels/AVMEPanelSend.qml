@@ -123,7 +123,7 @@ AVMEPanel {
         smooth: true
         fillMode: Image.PreserveAspectFit
         source: {
-          var avmeAddress = qmlSystem.getAVMEAddress()
+          var avmeAddress = qmlSystem.getContract("AVME")
           if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {
             source: "qrc:/img/avax_logo.png"
           } else if (chooseAssetPopup.chosenAssetAddress == avmeAddress) {

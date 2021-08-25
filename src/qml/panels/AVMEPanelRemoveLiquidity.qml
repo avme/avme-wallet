@@ -22,7 +22,7 @@ AVMEPanel {
   property string randomID
   property string userAsset1Reserves
   property string userAsset2Reserves
-  property string userLPSharePercentage // TODO: find out where this should be used
+  property string userLPSharePercentage
   property string removeAsset1Estimate
   property string removeAsset2Estimate
   property string removeLPEstimate
@@ -36,7 +36,6 @@ AVMEPanel {
   property string info
   property string historyInfo
   property alias removeBtn: removeLiquidityBtn
-
 
   Timer { id: requestsTimer; interval: 5000; repeat: true; onTriggered: (fetchAllowanceBalanceReservesAndSupply()) }
 
@@ -58,7 +57,7 @@ AVMEPanel {
         for (var item in resp) {
           if (resp[item]["id"] == 1) {
             pairBalance = qmlApi.weiToFixedPoint(qmlApi.parseHex(resp[item].result, ["uint"]), 18)
-          }  
+          }
           if (resp[item]["id"] == 2) {
             pairAllowance = qmlApi.parseHex(resp[item].result, ["uint"])
           }
@@ -169,15 +168,15 @@ AVMEPanel {
     var ABI = qmlApi.buildCustomABI(ethCallString)
     txData = ABI
   }
-  
+
   function removeLiquidityTx() {
     to = qmlSystem.getContract("router")
     coinValue = 0
     gas = 400000
     var ethCallJson = ({})
     info = "You will remove <b><br>"
-    + qmlApi.weiToFixedPoint(removeAsset1Estimate, removeAsset1Popup.chosenAssetDecimals) + " " + (removeAsset1Popup.chosenAssetSymbol) 
-    + " and " 
+    + qmlApi.weiToFixedPoint(removeAsset1Estimate, removeAsset1Popup.chosenAssetDecimals) + " " + (removeAsset1Popup.chosenAssetSymbol)
+    + " and "
     + qmlApi.weiToFixedPoint(removeAsset2Estimate, removeAsset2Popup.chosenAssetDecimals) + " " + removeAsset2Popup.chosenAssetSymbol
     + "<br></b> LP in Pangolin router contract (estimated)"
     if (removeAsset1Popup.chosenAssetSymbol == "AVAX" || removeAsset2Popup.chosenAssetSymbol == "AVAX") {
@@ -238,7 +237,7 @@ AVMEPanel {
       // to
       ethCallJson["args"].push(qmlSystem.getCurrentAccount())
       // deadline
-      ethCallJson["args"].push(String((+qmlApi.getCurrentUnixTime() + 3600) * 1000))      
+      ethCallJson["args"].push(String((+qmlApi.getCurrentUnixTime() + 3600) * 1000))
       ethCallJson["types"] = []
       ethCallJson["types"].push("address")
       ethCallJson["types"].push("address")
@@ -311,7 +310,7 @@ AVMEPanel {
         anchors.margins: 20
         fillMode: Image.PreserveAspectFit
         source: {
-          var avmeAddress = qmlSystem.getAVMEAddress()
+          var avmeAddress = qmlSystem.getContract("AVME")
           if (removeAsset1Popup.chosenAssetSymbol == "AVAX") {
             source: "qrc:/img/avax_logo.png"
           } else if (removeAsset1Popup.chosenAssetAddress == avmeAddress) {
@@ -332,7 +331,7 @@ AVMEPanel {
         anchors.margins: 20
         fillMode: Image.PreserveAspectFit
         source: {
-          var avmeAddress = qmlSystem.getAVMEAddress()
+          var avmeAddress = qmlSystem.getContract("AVME")
           if (removeAsset2Popup.chosenAssetSymbol == "AVAX") {
             source: "qrc:/img/avax_logo.png"
           } else if (removeAsset2Popup.chosenAssetAddress == avmeAddress) {
@@ -377,7 +376,7 @@ AVMEPanel {
       }
     }
   }
- 
+
   Image {
     id: removeLiquidityLoadingPng
     visible: loading
@@ -428,7 +427,7 @@ AVMEPanel {
       + removeAsset1Popup.chosenAssetSymbol + "/"
       + removeAsset2Popup.chosenAssetSymbol + " LP</b> from the pool."
       + "<br>This operation will have a total gas cost of:<br><b>"
-      + qmlSystem.calculateTransactionCost("0", "180000", qmlSystem.getAutomaticFee())
+      + qmlSystem.calculateTransactionCost("0", "180000", accountHeader.gasPrice)
       + " AVAX</b>"
     }
 
@@ -436,7 +435,7 @@ AVMEPanel {
       id: approveBtn
       width: parent.width
       enabled: (+accountHeader.coinRawBalance >=
-        +qmlSystem.calculateTransactionCost("0", "180000", qmlSystem.getAutomaticFee())
+        +qmlSystem.calculateTransactionCost("0", "180000", accountHeader.gasPrice)
       )
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve" : "Not enough funds"
@@ -444,14 +443,7 @@ AVMEPanel {
         if (checkTransactionFunds()) {
           approveTx();
           confirmRemoveApprovalPopup.setData(
-            to,
-            coinValue,
-            txData,
-            gas,
-            gasPrice,
-            automaticGas,
-            info,
-            historyInfo
+            to, coinValue, txData, gas, gasPrice, automaticGas, info, historyInfo
           )
           confirmRemoveApprovalPopup.open()
         } else {
@@ -571,14 +563,7 @@ AVMEPanel {
         if (checkTransactionFunds()) {
           removeLiquidityTx()
           confirmRemoveLiquidityPopup.setData(
-            to,
-            coinValue,
-            txData,
-            gas,
-            gasPrice,
-            automaticGas,
-            info,
-            historyInfo
+            to, coinValue, txData, gas, gasPrice, automaticGas, info, historyInfo
           )
           confirmRemoveLiquidityPopup.open()
         } else {

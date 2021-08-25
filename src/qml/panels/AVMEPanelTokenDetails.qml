@@ -24,7 +24,7 @@ AVMEPanel {
       fillMode: Image.PreserveAspectFit
       source: {
         if (tokensPanel.selectedToken != null) {
-          if (tokensPanel.selectedToken.itemAddress == qmlSystem.getAVMEAddress()) {
+          if (tokensPanel.selectedToken.itemAddress == qmlSystem.getContract("AVME")) {
             source: "qrc:/img/avme_logo.png"
           } else {
             var img = qmlSystem.getARC20TokenImage(tokensPanel.selectedToken.itemAddress)

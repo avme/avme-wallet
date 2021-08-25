@@ -58,23 +58,12 @@ class QmlSystem : public QObject {
     // Account screen signals
     void accountGenerated(QVariantMap data);
     void ledgerAccountGenerated(QVariantMap data);
-    void accountCreated(QVariantMap data);
-    void accountCreationFailed();
+    void accountCreated(bool success, QVariantMap data);
     void accountAVAXBalancesUpdated(
       QString address, QString avaxBalance, QString avaxValue, QString avaxPrice, QString avaxPriceData
     );
     void accountAllBalancesUpdated(
       QString address, QString tokenJsonListStr, QString CoinData, QString gasPrice
-    );
-
-    // Overview screen signals
-    void accountBalancesUpdated(QVariantMap data);
-    void accountFiatBalancesUpdated(QVariantMap data);
-    void walletBalancesUpdated(QVariantMap data);
-    void walletFiatBalancesUpdated(QVariantMap data);
-    void roiCalculated(QString ROI);
-    void marketDataUpdated(
-      int days, QString currentAVAXPrice, QString currentAVMEPrice, QVariantList AVMEHistory
     );
 
     // History screen signals
@@ -87,34 +76,13 @@ class QmlSystem : public QObject {
       QString txData, QString gas,
       QString gasPrice, QString pass
     );
-
     void operationOverride(
       QString op, QString amountCoin, QString amountToken, QString amountLP
     );
-    
     void txBuilt(bool b);
     void txSigned(bool b, QString msg);
     void txSent(bool b, QString linkUrl);
     void txRetry();
-
-    // Exchange screen signals
-    // TODO: split into exchangeAllowancesUpdated and stakingAllowancesUpdated
-    void allowancesUpdated(
-      QString exchangeAllowance, QString liquidityAllowance, QString stakingAllowance, QString compoundAllowance
-    );
-    void exchangeDataUpdated(
-      QString lowerTokenName, QString lowerTokenReserves,
-      QString higherTokenName, QString higherTokenReserves
-    );
-    void liquidityDataUpdated(
-      QString lowerTokenName, QString lowerTokenReserves,
-      QString higherTokenName, QString higherTokenReserves,
-      QString totalLiquidity
-    );
-
-    // Staking screen signals
-    void rewardUpdated(QString poolReward);
-    void compoundUpdated(QString reinvestReward);
 
   public:
     // ======================================================================
@@ -255,23 +223,6 @@ class QmlSystem : public QObject {
     // Get a QVariantList with the QRCode information
     Q_INVOKABLE QVariantList getQRCodeFromAddress(QString address);
 
-    // TODO: check all of those later
-    // Get the crypto and fiat balances for an Account and the whole Wallet, respectively.
-    // Emits, in order: accountBalancesUpdated(), accountFiatBalancesUpdated(),
-    // walletBalancesUpdated() and walletFiatBalancesUpdated()
-    //Q_INVOKABLE void getAccountBalancesOverview(QString address);
-    //Q_INVOKABLE void getAccountFiatBalancesOverview(QString address);
-    //Q_INVOKABLE void getAllAccountBalancesOverview();
-    //Q_INVOKABLE void getAllAccountFiatBalancesOverview();
-
-    // Get the current ROI for the staking reward.
-    // Emits roiCalculated()
-    //Q_INVOKABLE void calculateRewardCurrentROI();
-
-    // Get data for the market chart for the last X days (most to least recent).
-    // Emits marketDataUpdated()
-    //Q_INVOKABLE void getMarketData(int days);
-
     // ======================================================================
     // TOKENS SCREEN FUNCTIONS
     // ======================================================================
@@ -290,10 +241,6 @@ class QmlSystem : public QObject {
       QString address, QString symbol, QString name, int decimals, QString avaxPairContract
     );
     Q_INVOKABLE bool removeARC20Token(QString address);
-
-    // Get the AVME address.
-    // TODO: replace this with getContract("AVME")
-    Q_INVOKABLE QString getAVMEAddress();
 
     // Check if a token exists in the network.
     Q_INVOKABLE bool ARC20TokenExists(QString address);
@@ -315,9 +262,6 @@ class QmlSystem : public QObject {
     // ======================================================================
     // SEND SCREEN FUNCTIONS
     // ======================================================================
-  
-    // Get gas price from network
-    Q_INVOKABLE QString getAutomaticFee();
 
     // Create a RegExp for transaction amount inputs
     Q_INVOKABLE QRegExp createTxRegExp(int decimals);
@@ -339,7 +283,6 @@ class QmlSystem : public QObject {
     /**
      * Check for insufficient funds in a transaction.
      * Returns true if funds are lacking, or false if they're not.
-     * TODO: maybe invert this logic to hasFunds?
      */
     Q_INVOKABLE bool hasInsufficientFunds(
       QString senderAmount, QString receiverAmount, int decimals
@@ -363,14 +306,6 @@ class QmlSystem : public QObject {
 
     // Check if approval needs to be refreshed
     Q_INVOKABLE bool isApproved(QString amount, QString allowed);
-
-    // Update reserves for the exchange screen.
-    // Emits exchangeDataUpdated()
-    Q_INVOKABLE void updateExchangeData(QString tokenNameA, QString tokenNameB);
-
-    // Update reserves and liquidity supply for the exchange screen.
-    // Emits liquidityDataUpdated()
-    Q_INVOKABLE void updateLiquidityData(QString tokenNameA, QString tokenNameB);
 
     /**
      * Calculate the estimated output amount and price impact for a
@@ -407,15 +342,6 @@ class QmlSystem : public QObject {
     Q_INVOKABLE QVariantMap calculatePoolSharesForTokenValue(
       QString lowerReserves, QString higherReserves, QString totalLiquidity, QString LPTokenValue
     );
-
-    // ======================================================================
-    // EXCHANGE SCREEN FUNCTIONS
-    // ======================================================================
-
-    // Get the staking and compound rewards for a given Account, respectively.
-    // Emits, in order: rewardUpdated() and compoundUpdated()
-    Q_INVOKABLE void getPoolReward();
-    Q_INVOKABLE void getCompoundReward();
 };
 
 #endif  //QMLSYSTEM_H

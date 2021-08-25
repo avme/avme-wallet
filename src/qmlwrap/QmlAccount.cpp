@@ -58,7 +58,6 @@ void QmlSystem::generateLedgerAccounts(QString path, int idx) {
       std::string fullPath = path.toStdString() + boost::lexical_cast<std::string>(i);
       this->ledgerDevice.generateBip32Account(fullPath);
     }
-    // TODO: convert to multirequest
     for (ledger::account acc : this->ledgerDevice.getAccountList()) {
       QVariantMap obj;
       std::string idxStr = acc.index.substr(acc.index.find_last_of("/") + 1);
@@ -93,9 +92,9 @@ void QmlSystem::createAccount(QString seed, int index, QString name, QString pas
     if (!a.first.empty()) {
       obj.insert("accAddress", "0x" + QString::fromStdString(a.first));
       obj.insert("accName", QString::fromStdString(a.second));
-      emit accountCreated(obj);
+      emit accountCreated(true, obj);
     } else {
-      emit accountCreationFailed();
+      emit accountCreated(false, obj);
     }
   });
 }

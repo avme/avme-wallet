@@ -151,33 +151,10 @@ json Graph::getTokenPriceHistory(std::string address, int days) {
   return arr;
 }
 
-json Graph::getUSDTPriceHistory(int days) {
-  std::stringstream query;
-  query << "{\"query\": \"{"
-        << "tokenDayDatas(first: " << days << ", orderBy: date, orderDirection: desc, where: {"
-        << "token: \\\"0xde3a24028580884448a5397872046a019649b084\\\""
-        << "} ) { date priceUSD } }\"}";
-  std::string resp = httpGetRequest(query.str());
-  json respJson = json::parse(resp);
-  json arr = respJson["data"]["tokenDayDatas"];
-  return arr;
-}
-
-json Graph::getAVMEPriceHistory(int days) {
-  std::stringstream query;
-  query << "{\"query\": \"{"
-        << "tokenDayDatas(first: " << days << ", orderBy: date, orderDirection: desc, where: {"
-        << "token: \\\"0x1ecd47ff4d9598f89721a2866bfeb99505a413ed\\\""
-        << "} ) { date priceUSD } }\"}";
-  std::string resp = httpGetRequest(query.str());
-  json respJson = json::parse(resp);
-  json arr = respJson["data"]["tokenDayDatas"];
-  return arr;
-}
-
 json Graph::getAccountPrices(std::vector<ARC20Token> tokenList) {
   std::stringstream query;
   json ret;
+
   // Get USD AVAX price with ID USDAVAX.
   query << "{\"query\": \"{"
         << "USDAVAX: pair(id: \\\"0x9ee0a4e21bd333a6bb2ab298194320b8daa26516\\\")"

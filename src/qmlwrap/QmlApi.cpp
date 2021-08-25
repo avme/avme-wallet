@@ -103,15 +103,13 @@ void QmlApi::buildGetTxReceiptReq(std::string txidHex, QString requestID) {
   requestListLock.unlock();
 }
 
-// TODO: implement this
 void QmlApi::buildGetEstimateGasLimitReq(QString jsonStr, QString requestID) {
   json inputParams = json::parse(jsonStr.toStdString());
   json paramsArr = json::array();
   paramsArr.push_back(inputParams);
   requestListLock.lock();
   Request req{
-    this->requestList[requestID].size() + size_t(1), "2.0", "eth_estimateGas",
-    paramsArr
+    this->requestList[requestID].size() + size_t(1), "2.0", "eth_estimateGas", paramsArr
   };
   this->requestList[requestID].push_back(req);
   requestListLock.unlock();

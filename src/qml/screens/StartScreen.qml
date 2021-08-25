@@ -49,20 +49,20 @@ Item {
         walletFailPopup.open()
       }
     }
-    // TODO: merge those two
-    function onAccountCreated(obj) {
-      infoPopup.close()
-      qmlSystem.setCurrentAccount(obj.accAddress)
-      qmlSystem.setFirstLoad(true)
-      newWalletSeedPopup.showSeed(createWalletPopup.pass)
-      newWalletSeedPopup.open()
-      createWalletPopup.clean()
-      createWalletPopup.close()
-    }
-    function onAccountCreationFailed() {
-      infoPopup.close()
-      walletFailPopup.info = "Error on Account creation."
-      walletFailPopup.open()
+    function onAccountCreated(success, data) {
+      if (success) {
+        infoPopup.close()
+        qmlSystem.setCurrentAccount(data.accAddress)
+        qmlSystem.setFirstLoad(true)
+        newWalletSeedPopup.showSeed(createWalletPopup.pass)
+        newWalletSeedPopup.open()
+        createWalletPopup.clean()
+        createWalletPopup.close()
+      } else {
+        infoPopup.close()
+        walletFailPopup.info = "Error on Account creation."
+        walletFailPopup.open()
+      }
     }
   }
 

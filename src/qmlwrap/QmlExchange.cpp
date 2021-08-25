@@ -20,56 +20,6 @@ bool QmlSystem::isApproved(QString amount, QString allowed) {
   return ((allowedU256 > 0) && (allowedU256 >= amountU256));
 }
 
-void QmlSystem::updateExchangeData(QString tokenNameA, QString tokenNameB) {
-  QtConcurrent::run([=](){
-    QVariantMap ret;
-    std::string strA = tokenNameA.toStdString();
-    std::string strB = tokenNameB.toStdString();
-    if (strA == "AVAX") { strA = "WAVAX"; }
-    if (strB == "AVAX") { strB = "WAVAX"; }
-
-    std::vector<std::string> reserves = Pangolin::getReserves(strA, strB);
-    std::string first = Pangolin::getFirstFromPair(strA, strB);
-    if (strA == first) {
-      emit exchangeDataUpdated(
-        tokenNameA, QString::fromStdString(reserves[0]),
-        tokenNameB, QString::fromStdString(reserves[1])
-      );
-    } else if (strB == first) {
-      emit exchangeDataUpdated(
-        tokenNameA, QString::fromStdString(reserves[1]),
-        tokenNameB, QString::fromStdString(reserves[0])
-      );
-    }
-  });
-}
-
-void QmlSystem::updateLiquidityData(QString tokenNameA, QString tokenNameB) {
-  QtConcurrent::run([=](){
-    QVariantMap ret;
-    std::string strA = tokenNameA.toStdString();
-    std::string strB = tokenNameB.toStdString();
-    if (strA == "AVAX") { strA = "WAVAX"; }
-    if (strB == "AVAX") { strB = "WAVAX"; }
-    std::vector<std::string> reserves = Pangolin::getReserves(strA, strB);
-    std::string liquidity = Pangolin::totalSupply(strA, strB);
-    std::string first = Pangolin::getFirstFromPair(strA, strB);
-    if (strA == first) {
-      emit liquidityDataUpdated(
-        tokenNameA, QString::fromStdString(reserves[0]),
-        tokenNameB, QString::fromStdString(reserves[1]),
-        QString::fromStdString(liquidity)
-      );
-    } else if (strB == first) {
-      emit liquidityDataUpdated(
-        tokenNameA, QString::fromStdString(reserves[1]),
-        tokenNameB, QString::fromStdString(reserves[0]),
-        QString::fromStdString(liquidity)
-      );
-    }
-  });
-}
-
 QString QmlSystem::calculateExchangeAmount(
   QString amountIn, QString reservesIn, QString reservesOut, int inDecimals, int outDecimals
 ) {

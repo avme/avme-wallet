@@ -44,10 +44,6 @@ class Graph {
     static std::string getAVAXPriceUSD();
     static json avaxUSDData(int days);
     static std::string getTokenPriceDerived(std::string address);
-    /**
-     * Get the intire account prices for all both AVAX and Tokens
-     */
-    static json getAccountPrices(std::vector<ARC20Token> tokenList);
 
     /**
      * Parse a json which already contains the data to calculate AVAX value
@@ -55,17 +51,18 @@ class Graph {
     static std::string parseAVAXPriceUSD(json input);
 
     /**
-     * Get the HISTORICAL token prices in fiat (USD), from the last X days (starting from today).
-     * Data might span more than X days (e.g. skipping days w/ no price action),
-     * so "days" is really just the number of registered dates in history.
-     * TODO: fix this JSON stuff when calling it for real
-     * Returns a JSON array with the UNIX timestamps and
-     * prices in fixed point (e.g. "12.34").
-     * TODO: do this for AVAX when Pangolin fixes their priceUSD logic in graph
+     * Get the HISTORICAL token prices in fiat (USD), from the last X days
+     * (starting from today). Data might span more than X days (e.g. skipping
+     * days w/ no price action), so "days" is really just the number of
+     * registered dates in history.
+     * Returns a JSON array with the UNIX timestamps and prices in fixed point (e.g. "12.34").
      */
     static json getTokenPriceHistory(std::string address, int days);
-    static json getUSDTPriceHistory(int days);
-    static json getAVMEPriceHistory(int days);
+
+    /**
+     * Get the account prices for both AVAX and Tokens
+     */
+    static json getAccountPrices(std::vector<ARC20Token> tokenList);
 };
 
 #endif // GRAPH_H

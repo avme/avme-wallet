@@ -58,7 +58,7 @@ AVMEPanel {
         for (var item in resp) {
           if (resp[item]["id"] == 1) {
             pairAddress = qmlApi.parseHex(resp[item].result, ["address"])
-          }  
+          }
           if (resp[item]["id"] == 2) {
             asset1Allowance = qmlApi.parseHex(resp[item].result, ["uint"])
           }
@@ -105,11 +105,11 @@ AVMEPanel {
           loading = false
         }
       } else if (requestID == "QmlAddLiquidity_fetchReserves_"+randomID) {
-        var reserves 
+        var reserves
         for (var item in resp) {
           if (resp[item]["id"] == 1) {
             reserves = qmlApi.parseHex(resp[item].result, ["uint", "uint", "uint"])
-          }  
+          }
           if (resp[item]["id"] == 2) {
             pglSupply = qmlApi.parseHex(resp[item].result, ["uint"])
           }
@@ -203,7 +203,7 @@ AVMEPanel {
     var lowerAddress = qmlSystem.getFirstFromPair(
       addAsset1Popup.chosenAssetAddress, addAsset2Popup.chosenAssetAddress
     )
-    if ((lowerAddress == addAsset1Popup.chosenAssetAddress && isFirstInput) 
+    if ((lowerAddress == addAsset1Popup.chosenAssetAddress && isFirstInput)
     || (lowerAddress == addAsset2Popup.chosenAssetAddress && isFirstInput))
      {
       addAsset2Input.text = qmlSystem.calculateAddLiquidityAmount(
@@ -221,10 +221,10 @@ AVMEPanel {
   function calculateMaxAddLiquidityAmount() {
     // Get the max asset amounts, check who is lower and calculate accordingly
     var asset1Max = (addAsset1Popup.chosenAssetSymbol == "AVAX")
-      ? qmlSystem.getRealMaxAVAXAmount(accountHeader.coinRawBalance, "250000", qmlSystem.getAutomaticFee())
+      ? qmlSystem.getRealMaxAVAXAmount(accountHeader.coinRawBalance, "250000", accountHeader.gasPrice)
       : accountHeader.tokenList[addAsset1Popup.chosenAssetAddress]["rawBalance"]
     var asset2Max = (addAsset2Popup.chosenAssetSymbol == "AVAX")
-      ? qmlSystem.getRealMaxAVAXAmount(accountHeader.coinRawBalance, "250000", qmlSystem.getAutomaticFee())
+      ? qmlSystem.getRealMaxAVAXAmount(accountHeader.coinRawBalance, "250000", accountHeader.gasPrice)
       : accountHeader.tokenList[addAsset2Popup.chosenAssetAddress]["rawBalance"]
     var lowerAddress = qmlSystem.getFirstFromPair(
       addAsset1Popup.chosenAssetAddress, addAsset2Popup.chosenAssetAddress
@@ -235,7 +235,7 @@ AVMEPanel {
     // Limit the max amount to the lowest the user has, then set the right
     // values afterwards. If asset1Amount is higher than the balance in asset1Max,
     // then that balance is limiting. Same with asset2Amount and asset2Max.
-    
+
     var asset1MaxTmp = asset1Max
     var asset2MaxTmp = asset2Max
     // asset1MaxTmp = Input 1 Balance
@@ -288,7 +288,7 @@ AVMEPanel {
 
       var tokenBalance = +qmlApi.fixedPointToWei(
         accountHeader.tokenList[chosenTokenAddress]["rawBalance"],chosenTokenDecimals)
-        
+
       if (tokenBalance < +qmlApi.fixedPointToWei(chosenTokenAdd,chosenTokenDecimals)) {
           return false
       }
@@ -338,9 +338,9 @@ AVMEPanel {
       ethCallJson["function"] = "addLiquidityAVAX(address,uint256,uint256,uint256,address,uint256)"
       ethCallJson["args"] = []
       // Token
-      ethCallJson["args"].push((addAsset1Popup.chosenAssetSymbol == "AVAX") ? 
+      ethCallJson["args"].push((addAsset1Popup.chosenAssetSymbol == "AVAX") ?
         addAsset2Popup.chosenAssetAddress : addAsset1Popup.chosenAssetAddress)
-      // amountTokenDesired 
+      // amountTokenDesired
       var amountTokenDesired
       if (addAsset1Popup.chosenAssetSymbol != "AVAX") {
         amountTokenDesired = qmlApi.fixedPointToWei(add1Amount, addAsset1Popup.chosenAssetDecimals)
@@ -450,7 +450,7 @@ AVMEPanel {
         anchors.margins: 20
         fillMode: Image.PreserveAspectFit
         source: {
-          var avmeAddress = qmlSystem.getAVMEAddress()
+          var avmeAddress = qmlSystem.getContract("AVME")
           if (addAsset1Popup.chosenAssetSymbol == "AVAX") {
             source: "qrc:/img/avax_logo.png"
           } else if (addAsset1Popup.chosenAssetAddress == avmeAddress) {
@@ -471,7 +471,7 @@ AVMEPanel {
         anchors.margins: 20
         fillMode: Image.PreserveAspectFit
         source: {
-          var avmeAddress = qmlSystem.getAVMEAddress()
+          var avmeAddress = qmlSystem.getContract("AVME")
           if (addAsset2Popup.chosenAssetSymbol == "AVAX") {
             source: "qrc:/img/avax_logo.png"
           } else if (addAsset2Popup.chosenAssetAddress == avmeAddress) {
@@ -588,7 +588,7 @@ AVMEPanel {
       + "<br>This operation will have a total gas cost of:<br><b>"
       + qmlSystem.calculateTransactionCost("0",
         (!asset1Approved && !asset2Approved) ? "320000" : "180000",
-        qmlSystem.getAutomaticFee()
+        accountHeader.gasPrice
       ) + " AVAX</b>"
     }
 
@@ -597,7 +597,7 @@ AVMEPanel {
       width: parent.width
       visible: (!asset1Approved)
       enabled: (+accountHeader.coinRawBalance >=
-        +qmlSystem.calculateTransactionCost("0", "180000", qmlSystem.getAutomaticFee())
+        +qmlSystem.calculateTransactionCost("0", "180000", accountHeader.gasPrice)
       )
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve " + addAsset1Popup.chosenAssetSymbol : "Not enough funds"
@@ -629,7 +629,7 @@ AVMEPanel {
       width: parent.width
       visible: (!asset2Approved)
       enabled: (+accountHeader.coinRawBalance >=
-        +qmlSystem.calculateTransactionCost("0", "180000", qmlSystem.getAutomaticFee())
+        +qmlSystem.calculateTransactionCost("0", "180000", accountHeader.gasPrice)
       )
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve " + addAsset2Popup.chosenAssetSymbol : "Not enough funds"

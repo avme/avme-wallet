@@ -56,7 +56,7 @@ ListView {
           smooth: true
           fillMode: Image.PreserveAspectFit
           source: {
-            var avmeAddress = qmlSystem.getAVMEAddress()
+            var avmeAddress = qmlSystem.getContract("AVME")
             if (itemAddress == avmeAddress) {
               source: "qrc:/img/avme_logo.png"
             } else {

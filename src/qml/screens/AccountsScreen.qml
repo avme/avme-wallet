@@ -14,15 +14,16 @@ Item {
 
   Connections {
     target: qmlSystem
-    function onAccountCreated(data) {
-      chooseAccountPopup.clean()
-      chooseAccountPopup.close()
-      accountInfoPopup.close()
-      fetchAccounts()
-    }
-    function onAccountCreationFailed() {
-      accountInfoPopup.close()
-      accountFailPopup.open()
+    function onAccountCreated(success, data) {
+      if (success) {
+        chooseAccountPopup.clean()
+        chooseAccountPopup.close()
+        accountInfoPopup.close()
+        fetchAccounts()
+      } else {
+        accountInfoPopup.close()
+        accountFailPopup.open()
+      }
     }
     function onAccountAVAXBalancesUpdated(address, avaxBalance, avaxValue) {
       for (var i = 0; i < accountSelectPanel.accountModel.count; i++) {

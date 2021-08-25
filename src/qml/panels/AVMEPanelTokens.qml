@@ -67,7 +67,7 @@ AVMEPanel {
       width: (tokensPanel.width * 0.3)
       enabled: (
         tokenGrid.currentItem != null &&
-        tokenGrid.currentItem.itemAddress != qmlSystem.getAVMEAddress()
+        tokenGrid.currentItem.itemAddress != qmlSystem.getContract("AVME")
       )
       text: (enabled) ? "Remove this token" : "Can't remove"
     }

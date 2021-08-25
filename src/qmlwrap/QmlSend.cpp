@@ -4,10 +4,6 @@
 
 #include <qmlwrap/QmlSystem.h>
 
-QString QmlSystem::getAutomaticFee() {
-  return QString::fromStdString(API::getAutomaticFee());
-}
-
 QRegExp QmlSystem::createTxRegExp(int decimals) {
   QRegExp rx;
   rx.setPattern("[0-9]{1,99}(?:\\.[0-9]{1," + QString::number(decimals) + "})?");
@@ -85,7 +81,7 @@ void QmlSystem::makeTransaction(
     std::string gasStr = gas.toStdString();
     std::string gasPriceStr = gasPrice.toStdString();
     std::string passStr = pass.toStdString();
-    
+
     // Convert the values required for a transaction to their Wei formats.
     // Gas price is in Gwei (10^9 Wei) and amounts are in fixed point.
     // Gas limit is already in Wei so we skip that.

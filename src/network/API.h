@@ -67,13 +67,6 @@ class API {
     static std::string broadcastTx(std::string txidHex);
 
     /**
-     * Get the recommended gas price for a transaction.
-     * Returns the gas price in Gwei, which has to be converted to Wei
-     * when building a transaction (1 Gwei = 10^9 Wei).
-     */
-    static std::string getAutomaticFee();
-
-    /**
      * Get the highest available nonce for an address from the blockchain API.
      * Returns the nonce, or an empty string on failure.
      */

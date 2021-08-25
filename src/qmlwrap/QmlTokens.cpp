@@ -60,10 +60,6 @@ bool QmlSystem::removeARC20Token(QString address) {
   return QmlSystem::w.removeARC20Token(address.toStdString());
 }
 
-QString QmlSystem::getAVMEAddress() {
-  return QString::fromStdString(Pangolin::contracts["AVME"]);
-}
-
 bool QmlSystem::ARC20TokenExists(QString address) {
   std::string addressStr = Utils::toCamelCaseAddress(address.toStdString());
   json supplyJson, balanceJson;

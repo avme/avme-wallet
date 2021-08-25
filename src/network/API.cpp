@@ -3,6 +3,7 @@
 // file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "API.h"
 
+// TODO: depreciate the testnet once and for all
 #ifdef TESTNET
 std::string API::host = "testnet-api.avme.io";
 std::string API::port = "443";
@@ -184,11 +185,6 @@ std::string API::broadcastTx(std::string txidHex) {
   std::string resp = httpGetRequest(query);
   json respJson = json::parse(resp);
   return respJson["result"].get<std::string>();
-}
-
-// TODO: migrate to QmlApi when dynamic fees are implemented
-std::string API::getAutomaticFee() {
-  return "225"; // AVAX fees are fixed
 }
 
 std::string API::getNonce(std::string address) {

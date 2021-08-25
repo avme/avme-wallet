@@ -23,19 +23,19 @@ AVMEPanel {
   property string historyInfo
   title: "Classic Staking Rewards"
 
-  Timer { id: rewardsTimer; interval: 1000; repeat: true; onTriggered: (fetchRewards()) } 
+  Timer { id: rewardsTimer; interval: 1000; repeat: true; onTriggered: (fetchRewards()) }
 
   Connections {
-    target: qmlApi          
-      function onApiRequestAnswered(answer, requestID) {
-        var resp = JSON.parse(answer)
-        if (requestID == "QmlClassicStaking_fetchRewards") {
-          var rewardParsed = qmlApi.parseHex(resp[0].result, ["uint"])
-          reward = rewardParsed[0]
-          stakingLoadingPng.visible = false
-          loading = false
-        }
+    target: qmlApi
+    function onApiRequestAnswered(answer, requestID) {
+      var resp = JSON.parse(answer)
+      if (requestID == "QmlClassicStaking_fetchRewards") {
+        var rewardParsed = qmlApi.parseHex(resp[0].result, ["uint"])
+        reward = rewardParsed[0]
+        stakingLoadingPng.visible = false
+        loading = false
       }
+    }
   }
 
   function fetchRewards() {
@@ -139,7 +139,7 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       visible: (!loading)
       enabled: ((+reward != 0) && (+accountHeader.coinRawBalance >=
-        +qmlSystem.calculateTransactionCost("0", "70000", qmlSystem.getAutomaticFee())
+        +qmlSystem.calculateTransactionCost("0", "70000", accountHeader.gasPrice)
       ))
       onClicked: {
         exitTx()
@@ -164,7 +164,7 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       visible: (!loading)
       enabled: ((+reward != 0) &&(+accountHeader.coinRawBalance >=
-        +qmlSystem.calculateTransactionCost("0", "70000", qmlSystem.getAutomaticFee())
+        +qmlSystem.calculateTransactionCost("0", "70000", accountHeader.gasPrice)
       ))
       onClicked: {
         harvestTx()
