@@ -28,6 +28,7 @@ AVMEPopup {
   property string txData
   property string gas // gasLimit
   property string gasPrice // GWEI value, dynamic
+  property string randomID: ""
   property bool loadingFees
   property bool automaticGas
   property bool isSameAddress: false
@@ -37,34 +38,56 @@ AVMEPopup {
   Connections {
     target: qmlApi
     function onApiRequestAnswered(answer, requestID) {
-      if (requestID == "PopupConfirmTxGas") {
+      // randomID is used so it doesn't trigged other popups connections
+      if (requestID == "PopupConfirmTxGas_"+randomID) {
         var answerJson = JSON.parse(answer)
-        gas = Math.round(+qmlApi.uintFromHex(answerJson[0]["result"]) * 1.1)
-        loadingFees = false
+        if (!answerJson[0]["result"]) {
+          if (answerJson[0]["error"]["message"].includes("max fee per gas less than block base fee")) {
+            calculateGas(true)
+          } // TODO: ADD A ERROR HANDLER FOR INSUFICIENT BALANCE!!!
+        } else {
+          gas = qmlApi.floor(qmlApi.mul(qmlApi.parseHex(answerJson[0]["result"], ["uint"]), 1.1))
+          loadingFees = false
+        }
       }
     }
   }
 
-  function setData(inputTo, inputValue, inputTxData, inputGas, inputGasPrice, automaticGas, inputInfo, inputHistoryInfo) {
-    to = inputTo
-    value = inputValue
-    txData = inputTxData
-    gas = inputGas
-    gasPrice = +inputGasPrice + 10 // Avoid err: max fee per gas less than block base fee:
-    info = inputInfo
-    operation = inputHistoryInfo
+  function calculateGas(raiseGas) {
+    if (raiseGas) {
+      gasPrice = qmlApi.sum(gasPrice, 30)
+    }
+    if (+gasPrice < +accountHeader.gasPrice) {
+      gasPrice = qmlApi.sum(accountHeader.gasPrice, 30)
+    }
+    if (+gasPrice > 225) {
+      gasPrice = 225
+    }
     if (automaticGas) {
       loadingFees = true
       var Params = ({})
       Params["from"] = from
-      Params["to"] = inputTo
-      Params["gas"] = "0x" + qmlApi.uintToHex(inputGas)
-      Params["gasPrice"] = "0x" + qmlApi.uintToHex(qmlApi.fixedPointToWei(inputGasPrice, 9))
-      Params["value"] = "0x" + qmlApi.uintToHex(qmlApi.fixedPointToWei(inputValue, 18))
-      Params["data"] = inputTxData
-      qmlApi.buildGetEstimateGasLimitReq(JSON.stringify(Params), "PopupConfirmTxGas")
-      qmlApi.doAPIRequests("PopupConfirmTxGas")
+      Params["to"] = to
+      Params["gas"] = "0x" + qmlApi.uintToHex(gas)
+      Params["gasPrice"] = "0x" + qmlApi.uintToHex(qmlApi.fixedPointToWei(gasPrice, 9))
+      Params["value"] = "0x" + qmlApi.uintToHex(qmlApi.fixedPointToWei(value, 18))
+      Params["data"] = txData
+      qmlApi.buildGetEstimateGasLimitReq(JSON.stringify(Params), "PopupConfirmTxGas_"+randomID)
+      qmlApi.doAPIRequests("PopupConfirmTxGas_"+randomID)
     }
+  }
+
+  function setData(inputTo, inputValue, inputTxData, inputGas, inputGasPrice, inputAutomaticGas, inputInfo, inputHistoryInfo) {
+    randomID = qmlApi.getRandomID()
+    to = inputTo
+    value = inputValue
+    txData = inputTxData
+    gas = inputGas
+    gasPrice = inputGasPrice // Avoid err: max fee per gas less than block base fee:
+    info = inputInfo
+    operation = inputHistoryInfo
+    automaticGas = inputAutomaticGas
+    calculateGas(false)
   }
 
   function clean() {
