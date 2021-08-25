@@ -55,7 +55,7 @@ AVMEPanel {
   property string coinValue
   property string txData
   property string gas
-  property string gasPrice
+  property string gasPrice: qmlApi.sum(accountHeader.gasPrice, 15)
   property bool automaticGas: true
   property string info
   property string historyInfo
@@ -312,7 +312,6 @@ AVMEPanel {
     to = fromAssetPopup.chosenAssetAddress
     coinValue = 0
     gas = 100000
-    gasPrice = accountHeader.gasPrice
     info = "You will Approve <b>" + fromAssetPopup.chosenAssetSymbol + "<\b> on Pangolin Router Contract"
     historyInfo = "Approve <b>" + fromAssetPopup.chosenAssetSymbol + "<\b< on Pangolin"
 
@@ -332,7 +331,6 @@ AVMEPanel {
   function swapTx(amountIn, amountOut) {
     to = qmlSystem.getContract("router")
     gas = 300000
-    gasPrice = accountHeader.gasPrice
     info = "You will Swap <b>" + amountIn + " " + fromAssetPopup.chosenAssetSymbol + "<\b> to <b>"
     info += amountOut + " " + toAssetPopup.chosenAssetSymbol + "<\b> on Pangolin"
     historyInfo = "Swap <b>" + fromAssetPopup.chosenAssetSymbol + "<\b> to <b>" + toAssetPopup.chosenAssetSymbol + "<\b>"
@@ -344,7 +342,7 @@ AVMEPanel {
       ethCallJson["args"] = []
       // 1% Slippage TODO: Add setting to change slippage
       //uint256 amountOutMin
-      ethCallJson["args"].push(String(Math.round(+qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals) * 0.99)))
+      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals), 0.99)))
       //address[] path
       routing.push(qmlSystem.getContract("AVAX"))
       routing.push(toAssetPopup.chosenAssetAddress)
@@ -373,7 +371,7 @@ AVMEPanel {
       ethCallJson["args"].push(String(qmlApi.fixedPointToWei(amountIn, toAssetPopup.chosenAssetDecimals)))
       // 1% Slippage TODO: Add setting to change slippage
       // amountOutMin
-      ethCallJson["args"].push(String(Math.round(+qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals) * 0.99)))
+      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals), 0.99)))
       // address[] path
       routing.push(fromAssetPopup.chosenAssetAddress)
       routing.push(qmlSystem.getContract("AVAX"))
@@ -403,7 +401,7 @@ AVMEPanel {
       ethCallJson["args"].push(String(qmlApi.fixedPointToWei(amountIn, toAssetPopup.chosenAssetDecimals)))
       // 1% Slippage TODO: Add setting to change slippage
       // amountOutMin
-      ethCallJson["args"].push(String(Math.round(+qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals) * 0.99)))
+      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals), 0.99)))
       // address[] path
       if (!isInverse) {
         routing.push(fromAssetPopup.chosenAssetAddress)
@@ -603,7 +601,7 @@ AVMEPanel {
       text: "You need to approve your Account in order to swap <b>"
       + fromAssetPopup.chosenAssetSymbol + "</b>."
       + "<br>This operation will have a total gas cost of:<br><b>"
-      + qmlSystem.calculateTransactionCost("0", "180000", accountHeader.gasPrice)
+      + qmlSystem.calculateTransactionCost("0", "180000", gasPrice)
       + " AVAX</b>"
     }
 
@@ -611,7 +609,7 @@ AVMEPanel {
       id: btnApprove
       width: parent.width
       enabled: (+accountHeader.coinRawBalance >=
-        +qmlSystem.calculateTransactionCost("0", "180000", accountHeader.gasPrice)
+        +qmlSystem.calculateTransactionCost("0", "180000", gasPrice)
       )
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve" : "Not enough funds"
@@ -677,13 +675,13 @@ AVMEPanel {
           if (!isInverse) {
             swapInput.text = (fromAssetPopup.chosenAssetSymbol == "AVAX")
               ? qmlSystem.getRealMaxAVAXAmount(
-                accountHeader.coinRawBalance, "180000", accountHeader.gasPrice
+                accountHeader.coinRawBalance, "180000", gasPrice
               )
               : accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]["rawBalance"]
           } else {
             swapInput.text = (toAssetPopup.chosenAssetSymbol == "AVAX")
               ? qmlSystem.getRealMaxAVAXAmount(
-                accountHeader.coinRawBalance, "180000", accountHeader.gasPrice
+                accountHeader.coinRawBalance, "180000", gasPrice
               )
               : accountHeader.tokenList[toAssetPopup.chosenAssetAddress]["rawBalance"]
           }

@@ -31,7 +31,7 @@ AVMEPanel {
   property string coinValue
   property string txData
   property string gas
-  property string gasPrice: accountHeader.gasPrice
+  property string gasPrice: qmlApi.sum(accountHeader.gasPrice, 15)
   property bool automaticGas: true
   property string info
   property string historyInfo
@@ -136,8 +136,8 @@ AVMEPanel {
   }
 
   function checkTransactionFunds() {
-    var Fees = +qmlApi.fixedPointToWei(gasPrice, 8) * +gas
-    if (Fees > +qmlApi.fixedPointToWei(accountHeader.coinRawBalance, 18)) {
+    var Fees = +qmlApi.mul(qmlApi.fixedPointToWei(gasPrice, 9), gas)
+    if (+Fees > +qmlApi.fixedPointToWei(accountHeader.coinRawBalance, 18)) {
       return false
     }
     if (pairBalance) {
@@ -194,17 +194,17 @@ AVMEPanel {
       // amountTokenMin
       var amountTokenMin
       if (removeAsset1Popup.chosenAssetSymbol != "AVAX") {
-        amountTokenMin = String(Math.round(+removeAsset1Estimate * 0.99)) // 1% Slippage
+        amountTokenMin = qmlApi.floor(qmlApi.mul(removeAsset1Estimate, 0.99)) // 1% Slippage
       } else {
-        amountTokenMin = String(Math.round(+removeAsset2Estimate * 0.99)) // 1% Slippage
+        amountTokenMin = qmlApi.floor(qmlApi.mul(removeAsset2Estimate, 0.99)) // 1% Slippage
       }
       ethCallJson["args"].push(amountTokenMin)
       // amountETHMin
       var amountAVAXMin
       if (removeAsset1Popup.chosenAssetSymbol == "AVAX") {
-        amountAVAXMin = String(Math.round(+removeAsset1Estimate * 0.99)) // 1% Slippage
+        amountAVAXMin = qmlApi.floor(qmlApi.mul(removeAsset1Estimate,0.99))  // 1% Slippage
       } else {
-        amountAVAXMin = String(Math.round(+removeAsset2Estimate * 0.99)) // 1% Slippage
+        amountAVAXMin = qmlApi.floor(qmlApi.mul(removeAsset2Estimate,0.99)) // 1% Slippage
       }
       ethCallJson["args"].push(amountAVAXMin)
       // to
@@ -231,9 +231,9 @@ AVMEPanel {
       // liquidity
       ethCallJson["args"].push(qmlApi.fixedPointToWei(removeLPEstimate, 18))
       // amountAMin
-      ethCallJson["args"].push(String(Math.round(+removeAsset1Estimate * 0.99)))
+      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(removeAsset1Estimate, 0.99)))
       // amountBMin
-      ethCallJson["args"].push(String(Math.round(+removeAsset2Estimate * 0.99)))
+      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(removeAsset2Estimate, 0.99)))
       // to
       ethCallJson["args"].push(qmlSystem.getCurrentAccount())
       // deadline
@@ -427,7 +427,7 @@ AVMEPanel {
       + removeAsset1Popup.chosenAssetSymbol + "/"
       + removeAsset2Popup.chosenAssetSymbol + " LP</b> from the pool."
       + "<br>This operation will have a total gas cost of:<br><b>"
-      + qmlSystem.calculateTransactionCost("0", "180000", accountHeader.gasPrice)
+      + qmlSystem.calculateTransactionCost("0", "180000", gasPrice)
       + " AVAX</b>"
     }
 
@@ -435,7 +435,7 @@ AVMEPanel {
       id: approveBtn
       width: parent.width
       enabled: (+accountHeader.coinRawBalance >=
-        +qmlSystem.calculateTransactionCost("0", "180000", accountHeader.gasPrice)
+        +qmlSystem.calculateTransactionCost("0", "180000", gasPrice)
       )
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve" : "Not enough funds"

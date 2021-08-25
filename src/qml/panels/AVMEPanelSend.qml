@@ -58,7 +58,7 @@ AVMEPanel {
   }
 
   function updateTxCost() {
-    if (autoGasCheck.checked) { txGasPriceInput.text = accountHeader.gasPrice }
+    if (autoGasCheck.checked) { txGasPriceInput.text = +accountHeader.gasPrice + 15 }
     if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {  // Coin
       automaticGas = false;
       if (autoLimitCheck.checked) { txGasLimitInput.text = "21000" }
@@ -191,7 +191,7 @@ AVMEPanel {
         onClicked: {
           txAmountInput.text = (chooseAssetPopup.chosenAssetSymbol == "AVAX")
           ? qmlSystem.getRealMaxAVAXAmount(
-            accountHeader.coinRawBalance, txGasLimitInput.text, txGasPriceInput.text
+            accountHeader.coinRawBalance, txGasLimitInput.text, sendPanel.gasPrice
           )
           : (+accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]["rawBalance"])
           updateTxCost()

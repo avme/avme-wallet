@@ -115,16 +115,16 @@ AVMEPanel {
   }
 
   function calculateTransactionCost() {
-    var Fees = +qmlApi.fixedPointToWei(gasPrice, 8) * +gas
-    if (Fees > +qmlApi.fixedPointToWei(accountHeader.coinRawBalance, 18)) {
+    var Fees = +qmlApi.mul(qmlApi.fixedPointToWei(gasPrice, 9), gas)
+    if (+Fees > +qmlApi.fixedPointToWei(accountHeader.coinRawBalance, 18)) {
       return false
     }
     if (isStaking) {
-      if (pairUserBalance < stakeInput.text) {
+      if (+pairUserBalance < +stakeInput.text) {
         return false
       }
     } else {
-      if (pairUserLockedBalance < stakeInput.text) {
+      if (+pairUserLockedBalance < +stakeInput.text) {
         return false
       }
     }
@@ -276,7 +276,7 @@ AVMEPanel {
       text: "You need to approve your Account in order to stake<br>"
       + "<b>AVAX/AVME LP</b> in the staking contract."
       + "<br>This operation will have a total gas cost of:<br><b>"
-      + qmlSystem.calculateTransactionCost("0", "200000", accountHeader.gasPrice)
+      + qmlSystem.calculateTransactionCost("0", "200000", gasPrice)
       + " AVAX</b>"
     }
 
@@ -284,7 +284,7 @@ AVMEPanel {
       id: btnApprove
       width: parent.width
       enabled: (+accountHeader.coinRawBalance >=
-        +qmlSystem.calculateTransactionCost("0", "200000", accountHeader.gasPrice)
+        +qmlSystem.calculateTransactionCost("0", "200000", gasPrice)
       )
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve" : "Not enough funds"

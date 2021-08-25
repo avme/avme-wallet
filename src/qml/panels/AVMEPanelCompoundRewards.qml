@@ -17,7 +17,7 @@ AVMEPanel {
   property string coinValue
   property string txData
   property string gas
-  property string gasPrice: accountHeader.gasPrice
+  property string gasPrice: qmlApi.sum(accountHeader.gasPrice, 15)
   property bool automaticGas: true
   property string info
   property string historyInfo
@@ -122,7 +122,7 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       visible: (!loading)
       enabled: ((+reward != 0) && (+accountHeader.coinRawBalance >=
-        +qmlSystem.calculateTransactionCost("0", "70000", accountHeader.gasPrice)
+        +qmlSystem.calculateTransactionCost("0", "70000", gasPrice)
       ))
       onClicked: {
         reinvestTx()
