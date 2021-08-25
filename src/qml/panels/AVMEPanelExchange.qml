@@ -737,13 +737,28 @@ AVMEPanel {
       id: ignoreImpactCheck
       checked: false
       anchors.horizontalCenter: parent.horizontalCenter
-      text: "Ignore price impact"
+      text: "Allow high price impact swaps (>10%)"
       contentItem: Text {
         text: parent.text
         font.pixelSize: 14.0
         color: parent.checked ? "#FFFFFF" : "#888888"
         verticalAlignment: Text.AlignVCenter
         leftPadding: parent.indicator.width + parent.spacing
+      }
+      ToolTip {
+        id: impactTooltip
+        visible: parent.hovered
+        delay: 500
+        text: "Asset prices raise or lower based on the amounts you buy or sell."
+        + "<br>Larger amounts have bigger impact on prices."
+        + "<br>Swap is disabled by default at a 10% or greater price impact."
+        + "<br>You can still allow it if you wish, although not recommended."
+        contentItem: Text {
+          font.pixelSize: 12.0
+          color: "#FFFFFF"
+          text: impactTooltip.text
+        }
+        background: Rectangle { color: "#1C2029" }
       }
     }
 
