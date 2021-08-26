@@ -602,12 +602,12 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve " + addAsset1Popup.chosenAssetSymbol : "Not enough funds"
       onClicked: {
+        approveTx(addAsset1Popup.chosenAssetAddress)
         if (checkTransactionFunds()) {
           info = "You will approve <b>"
           + (addAsset1Popup.chosenAssetSymbol)
           + "</b> to be added to the pool for the current address"
           historyInfo = "Approve " + addAsset1Popup.chosenAssetSymbol
-          approveTx(addAsset1Popup.chosenAssetAddress)
           confirmAddApprovalAsset1Popup.setData(
             to,
             coinValue,
@@ -634,12 +634,12 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve " + addAsset2Popup.chosenAssetSymbol : "Not enough funds"
       onClicked: {
+        approveTx(addAsset2Popup.chosenAssetAddress)
         if (checkTransactionFunds()) {
           info = "You will approve <b>"
           + (addAsset2Popup.chosenAssetSymbol)
           + "</b> to be added to the pool for the current address"
           historyInfo = "Approve " + addAsset2Popup.chosenAssetSymbol
-          approveTx(addAsset2Popup.chosenAssetAddress)
           confirmAddApprovalAsset2Popup.setData(
             to,
             coinValue,

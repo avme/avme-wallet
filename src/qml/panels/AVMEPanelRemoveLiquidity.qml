@@ -194,17 +194,17 @@ AVMEPanel {
       // amountTokenMin
       var amountTokenMin
       if (removeAsset1Popup.chosenAssetSymbol != "AVAX") {
-        amountTokenMin = qmlApi.floor(qmlApi.mul(removeAsset1Estimate, 0.99)) // 1% Slippage
+        amountTokenMin = qmlApi.floor(qmlApi.mul(removeAsset1Estimate, "0.99")) // 1% Slippage
       } else {
-        amountTokenMin = qmlApi.floor(qmlApi.mul(removeAsset2Estimate, 0.99)) // 1% Slippage
+        amountTokenMin = qmlApi.floor(qmlApi.mul(removeAsset2Estimate, "0.99")) // 1% Slippage
       }
       ethCallJson["args"].push(amountTokenMin)
       // amountETHMin
       var amountAVAXMin
       if (removeAsset1Popup.chosenAssetSymbol == "AVAX") {
-        amountAVAXMin = qmlApi.floor(qmlApi.mul(removeAsset1Estimate,0.99))  // 1% Slippage
+        amountAVAXMin = qmlApi.floor(qmlApi.mul(removeAsset1Estimate, "0.99"))  // 1% Slippage
       } else {
-        amountAVAXMin = qmlApi.floor(qmlApi.mul(removeAsset2Estimate,0.99)) // 1% Slippage
+        amountAVAXMin = qmlApi.floor(qmlApi.mul(removeAsset2Estimate, "0.99")) // 1% Slippage
       }
       ethCallJson["args"].push(amountAVAXMin)
       // to
@@ -231,9 +231,9 @@ AVMEPanel {
       // liquidity
       ethCallJson["args"].push(qmlApi.fixedPointToWei(removeLPEstimate, 18))
       // amountAMin
-      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(removeAsset1Estimate, 0.99)))
+      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(removeAsset1Estimate, "0.99")))
       // amountBMin
-      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(removeAsset2Estimate, 0.99)))
+      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(removeAsset2Estimate, "0.99")))
       // to
       ethCallJson["args"].push(qmlSystem.getCurrentAccount())
       // deadline
@@ -440,8 +440,8 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve" : "Not enough funds"
       onClicked: {
+        approveTx();
         if (checkTransactionFunds()) {
-          approveTx();
           confirmRemoveApprovalPopup.setData(
             to, coinValue, txData, gas, gasPrice, automaticGas, info, historyInfo
           )
@@ -560,8 +560,8 @@ AVMEPanel {
       enabled: ((liquidityLPSlider.value > 0) && +removeLPEstimate != 0)
       text: "Remove from the pool"
       onClicked: {
+        removeLiquidityTx()
         if (checkTransactionFunds()) {
-          removeLiquidityTx()
           confirmRemoveLiquidityPopup.setData(
             to, coinValue, txData, gas, gasPrice, automaticGas, info, historyInfo
           )
