@@ -30,7 +30,7 @@ ListView {
   highlight: Rectangle {
     color: "#342e43";
     radius: 10;
-    anchors.verticalCenter: walletList.currentItem.verticalCenter
+    anchors.verticalCenter: walletList.currentItem.verticalCenter /*FIXME TODO FROM GEK: TypeError: Cannot read property 'verticalCenter' of null*/
   }
   highlightMoveVelocity: 1500
 
@@ -43,8 +43,8 @@ ListView {
       readonly property string itemAddress: address
       readonly property string itemCoinAmount: coinAmount
       readonly property string itemCoinValue: coinValue
-			width: parent.parent.width / 4
-      height: parent.height
+			width: parent.parent.width / 4 /*FIXME TODO FROM GEK: After making second account for my wallet: TypeError: Cannot read property 'parent' of null, occurs after this one:*/
+      height: parent.height		/*FIXME TODO FROM GEK: After making second account for my wallet: TypeError: Cannot read property 'height' of null*/
 
 			Rectangle {
         id: delegateRectangle
