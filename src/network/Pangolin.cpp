@@ -3,17 +3,6 @@
 // file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "Pangolin.h"
 
-#ifdef TESTNET
-std::map<std::string, std::string> Pangolin::contracts = {
-  {"factory", "0xE4A575550C2b460d2307b82dCd7aFe84AD1484dd"},
-  {"router", "0x2D99ABD9008Dc933ff5c0CD271B88309593aB921"},
-  {"staking", "0xfCA717d68EE18526e2626267594625Ee4CEFc66F"},
-  {"compound", "0xb34fE8A87DFEbD5Ab0a03DB73F2d49b903E63DB6"},
-  {"AVAX", "0xd00ae08403B9bbb9124bB305C09058E32C39A48c"},
-  {"AVME", "0x02aDedcfe78757C3d0a545CB0Cbd78a7d19eEE4f"},
-  {"AVAX-AVME", "0x0A7bc2Ab390774fE16610b3BA53748FDf4C6a955"},
-};
-#else
 std::map<std::string, std::string> Pangolin::contracts = {
   {"factory", "0xefa94DE7a4656D787667C749f7E1223D71E9FD88"},
   {"router", "0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106"},
@@ -23,7 +12,6 @@ std::map<std::string, std::string> Pangolin::contracts = {
   {"AVME", "0x1ECd47FF4d9598f89721A2866BFEb99505a413Ed"},
   {"AVAX-AVME", "0x381cc7bcba0afd3aeb0eaec3cb05d7796ddfd860"},
 };
-#endif
 
 std::map<std::string, std::string> Pangolin::ERC20Funcs = {
   {"name", "0x06fdde03"}, // name()
@@ -54,7 +42,7 @@ std::map<std::string, std::string> Pangolin::routerFuncs = {
 
 std::vector<std::string> Pangolin::parseHex(std::string hexStr, std::vector<std::string> types) {
   std::vector<std::string> ret;
-  
+
   try {
 
     // Get rid of the "0x" before converting and lowercase all letters

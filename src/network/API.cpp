@@ -3,14 +3,8 @@
 // file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "API.h"
 
-// TODO: depreciate the testnet once and for all
-#ifdef TESTNET
-std::string API::host = "testnet-api.avme.io";
-std::string API::port = "443";
-#else
 std::string API::host = "api.avme.io";
 std::string API::port = "443";
-#endif
 
 std::string API::httpGetRequest(std::string reqBody) {
   std::string result = "";
