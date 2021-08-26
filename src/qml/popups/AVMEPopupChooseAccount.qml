@@ -43,6 +43,16 @@ AVMEPopup {
     function onAccountGenerated(data) {
       accountList.append(data)
       isWaiting = false
+      qmlSystem.getAccountAVAXBalances(data.account)
+    }
+    function onAccountAVAXBalancesUpdated(
+      address, avaxBalance, avaxValue, avaxPrice, avaxPriceData
+    ) {
+      for (var i = 0; i < accountList.count; i++) {
+        if (accountList.get(i).account == address) {
+          accountList.setProperty(i, "balance", avaxBalance)
+        }
+      }
     }
   }
 

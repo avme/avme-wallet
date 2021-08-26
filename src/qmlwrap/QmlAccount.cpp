@@ -42,10 +42,10 @@ void QmlSystem::generateAccounts(QString seed, int idx) {
         switch (ct) {
           case 0: obj["idx"] = QVariant(itemStr); break;
           case 1: obj["account"] = QVariant(itemStr); break;
-          case 2: obj["balance"] = QVariant(itemStr); break;
         }
         ct++;
       }
+      obj["balance"] = "Loading...";
       emit accountGenerated(obj);
     }
   });
@@ -143,9 +143,9 @@ void QmlSystem::getAccountAVAXBalances(QString address) {
 
     // Return the values
     emit accountAVAXBalancesUpdated(
-      address, QString::fromStdString(avaxBalStr), 
-      QString::fromStdString(avaxUSDValueStr), 
-      QString::fromStdString(avaxUSDPriceStr), 
+      address, QString::fromStdString(avaxBalStr),
+      QString::fromStdString(avaxUSDValueStr),
+      QString::fromStdString(avaxUSDPriceStr),
       QString::fromStdString(avaxUSDData["data"]["AVAXUSDCHART"].dump())
     );
   });
@@ -168,7 +168,7 @@ void QmlSystem::getAllAVAXBalances(QStringList addresses) {
     std::string query = API::buildMultiRequest(requestsVec);
     std::string resp = API::httpGetRequest(query);
     json resultArr = json::parse(resp);
-    std::string avaxUSDValueStr = Graph::getAVAXPriceUSD(); 
+    std::string avaxUSDValueStr = Graph::getAVAXPriceUSD();
     bigfloat avaxUSDPrice = boost::lexical_cast<bigfloat>(avaxUSDValueStr);
 
     // Get each AVAX fixed point amount and calculate the fiat value
@@ -199,12 +199,12 @@ void QmlSystem::getAccountAllBalances(QString address) {
   QtConcurrent::run([=](){
     try {
       json tokensInformation = json::array();
-      json coinInformation; 
+      json coinInformation;
       std::string gasPrice;
       std::vector<Request> reqs;
       std::string addressStr = address.toStdString();
       if (addressStr.substr(0,2) == "0x") { addressStr = addressStr.substr(2); }
-      // Add AVAX balance as request [1] 
+      // Add AVAX balance as request [1]
       reqs.push_back({1, "2.0", "eth_getBalance", {address.toStdString(), "latest"}});
       // Add gasPrice as request [2]
       reqs.push_back({2, "2.0", "eth_baseFee", {}});
@@ -230,7 +230,7 @@ void QmlSystem::getAccountAllBalances(QString address) {
       json resultArr = json::parse(resp);
       // Request the prices of all the tokens to the GraphQL API
       auto tokensPrices = Graph::getAccountPrices(tokenList);
-  
+
       bigfloat avaxUSDPrice = boost::lexical_cast<bigfloat>(Graph::parseAVAXPriceUSD(tokensPrices));
       // Calculate the fiat value for each token
       for (auto id : idList) {
@@ -262,7 +262,7 @@ void QmlSystem::getAccountAllBalances(QString address) {
               boost::lexical_cast<std::string>(tokenWeiBal), tokenList[pos].decimals
             );
             std::string chartAddress = "chart_" + tokenList[pos].address;
-  
+
             // Again, we need to convert to lowercase and append chart_ as prefix
             chartAddress = Utils::toLowerCaseAddress(chartAddress);
             std::string tokenChartData = tokensPrices["data"][chartAddress].dump();
@@ -295,7 +295,7 @@ void QmlSystem::getAccountAllBalances(QString address) {
           avaxUSDBalPrec2 << std::setprecision(2) << std::fixed << avaxUSDBal;
           std::stringstream avaxUSDPricePrec2;
           avaxUSDPricePrec2 << std::setprecision(2) << std::fixed << avaxUSDPrice;
-  
+
           coinInformation["coinBalance"] = Utils::weiToFixedPoint(
             boost::lexical_cast<std::string>(avaxWeiBal), 18
           );
@@ -304,12 +304,12 @@ void QmlSystem::getAccountAllBalances(QString address) {
           coinInformation["coinPriceChart"] = tokensPrices["data"]["AVAXUSDCHART"].dump();
         }
         if (arrItem["id"].get<int>() == 2) {
-          // Parse gas Price as GWEI, located in request ID 2 
+          // Parse gas Price as GWEI, located in request ID 2
           u256 gasPriceWeiU256 = boost::lexical_cast<HexTo<u256>>(Utils::jsonToStr(arrItem["result"]));
           gasPrice = Utils::weiToFixedPoint(boost::lexical_cast<std::string>(gasPriceWeiU256), 9);
         }
       }
-  
+
       emit accountAllBalancesUpdated(
         address,
         QString::fromStdString(tokensInformation.dump()),

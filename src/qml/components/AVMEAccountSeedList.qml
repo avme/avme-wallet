@@ -37,7 +37,7 @@ ListView {
     height: parent.parent.height * 0.15
     color: "#201E2B"
     z: 2
-    anchors.horizontalCenter: parent.horizontalCenter 
+    anchors.horizontalCenter: parent.horizontalCenter
       Rectangle {
       id: listHeaderBg
       width: parent.width
@@ -59,7 +59,7 @@ ListView {
           padding: 5
           text: "Index"
         }
-    
+
         Text {
           id: headerAccount
           anchors.verticalCenter: parent.verticalCenter
@@ -70,7 +70,7 @@ ListView {
           padding: 5
           text: "Account"
         }
-    
+
         Text {
           id: headerBalance
           anchors.verticalCenter: parent.verticalCenter
