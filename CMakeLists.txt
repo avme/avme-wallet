@@ -29,7 +29,6 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-option(TESTNET OFF)
 message("C++ Standard: ${CMAKE_CXX_STANDARD}")
 message("C++ Standard is required: ${CMAKE_CXX_STANDARD_REQUIRED}")
 message("C++ extensions: ${CMAKE_CXX_EXTENSIONS}")
@@ -155,11 +154,6 @@ add_custom_command(
           -o "${CMAKE_SOURCE_DIR}/build/qml.cpp"
   DEPENDS always_rebuild
 )
-
-# Set testnet or mainnet
-if(TESTNET)
-  add_definitions(-DTESTNET)
-endif()
 
 # Compile the GUI executable
 if("${TOOLCHAIN_PREFIX}" STREQUAL "x86_64-w64-mingw32")

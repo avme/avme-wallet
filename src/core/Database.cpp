@@ -78,6 +78,9 @@ std::vector<std::string> Database::getAllTokenDBValues() {
 bool Database::openHistoryDB(std::string address) {
   std::string path = Utils::walletFolderPath.string()
     + "/wallet/c-avax/accounts/transactions/" + address;
+  // Automatically delete old history in JSON format if it exists
+  boost::filesystem::path oldPath = path;
+  if (boost::filesystem::is_regular_file(oldPath)) { boost::filesystem::remove(oldPath); }
   if (!exists(path)) { create_directories(path); }
   this->historyStatus = leveldb::DB::Open(this->historyOpts, path, &this->historyDB);
   return this->historyStatus.ok();

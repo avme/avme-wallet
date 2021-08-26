@@ -240,14 +240,7 @@ TransactionSkeleton Wallet::buildTransaction(
   txSkel.nonce = txNonce;
   txSkel.gas = u256(gasLimit);
   txSkel.gasPrice = u256(gasPrice);
-
-  // Support for EIP-155
-  #ifdef TESTNET
-    txSkel.chainId = 43113;
-  #else
-    txSkel.chainId = 43114;
-  #endif
-
+  txSkel.chainId = 43114; // Support for EIP-155
   return txSkel;
 }
 
@@ -272,11 +265,7 @@ std::string Wallet::sendTransaction(std::string txidHex, std::string operation) 
   // Send the transaction
   std::string txid = API::broadcastTx(txidHex);
   if (txid == "") { return ""; }
-  #ifdef TESTNET
-    std::string txLink = "https://cchain.explorer.avax-test.network/tx/" + txid;
-  #else
-    std::string txLink = "https://cchain.explorer.avax.network/tx/" + txid;
-  #endif
+  std::string txLink = "https://cchain.explorer.avax.network/tx/" + txid;
 
   /**
    * Store the successful transaction in the Account's history.
