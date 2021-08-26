@@ -32,7 +32,7 @@ void QmlSystem::downloadARC20TokenImage(QString address) {
   }
   API::httpGetFile(
     "raw.githubusercontent.com",
-    "/ava-labs/bridge-tokens/main/avalanche-tokens/" + addressStr + "/logo.png",
+    "/avme/avme-wallet-tokenlist/main/icons/" + addressStr + "/logo.png",
     filePath.string() + "/" + addressStr + ".png"
   );
 }
