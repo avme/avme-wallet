@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Wallet addresses can now be displayed as QR codes.
 - Transaction history and token information are now stored in LevelDB instead of JSON files.
   - This should make the wallet faster I/O-wise.
+  - Old history data for a given Account, if it exists, will be AUTOMATICALLY DELETED when choosing it.
 - Code is now separated in a more logical way in the `src` folder.
 - OpenSSL was moved to the depends system instead of being a git submodule.
 - A new API is being used, with support for multiple requests (thanks to Markus for the work!).
@@ -23,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - CLI executable for testing/debugging.
+- Support for testnet.
 
 ## [1.2.0] - 2021-06-14
 ### Added
