@@ -73,3 +73,7 @@ bool QmlSystem::seedIsValid(QString seed) {
   if (ct != 12) { return false; }
   return true;
 }
+
+void QmlSystem::setDefaultPathFolders() {
+  this->w.setDefaultPathFolders();
+}

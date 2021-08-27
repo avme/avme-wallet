@@ -37,6 +37,8 @@ class QmlSystem : public QObject {
     ledger::device ledgerDevice;
     bool firstLoad;
     bool ledgerFlag = false;
+    QString currentHardwareAccount;
+    QString currentHardwareAccountPath; 
 
   public slots:
     // Clean database, threads, etc before closing the program
@@ -57,7 +59,7 @@ class QmlSystem : public QObject {
 
     // Account screen signals
     void accountGenerated(QVariantMap data);
-    void ledgerAccountGenerated(QVariantMap data);
+    void ledgerAccountGenerated(QString dataStr);
     void accountCreated(bool success, QVariantMap data);
     void accountAVAXBalancesUpdated(
       QString address, QString avaxBalance, QString avaxValue, QString avaxPrice, QString avaxPriceData
@@ -94,6 +96,11 @@ class QmlSystem : public QObject {
     Q_INVOKABLE void setFirstLoad(bool b) { firstLoad = b; }
     Q_INVOKABLE bool getLedgerFlag() { return ledgerFlag; }
     Q_INVOKABLE void setLedgerFlag(bool b) { ledgerFlag = b; }
+    Q_INVOKABLE void setCurrentHardwareAccount(QString b) { currentHardwareAccount = b; }
+    Q_INVOKABLE QString getCurrentHardwareAccount() { return currentHardwareAccount; }
+    Q_INVOKABLE void setCurrentHardwareAccountPath(QString b) { currentHardwareAccountPath = b; }
+    Q_INVOKABLE QString getCurrentHardwareAccountPath() { return currentHardwareAccountPath; }
+
 
     // Get the project's version
     Q_INVOKABLE QString getProjectVersion();
@@ -213,6 +220,9 @@ class QmlSystem : public QObject {
     // (Re)Load the token and tx history databases, respectively.
     Q_INVOKABLE bool loadTokenDB();
     Q_INVOKABLE bool loadHistoryDB(QString address);
+
+    // Set/Create default folder path when loading with Ledger.
+    Q_INVOKABLE void setDefaultPathFolders();
 
     // ======================================================================
     // OVERVIEW SCREEN FUNCTIONS

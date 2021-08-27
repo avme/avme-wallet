@@ -120,7 +120,7 @@ namespace ledger {
       // Read more messages, if there is any.
       for (;;) {
         memset(receiveBuffer, 0, sizeof(receiveBuffer));
-        res = hid_read_timeout(this->device_handle, receiveBuffer, sizeof(receiveBuffer), 200);
+        res = hid_read_timeout(this->device_handle, receiveBuffer, sizeof(receiveBuffer), 20);
         if (res == 0) { break; }
         for (size_t i = 0; i < 64; ++i) { tmpRet[i] = receiveBuffer[i]; }
         ret.push_back(tmpRet);

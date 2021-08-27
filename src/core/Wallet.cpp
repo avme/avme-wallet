@@ -3,6 +3,18 @@
 // file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "Wallet.h"
 
+void Wallet::setDefaultPathFolders() {
+  auto defaultPath = Utils::getDataDir();
+  boost::filesystem::path walletFile = defaultPath.string() + "/wallet/c-avax/wallet.info";
+  boost::filesystem::path secretsFolder = defaultPath.string() + "/wallet/c-avax/accounts/secrets";
+  boost::filesystem::path historyFolder = defaultPath.string() + "/wallet/c-avax/accounts/transactions";
+  if (!exists(walletFile.parent_path())) { create_directories(walletFile.parent_path()); }
+  if (!exists(secretsFolder)) { create_directories(secretsFolder); }
+  if (!exists(historyFolder)) { create_directories(historyFolder); }
+  Utils::walletFolderPath = defaultPath;
+  return;
+}
+
 bool Wallet::create(boost::filesystem::path folder, std::string pass) {
   // Create the paths if they don't exist yet
   boost::filesystem::path walletFile = folder.string() + "/wallet/c-avax/wallet.info";
