@@ -46,14 +46,15 @@ AVMEPopup {
             calculateGas(true)
           } // TODO: ADD A ERROR HANDLER FOR INSUFICIENT BALANCE!!!
         } else {
-          gas = qmlApi.floor(qmlApi.mul(qmlApi.parseHex(answerJson[0]["result"], ["uint"]), 1.1))
-          loadingFees = false
+         gas = qmlApi.floor(qmlApi.mul(qmlApi.parseHex(answerJson[0]["result"], ["uint"]), 1.1))
+         loadingFees = false
         }
       }
     }
   }
 
   function calculateGas(raiseGas) {
+    randomID = qmlApi.getRandomID()
     if (raiseGas) {
       gasPrice = qmlApi.sum(gasPrice, 30)
     }
@@ -75,10 +76,10 @@ AVMEPopup {
       qmlApi.buildGetEstimateGasLimitReq(JSON.stringify(Params), "PopupConfirmTxGas_"+randomID)
       qmlApi.doAPIRequests("PopupConfirmTxGas_"+randomID)
     }
+    return
   }
 
   function setData(inputTo, inputValue, inputTxData, inputGas, inputGasPrice, inputAutomaticGas, inputInfo, inputHistoryInfo) {
-    randomID = qmlApi.getRandomID()
     to = inputTo
     value = inputValue
     txData = inputTxData
