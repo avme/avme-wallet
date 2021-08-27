@@ -67,7 +67,7 @@ class QmlSystem : public QObject {
     );
 
     // History screen signals
-    void historyLoaded(QVariantList data);
+    void historyLoaded(QString data);
 
     // Send screen signals
     void txStart(
