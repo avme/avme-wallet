@@ -101,9 +101,11 @@ void QmlSystem::makeTransaction(
     std::string signedTx;
     if (QmlSystem::getLedgerFlag()) {
       std::pair<bool, std::string> signStatus;
+      emit ledgerRequired();
       signStatus = this->ledgerDevice.signTransaction(
-        txSkel, this->w.getCurrentAccount().first
+        txSkel, this->getCurrentHardwareAccountPath().toStdString()
       );
+      emit ledgerDone();
       signSuccess = signStatus.first;
       signedTx = (signSuccess) ? signStatus.second : "";
       msg = (signSuccess) ? "Transaction signed!" : signStatus.second;

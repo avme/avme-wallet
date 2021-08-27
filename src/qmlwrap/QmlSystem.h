@@ -85,6 +85,8 @@ class QmlSystem : public QObject {
     void txSigned(bool b, QString msg);
     void txSent(bool b, QString linkUrl);
     void txRetry();
+    void ledgerRequired();
+    void ledgerDone();
 
   public:
     // ======================================================================

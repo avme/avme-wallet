@@ -35,6 +35,8 @@ AVMEPopup {
   onAboutToShow: passInput.focus = true
   onAboutToHide: confirmTxPopup.clean()
 
+  Timer { id: ledgerRetryTimer; interval: 125; onTriggered: checkLedger() }
+
   Connections {
     target: qmlApi
     function onApiRequestAnswered(answer, requestID) {
@@ -88,7 +90,24 @@ AVMEPopup {
     info = inputInfo
     operation = inputHistoryInfo
     automaticGas = inputAutomaticGas
-    calculateGas(false)
+    if (!qmlSystem.getLedgerFlag()) {
+      calculateGas(false)
+    } else {
+      checkLedger()
+    }
+  }
+
+  function checkLedger() {
+    var data = qmlSystem.checkForLedger()
+    if (data.state) {
+      ledgerFailPopup.close()
+      ledgerRetryTimer.stop()
+      calculateGas(false)
+    } else {
+      ledgerFailPopup.info = data.message
+      ledgerFailPopup.open()
+      ledgerRetryTimer.start()
+    }
   }
 
   function clean() {
@@ -141,6 +160,7 @@ AVMEPopup {
 
     Text {
       id: passInfo
+      visible: (qmlSystem.getLedgerFlag()) ? false : true
       anchors.horizontalCenter: parent.horizontalCenter
       horizontalAlignment: Text.AlignHCenter
       color: "#FFFFFF"
@@ -153,6 +173,7 @@ AVMEPopup {
 
     AVMEInput {
       id: passInput
+      visible: (qmlSystem.getLedgerFlag()) ? false : true
       anchors.horizontalCenter: parent.horizontalCenter
       width: confirmTxPopup.width / 2
       echoMode: TextInput.Password
@@ -174,9 +195,9 @@ AVMEPopup {
       AVMEButton {
         id: btnOk
         text: "OK"
-        enabled: (passInput.text !== "" && !loadingFees)
+        enabled: (qmlSystem.getLedgerFlag()) ? true : (passInput.text !== "" && !loadingFees)
         onClicked: {
-          if (!qmlSystem.checkWalletPass(passInput.text)) {
+          if (!qmlSystem.checkWalletPass(passInput.text) && !qmlSystem.getLedgerFlag()) {
             infoTimer.start()
           } else {
             // You have to provide the information before closing the popup
@@ -190,5 +211,13 @@ AVMEPopup {
         }
       }
     }
+  }
+
+  // Info popup for if communication with Ledger fails
+  AVMEPopupInfo {
+    id: ledgerFailPopup
+    icon: "qrc:/img/warn.png"
+    onAboutToHide: ledgerRetryTimer.stop()
+    okBtn.text: "Close"
   }
 }

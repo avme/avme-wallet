@@ -20,6 +20,7 @@ Rectangle {
   property string coinUSDPriceChart
   property string totalFiatBalance
   property string gasPrice
+  property bool isLedger: qmlSystem.getLedgerFlag()
 
   property var tokenList: ({})
   height: 50
@@ -29,6 +30,7 @@ Rectangle {
 
   Timer { id: addressTimer; interval: 1000 }
   Timer { id: balancesTimer; interval: 1000; repeat: true; onTriggered: refreshBalances() }
+  // TODO: Remove all "useless" ledger calls
   Timer { id: ledgerRetryTimer; interval: 250; onTriggered: checkLedger() }
 
   Connections {
@@ -80,10 +82,8 @@ Rectangle {
     if (data.state) {
       ledgerFailPopup.close()
       ledgerRetryTimer.stop()
-      ledgerPopup.open()
     } else {
       ledgerFailPopup.info = data.message
-      ledgerFailPopup.open()
       ledgerRetryTimer.start()
     }
   }
