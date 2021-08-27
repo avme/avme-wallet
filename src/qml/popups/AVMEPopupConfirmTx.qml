@@ -43,7 +43,6 @@ AVMEPopup {
       // randomID is used so it doesn't trigged other popups connections
       if (requestID == "PopupConfirmTxGas_"+randomID) {
         var answerJson = JSON.parse(answer)
-        console.log(answer)
         if (!answerJson[0]["result"]) {
           if (answerJson[0]["error"]["message"].includes("max fee per gas less than block base fee")) {
             calculateGas(true)

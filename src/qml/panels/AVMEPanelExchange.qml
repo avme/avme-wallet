@@ -385,7 +385,6 @@ AVMEPanel {
       if (!isInverse) {
         ethCallJson["args"].push(String(qmlApi.fixedPointToWei(amountIn, fromAssetPopup.chosenAssetDecimals)))
       } else {
-        console.log(qmlApi.fixedPointToWei(amountIn, toAssetPopup.chosenAssetDecimals))
         ethCallJson["args"].push(String(qmlApi.fixedPointToWei(amountIn, toAssetPopup.chosenAssetDecimals)))
       }
       // 1% Slippage TODO: Add setting to change slippage
