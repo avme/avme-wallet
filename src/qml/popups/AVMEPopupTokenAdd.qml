@@ -6,9 +6,7 @@ import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
 
-/**
- * Popup for adding a new ARC20 token.
- */
+// Popup for adding a new ARC20 token from a given address.
 AVMEPopup {
   id: addTokenPopup
 

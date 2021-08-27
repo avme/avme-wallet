@@ -11,6 +11,7 @@ AVMEPanel {
   id: tokensPanel
   title: "Token List"
   property alias selectedToken: tokenGrid.currentItem
+  property alias addListBtn: btnAddList
   property alias addTokenBtn: btnAddToken
   property alias removeTokenBtn: btnRemoveToken
 
@@ -58,18 +59,23 @@ AVMEPanel {
     spacing: 20
 
     AVMEButton {
+      id: btnAddList
+      width: (tokensPanel.width * 0.275)
+      text: "Add new token"
+    }
+    AVMEButton {
       id: btnAddToken
-      width: (tokensPanel.width * 0.3)
-      text: "Add a new token"
+      width: (tokensPanel.width * 0.275)
+      text: "Add token from address"
     }
     AVMEButton {
       id: btnRemoveToken
-      width: (tokensPanel.width * 0.3)
+      width: (tokensPanel.width * 0.275)
       enabled: (
         tokenGrid.currentItem != null &&
         tokenGrid.currentItem.itemAddress != qmlSystem.getContract("AVME")
       )
-      text: (enabled) ? "Remove this token" : "Can't remove"
+      text: (enabled) ? "Remove token" : "Can't remove"
     }
   }
 }

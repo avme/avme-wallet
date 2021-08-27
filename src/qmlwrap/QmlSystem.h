@@ -248,6 +248,9 @@ class QmlSystem : public QObject {
     Q_INVOKABLE void downloadARC20TokenImage(QString address);
     Q_INVOKABLE QString getARC20TokenImage(QString address);
 
+    // Get the ARC20 token list from the repo.
+    Q_INVOKABLE QVariantList getARC20TokenList();
+
     // Add and remove a token from the list, respectively.
     Q_INVOKABLE bool addARC20Token(
       QString address, QString symbol, QString name, int decimals, QString avaxPairContract
