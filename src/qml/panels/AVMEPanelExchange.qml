@@ -64,8 +64,13 @@ AVMEPanel {
   Timer { id: allowanceTimer; interval: 100; repeat: true; onTriggered: (fetchAllowance(false)) }
   // Timer is needed, because declaring on the variable itself doesn't cause it to change.
   Timer { id: swapTimer; interval: 10; repeat: true; onTriggered: {
-      swapEstimate = calculateExchangeAmount(swapInput.text, fromAssetPopup.chosenAssetDecimals, toAssetPopup.chosenAssetDecimals)
-      swapImpact = calculatePriceImpact(swapInput.text, fromAssetPopup.chosenAssetDecimals, toAssetPopup.chosenAssetDecimals)
+      if (!isInverse) {
+        swapEstimate = calculateExchangeAmount(swapInput.text, fromAssetPopup.chosenAssetDecimals, toAssetPopup.chosenAssetDecimals)
+        swapImpact = calculatePriceImpact(swapInput.text, fromAssetPopup.chosenAssetDecimals, toAssetPopup.chosenAssetDecimals)
+      } else {
+        swapEstimate = calculateExchangeAmount(swapInput.text, toAssetPopup.chosenAssetDecimals, fromAssetPopup.chosenAssetDecimals)
+        swapImpact = calculatePriceImpact(swapInput.text, toAssetPopup.chosenAssetDecimals, fromAssetPopup.chosenAssetDecimals)
+      }
     }
   }
 
@@ -194,15 +199,15 @@ AVMEPanel {
       if (!isInverse) {
       amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[0]["inReserves"], reservesList[0]["outReserves"], inDecimals, outDecimals)
       } else {
-        amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[0]["outReserves"], reservesList[0]["inReserves"], outDecimals, inDecimals)
+        amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[0]["outReserves"], reservesList[0]["inReserves"], inDecimals, outDecimals)
       }
     } else {
       if (!isInverse) {
         amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[0]["inReserves"], reservesList[0]["outReserves"], inDecimals, 18)
         amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[1]["inReserves"], reservesList[1]["outReserves"], 18, outDecimals)
       } else {
-        amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[1]["outReserves"], reservesList[1]["inReserves"], 18, outDecimals)
-        amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[0]["outReserves"], reservesList[0]["inReserves"], inDecimals, 18)
+        amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[1]["outReserves"], reservesList[1]["inReserves"], inDecimals, 18)
+        amountIn = qmlSystem.calculateExchangeAmount(amountIn, reservesList[0]["outReserves"], reservesList[0]["inReserves"], 18, outDecimals)
       }
     }
     return amountIn
@@ -334,7 +339,7 @@ AVMEPanel {
     info = "You will Swap <b>" + amountIn + " " + fromAssetPopup.chosenAssetSymbol + "<\b> to <b>"
     info += amountOut + " " + toAssetPopup.chosenAssetSymbol + "<\b> on Pangolin"
     historyInfo = "Swap <b>" + fromAssetPopup.chosenAssetSymbol + "<\b> to <b>" + toAssetPopup.chosenAssetSymbol + "<\b>"
-    if (fromAssetPopup.chosenAssetSymbol == "AVAX" || (toAssetPopup.chosenAssetSymbol == "AVAX" && isInverse)) {
+    if ((fromAssetPopup.chosenAssetSymbol == "AVAX" && !isInverse) || (toAssetPopup.chosenAssetSymbol == "AVAX" && isInverse)) {
       coinValue = String(amountIn)
       var ethCallJson = ({})
       var routing = ([])
@@ -342,10 +347,19 @@ AVMEPanel {
       ethCallJson["args"] = []
       // 1% Slippage TODO: Add setting to change slippage
       //uint256 amountOutMin
-      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals), 0.99)))
+      if (!isInverse) {
+        ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals), 0.99)))
+      } else {
+        ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, fromAssetPopup.chosenAssetDecimals), 0.99)))
+      }
       //address[] path
-      routing.push(qmlSystem.getContract("AVAX"))
-      routing.push(toAssetPopup.chosenAssetAddress)
+      if (!isInverse) {
+        routing.push(qmlSystem.getContract("AVAX"))
+        routing.push(toAssetPopup.chosenAssetAddress)
+      } else {
+        routing.push(qmlSystem.getContract("AVAX"))
+        routing.push(fromAssetPopup.chosenAssetAddress)
+      }
       ethCallJson["args"].push(routing)
       //address to
       ethCallJson["args"].push(qmlSystem.getCurrentAccount())
@@ -361,20 +375,30 @@ AVMEPanel {
       txData = ABI
       return;
     }
-    if (toAssetPopup.chosenAssetSymbol == "AVAX"|| (fromAssetPopup.chosenAssetSymbol == "AVAX" && isInverse)) {
+    if ((toAssetPopup.chosenAssetSymbol == "AVAX" && !isInverse) || (fromAssetPopup.chosenAssetSymbol == "AVAX" && isInverse)) {
       coinValue = 0
       var ethCallJson = ({})
       var routing = ([])
       ethCallJson["function"] = "swapExactTokensForAVAX(uint256,uint256,address[],address,uint256)"
       ethCallJson["args"] = []
       // uint256 amountIn
-      ethCallJson["args"].push(String(qmlApi.fixedPointToWei(amountIn, toAssetPopup.chosenAssetDecimals)))
+      if (!isInverse) {
+        ethCallJson["args"].push(String(qmlApi.fixedPointToWei(amountIn, fromAssetPopup.chosenAssetDecimals)))
+      } else {
+        console.log(qmlApi.fixedPointToWei(amountIn, toAssetPopup.chosenAssetDecimals))
+        ethCallJson["args"].push(String(qmlApi.fixedPointToWei(amountIn, toAssetPopup.chosenAssetDecimals)))
+      }
       // 1% Slippage TODO: Add setting to change slippage
       // amountOutMin
-      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals), 0.99)))
+      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, 18), 0.99)))
       // address[] path
-      routing.push(fromAssetPopup.chosenAssetAddress)
-      routing.push(qmlSystem.getContract("AVAX"))
+      if (!isInverse) {
+        routing.push(fromAssetPopup.chosenAssetAddress)
+        routing.push(qmlSystem.getContract("AVAX"))
+      } else {
+        routing.push(toAssetPopup.chosenAssetAddress)
+        routing.push(qmlSystem.getContract("AVAX"))
+      }
       ethCallJson["args"].push(routing)
       // address to
       ethCallJson["args"].push(qmlSystem.getCurrentAccount())
@@ -387,6 +411,7 @@ AVMEPanel {
       ethCallJson["types"].push("address")
       ethCallJson["types"].push("uint*")
       var ethCallString = JSON.stringify(ethCallJson)
+      console.log(ethCallString)
       var ABI = qmlApi.buildCustomABI(ethCallString)
       txData = ABI
       return;
@@ -398,10 +423,18 @@ AVMEPanel {
       ethCallJson["function"] = "swapExactTokensForTokens(uint256,uint256,address[],address,uint256)"
       ethCallJson["args"] = []
       // uint256 amountIn
-      ethCallJson["args"].push(String(qmlApi.fixedPointToWei(amountIn, toAssetPopup.chosenAssetDecimals)))
+      if (!isInverse) {
+        ethCallJson["args"].push(String(qmlApi.fixedPointToWei(amountIn, fromAssetPopup.chosenAssetDecimals)))
+      } else {
+        ethCallJson["args"].push(String(qmlApi.fixedPointToWei(amountIn, toAssetPopup.chosenAssetDecimals)))
+      }
       // 1% Slippage TODO: Add setting to change slippage
       // amountOutMin
-      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals), 0.99)))
+      if (!isInverse) {
+        ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals), 0.99)))
+      } else {
+        ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, fromAssetPopup.chosenAssetDecimals), 0.99)))
+      }
       // address[] path
       if (!isInverse) {
         routing.push(fromAssetPopup.chosenAssetAddress)
@@ -440,6 +473,7 @@ AVMEPanel {
     } else {
       isInverse = true
     }
+    swapInput.text = ""
     refreshAssetBalance()
   }
 
@@ -656,7 +690,7 @@ AVMEPanel {
       id: swapInput
       width: (parent.width * 0.8)
       validator: RegExpValidator {
-        regExp: qmlSystem.createTxRegExp(fromAssetPopup.chosenAssetDecimals)
+        regExp: qmlSystem.createTxRegExp((!isInverse) ? fromAssetPopup.chosenAssetDecimals : toAssetPopup.chosenAssetDecimals)
       }
       label: (!isInverse) ? fromAssetPopup.chosenAssetSymbol + " Amount" : toAssetPopup.chosenAssetSymbol + " Amount"
       placeholder: (enabled) ? "Fixed point amount (e.g. 0.5)" : "Loading reserves..."
