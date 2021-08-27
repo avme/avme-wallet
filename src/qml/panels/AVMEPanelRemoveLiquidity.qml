@@ -156,7 +156,7 @@ AVMEPanel {
     info = "You will approve <b>"
     + (removeAsset1Popup.chosenAssetSymbol) + "/" + removeAsset2Popup.chosenAssetSymbol
     + "</b> LP in Pangolin router contract"
-    historyInfo = "Approve <\b>" + (removeAsset1Popup.chosenAssetSymbol) + "/" + removeAsset2Popup.chosenAssetSymbol + "<\b>in Pangolin"
+    historyInfo = "Approve <\b>" + (removeAsset1Popup.chosenAssetSymbol) + "/" + removeAsset2Popup.chosenAssetSymbol + " PGL <\b>in Pangolin"
     ethCallJson["function"] = "approve(address,uint256)"
     ethCallJson["args"] = []
     ethCallJson["args"].push(qmlSystem.getContract("router"))
@@ -179,6 +179,7 @@ AVMEPanel {
     + " and "
     + qmlApi.weiToFixedPoint(removeAsset2Estimate, removeAsset2Popup.chosenAssetDecimals) + " " + removeAsset2Popup.chosenAssetSymbol
     + "<br></b> LP in Pangolin router contract (estimated)"
+    historyInfo = "Remove <b>" + removeAsset1Popup.chosenAssetSymbol  + "<\b> and <b> " + removeAsset2Popup.chosenAssetSymbol + "<\b> from Pangolin Liquidity"
     if (removeAsset1Popup.chosenAssetSymbol == "AVAX" || removeAsset2Popup.chosenAssetSymbol == "AVAX") {
       ethCallJson["function"] = "removeLiquidityAVAX(address,uint256,uint256,uint256,address,uint256)"
       ethCallJson["args"] = []

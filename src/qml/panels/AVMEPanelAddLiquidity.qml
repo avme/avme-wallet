@@ -332,7 +332,7 @@ AVMEPanel {
     gas = 300000
     info = "You will Add <b>" + addAsset1Input.text + " " + addAsset1Popup.symbol + "<\b> <br>and<br> <b>"
     info += addAsset1Input.text + " " + addAsset2Popup.symbol + "<\b> on Pangolin Liquidity Pool"
-    historyInfo = "Add <b>" + addAsset1Input.text + "<\b> and <b>" + addAsset2Popup.symbol + "<\b> to Pangolin Liquidity"
+    historyInfo = "Add <b>" + addAsset1Popup.chosenAssetSymbol + "<\b> and <b>" + addAsset2Popup.chosenAssetSymbol + "<\b> to Pangolin Liquidity"
     if (addAsset1Popup.chosenAssetSymbol == "AVAX" || addAsset2Popup.chosenAssetSymbol == "AVAX") {
       var ethCallJson = ({})
       ethCallJson["function"] = "addLiquidityAVAX(address,uint256,uint256,uint256,address,uint256)"
