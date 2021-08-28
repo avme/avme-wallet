@@ -13,6 +13,14 @@
 #include <boost/lexical_cast.hpp>
 #include <qrencode.h>
 
+#ifdef __MINGW32__
+#include <winsock2.h> // Windows.h asked for winsock2 to be included.
+#include <windows.h>
+#include <io.h>
+#include <shellapi.h>
+#include <shlobj.h>
+#endif
+
 #include <openssl/rand.h>
 
 #include <lib/devcore/CommonIO.h>
