@@ -132,3 +132,59 @@ std::vector<std::string> Database::getAllHistoryDBValues() {
   return ret;
 }
 
+// ======================================================================
+// LEDGER DATABASE FUNCTIONS
+// ======================================================================
+
+bool Database::openLedgerDB() {
+  std::string path = Utils::walletFolderPath.string() + "/wallet/c-avax/accounts/ledger";
+  if (!exists(path)) { create_directories(path); }
+  this->ledgerStatus = leveldb::DB::Open(this->ledgerOpts, path, &this->ledgerDB);
+  return this->ledgerStatus.ok();
+}
+
+std::string Database::getLedgerDBStatus() {
+  return this->ledgerStatus.ToString();
+}
+
+void Database::closeLedgerDB() {
+  delete this->ledgerDB;
+  this->ledgerDB = NULL;
+}
+
+bool Database::isLedgerDBOpen() {
+  return (this->ledgerDB != NULL);
+}
+
+bool Database::ledgerDBKeyExists(std::string key) {
+  leveldb::Iterator* it = this->ledgerDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    if (it->key().ToString() == key) return true;
+  }
+  return false;
+}
+
+std::string Database::getLedgerDBValue(std::string key) {
+  this->ledgerStatus = this->ledgerDB->Get(leveldb::ReadOptions(), key, &this->ledgerValue);
+  return (this->ledgerStatus.ok()) ? this->ledgerValue : this->ledgerStatus.ToString();
+}
+
+bool Database::putLedgerDBValue(std::string key, std::string value) {
+  this->ledgerStatus = this->ledgerDB->Put(leveldb::WriteOptions(), key, value);
+  return this->ledgerStatus.ok();
+}
+
+bool Database::deleteLedgerDBValue(std::string key) {
+  this->ledgerStatus = this->ledgerDB->Delete(leveldb::WriteOptions(), key);
+  return this->ledgerStatus.ok();
+}
+
+std::vector<std::string> Database::getAllLedgerDBValues() {
+  std::vector<std::string> ret;
+  leveldb::Iterator* it = this->ledgerDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    ret.push_back(it->value().ToString());
+  }
+  delete it;
+  return ret;
+}
