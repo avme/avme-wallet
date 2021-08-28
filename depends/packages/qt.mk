@@ -10,7 +10,7 @@ $(package)_qt_libs=corelib concurrent network widgets gui plugins testlib qlalr
 $(package)_patches=fix_qt_pkgconfig.patch mac-qmake.conf fix_no_printer.patch no-xlib.patch
 $(package)_patches+= fix_android_jni_static.patch dont_hardcode_pwd.patch
 $(package)_patches+= drop_lrelease_dependency.patch fix_qpainter_non_determinism.patch
-$(package)_patches+= no_sdk_version_check.patch fix_limits_header.patch
+$(package)_patches+= no_sdk_version_check.patch fix_limits_header.patch openssl-qt-crosscompile.patch
 
 $(package)_qttranslations_file_name=qttranslations-$($(package)_suffix)
 $(package)_qttranslations_sha256_hash=d5788e86257b21d5323f1efd94376a213e091d1e5e03b45a95dd052b5f570db8
@@ -160,6 +160,10 @@ $(package)_config_opts_mingw32 += -no-dbus
 $(package)_config_opts_mingw32 += -xplatform win32-g++
 $(package)_config_opts_mingw32 += -device-option CROSS_COMPILE="$(host)-"
 $(package)_config_opts_mingw32 += -pch
+$(package)_config_opts_mingw32 += -openssl-linked
+$(package)_config_opts_mingw32 += -static-runtime
+$(package)_config_opts_mingw32 += -L $(host_prefix)/lib
+$(package)_config_opts_mingw32 += -I $(host_prefix)/include
 
 $(package)_config_opts_android = -xplatform android-clang
 $(package)_config_opts_android += -android-sdk $(ANDROID_SDK)
@@ -250,6 +254,7 @@ define $(package)_preprocess_cmds
   patch -p1 -i $($(package)_patch_dir)/fix_qpainter_non_determinism.patch && \
   patch -p1 -i $($(package)_patch_dir)/no_sdk_version_check.patch && \
   patch -p1 -i $($(package)_patch_dir)/fix_limits_header.patch && \
+  patch -p1 -i $($(package)_patch_dir)/openssl-qt-crosscompile.patch && \
   sed -i.old "s|updateqm.commands = \$$$$\$$$$LRELEASE|updateqm.commands = $($(package)_extract_dir)/qttools/bin/lrelease|" qttranslations/translations/translations.pro && \
   mkdir -p qtbase/mkspecs/macx-clang-linux &&\
   cp -f qtbase/mkspecs/macx-clang/qplatformdefs.h qtbase/mkspecs/macx-clang-linux/ &&\
