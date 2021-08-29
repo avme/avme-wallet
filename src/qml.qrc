@@ -119,6 +119,7 @@
         <file>img/icons/qrcodeSelect.png</file>
         <file>img/icons/arrow.png</file>
         <file>img/icons/backArrow.png</file>
+        <file>img/icons/ledgerIcon.png</file>
 
         <file>fonts/IBMPlexMono-Bold.ttf</file>
         <file>fonts/IBMPlexMono-Italic.ttf</file>

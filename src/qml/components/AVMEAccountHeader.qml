@@ -226,12 +226,8 @@ Rectangle {
     }
     text: "Change Account"
     onClicked: {
-      if (qmlSystem.getLedgerFlag()) {
-        checkLedger()
-      } else {
-        qmlSystem.hideMenu()
-        qmlSystem.setScreen(content, "qml/screens/AccountsScreen.qml")
-      }
+      qmlSystem.hideMenu()
+      qmlSystem.setScreen(content, "qml/screens/AccountsScreen.qml")
     }
   }
 

@@ -45,6 +45,7 @@ class QmlSystem : public QObject {
     void cleanAndClose() {
       this->w.closeTokenDB();
       this->w.closeHistoryDB();
+      this->w.closeLedgerDB();
       return;
     }
 
@@ -198,8 +199,11 @@ class QmlSystem : public QObject {
     // Emits accountCreated() on success, accountCreationFailed() on failure
     Q_INVOKABLE void createAccount(QString seed, int index, QString name, QString pass);
 
-    // Import a Ledger account to the Wallet
+    // Import a Ledger account to the Wallet DB
     Q_INVOKABLE void importLedgerAccount(QString address, QString path);
+    
+    // Delete a ledger account on the wallet DB
+    Q_INVOKABLE bool deleteLedgerAccount(QString address);
 
     // Erase an Account
     Q_INVOKABLE bool eraseAccount(QString account);
@@ -222,6 +226,10 @@ class QmlSystem : public QObject {
     // (Re)Load the token and tx history databases, respectively.
     Q_INVOKABLE bool loadTokenDB();
     Q_INVOKABLE bool loadHistoryDB(QString address);
+
+    // (Re)Load ledger DB which contains ledger accoutns
+
+    Q_INVOKABLE bool loadLedgerDB();
 
     // Set/Create default folder path when loading with Ledger.
     Q_INVOKABLE void setDefaultPathFolders();

@@ -66,19 +66,6 @@ Item {
     }
   }
 
-  function checkLedger() {
-    var data = qmlSystem.checkForLedger()
-    if (data.state) {
-      ledgerFailPopup.close()
-      ledgerRetryTimer.stop()
-      ledgerPopup.open()
-    } else {
-      ledgerFailPopup.info = data.message
-      ledgerFailPopup.open()
-      ledgerRetryTimer.start()
-    }
-  }
-
   function useSeed() {
     createWalletPopup.seed = seedPopup.fullSeed
     seedPopup.clean()

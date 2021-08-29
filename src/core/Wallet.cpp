@@ -82,12 +82,21 @@ bool Wallet::loadHistoryDB(std::string address) {
   return this->db.openHistoryDB(address);
 }
 
+bool Wallet::loadLedgerDB() {
+  if (this->db.isLedgerDBOpen()) { this->db.closeLedgerDB(); }
+  return this->db.openLedgerDB();
+}
+
 void Wallet::closeTokenDB() {
   this->db.closeTokenDB();
 }
 
 void Wallet::closeHistoryDB() {
   this->db.closeHistoryDB();
+}
+
+void Wallet::closeLedgerDB() {
+  this->db.closeLedgerDB();
 }
 
 void Wallet::loadARC20Tokens() {
@@ -164,13 +173,30 @@ std::pair<std::string, std::string> Wallet::createAccount(
   return std::make_pair(k.address().hex(), name);
 }
 
-void Wallet::importLedgerAccount(std::string address, std::string path) {
-  // Only import if it hasn't been imported yet
-  if (this->ledgerAccounts.find(address) == this->ledgerAccounts.end()) {
-    this->ledgerAccounts.emplace(address, "ledger-" + path);
-  }
+bool Wallet::importLedgerAccount(std::string address, std::string path) {
+  json ledgerAccount;
+  ledgerAccount["address"] = address;
+  ledgerAccount["index"] = path;
+  bool success = this->db.putLedgerDBValue(address, ledgerAccount.dump());
+  if (success) { loadLedgerDB(); }
+  return success;
 }
 
+std::vector<ledger::account> Wallet::getAllLedgerAccounts() {
+  std::vector<ledger::account> ret;
+  auto accountsList = this->db.getAllLedgerDBValues();
+  for (auto account : accountsList) {
+    auto accountJson = json::parse(account);
+    ret.push_back({accountJson["address"], accountJson["index"]});
+  }
+  return ret;
+}
+
+
+bool Wallet::deleteLedgerAccount(std::string address) {
+  bool success = this->db.deleteLedgerDBValue(address);
+  return success;
+}
 bool Wallet::eraseAccount(std::string address) {
   if (accountExists(address)) {
     this->km.kill(userToAddress(address));

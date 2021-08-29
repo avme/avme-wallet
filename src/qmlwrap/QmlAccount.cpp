@@ -23,11 +23,23 @@ void QmlSystem::loadAccounts() {
 QVariantList QmlSystem::listAccounts() {
   QVariantList ret;
   for (std::pair<std::string, std::string> a : this->w.getAccounts()) {
-    std::string obj;
-    obj += "{\"address\": \"" + a.first;
-    obj += "\", \"name\": \"" + a.second;
-    obj += "\"}";
-    ret << QString::fromStdString(obj);
+    json obj;
+    obj["address"] = a.first;
+    obj["name"] = a.second;
+    obj["isLedger"] = false;
+    obj["derivationPath"] = "";
+    ret << QString::fromStdString(obj.dump());
+  }
+
+  auto ledgerAccounts = this->w.getAllLedgerAccounts();
+  for (auto ledgerAccount : ledgerAccounts) {
+    json obj;
+    obj["address"] = ledgerAccount.address;
+    // Name for Ledger accounts??
+    obj["name"] = "";
+    obj["isLedger"] = true;
+    obj["derivationPath"] = ledgerAccount.index;
+    ret << QString::fromStdString(obj.dump());
   }
   return ret;
 }
@@ -117,7 +129,19 @@ void QmlSystem::createAccount(QString seed, int index, QString name, QString pas
 }
 
 void QmlSystem::importLedgerAccount(QString address, QString path) {
-  this->w.importLedgerAccount(address.toStdString(), path.toStdString());
+  QVariantMap obj;
+  // TODO: avoid same account to be imported multiple times
+  bool success = this->w.importLedgerAccount(address.toStdString(), path.toStdString());
+  if (!success) {
+    emit accountCreated(false, obj);
+  } else {
+    emit accountCreated(true, obj);
+  }
+}
+
+bool QmlSystem::deleteLedgerAccount(QString address) {
+  bool success = this->w.deleteLedgerAccount(address.toStdString());
+  return success;
 }
 
 bool QmlSystem::eraseAccount(QString account) {
@@ -345,4 +369,8 @@ bool QmlSystem::loadTokenDB() {
 
 bool QmlSystem::loadHistoryDB(QString address) {
   return this->w.loadHistoryDB(address.toStdString());
+}
+
+bool QmlSystem::loadLedgerDB() {
+  return this->w.loadLedgerDB();
 }

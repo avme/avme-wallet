@@ -14,6 +14,7 @@ AVMEPanel {
   property alias btnImport: importBtn
   property alias btnSelect: selectBtn
   property alias btnErase: eraseBtn
+  property alias btnCreateLedger: createLedgerBtn
   title: "Accounts"
 
   Rectangle {
@@ -54,23 +55,29 @@ AVMEPanel {
 
     AVMEButton {
       id: selectBtn
-      width: (accountSelectPanel.width * 0.2)
+      width: (accountSelectPanel.width * 0.15)
       text: "Select This Account"
     }
     AVMEButton {
       id: createBtn
-      width: (accountSelectPanel.width * 0.2)
+      width: (accountSelectPanel.width * 0.15)
       text: "Create New Account"
     }
     AVMEButton {
       id: importBtn
-      width: (accountSelectPanel.width * 0.2)
-      text: "Import Account From Seed"
+      width: (accountSelectPanel.width * 0.15)
+      text: "Import From Seed"
     }
     AVMEButton {
       id: eraseBtn
-      width: (accountSelectPanel.width * 0.2)
+      width: (accountSelectPanel.width * 0.15)
       text: "Erase This Account"
+    }
+
+    AVMEButton {
+      id: createLedgerBtn
+      width: (accountSelectPanel.width * 0.15)
+      text: "Import Ledger Account"
     }
   }
 }

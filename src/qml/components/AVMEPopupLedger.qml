@@ -165,17 +165,7 @@ Popup {
       enabled: (!isWaiting && ledgerAccountList.currentIndex > -1)
       text: "Choose this Account"
       onClicked: {
-        qmlSystem.setLedgerFlag(true);
-        qmlSystem.setCurrentHardwareAccount(ledgerList.currentItem.itemAccount)
-        qmlSystem.setCurrentHardwareAccountPath(ledgerPopup.pathValue + ledgerPopup.index)
-        qmlSystem.importLedgerAccount(qmlSystem.getCurrentHardwareAccount(), qmlSystem.getCurrentHardwareAccountPath());
-        qmlSystem.setDefaultPathFolders()
-        qmlSystem.loadTokenDB()
-        qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
-        qmlSystem.loadARC20Tokens()
-        accountHeader.getAddress()
-        qmlSystem.goToOverview();
-        qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
+        qmlSystem.importLedgerAccount(ledgerList.currentItem.itemAccount, ledgerPopup.pathValue + ledgerPopup.index);
       }
     }
     AVMEButton {

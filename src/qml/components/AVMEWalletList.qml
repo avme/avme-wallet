@@ -43,6 +43,8 @@ ListView {
       readonly property string itemAddress: address
       readonly property string itemCoinAmount: coinAmount
       readonly property string itemCoinValue: coinValue
+      readonly property bool itemIsLedger: isLedger
+      readonly property string itemDerivationPath: derivationPath
 			width: parent.parent.width / 4
       height: parent.height
 
@@ -75,7 +77,7 @@ ListView {
 				height: (parent.height * 0.95)
 
 				Image {
-					source: "qrc:/img/icons/Icon_Profile_White.png"
+					source: (!itemIsLedger) ? "qrc:/img/icons/Icon_Profile_White.png" : "qrc:/img/icons/ledgerIcon.png"
 					anchors.top: parent.top
 					anchors.topMargin: parent.height * 0.1
 					anchors.horizontalCenter: parent.horizontalCenter

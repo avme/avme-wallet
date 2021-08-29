@@ -19,6 +19,7 @@ Item {
         chooseAccountPopup.clean()
         chooseAccountPopup.close()
         accountInfoPopup.close()
+        ledgerPopup.close()
         fetchAccounts()
       } else {
         accountInfoPopup.close()
@@ -39,8 +40,10 @@ Item {
     }
   }
 
-  Component.onCompleted: fetchAccounts()
-
+  Component.onCompleted: {
+    qmlSystem.loadLedgerDB()
+    fetchAccounts()
+  }
   function fetchAccounts() {
     accountSelectPanel.accountModel.clear()
     var accList = qmlSystem.listAccounts()
@@ -63,6 +66,21 @@ Item {
     chooseAccountPopup.open()
   }
 
+  function checkLedger() {
+    var data = qmlSystem.checkForLedger()
+    if (data.state) {
+      ledgerFailPopup.close()
+      ledgerRetryTimer.stop()
+      ledgerPopup.open()
+    } else {
+      ledgerFailPopup.info = data.message
+      ledgerFailPopup.open()
+      ledgerRetryTimer.start()
+    }
+  }
+
+  Timer { id: ledgerRetryTimer; interval: 250; onTriggered: parent.checkLedger() }
+
   AVMEPopupChooseAccount { id: chooseAccountPopup }
   AVMEPopupSeed { id: seedPopup }
 
@@ -74,14 +92,30 @@ Item {
     btnCreate.onClicked: chooseAccountPopup.open()
     btnImport.onClicked: seedPopup.open()
     btnSelect.onClicked: {
-      qmlSystem.setCurrentAccount(accountList.currentItem.itemAddress)
-      qmlSystem.loadTokenDB()
-      qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
-      qmlSystem.loadARC20Tokens()
-      accountHeader.getAddress()
-      qmlSystem.goToOverview()
-      qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
+      if (accountList.currentItem.itemIsLedger) {
+        qmlSystem.setLedgerFlag(true);
+        qmlSystem.setCurrentHardwareAccount(accountList.currentItem.itemAddress)
+        qmlSystem.setCurrentHardwareAccountPath(accountList.currentItem.itemDerivationPath)
+        qmlSystem.importLedgerAccount(qmlSystem.getCurrentHardwareAccount(), qmlSystem.getCurrentHardwareAccountPath());
+        qmlSystem.setDefaultPathFolders()
+        qmlSystem.loadTokenDB()
+        qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
+        qmlSystem.loadARC20Tokens()
+        accountHeader.getAddress()
+        qmlSystem.goToOverview();
+        qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
+      } else {
+        qmlSystem.setLedgerFlag(false);
+        qmlSystem.setCurrentAccount(accountList.currentItem.itemAddress)
+        qmlSystem.loadTokenDB()
+        qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
+        qmlSystem.loadARC20Tokens()
+        accountHeader.getAddress()
+        qmlSystem.goToOverview()
+        qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
+      }
     }
+    btnCreateLedger.onClicked: checkLedger()
     btnErase.onClicked: confirmErasePopup.open()
   }
 
@@ -123,17 +157,37 @@ Item {
       confirmErasePopup.close()
       accountInfoPopup.text = "Erasing Account..."
       accountInfoPopup.open()
-      if (qmlSystem.eraseAccount(accountSelectPanel.accountList.currentItem.itemAddress)) {
-        accountInfoPopup.close()
-        fetchAccounts()
+      if (accountSelectPanel.accountList.currentItem.itemIsLedger) {
+        if (qmlSystem.deleteLedgerAccount(accountSelectPanel.accountList.currentItem.itemAddress)) {
+          accountInfoPopup.close()
+          fetchAccounts()
+        } else {
+          accountInfoPopup.close()
+          eraseFailPopup.open()
+        }
       } else {
-        accountInfoPopup.close()
-        eraseFailPopup.open()
+        if (qmlSystem.eraseAccount(accountSelectPanel.accountList.currentItem.itemAddress)) {
+          accountInfoPopup.close()
+          fetchAccounts()
+        } else {
+          accountInfoPopup.close()
+          eraseFailPopup.open()
+        }
       }
     }
     noBtn.onClicked: {
       confirmErasePopup.close()
     }
+  }
+  AVMEPopupLedger {
+    id: ledgerPopup
+  }
+
+  AVMEPopupInfo {
+    id: ledgerFailPopup
+    icon: "qrc:/img/warn.png"
+    onAboutToHide: ledgerRetryTimer.stop()
+    okBtn.text: "Close"
   }
 }
 

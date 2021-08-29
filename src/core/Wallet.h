@@ -27,6 +27,7 @@
 #include <lib/devcore/SHA3.h>
 #include <lib/ethcore/KeyManager.h>
 #include <lib/ethcore/TransactionBase.h>
+#include <lib/ledger/ledger.h>
 
 #include <network/API.h>
 #include <core/BIP39.h>
@@ -120,8 +121,10 @@ class Wallet {
      */
     bool loadTokenDB();
     bool loadHistoryDB(std::string address);
+    bool loadLedgerDB();
     void closeTokenDB();
     void closeHistoryDB();
+    void closeLedgerDB();
 
     // ======================================================================
     // TOKEN MANAGEMENT
@@ -171,9 +174,21 @@ class Wallet {
     );
 
     /**
+     * Load all ledger accounts stored
+     */
+
+    std::vector<ledger::account> getAllLedgerAccounts();
+
+    /**
      * Import a Ledger account to the Wallet's account vector.
      */
-    void importLedgerAccount(std::string address, std::string path);
+    bool importLedgerAccount(std::string address, std::string path);
+
+    /**
+     * Delete a ledger account from DB
+     */
+
+    bool deleteLedgerAccount(std::string address);
 
     /**
      * Erase an Account from the Wallet.
