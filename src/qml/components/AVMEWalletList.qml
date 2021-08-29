@@ -110,7 +110,7 @@ ListView {
           width: parent.width * 0.9
 					color: "#ffffff"
 					font.pixelSize: 14.0
-          elide: Text.ElideRight
+          elide: Text.ElideMiddle
 					horizontalAlignment: Text.AlignHCenter
 				}
 				Text {
