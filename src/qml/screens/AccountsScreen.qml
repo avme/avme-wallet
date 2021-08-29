@@ -102,7 +102,7 @@ Item {
         qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
         qmlSystem.loadARC20Tokens()
         accountHeader.getAddress()
-        qmlSystem.goToOverview();
+        qmlSystem.goToOverview()
         qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
       } else {
         qmlSystem.setLedgerFlag(false);
