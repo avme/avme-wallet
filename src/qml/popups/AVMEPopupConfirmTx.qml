@@ -46,7 +46,19 @@ AVMEPopup {
         if (!answerJson[0]["result"]) {
           if (answerJson[0]["error"]["message"].includes("max fee per gas less than block base fee")) {
             calculateGas(true)
-          } // TODO: ADD A ERROR HANDLER FOR INSUFICIENT BALANCE!!!
+          } else {
+            var error;
+            error["operation"] = operation
+            error["to"] = to
+            error["value"] = value
+            error["txData"] = txData
+            error["gas"] = gas
+            error["gasPrice"] = gasPrice 
+            error["API ERROR"] = answerJson 
+            qmlApi.logToDebug(JSON.stringify(logToDebug))
+            transactionFailPopup.open();
+            loadingFees = false
+          }
         } else {
          gas = qmlApi.floor(qmlApi.mul(qmlApi.parseHex(answerJson[0]["result"], ["uint"]), 1.1))
          loadingFees = false
@@ -208,7 +220,7 @@ AVMEPopup {
             confirmTxPopup.close()
             txProgressPopup.open()
           }
-        }
+        }// TODO: ADD A ERROR HANDLER FOR INSUFICIENT BALANCE!!!
       }
     }
   }
@@ -218,6 +230,13 @@ AVMEPopup {
     id: ledgerFailPopup
     icon: "qrc:/img/warn.png"
     onAboutToHide: ledgerRetryTimer.stop()
+    okBtn.text: "Close"
+  }
+
+  AVMEPopupInfo {
+    id: transactionFailPopup
+    icon: "qrc:/img/warn.png"
+    info: "Transaction Likely to fail, please check your input"
     okBtn.text: "Close"
   }
 }

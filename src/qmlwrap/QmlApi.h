@@ -141,6 +141,7 @@ class QmlApi : public QObject {
     Q_INVOKABLE QString uintFromHex(QString hex);
     Q_INVOKABLE QString MAX_U256_VALUE();
     Q_INVOKABLE QString getCurrentUnixTime();
+    Q_INVOKABLE void logToDebug(QString log) { Utils::logToDebug(log.toStdString()); };
     // Timers that are changeable by a user, in order to avoid
     // conflits when changing asset, requires a randomID
     Q_INVOKABLE QString getRandomID();
