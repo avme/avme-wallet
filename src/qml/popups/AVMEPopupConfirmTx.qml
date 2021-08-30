@@ -43,7 +43,7 @@ AVMEPopup {
       // randomID is used so it doesn't trigged other popups connections
       if (requestID == "PopupConfirmTxGas_"+randomID) {
         var answerJson = JSON.parse(answer)
-        var txStructure;
+        var txStructure = ({});
         txStructure["operation"] = operation
         txStructure["to"] = to
         txStructure["value"] = value
@@ -52,6 +52,7 @@ AVMEPopup {
         txStructure["gasPrice"] = gasPrice 
         txStructure["API ANSWER"] = answer 
         qmlApi.logToDebug(JSON.stringify(txStructure))
+        
         if (!answerJson[0]["result"]) {
           if (answerJson[0]["error"]["message"].includes("max fee per gas less than block base fee")) {
             calculateGas(true)
