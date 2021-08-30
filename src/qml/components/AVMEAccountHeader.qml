@@ -21,11 +21,11 @@ Rectangle {
   property string totalFiatBalance
   property string gasPrice
   property bool isLedger: qmlSystem.getLedgerFlag()
-
   property var tokenList: ({})
+
   height: 50
-  color: "transparent"
   radius: 10
+  color: "transparent"
   signal updatedBalances()
 
   Timer { id: addressTimer; interval: 1000 }

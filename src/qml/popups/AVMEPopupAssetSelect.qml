@@ -38,6 +38,7 @@ AVMEPopup {
     for (var token in tokens) {
       var tmpTokenList = ({})
       tmpTokenList["address"] = token
+      tmpTokenList["icon"] = ""
       tmpTokenList["name"] = tokens[token]["name"]
       tmpTokenList["symbol"] = tokens[token]["symbol"]
       tmpTokenList["decimals"] = tokens[token]["decimals"]
