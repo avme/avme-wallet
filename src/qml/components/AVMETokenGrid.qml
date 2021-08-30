@@ -42,6 +42,7 @@ GridView {
           anchors.horizontalCenter: parent.horizontalCenter
           antialiasing: true
           smooth: true
+          asynchronous: true
           fillMode: Image.PreserveAspectFit
           source: {
             var avmeAddress = qmlSystem.getContract("AVME")
