@@ -125,6 +125,9 @@ $(package)_config_opts_darwin = -no-dbus
 $(package)_config_opts_darwin += -no-opengl
 $(package)_config_opts_darwin += -pch
 $(package)_config_opts_darwin += -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=$(OSX_MIN_VERSION)
+$(package)_config_opts_darwin += -openssl-linked
+$(package)_config_opts_darwin += -L $(host_prefix)/lib
+$(package)_config_opts_darwin += -I $(host_prefix)/include
 
 ifneq ($(build_os),darwin)
 $(package)_config_opts_darwin += -xplatform macx-clang-linux
