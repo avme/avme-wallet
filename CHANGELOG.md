@@ -4,11 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.0.0] - Unreleased
 ### Added
 - Support for multiple ARC20 tokens (send, exchange, add/remove liquidity).
 - A wrapper (QmlApi) for abstracting and exposing ABI/smart contract calls.
-  - This enables developers to create their own DApps and integrate them in the wallet.
+  - This will enable developers to create their own DApps and integrate them in the wallet.
+
+### Fixed
+- Existing accounts no longer have a chance to be rewritten when creating new ones.
 
 ### Changed
 - UI has a new design (thanks to Natalya Chavez for the work!).
@@ -18,13 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Old history data for a given Account, if it exists, will be AUTOMATICALLY DELETED when choosing it.
 - Code is now separated in a more logical way in the `src` folder.
 - OpenSSL was moved to the depends system instead of being a git submodule.
-- A new API is being used, with support for multiple requests (thanks to Markus for the work!).
-  - (Most) requests were also converted to use the nlohmann/json library instead of std::stringstream.
+- A new API for network requests is being used, with support for multiple requests (thanks to Markus for the work!).
+- The JSON library was changed from [png85/json_spirit](https://github.com/png85/json_spirit) to [nlohmann/json](https://github.com/nlohmann/json).
+  - (Most) network requests were also converted to be built using it instead of std::stringstream.
 - Price history for assets can now be set to 1 week, 1 month or 3 months.
 
 ### Removed
 - CLI executable for testing/debugging.
-- Support for testnet.
+- Support for testnet (most features in the wallet only exist/work properly in the mainnet).
 
 ## [1.2.0] - 2021-06-14
 ### Added
