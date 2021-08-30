@@ -26,6 +26,7 @@ AVMEPanel {
   property string removeAsset1Estimate
   property string removeAsset2Estimate
   property string removeLPEstimate
+  property string desiredSlippage: slippageSettings.slippage
   property bool loading: true
   property string to
   property string coinValue
@@ -195,17 +196,17 @@ AVMEPanel {
       // amountTokenMin
       var amountTokenMin
       if (removeAsset1Popup.chosenAssetSymbol != "AVAX") {
-        amountTokenMin = qmlApi.floor(qmlApi.mul(removeAsset1Estimate, "0.99")) // 1% Slippage
+        amountTokenMin = qmlApi.floor(qmlApi.mul(removeAsset1Estimate, desiredSlippage)) // 1% Slippage
       } else {
-        amountTokenMin = qmlApi.floor(qmlApi.mul(removeAsset2Estimate, "0.99")) // 1% Slippage
+        amountTokenMin = qmlApi.floor(qmlApi.mul(removeAsset2Estimate, desiredSlippage)) // 1% Slippage
       }
       ethCallJson["args"].push(amountTokenMin)
       // amountETHMin
       var amountAVAXMin
       if (removeAsset1Popup.chosenAssetSymbol == "AVAX") {
-        amountAVAXMin = qmlApi.floor(qmlApi.mul(removeAsset1Estimate, "0.99"))  // 1% Slippage
+        amountAVAXMin = qmlApi.floor(qmlApi.mul(removeAsset1Estimate, desiredSlippage))  // 1% Slippage
       } else {
-        amountAVAXMin = qmlApi.floor(qmlApi.mul(removeAsset2Estimate, "0.99")) // 1% Slippage
+        amountAVAXMin = qmlApi.floor(qmlApi.mul(removeAsset2Estimate, desiredSlippage)) // 1% Slippage
       }
       ethCallJson["args"].push(amountAVAXMin)
       // to
@@ -232,9 +233,9 @@ AVMEPanel {
       // liquidity
       ethCallJson["args"].push(qmlApi.fixedPointToWei(removeLPEstimate, 18))
       // amountAMin
-      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(removeAsset1Estimate, "0.99")))
+      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(removeAsset1Estimate, desiredSlippage)))
       // amountBMin
-      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(removeAsset2Estimate, "0.99")))
+      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(removeAsset2Estimate, desiredSlippage)))
       // to
       ethCallJson["args"].push(qmlSystem.getCurrentAccount())
       // deadline
@@ -603,5 +604,35 @@ AVMEPanel {
     id: fundsPopup
     icon: "qrc:/img/warn.png"
     info: "Insufficient funds. Please check your inputs."
+  }
+
+  Rectangle {
+    id: settingsRectangle
+    height: 48
+    width: 48
+    anchors.right: parent.right
+    anchors.top: parent.top
+    anchors.topMargin: 32
+    anchors.rightMargin: 32
+    color: "transparent"
+    radius: 5
+    Image {
+      id: slippageSettingsImage
+      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.verticalCenter: parent.verticalCenter
+      width: 32
+      height: 32
+      source: "qrc:/img/icons/Icon_Settings.png"
+    }
+    MouseArea {
+      id: settingsMouseArea
+      anchors.fill: parent
+      hoverEnabled: true
+      onEntered: settingsRectangle.color = "#1d1827"
+      onExited: settingsRectangle.color = "transparent"
+      onClicked: {
+        slippageSettings.open();
+      }
+    }
   }
 }

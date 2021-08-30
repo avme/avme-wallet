@@ -7,6 +7,7 @@ import QtQuick.Controls 2.2
 import QmlApi 1.0
 
 import "qrc:/qml/components"
+import "qrc:/qml/popups"
 
 /**
  * Panel for exchanging coins/tokens in a given Account.
@@ -51,6 +52,7 @@ AVMEPanel {
   property alias amountIn: swapInput.text
   property alias swapBtn: btnSwap
   property alias approveBtn: btnApprove
+  property string desiredSlippage: slippageSettings.slippage
   property string to
   property string coinValue
   property string txData
@@ -345,12 +347,11 @@ AVMEPanel {
       var routing = ([])
       ethCallJson["function"] = "swapExactAVAXForTokens(uint256,address[],address,uint256)"
       ethCallJson["args"] = []
-      // 1% Slippage TODO: Add setting to change slippage
       //uint256 amountOutMin
       if (!isInverse) {
-        ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals), 0.99)))
+        ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals), desiredSlippage)))
       } else {
-        ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, fromAssetPopup.chosenAssetDecimals), 0.99)))
+        ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, fromAssetPopup.chosenAssetDecimals), desiredSlippage)))
       }
       //address[] path
       if (!isInverse) {
@@ -387,9 +388,8 @@ AVMEPanel {
       } else {
         ethCallJson["args"].push(String(qmlApi.fixedPointToWei(amountIn, toAssetPopup.chosenAssetDecimals)))
       }
-      // 1% Slippage TODO: Add setting to change slippage
       // amountOutMin
-      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, 18), 0.99)))
+      ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, 18), desiredSlippage)))
       // address[] path
       if (!isInverse) {
         routing.push(fromAssetPopup.chosenAssetAddress)
@@ -427,12 +427,11 @@ AVMEPanel {
       } else {
         ethCallJson["args"].push(String(qmlApi.fixedPointToWei(amountIn, toAssetPopup.chosenAssetDecimals)))
       }
-      // 1% Slippage TODO: Add setting to change slippage
       // amountOutMin
       if (!isInverse) {
-        ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals), 0.99)))
+        ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, toAssetPopup.chosenAssetDecimals), desiredSlippage)))
       } else {
-        ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, fromAssetPopup.chosenAssetDecimals), 0.99)))
+        ethCallJson["args"].push(qmlApi.floor(qmlApi.mul(qmlApi.fixedPointToWei(amountOut, fromAssetPopup.chosenAssetDecimals), desiredSlippage)))
       }
       // address[] path
       if (!isInverse) {
@@ -804,6 +803,36 @@ AVMEPanel {
       ) && +swapInput.text != 0)
       text: (swapImpact <= 10.0 || ignoreImpactCheck.checked)
       ? "Make Swap" : "Price impact too high"
+    }
+  }
+
+  Rectangle {
+    id: settingsRectangle
+    height: 48
+    width: 48
+    anchors.right: parent.right
+    anchors.top: parent.top
+    anchors.topMargin: 32
+    anchors.rightMargin: 32
+    color: "transparent"
+    radius: 5
+    Image {
+      id: slippageSettingsImage
+      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.verticalCenter: parent.verticalCenter
+      width: 32
+      height: 32
+      source: "qrc:/img/icons/Icon_Settings.png"
+    }
+    MouseArea {
+      id: settingsMouseArea
+      anchors.fill: parent
+      hoverEnabled: true
+      onEntered: settingsRectangle.color = "#1d1827"
+      onExited: settingsRectangle.color = "transparent"
+      onClicked: {
+        slippageSettings.open();
+      }
     }
   }
 }

@@ -24,6 +24,7 @@ AVMEPanel {
   property bool asset1Approved
   property bool asset2Approved
   property string pairAddress
+  property string desiredSlippage: slippageSettings.slippage
   property alias add1Amount: addAsset1Input.text
   property alias add2Amount: addAsset2Input.text
   property alias addBtn: addLiquidityBtn
@@ -762,5 +763,35 @@ AVMEPanel {
     id: fundsPopup
     icon: "qrc:/img/warn.png"
     info: "Insufficient funds. Please check your inputs."
+  }
+  
+  Rectangle {
+    id: settingsRectangle
+    height: 48
+    width: 48
+    anchors.right: parent.right
+    anchors.top: parent.top
+    anchors.topMargin: 32
+    anchors.rightMargin: 32
+    color: "transparent"
+    radius: 5
+    Image {
+      id: slippageSettingsImage
+      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.verticalCenter: parent.verticalCenter
+      width: 32
+      height: 32
+      source: "qrc:/img/icons/Icon_Settings.png"
+    }
+    MouseArea {
+      id: settingsMouseArea
+      anchors.fill: parent
+      hoverEnabled: true
+      onEntered: settingsRectangle.color = "#1d1827"
+      onExited: settingsRectangle.color = "transparent"
+      onClicked: {
+        slippageSettings.open();
+      }
+    }
   }
 }

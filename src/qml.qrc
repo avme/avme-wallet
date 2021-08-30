@@ -33,6 +33,7 @@
         <file>qml/popups/AVMEPopupConfirmTx.qml</file>
         <file>qml/popups/AVMEPopupPriceChart.qml</file>
         <file>qml/popups/AVMEPopupTxProgress.qml</file>
+        <file>qml/popups/AVMEPopupExchangeSettings.qml</file>
 
         <file>qml/panels/AVMEPanelAccountSelect.qml</file>
         <file>qml/panels/AVMEPanelOverview.qml</file>

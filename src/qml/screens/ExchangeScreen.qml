@@ -197,4 +197,7 @@ Item {
     onAboutToHide: ledgerRetryTimer.stop()
     okBtn.text: "Close"
   }
+  AVMEPopupExchangeSettings {
+    id: slippageSettings
+  }
 }
