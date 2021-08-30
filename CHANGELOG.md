@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for multiple ARC20 tokens (send, exchange, add/remove liquidity).
 - A wrapper (QmlApi) for abstracting and exposing ABI/smart contract calls.
   - This will enable developers to create their own DApps and integrate them in the wallet.
+- Slippage setting for exchange.
 
 ### Fixed
 - Existing accounts no longer have a chance to be rewritten when creating new ones.
+- Sending a value of 0 should be no longer possible.
 
 ### Changed
 - UI has a new design (thanks to Natalya Chavez for the work!).
@@ -25,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The JSON library was changed from [png85/json_spirit](https://github.com/png85/json_spirit) to [nlohmann/json](https://github.com/nlohmann/json).
   - (Most) network requests were also converted to be built using it instead of std::stringstream.
 - Price history for assets can now be set to 1 week, 1 month or 3 months.
+- Transactions which are likely to fail are now logged to the wallet's `debug.log`.
+- API and Graph request loggings were disabled, which should make `debug.log` grow less over time.
 
 ### Removed
 - CLI executable for testing/debugging.
