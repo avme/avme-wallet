@@ -60,7 +60,7 @@ ListView {
             var avmeAddress = qmlSystem.getContract("AVME")
             if (itemAddress == avmeAddress) {
               source: "qrc:/img/avme_logo.png"
-            } else if (itemIcon) {
+            } else if (itemIcon && itemIcon != "") {
               source: itemIcon
             } else {
               var img = qmlSystem.getARC20TokenImage(itemAddress)
@@ -82,7 +82,7 @@ ListView {
         Text {
           id: delegateName
           anchors.verticalCenter: parent.verticalCenter
-          width: (parent.width * 0.4)
+          width: (parent.width * 0.3)
           x: delegateImage.width + delegateSymbol.width
           color: "white"
           font.pixelSize: 14.0
@@ -95,7 +95,7 @@ ListView {
           anchors.verticalCenter: parent.verticalCenter
           anchors.right: parent.right
           anchors.rightMargin: (parent.width * 0.05)
-          width: (parent.width * 0.4)
+          width: (parent.width * 0.3)
           color: "white"
           font.pixelSize: 14.0
           elide: Text.ElideRight

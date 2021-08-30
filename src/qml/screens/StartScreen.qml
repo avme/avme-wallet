@@ -77,7 +77,7 @@ Item {
     id: startPanel
     title: "Welcome to the AVME Wallet"
     width: (parent.width * 0.4)
-    height: (parent.height * 0.7)
+    height: (parent.height * 0.6)
     anchors {
       horizontalCenter: parent.horizontalCenter
       verticalCenter: parent.verticalCenter
