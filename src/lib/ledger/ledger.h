@@ -8,9 +8,13 @@
 
 #include <lib/ethcore/Common.h>
 #include <lib/ethcore/TransactionBase.h>
+#include <lib/nlohmann_json/json.hpp>
 
 #include "comms.h"
 #include "encoding.h"
+
+// For convenience.
+using json = nlohmann::json;
 
 /**
  * Namespace for Ledger-related functions.
@@ -43,6 +47,13 @@ namespace ledger {
       std::pair<bool, std::string> signTransaction(
         dev::eth::TransactionSkeleton transactionSkl, std::string path
       );
+
+      // Encode to JSON a account from the ledger struct
+      json encodeToJson(account ledgerAccount);
+
+      // Decode to ledger struct from JSON
+      account decodeFromJson(json ledgerAccount);
+
   };
 }
 

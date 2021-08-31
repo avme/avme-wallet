@@ -13,15 +13,16 @@ Item {
 
   Connections {
     target: qmlSystem
-    function onHistoryLoaded(data) {
-      if (data != null) {
+    function onHistoryLoaded(dataStr) {
+      if (dataStr != null) {
+        var data = JSON.parse(dataStr)
         if (sortByNew) {
           for (var i = (data.length - 1); i >= 0; i--) {
-            historyModel.append(JSON.parse(data[i]))
+            historyModel.append(data[i])
           }
         } else {
           for (var i = 0; i < data.length; i++) {
-            historyModel.append(JSON.parse(data[i]))
+            historyModel.append(data[i])
           }
         }
       }

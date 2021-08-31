@@ -5,7 +5,11 @@
 #include <qmlwrap/QmlSystem.h>
 
 QString QmlSystem::getCurrentAccount() {
-  return QString::fromStdString(this->w.getCurrentAccount().first);
+  if (!this->ledgerFlag) {
+    return QString::fromStdString(this->w.getCurrentAccount().first);
+  } else {
+    return this->getCurrentHardwareAccount();
+  }
 }
 
 void QmlSystem::setCurrentAccount(QString address) {
@@ -19,11 +23,23 @@ void QmlSystem::loadAccounts() {
 QVariantList QmlSystem::listAccounts() {
   QVariantList ret;
   for (std::pair<std::string, std::string> a : this->w.getAccounts()) {
-    std::string obj;
-    obj += "{\"address\": \"" + a.first;
-    obj += "\", \"name\": \"" + a.second;
-    obj += "\"}";
-    ret << QString::fromStdString(obj);
+    json obj;
+    obj["address"] = a.first;
+    obj["name"] = a.second;
+    obj["isLedger"] = false;
+    obj["derivationPath"] = "";
+    ret << QString::fromStdString(obj.dump());
+  }
+
+  auto ledgerAccounts = this->w.getAllLedgerAccounts();
+  for (auto ledgerAccount : ledgerAccounts) {
+    json obj;
+    obj["address"] = ledgerAccount.address;
+    // Name for Ledger accounts??
+    obj["name"] = "";
+    obj["isLedger"] = true;
+    obj["derivationPath"] = ledgerAccount.index;
+    ret << QString::fromStdString(obj.dump());
   }
   return ret;
 }
@@ -53,27 +69,40 @@ void QmlSystem::generateAccounts(QString seed, int idx) {
 
 void QmlSystem::generateLedgerAccounts(QString path, int idx) {
   QtConcurrent::run([=](){
-    QVariantList ret;
+    json ret = json::array();
+    std::vector<Request> requestsVec;
     for (int i = idx; i < idx + 10; i++) {
       std::string fullPath = path.toStdString() + boost::lexical_cast<std::string>(i);
       this->ledgerDevice.generateBip32Account(fullPath);
     }
-    for (ledger::account acc : this->ledgerDevice.getAccountList()) {
-      QVariantMap obj;
-      std::string idxStr = acc.index.substr(acc.index.find_last_of("/") + 1);
-      Request req{1, "2.0", "eth_getBalance", {acc.address, "latest"}};
-      std::string query = API::buildRequest(req);
-      std::string resp = API::httpGetRequest(query);
-      json respJson = json::parse(resp);
-      std::string bal = respJson["result"].get<std::string>();
-      u256 AVAXbalance = boost::lexical_cast<HexTo<u256>>(bal);
-      obj["idx"] = QVariant(QString::fromStdString(idxStr));
-      obj["account"] = QVariant(QString::fromStdString(acc.address));
-      obj["balance"] = QVariant(QString::fromStdString(Utils::weiToFixedPoint(
-        boost::lexical_cast<std::string>(AVAXbalance), 18
-      )));
-      emit ledgerAccountGenerated(obj);
+    std::map<int,std::string> addressIDs;
+    int addressID = 1;
+    auto ledgerAccountList = this->ledgerDevice.getAccountList();
+    for (int i = 0; i < ledgerAccountList.size(); ++i) {
+      Request req{i + size_t(1), "2.0", "eth_getBalance", {ledgerAccountList[i].address, "latest"}};
+      requestsVec.push_back(req);
+      addressIDs[addressID] = ledgerAccountList[i].address;
+      ++addressID;
     }
+
+    // Make the request and get the AVAX price in USD
+    std::string query = API::buildMultiRequest(requestsVec);
+    std::string resp = API::httpGetRequest(query);
+    json resultArr = json::parse(resp);
+
+    for (auto arrItem : resultArr) {
+      for (auto id : addressIDs)
+        if (arrItem["id"].get<int>() == id.first) {
+            json obj;
+            std::string idxStr = ledgerAccountList[id.first - 1].index.substr(ledgerAccountList[id.first - 1].index.find_last_of("/") + 1);
+            u256 AVAXbalance = boost::lexical_cast<HexTo<u256>>(arrItem["result"].get<std::string>());
+            obj["idx"] = idxStr;
+            obj["account"] = id.second;
+            obj["balance"] = Utils::weiToFixedPoint(boost::lexical_cast<std::string>(AVAXbalance), 18);
+            ret.push_back(obj);
+        }
+      }
+    emit ledgerAccountGenerated(QString::fromStdString(ret.dump()));
   });
 }
 
@@ -100,7 +129,19 @@ void QmlSystem::createAccount(QString seed, int index, QString name, QString pas
 }
 
 void QmlSystem::importLedgerAccount(QString address, QString path) {
-  this->w.importLedgerAccount(address.toStdString(), path.toStdString());
+  QVariantMap obj;
+  // TODO: avoid same account to be imported multiple times
+  bool success = this->w.importLedgerAccount(address.toStdString(), path.toStdString());
+  if (!success) {
+    emit accountCreated(false, obj);
+  } else {
+    emit accountCreated(true, obj);
+  }
+}
+
+bool QmlSystem::deleteLedgerAccount(QString address) {
+  bool success = this->w.deleteLedgerAccount(address.toStdString());
+  return success;
 }
 
 bool QmlSystem::eraseAccount(QString account) {
@@ -328,4 +369,8 @@ bool QmlSystem::loadTokenDB() {
 
 bool QmlSystem::loadHistoryDB(QString address) {
   return this->w.loadHistoryDB(address.toStdString());
+}
+
+bool QmlSystem::loadLedgerDB() {
+  return this->w.loadLedgerDB();
 }

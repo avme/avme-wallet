@@ -14,7 +14,7 @@ std::string API::httpGetRequest(std::string reqBody) {
 
   std::string RequestID = Utils::randomHexBytes();
   //std::cout << "REQUEST BODY: \n" << reqBody << std::endl;  // Uncomment for debugging
-  Utils::logToDebug("API Request ID " + RequestID + " : " + reqBody);
+  //Utils::logToDebug("API Request ID " + RequestID + " : " + reqBody);
 
   try {
     // Create context and load certificates into it
@@ -57,7 +57,7 @@ std::string API::httpGetRequest(std::string reqBody) {
     // Write only the body answer to output
     std::string body { boost::asio::buffers_begin(res.body().data()),boost::asio::buffers_end(res.body().data()) };
     result = body;
-    Utils::logToDebug("API Result ID " + RequestID + " : " + result);
+    //Utils::logToDebug("API Result ID " + RequestID + " : " + result);
     //std::cout << "REQUEST RESULT: \n" << result << std::endl; // Uncomment for debugging
 
     boost::system::error_code ec;
@@ -70,7 +70,7 @@ std::string API::httpGetRequest(std::string reqBody) {
     if (ec)
       throw boost::system::system_error{ec};
   } catch (std::exception const& e) {
-    Utils::logToDebug("API ID " + RequestID + " ERROR:" + e.what());
+    //Utils::logToDebug("API ID " + RequestID + " ERROR:" + e.what());
     return "";
   }
 

@@ -32,13 +32,21 @@ class Database {
     leveldb::Status historyStatus;
     std::string historyValue;
 
+    // The Ledger account database, options, status and value.
+    leveldb::DB* ledgerDB;
+    leveldb::Options ledgerOpts;
+    leveldb::Status ledgerStatus;
+    std::string ledgerValue;
+
   public:
     // Constructor. Set up any required options here.
     Database() {
       this->tokenOpts.create_if_missing = true;
       this->historyOpts.create_if_missing = true;
+      this->ledgerOpts.create_if_missing = true;
       tokenDB = NULL;
       historyDB = NULL;
+      ledgerDB = NULL;
     }
 
     // Token database functions.
@@ -62,6 +70,17 @@ class Database {
     bool putHistoryDBValue(std::string key, std::string value);
     bool deleteHistoryDBValue(std::string key);
     std::vector<std::string> getAllHistoryDBValues();
+
+    // Ledger account database functions.
+    bool openLedgerDB();
+    std::string getLedgerDBStatus();
+    void closeLedgerDB();
+    bool isLedgerDBOpen();
+    bool ledgerDBKeyExists(std::string key);
+    std::string getLedgerDBValue(std::string key);
+    bool putLedgerDBValue(std::string key, std::string value);
+    bool deleteLedgerDBValue(std::string key);
+    std::vector<std::string> getAllLedgerDBValues();
 };
 
 #endif  // DATABASE_H

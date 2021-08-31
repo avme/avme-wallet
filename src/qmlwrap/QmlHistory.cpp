@@ -6,27 +6,27 @@
 
 void QmlSystem::listAccountTransactions(QString address) {
   QtConcurrent::run([=](){
-    QVariantList ret;
+    json ret = json::array();
     this->w.updateAllTxStatus();
     this->w.loadTxHistory();
+    
     for (TxData tx : this->w.getCurrentAccountHistory()) {
-      std::string obj;
-      obj += "{\"txlink\": \"" + tx.txlink;
-      obj += "\", \"operation\": \"" + tx.operation;
-      obj += "\", \"txdata\": \"" + tx.data;
-      obj += "\", \"from\": \"" + tx.from;
-      obj += "\", \"to\": \"" + tx.to;
-      obj += "\", \"value\": \"" + tx.value;
-      obj += "\", \"gas\": \"" + tx.gas;
-      obj += "\", \"price\": \"" + tx.price;
-      obj += "\", \"datetime\": \"" + tx.humanDate;
-      obj += "\", \"unixtime\": " + std::to_string(tx.unixDate);
-      obj += ", \"confirmed\": " + QVariant(tx.confirmed).toString().toStdString();
-      obj += ", \"invalid\": " + QVariant(tx.invalid).toString().toStdString();
-      obj += "}";
-      ret << QString::fromStdString(obj);
+      json obj;
+      obj["txlink"] = tx.txlink;
+      obj["operation"] = tx.operation;
+      obj["txdata"] = tx.data;
+      obj["from"] = tx.from;
+      obj["to"] = tx.to;
+      obj["value"] = tx.value;
+      obj["gas"] = tx.gas;
+      obj["price"] = tx.price;
+      obj["datetime"] = tx.humanDate;
+      obj["unixtime"] = std::to_string(tx.unixDate);
+      obj["confirmed"] = tx.confirmed;
+      obj["invalid"] = tx.invalid;
+      ret.push_back(obj);
     }
-    emit historyLoaded(ret);
+    emit historyLoaded(QString::fromStdString(ret.dump()));
   });
 }
 

@@ -16,6 +16,7 @@ void QmlApi::doAPIRequests(QString requestID) {
       return;
     }
     this->requestList[requestID].clear();
+    this->requestList.erase(requestID);
     requestListLock.unlock();
     std::string response = API::httpGetRequest(requests);
     emit apiRequestAnswered(QString::fromStdString(response), requestID);

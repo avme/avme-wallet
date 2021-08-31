@@ -96,4 +96,17 @@ namespace ledger {
 
     return ret;
   }
+
+  json encodeToJson(account ledgerAccount) {
+    json ret;
+    ret["address"] = ledgerAccount.address;
+    ret["index"] = ledgerAccount.index;
+    return ret;
+  }
+  account decodeFromJson(json ledgerAccount) {
+    account ret;
+    ret.address = ledgerAccount["address"];
+    ret.index = ledgerAccount["index"];
+    return ret;
+  }
 }

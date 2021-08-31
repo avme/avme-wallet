@@ -20,15 +20,17 @@ Rectangle {
   property string coinUSDPriceChart
   property string totalFiatBalance
   property string gasPrice
-
+  property bool isLedger: qmlSystem.getLedgerFlag()
   property var tokenList: ({})
+
   height: 50
-  color: "transparent"
   radius: 10
+  color: "transparent"
   signal updatedBalances()
 
   Timer { id: addressTimer; interval: 1000 }
   Timer { id: balancesTimer; interval: 1000; repeat: true; onTriggered: refreshBalances() }
+  // TODO: Remove all "useless" ledger calls
   Timer { id: ledgerRetryTimer; interval: 250; onTriggered: checkLedger() }
 
   Connections {
@@ -80,10 +82,8 @@ Rectangle {
     if (data.state) {
       ledgerFailPopup.close()
       ledgerRetryTimer.stop()
-      ledgerPopup.open()
     } else {
       ledgerFailPopup.info = data.message
-      ledgerFailPopup.open()
       ledgerRetryTimer.start()
     }
   }
@@ -226,12 +226,8 @@ Rectangle {
     }
     text: "Change Account"
     onClicked: {
-      if (qmlSystem.getLedgerFlag()) {
-        checkLedger()
-      } else {
-        qmlSystem.hideMenu()
-        qmlSystem.setScreen(content, "qml/screens/AccountsScreen.qml")
-      }
+      qmlSystem.hideMenu()
+      qmlSystem.setScreen(content, "qml/screens/AccountsScreen.qml")
     }
   }
 

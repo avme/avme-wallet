@@ -66,19 +66,6 @@ Item {
     }
   }
 
-  function checkLedger() {
-    var data = qmlSystem.checkForLedger()
-    if (data.state) {
-      ledgerFailPopup.close()
-      ledgerRetryTimer.stop()
-      ledgerPopup.open()
-    } else {
-      ledgerFailPopup.info = data.message
-      ledgerFailPopup.open()
-      ledgerRetryTimer.start()
-    }
-  }
-
   function useSeed() {
     createWalletPopup.seed = seedPopup.fullSeed
     seedPopup.clean()
@@ -86,13 +73,11 @@ Item {
     createWalletPopup.open()
   }
 
-  Timer { id: ledgerRetryTimer; interval: 250; onTriggered: parent.checkLedger() }
-
   AVMEPanel {
     id: startPanel
     title: "Welcome to the AVME Wallet"
     width: (parent.width * 0.4)
-    height: (parent.height * 0.7)
+    height: (parent.height * 0.6)
     anchors {
       horizontalCenter: parent.horizontalCenter
       verticalCenter: parent.verticalCenter
@@ -146,13 +131,6 @@ Item {
         text: "Load Wallet"
         onClicked: loadWalletPopup.open()
       }
-      AVMEButton {
-        id: btnOpenLedger
-        width: (parent.width * 0.6)
-        anchors.horizontalCenter: parent.horizontalCenter
-        text: "Open Ledger"
-        onClicked: startScreen.checkLedger()
-      }
     }
   }
 
@@ -204,19 +182,6 @@ Item {
   AVMEPopupInfo {
     id: errorPopup
     icon: "qrc:/img/warn.png"
-  }
-
-  // Popup for Ledger accounts
-  AVMEPopupLedger {
-    id: ledgerPopup
-  }
-
-  // Info popup for if communication with Ledger fails
-  AVMEPopupInfo {
-    id: ledgerFailPopup
-    icon: "qrc:/img/warn.png"
-    onAboutToHide: ledgerRetryTimer.stop()
-    okBtn.text: "Close"
   }
 
   // Info popup for if the Wallet creation/loading/importing fails

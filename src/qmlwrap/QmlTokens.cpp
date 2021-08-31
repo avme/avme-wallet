@@ -24,7 +24,6 @@ QVariantList QmlSystem::getARC20Tokens() {
 }
 
 void QmlSystem::downloadARC20TokenImage(QString address) {
-  std::string addressStr = Utils::toCamelCaseAddress(address.toStdString());
   boost::filesystem::path filePath = Utils::walletFolderPath.string()
     + "/wallet/c-avax/tokens/icons";
   if (!boost::filesystem::exists(filePath)) {
@@ -32,8 +31,9 @@ void QmlSystem::downloadARC20TokenImage(QString address) {
   }
   API::httpGetFile(
     "raw.githubusercontent.com",
-    "/ava-labs/bridge-tokens/main/avalanche-tokens/" + addressStr + "/logo.png",
-    filePath.string() + "/" + addressStr + ".png"
+    "/avme/avme-wallet-tokenlist/main/icons/"
+      + Utils::toLowerCaseAddress(address.toStdString()) + "/logo.png",
+    filePath.string() + "/" + Utils::toCamelCaseAddress(address.toStdString()) + ".png"
   );
 }
 
@@ -45,6 +45,31 @@ QString QmlSystem::getARC20TokenImage(QString address) {
   } else {
     return "";
   }
+}
+
+QVariantList QmlSystem::getARC20TokenList() {
+  QVariantList ret;
+  boost::filesystem::path filePath = Utils::walletFolderPath.string()
+    + "/wallet/c-avax/tokenlist.json";
+  // Always force-refresh the list
+  if (boost::filesystem::exists(filePath)) { boost::filesystem::remove(filePath); }
+  API::httpGetFile(
+    "raw.githubusercontent.com",
+    "/avme/avme-wallet-tokenlist/main/tokenlist.json",
+    filePath.string()
+  );
+  json tokenlist = json::parse(Utils::readJSONFile(filePath));
+  json tokens = tokenlist["tokens"];
+  for (auto& token : tokens) {
+    QVariantMap tokenObj;
+    tokenObj["address"] = QString::fromStdString(token["contract-address"].get<std::string>());
+    tokenObj["name"] = QString::fromStdString(token["name"].get<std::string>());
+    tokenObj["symbol"] = QString::fromStdString(token["symbol"].get<std::string>());
+    tokenObj["decimals"] = token["decimals"].get<int>();
+    tokenObj["icon"] = QString::fromStdString(token["logoURI"].get<std::string>());
+    ret << tokenObj;
+  }
+  return ret;
 }
 
 bool QmlSystem::addARC20Token(

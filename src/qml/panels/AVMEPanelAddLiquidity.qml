@@ -24,6 +24,7 @@ AVMEPanel {
   property bool asset1Approved
   property bool asset2Approved
   property string pairAddress
+  property string desiredSlippage: slippageSettings.slippage
   property alias add1Amount: addAsset1Input.text
   property alias add2Amount: addAsset2Input.text
   property alias addBtn: addLiquidityBtn
@@ -332,7 +333,7 @@ AVMEPanel {
     gas = 300000
     info = "You will Add <b>" + addAsset1Input.text + " " + addAsset1Popup.symbol + "<\b> <br>and<br> <b>"
     info += addAsset1Input.text + " " + addAsset2Popup.symbol + "<\b> on Pangolin Liquidity Pool"
-    historyInfo = "Add <b>" + addAsset1Input.text + "<\b> and <b>" + addAsset2Popup.symbol + "<\b> to Pangolin Liquidity"
+    historyInfo = "Add <b>" + addAsset1Popup.chosenAssetSymbol + "<\b> and <b>" + addAsset2Popup.chosenAssetSymbol + "<\b> to Pangolin Liquidity"
     if (addAsset1Popup.chosenAssetSymbol == "AVAX" || addAsset2Popup.chosenAssetSymbol == "AVAX") {
       var ethCallJson = ({})
       ethCallJson["function"] = "addLiquidityAVAX(address,uint256,uint256,uint256,address,uint256)"
@@ -762,5 +763,35 @@ AVMEPanel {
     id: fundsPopup
     icon: "qrc:/img/warn.png"
     info: "Insufficient funds. Please check your inputs."
+  }
+  
+  Rectangle {
+    id: settingsRectangle
+    height: 48
+    width: 48
+    anchors.right: parent.right
+    anchors.top: parent.top
+    anchors.topMargin: 32
+    anchors.rightMargin: 32
+    color: "transparent"
+    radius: 5
+    Image {
+      id: slippageSettingsImage
+      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.verticalCenter: parent.verticalCenter
+      width: 32
+      height: 32
+      source: "qrc:/img/icons/Icon_Settings.png"
+    }
+    MouseArea {
+      id: settingsMouseArea
+      anchors.fill: parent
+      hoverEnabled: true
+      onEntered: settingsRectangle.color = "#1d1827"
+      onExited: settingsRectangle.color = "transparent"
+      onClicked: {
+        slippageSettings.open();
+      }
+    }
   }
 }

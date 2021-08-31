@@ -37,12 +37,15 @@ class QmlSystem : public QObject {
     ledger::device ledgerDevice;
     bool firstLoad;
     bool ledgerFlag = false;
+    QString currentHardwareAccount;
+    QString currentHardwareAccountPath; 
 
   public slots:
     // Clean database, threads, etc before closing the program
     void cleanAndClose() {
       this->w.closeTokenDB();
       this->w.closeHistoryDB();
+      this->w.closeLedgerDB();
       return;
     }
 
@@ -57,7 +60,7 @@ class QmlSystem : public QObject {
 
     // Account screen signals
     void accountGenerated(QVariantMap data);
-    void ledgerAccountGenerated(QVariantMap data);
+    void ledgerAccountGenerated(QString dataStr);
     void accountCreated(bool success, QVariantMap data);
     void accountAVAXBalancesUpdated(
       QString address, QString avaxBalance, QString avaxValue, QString avaxPrice, QString avaxPriceData
@@ -67,7 +70,7 @@ class QmlSystem : public QObject {
     );
 
     // History screen signals
-    void historyLoaded(QVariantList data);
+    void historyLoaded(QString data);
 
     // Send screen signals
     void txStart(
@@ -83,6 +86,8 @@ class QmlSystem : public QObject {
     void txSigned(bool b, QString msg);
     void txSent(bool b, QString linkUrl);
     void txRetry();
+    void ledgerRequired();
+    void ledgerDone();
 
   public:
     // ======================================================================
@@ -94,6 +99,11 @@ class QmlSystem : public QObject {
     Q_INVOKABLE void setFirstLoad(bool b) { firstLoad = b; }
     Q_INVOKABLE bool getLedgerFlag() { return ledgerFlag; }
     Q_INVOKABLE void setLedgerFlag(bool b) { ledgerFlag = b; }
+    Q_INVOKABLE void setCurrentHardwareAccount(QString b) { currentHardwareAccount = b; }
+    Q_INVOKABLE QString getCurrentHardwareAccount() { return currentHardwareAccount; }
+    Q_INVOKABLE void setCurrentHardwareAccountPath(QString b) { currentHardwareAccountPath = b; }
+    Q_INVOKABLE QString getCurrentHardwareAccountPath() { return currentHardwareAccountPath; }
+
 
     // Get the project's version
     Q_INVOKABLE QString getProjectVersion();
@@ -189,8 +199,11 @@ class QmlSystem : public QObject {
     // Emits accountCreated() on success, accountCreationFailed() on failure
     Q_INVOKABLE void createAccount(QString seed, int index, QString name, QString pass);
 
-    // Import a Ledger account to the Wallet
+    // Import a Ledger account to the Wallet DB
     Q_INVOKABLE void importLedgerAccount(QString address, QString path);
+    
+    // Delete a ledger account on the wallet DB
+    Q_INVOKABLE bool deleteLedgerAccount(QString address);
 
     // Erase an Account
     Q_INVOKABLE bool eraseAccount(QString account);
@@ -214,6 +227,13 @@ class QmlSystem : public QObject {
     Q_INVOKABLE bool loadTokenDB();
     Q_INVOKABLE bool loadHistoryDB(QString address);
 
+    // (Re)Load ledger DB which contains ledger accoutns
+
+    Q_INVOKABLE bool loadLedgerDB();
+
+    // Set/Create default folder path when loading with Ledger.
+    Q_INVOKABLE void setDefaultPathFolders();
+
     // ======================================================================
     // OVERVIEW SCREEN FUNCTIONS
     // ======================================================================
@@ -235,6 +255,9 @@ class QmlSystem : public QObject {
     // get returns empty if file doesn't exist.
     Q_INVOKABLE void downloadARC20TokenImage(QString address);
     Q_INVOKABLE QString getARC20TokenImage(QString address);
+
+    // Get the ARC20 token list from the repo.
+    Q_INVOKABLE QVariantList getARC20TokenList();
 
     // Add and remove a token from the list, respectively.
     Q_INVOKABLE bool addARC20Token(

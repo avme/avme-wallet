@@ -84,6 +84,14 @@ Popup {
       sendText.text = "Transaction nonce is too low, or a transaction with"
       + "<br>the same hash was already imported. Retrying..."
     }
+
+    function onLedgerRequired() {
+      ledgerStatusPopup.open()
+    }
+
+    function onLedgerDone() {
+      ledgerStatusPopup.close()
+    }
   }
 
   function resetStatuses() {
@@ -238,5 +246,11 @@ Popup {
     onClicked: {
       txProgressPopup.close()
     }
+  }
+  AVMEPopupInfo {
+    id: ledgerStatusPopup
+    icon: "qrc:/img/warn.png"
+    info: "Please confirm your transaction on your Device"
+    okBtn.text: "Close"
   }
 }

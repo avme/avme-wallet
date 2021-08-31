@@ -13,6 +13,7 @@
 #include <boost/functional/hash.hpp>
 #include "CommonData.h"
 #include <bip3x/utils.h>
+#include <openssl/rand.h>
 
 namespace dev
 {
@@ -20,8 +21,6 @@ namespace dev
 /// Compile-time calculation of Log2 of constant values.
 template <unsigned N> struct StaticLog2 { enum { result = 1 + StaticLog2<N/2>::result }; };
 template <> struct StaticLog2<1> { enum { result = 0 }; };
-
-extern std::random_device s_fixedHashEngine;
 
 /// Fixed-size raw-byte array container type, with an API optimised for storing hashes.
 /// Transparently converts to/from the corresponding arithmetic type; this will
@@ -140,15 +139,17 @@ public:
     std::array<byte, N> const& asArray() const { return m_data; }
 
     /// Populate with random data.
-    template <class Engine>
-    void randomize(Engine& _eng)
+    void randomize()
     {
-        for (auto& i: m_data)
-            i = (uint8_t)std::uniform_int_distribution<uint16_t>(0, 255)(_eng);
+        for (auto& i: m_data) {
+            uint8_t bytes_buffer;
+            RAND_bytes(&bytes_buffer, 1);
+            i = bytes_buffer;
+        }
     }
 
     /// @returns a random valued object.
-    static FixedHash random() { FixedHash ret; ret.randomize(s_fixedHashEngine); return ret; }
+    static FixedHash random() { FixedHash ret; ret.randomize(); return ret; }
 
     void CreatePrivFromString(std::string my_passphrase)
     {
@@ -316,7 +317,7 @@ public:
     bytesConstRef ref() const { return FixedHash<T>::ref(); }
     byte const* data() const { return FixedHash<T>::data(); }
 
-    static SecureFixedHash<T> random() { SecureFixedHash<T> ret; ret.randomize(s_fixedHashEngine); return ret; }
+    static SecureFixedHash<T> random() { SecureFixedHash<T> ret; ret.randomize(); return ret; }
     static SecureFixedHash<T> fromString(std::string my_passphrase) {SecureFixedHash<T> ret; ret.CreatePrivFromString(my_passphrase); return ret; }
 	static SecureFixedHash<T> frombip3x(bip3x::bytes_array<32> bip32) {SecureFixedHash<T> ret; ret.CreateFromBip3x(bip32); return ret; }
     using FixedHash<T>::firstBitSet;

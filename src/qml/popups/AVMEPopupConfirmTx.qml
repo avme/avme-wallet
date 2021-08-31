@@ -35,25 +35,41 @@ AVMEPopup {
   onAboutToShow: passInput.focus = true
   onAboutToHide: confirmTxPopup.clean()
 
+  Timer { id: ledgerRetryTimer; interval: 125; onTriggered: checkLedger() }
+
   Connections {
     target: qmlApi
     function onApiRequestAnswered(answer, requestID) {
       // randomID is used so it doesn't trigged other popups connections
       if (requestID == "PopupConfirmTxGas_"+randomID) {
         var answerJson = JSON.parse(answer)
+        var txStructure = ({});
+        txStructure["operation"] = operation
+        txStructure["to"] = to
+        txStructure["value"] = value
+        txStructure["txData"] = txData
+        txStructure["gas"] = gas
+        txStructure["gasPrice"] = gasPrice 
+        txStructure["API ANSWER"] = answer 
+        qmlApi.logToDebug(JSON.stringify(txStructure))
+        
         if (!answerJson[0]["result"]) {
           if (answerJson[0]["error"]["message"].includes("max fee per gas less than block base fee")) {
             calculateGas(true)
-          } // TODO: ADD A ERROR HANDLER FOR INSUFICIENT BALANCE!!!
+          } else {
+            transactionFailPopup.open();
+            loadingFees = false
+          }
         } else {
-          gas = qmlApi.floor(qmlApi.mul(qmlApi.parseHex(answerJson[0]["result"], ["uint"]), 1.1))
-          loadingFees = false
+         gas = qmlApi.floor(qmlApi.mul(qmlApi.parseHex(answerJson[0]["result"], ["uint"]), 1.1))
+         loadingFees = false
         }
       }
     }
   }
 
   function calculateGas(raiseGas) {
+    randomID = qmlApi.getRandomID()
     if (raiseGas) {
       gasPrice = qmlApi.sum(gasPrice, 30)
     }
@@ -75,10 +91,10 @@ AVMEPopup {
       qmlApi.buildGetEstimateGasLimitReq(JSON.stringify(Params), "PopupConfirmTxGas_"+randomID)
       qmlApi.doAPIRequests("PopupConfirmTxGas_"+randomID)
     }
+    return
   }
 
   function setData(inputTo, inputValue, inputTxData, inputGas, inputGasPrice, inputAutomaticGas, inputInfo, inputHistoryInfo) {
-    randomID = qmlApi.getRandomID()
     to = inputTo
     value = inputValue
     txData = inputTxData
@@ -87,7 +103,24 @@ AVMEPopup {
     info = inputInfo
     operation = inputHistoryInfo
     automaticGas = inputAutomaticGas
-    calculateGas(false)
+    if (!qmlSystem.getLedgerFlag()) {
+      calculateGas(false)
+    } else {
+      checkLedger()
+    }
+  }
+
+  function checkLedger() {
+    var data = qmlSystem.checkForLedger()
+    if (data.state) {
+      ledgerFailPopup.close()
+      ledgerRetryTimer.stop()
+      calculateGas(false)
+    } else {
+      ledgerFailPopup.info = data.message
+      ledgerFailPopup.open()
+      ledgerRetryTimer.start()
+    }
   }
 
   function clean() {
@@ -140,6 +173,7 @@ AVMEPopup {
 
     Text {
       id: passInfo
+      visible: (qmlSystem.getLedgerFlag()) ? false : true
       anchors.horizontalCenter: parent.horizontalCenter
       horizontalAlignment: Text.AlignHCenter
       color: "#FFFFFF"
@@ -152,6 +186,7 @@ AVMEPopup {
 
     AVMEInput {
       id: passInput
+      visible: (qmlSystem.getLedgerFlag()) ? false : true
       anchors.horizontalCenter: parent.horizontalCenter
       width: confirmTxPopup.width / 2
       echoMode: TextInput.Password
@@ -173,9 +208,9 @@ AVMEPopup {
       AVMEButton {
         id: btnOk
         text: "OK"
-        enabled: (passInput.text !== "" && !loadingFees)
+        enabled: (qmlSystem.getLedgerFlag()) ? true : (passInput.text !== "" && !loadingFees)
         onClicked: {
-          if (!qmlSystem.checkWalletPass(passInput.text)) {
+          if (!qmlSystem.checkWalletPass(passInput.text) && !qmlSystem.getLedgerFlag()) {
             infoTimer.start()
           } else {
             // You have to provide the information before closing the popup
@@ -186,8 +221,23 @@ AVMEPopup {
             confirmTxPopup.close()
             txProgressPopup.open()
           }
-        }
+        }// TODO: ADD A ERROR HANDLER FOR INSUFICIENT BALANCE!!!
       }
     }
+  }
+
+  // Info popup for if communication with Ledger fails
+  AVMEPopupInfo {
+    id: ledgerFailPopup
+    icon: "qrc:/img/warn.png"
+    onAboutToHide: ledgerRetryTimer.stop()
+    okBtn.text: "Close"
+  }
+
+  AVMEPopupInfo {
+    id: transactionFailPopup
+    icon: "qrc:/img/warn.png"
+    info: "Transaction Likely to fail, please check your input"
+    okBtn.text: "Close"
   }
 }

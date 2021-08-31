@@ -33,8 +33,11 @@ Popup {
 
   Connections {
     target: qmlSystem
-    function onLedgerAccountGenerated(data) {
-      accountList.append(data)
+    function onLedgerAccountGenerated(dataStr) {
+      var data = JSON.parse(dataStr)
+      for (var account in data) {
+        accountList.append(data[account])
+      }
       isWaiting = false
     }
   }
@@ -117,6 +120,26 @@ Popup {
     }
   }
 
+  Image {
+    id: ledgerLoadingPng
+    visible: isWaiting
+    width: parent.height * 0.25
+    height: width
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.verticalCenter: parent.verticalCenter
+    fillMode: Image.PreserveAspectFit
+    source: "qrc:/img/icons/loading.png"
+    RotationAnimator {
+      target: ledgerLoadingPng
+      from: 0
+      to: 360
+      duration: 1000
+      loops: Animation.Infinite
+      easing.type: Easing.InOutQuad
+      running: true
+    }
+  }
+
   Row {
     id: bottomRow
     anchors {
@@ -142,21 +165,7 @@ Popup {
       enabled: (!isWaiting && ledgerAccountList.currentIndex > -1)
       text: "Choose this Account"
       onClicked: {
-        // Always default to AVAX & AVME on first load
-        if (qmlSystem.getCurrentCoin() == "") {
-          qmlSystem.setCurrentCoin("AVAX")
-          qmlSystem.setCurrentCoinDecimals(18)
-        }
-        if (qmlSystem.getCurrentToken() == "") {
-          qmlSystem.setCurrentToken("AVME")
-          qmlSystem.setCurrentTokenDecimals(18)
-        }
-        qmlSystem.setLedgerFlag(true);
-        qmlSystem.setCurrentAccount(ledgerList.currentItem.itemAccount)
-        qmlSystem.setCurrentAccountPath(ledgerPopup.pathValue + ledgerPopup.index)
-        qmlSystem.importLedgerAccount(qmlSystem.getCurrentAccount(), qmlSystem.getCurrentAccountPath());
-        qmlSystem.goToOverview();
-        qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
+        qmlSystem.importLedgerAccount(ledgerList.currentItem.itemAccount, ledgerPopup.pathValue + ledgerPopup.index);
       }
     }
     AVMEButton {

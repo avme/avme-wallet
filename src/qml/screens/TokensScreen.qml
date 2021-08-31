@@ -23,6 +23,7 @@ Item {
       left: parent.left
       margins: 10
     }
+    addListBtn.onClicked: addListTokenPopup.open()
     addTokenBtn.onClicked: addTokenPopup.open()
     removeTokenBtn.onClicked: confirmEraseTokenPopup.open()
   }
@@ -39,7 +40,15 @@ Item {
     }
   }
 
-  // Popup for adding a new token
+  // Popup for adding a new token from the repo
+  AVMEPopupTokenAddList {
+    id: addListTokenPopup
+    widthPct: 0.4
+    heightPct: 0.95
+    onAboutToHide: tokensPanel.reloadTokens()
+  }
+
+  // Popup for adding a new token from a given address
   AVMEPopupTokenAdd {
     id: addTokenPopup
     widthPct: 0.4

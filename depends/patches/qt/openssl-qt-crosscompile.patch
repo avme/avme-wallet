@@ -1,0 +1,11 @@
+--- a/qtbase/src/network/configure.json	2020-10-27 05:02:11.000000000 -0300
++++ b/qtbase/src/network/configure.json	2021-08-28 03:09:46.834793930 -0300
+@@ -86,7 +86,7 @@
+             "sources": [
+                 { "type": "openssl" },
+                 {
+-                    "libs": "-lssleay32 -llibeay32 -lUser32 -lWs2_32 -lAdvapi32 -lGdi32",
++                    "libs": "-lssl -lcrypto -lws2_32 -lgdi32 -lcrypt32",
+                     "condition": "config.win32"
+                 },
+                 {

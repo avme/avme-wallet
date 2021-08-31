@@ -28,10 +28,12 @@
         <file>qml/popups/AVMEPopupViewPrivKey.qml</file>
         <file>qml/popups/AVMEPopupAssetSelect.qml</file>
         <file>qml/popups/AVMEPopupTokenAdd.qml</file>
+        <file>qml/popups/AVMEPopupTokenAddList.qml</file>
         <file>qml/popups/AVMEPopupQRCode.qml</file>
         <file>qml/popups/AVMEPopupConfirmTx.qml</file>
         <file>qml/popups/AVMEPopupPriceChart.qml</file>
         <file>qml/popups/AVMEPopupTxProgress.qml</file>
+        <file>qml/popups/AVMEPopupExchangeSettings.qml</file>
 
         <file>qml/panels/AVMEPanelAccountSelect.qml</file>
         <file>qml/panels/AVMEPanelOverview.qml</file>
@@ -118,6 +120,7 @@
         <file>img/icons/qrcodeSelect.png</file>
         <file>img/icons/arrow.png</file>
         <file>img/icons/backArrow.png</file>
+        <file>img/icons/ledgerIcon.png</file>
 
         <file>fonts/IBMPlexMono-Bold.ttf</file>
         <file>fonts/IBMPlexMono-Italic.ttf</file>

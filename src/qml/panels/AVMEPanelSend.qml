@@ -293,7 +293,9 @@ AVMEPanel {
       Timer { id: ledgerRetryTimer; interval: 250; onTriggered: btnMakeTx.checkLedger() }
       enabled: (
         txToInput.acceptableInput && txAmountInput.acceptableInput &&
-        txGasLimitInput.acceptableInput && txGasPriceInput.acceptableInput
+        txGasLimitInput.acceptableInput && txGasPriceInput.acceptableInput &&
+        +txAmountInput.text != 0 && +txGasLimitInput.text != 0 &&
+        txGasPriceInput.text != 0
       )
     }
   }
