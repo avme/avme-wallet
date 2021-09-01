@@ -430,7 +430,6 @@ AVMEPanel {
       ethCallJson["types"].push("address")
       ethCallJson["types"].push("uint*")
       var ethCallString = JSON.stringify(ethCallJson)
-      console.log(ethCallString)
       var ABI = qmlApi.buildCustomABI(ethCallString)
       txData = ABI
       return;
