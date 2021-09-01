@@ -38,7 +38,7 @@ class QmlSystem : public QObject {
     bool firstLoad;
     bool ledgerFlag = false;
     QString currentHardwareAccount;
-    QString currentHardwareAccountPath; 
+    QString currentHardwareAccountPath;
 
   public slots:
     // Clean database, threads, etc before closing the program
@@ -46,6 +46,7 @@ class QmlSystem : public QObject {
       this->w.closeTokenDB();
       this->w.closeHistoryDB();
       this->w.closeLedgerDB();
+      this->w.closeAppDB();
       return;
     }
 
@@ -201,7 +202,7 @@ class QmlSystem : public QObject {
 
     // Import a Ledger account to the Wallet DB
     Q_INVOKABLE void importLedgerAccount(QString address, QString path);
-    
+
     // Delete a ledger account on the wallet DB
     Q_INVOKABLE bool deleteLedgerAccount(QString address);
 
@@ -321,7 +322,7 @@ class QmlSystem : public QObject {
     );
 
     // ======================================================================
-    // EXCHANGE SCREEN FUNCTIONS
+    // EXCHANGE/LIQUIDITY/STAKING SCREEN FUNCTIONS
     // ======================================================================
 
     // Get the first (lower) address from a pair
@@ -365,6 +366,17 @@ class QmlSystem : public QObject {
     Q_INVOKABLE QVariantMap calculatePoolSharesForTokenValue(
       QString lowerReserves, QString higherReserves, QString totalLiquidity, QString LPTokenValue
     );
+
+    // ======================================================================
+    // APPLICATIONS SCREEN FUNCTIONS
+    // ======================================================================
+    // TODO
+
+    // Download the JSON file from the repo containing the latest DApp info.
+    //Q_INVOKABLE void downloadAppList();
+
+    // Load the DApp list from the stored JSON file.
+    //Q_INVOKABLE void loadApps();
 };
 
 #endif  //QMLSYSTEM_H

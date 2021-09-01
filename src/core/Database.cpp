@@ -188,3 +188,60 @@ std::vector<std::string> Database::getAllLedgerDBValues() {
   delete it;
   return ret;
 }
+
+// ======================================================================
+// DAPP DATABASE FUNCTIONS
+// ======================================================================
+
+bool Database::openAppDB() {
+  std::string path = Utils::walletFolderPath.string() + "/wallet/c-avax/apps";
+  if (!exists(path)) { create_directories(path); }
+  this->appStatus = leveldb::DB::Open(this->appOpts, path, &this->appDB);
+  return this->appStatus.ok();
+}
+
+std::string Database::getAppDBStatus() {
+  return this->appStatus.ToString();
+}
+
+void Database::closeAppDB() {
+  delete this->appDB;
+  this->appDB = NULL;
+}
+
+bool Database::isAppDBOpen() {
+  return (this->appDB != NULL);
+}
+
+bool Database::appDBKeyExists(std::string key) {
+  leveldb::Iterator* it = this->appDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    if (it->key().ToString() == key) return true;
+  }
+  return false;
+}
+
+std::string Database::getAppDBValue(std::string key) {
+  this->appStatus = this->appDB->Get(leveldb::ReadOptions(), key, &this->appValue);
+  return (this->appStatus.ok()) ? this->appValue : this->appStatus.ToString();
+}
+
+bool Database::putAppDBValue(std::string key, std::string value) {
+  this->appStatus = this->appDB->Put(leveldb::WriteOptions(), key, value);
+  return this->appStatus.ok();
+}
+
+bool Database::deleteAppDBValue(std::string key) {
+  this->appStatus = this->appDB->Delete(leveldb::WriteOptions(), key);
+  return this->appStatus.ok();
+}
+
+std::vector<std::string> Database::getAllAppDBValues() {
+  std::vector<std::string> ret;
+  leveldb::Iterator* it = this->appDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    ret.push_back(it->value().ToString());
+  }
+  delete it;
+  return ret;
+}

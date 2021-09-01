@@ -87,6 +87,11 @@ bool Wallet::loadLedgerDB() {
   return this->db.openLedgerDB();
 }
 
+bool Wallet::loadAppDB() {
+  if (this->db.isAppDBOpen()) { this->db.closeAppDB(); }
+  return this->db.openAppDB();
+}
+
 void Wallet::closeTokenDB() {
   this->db.closeTokenDB();
 }
@@ -97,6 +102,10 @@ void Wallet::closeHistoryDB() {
 
 void Wallet::closeLedgerDB() {
   this->db.closeLedgerDB();
+}
+
+void Wallet::closeAppDB() {
+  this->db.closeAppDB();
 }
 
 void Wallet::loadARC20Tokens() {
@@ -251,6 +260,49 @@ Secret Wallet::getSecret(std::string const& address, std::string pass) {
     return Secret();
   }
 }
+
+/*
+void Wallet::loadAvailableApps() {
+  this->availableApps.clear();
+  boost::filesystem::path appsFile = folder.string() + "/wallet/c-avax/apps.json";
+  std::string appJsonStr = Utils::readJSONFile(appsFile);
+  json appJson = json::parse(appJsonStr);
+  json devsArr = appJson["devs"];
+  for (auto& dev : devsArr) {
+    json appsArr = dev["apps"];
+    for (auto& app : appsArr) {
+      App a;
+      a.devName = dev["name"].get<std::string>();
+      a.devIcon = dev["icon"].get<std::string>();
+      a.name = app["name"].get<std::string>();
+      a.icon = app["icon"].get<std::string>();
+      a.description = app["description"].get<std::string>();
+      a.major = app["major"].get<int>();
+      a.minor = app["minor"].get<int>();
+      a.patch = app["patch"].get<int>();
+      this->availableApps.push_back(a);
+    }
+  }
+}
+
+void Wallet::loadInstalledApps() {
+  this->installedApps.clear();
+  std::vector<std::string> appJsonList = this->db.getAllAppDBValues();
+  for (std::string appJson : appJsonList) {
+    App a;
+    json appData = json::parse(appJson);
+    a.devName = appData["devName"].get<std::string>();
+    a.devIcon = appData["devIcon"].get<std::string>();
+    a.name = appData["name"].get<std::string>();
+    a.icon = appData["icon"].get<std::string>();
+    a.description = appData["description"].get<std::string>();
+    a.major = appData["major"].get<int>();
+    a.minor = appData["minor"].get<int>();
+    a.patch = appData["patch"].get<int>();
+    this->installedApps.push_back(a);
+  }
+}
+*/
 
 TransactionSkeleton Wallet::buildTransaction(
   std::string from, std::string to, std::string value,

@@ -46,7 +46,7 @@ using namespace boost::filesystem;
  */
 class Wallet {
   private:
-    // Objects for the "proper" wallet and the token/history databases.
+    // Objects for the "proper" wallet and the LevelDB databases.
     KeyManager km;
     Database db;
 
@@ -82,7 +82,6 @@ class Wallet {
      * Create/Set the folder path for the wallet
      * Used when loading ledger.
      */
-
     void setDefaultPathFolders();
 
     /**
@@ -117,14 +116,16 @@ class Wallet {
     bool auth(std::string pass);
 
     /**
-     * (Re)Load and close the token and tx history databases, respectively.
+     * (Re)Load and close the token, tx history, Ledger and DApp databases, respectively.
      */
     bool loadTokenDB();
     bool loadHistoryDB(std::string address);
     bool loadLedgerDB();
+    bool loadAppDB();
     void closeTokenDB();
     void closeHistoryDB();
     void closeLedgerDB();
+    void closeAppDB();
 
     // ======================================================================
     // TOKEN MANAGEMENT
@@ -174,9 +175,8 @@ class Wallet {
     );
 
     /**
-     * Load all ledger accounts stored
+     * Load all Ledger accounts stored in the Wallet.
      */
-
     std::vector<ledger::account> getAllLedgerAccounts();
 
     /**
@@ -185,9 +185,8 @@ class Wallet {
     bool importLedgerAccount(std::string address, std::string path);
 
     /**
-     * Delete a ledger account from DB
+     * Delete a Ledger account from the DB.
      */
-
     bool deleteLedgerAccount(std::string address);
 
     /**
@@ -227,6 +226,17 @@ class Wallet {
      * Returns the proper Secret, or an "empty" Secret on failure.
      */
     Secret getSecret(std::string const& account, std::string pass);
+
+    // ======================================================================
+    // APPLICATION MANAGEMENT
+    // ======================================================================
+
+    /**
+     * (Re)Load the available and installed DApps on the Wallet, respectively.
+     */
+    // TODO
+    //void loadAvailableApps();
+    //void loadInstalledApps();
 
     // ======================================================================
     // TRANSACTION MANAGEMENT

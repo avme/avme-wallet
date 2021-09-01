@@ -38,15 +38,23 @@ class Database {
     leveldb::Status ledgerStatus;
     std::string ledgerValue;
 
+    // The local DApp database, options, status and value.
+    leveldb::DB* appDB;
+    leveldb::Options appOpts;
+    leveldb::Status appStatus;
+    std::string appValue;
+
   public:
     // Constructor. Set up any required options here.
     Database() {
       this->tokenOpts.create_if_missing = true;
       this->historyOpts.create_if_missing = true;
       this->ledgerOpts.create_if_missing = true;
+      this->appOpts.create_if_missing = true;
       tokenDB = NULL;
       historyDB = NULL;
       ledgerDB = NULL;
+      appDB = NULL;
     }
 
     // Token database functions.
@@ -81,7 +89,17 @@ class Database {
     bool putLedgerDBValue(std::string key, std::string value);
     bool deleteLedgerDBValue(std::string key);
     std::vector<std::string> getAllLedgerDBValues();
+
+    // DApp database functions.
+    bool openAppDB();
+    std::string getAppDBStatus();
+    void closeAppDB();
+    bool isAppDBOpen();
+    bool appDBKeyExists(std::string key);
+    std::string getAppDBValue(std::string key);
+    bool putAppDBValue(std::string key, std::string value);
+    bool deleteAppDBValue(std::string key);
+    std::vector<std::string> getAllAppDBValues();
 };
 
 #endif  // DATABASE_H
-
