@@ -159,7 +159,7 @@ AVMEPopup {
         var valueX = new Date(marketGraph.minX.getTime() + (mouse.x * valueXPerPixel))
         var valueY = marketGraph.maxY - (mouse.y * valueYPerPixel)
         mouseRectX.info = Qt.formatDate(valueX, "dd/MM")
-        mouseRectY.info = valueY.toFixed(3)
+        mouseRectY.info = valueY.toFixed(valueY.toString().split('.')[1].length)
         mouseLineX.x = parent.plotArea.x + mouse.x
         mouseLineY.y = parent.plotArea.y + mouse.y
         mouseRectX.x = mouseLineX.x - (mouseRectX.width / 2)
@@ -177,6 +177,7 @@ AVMEPopup {
       radius: 5
       color: "#3E4653"
       Text {
+        id: mouseRectXText
         color: "#FFFFFF"
         font.pixelSize: 12.0
         anchors.centerIn: parent
@@ -188,12 +189,13 @@ AVMEPopup {
       id: mouseRectY
       property string info
       visible: false
-      width: 60
+      width: mouseRectYText.width + 20
       height: 30
       anchors.right: chartArea.left
       radius: 5
       color: "#3E4653"
       Text {
+        id: mouseRectYText
         color: "#FFFFFF"
         font.pixelSize: 12.0
         anchors.centerIn: parent
