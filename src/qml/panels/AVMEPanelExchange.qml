@@ -38,7 +38,8 @@ import "qrc:/qml/popups"
 AVMEPanel {
   id: exchangePanel
   title: "Exchange Details"
-  property string allowance
+  property string allowanceAsset1
+  property string allowanceAsset2
   property string pairAddress
   property var reservesList: {[]}
   property var pairAddresses: ([])
@@ -46,6 +47,7 @@ AVMEPanel {
   property string pairTokenInAddress
   property string pairTokenOutAddress
   property string randomID
+  property bool ignoreReservesScreenSet: false
   property bool needRoute
   property double swapImpact
   property bool isInverse: false
@@ -61,6 +63,9 @@ AVMEPanel {
   property bool automaticGas: true
   property string info
   property string historyInfo
+
+  // TODO: This screen needs a refactor, code is currently too confusing
+  // Specially because of the "swapOrder" button
 
   Timer { id: reservesTimer; interval: 1000; repeat: true; onTriggered: (refreshReserves()) }
   Timer { id: allowanceTimer; interval: 100; repeat: true; onTriggered: (fetchAllowance(false)) }
@@ -92,34 +97,38 @@ AVMEPanel {
       if (requestID == "QmlExchange_fetchAllowance") {
         var respArr = JSON.parse(answer)
         needRoute = false;
-        allowance = ""
+        allowanceAsset1 = ""
+        allowanceAsset2 = ""
         pairAddress = ""
         pairTokenInAddress = ""
         pairTokenOutAddress = ""
         // Loop the answer, as we know, API requests can answer unordered.
         for (var answerItem in respArr) {
           if (respArr[answerItem]["id"] == 1) {
-            allowance = qmlApi.parseHex(respArr[answerItem].result, ["uint"])
+            allowanceAsset1 = qmlApi.parseHex(respArr[answerItem].result, ["uint"])
           }
           if (respArr[answerItem]["id"] == 2) {
-            pairAddress = qmlApi.parseHex(respArr[answerItem].result, ["address"])
+            allowanceAsset2 = qmlApi.parseHex(respArr[answerItem].result, ["uint"])
           }
           if (respArr[answerItem]["id"] == 3) {
-            pairTokenInAddress = qmlApi.parseHex(respArr[answerItem].result, ["address"])
+            pairAddress = qmlApi.parseHex(respArr[answerItem].result, ["address"])
           }
           if (respArr[answerItem]["id"] == 4) {
+            pairTokenInAddress = qmlApi.parseHex(respArr[answerItem].result, ["address"])
+          }
+          if (respArr[answerItem]["id"] == 5) {
             pairTokenOutAddress = qmlApi.parseHex(respArr[answerItem].result, ["address"])
           }
         }
         // AVAX doesn't need approval, tokens do (and individually)
-        if (fromAssetPopup.chosenAssetSymbol == "AVAX") {
+        if (((!isInverse) ? fromAssetPopup.chosenAssetSymbol : toAssetPopup.chosenAssetSymbol) == "AVAX") {
           allowanceTimer.stop()
           reservesTimer.start()
           return
         } else {
-          var asset = accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]
-          if (+allowance <= +qmlSystem.fixedPointToWei(
-            asset["rawBalance"], fromAssetPopup.chosenAssetDecimals
+          var asset = accountHeader.tokenList[((!isInverse) ? fromAssetPopup.chosenAssetAddress : toAssetPopup.chosenAssetAddress)]
+          if (((!isInverse) ? allowanceAsset1 : allowanceAsset2) <= +qmlSystem.fixedPointToWei(
+            asset["rawBalance"], ((!isInverse) ? fromAssetPopup.chosenAssetDecimals : toAssetPopup.chosenAssetDecimals)
           )) {
             exchangeApprovalColumn.visible = true
             exchangeDetailsColumn.visible = false
@@ -128,6 +137,7 @@ AVMEPanel {
           }
         }
         allowanceTimer.stop()
+        ignoreReservesScreenSet = false
         reservesTimer.start()
       } else if (requestID == "QmlExchange_refreshReserves_" + randomID) {
         var resp = JSON.parse(answer)
@@ -188,9 +198,11 @@ AVMEPanel {
             }
           }
         }
-        exchangeApprovalColumn.visible = false
-        exchangeDetailsColumn.visible = true
-        exchangeLoadingPng.visible = false
+        if (!ignoreReservesScreenSet) {
+          exchangeApprovalColumn.visible = false
+          exchangeDetailsColumn.visible = true
+          exchangeLoadingPng.visible = false
+        }
       }
       qmlApi.clearAPIRequests(requestID)
     }
@@ -252,8 +264,16 @@ AVMEPanel {
     qmlApi.clearAPIRequests("QmlExchange_fetchAllowance")
     // Get allowance for inToken and reserves for all
     // Including reserves for both in/out tokens against WAVAX
+    // Allowance for asset1
     qmlApi.buildGetAllowanceReq(
       fromAssetPopup.chosenAssetAddress,
+      qmlSystem.getCurrentAccount(),
+      qmlSystem.getContract("router"),
+      "QmlExchange_fetchAllowance"
+    )
+    // Allowance for asset2
+    qmlApi.buildGetAllowanceReq(
+      toAssetPopup.chosenAssetAddress,
       qmlSystem.getCurrentAccount(),
       qmlSystem.getContract("router"),
       "QmlExchange_fetchAllowance"
@@ -316,11 +336,11 @@ AVMEPanel {
   }
 
   function approveTx() {
-    to = fromAssetPopup.chosenAssetAddress
+    to = ((!isInverse) ? fromAssetPopup.chosenAssetAddress : toAssetPopup.chosenAssetAddress)
     coinValue = 0
     gas = 100000
-    info = "You will Approve <b>" + fromAssetPopup.chosenAssetSymbol + "<\b> on Pangolin Router Contract"
-    historyInfo = "Approve <b>" + fromAssetPopup.chosenAssetSymbol + "<\b< on Pangolin"
+    info = "You will Approve <b>" + ((!isInverse) ? fromAssetPopup.chosenAssetSymbol : toAssetPopup.chosenAssetSymbol) + "<\b> on Pangolin Router Contract"
+    historyInfo = "Approve <b>" + ((!isInverse) ? fromAssetPopup.chosenAssetSymbol : toAssetPopup.chosenAssetSymbol) + "<\b< on Pangolin"
 
     var ethCallJson = ({})
     ethCallJson["function"] = "approve(address,uint256)"
@@ -467,8 +487,32 @@ AVMEPanel {
 
   function swapOrder() {
     if (isInverse) {
+      var asset = accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]
+      if (fromAssetPopup.chosenAssetSymbol != "AVAX" && (allowanceAsset1 <= +qmlSystem.fixedPointToWei(asset["rawBalance"], fromAssetPopup.chosenAssetDecimals))) {
+        exchangeApprovalColumn.visible = true
+        exchangeDetailsColumn.visible = false
+        exchangeLoadingPng.visible = false
+        ignoreReservesScreenSet = true
+      } else {
+        exchangeApprovalColumn.visible = false
+        exchangeDetailsColumn.visible = true
+        exchangeLoadingPng.visible = false
+        ignoreReservesScreenSet = false
+      }
       isInverse = false
     } else {
+      var asset = accountHeader.tokenList[toAssetPopup.chosenAssetAddress]
+      if (toAssetPopup.chosenAssetSymbol != "AVAX" && (allowanceAsset2 <= +qmlSystem.fixedPointToWei(asset["rawBalance"], toAssetPopup.chosenAssetDecimals))) {
+        exchangeApprovalColumn.visible = true
+        exchangeDetailsColumn.visible = false
+        exchangeLoadingPng.visible = false       
+        ignoreReservesScreenSet = true 
+      } else {
+        exchangeApprovalColumn.visible = false
+        exchangeDetailsColumn.visible = true
+        exchangeLoadingPng.visible = false
+        ignoreReservesScreenSet = false
+      }
       isInverse = true
     }
     swapInput.text = ""
@@ -545,6 +589,7 @@ AVMEPanel {
           id: swapOrderMouseArea
           anchors.fill: parent
           hoverEnabled: true
+          enabled: (!exchangeLoadingPng.visible)
           onEntered: swapOrderRectangle.color = "#1d1827"
           onExited: swapOrderRectangle.color = "transparent"
           onClicked: {
@@ -631,7 +676,7 @@ AVMEPanel {
       color: "#FFFFFF"
       font.pixelSize: 14.0
       text: "You need to approve your Account in order to swap <b>"
-      + fromAssetPopup.chosenAssetSymbol + "</b>."
+      + ((!isInverse) ? fromAssetPopup.chosenAssetSymbol : toAssetPopup.chosenAssetSymbol) + "</b>."
       + "<br>This operation will have a total gas cost of:<br><b>"
       + qmlSystem.calculateTransactionCost("0", "180000", gasPrice)
       + " AVAX</b>"
