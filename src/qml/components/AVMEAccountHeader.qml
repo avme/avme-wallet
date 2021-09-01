@@ -243,6 +243,7 @@ Rectangle {
     onClicked: {
       qmlSystem.setLedgerFlag(false)
       qmlSystem.hideMenu()
+      qmlSystem.cleanAndClose()
       qmlSystem.setScreen(content, "qml/screens/StartScreen.qml")
     }
   }
