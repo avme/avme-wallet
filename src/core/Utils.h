@@ -11,6 +11,8 @@
 #include <boost/chrono.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/nowide/filesystem.hpp>
+#include <boost/nowide/fstream.hpp>
 #include <qrencode.h>
 
 #ifdef __MINGW32__

@@ -71,7 +71,7 @@ inline _T contentsGeneric(boost::filesystem::path const& _file)
 {
     _T ret;
     size_t const c_elementSize = sizeof(typename _T::value_type);
-    boost::filesystem::ifstream is(_file, std::ifstream::binary);
+    boost::nowide::ifstream is(_file.string(), std::ifstream::binary);
     if (!is)
         return ret;
 
@@ -84,6 +84,7 @@ inline _T contentsGeneric(boost::filesystem::path const& _file)
 
     ret.resize((length + c_elementSize - 1) / c_elementSize);
     is.read(const_cast<char*>(reinterpret_cast<char const*>(ret.data())), length);
+    is.close();
     return ret;
 }
 
@@ -118,8 +119,9 @@ void writeFile(boost::filesystem::path const& _file, bytesConstRef _data, bool _
     {
         createDirectoryIfNotExistent(_file.parent_path());
 
-        boost::filesystem::ofstream s(_file, ios::trunc | ios::binary);
+        boost::nowide::ofstream s(_file, ios::trunc | ios::binary);
         s.write(reinterpret_cast<char const*>(_data.data()), _data.size());
+        s.close();
         if (!s)
             BOOST_THROW_EXCEPTION(FileError() << errinfo_comment("Could not write to file: " + _file.string()));
         DEV_IGNORE_EXCEPTIONS(fs::permissions(_file, fs::owner_read | fs::owner_write));

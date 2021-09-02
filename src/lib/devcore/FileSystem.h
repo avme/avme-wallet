@@ -6,6 +6,8 @@
 
 #include <string>
 #include <boost/filesystem.hpp>
+#include <boost/nowide/filesystem.hpp>
+#include <boost/nowide/fstream.hpp>
 
 namespace dev
 {

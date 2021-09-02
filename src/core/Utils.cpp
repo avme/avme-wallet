@@ -340,7 +340,7 @@ std::string Utils::readJSONFile(boost::filesystem::path filePath) {
     return errorData.dump();
   }
   try {
-    std::ifstream jsonFile(filePath.c_str());
+    boost::nowide::ifstream jsonFile(filePath.string());
     jsonFile >> returnData;
   } catch (std::exception &e) {
     json errorData;
@@ -358,7 +358,7 @@ std::string Utils::writeJSONFile(json obj, boost::filesystem::path filePath) {
   storageThreadLock.lock();
 
   try {
-    std::ofstream os(filePath.c_str());
+    boost::nowide::ofstream os(filePath.string());
     os << std::setw(2) << obj << std::endl;
     os.close();
   } catch (std::exception &e) {
