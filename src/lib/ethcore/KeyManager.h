@@ -13,6 +13,11 @@
 
 #include <boost/filesystem.hpp>
 
+// Boost 1.73 deprecated Bind placeholder declarations on global namespace.
+// Defining this macro retains current behaviour.
+// Alternatively, use <boost/bind/bind.hpp> + using namespace boost::placeholders.
+#define BOOST_BIND_GLOBAL_PLACEHOLDERS
+
 namespace dev
 {
 namespace eth
