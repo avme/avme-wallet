@@ -135,7 +135,7 @@ void API::httpGetFile(std::string host, std::string get, std::string target) {
 
   // Write whatever content we already have to output, and read until EOF,
   // writing data to output as we go.
-  std::ofstream outFile(target, std::ofstream::out | std::ofstream::binary);
+  boost::nowide::ofstream outFile(target, std::ofstream::out | std::ofstream::binary);
   if (response.size() > 0) {
     outFile << &response;
   }
