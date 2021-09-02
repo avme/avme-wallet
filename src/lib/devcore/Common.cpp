@@ -24,7 +24,7 @@ void InvariantChecker::checkInvariants(HasInvariants const* _this, char const* _
     if (!_this->invariants())
     {
         // cwarn << (_pre ? "Pre" : "Post") << "invariant failed in" << _fn << "at" << _file << ":" << _line;
-        BOOST_THROW_EXCEPTION(FailedInvariant() << errinfo_comment(std::string("_fn: ") + _fn + " _file: " + _file + " _line: " + std::string(_line))); 
+        BOOST_THROW_EXCEPTION(FailedInvariant() << errinfo_comment(std::string("_fn: ") + _fn + " _file: " + _file + " _line: " + std::to_string(_line))); 
     }
 }
 
