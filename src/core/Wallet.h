@@ -116,16 +116,18 @@ class Wallet {
     bool auth(std::string pass);
 
     /**
-     * (Re)Load and close the token, tx history, Ledger and DApp databases, respectively.
+     * (Re)Load and close the Wallet's databases.
      */
     bool loadTokenDB();
     bool loadHistoryDB(std::string address);
     bool loadLedgerDB();
     bool loadAppDB();
+    bool loadConfigDB();
     void closeTokenDB();
     void closeHistoryDB();
     void closeLedgerDB();
     void closeAppDB();
+    void closeConfigDB();
 
     // ======================================================================
     // TOKEN MANAGEMENT
@@ -294,6 +296,14 @@ class Wallet {
      * Returns true on success, false on failure.
      */
     bool updateAllTxStatus();
+
+    // ======================================================================
+    // SETTINGS MANAGEMENT
+    // ======================================================================
+
+    // Get/Set a given value in the Settings screen.
+    std::string getConfigValue(std::string key);
+    bool setConfigValue(std::string key, std::string value);
 };
 
 #endif // WALLET_H

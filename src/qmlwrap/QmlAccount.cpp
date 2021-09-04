@@ -363,18 +363,11 @@ void QmlSystem::getAccountAllBalances(QString address) {
   });
 }
 
-bool QmlSystem::loadTokenDB() {
-  return this->w.loadTokenDB();
-}
-
+bool QmlSystem::loadTokenDB() { return this->w.loadTokenDB(); }
 bool QmlSystem::loadHistoryDB(QString address) {
   return this->w.loadHistoryDB(address.toStdString());
 }
+bool QmlSystem::loadLedgerDB() { return this->w.loadLedgerDB(); }
+bool QmlSystem::loadAppDB() { return this->w.loadAppDB(); }
+bool QmlSystem::loadConfigDB() { return this->w.loadConfigDB(); }
 
-bool QmlSystem::loadLedgerDB() {
-  return this->w.loadLedgerDB();
-}
-
-bool QmlSystem::loadAppDB() {
-  return this->w.loadAppDB();
-}

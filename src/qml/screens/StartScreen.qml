@@ -208,6 +208,7 @@ Item {
       qmlSystem.loadTokenDB()
       qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
       qmlSystem.loadAppDB()
+      qmlSystem.loadConfigDB()
       qmlSystem.loadARC20Tokens()
       accountHeader.getAddress()
       qmlSystem.goToOverview()

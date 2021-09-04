@@ -44,6 +44,12 @@ class Database {
     leveldb::Status appStatus;
     std::string appValue;
 
+    // The settings database, options, status and value.
+    leveldb::DB* configDB;
+    leveldb::Options configOpts;
+    leveldb::Status configStatus;
+    std::string configValue;
+
   public:
     // Constructor. Set up any required options here.
     Database() {
@@ -51,10 +57,8 @@ class Database {
       this->historyOpts.create_if_missing = true;
       this->ledgerOpts.create_if_missing = true;
       this->appOpts.create_if_missing = true;
-      tokenDB = NULL;
-      historyDB = NULL;
-      ledgerDB = NULL;
-      appDB = NULL;
+      this->configOpts.create_if_missing = true;
+      tokenDB = historyDB = ledgerDB = appDB = configDB = NULL;
     }
 
     // Token database functions.
@@ -100,6 +104,17 @@ class Database {
     bool putAppDBValue(std::string key, std::string value);
     bool deleteAppDBValue(std::string key);
     std::vector<std::string> getAllAppDBValues();
+
+    // Settings database functions.
+    bool openConfigDB();
+    std::string getConfigDBStatus();
+    void closeConfigDB();
+    bool isConfigDBOpen();
+    bool configDBKeyExists(std::string key);
+    std::string getConfigDBValue(std::string key);
+    bool putConfigDBValue(std::string key, std::string value);
+    bool deleteConfigDBValue(std::string key);
+    std::vector<std::string> getAllConfigDBValues();
 };
 
 #endif  // DATABASE_H

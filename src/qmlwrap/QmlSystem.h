@@ -47,6 +47,7 @@ class QmlSystem : public QObject {
       this->w.closeHistoryDB();
       this->w.closeLedgerDB();
       this->w.closeAppDB();
+      this->w.closeConfigDB();
       return;
     }
 
@@ -105,7 +106,6 @@ class QmlSystem : public QObject {
     Q_INVOKABLE void setCurrentHardwareAccountPath(QString b) { currentHardwareAccountPath = b; }
     Q_INVOKABLE QString getCurrentHardwareAccountPath() { return currentHardwareAccountPath; }
 
-
     // Get the project's version
     Q_INVOKABLE QString getProjectVersion();
 
@@ -137,6 +137,10 @@ class QmlSystem : public QObject {
 
     // Get the given hardcoded contract address
     Q_INVOKABLE QString getContract(QString name);
+
+    // Get/Set a given value in the Settings screen.
+    Q_INVOKABLE QString getConfigValue(QString key);
+    Q_INVOKABLE bool setConfigValue(QString key, QString value);
 
     // ======================================================================
     // START/WALLET SCREEN FUNCTIONS
@@ -229,6 +233,7 @@ class QmlSystem : public QObject {
     Q_INVOKABLE bool loadHistoryDB(QString address);
     Q_INVOKABLE bool loadLedgerDB();
     Q_INVOKABLE bool loadAppDB();
+    Q_INVOKABLE bool loadConfigDB();
 
     // Set/Create default folder path when loading with Ledger.
     Q_INVOKABLE void setDefaultPathFolders();

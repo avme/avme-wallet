@@ -107,4 +107,15 @@ AVMEPanel {
     }
     // TODO: "Open Local App" button when Developer Mode is implemented in Settings
   }
+
+  AVMEButton {
+    id: btnOpenLocal
+    visible: (qmlSystem.getConfigValue("devMode") == "true")
+    width: (appDetailsPanel.width * 0.8)
+    anchors.horizontalCenter: parent.horizontalCenter
+    anchors.bottom: parent.bottom
+    anchors.bottomMargin: 20
+    text: "Open Local App"
+    onClicked: {} // TODO
+  }
 }

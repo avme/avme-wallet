@@ -92,21 +92,16 @@ bool Wallet::loadAppDB() {
   return this->db.openAppDB();
 }
 
-void Wallet::closeTokenDB() {
-  this->db.closeTokenDB();
+bool Wallet::loadConfigDB() {
+  if (this->db.isConfigDBOpen()) { this->db.closeConfigDB(); }
+  return this->db.openConfigDB();
 }
 
-void Wallet::closeHistoryDB() {
-  this->db.closeHistoryDB();
-}
-
-void Wallet::closeLedgerDB() {
-  this->db.closeLedgerDB();
-}
-
-void Wallet::closeAppDB() {
-  this->db.closeAppDB();
-}
+void Wallet::closeTokenDB() { this->db.closeTokenDB(); }
+void Wallet::closeHistoryDB() { this->db.closeHistoryDB(); }
+void Wallet::closeLedgerDB() { this->db.closeLedgerDB(); }
+void Wallet::closeAppDB() { this->db.closeAppDB(); }
+void Wallet::closeConfigDB() { this->db.closeConfigDB(); }
 
 void Wallet::loadARC20Tokens() {
   this->ARC20Tokens.clear();
@@ -473,5 +468,13 @@ bool Wallet::updateAllTxStatus() {
     saveTxToHistory(tx);
   }
   return true;
+}
+
+std::string Wallet::getConfigValue(std::string key) {
+  return this->db.getConfigDBValue(key);
+}
+
+bool Wallet::setConfigValue(std::string key, std::string value) {
+  return this->db.putConfigDBValue(key, value);
 }
 

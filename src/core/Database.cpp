@@ -245,3 +245,60 @@ std::vector<std::string> Database::getAllAppDBValues() {
   delete it;
   return ret;
 }
+
+// ======================================================================
+// SETTINGS DATABASE FUNCTIONS
+// ======================================================================
+
+bool Database::openConfigDB() {
+  std::string path = Utils::walletFolderPath.string() + "/config";
+  if (!exists(path)) { create_directories(path); }
+  this->configStatus = leveldb::DB::Open(this->configOpts, path, &this->configDB);
+  return this->configStatus.ok();
+}
+
+std::string Database::getConfigDBStatus() {
+  return this->configStatus.ToString();
+}
+
+void Database::closeConfigDB() {
+  delete this->configDB;
+  this->configDB = NULL;
+}
+
+bool Database::isConfigDBOpen() {
+  return (this->configDB != NULL);
+}
+
+bool Database::configDBKeyExists(std::string key) {
+  leveldb::Iterator* it = this->configDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    if (it->key().ToString() == key) return true;
+  }
+  return false;
+}
+
+std::string Database::getConfigDBValue(std::string key) {
+  this->configStatus = this->configDB->Get(leveldb::ReadOptions(), key, &this->configValue);
+  return (this->configStatus.ok()) ? this->configValue : this->configStatus.ToString();
+}
+
+bool Database::putConfigDBValue(std::string key, std::string value) {
+  this->configStatus = this->configDB->Put(leveldb::WriteOptions(), key, value);
+  return this->configStatus.ok();
+}
+
+bool Database::deleteConfigDBValue(std::string key) {
+  this->configStatus = this->configDB->Delete(leveldb::WriteOptions(), key);
+  return this->configStatus.ok();
+}
+
+std::vector<std::string> Database::getAllConfigDBValues() {
+  std::vector<std::string> ret;
+  leveldb::Iterator* it = this->configDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    ret.push_back(it->value().ToString());
+  }
+  delete it;
+  return ret;
+}

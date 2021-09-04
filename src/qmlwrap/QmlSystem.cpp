@@ -62,3 +62,12 @@ bool QmlSystem::firstHigherThanSecond(QString first, QString second) {
 QString QmlSystem::getContract(QString name) {
   return QString::fromStdString(Pangolin::contracts[name.toStdString()]);
 }
+
+QString QmlSystem::getConfigValue(QString key) {
+  return QString::fromStdString(this->w.getConfigValue(key.toStdString()));
+}
+
+bool QmlSystem::setConfigValue(QString key, QString value) {
+  return this->w.setConfigValue(key.toStdString(), value.toStdString());
+}
+

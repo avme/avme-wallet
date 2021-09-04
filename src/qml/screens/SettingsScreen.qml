@@ -76,6 +76,38 @@ Item {
           onClicked: viewSeedPopup.open()
         }
       }
+
+      Text {
+        id: developerText
+        width: settingsCol.width * 0.75
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        text: "Enable loading DApps from a local folder (FOR EXPERTS/DEVELOPERS ONLY!)"
+
+        CheckBox {
+          id: developerCheck
+          checked: false
+          width: settingsCol.width * 0.25
+          anchors {
+            verticalCenter: parent.verticalCenter
+            left: parent.right
+          }
+          text: "Developer Mode"
+          contentItem: Text {
+            text: parent.text
+            font.pixelSize: 14.0
+            color: parent.checked ? "#FFFFFF" : "#888888"
+            verticalAlignment: Text.AlignVCenter
+            leftPadding: parent.indicator.width + parent.spacing
+          }
+          Component.onCompleted: {
+            var toggled = qmlSystem.getConfigValue("devMode")
+            if (toggled == "true") { checked = true }
+            else if (toggled == "false") { checked = false }
+          }
+          onToggled: qmlSystem.setConfigValue("devMode", (checked) ? "true" : "false")
+        }
+      }
     }
   }
 
