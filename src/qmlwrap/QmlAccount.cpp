@@ -374,3 +374,7 @@ bool QmlSystem::loadHistoryDB(QString address) {
 bool QmlSystem::loadLedgerDB() {
   return this->w.loadLedgerDB();
 }
+
+bool QmlSystem::loadAppDB() {
+  return this->w.loadAppDB();
+}

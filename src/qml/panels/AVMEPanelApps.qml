@@ -14,6 +14,11 @@ AVMEPanel {
 
   Component.onCompleted: {} // TODO: reload apps here probably
 
+  Connections {
+    target: filterComboBox
+    function onActivated(index) {}  // TODO
+  }
+
   AVMEAppList {
     id: appList
     width: (parent.width * 0.9)
@@ -28,21 +33,17 @@ AVMEPanel {
     model: ListModel {
       id: appModel
       ListElement {
-        devIcon: "qrc:/img/avax_logo.png"
-        icon: "qrc:/img/avme_logo.png"
+        chainId: 41113
+        folder: "Test-1"
         name: "Test App 1"
-        description: "A nice test app numbered as one"
-        creator: "MyName Here"
         major: 1
         minor: 0
         patch: 2
       }
       ListElement {
-        devIcon: "qrc:/img/pangolin.png"
-        icon: "qrc:/img/yieldyak.png"
+        chainId: 41113
+        folder: "Test-1"
         name: "Test App 2"
-        description: "A pretty long description here about how utterly fantabulous this test app is and the fact it is numero DOS which in Spanish means two"
-        creator: "SomeDude WithAVision Inc."
         major: 3
         minor: 14
         patch: 159
@@ -65,14 +66,19 @@ AVMEPanel {
       anchors.verticalCenter: filterInput.verticalCenter
       color: "#FFFFFF"
       font.pixelSize: 14.0
-      text: "Filter:"
+      text: "Filters:"
     }
 
-    // TODO: the actual filter
+    // TODO: the actual filters
     AVMEInput {
       id: filterInput
       width: appsPanel.width * 0.5
-      placeholder: "Creator or name"
+      placeholder: "Name"
+    }
+    ComboBox {
+      id: filterComboBox
+      width: appsPanel.width * 0.25
+      model: ["All", "Uninstalled", "Installed", "Needs Update"]
     }
   }
 }

@@ -98,22 +98,17 @@ Item {
         qmlSystem.setCurrentHardwareAccountPath(accountList.currentItem.itemDerivationPath)
         qmlSystem.importLedgerAccount(qmlSystem.getCurrentHardwareAccount(), qmlSystem.getCurrentHardwareAccountPath());
         qmlSystem.setDefaultPathFolders()
-        qmlSystem.loadTokenDB()
-        qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
-        qmlSystem.loadARC20Tokens()
-        accountHeader.getAddress()
-        qmlSystem.goToOverview()
-        qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
       } else {
         qmlSystem.setLedgerFlag(false);
         qmlSystem.setCurrentAccount(accountList.currentItem.itemAddress)
-        qmlSystem.loadTokenDB()
-        qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
-        qmlSystem.loadARC20Tokens()
-        accountHeader.getAddress()
-        qmlSystem.goToOverview()
-        qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
       }
+      qmlSystem.loadTokenDB()
+      qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
+      qmlSystem.loadAppDB()
+      qmlSystem.loadARC20Tokens()
+      accountHeader.getAddress()
+      qmlSystem.goToOverview()
+      qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
     }
     btnCreateLedger.onClicked: checkLedger()
     btnErase.onClicked: confirmErasePopup.open()

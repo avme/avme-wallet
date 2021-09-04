@@ -24,20 +24,20 @@ ListView {
   clip: true
   boundsBehavior: Flickable.StopAtBounds
 
+  Component.onCompleted: forceActiveFocus()
+
   delegate: Component {
     id: listDelegate
     Item {
       id: listItem
-      readonly property string itemDevIcon: devIcon
-      readonly property string itemIcon: icon
+      readonly property string itemChainId: chainId
+      readonly property string itemFolder: folder
       readonly property string itemName: name
-      readonly property string itemDescription: description
-      readonly property string itemCreator: creator
       readonly property int itemMajor: major
       readonly property int itemMinor: minor
       readonly property int itemPatch: patch
       width: appList.width
-      height: 50
+      height: 64
 
       Rectangle {
         id: delegateRectangle
@@ -51,40 +51,45 @@ ListView {
         Image {
           id: delegateIcon
           anchors.verticalCenter: parent.verticalCenter
+          anchors.left: parent.left
+          anchors.leftMargin: 5
           width: parent.height * 0.9
           height: width
           antialiasing: true
           smooth: true
           fillMode: Image.PreserveAspectFit
-          source: itemIcon
-        }
-        Text {
-          id: delegateCreator
-          anchors.verticalCenter: parent.verticalCenter
-          width: (parent.width * 0.4)
-          x: delegateIcon.width
-          color: "white"
-          font.pixelSize: 14.0
-          padding: 5
-          elide: Text.ElideRight
-          text: itemCreator
+          source: "qrc:/img/unknown_token.png"  // TODO
         }
         Text {
           id: delegateName
           anchors.verticalCenter: parent.verticalCenter
-          anchors.right: parent.right
-          anchors.rightMargin: parent.width * 0.05
-          width: parent.width * 0.4
+          anchors.left: delegateIcon.right
+          anchors.leftMargin: 10
+          width: parent.width * 0.6
           color: "white"
-          font.pixelSize: 14.0
+          font.pixelSize: 18.0
+          font.bold: true
           elide: Text.ElideRight
           text: itemName
+        }
+        Text {
+          id: delegateStatus
+          anchors.verticalCenter: parent.verticalCenter
+          anchors.right: parent.right
+          anchors.rightMargin: 20
+          width: parent.width * 0.2
+          color: "white"
+          font.pixelSize: 18.0
+          text: ""  // TODO
         }
       }
       MouseArea {
         id: delegateMouseArea
         anchors.fill: parent
-        onClicked: appList.currentIndex = index
+        onClicked: {
+          appList.currentIndex = index
+          forceActiveFocus()
+        }
       }
     }
   }

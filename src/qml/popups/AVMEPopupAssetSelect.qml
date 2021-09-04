@@ -119,7 +119,10 @@ AVMEPopup {
           width: parent.width
           height: (parent.height * 0.15)
           anchors.horizontalCenter: parent.horizontalCenter
-          onGrabFocus: tokenSelectList.currentIndex = -1
+          onGrabFocus: {
+            tokenSelectList.currentIndex = -1
+            forceActiveFocus()
+          }
           model: ListModel { id: coinList }
         }
         AVMETokenList {
@@ -127,7 +130,10 @@ AVMEPopup {
           width: parent.width
           height: (parent.height * 0.85)
           anchors.horizontalCenter: parent.horizontalCenter
-          onGrabFocus: coinSelectList.currentIndex = -1
+          onGrabFocus: {
+            coinSelectList.currentIndex = -1
+            forceActiveFocus()
+          }
           model: ListModel {
             id: tokenList
             function sortBySymbol() {

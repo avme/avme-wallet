@@ -24,6 +24,8 @@ ListView {
   clip: true
   boundsBehavior: Flickable.StopAtBounds
 
+  Component.onCompleted: forceActiveFocus()
+
   // Header (top bar)
   header: Rectangle {
     id: listHeader

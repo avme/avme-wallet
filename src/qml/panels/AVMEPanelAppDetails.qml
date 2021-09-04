@@ -30,20 +30,13 @@ AVMEPanel {
       spacing: 20
 
       Image {
-        id: appCreatorIcon
-        height: 64
-        antialiasing: true
-        smooth: true
-        fillMode: Image.PreserveAspectFit
-        source: (appsPanel.selectedApp != null) ? appsPanel.selectedApp.itemDevIcon : ""
-      }
-      Image {
         id: appIcon
-        height: 64
+        height: 128
         antialiasing: true
         smooth: true
         fillMode: Image.PreserveAspectFit
-        source: (appsPanel.selectedApp != null) ? appsPanel.selectedApp.itemIcon : ""
+        source: "qrc:/img/unknown_token.png"  // TODO
+        //source: (appsPanel.selectedApp != null) ? appsPanel.selectedApp.itemIcon : ""
       }
     }
 
@@ -58,32 +51,13 @@ AVMEPanel {
       text: ((appsPanel.selectedApp != null) ? appsPanel.selectedApp.itemName : "")
     }
     Text {
-      id: appDescription
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: (appDetailsPanel.width * 0.9)
-      horizontalAlignment: Text.AlignHCenter
-      wrapMode: Text.WordWrap
-      color: "#FFFFFF"
-      font.pixelSize: 14.0
-      text: ((appsPanel.selectedApp != null) ? appsPanel.selectedApp.itemDescription : "")
-    }
-    Text {
-      id: appCreator
-      anchors.horizontalCenter: parent.horizontalCenter
-      width: (appDetailsPanel.width * 0.9)
-      horizontalAlignment: Text.AlignHCenter
-      color: "#FFFFFF"
-      font.pixelSize: 14.0
-      text: "<b>Created by:</b> " + ((appsPanel.selectedApp != null)
-      ? appsPanel.selectedApp.itemCreator : "")
-    }
-    Text {
       id: appVersion
       anchors.horizontalCenter: parent.horizontalCenter
       width: (appDetailsPanel.width * 0.9)
       horizontalAlignment: Text.AlignHCenter
       color: "#FFFFFF"
       font.pixelSize: 14.0
+      // TODO: *installed* app version (for comparison with updates)
       text: "<b>Version:</b> " + ((appsPanel.selectedApp != null)
       ? appsPanel.selectedApp.itemMajor + "."
       + appsPanel.selectedApp.itemMinor + "."
@@ -131,5 +105,6 @@ AVMEPanel {
       text: "Uninstall Application"
       onClicked: confirmUninstallAppPopup.open()
     }
+    // TODO: "Open Local App" button when Developer Mode is implemented in Settings
   }
 }

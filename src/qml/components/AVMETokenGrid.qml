@@ -20,6 +20,8 @@ GridView {
   cellWidth: 120
   cellHeight: 120
 
+  Component.onCompleted: forceActiveFocus()
+
   delegate: Component {
     id: gridDelegate
     Item {

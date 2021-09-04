@@ -224,13 +224,11 @@ class QmlSystem : public QObject {
     // Get the balances of all registered tokens for a specific Account
     Q_INVOKABLE void getAccountAllBalances(QString address);
 
-    // (Re)Load the token and tx history databases, respectively.
+    // (Re)Load the respective wallet databases.
     Q_INVOKABLE bool loadTokenDB();
     Q_INVOKABLE bool loadHistoryDB(QString address);
-
-    // (Re)Load ledger DB which contains ledger accoutns
-
     Q_INVOKABLE bool loadLedgerDB();
+    Q_INVOKABLE bool loadAppDB();
 
     // Set/Create default folder path when loading with Ledger.
     Q_INVOKABLE void setDefaultPathFolders();

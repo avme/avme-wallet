@@ -207,6 +207,7 @@ Item {
       newWalletSeedPopup.close()
       qmlSystem.loadTokenDB()
       qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
+      qmlSystem.loadAppDB()
       qmlSystem.loadARC20Tokens()
       accountHeader.getAddress()
       qmlSystem.goToOverview()
