@@ -5,6 +5,7 @@
 #define QMLSYSTEM_H
 
 #include <QtConcurrent/qtconcurrentrun.h>
+#include <QtCore/QDateTime>
 #include <QtCore/QFile>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
@@ -91,6 +92,9 @@ class QmlSystem : public QObject {
     void ledgerRequired();
     void ledgerDone();
 
+    // Applications screen signals
+    void appLoaded(QString folderPath);
+
   public:
     // ======================================================================
     // COMMON FUNCTIONS
@@ -112,8 +116,10 @@ class QmlSystem : public QObject {
     // Open the "About Qt" window
     Q_INVOKABLE void openQtAbout();
 
-    // Change the current loaded screen
+    // Change the current loaded screen from the qrc resource file or a
+    // local file, respectively.
     Q_INVOKABLE void setScreen(QObject* loader, QString qmlFile);
+    Q_INVOKABLE void setLocalScreen(QObject* loader, QString qmlFile);
 
     // Copy a string to the system clipboard
     Q_INVOKABLE void copyToClipboard(QString str);
@@ -174,6 +180,9 @@ class QmlSystem : public QObject {
 
     // Check if a BIP39 seed is valid
     Q_INVOKABLE bool seedIsValid(QString seed);
+
+    // Check if a DApp exists in the given folder
+    Q_INVOKABLE bool checkForApp(QString folder);
 
     // ======================================================================
     // ACCOUNT SCREEN FUNCTIONS
@@ -373,6 +382,7 @@ class QmlSystem : public QObject {
     // ======================================================================
     // APPLICATIONS SCREEN FUNCTIONS
     // ======================================================================
+
     // TODO
 
     // Download the JSON file from the repo containing the latest DApp info.

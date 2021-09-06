@@ -105,7 +105,6 @@ AVMEPanel {
       text: "Uninstall Application"
       onClicked: confirmUninstallAppPopup.open()
     }
-    // TODO: "Open Local App" button when Developer Mode is implemented in Settings
   }
 
   AVMEButton {
@@ -116,6 +115,6 @@ AVMEPanel {
     anchors.bottom: parent.bottom
     anchors.bottomMargin: 20
     text: "Open Local App"
-    onClicked: {} // TODO
+    onClicked: loadAppPopup.open()
   }
 }

@@ -34,6 +34,18 @@ Item {
     }
   }
 
+  // Popup for loading a local application (for developers)
+  AVMEPopupLoadApp {
+    id: loadAppPopup
+    widthPct: 0.4
+    heightPct: 0.4
+    loadBtn.onClicked: loadLocalApp()
+    function loadLocalApp() {
+      qmlSystem.setScreen(content, "qml/screens/AppScreen.qml")
+      qmlSystem.appLoaded(folder)
+    }
+  }
+
   // Popup for confirming app uninstallation
   AVMEPopupYesNo {
     id: confirmUninstallAppPopup
