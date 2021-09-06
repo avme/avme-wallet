@@ -81,7 +81,7 @@ AVMEPopup {
       id: seedText
       property alias timer: seedTextTimer
       width: (parent.width * 0.9)
-      height: 50
+      height: 75
       anchors.horizontalCenter: parent.horizontalCenter
       horizontalAlignment: Text.AlignHCenter
       verticalAlignment: Text.AlignVCenter
@@ -90,6 +90,7 @@ AVMEPopup {
       selectionColor: popupSelectionColor
       color: "#FFFFFF"
       font.pixelSize: 14.0
+      wrapMode: Text.Wrap
       background: Rectangle {
         width: parent.width
         height: parent.height

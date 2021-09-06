@@ -48,6 +48,7 @@ AVMEPopup {
     TextArea {
       id: seedText
       width: (parent.width * 0.9)
+      height: 75
       anchors.horizontalCenter: parent.horizontalCenter
       horizontalAlignment: Text.AlignHCenter
       verticalAlignment: Text.AlignVCenter
@@ -55,6 +56,7 @@ AVMEPopup {
       selectByMouse: true
       selectionColor: popupSelectionColor
       color: "#FFFFFF"
+      wrapMode: Text.Wrap
       font.pixelSize: 14.0
       background: Rectangle {
         width: parent.width

@@ -70,7 +70,7 @@ bool QmlSystem::seedIsValid(QString seed) {
     if (!BIP39::wordExists(word)) { return false; }
     ct++;
   }
-  if (ct != 12) { return false; }
+  if (ct != 12 && ct != 24) { return false; }
   return true;
 }
 
