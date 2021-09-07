@@ -48,23 +48,20 @@ ListView {
         radius: 5
         height: parent.height
         width: parent.width * 0.9
-        Image {
+        AVMEAsyncImage {
           id: delegateImage
           anchors.verticalCenter: parent.verticalCenter
           width: parent.height * 0.9
           height: width
-          antialiasing: true
-          smooth: true
-          fillMode: Image.PreserveAspectFit
-          source: {
+          imageSource: {
             var avmeAddress = qmlSystem.getContract("AVME")
             if (itemAddress == avmeAddress) {
-              source: "qrc:/img/avme_logo.png"
+              imageSource: "qrc:/img/avme_logo.png"
             } else if (itemIcon && itemIcon != "") {
-              source: itemIcon
+              imageSource: itemIcon
             } else {
               var img = qmlSystem.getARC20TokenImage(itemAddress)
-              source: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
+              imageSource: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
             }
           }
         }

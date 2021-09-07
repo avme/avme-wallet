@@ -128,16 +128,13 @@ ListView {
           anchors.margins: 10
           spacing: 10
 
-          Image {
+          AVMEAsyncImage {
             id: listAssetImage
             height: 48
-            antialiasing: true
-            asynchronous: true
-            smooth: true
-            cache: true
-            fillMode: Image.PreserveAspectFit
-            source: imagePath
+            width: 48
+            imageSource: imagePath
           }
+          
           Text {
             id: listAssetAmount
             color: "white"
