@@ -151,7 +151,7 @@ Rectangle {
       width: (parent.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
       text: "Applications (WIP)"
-      enabled: (enableBtn && false) // TODO: re-enable when implementing DApps
+      // enabled: (enableBtn && false) // TODO: re-enable when implementing DApps
       onClicked: {
         itemSelection.y = items.y + y
         changeScreen("Applications")

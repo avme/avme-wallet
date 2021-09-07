@@ -14,6 +14,8 @@ Item {
     target: qmlSystem
     function onAppLoaded(folderPath) {
       folder = folderPath
+      appContent.source = "" // trimComponentCache can *only* be called after setting the source to ""
+      qmlSystem.trimComponentCache()
       qmlSystem.setLocalScreen(appContent, folder + "/main.qml")
     }
   }

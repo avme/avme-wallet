@@ -18,9 +18,7 @@ void QmlSystem::setScreen(QObject* loader, QString qmlFile) {
 
 void QmlSystem::setLocalScreen(QObject* loader, QString qmlFile) {
   loader->setProperty(
-    "source", "file:" + qmlFile + "?t=" + QString::number(
-      QDateTime::currentMSecsSinceEpoch(), 10
-    )
+    "source", "file:" + qmlFile
   );
 }
 

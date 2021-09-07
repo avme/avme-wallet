@@ -21,7 +21,11 @@ int main(int argc, char *argv[]) {
   // Create the actual application and register our custom classes into it
   QApplication app(argc, argv);
   QQmlApplicationEngine engine;
-  qmlRegisterType<QmlSystem>("QmlSystem", 1, 0, "QmlSystem");
+
+  QmlSystem qmlsystem;
+  qmlsystem.setEngine(&engine);
+
+  engine.rootContext()->setContextProperty("qmlSystem", &qmlsystem);
   qmlRegisterType<QmlApi>("QmlApi", 1, 0, "QmlApi");
 
   // Set the app's text font and icon
@@ -36,7 +40,7 @@ int main(int argc, char *argv[]) {
   // Load the main screen, link the required signals/slots and start the app
   engine.load(QUrl(QStringLiteral("qrc:/qml/screens/main.qml")));
   if (engine.rootObjects().isEmpty()) return -1;
-  QmlSystem qmlsystem;
+
   QObject::connect(&app, SIGNAL(aboutToQuit()), &qmlsystem, SLOT(cleanAndClose()));
   return app.exec();
 }
