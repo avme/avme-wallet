@@ -40,6 +40,7 @@ class QmlSystem : public QObject {
     bool ledgerFlag = false;
     QString currentHardwareAccount;
     QString currentHardwareAccountPath;
+    QQmlApplicationEngine *engine = nullptr;
 
   public slots:
     // Clean database, threads, etc before closing the program
@@ -109,7 +110,13 @@ class QmlSystem : public QObject {
     Q_INVOKABLE QString getCurrentHardwareAccount() { return currentHardwareAccount; }
     Q_INVOKABLE void setCurrentHardwareAccountPath(QString b) { currentHardwareAccountPath = b; }
     Q_INVOKABLE QString getCurrentHardwareAccountPath() { return currentHardwareAccountPath; }
+    void setEngine(QQmlApplicationEngine *targetEngine) { engine = targetEngine;}; // INVOKATION FROM QML SHOULD *NOT* BE ALLOWED!
 
+    // Trim component cache
+    // Removes *only* the data not being used
+    Q_INVOKABLE void trimComponentCache() {
+      engine->trimComponentCache();
+    }
     // Get the project's version
     Q_INVOKABLE QString getProjectVersion();
 
