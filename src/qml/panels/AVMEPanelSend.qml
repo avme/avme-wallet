@@ -193,7 +193,7 @@ AVMEPanel {
           ? qmlSystem.getRealMaxAVAXAmount(
             accountHeader.coinRawBalance, txGasLimitInput.text, sendPanel.gasPrice
           )
-          : (+accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]["rawBalance"])
+          : (accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]["rawBalance"])
           updateTxCost()
         }
       }
