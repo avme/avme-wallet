@@ -487,7 +487,7 @@ AVMEPanel {
   function swapOrder() {
     if (isInverse) {
       var asset = accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]
-      if (fromAssetPopup.chosenAssetSymbol != "AVAX" && (allowanceAsset1 <= +qmlSystem.fixedPointToWei(asset["rawBalance"], fromAssetPopup.chosenAssetDecimals))) {
+      if (fromAssetPopup.chosenAssetSymbol != "AVAX" && (+allowanceAsset1 <= +qmlSystem.fixedPointToWei(asset["rawBalance"], fromAssetPopup.chosenAssetDecimals))) {
         exchangeApprovalColumn.visible = true
         exchangeDetailsColumn.visible = false
         exchangeLoadingPng.visible = false
@@ -501,7 +501,7 @@ AVMEPanel {
       isInverse = false
     } else {
       var asset = accountHeader.tokenList[toAssetPopup.chosenAssetAddress]
-      if (toAssetPopup.chosenAssetSymbol != "AVAX" && (allowanceAsset2 <= +qmlSystem.fixedPointToWei(asset["rawBalance"], toAssetPopup.chosenAssetDecimals))) {
+      if (toAssetPopup.chosenAssetSymbol != "AVAX" && (+allowanceAsset2 <= +qmlSystem.fixedPointToWei(asset["rawBalance"], toAssetPopup.chosenAssetDecimals))) {
         exchangeApprovalColumn.visible = true
         exchangeDetailsColumn.visible = false
         exchangeLoadingPng.visible = false       
