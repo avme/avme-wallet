@@ -14,7 +14,7 @@ Item {
 
   AVMEPanelApps {
     id: appsPanel
-    width: (parent.width * 0.6)
+    width: (parent.width * 0.7)
     anchors {
       top: parent.top
       left: parent.left
@@ -25,7 +25,7 @@ Item {
 
   AVMEPanelAppDetails {
     id: appDetailsPanel
-    width: (parent.width * 0.4)
+    width: (parent.width * 0.3)
     anchors {
       top: parent.top
       right: parent.right

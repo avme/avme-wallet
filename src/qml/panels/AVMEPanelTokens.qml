@@ -29,13 +29,15 @@ AVMEPanel {
 
   AVMETokenGrid {
     id: tokenGrid
-    width: (parent.width * 0.9)
     anchors {
       top: parent.top
       bottom: btnRow.top
-      horizontalCenter: parent.horizontalCenter
+      left: parent.left
+      right: parent.right
       topMargin: 80
       bottomMargin: 20
+      leftMargin: 20
+      rightMargin: 20
     }
     model: ListModel {
       id: tokenList

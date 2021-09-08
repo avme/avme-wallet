@@ -69,7 +69,7 @@
         <file>qml/components/AVMEAccountQRCode.qml</file>
         <file>qml/components/AVMEOverviewBalance.qml</file>
         <file>qml/components/AVMEOverviewAssetList.qml</file>
-        <file>qml/components/AVMEAppList.qml</file>
+        <file>qml/components/AVMEAppGrid.qml</file>
         <file>qml/components/AVMEAsyncImage.qml</file>
 
         <file>img/Welcome_Logo_AVME.png</file>

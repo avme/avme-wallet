@@ -10,7 +10,7 @@ import "qrc:/qml/components"
 AVMEPanel {
   id: appsPanel
   title: "Applications"
-  property alias selectedApp: appList.currentItem
+  property alias selectedApp: appGrid.currentItem
 
   Component.onCompleted: {} // TODO: reload apps here probably
 
@@ -19,15 +19,17 @@ AVMEPanel {
     function onActivated(index) {}  // TODO
   }
 
-  AVMEAppList {
-    id: appList
-    width: (parent.width * 0.9)
+  AVMEAppGrid {
+    id: appGrid
     anchors {
       top: parent.top
       bottom: filterRow.top
-      horizontalCenter: parent.horizontalCenter
+      left: parent.left
+      right: parent.right
       topMargin: 80
       bottomMargin: 20
+      leftMargin: 20
+      rightMargin: 20
     }
     // TODO: real data here
     model: ListModel {
@@ -42,11 +44,35 @@ AVMEPanel {
       }
       ListElement {
         chainId: 41113
-        folder: "Test-1"
-        name: "Test App 2"
+        folder: "Test-2"
+        name: "Test Application No. 2"
         major: 3
         minor: 14
         patch: 159
+      }
+      ListElement {
+        chainId: 41113
+        folder: "Test-3"
+        name: "AVME Test Application Number 3"
+        major: 2
+        minor: 1
+        patch: 0
+      }
+      ListElement {
+        chainId: 41113
+        folder: "Test-4"
+        name: "AVME Wallet Test Application Number Four"
+        major: 0
+        minor: 1
+        patch: 5
+      }
+      ListElement {
+        chainId: 41113
+        folder: "Test-5"
+        name: "AVME Wallet Test Application Number Five And Knuckles GOTY Edition"
+        major: 5
+        minor: 5
+        patch: 5
       }
     }
   }

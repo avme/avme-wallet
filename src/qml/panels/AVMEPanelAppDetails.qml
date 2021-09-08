@@ -44,9 +44,12 @@ AVMEPanel {
       id: appName
       anchors.horizontalCenter: parent.horizontalCenter
       width: (appDetailsPanel.width * 0.9)
+      height: 40
       horizontalAlignment: Text.AlignHCenter
+      wrapMode: Text.WordWrap
+      elide: Text.ElideRight
       color: "#FFFFFF"
-      font.pixelSize: 18.0
+      font.pixelSize: 14.0
       font.bold: true
       text: ((appsPanel.selectedApp != null) ? appsPanel.selectedApp.itemName : "")
     }
