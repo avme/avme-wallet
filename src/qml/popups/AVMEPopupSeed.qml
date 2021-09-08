@@ -554,12 +554,20 @@ AVMEPopup {
         seedInput7.text != "" && seedInput8.text != "" &&
         seedInput9.text != "" && seedInput10.text != "" &&
         seedInput11.text != "" && seedInput12.text != "" &&
+        +phraseValue == 12 || (
+        seedInput1.text != "" && seedInput2.text != "" &&
+        seedInput3.text != "" && seedInput4.text != "" &&
+        seedInput5.text != "" && seedInput6.text != "" &&
+        seedInput7.text != "" && seedInput8.text != "" &&
+        seedInput9.text != "" && seedInput10.text != "" &&
+        seedInput11.text != "" && seedInput12.text != "" &&
         seedInput13.text != "" && seedInput14.text != "" &&
         seedInput15.text != "" && seedInput16.text != "" &&
         seedInput17.text != "" && seedInput18.text != "" &&
         seedInput20.text != "" && seedInput21.text != "" &&
         seedInput22.text != "" && seedInput23.text != "" &&
         seedInput24.text != ""
+        )
       )
       text: "Done"
       onClicked: checkSeed()
