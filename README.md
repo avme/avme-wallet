@@ -11,15 +11,21 @@ Official wallet for the AVME Project.
 * **Build deps for Qt 5.15.2** or higher (see the [Qt docs](https://wiki.qt.io/Building_Qt_5_from_Git) for more info)
 * Required packages for Bitcoin Core's depends system (see [depends/README.md](depends/README.md) for more info)
 
-Example for APT-based distros:
-* `sudo apt-get build-dep qt5-default`
-* `sudo apt-get install bison build-essential mingw-w64 make automake autotools-dev cmake curl g++-multilib libdouble-conversion-dev libtool binutils-gold bsdmainutils pkg-config python3 patch libxcb-xinerama0-dev`
+Example for APT-based distros (Debian 10 Buster or newer):
+* `sudo apt-get build-dep qtbase5-dev`
+* `sudo apt-get install bison build-essential mingw-w64 make automake autotools-dev cmake curl g++-multilib libdouble-conversion-dev libtool binutils-gold bsdmainutils pkg-config python3 patch libxcb-xinerama0-dev gperf libgssapi-krb5-2`
+
+**NOTE**: CMake on Debian 10 and 11 is too old and has to be installed manually from [their website](https://cmake.org/download).
 
 ### Instructions
 
 * Clone the project: `git clone https://github.com/avme/avme-wallet`
 * Go to the project's root folder, create a "build" folder and change to it:
   * `cd avme-wallet && mkdir build && cd build`
+* **If cross-compiling with MinGW**, set both gcc and g++ to *POSIX* instead of *Win32*:
+  * `sudo update-alternatives --config x86_64-w64-mingw32-gcc`
+  * `sudo update-alternatives --config x86_64-w64-mingw32-g++`
+  * Choose the `-posix` option for both
 * Compile the depends system:
   * If using **GCC**: `make -C ../depends -j$(nproc)`
   * If using **MinGW**: `make HOST=x86_64-w64-mingw32 -C ../depends -j$(nproc)`
