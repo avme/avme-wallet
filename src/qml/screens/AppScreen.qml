@@ -22,6 +22,10 @@ Item {
 
   Component.onDestruction: appContent.source = ""
 
+  function closeScreen() {
+    qmlSystem.setScreen(content, "qml/screens/ApplicationsScreen.qml")
+  }
+
   function changeScreen(file) {
     qmlSystem.setLocalScreen(appContent, folder + "/" + file)
   }
