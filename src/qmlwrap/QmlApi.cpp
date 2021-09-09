@@ -224,6 +224,12 @@ void QmlApi::buildCustomEthCallReq(QString contract, QString ABI, QString reques
   requestListLock.unlock();
 }
 
+QString QmlApi::getFirstFromPair(QString assetAddressA, QString assetAddressB) {
+  return QString::fromStdString(
+    Pangolin::getFirstFromPair(assetAddressA.toStdString(), assetAddressB.toStdString())
+  );
+}
+
 QString QmlApi::buildCustomABI(QString input) {
   return QString::fromStdString(ABI::encodeABIfromJson(input.toStdString()));
 }

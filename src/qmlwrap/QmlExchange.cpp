@@ -4,22 +4,6 @@
 
 #include <qmlwrap/QmlSystem.h>
 
-QString QmlSystem::getFirstFromPair(QString assetAddressA, QString assetAddressB) {
-  return QString::fromStdString(
-    Pangolin::getFirstFromPair(assetAddressA.toStdString(), assetAddressB.toStdString())
-  );
-}
-
-bool QmlSystem::isApproved(QString amount, QString allowed) {
-  if (amount.isEmpty()) { amount = QString("0"); }
-  if (allowed.isEmpty()) { allowed = QString("0"); }
-  u256 amountU256 = boost::lexical_cast<u256>(
-    Utils::fixedPointToWei(amount.toStdString(), 18)
-  );
-  u256 allowedU256 = boost::lexical_cast<u256>(allowed.toStdString());
-  return ((allowedU256 > 0) && (allowedU256 >= amountU256));
-}
-
 QString QmlSystem::calculateExchangeAmount(
   QString amountIn, QString reservesIn, QString reservesOut, int inDecimals, int outDecimals
 ) {
@@ -94,28 +78,6 @@ QVariantMap QmlSystem::calculateRemoveLiquidityAmount(
   ret.insert("higher", QString::fromStdString(higher));
   ret.insert("lp", QString::fromStdString(lp));
   return ret;
-}
-
-QString QmlSystem::queryExchangeAmount(QString amount, QString fromName, QString toName) {
-  // Convert QStrings to std::strings
-  std::string amountStr = amount.toStdString();
-  std::string fromStr = fromName.toStdString();
-  std::string toStr = toName.toStdString();
-  if (fromStr == "AVAX") { fromStr = "WAVAX"; }
-  if (toStr == "AVAX") { toStr = "WAVAX"; }
-
-  // reserves[0] = first/lower token, reserves[1] = second/higher token
-  std::vector<std::string> reserves = Pangolin::getReserves(fromStr, toStr);
-  std::string first = Pangolin::getFirstFromPair(fromStr, toStr);
-  std::string input = Utils::fixedPointToWei(amountStr, 18);
-  std::string output;
-  if (fromStr == first) {
-    output = Pangolin::calcExchangeAmountOut(input, reserves[0], reserves[1]);
-  } else if (toStr == first) {
-    output = Pangolin::calcExchangeAmountOut(input, reserves[1], reserves[0]);
-  }
-  output = Utils::weiToFixedPoint(output, 18);
-  return QString::fromStdString(output);
 }
 
 QVariantMap QmlSystem::calculatePoolShares(

@@ -68,7 +68,7 @@ AVMEPanel {
           return
         }
 
-        lowerAddress = qmlSystem.getFirstFromPair(
+        lowerAddress = qmlApi.getFirstFromPair(
           qmlSystem.getContract("AVAX"), qmlSystem.getContract("AVME")
         )
 

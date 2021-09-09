@@ -116,7 +116,7 @@ AVMEPanel {
           }
         }
         var reserves = qmlApi.parseHex(resp[0].result, ["uint", "uint", "uint"])
-        var lowerAddress = qmlSystem.getFirstFromPair(
+        var lowerAddress = qmlApi.getFirstFromPair(
           addAsset1Popup.chosenAssetAddress, addAsset2Popup.chosenAssetAddress
         )
         if (lowerAddress == addAsset1Popup.chosenAssetAddress) {
@@ -201,7 +201,7 @@ AVMEPanel {
 
   // For manual inputs on amounts
   function calculateAddLiquidityAmount(isFirstInput) {
-    var lowerAddress = qmlSystem.getFirstFromPair(
+    var lowerAddress = qmlApi.getFirstFromPair(
       addAsset1Popup.chosenAssetAddress, addAsset2Popup.chosenAssetAddress
     )
     if ((lowerAddress == addAsset1Popup.chosenAssetAddress && isFirstInput)
@@ -227,7 +227,7 @@ AVMEPanel {
     var asset2Max = (addAsset2Popup.chosenAssetSymbol == "AVAX")
       ? qmlSystem.getRealMaxAVAXAmount(accountHeader.coinRawBalance, "250000", gasPrice) // Always make sure that the transaction won't fail
       : accountHeader.tokenList[addAsset2Popup.chosenAssetAddress]["rawBalance"]
-    var lowerAddress = qmlSystem.getFirstFromPair(
+    var lowerAddress = qmlApi.getFirstFromPair(
       addAsset1Popup.chosenAssetAddress, addAsset2Popup.chosenAssetAddress
     )
     var asset1Amount, asset2Amount

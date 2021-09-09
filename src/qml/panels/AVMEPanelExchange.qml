@@ -145,7 +145,7 @@ AVMEPanel {
         if (!needRoute) {
           var reservesAnswer = qmlApi.parseHex(resp[0].result, ["uint", "uint", "uint"])
           var reserves = ({})
-          var lowerAddress = qmlSystem.getFirstFromPair(
+          var lowerAddress = qmlApi.getFirstFromPair(
             fromAssetPopup.chosenAssetAddress, toAssetPopup.chosenAssetAddress
           )
           if (lowerAddress == fromAssetPopup.chosenAssetAddress) {
@@ -167,7 +167,7 @@ AVMEPanel {
             if (resp[i]["id"] == 1) {
               var reservesAnswer = qmlApi.parseHex(resp[i].result, ["uint", "uint", "uint"])
               var reserves = ({})
-              var lowerAddress = qmlSystem.getFirstFromPair(
+              var lowerAddress = qmlApi.getFirstFromPair(
                 fromAssetPopup.chosenAssetAddress, qmlSystem.getContract("AVAX")
               )
               if (lowerAddress == fromAssetPopup.chosenAssetAddress) {
@@ -183,7 +183,7 @@ AVMEPanel {
             if (resp[i]["id"] == 2) {
               var reservesAnswer = qmlApi.parseHex(resp[i].result, ["uint", "uint", "uint"])
               var reserves = ({})
-              var lowerAddress = qmlSystem.getFirstFromPair(
+              var lowerAddress = qmlApi.getFirstFromPair(
                 toAssetPopup.chosenAssetAddress, qmlSystem.getContract("AVAX")
               )
               if (lowerAddress == qmlSystem.getContract("AVAX")) {

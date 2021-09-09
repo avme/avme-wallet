@@ -77,7 +77,7 @@ AVMEPanel {
           return
         }
 
-        lowerAddress = qmlSystem.getFirstFromPair(
+        lowerAddress = qmlApi.getFirstFromPair(
           qmlSystem.getContract("AVAX"), qmlSystem.getContract("AVME")
         )
         pairUserLockedBalance = qmlApi.floor(qmlApi.div(qmlApi.mul(compoundUserLockedBalance,compoundTotalDeposits),compoundSupply))

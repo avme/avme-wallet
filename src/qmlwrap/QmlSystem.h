@@ -344,12 +344,6 @@ class QmlSystem : public QObject {
     // EXCHANGE/LIQUIDITY/STAKING SCREEN FUNCTIONS
     // ======================================================================
 
-    // Get the first (lower) address from a pair
-    Q_INVOKABLE QString getFirstFromPair(QString assetAddressA, QString assetAddressB);
-
-    // Check if approval needs to be refreshed
-    Q_INVOKABLE bool isApproved(QString amount, QString allowed);
-
     /**
      * Calculate the estimated output amount and price impact for a
      * coin/token exchange, respectively
@@ -371,9 +365,6 @@ class QmlSystem : public QObject {
     Q_INVOKABLE QVariantMap calculateRemoveLiquidityAmount(
       QString asset1Reserves, QString asset2Reserves, QString percentage, QString pairBalance
     );
-
-    // Estimate the amount of coin/token that will be exchanged
-    Q_INVOKABLE QString queryExchangeAmount(QString amount, QString fromName, QString toName);
 
     // Calculate the Account's share in AVAX/AVME/LP in the pool, respectively
     Q_INVOKABLE QVariantMap calculatePoolShares(

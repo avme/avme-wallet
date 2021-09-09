@@ -76,7 +76,7 @@ AVMEPanel {
         } else {
           removeLiquidityDetailsColumn.visible = false
         }
-        var lowerAddress = qmlSystem.getFirstFromPair(
+        var lowerAddress = qmlApi.getFirstFromPair(
           removeAsset1Popup.chosenAssetAddress, removeAsset2Popup.chosenAssetAddress
         )
         if (lowerAddress == removeAsset1Popup.chosenAssetAddress) {

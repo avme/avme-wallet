@@ -132,6 +132,9 @@ class QmlApi : public QObject {
     Q_INVOKABLE void buildCustomEthCallReq(QString contract, QString ABI, QString requestID);
     Q_INVOKABLE QString buildCustomABI(QString input);
 
+    // Get the first (lower) address from a pair
+    Q_INVOKABLE QString getFirstFromPair(QString assetAddressA, QString assetAddressB);
+
     /**
      * Wrappers for utils functions
      */
