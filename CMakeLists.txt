@@ -116,7 +116,7 @@ add_library(avme-lib
 )
 target_link_libraries(avme-lib PUBLIC
   devcore devcrypto ethcore ledger ${ETHASH_BYPRODUCTS} Ethash
-  toolbox bip39 LevelDB ${BOOST_LIBS} ssl crypto
+  toolbox bip39 LevelDB ${BOOST_LIBS} ssl crypto -lsnappy
 )
 
 # Set the project version as a macro in a header file

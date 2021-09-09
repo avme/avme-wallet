@@ -1,7 +1,6 @@
 # double-conversion is statically linked due to version differences between distros
-# libgssapi_krb5.so doesn't exist on Debian installations, only .so.2 and beyond
 SET(QT_LIBS "")
-LIST(APPEND QT_LIBS "-ldl -lsnappy -lmd4c -l:libgssapi_krb5.so.2 -l:libdouble-conversion.a")
+LIST(APPEND QT_LIBS "-ldl -lmd4c -lgssapi_krb5 -l:libdouble-conversion.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Network.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Gui.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Qml.a")

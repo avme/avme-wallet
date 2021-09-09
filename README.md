@@ -11,10 +11,10 @@ Official wallet for the AVME Project.
 * **Build deps for Qt 5.15.2** or higher (see the [Qt docs](https://wiki.qt.io/Building_Qt_5_from_Git) for more info)
 * Required packages for Bitcoin Core's depends system (see [depends/README.md](depends/README.md) for more info)
 * For compiling LevelDB: **libsnappy**
-* For compiling Qt: **libdouble-conversion-dev**, **libgssapi-krb5-2** and **libvulkan**
+* For compiling Qt: **libdouble-conversion-dev**, **libkrb5-dev** and **libvulkan**
 
 Handy one-liner for **Debian 9 Stretch or newer**:
-* `sudo apt-get build-dep qtbase5-dev && sudo apt-get install build-essential make automake cmake curl g++-multilib mingw-w64 libtool binutils bsdmainutils pkg-config python3 patch bison gperf libdouble-conversion-dev libxcb-xinerama0-dev libgssapi-krb5-2 libsnappy-dev libvulkan-dev`
+* `sudo apt-get build-dep qtbase5-dev && sudo apt-get install build-essential make automake cmake curl g++-multilib mingw-w64 libtool binutils bsdmainutils pkg-config python3 patch bison gperf libdouble-conversion-dev libxcb-xinerama0-dev libkrb5-dev libsnappy-dev libvulkan-dev`
 
 ### Known caveats
 
