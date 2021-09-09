@@ -10,12 +10,15 @@ Official wallet for the AVME Project.
 * **GCC** (native Linux) *or* **MinGW** (cross-compile from Linux to Windows) with support for **C++14** or higher
 * **Build deps for Qt 5.15.2** or higher (see the [Qt docs](https://wiki.qt.io/Building_Qt_5_from_Git) for more info)
 * Required packages for Bitcoin Core's depends system (see [depends/README.md](depends/README.md) for more info)
+* For compiling LevelDB: **libsnappy**
+* For compiling Qt: **libdouble-conversion-dev**, **libgssapi-krb5-2** and **libvulkan**
 
-Example for APT-based distros (Debian 10 Buster or newer):
-* `sudo apt-get build-dep qtbase5-dev`
-* `sudo apt-get install bison build-essential mingw-w64 make automake autotools-dev cmake curl g++-multilib libdouble-conversion-dev libtool binutils-gold bsdmainutils pkg-config python3 patch libxcb-xinerama0-dev gperf libgssapi-krb5-2`
+Handy one-liner for **Debian 9 Stretch or newer**:
+* `sudo apt-get build-dep qtbase5-dev && sudo apt-get install build-essential make automake cmake curl g++-multilib mingw-w64 libtool binutils bsdmainutils pkg-config python3 patch bison gperf libdouble-conversion-dev libxcb-xinerama0-dev libgssapi-krb5-2 libsnappy-dev libvulkan-dev`
 
-**NOTE**: CMake on Debian 10 and 11 is too old and has to be installed manually from [their website](https://cmake.org/download).
+### Known caveats
+
+* **Debian 11 Bullseye and older**: CMake is too old and has to be installed manually from [their website](https://cmake.org/download)
 
 ### Instructions
 

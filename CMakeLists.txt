@@ -66,6 +66,7 @@ include(ProjectLevelDB)
 include(ProjectSecp256k1)
 include(ProjectToolbox)
 include(ProjectBip3x)
+include(ProjectLibmd4c)
 find_package(Threads)
 
 # Include headers and libs
@@ -73,12 +74,14 @@ include_directories(
   "${CMAKE_SOURCE_DIR}"
   "${CMAKE_SOURCE_DIR}/src"
   "${CMAKE_SOURCE_DIR}/build"
+  "${CMAKE_SOURCE_DIR}/build/deps/include"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/include"
 )
 link_directories(
   "${CMAKE_SOURCE_DIR}"
   "${CMAKE_SOURCE_DIR}/src"
   "${CMAKE_SOURCE_DIR}/build"
+  "${CMAKE_SOURCE_DIR}/build/deps/lib"
   "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib"
 )
 

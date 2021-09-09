@@ -48,7 +48,7 @@ The paths are automatically configured and no other options are needed unless ta
 
 #### For Win64 cross compilation
 
-- see [build-windows.md](../doc/build-windows.md#cross-compilation-for-ubuntu-and-windows-subsystem-for-linux)
+- see [build-windows.md](build-windows.md)
 
 #### For linux (including i386, ARM) cross compilation
 
