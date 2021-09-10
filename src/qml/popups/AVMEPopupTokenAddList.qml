@@ -44,7 +44,7 @@ AVMEPopup {
     // Enter/Return key override
     Keys.onPressed: {
       if ((event.key == Qt.Key_Return) || (event.key == Qt.Key_Enter)) {
-        // TODO
+        if (btnOk.enabled) { btnOk.handleAdd() }
       }
     }
 
@@ -96,7 +96,8 @@ AVMEPopup {
       anchors.horizontalCenter: parent.horizontalCenter
       enabled: (tokenList.currentItem != null)
       text: "Add token"
-      onClicked: {
+      onClicked: handleAdd()
+      function handleAdd() {
         var tokenData = qmlSystem.getARC20TokenData(tokenList.currentItem.itemAddress)
         qmlSystem.addARC20Token(
           tokenData.address, tokenData.symbol, tokenData.name,

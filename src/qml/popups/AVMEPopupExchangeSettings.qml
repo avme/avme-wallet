@@ -21,6 +21,15 @@ AVMEPopup {
   widthPct: 0.25
   heightPct: 0.2
 
+  // Enter/Numpad enter key override
+  Item {
+    focus: true
+    Keys.onPressed: {
+      if ((event.key == Qt.Key_Return) || (event.key == Qt.Key_Enter)) {
+        exchangeSettingsPopup.close()
+      }
+    }
+  }
 
   Text {
     id: "slippageText"
@@ -56,11 +65,9 @@ AVMEPopup {
       bottomMargin: parent.height / 10
     }
     AVMEButton {
-     id: closeBtn
-     text: "Ok" 
-     onClicked: {
-        exchangeSettingsPopup.close()
-      } 
+      id: closeBtn
+      text: "Ok" 
+      onClicked: exchangeSettingsPopup.close()
     }
   }
 }

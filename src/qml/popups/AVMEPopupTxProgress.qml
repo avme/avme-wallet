@@ -125,6 +125,13 @@ Popup {
     }
     spacing: 40
 
+    // Enter/Numpad enter key override
+    Keys.onPressed: {
+      if ((event.key == Qt.Key_Return) || (event.key == Qt.Key_Enter)) {
+        if (btnClose.visible) { txProgressPopup.close() }
+      }
+    }
+
     Row {
       id: buildRow
       anchors.horizontalCenter: parent.horizontalCenter
@@ -243,9 +250,7 @@ Popup {
       margins: 30
     }
     text: "Close"
-    onClicked: {
-      txProgressPopup.close()
-    }
+    onClicked: txProgressPopup.close()
   }
   AVMEPopupInfo {
     id: ledgerStatusPopup

@@ -94,6 +94,16 @@ AVMEPopup {
     anchors.verticalCenter: parent.verticalCenter
     spacing: 20
 
+    // Enter/Numpad enter key override
+    Keys.onPressed: {
+      if ((event.key == Qt.Key_Return) || (event.key == Qt.Key_Enter)) {
+        if (btnChoose.enabled) {
+          chooseAsset()
+          chooseAssetPopup.close()
+        }
+      }
+    }
+
     Text {
       id: infoLabel
       anchors.horizontalCenter: parent.horizontalCenter

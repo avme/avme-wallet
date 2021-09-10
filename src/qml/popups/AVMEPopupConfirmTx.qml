@@ -49,10 +49,10 @@ AVMEPopup {
         txStructure["value"] = value
         txStructure["txData"] = txData
         txStructure["gas"] = gas
-        txStructure["gasPrice"] = gasPrice 
-        txStructure["API ANSWER"] = answer 
+        txStructure["gasPrice"] = gasPrice
+        txStructure["API ANSWER"] = answer
         qmlApi.logToDebug(JSON.stringify(txStructure))
-        
+
         if (!answerJson[0]["result"]) {
           if (answerJson[0]["error"]["message"].includes("max fee per gas less than block base fee")) {
             calculateGas(true)
@@ -130,6 +130,13 @@ AVMEPopup {
   Column {
     anchors.centerIn: parent
     spacing: 20
+
+    // Enter/Numpad enter key override
+    Keys.onPressed: {
+      if ((event.key == Qt.Key_Return) || (event.key == Qt.Key_Enter)) {
+        if (btnOk.enabled) { btnOk.handleConfirm() }
+      }
+    }
 
     Text {
       id: warningText
@@ -209,7 +216,8 @@ AVMEPopup {
         id: btnOk
         text: "OK"
         enabled: (qmlSystem.getLedgerFlag()) ? true : (passInput.text !== "" && !loadingFees)
-        onClicked: {
+        onClicked: handleConfirm()
+        function handleConfirm() {
           if (!qmlSystem.checkWalletPass(passInput.text) && !qmlSystem.getLedgerFlag()) {
             infoTimer.start()
           } else {
@@ -221,7 +229,7 @@ AVMEPopup {
             confirmTxPopup.close()
             txProgressPopup.open()
           }
-        }// TODO: ADD A ERROR HANDLER FOR INSUFICIENT BALANCE!!!
+        } // TODO: ADD A ERROR HANDLER FOR INSUFICIENT BALANCE!!!
       }
     }
   }
