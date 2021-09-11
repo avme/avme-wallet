@@ -18,6 +18,7 @@
 #include <lib/ledger/ledger.h>
 
 #include <network/API.h>
+#include <network/Server.h>
 #include <core/BIP39.h>
 #include <core/Utils.h>
 #include <core/Wallet.h>
@@ -27,6 +28,8 @@
 
 #include "version.h"
 
+class Server;  // https://stackoverflow.com/a/4964508
+
 /**
  * Class for wrapping C++ and QML together.
  */
@@ -35,6 +38,7 @@ class QmlSystem : public QObject {
 
   private:
     Wallet w;
+    Server *s;
     ledger::device ledgerDevice;
     bool firstLoad;
     bool ledgerFlag = false;
@@ -50,6 +54,9 @@ class QmlSystem : public QObject {
       this->w.closeLedgerDB();
       this->w.closeAppDB();
       this->w.closeConfigDB();
+      // TODO: stop server here
+      delete this->s;
+      this->s = NULL;
       return;
     }
 
@@ -154,6 +161,9 @@ class QmlSystem : public QObject {
     // Get/Set a given value in the Settings screen.
     Q_INVOKABLE QString getConfigValue(QString key);
     Q_INVOKABLE bool setConfigValue(QString key, QString value);
+
+    // Handle a websocket server request.
+    std::string handleServer(std::string input);
 
     // ======================================================================
     // START/WALLET SCREEN FUNCTIONS
