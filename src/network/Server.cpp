@@ -4,6 +4,8 @@
 
 #include "Server.h"
 
+#include <qmlwrap/QmlSystem.h> // https://stackoverflow.com/a/4964508
+
 void Server::session::run() {
   net::dispatch(ws_.get_executor(), beast::bind_front_handler(
     &session::on_run, shared_from_this()
@@ -50,7 +52,7 @@ void Server::session::on_write(beast::error_code ec, std::size_t bytes_transferr
 }
 
 void Server::listener::run() { do_accept(); }
-void Server::listener::stop() { ioc_.stop(); }
+void Server::listener::stop() { ioc_.stop(); ioc_.restart(); }
 
 void Server::listener::do_accept() {
   // The new connection gets its own strand

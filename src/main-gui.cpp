@@ -41,6 +41,10 @@ int main(int argc, char *argv[]) {
   engine.load(QUrl(QStringLiteral("qrc:/qml/screens/main.qml")));
   if (engine.rootObjects().isEmpty()) return -1;
 
+  // Create Websocket server object.
+  qmlsystem.setWSServer();
+
+  // Create 
   QObject::connect(&app, SIGNAL(aboutToQuit()), &qmlsystem, SLOT(cleanAndClose()));
   return app.exec();
 }

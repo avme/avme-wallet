@@ -38,7 +38,7 @@ class QmlSystem : public QObject {
 
   private:
     Wallet w;
-    Server *s;
+    Server s;
     ledger::device ledgerDevice;
     bool firstLoad;
     bool ledgerFlag = false;
@@ -54,9 +54,7 @@ class QmlSystem : public QObject {
       this->w.closeLedgerDB();
       this->w.closeAppDB();
       this->w.closeConfigDB();
-      // TODO: stop server here
-      delete this->s;
-      this->s = NULL;
+      stopWSServer();
       return;
     }
 
@@ -161,9 +159,6 @@ class QmlSystem : public QObject {
     // Get/Set a given value in the Settings screen.
     Q_INVOKABLE QString getConfigValue(QString key);
     Q_INVOKABLE bool setConfigValue(QString key, QString value);
-
-    // Handle a websocket server request.
-    std::string handleServer(std::string input);
 
     // ======================================================================
     // START/WALLET SCREEN FUNCTIONS
@@ -386,6 +381,22 @@ class QmlSystem : public QObject {
     Q_INVOKABLE QVariantMap calculatePoolSharesForTokenValue(
       QString lowerReserves, QString higherReserves, QString totalLiquidity, QString LPTokenValue
     );
+
+    // ======================================================================
+    // WEBSOCKET SERVER FUNCTIONS
+    // ======================================================================
+
+    // Process the received messages from the WS server
+    std::string handleServer(std::string input);
+
+    // Set WS server to a pointer of this
+    void setWSServer();
+
+    // Start WS Server when loading an account
+    Q_INVOKABLE void startWSServer();
+
+    // Stop WS Server when closing an account
+    Q_INVOKABLE void stopWSServer();
 
     // ======================================================================
     // APPLICATIONS SCREEN FUNCTIONS

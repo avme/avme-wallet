@@ -18,8 +18,6 @@
 #include <thread>
 #include <vector>
 
-#include <qmlwrap/QmlSystem.h>
-
 class QmlSystem;  // https://stackoverflow.com/a/4964508
 
 namespace beast = boost::beast;

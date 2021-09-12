@@ -108,6 +108,7 @@ Item {
       qmlSystem.loadConfigDB()
       qmlSystem.loadARC20Tokens()
       accountHeader.getAddress()
+      qmlSystem.startWSServer()
       qmlSystem.goToOverview()
       qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
     }

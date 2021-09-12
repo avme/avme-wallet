@@ -77,9 +77,3 @@ bool QmlSystem::setConfigValue(QString key, QString value) {
   return this->w.setConfigValue(key.toStdString(), value.toStdString());
 }
 
-std::string QmlSystem::handleServer(std::string input) {
-  std::string response;
-  // TODO: treat input here
-  return response;
-}
-

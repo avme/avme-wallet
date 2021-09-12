@@ -31,19 +31,11 @@ void QmlSystem::loadWallet(QString folder, QString pass) {
   QtConcurrent::run([=](){
     std::string passStr = pass.toStdString();
     bool loadSuccess = this->w.load(folder.toStdString(), passStr);
-    if (loadSuccess) {
-      this->s = new Server();
-      this->s->setQmlSystem(this);
-    }
-    // TODO: start server here
     emit walletLoaded(loadSuccess);
   });
 }
 
 void QmlSystem::closeWallet() {
-  // TODO: stop server here
-  delete this->s;
-  this->s = NULL;
   this->w.close();
 }
 
