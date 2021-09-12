@@ -19,7 +19,9 @@ void QmlSystem::setWSServer() {
 
 // Should run *inside* another thread, to avoid getting stuck at .run()
 Q_INVOKABLE void QmlSystem::startWSServer() {
-  this->s.start();
+  QtConcurrent::run([=](){
+    this->s.start();
+  });
 }
 
 

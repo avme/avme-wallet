@@ -17,6 +17,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <unordered_set>
 
 class QmlSystem;  // https://stackoverflow.com/a/4964508
 
@@ -33,18 +34,28 @@ using tcp = boost::asio::ip::tcp;
 class Server {
   // Handles all received WebSocket messages.
   class session : public std::enable_shared_from_this<session> {
-    websocket::stream<beast::tcp_stream> ws_;
     beast::flat_buffer buffer_;
-
+    // Pointer to list of sessions
+    // Session needs access to it for insert itself in the list
+    std::unordered_set<session*> *sessions_;
     public:
+      // WS needs to be public to be accessible by another thread.
+      // TODO: Wrap object around what we need
+      websocket::stream<beast::tcp_stream> ws_;
       // Take ownership of the socket.
-      explicit session(tcp::socket&& socket) : ws_(std::move(socket)) {}
+      explicit session(tcp::socket&& socket, std::unordered_set<session*> *sessions) : ws_(std::move(socket)), sessions_(sessions) {}
 
       // Get on the correct executor.
       // We need to be executing within a strand to perform async operations
       // on the I/O objects in this session. Although not strictly necessary
       // for single-threaded contexts, this example code is written to be
       // thread-safe by default.
+
+      // Close the socket
+      void close();
+
+      void on_closed(beast::error_code ec);
+
       void run();
 
       // Start the asynchronous operation.
@@ -66,11 +77,19 @@ class Server {
   // Accepts incoming connections and launches the sessions.
   class listener : public std::enable_shared_from_this<listener> {
     net::io_context& ioc_;
-    tcp::acceptor acceptor_;
+    // Pointer to the list of sessions
+    // Listener needs to hold that to pass to the session it creates
+    std::unordered_set<session*> *sessions_;
+    // Pointer to the list of listeners
+    // Listener needs access to it in order to insert itself.
+    std::unordered_set<listener*> *listeners_;
+    // 
 
     public:
+      tcp::acceptor acceptor_;
       // Constructor.
-      listener(net::io_context& ioc, tcp::endpoint endpoint) : ioc_(ioc), acceptor_(ioc) {
+      listener(net::io_context& ioc, tcp::endpoint endpoint, std::unordered_set<session*> *sessions, std::unordered_set<listener*> *listeners) 
+        : ioc_(ioc), acceptor_(ioc), sessions_(sessions), listeners_(listeners) {
         beast::error_code ec;
         acceptor_.open(endpoint.protocol(), ec);  // Open the acceptor
         if (ec) { fail(ec, "open"); return; }
@@ -95,8 +114,18 @@ class Server {
   };
 
   private:
-    std::shared_ptr<listener> ls;
     QmlSystem* sys;
+    net::io_context ioc;
+    // In order to send a boost::asio::post message to the thread.
+    // We need a object of it.
+    // For that reason, I have created a pointer which will pass through objects until
+    // it is inserted by the session itself.
+    // TODO: PROTECT THE LIST WITH MUTEX'ES
+    std::unordered_set<session*> sessions_;
+    // We also need a list of the listeners, in order to close them after the sessions are closed...
+    std::unordered_set<listener*> listeners_;
+    // TODO: This might be not the correct way to do this.
+    // But it was the way that I found... :shrug:
 
   public:
     // Create and launch a listening port, and run the I/O service.
