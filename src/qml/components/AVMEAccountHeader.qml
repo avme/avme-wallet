@@ -70,10 +70,23 @@ Rectangle {
   Connections {
     target: qmlSystem
     function onAskForPermission(website_) {
-      console.log("hello sir")
-      website = website_;
-      confirmWebsiteAllowance.open();
-      window.requestActivate();
+      website = website_
+      confirmWebsiteAllowance.open()
+      window.requestActivate()
+    }
+    function onAskForTransaction(data,from,gas,to,value,website_) {
+      confirmRT.setData(
+        to, 
+        qmlApi.weiToFixedPoint(qmlApi.parseHex(value,["uint"]),18), 
+        data, 
+        qmlApi.parseHex(gas,["uint"]), 
+        +gasPrice + 20, 
+        true,
+        "The following website is requesting a transaction: <b> " + website_ + "</b>", 
+        "Tx from: <b> " + website_ + "</b>"
+        ) 
+      confirmRT.open()
+      window.requestActivate()
     }
   }
 
@@ -278,28 +291,31 @@ Rectangle {
     textAddress.text: currentAddress
   }
 
-  // TODO: This popup is ugly as hell, refactor it.
   AVMEPopup {
     id: confirmWebsiteAllowance
-    width: parent.width * 0.4
-    height: parent.width * 0.3
+    width: parent.width * 0.66
+    height: parent.width * 0.1
     z: 9999
     Column {
+      id: confirmWebsiteAllowanceColumn
       anchors.centerIn: parent
+      anchors.horizontalCenter: parent.horizontalCenter
       width: parent.width
       height: parent.height * 0.9
       spacing: 30
       Text {
+        anchors.horizontalCenter: parent.horizontalCenter
         id: websiteText
         color: "#FFFFFF"
         font.pixelSize: 17.0
-        text: "Allow " + website + " to connect?"
+        text: "Allow <b>" + website + "</b> to connect?"
       }
       Row {
-        width: parent.width
+        anchors.horizontalCenter: parent.horizontalCenter
+        spacing: confirmWebsiteAllowanceColumn.width * 0.1
         AVMEButton {
           id: refuseWebsiteBtn
-          width: parent.width * 0.4
+          width: confirmWebsiteAllowanceColumn.width * 0.4
           text: "No"
           onClicked: {
             qmlSystem.addToPermissionList(website, false)
@@ -308,7 +324,7 @@ Rectangle {
         }
         AVMEButton {
           id: approveWebsiteBtn
-          width: parent.width * 0.4
+          width: confirmWebsiteAllowanceColumn.width * 0.4
           text: "Yes"
           onClicked: {
             qmlSystem.addToPermissionList(website, true)
@@ -317,5 +333,17 @@ Rectangle {
         }
       }
     }
+  }
+  AVMEPopupConfirmTx {
+    id: confirmRT
+    backBtn.onClicked: {
+      confirmRT.close()
+      qmlSystem.requestedTransactionStatus(false, "")
+    }
+  }
+
+  AVMEPopupTxProgress {
+    id: txProgressPopup
+    requestedFromWS: true
   }
 }

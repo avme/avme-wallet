@@ -11,7 +11,7 @@ import "qrc:/qml/components"
 Popup {
   id: txProgressPopup
   property color popupBgColor: "#1C2029"
-
+  property bool requestedFromWS: false
   Connections {
     target: qmlSystem
     function onTxStart(
@@ -62,7 +62,7 @@ Popup {
         btnClose.visible = true
       }
     }
-    function onTxSent(b, linkUrl) {
+    function onTxSent(b, linkUrl, txid) {
       sendPngRotate.stop()
       sendPng.rotation = 0
       if (b) {
@@ -72,6 +72,11 @@ Popup {
         if (linkUrl != "") {
           btnOpenLink.linkUrl = linkUrl
           btnOpenLink.visible = true
+          if (requestedFromWS) {
+            if (txid != "") {
+              qmlSystem.requestedTransactionStatus(true, txid)
+            }
+          }
         }
       } else {
         sendText.color = "crimson"

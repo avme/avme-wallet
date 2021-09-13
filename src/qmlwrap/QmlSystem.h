@@ -52,8 +52,14 @@ class QmlSystem : public QObject {
 
     // Mutex locks for when dealing with WS Server
     std::mutex permissionListMutex;
-    std::mutex userInputRequest;
-    std::mutex userInputAnswer;
+    std::mutex globalUserInputRequest;
+    std::mutex PLuserInputRequest;
+    std::mutex PLuserInputAnswer;
+    std::mutex requestTransactionMutex;
+    std::mutex RTuserInputRequest;
+    std::mutex RTuserInputAnswer;
+    // String that will hold the TXID of a approved transaction
+    std::string RTtxid = "";
 
   public slots:
     // Clean database, threads, etc before closing the program
@@ -102,7 +108,7 @@ class QmlSystem : public QObject {
     );
     void txBuilt(bool b);
     void txSigned(bool b, QString msg);
-    void txSent(bool b, QString linkUrl);
+    void txSent(bool b, QString linkUrl, QString txid);
     void txRetry();
     void ledgerRequired();
     void ledgerDone();
@@ -111,8 +117,10 @@ class QmlSystem : public QObject {
     void appLoaded(QString folderPath);
 
     // Signal for request user input to give permission for said website
-
     void askForPermission(QString website_);
+
+    // Signal to request user to sign a given transaction
+    void askForTransaction(QString data, QString from, QString gas, QString to, QString value, QString website_);
 
   public:
     // ======================================================================
@@ -411,7 +419,10 @@ class QmlSystem : public QObject {
     // Stop WS Server when closing an account
     Q_INVOKABLE void stopWSServer();
 
+    // Ask for user input to approve/refuse a transaction
     Q_INVOKABLE void addToPermissionList(QString website, bool allow);
+
+    Q_INVOKABLE void requestedTransactionStatus(bool approved, QString txid);
 
     // ======================================================================
     // APPLICATIONS SCREEN FUNCTIONS

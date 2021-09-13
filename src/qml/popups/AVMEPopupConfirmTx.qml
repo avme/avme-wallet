@@ -21,6 +21,7 @@ AVMEPopup {
   property alias passFocus: passInput.focus
   property alias timer: infoTimer
   property alias okBtn: btnOk
+  property alias backBtn: btnBack
   property string from: qmlSystem.getCurrentAccount()
   property string operation // For usage under history
   property string to
@@ -88,6 +89,7 @@ AVMEPopup {
       Params["gasPrice"] = "0x" + qmlApi.uintToHex(qmlApi.fixedPointToWei(gasPrice, 9))
       Params["value"] = "0x" + qmlApi.uintToHex(qmlApi.fixedPointToWei(value, 18))
       Params["data"] = txData
+      console.log(JSON.stringify(Params))
       qmlApi.buildGetEstimateGasLimitReq(JSON.stringify(Params), "PopupConfirmTxGas_"+randomID)
       qmlApi.doAPIRequests("PopupConfirmTxGas_"+randomID)
     }
@@ -95,6 +97,7 @@ AVMEPopup {
   }
 
   function setData(inputTo, inputValue, inputTxData, inputGas, inputGasPrice, inputAutomaticGas, inputInfo, inputHistoryInfo) {
+    from = qmlSystem.getCurrentAccount()
     to = inputTo
     value = inputValue
     txData = inputTxData

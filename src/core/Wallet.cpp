@@ -361,7 +361,7 @@ std::string Wallet::sendTransaction(std::string txidHex, std::string operation) 
   txData.txlink = txLink;
   txData.operation = operation;
   saveTxToHistory(txData);
-  return txLink;
+  return txid;
 }
 
 json Wallet::txDataToJSON() {

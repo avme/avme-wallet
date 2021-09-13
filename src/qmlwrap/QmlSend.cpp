@@ -117,11 +117,11 @@ void QmlSystem::makeTransaction(
     emit txSigned(signSuccess, QString::fromStdString(msg));
 
     // Send the transaction
-    std::string txLink = this->w.sendTransaction(signedTx, operationStr);
-    if (txLink.empty()) { emit txSent(false, ""); }
+    std::string txid = this->w.sendTransaction(signedTx, operationStr);
+    if (txid.empty()) { emit txSent(false, "", ""); }
     while (
-      txLink.find("Transaction nonce is too low") != std::string::npos ||
-      txLink.find("Transaction with the same hash was already imported") != std::string::npos
+      txid.find("Transaction nonce is too low") != std::string::npos ||
+      txid.find("Transaction with the same hash was already imported") != std::string::npos
     ) {
       emit txRetry();
       txSkel.nonce++;
@@ -135,8 +135,9 @@ void QmlSystem::makeTransaction(
       } else {
         signedTx = this->w.signTransaction(txSkel, passStr);
       }
-      txLink = this->w.sendTransaction(signedTx, operationStr);
+      txid = this->w.sendTransaction(signedTx, operationStr);
     }
-    emit txSent(true, QString::fromStdString(txLink));
+    std::string txLink = "https://cchain.explorer.avax.network/tx/" + txid;
+    emit txSent(true, QString::fromStdString(txLink), QString::fromStdString(txid));
   });
 }
