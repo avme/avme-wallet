@@ -15,7 +15,9 @@ void session::run() {
 
 void session::close() {
   m_lock.lock();
-  ws_.async_close(websocket::close_code::normal,beast::bind_front_handler(&session::on_closed, shared_from_this()));
+  if (ws_.is_open()) { // Check if it is even open before closing
+    ws_.async_close(websocket::close_code::normal,beast::bind_front_handler(&session::on_closed, shared_from_this()));
+  }
   m_lock.unlock();
 }
 

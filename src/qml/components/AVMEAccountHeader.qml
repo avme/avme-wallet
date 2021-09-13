@@ -20,6 +20,7 @@ Rectangle {
   property string coinUSDPriceChart
   property string totalFiatBalance
   property string gasPrice
+  property string website
   property bool isLedger: qmlSystem.getLedgerFlag()
   property var tokenList: ({})
 
@@ -64,6 +65,15 @@ Rectangle {
         gasPrice = String(Math.round(+gasPriceStr))
         updatedBalances()
       }
+    }
+  }
+  Connections {
+    target: qmlSystem
+    function onAskForPermission(website_) {
+      console.log("hello sir")
+      website = website_;
+      confirmWebsiteAllowance.open();
+      window.requestActivate();
     }
   }
 
@@ -266,5 +276,46 @@ Rectangle {
     id: qrcodePopup
     qrcodeWidth: (currentAddress != "") ? qmlSystem.getQRCodeSize(currentAddress) : 1
     textAddress.text: currentAddress
+  }
+
+  // TODO: This popup is ugly as hell, refactor it.
+  AVMEPopup {
+    id: confirmWebsiteAllowance
+    width: parent.width * 0.4
+    height: parent.width * 0.3
+    z: 9999
+    Column {
+      anchors.centerIn: parent
+      width: parent.width
+      height: parent.height * 0.9
+      spacing: 30
+      Text {
+        id: websiteText
+        color: "#FFFFFF"
+        font.pixelSize: 17.0
+        text: "Allow " + website + " to connect?"
+      }
+      Row {
+        width: parent.width
+        AVMEButton {
+          id: refuseWebsiteBtn
+          width: parent.width * 0.4
+          text: "No"
+          onClicked: {
+            qmlSystem.addToPermissionList(website, false)
+            confirmWebsiteAllowance.close()
+          }
+        }
+        AVMEButton {
+          id: approveWebsiteBtn
+          width: parent.width * 0.4
+          text: "Yes"
+          onClicked: {
+            qmlSystem.addToPermissionList(website, true)
+            confirmWebsiteAllowance.close()
+          }
+        }
+      }
+    }
   }
 }

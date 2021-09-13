@@ -46,6 +46,14 @@ class QmlSystem : public QObject {
     QString currentHardwareAccount;
     QString currentHardwareAccountPath;
     QQmlApplicationEngine *engine = nullptr;
+    
+    // Permission list of websites allowed to join.
+    std::vector<std::pair<std::string,bool>> permissionList;
+
+    // Mutex locks for when dealing with WS Server
+    std::mutex permissionListMutex;
+    std::mutex userInputRequest;
+    std::mutex userInputAnswer;
 
   public slots:
     // Clean database, threads, etc before closing the program
@@ -101,6 +109,10 @@ class QmlSystem : public QObject {
 
     // Applications screen signals
     void appLoaded(QString folderPath);
+
+    // Signal for request user input to give permission for said website
+
+    void askForPermission(QString website_);
 
   public:
     // ======================================================================
@@ -398,6 +410,8 @@ class QmlSystem : public QObject {
 
     // Stop WS Server when closing an account
     Q_INVOKABLE void stopWSServer();
+
+    Q_INVOKABLE void addToPermissionList(QString website, bool allow);
 
     // ======================================================================
     // APPLICATIONS SCREEN FUNCTIONS
