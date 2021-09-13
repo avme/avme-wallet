@@ -24,6 +24,10 @@ int main(int argc, char *argv[]) {
 
   QmlSystem qmlsystem;
   qmlsystem.setEngine(&engine);
+  // Initialize the global thread pool to 64 threads.
+  // We should never reach this limit, but it is to avoid
+  // Taking to long to answer towards the websocket server
+  QThreadPool::globalInstance()->setMaxThreadCount(64);
 
   engine.rootContext()->setContextProperty("qmlSystem", &qmlsystem);
   qmlRegisterType<QmlApi>("QmlApi", 1, 0, "QmlApi");
