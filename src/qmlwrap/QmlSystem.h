@@ -29,6 +29,7 @@
 #include "version.h"
 
 class Server;  // https://stackoverflow.com/a/4964508
+class session;
 
 /**
  * Class for wrapping C++ and QML together.
@@ -387,7 +388,7 @@ class QmlSystem : public QObject {
     // ======================================================================
 
     // Process the received messages from the WS server
-    std::string handleServer(std::string input);
+    void handleServer(std::string input, session *session_);
 
     // Set WS server to a pointer of this
     void setWSServer();

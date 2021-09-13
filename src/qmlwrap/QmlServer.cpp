@@ -6,10 +6,13 @@
 #include <network/Server.h> // https://stackoverflow.com/a/4964508
 
 
-std::string QmlSystem::handleServer(std::string input) {
-  std::string response;
-  // TODO: treat input here
-  return response;
+void QmlSystem::handleServer(std::string input, session *session_) {
+  // Run answer in another thread to allow the Server to take more inputs
+  QtConcurrent::run([=](){
+    // TODO: treat input here
+    session_->do_write(input);
+  });
+  return;
 }
 
 void QmlSystem::setWSServer() {
