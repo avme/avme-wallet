@@ -54,6 +54,7 @@ void session::on_read(beast::error_code ec, std::size_t bytes_transferred) {
   boost::ignore_unused(bytes_transferred);
   if (ec == websocket::error::closed) { return; } // This indicates the session was closed
   if (ec.value() == 125) { return; } // Operation cancelled
+  if (ec.value() == 995) { return; } // Interrupted by host
   if (ec) { Server::fail(ec, "read"); }
   ws_.text(ws_.got_text()); // TODO: handle user input with QmlSystem::handleServer() here
   // Send the message for another thread to parse it.
