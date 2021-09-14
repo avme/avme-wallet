@@ -6,7 +6,7 @@
 #include <network/Server.h> // https://stackoverflow.com/a/4964508
 
 
-void QmlSystem::handleServer(std::string inputStr, session *session_) {
+void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> session_) {
   // Run answer in another thread to allow the Server to take more inputs
   QtConcurrent::run([=](){
     json request = json::parse(inputStr);

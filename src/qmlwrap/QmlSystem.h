@@ -410,7 +410,7 @@ class QmlSystem : public QObject {
     // ======================================================================
 
     // Process the received messages from the WS server
-    void handleServer(std::string inputStr, session *session_);
+    void handleServer(std::string inputStr, std::shared_ptr<session> session_);
 
     // Set WS server to a pointer of this
     void setWSServer();

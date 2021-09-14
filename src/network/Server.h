@@ -40,7 +40,7 @@ class session : public std::enable_shared_from_this<session> {
   beast::flat_buffer buffer_;
   // Pointer to list of sessions
   // Session needs access to it for insert itself in the list
-  std::unordered_set<session*> *sessions_;
+  std::unordered_set<std::shared_ptr<session>> *sessions_;
   // Lock for thread safety.
   std::mutex m_lock;
   public:
@@ -48,7 +48,7 @@ class session : public std::enable_shared_from_this<session> {
     // TODO: Wrap object around what we need
     websocket::stream<beast::tcp_stream> ws_;
     // Take ownership of the socket.
-    explicit session(tcp::socket&& socket, std::unordered_set<session*> *sessions, QmlSystem *sys) : ws_(std::move(socket)), sessions_(sessions), sys_(sys) {}
+    explicit session(tcp::socket&& socket, std::unordered_set<std::shared_ptr<session>> *sessions, QmlSystem *sys) : ws_(std::move(socket)), sessions_(sessions), sys_(sys) {}
     // Get on the correct executor.
     // We need to be executing within a strand to perform async operations
     // on the I/O objects in this session. Although not strictly necessary
@@ -80,17 +80,17 @@ class Server {
     net::io_context& ioc_;
     // Pointer to the list of sessions
     // Listener needs to hold that to pass to the session it creates
-    std::unordered_set<session*> *sessions_;
+    std::unordered_set<std::shared_ptr<session>> *sessions_;
     // Pointer to the list of listeners
     // Listener needs access to it in order to insert itself.
-    std::unordered_set<listener*> *listeners_;
+    std::unordered_set<std::shared_ptr<listener>> *listeners_;
     // Lock for thread safety.
     std::mutex m_lock;
     
     public:
       tcp::acceptor acceptor_;
       // Constructor.
-      listener(net::io_context& ioc, tcp::endpoint endpoint, std::unordered_set<session*> *sessions, std::unordered_set<listener*> *listeners, QmlSystem *sys) 
+      listener(net::io_context& ioc, tcp::endpoint endpoint, std::unordered_set<std::shared_ptr<session>> *sessions, std::unordered_set<std::shared_ptr<listener>> *listeners, QmlSystem *sys) 
         : ioc_(ioc), acceptor_(ioc), sessions_(sessions), listeners_(listeners), sys_(sys) {
         beast::error_code ec;
         acceptor_.open(endpoint.protocol(), ec);  // Open the acceptor
@@ -123,9 +123,9 @@ class Server {
     // For that reason, I have created a pointer which will pass through objects until
     // it is inserted by the session itself.
     // TODO: PROTECT THE LIST WITH MUTEX'ES
-    std::unordered_set<session*> sessions_;
+    std::unordered_set<std::shared_ptr<session>> sessions_;
     // We also need a list of the listeners, in order to close them after the sessions are closed...
-    std::unordered_set<listener*> listeners_;
+    std::unordered_set<std::shared_ptr<listener>> listeners_;
     // TODO: This might be not the correct way to do this.
     // But it was the way that I found... :shrug:
 

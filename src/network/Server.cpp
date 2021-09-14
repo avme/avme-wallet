@@ -36,7 +36,7 @@ void session::on_run() {
   }));
 
   // Insert the session to the list of sessions.
-  sessions_->insert(this);
+  sessions_->insert(shared_from_this());
   // Accept the websocket handshake
   ws_.async_accept(beast::bind_front_handler(&session::on_accept, shared_from_this()));
 }
@@ -57,7 +57,7 @@ void session::on_read(beast::error_code ec, std::size_t bytes_transferred) {
   if (ec) { Server::fail(ec, "read"); }
   ws_.text(ws_.got_text()); // TODO: handle user input with QmlSystem::handleServer() here
   // Send the message for another thread to parse it.
-  sys_->handleServer(boost::beast::buffers_to_string(buffer_.data()), this);
+  sys_->handleServer(boost::beast::buffers_to_string(buffer_.data()), shared_from_this());
   buffer_.consume(buffer_.size());
   do_read();
 }
@@ -85,7 +85,7 @@ void session::on_write(beast::error_code ec, std::size_t bytes_transferred) {
 
 void Server::listener::run() { 
   // Insert itself on the list
-  listeners_->insert(this);
+  listeners_->insert(shared_from_this());
   do_accept(); 
 }
 
