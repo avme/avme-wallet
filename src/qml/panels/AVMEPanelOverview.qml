@@ -8,10 +8,28 @@ import QtCharts 2.2
 import "qrc:/qml/components"
 
 // Panel for the Account's balance overview chart.
-
 AVMEPanel {
   id: overviewPanel
   title: "Your Account"
+  property var chartColors: [
+    // https://sashamaps.net/docs/resources/20-colors
+    "#E6194B", // Red
+    "#3CB44B", // Green
+    "#FFE119", // Yellow
+    "#4363D8", // Blue
+    "#F58231", // Orange
+    "#42D4F4", // Cyan
+    "#F032E6", // Magenta
+    "#FABED4", // Pink
+    "#469990", // Teal
+    "#DCBEEF", // Lavender
+    "#9A6324", // Brown
+    "#FFFAC8", // Beige
+    "#800000", // Maroon
+    "#AAFFC3", // Mint
+    "#0000FF", // Dark Blue because Navy is too dark
+    "#A9A9A9", // Grey
+  ]
 
   Connections {
     target: accountHeader
@@ -53,11 +71,12 @@ AVMEPanel {
             var bal = accountHeader.tokenList[token].fiatValue
             append(sym, bal)
           }
-          var baseColor = "#AD00FA"
+          var colorCt = 0
           for (var i = 0; i < count; i++) {
-            at(i).color = baseColor
+            at(i).color = chartColors[colorCt]
+            colorCt++
+            if (colorCt >= chartColors.length) { colorCt = 0 }
             at(i).borderColor = overviewPanel.color.toString()
-            baseColor = Qt.darker(baseColor, 1.2)
           }
           accountChartLegendModel.refresh()
         }
