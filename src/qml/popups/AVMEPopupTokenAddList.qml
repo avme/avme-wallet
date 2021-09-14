@@ -14,6 +14,8 @@ AVMEPopup {
   onAboutToShow: {
     tokens = qmlSystem.getARC20TokenList()
     refreshList("")
+    filterInput.text = ""
+    filterInput.forceActiveFocus()
   }
   onAboutToHide: {
     tokenModel.clear()

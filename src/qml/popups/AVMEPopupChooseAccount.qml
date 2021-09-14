@@ -36,7 +36,7 @@ AVMEPopup {
   property alias pass: passInput.text
   property color popupBgColor: "#1C2029"
 
-  onAboutToShow: passInput.focus = true
+  onAboutToShow: passInput.forceActiveFocus()
 
   Connections {
     target: qmlSystem

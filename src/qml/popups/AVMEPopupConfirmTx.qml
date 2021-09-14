@@ -33,7 +33,7 @@ AVMEPopup {
   property bool loadingFees
   property bool automaticGas
   property bool isSameAddress: false
-  onAboutToShow: passInput.focus = true
+  onAboutToShow: passInput.forceActiveFocus()
   onAboutToHide: confirmTxPopup.clean()
 
   Timer { id: ledgerRetryTimer; interval: 125; onTriggered: checkLedger() }

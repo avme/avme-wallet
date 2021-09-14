@@ -21,40 +21,42 @@ AVMEPopup {
   widthPct: 0.25
   heightPct: 0.2
 
-  // Enter/Numpad enter key override
-  Item {
-    focus: true
-    Keys.onPressed: {
-      if ((event.key == Qt.Key_Return) || (event.key == Qt.Key_Enter)) {
-        exchangeSettingsPopup.close()
-      }
-    }
-  }
+  onAboutToShow: slippageInput.forceActiveFocus()
 
   Text {
-    id: "slippageText"
+    id: slippageText
+    height: parent.height * 0.2
     horizontalAlignment: Text.AlignHCenter
     verticalAlignment: Text.AlignVCenter
-    height: parent.height * 0.2
-    anchors.top: parent.top
-    anchors.topMargin: parent.height / 6
-    anchors.left: parent.left
-    anchors.leftMargin: parent.width * 0.2
+    anchors {
+      top: parent.top
+      topMargin: parent.height / 6
+      left: parent.left
+      leftMargin: parent.width * 0.2
+    }
     color: "#FFFFFF"
     font.pixelSize: 14.0
     text: "Slippage: "
   }
 
   AVMEInput {
+    id: slippageInput
     width: parent.width * 0.35
     height: parent.height * 0.2
-    anchors.top: parent.top
-    anchors.topMargin: parent.height / 6
-    anchors.right: parent.right
-    anchors.rightMargin: parent.width * 0.2
-    id: slippageInput
+    anchors {
+      top: parent.top
+      topMargin: parent.height / 6
+      right: parent.right
+      rightMargin: parent.width * 0.2
+    }
     inputMask: "00.00;"
     text: "1.0"
+    // Enter/Numpad enter key override
+    Keys.onPressed: {
+      if ((event.key == Qt.Key_Return) || (event.key == Qt.Key_Enter)) {
+        exchangeSettingsPopup.close()
+      }
+    }
   }
 
   Row {
@@ -66,7 +68,7 @@ AVMEPopup {
     }
     AVMEButton {
       id: closeBtn
-      text: "Ok" 
+      text: "Ok"
       onClicked: exchangeSettingsPopup.close()
     }
   }

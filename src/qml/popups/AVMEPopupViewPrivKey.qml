@@ -20,8 +20,9 @@ AVMEPopup {
 
   onAboutToShow: {
     btnCopy.enabled = false
-    keyPassInput.focus = true
+    keyPassInput.forceActiveFocus()
   }
+  onAboutToHide: viewPrivKeyPopup.clean()
 
   function showPrivKey() {
     if (keyText.timer.running) { keyText.timer.stop() }
@@ -109,10 +110,7 @@ AVMEPopup {
       AVMEButton {
         id: btnClose
         text: "Close"
-        onClicked: {
-          viewPrivKeyPopup.clean()
-          viewPrivKeyPopup.close()
-        }
+        onClicked: viewPrivKeyPopup.close()
       }
       AVMEButton {
         id: btnCopy

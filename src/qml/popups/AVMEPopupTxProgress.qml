@@ -6,7 +6,6 @@ import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
 
-// TODO: This screen needs a redesign to fit the current design
 // Popup for showing the progress of a transaction. Has to be opened manually.
 AVMEPopup {
   id: txProgressPopup

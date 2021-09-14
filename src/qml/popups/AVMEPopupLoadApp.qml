@@ -8,7 +8,6 @@ import Qt.labs.platform 1.0
 import "qrc:/qml/components"
 
 // Popup for loading a local DApp (for developers)
-
 AVMEPopup {
   id: loadAppPopup
   property alias folder: loadAppInput.text

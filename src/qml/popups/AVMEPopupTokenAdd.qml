@@ -10,7 +10,8 @@ import "qrc:/qml/components"
 AVMEPopup {
   id: addTokenPopup
 
-  onAboutToShow: addressInput.focus = true
+  onAboutToShow: addressInput.forceActiveFocus()
+  onAboutToHide: addTokenPopup.clean()
 
   function clean() {
     addressInput.text = ""

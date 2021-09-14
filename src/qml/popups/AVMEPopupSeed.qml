@@ -20,7 +20,8 @@ AVMEPopup {
   property string fullSeed
   property alias phraseValue: phraseSize.currentValue
 
-  onAboutToShow: seedLabel1.focus = true
+  onAboutToShow: seedLabel1.forceActiveFocus()
+  onAboutToHide: seedPopup.clean()
 
   function handlePaste(event) {
     if ((event.key == Qt.Key_V) && (event.modifiers & Qt.ControlModifier)) {
@@ -578,10 +579,7 @@ AVMEPopup {
       width: (seedItems.width * 0.9)
       anchors.horizontalCenter: parent.horizontalCenter
       text: "Back"
-      onClicked: {
-        seedPopup.clean()
-        seedPopup.close()
-      }
+      onClicked: seedPopup.close()
     }
   }
 }

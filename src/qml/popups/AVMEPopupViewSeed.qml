@@ -21,6 +21,7 @@ AVMEPopup {
     btnCopy.enabled = false
     passInput.focus = true
   }
+  onAboutToHide: viewSeedPopup.clean()
 
   function showSeed() {
     if (seedText.timer.running) { seedText.timer.stop() }
@@ -108,10 +109,7 @@ AVMEPopup {
       AVMEButton {
         id: btnClose
         text: "Close"
-        onClicked: {
-          viewSeedPopup.clean()
-          viewSeedPopup.close()
-        }
+        onClicked: viewSeedPopup.close()
       }
       AVMEButton {
         id: btnCopy
