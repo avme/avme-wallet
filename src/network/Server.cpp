@@ -65,7 +65,6 @@ void session::on_read(beast::error_code ec, std::size_t bytes_transferred) {
 void session::do_write(std::string response) {
   m_lock.lock();
   if (ws_.is_open()) { // Check if the stream is open, before commiting to it.
-    beast::flat_buffer answerBuffer_;
     // Copy string to buffer
     answerBuffer_.consume(answerBuffer_.size());
     size_t n = boost::asio::buffer_copy(answerBuffer_.prepare(response.size()), boost::asio::buffer(response));

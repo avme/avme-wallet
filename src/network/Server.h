@@ -38,6 +38,7 @@ class session : public std::enable_shared_from_this<session> {
   // Pointer to QmlSystem
   QmlSystem* sys_;
   beast::flat_buffer buffer_;
+  beast::flat_buffer answerBuffer_;
   // Pointer to list of sessions
   // Session needs access to it for insert itself in the list
   std::unordered_set<std::shared_ptr<session>> *sessions_;
