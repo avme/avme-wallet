@@ -4,12 +4,40 @@
 
 #include <qmlwrap/QmlSystem.h>
 
-/*
 void QmlSystem::downloadAppList() {
-  ;
+  QtConcurrent::run([=](){
+    boost::filesystem::path filePath = Utils::walletFolderPath.string()
+      + "/wallet/c-avax/applist.json";
+    // Force download the list every time
+    if (boost::filesystem::exists(filePath)) { boost::filesystem::remove(filePath); }
+    API::httpGetFile(
+      "raw.githubusercontent.com",
+      "/avme/avme-wallet-applications/main/applist.json",
+      filePath.string() + "/applist.json"
+    );
+    if (boost::filesystem::exists(filePath)) {
+      emit appListDownloaded();
+    } else {
+      emit appListDownloadFailed();
+    }
+  });
 }
 
-void QmlSystem::loadApps() {
-  ;
+QVariantList QmlSystem::loadAppsFromList() {
+  QVariantList ret;
+  json applist = json::parse(Utils::readJSONFile(
+    Utils::walletFolderPath.string() + "/wallet/c-avax/applist.json"
+  ));
+  json apps = applist["apps"];
+  for (auto& app : apps) {
+    QVariantMap appObj;
+    appObj["chainId"] = QString::fromStdString(app["chainId"].get<std::string>());
+    appObj["folder"] = QString::fromStdString(app["folder"].get<std::string>());
+    appObj["name"] = QString::fromStdString(app["name"].get<std::string>());
+    appObj["major"] = app["major"].get<int>();
+    appObj["minor"] = app["minor"].get<int>();
+    appObj["patch"] = app["patch"].get<int>();
+    ret << appObj;
+  }
+  return ret;
 }
-*/

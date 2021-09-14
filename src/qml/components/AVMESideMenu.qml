@@ -150,7 +150,7 @@ Rectangle {
       id: itemApplications
       width: (parent.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
-      text: "Applications (WIP)"
+      text: "Applications"
       enabled: enableBtn
       onClicked: {
         itemSelection.y = items.y + y

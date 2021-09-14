@@ -42,7 +42,10 @@ GridView {
           width: 64
           height: 64
           anchors.horizontalCenter: parent.horizontalCenter
-          imageSource: "qrc:/img/unknown_token.png" // TODO
+          imageSource: "https://raw.githubusercontent.com"
+          + "/avme/avme-wallet-applications/main/apps"
+          + itemFolder + "/icon.png"
+          //imageSource: "qrc:/img/unknown_token.png" // TODO
         }
         Text {
           id: appName

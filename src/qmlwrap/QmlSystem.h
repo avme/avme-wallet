@@ -46,7 +46,7 @@ class QmlSystem : public QObject {
     QString currentHardwareAccount;
     QString currentHardwareAccountPath;
     QQmlApplicationEngine *engine = nullptr;
-    
+
     // Permission list of websites allowed to join.
     std::vector<std::pair<std::string,bool>> permissionList;
 
@@ -114,6 +114,8 @@ class QmlSystem : public QObject {
     void ledgerDone();
 
     // Applications screen signals
+    void appListDownloaded();
+    void appListDownloadFailed();
     void appLoaded(QString folderPath);
 
     // Signal for request user input to give permission for said website
@@ -428,13 +430,11 @@ class QmlSystem : public QObject {
     // APPLICATIONS SCREEN FUNCTIONS
     // ======================================================================
 
-    // TODO
-
     // Download the JSON file from the repo containing the latest DApp info.
-    //Q_INVOKABLE void downloadAppList();
+    Q_INVOKABLE void downloadAppList();
 
     // Load the DApp list from the stored JSON file.
-    //Q_INVOKABLE void loadApps();
+    Q_INVOKABLE QVariantList loadAppsFromList();
 };
 
 #endif  //QMLSYSTEM_H

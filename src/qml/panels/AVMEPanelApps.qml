@@ -5,18 +5,46 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
+import "qrc:/qml/popups"
 
 // Panel for accessing DApps.
 AVMEPanel {
   id: appsPanel
   title: "Applications"
   property alias selectedApp: appGrid.currentItem
+  property int downloadRetries: 0
 
-  Component.onCompleted: {} // TODO: reload apps here probably
+  Component.onCompleted: {
+    infoPopup.info = "Downloading app list,<br>please wait..."
+    infoPopup.open()
+    qmlSystem.downloadAppList()
+  }
 
   Connections {
     target: filterComboBox
-    function onActivated(index) {}  // TODO
+    function onActivated(index) {}  // TODO: filter by status
+  }
+
+  Connections {
+    target: qmlSystem
+    function onAppListDownloaded() {
+      infoPopup.info = "Download complete,<br>reading apps..."
+      var apps = qmlSystem.loadAppsFromList()
+      for (var i = 0; i < apps.length; i++) {
+        appList.append(apps[i]);
+      }
+      infoPopup.close()
+    }
+    function onAppListDownloadFailed() {
+      if (downloadRetries < 5) {
+        infoPopup.info = "Download failed, re-trying...<br>"
+        + "(" + (5 - downloadRetries) + " tries left)"
+        downloadRetries += 1
+        qmlSystem.downloadAppList()
+      } else {
+        infoPopup.close()
+      }
+    }
   }
 
   AVMEAppGrid {
@@ -33,7 +61,8 @@ AVMEPanel {
     }
     // TODO: real data here
     model: ListModel {
-      id: appModel
+      id: appList
+      /*
       ListElement {
         chainId: 41113
         folder: "Test-1"
@@ -74,6 +103,7 @@ AVMEPanel {
         minor: 5
         patch: 5
       }
+      */
     }
   }
 
@@ -105,6 +135,21 @@ AVMEPanel {
       id: filterComboBox
       width: appsPanel.width * 0.25
       model: ["All", "Uninstalled", "Installed", "Needs Update"]
+    }
+  }
+
+  // Info popup for downloading the app list
+  AVMEPopup {
+    id: infoPopup
+    property alias info: infoText.text
+    widthPct: 0.2
+    heightPct: 0.1
+    Text {
+      id: infoText
+      color: "#FFFFFF"
+      horizontalAlignment: Text.AlignHCenter
+      anchors.centerIn: parent
+      font.pixelSize: 14.0
     }
   }
 }
