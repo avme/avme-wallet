@@ -76,15 +76,15 @@ Rectangle {
     }
     function onAskForTransaction(data,from,gas,to,value,website_) {
       confirmRT.setData(
-        to, 
-        qmlApi.weiToFixedPoint(qmlApi.parseHex(value,["uint"]),18), 
-        data, 
-        qmlApi.parseHex(gas,["uint"]), 
-        +gasPrice + 20, 
+        to,
+        qmlApi.weiToFixedPoint(qmlApi.parseHex(value,["uint"]),18),
+        data,
+        qmlApi.parseHex(gas,["uint"]),
+        +gasPrice + 20,
         true,
-        "The following website is requesting a transaction: <b> " + website_ + "</b>", 
+        "The following website is requesting a transaction: <b> " + website_ + "</b>",
         "Tx from: <b> " + website_ + "</b>"
-        ) 
+        )
       confirmRT.open()
       window.requestActivate()
     }

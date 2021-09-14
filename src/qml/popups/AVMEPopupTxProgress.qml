@@ -8,10 +8,13 @@ import "qrc:/qml/components"
 
 // TODO: This screen needs a redesign to fit the current design
 // Popup for showing the progress of a transaction. Has to be opened manually.
-Popup {
+AVMEPopup {
   id: txProgressPopup
+  widthPct: 0.8
+  heightPct: 0.8
   property color popupBgColor: "#1C2029"
   property bool requestedFromWS: false
+
   Connections {
     target: qmlSystem
     function onTxStart(
@@ -111,16 +114,6 @@ Popup {
     btnOpenLink.visible = false
     btnClose.visible = false
   }
-
-  width: parent.width * 0.9
-  height: parent.height * 0.9
-  x: (parent.width * 0.1) / 2
-  y: (parent.height * 0.1) / 2
-  modal: true
-  focus: true
-  padding: 0  // Remove white borders
-  closePolicy: Popup.NoAutoClose
-  background: Rectangle { anchors.fill: parent; color: popupBgColor; radius: 10 }
 
   Column {
     id: items
