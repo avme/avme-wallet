@@ -73,8 +73,9 @@ AVMEPopup {
   Column {
     id: seedItems
     width: parent.width
-    height: parent.height * 0.9
-    anchors.verticalCenter: parent.verticalCenter
+    height: parent.height * 0.85
+    anchors.top: parent.top
+    anchors.topMargin: 20
     spacing: 30
 
     // Enter/Numpad enter key override
@@ -543,6 +544,15 @@ AVMEPopup {
         }
       }
     }
+  }
+
+  Column {
+    id: seedBtnCol
+    width: parent.width
+    height: parent.height * 0.15
+    anchors.bottom: parent.bottom
+    anchors.bottomMargin: 20
+    spacing: 20
 
     AVMEButton {
       id: btnOk
