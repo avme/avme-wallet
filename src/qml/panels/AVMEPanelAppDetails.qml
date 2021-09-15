@@ -103,14 +103,6 @@ AVMEPanel {
       }
     }
     AVMEButton {
-      id: btnInstall
-      width: (appDetailsPanel.width * 0.8)
-      anchors.horizontalCenter: parent.horizontalCenter
-      visible: (appsPanel.selectedApp != null && appsPanel.selectedApp.itemStatus == 0)
-      text: "Install Application"
-      onClicked: {} // TODO
-    }
-    AVMEButton {
       id: btnOpen
       width: (appDetailsPanel.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
@@ -130,9 +122,6 @@ AVMEPanel {
       id: btnUninstall
       width: (appDetailsPanel.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
-      visible: (appsPanel.selectedApp != null &&
-        (appsPanel.selectedApp.itemStatus == 1 || appsPanel.selectedApp.itemStatus == 2)
-      )
       text: "Uninstall Application"
       onClicked: confirmUninstallAppPopup.open()
     }

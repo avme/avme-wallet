@@ -436,6 +436,14 @@ class QmlSystem : public QObject {
 
     // Load the DApp list from the stored JSON file.
     Q_INVOKABLE QVariantList loadAppsFromList();
+
+    // Load the installed DApps from the database.
+    Q_INVOKABLE QVariantList loadInstalledApps();
+
+    // Check if a DApp is installed, install and uninstall it, respectively
+    Q_INVOKABLE bool appIsInstalled(QString folder);
+    Q_INVOKABLE bool installApp(QVariantMap data);
+    Q_INVOKABLE bool uninstallApp(QString folder);
 };
 
 #endif  //QMLSYSTEM_H

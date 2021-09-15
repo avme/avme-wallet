@@ -256,48 +256,45 @@ Secret Wallet::getSecret(std::string const& address, std::string pass) {
   }
 }
 
-/*
-void Wallet::loadAvailableApps() {
-  this->availableApps.clear();
-  boost::filesystem::path appsFile = folder.string() + "/wallet/c-avax/apps.json";
-  std::string appJsonStr = Utils::readJSONFile(appsFile);
-  json appJson = json::parse(appJsonStr);
-  json devsArr = appJson["devs"];
-  for (auto& dev : devsArr) {
-    json appsArr = dev["apps"];
-    for (auto& app : appsArr) {
-      App a;
-      a.devName = dev["name"].get<std::string>();
-      a.devIcon = dev["icon"].get<std::string>();
-      a.name = app["name"].get<std::string>();
-      a.icon = app["icon"].get<std::string>();
-      a.description = app["description"].get<std::string>();
-      a.major = app["major"].get<int>();
-      a.minor = app["minor"].get<int>();
-      a.patch = app["patch"].get<int>();
-      this->availableApps.push_back(a);
-    }
-  }
-}
-
-void Wallet::loadInstalledApps() {
-  this->installedApps.clear();
+json Wallet::getInstalledApps() {
+  json appList = json::array();
   std::vector<std::string> appJsonList = this->db.getAllAppDBValues();
   for (std::string appJson : appJsonList) {
-    App a;
-    json appData = json::parse(appJson);
-    a.devName = appData["devName"].get<std::string>();
-    a.devIcon = appData["devIcon"].get<std::string>();
-    a.name = appData["name"].get<std::string>();
-    a.icon = appData["icon"].get<std::string>();
-    a.description = appData["description"].get<std::string>();
-    a.major = appData["major"].get<int>();
-    a.minor = appData["minor"].get<int>();
-    a.patch = appData["patch"].get<int>();
-    this->installedApps.push_back(a);
+    appList.push_back(json::parse(appJson));
   }
+  return appList;
 }
-*/
+
+bool Wallet::appIsInstalled(std::string folder) {
+  return this->db.appDBKeyExists(folder);
+}
+
+bool Wallet::installApp(
+  int chainId, std::string folder, std::string name,
+  int major, int minor, int patch
+) {
+  boost::filesystem::path appPath = Utils::walletFolderPath.string()
+    + "/wallet/c-avax/apps/" + folder;
+  if (!boost::filesystem::exists(appPath)) { boost::filesystem::create_directories(appPath); }
+  // TODO: download files here
+  json app;
+  app["chainId"] = chainId;
+  app["folder"] = folder;
+  app["name"] = name;
+  app["major"] = major;
+  app["minor"] = minor;
+  app["patch"] = patch;
+  this->db.putAppDBValue(folder, app.dump());
+  return appIsInstalled(folder);
+}
+
+bool Wallet::uninstallApp(std::string folder) {
+  boost::filesystem::path appPath = Utils::walletFolderPath.string()
+    + "/wallet/c-avax/apps/" + folder;
+  this->db.deleteAppDBValue(folder);
+  if (boost::filesystem::exists(appPath)) { boost::filesystem::remove(appPath); }
+  return !appIsInstalled(folder);
+}
 
 TransactionSkeleton Wallet::buildTransaction(
   std::string from, std::string to, std::string value,

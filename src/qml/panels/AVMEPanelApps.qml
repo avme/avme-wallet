@@ -28,11 +28,6 @@ AVMEPanel {
   Connections {
     target: qmlSystem
     function onAppListDownloaded() {
-      infoPopup.info = "Download complete,<br>reading apps..."
-      var apps = qmlSystem.loadAppsFromList()
-      for (var i = 0; i < apps.length; i++) {
-        appList.append(apps[i]);
-      }
       infoPopup.close()
       refreshGrid()
     }
@@ -49,30 +44,21 @@ AVMEPanel {
     }
   }
 
-  // TODO: real data here
   function refreshGrid() {
     appList.clear()
-    for (var i = 0; i < 5; i++) {
-      var obj = {
-        "chainId": 41113,
-        "folder": "Test-" + (i + 1),
-        "name": "Test App " + (i + 1),
-        "major": 1,
-        "minor": 0,
-        "patch": (i + 1),
-        "status": i % 3
-      }
+    var apps = qmlSystem.loadInstalledApps()
+    for (var i = 0; i < apps.length; i++) {
       var statusOn = (filterComboBox.currentIndex != 0)
       var nameOn = (filterInput.text != "")
-      var statusOk = (obj.status == filterComboBox.currentIndex - 1) // 0 = "All"
-      var nameOk = (obj.name.toUpperCase().includes(filterInput.text.toUpperCase()))
+      var statusOk = (apps[i].status == filterComboBox.currentIndex - 1) // 0 = "All"
+      var nameOk = (apps[i].name.toUpperCase().includes(filterInput.text.toUpperCase()))
       if (
         ((statusOn && !nameOn) && statusOk) ||              // Status only
         ((!statusOn && nameOn) && nameOk) ||                // Name only
         ((statusOn && nameOn) && (statusOk && nameOk)) ||   // Both
         (!statusOn && !nameOn)                              // Neither
       ) {
-        appList.append(obj)
+        appList.append(apps[i]);
       }
     }
   }
@@ -81,7 +67,7 @@ AVMEPanel {
     id: appGrid
     anchors {
       top: parent.top
-      bottom: filterRow.top
+      bottom: bottomRow.top
       left: parent.left
       right: parent.right
       topMargin: 80
@@ -93,7 +79,7 @@ AVMEPanel {
   }
 
   Row {
-    id: filterRow
+    id: bottomRow
     anchors {
       bottom: parent.bottom
       horizontalCenter: parent.horizontalCenter
@@ -101,6 +87,12 @@ AVMEPanel {
     }
     spacing: 20
 
+    AVMEButton {
+      id: btnAdd
+      width: appsPanel.width * 0.25
+      text: "Add Application"
+      onClicked: appSelectPopup.open()
+    }
     Text {
       id: filterText
       horizontalAlignment: Text.AlignHCenter
@@ -109,10 +101,9 @@ AVMEPanel {
       font.pixelSize: 14.0
       text: "Filters:"
     }
-
     AVMEInput {
       id: filterInput
-      width: appsPanel.width * 0.5
+      width: appsPanel.width * 0.25
       placeholder: "Name"
       onTextEdited: refreshGrid()
     }

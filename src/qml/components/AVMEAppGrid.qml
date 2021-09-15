@@ -4,7 +4,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
-// GridView for DApps.
+// GridView for installed DApps.
 GridView {
   id: appGrid
   property color listHighlightColor: "#887AC1EB"
@@ -35,6 +35,7 @@ GridView {
       height: appGrid.cellHeight - 10
       Rectangle { id: gridItemBg; anchors.fill: parent; radius: 5; color: "transparent" }
 
+      // TODO: redo status logic
       Rectangle {
         id: appStatus
         width: 16
@@ -78,7 +79,6 @@ GridView {
           wrapMode: Text.WordWrap
           text: itemName
         }
-        // TODO: status (installed, uninstalled, needs update)
       }
       MouseArea {
         id: delegateMouseArea

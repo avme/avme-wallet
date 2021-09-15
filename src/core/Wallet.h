@@ -234,11 +234,25 @@ class Wallet {
     // ======================================================================
 
     /**
-     * (Re)Load the available and installed DApps on the Wallet, respectively.
+     * Get the installed DApps from the database.
+     * Returns a json array with the installed DApps.
      */
-    // TODO
-    //void loadAvailableApps();
-    //void loadInstalledApps();
+    json getInstalledApps();
+
+    /**
+     * Check if a DApp is installed.
+     * If the DApp exists in the database, it's considered as installed.
+     */
+    bool appIsInstalled(std::string folder);
+
+    /**
+     * Install and uninstall an app, respectively.
+     */
+    bool installApp(
+      int chainId, std::string folder, std::string name,
+      int major, int minor, int patch
+    );
+    bool uninstallApp(std::string folder);
 
     // ======================================================================
     // TRANSACTION MANAGEMENT

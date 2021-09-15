@@ -194,7 +194,7 @@ std::vector<std::string> Database::getAllLedgerDBValues() {
 // ======================================================================
 
 bool Database::openAppDB() {
-  std::string path = Utils::walletFolderPath.string() + "/wallet/c-avax/apps";
+  std::string path = Utils::walletFolderPath.string() + "/wallet/c-avax/appdb";
   if (!exists(path)) { create_directories(path); }
   this->appStatus = leveldb::DB::Open(this->appOpts, path, &this->appDB);
   return this->appStatus.ok();

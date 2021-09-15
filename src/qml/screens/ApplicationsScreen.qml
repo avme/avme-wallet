@@ -46,6 +46,23 @@ Item {
     }
   }
 
+  // Popup for selecting a DApp from the repo
+  AVMEPopupAppSelect {
+    id: appSelectPopup
+    installBtn.onClicked: {
+      var app = ({})
+      app["chainId"] = appList.currentItem.itemChainId
+      app["folder"] = appList.currentItem.itemFolder
+      app["name"] = appList.currentItem.itemName
+      app["major"] = appList.currentItem.itemMajor
+      app["minor"] = appList.currentItem.itemMinor
+      app["patch"] = appList.currentItem.itemPatch
+      qmlSystem.installApp(app)
+      appSelectPopup.close()
+      appsPanel.refreshGrid()
+    }
+  }
+
   // Popup for confirming app uninstallation
   AVMEPopupYesNo {
     id: confirmUninstallAppPopup
@@ -53,9 +70,10 @@ Item {
     heightPct: 0.25
     icon: "qrc:/img/warn.png"
     info: "Are you sure you want to uninstall this application?"
-    // TODO
     yesBtn.onClicked: {
+      qmlSystem.uninstallApp(appsPanel.selectedApp.itemFolder)
       confirmUninstallAppPopup.close()
+      appsPanel.refreshGrid()
     }
     noBtn.onClicked: {
       confirmUninstallAppPopup.close()
