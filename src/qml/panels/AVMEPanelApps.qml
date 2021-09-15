@@ -22,7 +22,7 @@ AVMEPanel {
 
   Connections {
     target: filterComboBox
-    function onActivated(index) {}  // TODO: filter by status
+    function onActivated(index) { refreshGrid() }
   }
 
   Connections {
@@ -34,6 +34,7 @@ AVMEPanel {
         appList.append(apps[i]);
       }
       infoPopup.close()
+      refreshGrid()
     }
     function onAppListDownloadFailed() {
       if (downloadRetries < 5) {
@@ -43,6 +44,35 @@ AVMEPanel {
         qmlSystem.downloadAppList()
       } else {
         infoPopup.close()
+        refreshGrid()
+      }
+    }
+  }
+
+  // TODO: real data here
+  function refreshGrid() {
+    appList.clear()
+    for (var i = 0; i < 5; i++) {
+      var obj = {
+        "chainId": 41113,
+        "folder": "Test-" + (i + 1),
+        "name": "Test App " + (i + 1),
+        "major": 1,
+        "minor": 0,
+        "patch": (i + 1),
+        "status": i % 3
+      }
+      var statusOn = (filterComboBox.currentIndex != 0)
+      var nameOn = (filterInput.text != "")
+      var statusOk = (obj.status == filterComboBox.currentIndex - 1) // 0 = "All"
+      var nameOk = (obj.name.toUpperCase().includes(filterInput.text.toUpperCase()))
+      if (
+        ((statusOn && !nameOn) && statusOk) ||              // Status only
+        ((!statusOn && nameOn) && nameOk) ||                // Name only
+        ((statusOn && nameOn) && (statusOk && nameOk)) ||   // Both
+        (!statusOn && !nameOn)                              // Neither
+      ) {
+        appList.append(obj)
       }
     }
   }
@@ -59,55 +89,7 @@ AVMEPanel {
       leftMargin: 20
       rightMargin: 20
     }
-    // TODO: real data here
-    model: ListModel {
-      id: appList
-      ListElement {
-        chainId: 41113
-        folder: "Test-1"
-        name: "Test App 1"
-        major: 1
-        minor: 0
-        patch: 2
-        status: 0
-      }
-      ListElement {
-        chainId: 41113
-        folder: "Test-2"
-        name: "Test Application No. 2"
-        major: 3
-        minor: 14
-        patch: 159
-        status: 1
-      }
-      ListElement {
-        chainId: 41113
-        folder: "Test-3"
-        name: "AVME Test Application Number 3"
-        major: 2
-        minor: 1
-        patch: 0
-        status: 2
-      }
-      ListElement {
-        chainId: 41113
-        folder: "Test-4"
-        name: "AVME Wallet Test Application Number Four"
-        major: 0
-        minor: 1
-        patch: 5
-        status: 1
-      }
-      ListElement {
-        chainId: 41113
-        folder: "Test-5"
-        name: "AVME Wallet Test Application Number Five And Knuckles GOTY Edition"
-        major: 5
-        minor: 5
-        patch: 5
-        status: 0
-      }
-    }
+    model: ListModel { id: appList }
   }
 
   Row {
@@ -128,11 +110,11 @@ AVMEPanel {
       text: "Filters:"
     }
 
-    // TODO: the actual filters
     AVMEInput {
       id: filterInput
       width: appsPanel.width * 0.5
       placeholder: "Name"
+      onTextEdited: refreshGrid()
     }
     ComboBox {
       id: filterComboBox

@@ -76,7 +76,9 @@ AVMEPanel {
       horizontalAlignment: Text.AlignHCenter
       font.pixelSize: 14.0
       color: {
-        if (appsPanel.selectedApp.itemStatus == 0) {
+        if (appsPanel.selectedApp == null) {
+          color: "#FFFFFF"
+        } else if (appsPanel.selectedApp.itemStatus == 0) {
           color: "red"
         } else if (appsPanel.selectedApp.itemStatus == 1) {
           color: "green"
@@ -85,7 +87,9 @@ AVMEPanel {
         }
       }
       text: {
-        if (appsPanel.selectedApp.itemStatus == 0) {
+        if (appsPanel.selectedApp == null) {
+          text: ""
+        } else if (appsPanel.selectedApp.itemStatus == 0) {
           text: "<b>Status:</b> Uninstalled"
         } else if (appsPanel.selectedApp.itemStatus == 1) {
           text: "<b>Status:</b> Installed"
