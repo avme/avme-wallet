@@ -30,9 +30,28 @@ GridView {
       readonly property int itemMajor: major
       readonly property int itemMinor: minor
       readonly property int itemPatch: patch
+      readonly property int itemStatus: status
       width: appGrid.cellWidth - 10
       height: appGrid.cellHeight - 10
       Rectangle { id: gridItemBg; anchors.fill: parent; radius: 5; color: "transparent" }
+
+      Rectangle {
+        id: appStatus
+        width: 16
+        height: 16
+        anchors.top: parent.top
+        anchors.right: parent.right
+        radius: width * 0.5
+        color: {
+          if (itemStatus == 0) {
+            color: "red"  // Uninstalled
+          } else if (itemStatus == 1) {
+            color: "green"  // Installed
+          } else if (itemStatus == 2) {
+            color: "yellow" // Needs Update
+          }
+        }
+      }
 
       Column {
         anchors.centerIn: parent
@@ -42,10 +61,10 @@ GridView {
           width: 64
           height: 64
           anchors.horizontalCenter: parent.horizontalCenter
-          imageSource: "https://raw.githubusercontent.com"
-          + "/avme/avme-wallet-applications/main/apps"
-          + itemFolder + "/icon.png"
-          //imageSource: "qrc:/img/unknown_token.png" // TODO
+          //imageSource: "https://raw.githubusercontent.com"
+          //+ "/avme/avme-wallet-applications/main/apps"
+          //+ itemFolder + "/icon.png"
+          imageSource: "qrc:/img/unknown_token.png" // TODO
         }
         Text {
           id: appName

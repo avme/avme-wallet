@@ -62,7 +62,6 @@ AVMEPanel {
     // TODO: real data here
     model: ListModel {
       id: appList
-      /*
       ListElement {
         chainId: 41113
         folder: "Test-1"
@@ -70,6 +69,7 @@ AVMEPanel {
         major: 1
         minor: 0
         patch: 2
+        status: 0
       }
       ListElement {
         chainId: 41113
@@ -78,6 +78,7 @@ AVMEPanel {
         major: 3
         minor: 14
         patch: 159
+        status: 1
       }
       ListElement {
         chainId: 41113
@@ -86,6 +87,7 @@ AVMEPanel {
         major: 2
         minor: 1
         patch: 0
+        status: 2
       }
       ListElement {
         chainId: 41113
@@ -94,6 +96,7 @@ AVMEPanel {
         major: 0
         minor: 1
         patch: 5
+        status: 1
       }
       ListElement {
         chainId: 41113
@@ -102,8 +105,8 @@ AVMEPanel {
         major: 5
         minor: 5
         patch: 5
+        status: 0
       }
-      */
     }
   }
 

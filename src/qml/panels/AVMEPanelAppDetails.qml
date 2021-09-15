@@ -35,8 +35,10 @@ AVMEPanel {
         antialiasing: true
         smooth: true
         fillMode: Image.PreserveAspectFit
+        //source: "https://raw.githubusercontent.com"
+        //+ "/avme/avme-wallet-applications/main/apps"
+        //+ appsPanel.selectedApp.itemFolder + "/icon.png"
         source: "qrc:/img/unknown_token.png"  // TODO
-        //source: (appsPanel.selectedApp != null) ? appsPanel.selectedApp.itemIcon : ""
       }
     }
 
@@ -60,7 +62,7 @@ AVMEPanel {
       horizontalAlignment: Text.AlignHCenter
       color: "#FFFFFF"
       font.pixelSize: 14.0
-      // TODO: *installed* app version (for comparison with updates)
+      // TODO: *installed* app version when status > 0 (for comparison with updates)
       text: "<b>Version:</b> " + ((appsPanel.selectedApp != null)
       ? appsPanel.selectedApp.itemMajor + "."
       + appsPanel.selectedApp.itemMinor + "."
@@ -72,18 +74,35 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       width: (appDetailsPanel.width * 0.9)
       horizontalAlignment: Text.AlignHCenter
-      color: "#FFFFFF"
       font.pixelSize: 14.0
-      text: "<b>Status:</b> "
-      // TODO
-      // Status would be "Installed", "Not Installed", "Needs Update"
-      // if not updating automatically, etc.
-      //+ ((tokensPanel.selectedToken != null) ? tokensPanel.selectedToken.itemAVAXPairContract : "")
+      color: {
+        if (appsPanel.selectedApp.itemStatus == 0) {
+          color: "red"
+        } else if (appsPanel.selectedApp.itemStatus == 1) {
+          color: "green"
+        } else if (appsPanel.selectedApp.itemStatus == 2) {
+          color: "yellow"
+        }
+      }
+      text: {
+        if (appsPanel.selectedApp.itemStatus == 0) {
+          text: "<b>Status:</b> Uninstalled"
+        } else if (appsPanel.selectedApp.itemStatus == 1) {
+          text: "<b>Status:</b> Installed"
+        } else if (appsPanel.selectedApp.itemStatus == 2) {
+          text: "<b>Status:</b> Needs Update ("
+          + appsPanel.selectedApp.itemMajor + "."
+          + appsPanel.selectedApp.itemMinor + "."
+          + appsPanel.selectedApp.itemPatch
+          + ")"
+        }
+      }
     }
     AVMEButton {
       id: btnInstall
       width: (appDetailsPanel.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
+      visible: (appsPanel.selectedApp != null && appsPanel.selectedApp.itemStatus == 0)
       text: "Install Application"
       onClicked: {} // TODO
     }
@@ -91,6 +110,7 @@ AVMEPanel {
       id: btnOpen
       width: (appDetailsPanel.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
+      visible: (appsPanel.selectedApp != null && appsPanel.selectedApp.itemStatus == 1)
       text: "Open Application"
       onClicked: {} // TODO
     }
@@ -98,6 +118,7 @@ AVMEPanel {
       id: btnUpdate
       width: (appDetailsPanel.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
+      visible: (appsPanel.selectedApp != null && appsPanel.selectedApp.itemStatus == 2)
       text: "Update Application"
       onClicked: {} // TODO
     }
@@ -105,6 +126,9 @@ AVMEPanel {
       id: btnUninstall
       width: (appDetailsPanel.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
+      visible: (appsPanel.selectedApp != null &&
+        (appsPanel.selectedApp.itemStatus == 1 || appsPanel.selectedApp.itemStatus == 2)
+      )
       text: "Uninstall Application"
       onClicked: confirmUninstallAppPopup.open()
     }
