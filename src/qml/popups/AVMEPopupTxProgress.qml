@@ -46,6 +46,7 @@ AVMEPopup {
         buildText.text = "Error on building transaction."
         buildPng.source = "qrc:/img/no.png"
         btnClose.visible = true
+        btnRetry.visible = true
       }
     }
     function onTxSigned(b, msg) {
@@ -62,6 +63,7 @@ AVMEPopup {
         signText.text = msg
         signPng.source = "qrc:/img/no.png"
         btnClose.visible = true
+        btnRetry.visible = true
       }
     }
     function onTxSent(b, linkUrl, txid) {
@@ -71,6 +73,8 @@ AVMEPopup {
         sendText.color = "limegreen"
         sendText.text = "Transaction sent!"
         sendPng.source = "qrc:/img/ok.png"
+        confirmText.color = "#FFFFFF"
+        confirmPngRotate.start()
         if (linkUrl != "") {
           btnOpenLink.linkUrl = linkUrl
           btnOpenLink.visible = true
@@ -84,6 +88,22 @@ AVMEPopup {
         sendText.color = "crimson"
         sendText.text = "Error on sending transaction."
         sendPng.source = "qrc:/img/no.png"
+        btnClose.visible = true
+        btnRetry.visible = true
+      }
+    }
+    function onTxConfirmed(b) {
+      confirmPngRotate.stop()
+      confirmPng.rotation = 0
+      if (b) {
+        confirmText.color = "limegreen"
+        confirmText.text = "Transaction confirmed!"
+        confirmPng.source = "qrc:/img/ok.png"
+      } else {
+        confirmText.color = "crimson"
+        confirmText.text = "Transaction not confirmed.<br>Retrying will attempt a higher fee."
+        confirmPng.source = "qrc:/img/no.png"
+        btnRetry.visible = true
       }
       btnClose.visible = true
     }
@@ -91,27 +111,24 @@ AVMEPopup {
       sendText.text = "Transaction nonce is too low, or a transaction with"
       + "<br>the same hash was already imported. Retrying..."
     }
-
-    function onLedgerRequired() {
-      ledgerStatusPopup.open()
-    }
-
-    function onLedgerDone() {
-      ledgerStatusPopup.close()
-    }
+    function onLedgerRequired() { ledgerStatusPopup.open() }
+    function onLedgerDone() { ledgerStatusPopup.close() }
   }
 
   function resetStatuses() {
     buildText.color = "#FFFFFF"
     signText.color = "#444444"
     sendText.color = "#444444"
+    confirmText.color = "#444444"
     buildText.text = "Building transaction..."
     signText.text = "Signing transaction..."
     sendText.text = "Broadcasting transaction..."
+    confirmText.text = "Confirming transaction..."
     buildPng.source = signPng.source = sendPng.source = "qrc:/img/icons/loading.png"
     buildPngRotate.start()
     btnOpenLink.visible = false
     btnClose.visible = false
+    btnRetry.visible = false
   }
 
   Column {
@@ -120,7 +137,7 @@ AVMEPopup {
       centerIn: parent
       margins: 30
     }
-    spacing: 40
+    spacing: 20
 
     // Enter/Numpad enter key override
     Keys.onPressed: {
@@ -224,6 +241,38 @@ AVMEPopup {
         text: "Broadcasting transaction..."
       }
     }
+
+    Row {
+      id: confirmRow
+      anchors.horizontalCenter: parent.horizontalCenter
+      height: 70
+      spacing: 40
+
+      Image {
+        id: confirmPng
+        height: 64
+        anchors.verticalCenter: confirmText.verticalCenter
+        fillMode: Image.PreserveAspectFit
+        source: "qrc:/img/icons/loading.png"
+        RotationAnimator {
+          id: confirmPngRotate
+          target: confirmPng
+          from: 0
+          to: 360
+          duration: 1000
+          loops: Animation.Infinite
+          easing.type: Easing.InOutQuad
+          running: false
+        }
+      }
+
+      Text {
+        id: confirmText
+        font.pixelSize: 24.0
+        color: "#444444"
+        text: "Confirming transaction..."
+      }
+    }
   }
 
   AVMEButton {
@@ -233,26 +282,42 @@ AVMEPopup {
     anchors {
       bottom: btnClose.top
       horizontalCenter: parent.horizontalCenter
-      margins: 30
+      margins: 20
     }
     text: "Open Transaction in Block Explorer"
     onClicked: Qt.openUrlExternally(linkUrl)
   }
 
   AVMEButton {
-    id: btnClose
+    id: btnRetry
+    width: parent.width * 0.25
     anchors {
       bottom: parent.bottom
       horizontalCenter: parent.horizontalCenter
-      margins: 30
+      horizontalCenterOffset: -150
+      margins: 20
+    }
+    text: "Retry"
+    onClicked: {} // TODO
+  }
+
+  AVMEButton {
+    id: btnClose
+    width: parent.width * 0.25
+    anchors {
+      bottom: parent.bottom
+      horizontalCenter: parent.horizontalCenter
+      horizontalCenterOffset: 150
+      margins: 20
     }
     text: "Close"
     onClicked: txProgressPopup.close()
   }
+
   AVMEPopupInfo {
     id: ledgerStatusPopup
     icon: "qrc:/img/warn.png"
-    info: "Please confirm your transaction on your Device"
+    info: "Please confirm the transaction on your device."
     okBtn.text: "Close"
   }
 }

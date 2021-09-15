@@ -139,5 +139,7 @@ void QmlSystem::makeTransaction(
     }
     std::string txLink = "https://cchain.explorer.avax.network/tx/" + txid;
     emit txSent(true, QString::fromStdString(txLink), QString::fromStdString(txid));
+
+    // TODO: confirm the transaction and emit txConfirmed() here
   });
 }

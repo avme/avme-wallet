@@ -109,6 +109,7 @@ class QmlSystem : public QObject {
     void txBuilt(bool b);
     void txSigned(bool b, QString msg);
     void txSent(bool b, QString linkUrl, QString txid);
+    void txConfirmed(bool b);
     void txRetry();
     void ledgerRequired();
     void ledgerDone();
