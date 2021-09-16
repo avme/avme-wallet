@@ -13,6 +13,7 @@ AVMEPopup {
   heightPct: 0.8
   property color popupBgColor: "#1C2029"
   property bool requestedFromWS: false
+  property bool alreadyTransmitted: false
 
   // Store the data in case we need to retry the transaction
   property string operation
@@ -98,6 +99,7 @@ AVMEPopup {
           confirmPng.source = "qrc:/img/ok.png"
           if (requestedFromWS) {
             qmlSystem.requestedTransactionStatus(true, txid)
+            alreadyTransmitted = true
           }
           qmlSystem.updateAccountNonce(from);
         } else {
@@ -164,6 +166,7 @@ AVMEPopup {
     // console.log(gas)
     // console.log(gasPrice)
     resetStatuses()
+    alreadyTransmitted = false;
     qmlSystem.makeTransaction(
       operation, from, to, value, txData, gas, gasPrice, pass, nonce, randomID
     )
@@ -180,7 +183,16 @@ AVMEPopup {
     // Enter/Numpad enter key override
     Keys.onPressed: {
       if ((event.key == Qt.Key_Return) || (event.key == Qt.Key_Enter)) {
-        if (btnClose.visible) { txProgressPopup.close() }
+        if (btnClose.visible) { 
+          if (!alreadyTransmitted) {
+            // Unlock the mutex if the transaction was not transmitted to the plugin
+            console.log("unlocking mutex")
+            qmlSystem.requestedTransactionStatus(false, "")
+            txProgressPopup.close() 
+          } else {
+            txProgressPopup.close() 
+          }
+        }
       }
     }
 
@@ -349,7 +361,16 @@ AVMEPopup {
       margins: 20
     }
     text: "Close"
-    onClicked: txProgressPopup.close()
+    onClicked: {
+      if (!alreadyTransmitted) {
+        // Unlock the mutex if the transaction was not transmitted to the plugin
+        console.log("unlocking mutex")
+        qmlSystem.requestedTransactionStatus(false, "")
+        txProgressPopup.close() 
+      } else {
+        txProgressPopup.close() 
+      }
+    }
   }
 
   AVMEPopupInfo {

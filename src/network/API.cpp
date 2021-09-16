@@ -6,7 +6,7 @@
 std::string API::host = "api.avme.io";
 std::string API::port = "443";
 
-std::string API::httpGetRequest(std::string reqBody) {
+std::string API::httpGetRequest(std::string reqBody, bool usePublic) {
   std::string result = "";
   using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
   namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
@@ -15,6 +15,20 @@ std::string API::httpGetRequest(std::string reqBody) {
   std::string RequestID = Utils::randomHexBytes();
   //std::cout << "REQUEST BODY: \n" << reqBody << std::endl;  // Uncomment for debugging
   //Utils::logToDebug("API Request ID " + RequestID + " : " + reqBody);
+
+  std::string host;
+  std::string port;
+  std::string target;
+
+  if (usePublic) {
+    host = "api.avax.network";
+    port = "443";
+    target = "/ext/bc/C/rpc";
+  } else {
+    host = API::host;
+    port = "443";
+    target = "/";
+  }
 
   try {
     // Create context and load certificates into it
@@ -26,19 +40,19 @@ std::string API::httpGetRequest(std::string reqBody) {
     ssl::stream<tcp::socket> stream{ioc, ctx};
 
     // Set SNI Hostname (many hosts need this to handshake successfully)
-    if (!SSL_set_tlsext_host_name(stream.native_handle(), API::host.c_str())) {
+    if (!SSL_set_tlsext_host_name(stream.native_handle(), host.c_str())) {
       boost::system::error_code ec{static_cast<int>(::ERR_get_error()), boost::asio::error::get_ssl_category()};
       throw boost::system::system_error{ec};
     }
-    auto const results = resolver.resolve(API::host, API::port);
+    auto const results = resolver.resolve(host, port);
 
     // Connect and Handshake
     boost::asio::connect(stream.next_layer(), results.begin(), results.end());
     stream.handshake(ssl::stream_base::client);
 
     // Set up an HTTP GET request message
-    http::request<http::string_body> req{http::verb::post, "/", 11};
-    req.set(http::field::host, API::host);
+    http::request<http::string_body> req{http::verb::post, target, 11};
+    req.set(http::field::host, host);
     req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
     req.set(http::field::content_type, "application/json");
     req.body() = reqBody;

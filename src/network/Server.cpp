@@ -52,13 +52,15 @@ void session::do_read() {
 
 void session::on_read(beast::error_code ec, std::size_t bytes_transferred) {
   boost::ignore_unused(bytes_transferred);
+  std::cout << "Request received!" << std::endl;
   if (ec == websocket::error::closed) { return; } // This indicates the session was closed
   if (ec.value() == 125) { return; } // Operation cancelled
   if (ec.value() == 995) { return; } // Interrupted by host
   if (ec) { Server::fail(ec, "read"); }
-  ws_.text(ws_.got_text()); // TODO: handle user input with QmlSystem::handleServer() here
   // Send the message for another thread to parse it.
-  sys_->handleServer(boost::beast::buffers_to_string(buffer_.data()), shared_from_this());
+  std::cout << "Passing it to our handler" << std::endl;
+  // Run in another thread natively.
+  QtConcurrent::run(sys_, &QmlSystem::handleServer,boost::beast::buffers_to_string(buffer_.data()),shared_from_this());
   buffer_.consume(buffer_.size());
   do_read();
 }
@@ -118,7 +120,7 @@ void Server::listener::stop() {
 void Server::start() {
   auto const address = boost::asio::ip::make_address("127.0.0.1");
   auto const port = static_cast<unsigned short>(std::atoi("1248"));
-  auto const threads = 1;
+  auto const threads = 8;
   // Restart is needed in order to .run() the ioc again. otherwise .run() will return instantly.
   ioc.restart();
   std::make_shared<listener>(ioc, tcp::endpoint{address, port}, &sessions_, &listeners_, sys_)->run();
@@ -154,6 +156,8 @@ void Server::stop() {
   listeners_.clear();
   // Restart is needed in order to .run() the ioc again in the future.
   ioc.stop();
+  // "run" again so it can fully stop
+  ioc.run();
   ioc.restart();
 }
 

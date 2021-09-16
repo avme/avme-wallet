@@ -8,6 +8,8 @@
 
 void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> session_) {
   // Run answer in another thread to allow the Server to take more inputs
+  std::cout << "Server Handler request!" << std::endl;
+  std::cout << inputStr << std::endl;
   QtConcurrent::run([=](){
     json request = json::parse(inputStr);
     json response;
@@ -42,7 +44,7 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       requestTransaction = true;
       requirePermission = true;
     } else {
-        // Route any future request to our API.
+        // Route any future request to the avalanche PUBLIC API.
         response = json::parse(API::httpGetRequest(request.dump()));
         requirePermission = false;
     }
@@ -76,7 +78,9 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       }
       if (!found) {
         // Ask user to give permission or not.
+        std::cout << "Lock global" << std::endl;
         globalUserInputRequest.lock();
+        std::cout << "Global locked" << std::endl;
         PLuserInputRequest.lock();
         // Tell QML to show and ask for permission for given website
         std::string website = request["__frameOrigin"];
@@ -93,7 +97,9 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
         }
         PLuserInputAnswer.unlock();
         PLuserInputRequest.unlock();
+        std::cout << "Unlock global" << std::endl;
         globalUserInputRequest.unlock();
+        std::cout << "Global unlocked" << std::endl;
       }
 
       this->permissionListMutex.unlock();
@@ -106,7 +112,9 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
     // Process with a transaction request.
 
     if (requestTransaction) {
+      std::cout << "Lock global TX" << std::endl;
       globalUserInputRequest.lock();
+      std::cout << "Global locked TX" << std::endl;
       requestTransactionMutex.lock();
       // 4001 	User Rejected Request 	The user rejected the request.
       RTuserInputRequest.lock();
@@ -138,12 +146,14 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       } else {
         response["result"] = RTtxid;
       }
-      requestTransactionMutex.unlock();
-      globalUserInputRequest.unlock();
-      RTuserInputRequest.unlock();
       RTuserInputAnswer.unlock();
+      RTuserInputRequest.unlock();
+      requestTransactionMutex.unlock();
+      std::cout << "Unlock global TX" << std::endl;
+      globalUserInputRequest.unlock();
+      std::cout << "Global unlocked TX" << std::endl;
     }
-
+    std::cout << "Writing back: " << response.dump() << std::endl;
     session_->do_write(response.dump());
   });
   return;

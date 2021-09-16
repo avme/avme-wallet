@@ -45,7 +45,7 @@ class API {
      * Send an HTTP GET Request to the API.
      * Returns the requested pure JSON data, or an empty string at connection failure.
      */
-    static std::string httpGetRequest(std::string reqBody);
+    static std::string httpGetRequest(std::string reqBody, bool usePublic = false);
 
     /**
      * Downloads a file from a given host URL and a given path (e.g. "/file.txt")
