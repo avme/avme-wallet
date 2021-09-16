@@ -177,8 +177,7 @@ std::string API::broadcastTx(std::string txidHex) {
   Request req{1, "2.0", "eth_sendRawTransaction", {"0x" + txidHex}};
   std::string query = buildRequest(req);
   std::string resp = httpGetRequest(query);
-  json respJson = json::parse(resp);
-  return respJson["result"].get<std::string>();
+  return resp;
 }
 
 std::string API::getNonce(std::string address) {

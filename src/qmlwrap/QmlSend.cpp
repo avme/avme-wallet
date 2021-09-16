@@ -66,10 +66,20 @@ bool QmlSystem::hasInsufficientFunds(
   return (receiverU256 > senderU256);
 }
 
+void QmlSystem::updateAccountNonce(QString from) {
+  QtConcurrent::run([=](){
+    std::string ret;
+    std::string nonce = API::getNonce(from.toStdString());
+    auto nonceParsed = Pangolin::parseHex(nonce, {"uint"});
+    ret = nonceParsed[0];
+    emit this->accountNonceUpdate(QString::fromStdString(ret));
+  });
+}
+
 void QmlSystem::makeTransaction(
     QString operation, QString from, QString to,
     QString value, QString txData, QString gas,
-    QString gasPrice, QString pass
+    QString gasPrice, QString pass, QString txNonce
 ) {
   QtConcurrent::run([=](){
     // Convert everything to std::string for easier handling
@@ -81,6 +91,7 @@ void QmlSystem::makeTransaction(
     std::string gasStr = gas.toStdString();
     std::string gasPriceStr = gasPrice.toStdString();
     std::string passStr = pass.toStdString();
+    std::string txNonceStr = txNonce.toStdString();
 
     // Convert the values required for a transaction to their Wei formats.
     // Gas price is in Gwei (10^9 Wei) and amounts are in fixed point.
@@ -92,7 +103,7 @@ void QmlSystem::makeTransaction(
 
     // Build the transaction and data hex according to the operation
     TransactionSkeleton txSkel;
-    txSkel = w.buildTransaction(fromStr, toStr, valueStr, gasStr, gasPriceStr, txDataStr);
+    txSkel = w.buildTransaction(fromStr, toStr, valueStr, gasStr, gasPriceStr, txDataStr, txNonceStr);
     emit txBuilt(txSkel.nonce != Utils::MAX_U256_VALUE());
 
     // Sign the transaction
@@ -117,29 +128,64 @@ void QmlSystem::makeTransaction(
     emit txSigned(signSuccess, QString::fromStdString(msg));
 
     // Send the transaction
-    std::string txid = this->w.sendTransaction(signedTx, operationStr);
-    if (txid.empty()) { emit txSent(false, "", ""); }
-    while (
-      txid.find("Transaction nonce is too low") != std::string::npos ||
-      txid.find("Transaction with the same hash was already imported") != std::string::npos
-    ) {
-      emit txRetry();
-      txSkel.nonce++;
-      if (QmlSystem::getLedgerFlag()) {
-        std::pair<bool, std::string> signStatus;
-        signStatus = this->ledgerDevice.signTransaction(
-          txSkel, this->w.getCurrentAccount().first
-        );
-        signSuccess = signStatus.first;
-        signedTx = (signSuccess) ? signStatus.second : "";
-      } else {
-        signedTx = this->w.signTransaction(txSkel, passStr);
-      }
-      txid = this->w.sendTransaction(signedTx, operationStr);
+    std::cout << "Signed tx: " << signedTx << std::endl;
+    json transactionResult = json::parse(this->w.sendTransaction(signedTx, operationStr));
+    std::cout << "Dump from answer" << transactionResult.dump() << std::endl;
+    msg = "";
+    if (!transactionResult.contains("result")) {
+      // Error when trying to transmit a transaction
+      msg = transactionResult["error"]["message"];
+      emit txSent(false, "", "", QString::fromStdString(msg));
+    } else {
+      std::string txLink = std::string("https://cchain.explorer.avax.network/tx/") + transactionResult["result"].get<std::string>();
+      emit txSent(true, QString::fromStdString(txLink), QString::fromStdString(transactionResult["result"]), QString::fromStdString(msg));
     }
-    std::string txLink = "https://cchain.explorer.avax.network/tx/" + txid;
-    emit txSent(true, QString::fromStdString(txLink), QString::fromStdString(txid));
+    // Confirming the transaction should happen OUTSIDE this function!
+  });
+}
 
-    // TODO: confirm the transaction and emit txConfirmed() here
+void QmlSystem::checkTransactionFor15s(QString txid) {
+  QtConcurrent::run([=](){
+    // Request current block and current transaction status for around 15 seconds
+    const auto p1 = std::chrono::system_clock::now();
+    uint64_t startTime = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
+    // Build the request data outside of the loop to avoid unecessary computing
+    std::vector<Request> reqs;
+    // Current block
+    reqs.push_back({1, "2.0", "eth_blockNumber", {}});
+    // Transaction Data.
+    reqs.push_back({2, "2.0", "eth_getTransactionReceipt", {txid.toStdString()}});
+    while (true) { // Use "break" to exit the function
+      const auto p2 = std::chrono::system_clock::now();
+      uint64_t currentTime =  std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
+      if ((startTime + 15) > currentTime) {
+        emit txConfirmed(false, txid);
+        break;
+      }
+
+      std::string query = API::buildMultiRequest(reqs);
+      json resultArr = json::parse(API::httpGetRequest(query));
+      std::string currentBlockStr;
+      std::string txidBlockStr;
+      // Loop around the result as the RPC can answer unorganized.
+      for (auto result : resultArr) {
+        if (result["id"] == 1) {
+          currentBlockStr = result["result"];
+        } else if (result["id"] == 2) {
+          // Avoid erroring out due to no transaction found on mempool
+          if (result.contains("result")) {
+            if (result.contains("blockNumber")) {
+              txidBlockStr = result["result"]["blockNumber"];
+            }
+          }
+        }
+      }
+      // Check if transaction was included in a block, a.k.a confirmed
+      u256 txidBlock = boost::lexical_cast<HexTo<u256>>(txidBlockStr);
+      u256 currentBlock = boost::lexical_cast<HexTo<u256>>(currentBlockStr);
+      if (txidBlock > currentBlock) {
+        emit txConfirmed(true, txid);
+      }  
+    }
   });
 }

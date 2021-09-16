@@ -14,11 +14,31 @@ AVMEPopup {
   property color popupBgColor: "#1C2029"
   property bool requestedFromWS: false
 
+  // Store the data in case we need to retry the transaction
+  property string operation
+  property string from
+  property string to
+  property string value
+  property string txData
+  property string gas
+  property string gasPrice
+  property string pass
+  property string nonce
+
   Connections {
     target: qmlSystem
     function onTxStart(
-      operation, from, to, value, txData, gas, gasPrice, pass
+      operation_, from_, to_, value_, txData_, gas_, gasPrice_, pass_
     ) {
+      operation = operation_
+      from = from_
+      to = to_
+      value = value_
+      txData = txData_
+      gas = gas_
+      gasPrice = gasPrice_
+      pass = pass_
+      nonce = accountHeader.accountNonce
       // Uncomment to see the data passed to the popup
       //console.log(operation)
       //console.log(from)
@@ -28,8 +48,9 @@ AVMEPopup {
       //console.log(gas)
       //console.log(gasPrice)
       resetStatuses()
+      console.log("Ue tem dois rodando " + parent.id)
       qmlSystem.makeTransaction(
-        operation, from, to, value, txData, gas, gasPrice, pass
+        operation, from, to, value, txData, gas, gasPrice, pass, nonce
       )
     }
     function onTxBuilt(b) {
@@ -66,7 +87,7 @@ AVMEPopup {
         btnRetry.visible = true
       }
     }
-    function onTxSent(b, linkUrl, txid) {
+    function onTxSent(b, linkUrl, txid, msg) {
       sendPngRotate.stop()
       sendPng.rotation = 0
       if (b) {
@@ -75,33 +96,28 @@ AVMEPopup {
         sendPng.source = "qrc:/img/ok.png"
         confirmText.color = "#FFFFFF"
         confirmPngRotate.start()
-        if (linkUrl != "") {
-          btnOpenLink.linkUrl = linkUrl
-          btnOpenLink.visible = true
-          if (requestedFromWS) {
-            if (txid != "") {
-              qmlSystem.requestedTransactionStatus(true, txid)
-            }
-          }
-        }
+        qmlSystem.checkTransactionFor15s(txid);
       } else {
         sendText.color = "crimson"
-        sendText.text = "Error on sending transaction."
+        sendText.text = "Error on sending transaction.<br> " + msg
         sendPng.source = "qrc:/img/no.png"
         btnClose.visible = true
         btnRetry.visible = true
       }
     }
-    function onTxConfirmed(b) {
+    function onTxConfirmed(b, txid) {
       confirmPngRotate.stop()
       confirmPng.rotation = 0
       if (b) {
         confirmText.color = "limegreen"
         confirmText.text = "Transaction confirmed!"
         confirmPng.source = "qrc:/img/ok.png"
+        if (requestedFromWS) {
+          qmlSystem.requestedTransactionStatus(true, txid)
+        }
       } else {
         confirmText.color = "crimson"
-        confirmText.text = "Transaction not confirmed.<br>Retrying will attempt a higher fee."
+        confirmText.text = "Transaction not confirmed.<br><b>Retrying will attempt a higher fee. (Recommended)</b>"
         confirmPng.source = "qrc:/img/no.png"
         btnRetry.visible = true
       }

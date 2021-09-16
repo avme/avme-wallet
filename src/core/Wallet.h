@@ -268,7 +268,7 @@ class Wallet {
      */
     TransactionSkeleton buildTransaction(
       std::string from, std::string to, std::string value,
-      std::string gasLimit, std::string gasPrice, std::string dataHex = ""
+      std::string gasLimit, std::string gasPrice, std::string dataHex, std::string txNonce
     );
 
     /**

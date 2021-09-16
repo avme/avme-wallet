@@ -238,6 +238,7 @@ void QmlSystem::getAllAVAXBalances(QStringList addresses) {
 
 void QmlSystem::getAccountAllBalances(QString address) {
   QtConcurrent::run([=](){
+    this->updateAccountNonce(address);
     try {
       json tokensInformation = json::array();
       json coinInformation;

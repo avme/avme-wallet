@@ -58,7 +58,14 @@ AVMEPanel {
   }
 
   function updateTxCost() {
-    if (autoGasCheck.checked) { txGasPriceInput.text = +accountHeader.gasPrice + 15 }
+    if (autoGasCheck.checked) { 
+        var calculatedGasPrice = +accountHeader.gasPrice + 15
+        if (calculatedGasPrice > 225) {
+          txGasPriceInput.text = 225
+        } else {
+          txGasPriceInput.text = calculatedGasPrice
+        }
+      }
     if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {  // Coin
       automaticGas = false;
       if (autoLimitCheck.checked) { txGasLimitInput.text = "21000" }

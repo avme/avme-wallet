@@ -298,28 +298,18 @@ bool Wallet::uninstallApp(std::string folder) {
 
 TransactionSkeleton Wallet::buildTransaction(
   std::string from, std::string to, std::string value,
-  std::string gasLimit, std::string gasPrice, std::string dataHex
+  std::string gasLimit, std::string gasPrice, std::string dataHex, std::string txNonce
 ) {
   TransactionSkeleton txSkel;
-  int txNonce;
 
-  // Check if nonce is valid (not an error message)
-  std::string txNonceStr = API::getNonce(from);
-  if (txNonceStr == "") {
-    txSkel.nonce = Utils::MAX_U256_VALUE();
-    return txSkel;
-  }
-  std::stringstream nonceStrm;
-  nonceStrm << std::hex << txNonceStr;
-  nonceStrm >> txNonce;
-
+  std::cout << txNonce << std::endl;
   // Building the transaction structure
   txSkel.creation = false;
   txSkel.from = toAddress(from);
   txSkel.to = toAddress(to);
   txSkel.value = u256(value);
   if (!dataHex.empty()) { txSkel.data = fromHex(dataHex); }
-  txSkel.nonce = txNonce;
+  txSkel.nonce = boost::lexical_cast<int>(txNonce);
   txSkel.gas = u256(gasLimit);
   txSkel.gasPrice = u256(gasPrice);
   txSkel.chainId = 43114; // Support for EIP-155
@@ -345,20 +335,21 @@ std::string Wallet::signTransaction(TransactionSkeleton txSkel, std::string pass
 
 std::string Wallet::sendTransaction(std::string txidHex, std::string operation) {
   // Send the transaction
-  std::string txid = API::broadcastTx(txidHex);
-  if (txid == "") { return ""; }
-  std::string txLink = "https://cchain.explorer.avax.network/tx/" + txid;
+  json transactionResult = API::broadcastTx(txidHex);
 
   /**
    * Store the successful transaction in the Account's history.
    * Since the AVAX chain is pretty fast, we can ask if the transaction was
    * already confirmed even immediately after sending it.
    */
-  TxData txData = Utils::decodeRawTransaction(txidHex);
-  txData.txlink = txLink;
-  txData.operation = operation;
-  saveTxToHistory(txData);
-  return txid;
+  if (transactionResult.contains("result")) {
+    std::string txLink = "https://cchain.explorer.avax.network/tx/" + transactionResult["result"].get<std::string>();
+    TxData txData = Utils::decodeRawTransaction(txidHex);
+    txData.txlink = txLink;
+    txData.operation = operation;
+    saveTxToHistory(txData);
+  } 
+  return transactionResult.dump();
 }
 
 json Wallet::txDataToJSON() {

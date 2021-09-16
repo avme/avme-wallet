@@ -19,6 +19,7 @@ Rectangle {
   property string coinUSDPrice
   property string coinUSDPriceChart
   property string totalFiatBalance
+  property string accountNonce
   property string gasPrice
   property string website
   property bool isLedger: qmlSystem.getLedgerFlag()
@@ -66,9 +67,6 @@ Rectangle {
         updatedBalances()
       }
     }
-  }
-  Connections {
-    target: qmlSystem
     function onAskForPermission(website_) {
       website = website_
       confirmWebsiteAllowance.open()
@@ -87,6 +85,9 @@ Rectangle {
         )
       confirmRT.open()
       window.requestActivate()
+    }
+    function onAccountNonceUpdate(nonce) {
+      accountNonce = nonce
     }
   }
 

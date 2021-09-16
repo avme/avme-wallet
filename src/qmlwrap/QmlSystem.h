@@ -108,11 +108,12 @@ class QmlSystem : public QObject {
     );
     void txBuilt(bool b);
     void txSigned(bool b, QString msg);
-    void txSent(bool b, QString linkUrl, QString txid);
-    void txConfirmed(bool b);
+    void txSent(bool b, QString linkUrl, QString txid, QString msg);
+    void txConfirmed(bool b, QString txid);
     void txRetry();
     void ledgerRequired();
     void ledgerDone();
+    void accountNonceUpdate(QString nonce);
 
     // Applications screen signals
     void appListDownloaded();
@@ -332,7 +333,7 @@ class QmlSystem : public QObject {
     Q_INVOKABLE void listAccountTransactions(QString address);
 
     // ======================================================================
-    // SEND SCREEN FUNCTIONS
+    // TRANSACTION RELATED FUNCTIONS
     // ======================================================================
 
     // Create a RegExp for transaction amount inputs
@@ -360,14 +361,20 @@ class QmlSystem : public QObject {
       QString senderAmount, QString receiverAmount, int decimals
     );
 
+    Q_INVOKABLE void updateAccountNonce(QString from);
+
     // Make a transaction with the collected data.
     // Emits txBuilt(), txSigned(), txSent() and txRetry()
 
     Q_INVOKABLE void makeTransaction(
       QString operation, QString from, QString to,
       QString value, QString txData, QString gas,
-      QString gasPrice, QString pass
+      QString gasPrice, QString pass, QString txNonce
     );
+
+    // Check if the transaction was confirmed or not, and even if transaction was "stuck"
+
+    Q_INVOKABLE void checkTransactionFor15s(QString txid);
 
     // ======================================================================
     // EXCHANGE/LIQUIDITY/STAKING SCREEN FUNCTIONS
