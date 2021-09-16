@@ -50,16 +50,20 @@ Item {
   AVMEPopupAppSelect {
     id: appSelectPopup
     installBtn.onClicked: {
-      var app = ({})
-      app["chainId"] = appList.currentItem.itemChainId
-      app["folder"] = appList.currentItem.itemFolder
-      app["name"] = appList.currentItem.itemName
-      app["major"] = appList.currentItem.itemMajor
-      app["minor"] = appList.currentItem.itemMinor
-      app["patch"] = appList.currentItem.itemPatch
-      qmlSystem.installApp(app)
-      appSelectPopup.close()
-      appsPanel.refreshGrid()
+      if (!qmlSystem.appIsInstalled(appList.currentItem.itemFolder)) {
+        var app = ({})
+        app["chainId"] = appList.currentItem.itemChainId
+        app["folder"] = appList.currentItem.itemFolder
+        app["name"] = appList.currentItem.itemName
+        app["major"] = appList.currentItem.itemMajor
+        app["minor"] = appList.currentItem.itemMinor
+        app["patch"] = appList.currentItem.itemPatch
+        qmlSystem.installApp(app)
+        appSelectPopup.close()
+        appsPanel.refreshGrid()
+      } else {
+        infoTimer.start()
+      }
     }
   }
 
@@ -69,7 +73,7 @@ Item {
     widthPct: 0.4
     heightPct: 0.25
     icon: "qrc:/img/warn.png"
-    info: "Are you sure you want to uninstall this application?"
+    info: "Are you sure you want to remove this application?"
     yesBtn.onClicked: {
       qmlSystem.uninstallApp(appsPanel.selectedApp.itemFolder)
       confirmUninstallAppPopup.close()

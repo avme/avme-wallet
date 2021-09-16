@@ -14,6 +14,7 @@ AVMEPopup {
   property var apps: null
   property alias appList: appList
   property alias installBtn: btnInstall
+  property alias infoTimer: infoTimer
 
   onAboutToShow: {
     apps = qmlSystem.loadAppsFromList()
@@ -57,7 +58,10 @@ AVMEPopup {
       anchors.horizontalCenter: parent.horizontalCenter
       color: "#FFFFFF"
       font.pixelSize: 14.0
-      text: "Choose an application from the list."
+      text: (!infoTimer.running)
+      ? "Choose an application from the list."
+      : "Application already installed, please try another."
+      Timer { id: infoTimer; interval: 2000 }
     }
 
     Rectangle {

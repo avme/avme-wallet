@@ -30,28 +30,23 @@ GridView {
       readonly property int itemMajor: major
       readonly property int itemMinor: minor
       readonly property int itemPatch: patch
-      readonly property int itemStatus: status
+      readonly property bool itemIsUpdated: isUpdated
+      readonly property int itemNextMajor: nextMajor
+      readonly property int itemNextMinor: nextMinor
+      readonly property int itemNextPatch: nextPatch
       width: appGrid.cellWidth - 10
       height: appGrid.cellHeight - 10
       Rectangle { id: gridItemBg; anchors.fill: parent; radius: 5; color: "transparent" }
 
-      // TODO: redo status logic
       Rectangle {
-        id: appStatus
+        id: appUpdateStatus
         width: 16
         height: 16
+        visible: !itemIsUpdated
         anchors.top: parent.top
         anchors.right: parent.right
         radius: width * 0.5
-        color: {
-          if (itemStatus == 0) {
-            color: "red"  // Uninstalled
-          } else if (itemStatus == 1) {
-            color: "green"  // Installed
-          } else if (itemStatus == 2) {
-            color: "yellow" // Needs Update
-          }
-        }
+        color: "yellow"
       }
 
       Column {
@@ -86,7 +81,10 @@ GridView {
         hoverEnabled: true
         onEntered: gridItemBg.color = listHoveredColor
         onExited: gridItemBg.color = "transparent"
-        onClicked: appGrid.currentIndex = index
+        onClicked: {
+          appGrid.currentIndex = index
+          forceActiveFocus()
+        }
       }
     }
   }

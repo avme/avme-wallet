@@ -62,7 +62,6 @@ AVMEPanel {
       horizontalAlignment: Text.AlignHCenter
       color: "#FFFFFF"
       font.pixelSize: 14.0
-      // TODO: *installed* app version when status > 0 (for comparison with updates)
       text: "<b>Version:</b> " + ((appsPanel.selectedApp != null)
       ? appsPanel.selectedApp.itemMajor + "."
       + appsPanel.selectedApp.itemMinor + "."
@@ -73,40 +72,21 @@ AVMEPanel {
       id: appStatus
       anchors.horizontalCenter: parent.horizontalCenter
       width: (appDetailsPanel.width * 0.9)
+      visible: (appsPanel.selectedApp != null && !appsPanel.selectedApp.itemIsUpdated)
       horizontalAlignment: Text.AlignHCenter
       font.pixelSize: 14.0
-      color: {
-        if (appsPanel.selectedApp == null) {
-          color: "#FFFFFF"
-        } else if (appsPanel.selectedApp.itemStatus == 0) {
-          color: "red"
-        } else if (appsPanel.selectedApp.itemStatus == 1) {
-          color: "green"
-        } else if (appsPanel.selectedApp.itemStatus == 2) {
-          color: "yellow"
-        }
-      }
-      text: {
-        if (appsPanel.selectedApp == null) {
-          text: ""
-        } else if (appsPanel.selectedApp.itemStatus == 0) {
-          text: "<b>Status:</b> Uninstalled"
-        } else if (appsPanel.selectedApp.itemStatus == 1) {
-          text: "<b>Status:</b> Installed"
-        } else if (appsPanel.selectedApp.itemStatus == 2) {
-          text: "<b>Status:</b> Needs Update ("
-          + appsPanel.selectedApp.itemMajor + "."
-          + appsPanel.selectedApp.itemMinor + "."
-          + appsPanel.selectedApp.itemPatch
-          + ")"
-        }
-      }
+      color: "yellow"
+      text: "Needs Update -> " + ((appsPanel.selectedApp != null)
+      ? appsPanel.selectedApp.itemNextMajor + "."
+      + appsPanel.selectedApp.itemNextMinor + "."
+      + appsPanel.selectedApp.itemNextPatch
+      : "")
     }
     AVMEButton {
       id: btnOpen
       width: (appDetailsPanel.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
-      visible: (appsPanel.selectedApp != null && appsPanel.selectedApp.itemStatus == 1)
+      visible: (appsPanel.selectedApp != null && appsPanel.selectedApp.itemIsUpdated)
       text: "Open Application"
       onClicked: {} // TODO
     }
@@ -114,7 +94,7 @@ AVMEPanel {
       id: btnUpdate
       width: (appDetailsPanel.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
-      visible: (appsPanel.selectedApp != null && appsPanel.selectedApp.itemStatus == 2)
+      visible: (appsPanel.selectedApp != null && !appsPanel.selectedApp.itemIsUpdated)
       text: "Update Application"
       onClicked: {} // TODO
     }
@@ -122,19 +102,8 @@ AVMEPanel {
       id: btnUninstall
       width: (appDetailsPanel.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
-      text: "Uninstall Application"
+      text: "Remove Application"
       onClicked: confirmUninstallAppPopup.open()
     }
-  }
-
-  AVMEButton {
-    id: btnOpenLocal
-    visible: (qmlSystem.getConfigValue("devMode") == "true")
-    width: (appDetailsPanel.width * 0.8)
-    anchors.horizontalCenter: parent.horizontalCenter
-    anchors.bottom: parent.bottom
-    anchors.bottomMargin: 20
-    text: "Open Local App"
-    onClicked: loadAppPopup.open()
   }
 }

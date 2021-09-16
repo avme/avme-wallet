@@ -9,7 +9,8 @@ void QmlSystem::downloadAppList() {
     boost::filesystem::path filePath = Utils::walletFolderPath.string()
       + "/wallet/c-avax/applist.json";
     // Force download the list every time
-    if (boost::filesystem::exists(filePath)) { boost::filesystem::remove(filePath); }
+    // TODO: re-enable this when the real list exists in the repo
+    //if (boost::filesystem::exists(filePath)) { boost::filesystem::remove(filePath); }
     API::httpGetFile(
       "raw.githubusercontent.com",
       "/avme/avme-wallet-applications/main/applist.json",
