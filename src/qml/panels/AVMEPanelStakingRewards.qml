@@ -57,7 +57,7 @@ AVMEPanel {
   function exitTx() {
     to = qmlSystem.getContract("staking")
     coinValue = 0
-    gas = 200000
+    gas = 400000
     info = "You will Harvest <b> " + qmlApi.weiToFixedPoint(reward, 18) + " AVME <\b> "
     + "<br> and withdraw <b>" + qmlApi.weiToFixedPoint(lockedBalance, 18) + " AVME/AVAX LP "
     + "</b><br> on Classic Staking Contract"
@@ -74,7 +74,7 @@ AVMEPanel {
   function harvestTx() {
     to = qmlSystem.getContract("staking")
     coinValue = 0
-    gas = 200000
+    gas = 250000
     info = "You will Harvest <b> " + qmlApi.weiToFixedPoint(reward, 18) + " AVME <\b>"
     + "</b><br> on Classic Staking Contract"
     historyInfo = "Harves Classic Staking Contract"
@@ -139,7 +139,7 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       visible: (!loading)
       enabled: ((+reward != 0) && (+accountHeader.coinRawBalance >=
-        +qmlSystem.calculateTransactionCost("0", "70000", gasPrice)
+        +qmlSystem.calculateTransactionCost("0", "400000", gasPrice)
       ))
       onClicked: {
         exitTx()
@@ -164,7 +164,7 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       visible: (!loading)
       enabled: ((+reward != 0) &&(+accountHeader.coinRawBalance >=
-        +qmlSystem.calculateTransactionCost("0", "70000", gasPrice)
+        +qmlSystem.calculateTransactionCost("0", "250000", gasPrice)
       ))
       onClicked: {
         harvestTx()

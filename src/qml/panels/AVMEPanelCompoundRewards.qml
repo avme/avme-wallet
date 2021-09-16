@@ -57,7 +57,7 @@ AVMEPanel {
   function reinvestTx() {
     to = qmlSystem.getContract("compound")
     coinValue = 0
-    gas = 400000
+    gas = 600000 // Avoid "gas required exceeds allowance" error
     info = "You will reinvest and receive <b> " + qmlApi.weiToFixedPoint(reward, 18) + " AVME <\b>"
     + "</b><br> on Compound Staking Contract"
     historyInfo = "Harvest Compound Staking Contract"

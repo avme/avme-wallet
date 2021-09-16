@@ -173,7 +173,7 @@ AVMEPanel {
   function removeLiquidityTx() {
     to = qmlSystem.getContract("router")
     coinValue = 0
-    gas = 400000
+    gas = 600000
     var ethCallJson = ({})
     info = "You will remove <b><br>"
     + qmlApi.weiToFixedPoint(removeAsset1Estimate, removeAsset1Popup.chosenAssetDecimals) + " " + (removeAsset1Popup.chosenAssetSymbol)
@@ -429,7 +429,7 @@ AVMEPanel {
       + removeAsset1Popup.chosenAssetSymbol + "/"
       + removeAsset2Popup.chosenAssetSymbol + " LP</b> from the pool."
       + "<br>This operation will have a total gas cost of:<br><b>"
-      + qmlSystem.calculateTransactionCost("0", "180000", gasPrice)
+      + qmlSystem.calculateTransactionCost("0", "600000", gasPrice)
       + " AVAX</b>"
     }
 
@@ -437,7 +437,7 @@ AVMEPanel {
       id: approveBtn
       width: parent.width
       enabled: (+accountHeader.coinRawBalance >=
-        +qmlSystem.calculateTransactionCost("0", "180000", gasPrice)
+        +qmlSystem.calculateTransactionCost("0", "100000", gasPrice)
       )
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve" : "Not enough funds"

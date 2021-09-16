@@ -154,7 +154,7 @@ AVMEPanel {
   function stakeTx() {
     to = qmlSystem.getContract("staking")
     coinValue = 0
-    gas = 200000
+    gas = 300000
     info = "You will stake <b> " + qmlApi.weiToFixedPoint(stakeInput.text, 18) + " AVME/AVAX LP <\b> on Classic Staking"
     historyInfo = "Stake <b> AVME/AVAX LP <\b> on Classic Staking"
     var ethCallJson = ({})
@@ -171,7 +171,7 @@ AVMEPanel {
   function unstakeTx() {
     to = qmlSystem.getContract("staking")
     coinValue = 0
-    gas = 200000
+    gas = 300000
     info = "You will unstake <b> " + qmlApi.weiToFixedPoint(stakeInput.text, 18) + " AVME/AVAX LP <\b> on Classic Staking"
     historyInfo = "Unstake <b> AVME/AVAX LP <\b> on Classic Staking"
     var ethCallJson = ({})
@@ -276,7 +276,7 @@ AVMEPanel {
       text: "You need to approve your Account in order to stake<br>"
       + "<b>AVAX/AVME LP</b> in the staking contract."
       + "<br>This operation will have a total gas cost of:<br><b>"
-      + qmlSystem.calculateTransactionCost("0", "200000", gasPrice)
+      + qmlSystem.calculateTransactionCost("0", "100000", gasPrice)
       + " AVAX</b>"
     }
 
@@ -284,7 +284,7 @@ AVMEPanel {
       id: btnApprove
       width: parent.width
       enabled: (+accountHeader.coinRawBalance >=
-        +qmlSystem.calculateTransactionCost("0", "200000", gasPrice)
+        +qmlSystem.calculateTransactionCost("0", "100000", gasPrice)
       )
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve" : "Not enough funds"

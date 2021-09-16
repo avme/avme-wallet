@@ -357,7 +357,7 @@ AVMEPanel {
 
   function swapTx(amountIn, amountOut) {
     to = qmlSystem.getContract("router")
-    gas = 300000
+    gas = 500000
     info = "You will Swap <b>" + amountIn + " " + fromAssetPopup.chosenAssetSymbol + "<\b> to <b>"
     info += amountOut + " " + toAssetPopup.chosenAssetSymbol + "<\b> on Pangolin"
     historyInfo = "Swap <b>" + fromAssetPopup.chosenAssetSymbol + "<\b> to <b>" + toAssetPopup.chosenAssetSymbol + "<\b>"
@@ -677,7 +677,7 @@ AVMEPanel {
       text: "You need to approve your Account in order to swap <b>"
       + ((!isInverse) ? fromAssetPopup.chosenAssetSymbol : toAssetPopup.chosenAssetSymbol) + "</b>."
       + "<br>This operation will have a total gas cost of:<br><b>"
-      + qmlSystem.calculateTransactionCost("0", "180000", gasPrice)
+      + qmlSystem.calculateTransactionCost("0", "10000", gasPrice)
       + " AVAX</b>"
     }
 
@@ -685,7 +685,7 @@ AVMEPanel {
       id: btnApprove
       width: parent.width
       enabled: (+accountHeader.coinRawBalance >=
-        +qmlSystem.calculateTransactionCost("0", "180000", gasPrice)
+        +qmlSystem.calculateTransactionCost("0", "100000", gasPrice)
       )
       anchors.horizontalCenter: parent.horizontalCenter
       text: (enabled) ? "Approve" : "Not enough funds"
@@ -751,13 +751,13 @@ AVMEPanel {
           if (!isInverse) {
             swapInput.text = (fromAssetPopup.chosenAssetSymbol == "AVAX")
               ? qmlSystem.getRealMaxAVAXAmount(
-                accountHeader.coinRawBalance, "180000", gasPrice
+                accountHeader.coinRawBalance, "500000", gasPrice
               )
               : accountHeader.tokenList[fromAssetPopup.chosenAssetAddress]["rawBalance"]
           } else {
             swapInput.text = (toAssetPopup.chosenAssetSymbol == "AVAX")
               ? qmlSystem.getRealMaxAVAXAmount(
-                accountHeader.coinRawBalance, "180000", gasPrice
+                accountHeader.coinRawBalance, "500000", gasPrice
               )
               : accountHeader.tokenList[toAssetPopup.chosenAssetAddress]["rawBalance"]
           }
