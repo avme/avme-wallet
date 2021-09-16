@@ -305,6 +305,7 @@ TransactionSkeleton Wallet::buildTransaction(
   std::cout << txNonce << std::endl;
   // Building the transaction structure
   txSkel.creation = false;
+  std::cout << "from: " << from << std::endl;
   txSkel.from = toAddress(from);
   txSkel.to = toAddress(to);
   txSkel.value = u256(value);
@@ -317,6 +318,8 @@ TransactionSkeleton Wallet::buildTransaction(
 }
 
 std::string Wallet::signTransaction(TransactionSkeleton txSkel, std::string pass) {
+  std::cout << "Sign from: " << txSkel.from << std::endl;
+  std::cout << "Password: " << pass << std::endl;
   Secret s = getSecret("0x" + boost::lexical_cast<std::string>(txSkel.from), pass);
   std::stringstream txHexBuffer;
 
@@ -333,9 +336,9 @@ std::string Wallet::signTransaction(TransactionSkeleton txSkel, std::string pass
   return txHexBuffer.str();
 }
 
-std::string Wallet::sendTransaction(std::string txidHex, std::string operation) {
+json Wallet::sendTransaction(std::string txidHex, std::string operation) {
   // Send the transaction
-  json transactionResult = API::broadcastTx(txidHex);
+  json transactionResult = json::parse(API::broadcastTx(txidHex));
 
   /**
    * Store the successful transaction in the Account's history.
@@ -349,7 +352,7 @@ std::string Wallet::sendTransaction(std::string txidHex, std::string operation) 
     txData.operation = operation;
     saveTxToHistory(txData);
   } 
-  return transactionResult.dump();
+  return transactionResult;
 }
 
 json Wallet::txDataToJSON() {

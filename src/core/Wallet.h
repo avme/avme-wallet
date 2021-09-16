@@ -282,7 +282,7 @@ class Wallet {
      * Send a signed transaction for broadcast and store it in history if successful.
      * Returns a link to the transaction in the blockchain, or an empty string on failure.
      */
-    std::string sendTransaction(std::string txidHex, std::string operation);
+    json sendTransaction(std::string txidHex, std::string operation);
 
     // ======================================================================
     // HISTORY MANAGEMENT

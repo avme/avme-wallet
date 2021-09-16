@@ -79,7 +79,7 @@ void QmlSystem::updateAccountNonce(QString from) {
 void QmlSystem::makeTransaction(
     QString operation, QString from, QString to,
     QString value, QString txData, QString gas,
-    QString gasPrice, QString pass, QString txNonce
+    QString gasPrice, QString pass, QString txNonce, QString randomID
 ) {
   QtConcurrent::run([=](){
     // Convert everything to std::string for easier handling
@@ -104,7 +104,7 @@ void QmlSystem::makeTransaction(
     // Build the transaction and data hex according to the operation
     TransactionSkeleton txSkel;
     txSkel = w.buildTransaction(fromStr, toStr, valueStr, gasStr, gasPriceStr, txDataStr, txNonceStr);
-    emit txBuilt(txSkel.nonce != Utils::MAX_U256_VALUE());
+    emit txBuilt(txSkel.nonce != Utils::MAX_U256_VALUE(), randomID);
 
     // Sign the transaction
     bool signSuccess;
@@ -112,11 +112,11 @@ void QmlSystem::makeTransaction(
     std::string signedTx;
     if (QmlSystem::getLedgerFlag()) {
       std::pair<bool, std::string> signStatus;
-      emit ledgerRequired();
+      emit ledgerRequired(randomID);
       signStatus = this->ledgerDevice.signTransaction(
         txSkel, this->getCurrentHardwareAccountPath().toStdString()
       );
-      emit ledgerDone();
+      emit ledgerDone(randomID);
       signSuccess = signStatus.first;
       signedTx = (signSuccess) ? signStatus.second : "";
       msg = (signSuccess) ? "Transaction signed!" : signStatus.second;
@@ -125,67 +125,50 @@ void QmlSystem::makeTransaction(
       signSuccess = !signedTx.empty();
       msg = (signSuccess) ? "Transaction signed!" : "Error on signing transaction.";
     }
-    emit txSigned(signSuccess, QString::fromStdString(msg));
+    emit txSigned(signSuccess, QString::fromStdString(msg), randomID);
 
     // Send the transaction
-    std::cout << "Signed tx: " << signedTx << std::endl;
-    json transactionResult = json::parse(this->w.sendTransaction(signedTx, operationStr));
-    std::cout << "Dump from answer" << transactionResult.dump() << std::endl;
+    json transactionResult = this->w.sendTransaction(signedTx, operationStr);
     msg = "";
     if (!transactionResult.contains("result")) {
       // Error when trying to transmit a transaction
-      msg = transactionResult["error"]["message"];
-      emit txSent(false, "", "", QString::fromStdString(msg));
+      msg = transactionResult["error"]["message"] .get<std::string>();
+      emit txSent(false, "", "", QString::fromStdString(msg), randomID);
     } else {
       std::string txLink = std::string("https://cchain.explorer.avax.network/tx/") + transactionResult["result"].get<std::string>();
-      emit txSent(true, QString::fromStdString(txLink), QString::fromStdString(transactionResult["result"]), QString::fromStdString(msg));
+      emit txSent(true, QString::fromStdString(txLink), QString::fromStdString(transactionResult["result"]), QString::fromStdString(msg), randomID);
     }
     // Confirming the transaction should happen OUTSIDE this function!
   });
 }
 
-void QmlSystem::checkTransactionFor15s(QString txid) {
+void QmlSystem::checkTransactionFor15s(QString txid, QString randomID) {
   QtConcurrent::run([=](){
     // Request current block and current transaction status for around 15 seconds
-    const auto p1 = std::chrono::system_clock::now();
-    uint64_t startTime = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
+    auto t_start = std::chrono::high_resolution_clock::now();
     // Build the request data outside of the loop to avoid unecessary computing
-    std::vector<Request> reqs;
-    // Current block
-    reqs.push_back({1, "2.0", "eth_blockNumber", {}});
-    // Transaction Data.
-    reqs.push_back({2, "2.0", "eth_getTransactionReceipt", {txid.toStdString()}});
+    Request transactionReceipt({1, "2.0", "eth_getTransactionReceipt", {txid.toStdString()}});
     while (true) { // Use "break" to exit the function
-      const auto p2 = std::chrono::system_clock::now();
-      uint64_t currentTime =  std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
-      if ((startTime + 15) > currentTime) {
-        emit txConfirmed(false, txid);
+      auto t_end = std::chrono::high_resolution_clock::now();
+      double elapsed_time_ms = std::chrono::duration<double, std::milli>(t_end-t_start).count();
+      if (elapsed_time_ms > 15000) {
+        emit txConfirmed(false, txid, randomID);
         break;
       }
 
-      std::string query = API::buildMultiRequest(reqs);
-      json resultArr = json::parse(API::httpGetRequest(query));
-      std::string currentBlockStr;
-      std::string txidBlockStr;
-      // Loop around the result as the RPC can answer unorganized.
-      for (auto result : resultArr) {
-        if (result["id"] == 1) {
-          currentBlockStr = result["result"];
-        } else if (result["id"] == 2) {
-          // Avoid erroring out due to no transaction found on mempool
-          if (result.contains("result")) {
-            if (result.contains("blockNumber")) {
-              txidBlockStr = result["result"]["blockNumber"];
-            }
-          }
-        }
-      }
+      json result = json::parse(API::httpGetRequest(API::buildRequest(transactionReceipt)));
+      std::cout << result.dump(2) << std::endl;
+      std::string status = "";
+
+
+      if (result.contains("result"))
+        if (result["result"].contains("status"))
+          status = result["result"]["status"];
       // Check if transaction was included in a block, a.k.a confirmed
-      u256 txidBlock = boost::lexical_cast<HexTo<u256>>(txidBlockStr);
-      u256 currentBlock = boost::lexical_cast<HexTo<u256>>(currentBlockStr);
-      if (txidBlock > currentBlock) {
-        emit txConfirmed(true, txid);
-      }  
+      if (status != "") {
+        emit txConfirmed(true, txid, randomID);
+        break;
+      }
     }
   });
 }

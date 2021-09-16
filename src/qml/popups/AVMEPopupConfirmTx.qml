@@ -22,7 +22,7 @@ AVMEPopup {
   property alias timer: infoTimer
   property alias okBtn: btnOk
   property alias backBtn: btnBack
-  property string from: qmlSystem.getCurrentAccount()
+  property string from
   property string operation // For usage under history
   property string to
   property string value // Not WEI value!
@@ -89,7 +89,6 @@ AVMEPopup {
       Params["gasPrice"] = "0x" + qmlApi.uintToHex(qmlApi.fixedPointToWei(gasPrice, 9))
       Params["value"] = "0x" + qmlApi.uintToHex(qmlApi.fixedPointToWei(value, 18))
       Params["data"] = txData
-      console.log(JSON.stringify(Params))
       qmlApi.buildGetEstimateGasLimitReq(JSON.stringify(Params), "PopupConfirmTxGas_"+randomID)
       qmlApi.doAPIRequests("PopupConfirmTxGas_"+randomID)
     }
@@ -226,10 +225,10 @@ AVMEPopup {
           } else {
             // You have to provide the information before closing the popup
             // Otherwise, the passInput.text will be equal to ""
-            qmlSystem.txStart(
-              operation, from, to, value, txData, gas, gasPrice, passInput.text
+            txProgressPopup.txStart(
+              operation, from, to, value, txData, gas, gasPrice, passInput.text, randomID
             )
-            confirmTxPopup.close()
+            confirmTxPopup.close() // txStart need to happen before close, because password input will be empty
             txProgressPopup.open()
           }
         } // TODO: ADD A ERROR HANDLER FOR INSUFICIENT BALANCE!!!

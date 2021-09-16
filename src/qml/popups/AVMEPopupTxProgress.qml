@@ -24,111 +24,107 @@ AVMEPopup {
   property string gasPrice
   property string pass
   property string nonce
+  property string randomID
 
   Connections {
     target: qmlSystem
-    function onTxStart(
-      operation_, from_, to_, value_, txData_, gas_, gasPrice_, pass_
-    ) {
-      operation = operation_
-      from = from_
-      to = to_
-      value = value_
-      txData = txData_
-      gas = gas_
-      gasPrice = gasPrice_
-      pass = pass_
-      nonce = accountHeader.accountNonce
-      // Uncomment to see the data passed to the popup
-      //console.log(operation)
-      //console.log(from)
-      //console.log(to)
-      //console.log(value)
-      //console.log(txData)
-      //console.log(gas)
-      //console.log(gasPrice)
-      resetStatuses()
-      console.log("Ue tem dois rodando " + parent.id)
-      qmlSystem.makeTransaction(
-        operation, from, to, value, txData, gas, gasPrice, pass, nonce
-      )
-    }
-    function onTxBuilt(b) {
-      buildPngRotate.stop()
-      buildPng.rotation = 0
-      if (b) {
-        buildText.color = "limegreen"
-        buildText.text = "Transaction built!"
-        buildPng.source = "qrc:/img/ok.png"
-        signText.color = "#FFFFFF"
-        signPngRotate.start()
-      } else {
-        buildText.color = "crimson"
-        buildText.text = "Error on building transaction."
-        buildPng.source = "qrc:/img/no.png"
-        btnClose.visible = true
-        btnRetry.visible = true
-      }
-    }
-    function onTxSigned(b, msg) {
-      signPngRotate.stop()
-      signPng.rotation = 0
-      if (b) {
-        signText.color = "limegreen"
-        signText.text = msg
-        signPng.source = "qrc:/img/ok.png"
-        sendText.color = "#FFFFFF"
-        sendPngRotate.start()
-      } else {
-        signText.color = "crimson"
-        signText.text = msg
-        signPng.source = "qrc:/img/no.png"
-        btnClose.visible = true
-        btnRetry.visible = true
-      }
-    }
-    function onTxSent(b, linkUrl, txid, msg) {
-      sendPngRotate.stop()
-      sendPng.rotation = 0
-      if (b) {
-        sendText.color = "limegreen"
-        sendText.text = "Transaction sent!"
-        sendPng.source = "qrc:/img/ok.png"
-        confirmText.color = "#FFFFFF"
-        confirmPngRotate.start()
-        qmlSystem.checkTransactionFor15s(txid);
-      } else {
-        sendText.color = "crimson"
-        sendText.text = "Error on sending transaction.<br> " + msg
-        sendPng.source = "qrc:/img/no.png"
-        btnClose.visible = true
-        btnRetry.visible = true
-      }
-    }
-    function onTxConfirmed(b, txid) {
-      confirmPngRotate.stop()
-      confirmPng.rotation = 0
-      if (b) {
-        confirmText.color = "limegreen"
-        confirmText.text = "Transaction confirmed!"
-        confirmPng.source = "qrc:/img/ok.png"
-        if (requestedFromWS) {
-          qmlSystem.requestedTransactionStatus(true, txid)
+    function onTxBuilt(b, randomID_) {
+      if (randomID == randomID_) {
+        buildPngRotate.stop()
+        buildPng.rotation = 0
+        if (b) {
+          buildText.color = "limegreen"
+          buildText.text = "Transaction built!"
+          buildPng.source = "qrc:/img/ok.png"
+          signText.color = "#FFFFFF"
+          signPngRotate.start()
+        } else {
+          buildText.color = "crimson"
+          buildText.text = "Error on building transaction."
+          buildPng.source = "qrc:/img/no.png"
+          btnClose.visible = true
+          btnRetry.visible = true
         }
-      } else {
-        confirmText.color = "crimson"
-        confirmText.text = "Transaction not confirmed.<br><b>Retrying will attempt a higher fee. (Recommended)</b>"
-        confirmPng.source = "qrc:/img/no.png"
-        btnRetry.visible = true
       }
-      btnClose.visible = true
     }
-    function onTxRetry() {
-      sendText.text = "Transaction nonce is too low, or a transaction with"
-      + "<br>the same hash was already imported. Retrying..."
+    function onTxSigned(b, msg, randomID_) {
+      if (randomID == randomID_) {
+        signPngRotate.stop()
+        signPng.rotation = 0
+        if (b) {
+          signText.color = "limegreen"
+          signText.text = msg
+          signPng.source = "qrc:/img/ok.png"
+          sendText.color = "#FFFFFF"
+          sendPngRotate.start()
+        } else {
+          signText.color = "crimson"
+          signText.text = msg
+          signPng.source = "qrc:/img/no.png"
+          btnClose.visible = true
+          btnRetry.visible = true
+        }
+      }
     }
-    function onLedgerRequired() { ledgerStatusPopup.open() }
-    function onLedgerDone() { ledgerStatusPopup.close() }
+    function onTxSent(b, linkUrl, txid, msg, randomID_) {
+      if (randomID == randomID_) {
+        sendPngRotate.stop()
+        sendPng.rotation = 0
+        if (b) {
+          btnOpenLink.linkUrl = linkUrl
+          sendText.color = "limegreen"
+          sendText.text = "Transaction sent!"
+          sendPng.source = "qrc:/img/ok.png"
+          confirmText.color = "#FFFFFF"
+          confirmPngRotate.start()
+          btnOpenLink.visible = true
+          qmlSystem.checkTransactionFor15s(txid, randomID);
+        } else {
+          sendText.color = "crimson"
+          sendText.text = "Error on sending transaction.<br> " + msg
+          sendPng.source = "qrc:/img/no.png"
+          btnClose.visible = true
+          btnRetry.visible = true
+        }
+      }
+    }
+    function onTxConfirmed(b, txid, randomID_) {
+      if (randomID == randomID_) {
+        confirmPngRotate.stop()
+        confirmPng.rotation = 0
+        if (b) {
+          confirmText.color = "limegreen"
+          confirmText.text = "Transaction confirmed!"
+          confirmPng.source = "qrc:/img/ok.png"
+          if (requestedFromWS) {
+            qmlSystem.requestedTransactionStatus(true, txid)
+          }
+          qmlSystem.updateAccountNonce(from);
+        } else {
+          confirmText.color = "crimson"
+          confirmText.text = "Transaction not confirmed.<br><b>Retrying will attempt a higher fee. (Recommended)</b>"
+          confirmPng.source = "qrc:/img/no.png"
+          btnRetry.visible = true
+        }
+        btnClose.visible = true
+      }
+    }
+    function onTxRetry(randomID_) {
+    if (randomID == randomID_) {
+        sendText.text = "Transaction nonce is too low, or a transaction with"
+        + "<br>the same hash was already imported. Retrying..."
+      }
+      function onLedgerRequired(randomID) { 
+        if (randomID == randomID_) { 
+          ledgerStatusPopup.open() 
+        }
+      }
+      function onLedgerDone(randomID) { 
+        if (randomID == randomID_) { 
+          ledgerStatusPopup.close() 
+        }
+      }
+    }
   }
 
   function resetStatuses() {
@@ -145,6 +141,32 @@ AVMEPopup {
     btnOpenLink.visible = false
     btnClose.visible = false
     btnRetry.visible = false
+  }
+
+  function txStart(
+    operation_, from_, to_, value_, txData_, gas_, gasPrice_, pass_, randomID_
+  ) {
+    operation = operation_
+    from = from_
+    to = to_
+    value = value_
+    txData = txData_
+    gas = gas_
+    gasPrice = gasPrice_
+    pass = pass_
+    nonce = accountHeader.accountNonce
+    // Uncomment to see the data passed to the popup
+    // console.log(operation)
+    // console.log(from)
+    // console.log(to)
+    // console.log(value)
+    // console.log(txData)
+    // console.log(gas)
+    // console.log(gasPrice)
+    resetStatuses()
+    qmlSystem.makeTransaction(
+      operation, from, to, value, txData, gas, gasPrice, pass, nonce, randomID
+    )
   }
 
   Column {

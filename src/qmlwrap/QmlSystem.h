@@ -97,22 +97,16 @@ class QmlSystem : public QObject {
     void historyLoaded(QString data);
 
     // Send screen signals
-    void txStart(
-      QString operation, QString from,
-      QString to, QString value,
-      QString txData, QString gas,
-      QString gasPrice, QString pass
-    );
     void operationOverride(
       QString op, QString amountCoin, QString amountToken, QString amountLP
     );
-    void txBuilt(bool b);
-    void txSigned(bool b, QString msg);
-    void txSent(bool b, QString linkUrl, QString txid, QString msg);
-    void txConfirmed(bool b, QString txid);
-    void txRetry();
-    void ledgerRequired();
-    void ledgerDone();
+    void txBuilt(bool b, QString randomID);
+    void txSigned(bool b, QString msg, QString randomID);
+    void txSent(bool b, QString linkUrl, QString txid, QString msg, QString randomID);
+    void txConfirmed(bool b, QString txid, QString randomID);
+    void txRetry(QString randomID);
+    void ledgerRequired(QString randomID);
+    void ledgerDone(QString randomID);
     void accountNonceUpdate(QString nonce);
 
     // Applications screen signals
@@ -369,12 +363,12 @@ class QmlSystem : public QObject {
     Q_INVOKABLE void makeTransaction(
       QString operation, QString from, QString to,
       QString value, QString txData, QString gas,
-      QString gasPrice, QString pass, QString txNonce
+      QString gasPrice, QString pass, QString txNonce, QString randomID
     );
 
     // Check if the transaction was confirmed or not, and even if transaction was "stuck"
 
-    Q_INVOKABLE void checkTransactionFor15s(QString txid);
+    Q_INVOKABLE void checkTransactionFor15s(QString txid, QString randomID);
 
     // ======================================================================
     // EXCHANGE/LIQUIDITY/STAKING SCREEN FUNCTIONS
