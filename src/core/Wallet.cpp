@@ -3,6 +3,28 @@
 // file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "Wallet.h"
 
+void Wallet::storedPassThreadHandler() {
+  while (true) {
+    std::time_t now = std::time(nullptr);
+    if (now > this->storedPassDeadline) break;
+    boost::this_thread::sleep_for(boost::chrono::seconds(1));
+  }
+  this->storedPass = "";
+  this->storedPassDeadline = 0;
+}
+
+void Wallet::startPassThread(std::string pass, std::time_t deadline) {
+  this->storedPass = pass;
+  this->storedPassDeadline = deadline;
+  this->storedPassThread = boost::thread(boost::bind(&Wallet::storedPassThreadHandler, this));
+  this->storedPassThread.detach();
+}
+
+void Wallet::stopPassThread() {
+  this->storedPass = "";
+  this->storedPassDeadline = 0;  // This ensures the thread will be terminated
+}
+
 void Wallet::setDefaultPathFolders() {
   auto defaultPath = Utils::getDataDir();
   boost::filesystem::path walletFile = defaultPath.string() + "/wallet/c-avax/wallet.info";
@@ -351,7 +373,7 @@ json Wallet::sendTransaction(std::string txidHex, std::string operation) {
     txData.txlink = txLink;
     txData.operation = operation;
     saveTxToHistory(txData);
-  } 
+  }
   return transactionResult;
 }
 

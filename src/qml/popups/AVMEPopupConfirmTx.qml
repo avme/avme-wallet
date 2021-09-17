@@ -33,7 +33,25 @@ AVMEPopup {
   property bool loadingFees
   property bool automaticGas
   property bool isSameAddress: false
-  onAboutToShow: passInput.forceActiveFocus()
+
+  onAboutToShow: {
+    if (qmlSystem.getLedgerFlag()) {  // Ledger doesn't need password
+      passInfo.visible = passInput.visible = false
+    } else {
+      if (+qmlSystem.getConfigValue("storePass") > 0) { // Set to store pass
+        passInput.text = qmlSystem.retrievePass()
+        if (passInput.text == "") { // Pass wasn't stored (first time)
+          passInfo.visible = passInput.visible = true
+          passInput.forceActiveFocus()
+        } else {  // Pass was stored
+          passInfo.visible = passInput.visible = false
+        }
+      } else {  // NOT set to store pass
+        passInfo.visible = passInput.visible = true
+        passInput.forceActiveFocus()
+      }
+    }
+  }
   onAboutToHide: confirmTxPopup.clean()
 
   Timer { id: ledgerRetryTimer; interval: 125; onTriggered: checkLedger() }
@@ -182,7 +200,6 @@ AVMEPopup {
 
     Text {
       id: passInfo
-      visible: (qmlSystem.getLedgerFlag()) ? false : true
       anchors.horizontalCenter: parent.horizontalCenter
       horizontalAlignment: Text.AlignHCenter
       color: "#FFFFFF"
@@ -195,7 +212,6 @@ AVMEPopup {
 
     AVMEInput {
       id: passInput
-      visible: (qmlSystem.getLedgerFlag()) ? false : true
       anchors.horizontalCenter: parent.horizontalCenter
       width: confirmTxPopup.width / 2
       echoMode: TextInput.Password
@@ -214,6 +230,7 @@ AVMEPopup {
         text: "Back"
         onClicked: confirmTxPopup.close()
       }
+
       AVMEButton {
         id: btnOk
         text: "OK"
@@ -223,12 +240,16 @@ AVMEPopup {
           if (!qmlSystem.checkWalletPass(passInput.text) && !qmlSystem.getLedgerFlag()) {
             infoTimer.start()
           } else {
-            // You have to provide the information before closing the popup
-            // Otherwise, the passInput.text will be equal to ""
+            // Store the password in memory if prompted by the user and not stored yet
+            if (+qmlSystem.getConfigValue("storePass") > 0 && qmlSystem.retrievePass() == "") {
+              qmlSystem.storePass(passInput.text)
+            }
+            // txStart needs to happen before close, otherwise the password input
+            // will be cleaned before being used to start the transaction
             txProgressPopup.txStart(
               operation, from, to, value, txData, gas, gasPrice, passInput.text, randomID
             )
-            confirmTxPopup.close() // txStart need to happen before close, because password input will be empty
+            confirmTxPopup.close()
             txProgressPopup.open()
           }
         } // TODO: ADD A ERROR HANDLER FOR INSUFICIENT BALANCE!!!

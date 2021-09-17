@@ -69,6 +69,20 @@ QString QmlSystem::getContract(QString name) {
   return QString::fromStdString(Pangolin::contracts[name.toStdString()]);
 }
 
+void QmlSystem::storePass(QString pass) {
+  int minutes = std::stoi(this->w.getConfigValue("storePass"));
+  std::time_t deadline = std::time(nullptr) + (minutes * 60); // std::time is in seconds
+  this->w.startPassThread(pass.toStdString(), deadline);
+}
+
+QString QmlSystem::retrievePass() {
+  return QString::fromStdString(this->w.getStoredPass());
+}
+
+void QmlSystem::resetPass() {
+  this->w.stopPassThread();
+}
+
 QString QmlSystem::getConfigValue(QString key) {
   return QString::fromStdString(this->w.getConfigValue(key.toStdString()));
 }

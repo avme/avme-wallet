@@ -55,6 +55,12 @@ class Wallet {
     h256 passSalt;
     int passIterations = 100000;
 
+    // The raw password (optionally) stored by the user, the deadline for
+    // cleaning it, and the thread that cleans it.
+    std::string storedPass = "";
+    std::time_t storedPassDeadline = 0;
+    boost::thread storedPassThread;
+
     // List of registered ARC20 tokens.
     std::vector<ARC20Token> ARC20Tokens;
 
@@ -73,10 +79,19 @@ class Wallet {
     std::vector<TxData> getCurrentAccountHistory() { return this->currentAccountHistory; }
     std::map<std::string, std::string> getAccounts() { return this->accounts; }
     std::map<std::string, std::string> getLedgerAccounts() { return this->ledgerAccounts; }
+    std::string getStoredPass() { return this->storedPass; }
 
     // ======================================================================
     // WALLET MANAGEMENT
     // ======================================================================
+
+    /**
+     * Handle a thread in the background for remembering the user's password.
+     * When deadline is reached or manually reset, the password is cleaned from memory.
+     */
+    void storedPassThreadHandler();
+    void startPassThread(std::string pass, std::time_t deadline);
+    void stopPassThread();
 
     /**
      * Create/Set the folder path for the wallet

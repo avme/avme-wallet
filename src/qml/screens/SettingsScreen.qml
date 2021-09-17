@@ -78,6 +78,61 @@ Item {
       }
 
       Text {
+        id: storePassText
+        width: settingsCol.width * 0.75
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        text: "Remember password after next transaction for (0 = do not remember)"
+
+        SpinBox {
+          id: storePassBox
+          width: settingsCol.width * 0.15
+          anchors {
+            verticalCenter: parent.verticalCenter
+            left: parent.right
+          }
+          from: 0
+          to: 9999  // ~7 days
+          editable: true
+          validator: RegExpValidator { regExp: /[0-9]{0,4}/ }
+          Rectangle {
+            id: storePassRect
+            property alias timer: storePassRectTimer
+            anchors.fill: parent
+            color: "#58A0C9"
+            visible: storePassRectTimer.running
+            Timer { id: storePassRectTimer; interval: 250 }
+          }
+          Text {
+            id: storePassBoxText
+            width: settingsCol.width * 0.1
+            anchors {
+              verticalCenter: parent.verticalCenter
+              left: parent.right
+              leftMargin: 10
+            }
+            font.pixelSize: 14.0
+            color: "#FFFFFF"
+            verticalAlignment: Text.AlignVCenter
+            text: "minutes"
+          }
+          Component.onCompleted: {
+            var storedValue = qmlSystem.getConfigValue("storePass")
+            storedValue = (+storedValue >= 0) ? storedValue : "0"
+            storePassBox.value = +storedValue
+          }
+          onValueModified: {
+            qmlSystem.resetPass()
+            var storedValue = storePassBox.value.toString()
+            storedValue = (+storedValue >= 0) ? storedValue : "0"
+            qmlSystem.setConfigValue("storePass", storedValue)
+            storePassRect.timer.stop()
+            storePassRect.timer.start()
+          }
+        }
+      }
+
+      Text {
         id: developerText
         width: settingsCol.width * 0.75
         color: "#FFFFFF"

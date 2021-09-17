@@ -175,6 +175,11 @@ class QmlSystem : public QObject {
     // Get the given hardcoded contract address
     Q_INVOKABLE QString getContract(QString name);
 
+    // Store the password using a thread, retrieve it and reset it manually, respectively.
+    Q_INVOKABLE void storePass(QString pass);
+    Q_INVOKABLE QString retrievePass();
+    Q_INVOKABLE void resetPass();
+
     // Get/Set a given value in the Settings screen.
     Q_INVOKABLE QString getConfigValue(QString key);
     Q_INVOKABLE bool setConfigValue(QString key, QString value);
