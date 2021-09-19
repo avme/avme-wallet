@@ -138,7 +138,7 @@ AVMEPopup {
     signText.text = "Signing transaction..."
     sendText.text = "Broadcasting transaction..."
     confirmText.text = "Confirming transaction..."
-    buildPng.source = signPng.source = sendPng.source = "qrc:/img/icons/loading.png"
+    buildPng.source = signPng.source = sendPng.source = confirmPng.source = "qrc:/img/icons/loading.png"
     buildPngRotate.start()
     btnOpenLink.visible = false
     btnClose.visible = false
