@@ -42,6 +42,7 @@ Item {
 
   Component.onCompleted: {
     qmlSystem.loadLedgerDB()
+    qmlSystem.loadConfigDB()
     fetchAccounts()
   }
   function fetchAccounts() {
@@ -106,6 +107,7 @@ Item {
       qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
       qmlSystem.loadAppDB()
       qmlSystem.loadConfigDB()
+      qmlSystem.loadPermisionList()
       qmlSystem.loadARC20Tokens()
       accountHeader.getAddress()
       qmlSystem.startWSServer()

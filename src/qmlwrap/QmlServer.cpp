@@ -176,12 +176,34 @@ Q_INVOKABLE void QmlSystem::stopWSServer() {
   this->s.stop();
 }
 
+Q_INVOKABLE void QmlSystem::loadPermisionList() {
+  // No lock required as there will be only one thread reading/writing to the permission list
+  std::string configValue  = getConfigValue(QString::fromStdString("websitePermissions")).toStdString();
+  if (!(configValue.find("NotFound") != std::string::npos)) {
+    json storedPermissionList = json::parse(configValue);
+    // Clear the permission list.
+    permissionList.clear();
+    if (!storedPermissionList.empty()) {
+      for (auto item : storedPermissionList.items()) {
+        permissionList.push_back(std::make_pair(item.key(), item.value()));
+      }
+    }
+  }
+}
+
 Q_INVOKABLE void QmlSystem::addToPermissionList(QString website, bool allow) {
   // We don't need a mutex lock here,
   // Because handleServer is waiting for it to be unlocked below
   // In order to read the permissionList
-  // Meaning, there is only one thread accessing the variable
-  permissionList.push_back(std::make_pair(website.toStdString(), allow));
+  // Meaning, there is only one thread accessing the variabl
+  std::string configValue = getConfigValue(QString::fromStdString("websitePermissions")).toStdString();
+  json storedPermissionList;
+  if (!(configValue.find("NotFound") != std::string::npos)) {
+    storedPermissionList = json::parse(configValue);
+  }
+  storedPermissionList[website.toStdString()] = allow;
+  setConfigValue(QString::fromStdString("websitePermissions"), QString::fromStdString(storedPermissionList.dump()));
+  loadPermisionList();
   PLuserInputAnswer.unlock(); // Unlock for handleServer self-lock.
 }
 

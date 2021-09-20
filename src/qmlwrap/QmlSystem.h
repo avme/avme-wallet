@@ -62,6 +62,12 @@ class QmlSystem : public QObject {
     std::string RTtxid = "";
 
   public slots:
+    void cleanAndCloseAccount() {
+      this->w.closeTokenDB();
+      this->w.closeHistoryDB();
+      this->w.closeAppDB();
+      stopWSServer();
+    }
     // Clean database, threads, etc before closing the program
     void cleanAndClose() {
       this->w.closeTokenDB();
@@ -430,6 +436,8 @@ class QmlSystem : public QObject {
 
     // Ask for user input to approve/refuse a transaction
     Q_INVOKABLE void addToPermissionList(QString website, bool allow);
+
+    Q_INVOKABLE void loadPermisionList();
 
     Q_INVOKABLE void requestedTransactionStatus(bool approved, QString txid);
 
