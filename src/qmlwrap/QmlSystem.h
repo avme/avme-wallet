@@ -9,8 +9,10 @@
 #include <QtCore/QFile>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
+#include <QtCore/QUrl>
 #include <QtCore/QVariant>
 #include <QtGui/QClipboard>
+#include <QtNetwork/QSslSocket>
 #include <QtQml/QQmlContext>
 #include <QtQml/QQmlApplicationEngine>
 #include <QtWidgets/QApplication>
@@ -83,6 +85,7 @@ class QmlSystem : public QObject {
     // Common signals
     void hideMenu();
     void goToOverview();
+    void urlChecked(QString link, bool b);
 
     // Start/Wallet screen signals
     void walletCreated(bool success);
@@ -185,6 +188,9 @@ class QmlSystem : public QObject {
     Q_INVOKABLE void storePass(QString pass);
     Q_INVOKABLE QString retrievePass();
     Q_INVOKABLE void resetPass();
+
+    // Check if a URL exists (has data in it).
+    Q_INVOKABLE void checkIfUrlExists(QUrl url);
 
     // Get/Set a given value in the Settings screen.
     Q_INVOKABLE QString getConfigValue(QString key);

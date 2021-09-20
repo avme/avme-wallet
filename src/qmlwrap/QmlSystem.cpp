@@ -83,6 +83,23 @@ void QmlSystem::resetPass() {
   this->w.stopPassThread();
 }
 
+void QmlSystem::checkIfUrlExists(QUrl url) {
+  // Adapted from https://stackoverflow.com/a/28498623
+  QtConcurrent::run([=](){
+    bool ret = false;
+    QSslSocket sck;
+    sck.connectToHostEncrypted(url.host(), 443);
+    if (sck.waitForConnected()) {
+      sck.write(
+        "HEAD " + url.path().toUtf8() + " HTTP/1.1\r\n"
+        "Host: " + url.host().toUtf8() + "\r\n\r\n"
+      );
+      if (sck.waitForReadyRead()) { ret = sck.readAll().contains("200 OK"); }
+    }
+    emit urlChecked(url.url(), ret);
+  });
+}
+
 QString QmlSystem::getConfigValue(QString key) {
   return QString::fromStdString(this->w.getConfigValue(key.toStdString()));
 }

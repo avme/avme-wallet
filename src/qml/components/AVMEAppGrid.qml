@@ -54,13 +54,22 @@ GridView {
         spacing: 10
         AVMEAsyncImage {
           id: appImage
+          property var imgUrl: "https://raw.githubusercontent.com"
+            + "/avme/avme-wallet-applications/main/apps/"
+            + itemFolder + "/icon.png"
           width: 64
           height: 64
           anchors.horizontalCenter: parent.horizontalCenter
-          //imageSource: "https://raw.githubusercontent.com"
-          //+ "/avme/avme-wallet-applications/main/apps"
-          //+ itemFolder + "/icon.png"
-          imageSource: "qrc:/img/unknown_token.png" // TODO
+          Component.onCompleted: { qmlSystem.checkIfUrlExists(Qt.resolvedUrl(imgUrl)) }
+          Connections {
+            target: qmlSystem
+            function onUrlChecked(link, b) {
+              if (link == appImage.imgUrl) {
+                appImage.imageSource = (b)
+                  ? appImage.imgUrl : "qrc:/img/unknown_token.png"
+              }
+            }
+          }
         }
         Text {
           id: appName

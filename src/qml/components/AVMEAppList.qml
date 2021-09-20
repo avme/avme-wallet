@@ -49,10 +49,22 @@ ListView {
         width: parent.width * 0.9
         AVMEAsyncImage {
           id: delegateImage
+          property var imgUrl: "https://raw.githubusercontent.com"
+            + "/avme/avme-wallet-applications/main/apps/"
+            + itemFolder + "/icon.png"
           anchors.verticalCenter: parent.verticalCenter
           width: parent.height * 0.9
           height: width
-          imageSource: "qrc:/img/unknown_token.png" // TODO
+          Component.onCompleted: { qmlSystem.checkIfUrlExists(Qt.resolvedUrl(imgUrl)) }
+          Connections {
+            target: qmlSystem
+            function onUrlChecked(link, b) {
+              if (link == delegateImage.imgUrl) {
+                delegateImage.imageSource = (b)
+                  ? delegateImage.imgUrl : "qrc:/img/unknown_token.png"
+              }
+            }
+          }
         }
         Text {
           id: delegateName
