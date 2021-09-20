@@ -25,20 +25,24 @@ AVMEPanel {
     anchors.centerIn: parent
     spacing: 20
 
-    Row {
+    AVMEAsyncImage {
+      id: appIcon
+      property var imgUrl: "https://raw.githubusercontent.com"
+        + "/avme/avme-wallet-applications/main/apps/"
+        + ((appsPanel.selectedApp != null) ? appsPanel.selectedApp.itemFolder : "")
+        + "/icon.png"
+      width: 128
+      height: 128
       anchors.horizontalCenter: parent.horizontalCenter
-      spacing: 20
-
-      Image {
-        id: appIcon
-        height: 128
-        antialiasing: true
-        smooth: true
-        fillMode: Image.PreserveAspectFit
-        //source: "https://raw.githubusercontent.com"
-        //+ "/avme/avme-wallet-applications/main/apps"
-        //+ appsPanel.selectedApp.itemFolder + "/icon.png"
-        source: "qrc:/img/unknown_token.png"  // TODO
+      Component.onCompleted: { qmlSystem.checkIfUrlExists(Qt.resolvedUrl(imgUrl)) }
+      Connections {
+        target: qmlSystem
+        function onUrlChecked(link, b) {
+          if (link == appIcon.imgUrl) {
+            appIcon.imageSource = (b)
+              ? appIcon.imgUrl : "qrc:/img/unknown_token.png"
+          }
+        }
       }
     }
 
