@@ -44,7 +44,7 @@ AVMEPopup {
           buildText.text = "Error on building transaction."
           buildPng.source = "qrc:/img/no.png"
           btnClose.visible = true
-          btnRetry.visible = true
+          btnRetry.visible = false
         }
       }
     }
@@ -63,7 +63,8 @@ AVMEPopup {
           signText.text = msg
           signPng.source = "qrc:/img/no.png"
           btnClose.visible = true
-          btnRetry.visible = true
+          btnRetry.visible = false
+          qmlApi.logToDebug("Transaction Error: " + msg)
         }
       }
     }
@@ -86,6 +87,7 @@ AVMEPopup {
           sendPng.source = "qrc:/img/no.png"
           btnClose.visible = true
           btnRetry.visible = true
+          qmlApi.logToDebug("Transaction Error: " + msg)
         }
       }
     }
@@ -165,6 +167,9 @@ AVMEPopup {
     // console.log(txData)
     // console.log(gas)
     // console.log(gasPrice)
+    if (+gasPrice > 225) {
+      gasPrice = 225
+    }
     resetStatuses()
     alreadyTransmitted = false;
     qmlSystem.makeTransaction(
@@ -348,7 +353,17 @@ AVMEPopup {
       margins: 20
     }
     text: "Retry"
-    onClicked: {} // TODO
+    onClicked: {
+      var networkGasPrice = accountHeader.gasPrice
+      if (+networkGasPrice > +gasPrice) {
+        gasPrice = +networkGasPrice + 25 
+        if (+gasPrice > 225) {
+          gasPrice = 225
+        }
+      }
+      txStart(operation, from, to, value, txData, gas, gasPrice, pass, randomID)
+      resetStatuses();
+    } // TODO
   }
 
   AVMEButton {

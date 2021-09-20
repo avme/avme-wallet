@@ -80,7 +80,8 @@ Rectangle {
         qmlApi.parseHex(gas,["uint"]),
         +gasPrice + 20,
         true,
-        "The following website is requesting a transaction: <b> " + website_ + "</b>",
+        "The following website is requesting a transaction: <b> " + website_ + "</b>" +
+        "<br>Total Value: <b>" + qmlApi.weiToFixedPoint(qmlApi.parseHex(value,["uint"]),18) + "</b>",
         "Tx from: <b> " + website_ + "</b>"
         )
       confirmRT.open()
