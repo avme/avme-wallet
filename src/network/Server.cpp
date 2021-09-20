@@ -53,9 +53,9 @@ void session::do_read() {
 void session::on_read(beast::error_code ec, std::size_t bytes_transferred) {
   boost::ignore_unused(bytes_transferred);
   std::cout << "Request received!" << std::endl;
-  if (ec == websocket::error::closed) { return; } // This indicates the session was closed
-  if (ec.value() == 125) { return; } // Operation cancelled
-  if (ec.value() == 995) { return; } // Interrupted by host
+  if (ec == websocket::error::closed) { Server::fail(ec, "read"); return; } // This indicates the session was closed
+  if (ec.value() == 125) { Server::fail(ec, "read"); return; } // Operation cancelled
+  if (ec.value() == 995) { Server::fail(ec, "read"); return; } // Interrupted by host
   if (ec) { Server::fail(ec, "read"); }
   // Send the message for another thread to parse it.
   std::cout << "Passing it to our handler" << std::endl;
@@ -103,6 +103,7 @@ void Server::listener::on_accept(beast::error_code ec, tcp::socket socket) {
   if (ec) {
     if (ec.value() == 125) { return; } // Operation cancelled
     fail(ec, "accept");
+    return; // Close the listener regardless of the error
   } else {
     std::make_shared<session>(std::move(socket),sessions_,sys_)->run();
   }
@@ -135,8 +136,9 @@ void Server::stop() {
     // Send a post message to the thread running the session.
     // Telling it to close
     // We need to bind_front_handler to the actual object running inside the thread.
+    auto session_executor = session_->get_executor();
     net::post(
-          session_->ws_.get_executor(),
+          session_executor,
           beast::bind_front_handler(
               &session::close,
               session_));
@@ -146,8 +148,9 @@ void Server::stop() {
   // After closing the sessions, you can succesfully close the listeners
   for (auto listener_ : listeners_) {
     // Same as above, but for the listener
+    auto listener_executor = listener_->get_executor();
     net::post(
-          listener_->acceptor_.get_executor(),
+          listener_executor,
           beast::bind_front_handler(
             &listener::stop,
             listener_));

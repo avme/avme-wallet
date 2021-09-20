@@ -7,6 +7,7 @@
 
 #include <boost/beast/core.hpp>
 #include <boost/beast/websocket.hpp>
+#include <boost/beast/websocket/stream.hpp>
 #include <boost/asio/dispatch.hpp>
 #include <boost/asio/strand.hpp>
 #include <algorithm>
@@ -39,15 +40,15 @@ class session : public std::enable_shared_from_this<session> {
   QmlSystem* sys_;
   beast::flat_buffer buffer_;
   beast::flat_buffer answerBuffer_;
+  websocket::stream<beast::tcp_stream> ws_;
   // Pointer to list of sessions
   // Session needs access to it for insert itself in the list
   std::unordered_set<std::shared_ptr<session>> *sessions_;
   // Lock for thread safety.
   std::mutex m_lock;
   public:
-    // WS needs to be public to be accessible by another thread.
-    // TODO: Wrap object around what we need
-    websocket::stream<beast::tcp_stream> ws_;
+    websocket::stream<beast::tcp_stream>::executor_type get_executor() { return ws_.get_executor(); };
+ 
     // Take ownership of the socket.
     explicit session(tcp::socket&& socket, std::unordered_set<std::shared_ptr<session>> *sessions, QmlSystem *sys) : ws_(std::move(socket)), sessions_(sessions), sys_(sys) {}
     // Get on the correct executor.
@@ -79,6 +80,7 @@ class Server {
     // Pointer to QmlSystem
     QmlSystem* sys_;
     net::io_context& ioc_;
+    tcp::acceptor acceptor_;
     // Pointer to the list of sessions
     // Listener needs to hold that to pass to the session it creates
     std::unordered_set<std::shared_ptr<session>> *sessions_;
@@ -89,7 +91,7 @@ class Server {
     std::mutex m_lock;
     
     public:
-      tcp::acceptor acceptor_;
+      auto get_executor() { return acceptor_.get_executor(); };
       // Constructor.
       listener(net::io_context& ioc, tcp::endpoint endpoint, std::unordered_set<std::shared_ptr<session>> *sessions, std::unordered_set<std::shared_ptr<listener>> *listeners, QmlSystem *sys) 
         : ioc_(ioc), acceptor_(ioc), sessions_(sessions), listeners_(listeners), sys_(sys) {
