@@ -249,25 +249,21 @@ class Wallet {
     // ======================================================================
 
     /**
-     * Get the installed DApps from the database.
-     * Returns a json array with the installed DApps.
+     * Get the registered DApps from the database.
+     * Returns a json array with the registered DApps.
      */
-    json getInstalledApps();
+    json getRegisteredApps();
 
     /**
-     * Check if a DApp is installed.
-     * If the DApp exists in the database, it's considered as installed.
+     * Check if a DApp is registered, register and unregister it, respectively.
+     * If the DApp exists in the database, it's considered as "installed".
      */
-    bool appIsInstalled(std::string folder);
-
-    /**
-     * Install and uninstall an app, respectively.
-     */
-    bool installApp(
+    bool appIsRegistered(std::string folder);
+    bool registerApp(
       int chainId, std::string folder, std::string name,
       int major, int minor, int patch
     );
-    bool uninstallApp(std::string folder);
+    bool unregisterApp(std::string folder);
 
     // ======================================================================
     // TRANSACTION MANAGEMENT

@@ -34,6 +34,21 @@ Item {
     }
   }
 
+  // Info popup for download statuses
+  AVMEPopup {
+    id: infoPopup
+    property alias info: infoText.text
+    widthPct: 0.2
+    heightPct: 0.1
+    Text {
+      id: infoText
+      color: "#FFFFFF"
+      horizontalAlignment: Text.AlignHCenter
+      anchors.centerIn: parent
+      font.pixelSize: 14.0
+    }
+  }
+
   // Popup for loading a local application (for developers)
   AVMEPopupLoadApp {
     id: loadAppPopup
@@ -75,7 +90,14 @@ Item {
     icon: "qrc:/img/warn.png"
     info: "Are you sure you want to remove this application?"
     yesBtn.onClicked: {
-      qmlSystem.uninstallApp(appsPanel.selectedApp.itemFolder)
+      var app = ({})
+      app["chainId"] = appsPanel.selectedApp.itemChainId
+      app["folder"] = appsPanel.selectedApp.itemFolder
+      app["name"] = appsPanel.selectedApp.itemName
+      app["major"] = appsPanel.selectedApp.itemMajor
+      app["minor"] = appsPanel.selectedApp.itemMinor
+      app["patch"] = appsPanel.selectedApp.itemPatch
+      qmlSystem.uninstallApp(app)
       confirmUninstallAppPopup.close()
       appsPanel.refreshGrid()
     }

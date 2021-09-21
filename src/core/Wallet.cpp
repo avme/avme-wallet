@@ -278,7 +278,7 @@ Secret Wallet::getSecret(std::string const& address, std::string pass) {
   }
 }
 
-json Wallet::getInstalledApps() {
+json Wallet::getRegisteredApps() {
   json appList = json::array();
   std::vector<std::string> appJsonList = this->db.getAllAppDBValues();
   for (std::string appJson : appJsonList) {
@@ -287,18 +287,14 @@ json Wallet::getInstalledApps() {
   return appList;
 }
 
-bool Wallet::appIsInstalled(std::string folder) {
+bool Wallet::appIsRegistered(std::string folder) {
   return this->db.appDBKeyExists(folder);
 }
 
-bool Wallet::installApp(
+bool Wallet::registerApp(
   int chainId, std::string folder, std::string name,
   int major, int minor, int patch
 ) {
-  boost::filesystem::path appPath = Utils::walletFolderPath.string()
-    + "/wallet/c-avax/apps/" + folder;
-  if (!boost::filesystem::exists(appPath)) { boost::filesystem::create_directories(appPath); }
-  // TODO: download files here
   json app;
   app["chainId"] = chainId;
   app["folder"] = folder;
@@ -306,16 +302,11 @@ bool Wallet::installApp(
   app["major"] = major;
   app["minor"] = minor;
   app["patch"] = patch;
-  this->db.putAppDBValue(folder, app.dump());
-  return appIsInstalled(folder);
+  return this->db.putAppDBValue(folder, app.dump());
 }
 
-bool Wallet::uninstallApp(std::string folder) {
-  boost::filesystem::path appPath = Utils::walletFolderPath.string()
-    + "/wallet/c-avax/apps/" + folder;
-  this->db.deleteAppDBValue(folder);
-  if (boost::filesystem::exists(appPath)) { boost::filesystem::remove(appPath); }
-  return !appIsInstalled(folder);
+bool Wallet::unregisterApp(std::string folder) {
+  return this->db.deleteAppDBValue(folder);
 }
 
 TransactionSkeleton Wallet::buildTransaction(

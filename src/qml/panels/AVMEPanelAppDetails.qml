@@ -92,7 +92,12 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       visible: (appsPanel.selectedApp != null && appsPanel.selectedApp.itemIsUpdated)
       text: "Open Application"
-      onClicked: {} // TODO
+      onClicked: {
+        qmlSystem.setScreen(content, "qml/screens/AppScreen.qml")
+        qmlSystem.appLoaded(qmlSystem.getAppFolderPath(
+          appsPanel.selectedApp.itemChainId, appsPanel.selectedApp.itemFolder
+        ))
+      }
     }
     AVMEButton {
       id: btnUpdate
@@ -100,7 +105,21 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       visible: (appsPanel.selectedApp != null && !appsPanel.selectedApp.itemIsUpdated)
       text: "Update Application"
-      onClicked: {} // TODO
+      onClicked: {
+        infoPopup.info = "Downloading app,<br>please wait..."
+        infoPopup.open()
+        var app = ({})
+        app["chainId"] = appsPanel.selectedApp.itemChainId
+        app["folder"] = appsPanel.selectedApp.itemFolder
+        app["name"] = appsPanel.selectedApp.itemName
+        app["major"] = appsPanel.selectedApp.itemMajor
+        app["minor"] = appsPanel.selectedApp.itemMinor
+        app["patch"] = appsPanel.selectedApp.itemPatch
+        qmlSystem.uninstallApp(app)
+        qmlSystem.installApp(app)
+        infoPopup.close()
+        appsPanel.refreshGrid()
+      }
     }
     AVMEButton {
       id: btnUninstall

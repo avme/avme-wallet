@@ -39,6 +39,9 @@ AVMEPanel {
         refreshGrid()
       }
     }
+    function onAppDownloadProgressUpdated(progress, total) {
+      infoPopup.text = "Downloading app,<br>please wait... (" + progress + "/" + total + ")"
+    }
   }
 
   function refreshGrid() {
@@ -117,21 +120,6 @@ AVMEPanel {
       width: appsPanel.width * 0.2
       text: "Open Local App"
       onClicked: loadAppPopup.open()
-    }
-  }
-
-  // Info popup for downloading the app list
-  AVMEPopup {
-    id: infoPopup
-    property alias info: infoText.text
-    widthPct: 0.2
-    heightPct: 0.1
-    Text {
-      id: infoText
-      color: "#FFFFFF"
-      horizontalAlignment: Text.AlignHCenter
-      anchors.centerIn: parent
-      font.pixelSize: 14.0
     }
   }
 }

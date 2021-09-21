@@ -121,6 +121,7 @@ class QmlSystem : public QObject {
     // Applications screen signals
     void appListDownloaded();
     void appListDownloadFailed();
+    void appDownloadProgressUpdated(int progress, int total);
     void appLoaded(QString folderPath);
 
     // Signal for request user input to give permission for said website
@@ -460,10 +461,15 @@ class QmlSystem : public QObject {
     // Load the installed DApps from the database.
     Q_INVOKABLE QVariantList loadInstalledApps();
 
-    // Check if a DApp is installed, install and uninstall it, respectively
+    // Get the full DApp folder path.
+    Q_INVOKABLE QString getAppFolderPath(int chainId, QString folder);
+
+    // Check if a DApp is installed, install and uninstall it, respectively.
+    // Installs are atomic - either all files are downloaded and the DApp is
+    // properly registered in the database, or the install fails altogether.
     Q_INVOKABLE bool appIsInstalled(QString folder);
     Q_INVOKABLE bool installApp(QVariantMap data);
-    Q_INVOKABLE bool uninstallApp(QString folder);
+    Q_INVOKABLE bool uninstallApp(QVariantMap data);
 };
 
 #endif  //QMLSYSTEM_H
