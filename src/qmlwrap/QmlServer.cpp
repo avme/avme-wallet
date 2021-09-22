@@ -216,3 +216,19 @@ Q_INVOKABLE void QmlSystem::requestedTransactionStatus(bool approved, QString tx
     RTuserInputAnswer.unlock();
   }
 }
+
+QString QmlSystem::getWebsitePermissionList() {
+  json ret;
+
+  for (auto permission : permissionList) {
+    ret[permission.first] = permission.second;
+  }
+
+  return QString::fromStdString(ret.dump());
+}
+
+void QmlSystem::clearWebsitePermissionList() {
+  json cleanJson;
+  setConfigValue(QString::fromStdString("websitePermissions"), QString::fromStdString(cleanJson.dump()));
+  loadPermisionList();
+}

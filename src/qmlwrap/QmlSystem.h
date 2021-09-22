@@ -448,6 +448,10 @@ class QmlSystem : public QObject {
 
     Q_INVOKABLE void requestedTransactionStatus(bool approved, QString txid);
 
+    Q_INVOKABLE QString getWebsitePermissionList();
+
+    Q_INVOKABLE void clearWebsitePermissionList();
+
     // ======================================================================
     // APPLICATIONS SCREEN FUNCTIONS
     // ======================================================================

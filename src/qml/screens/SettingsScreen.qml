@@ -163,10 +163,29 @@ Item {
           onToggled: qmlSystem.setConfigValue("devMode", (checked) ? "true" : "false")
         }
       }
+      Text {
+        id: viewWesbitePermission
+        width: settingsCol.width * 0.75
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        text: "View Website permission list"
+
+        AVMEButton {
+          id: btnViewWebsitePermission
+          width: settingsCol.width * 0.25
+          anchors {
+            verticalCenter: parent.verticalCenter
+            left: parent.right
+          }
+          text: "Open Permission List"
+          onClicked: viewWebsitePermissionPopup.open()
+        }
+      }
     }
   }
 
   // Popups for viewing the Account's private key and seed, respectively
   AVMEPopupViewPrivKey { id: viewPrivKeyPopup }
   AVMEPopupViewSeed { id: viewSeedPopup }
+  AVMEPopupWebsitePermission { id: viewWebsitePermissionPopup }
 }
