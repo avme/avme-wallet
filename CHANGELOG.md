@@ -7,25 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.0] - Unreleased
 ### Added
 - Support for multiple ARC20 tokens (send, exchange, add/remove liquidity).
-- A wrapper (QmlApi) for abstracting and exposing ABI/smart contract calls.
-  - This will enable developers to create their own DApps and integrate them in the wallet.
-- Slippage setting for exchange.
-- Component for loading async images and display a loading icon.
-- Support for 24 word phrases
+- Support for decentralized applications (DApps) in two ways:
+  - Metamask-compatible DApps can connect to the Wallet's built-in websocket server.
+  - Developers can make native QML DApps for the Wallet and submit them to a separate repo.
+- "Developer Mode" (setting for devs to load their DApps locally for testing purposes).
+- Slippage configuration in the Exchange screen.
+- Component for loading async images (AVMEAsyncImage).
+- Support for 24-word seed phrases and QR codes for addresses.
+- (Opt-in) Setting for remembering the Wallet's passphrase for a given time when making transactions.
 
 ### Fixed
 - Existing accounts no longer have a chance to be rewritten when creating new ones.
 - Sending a value of 0 should be no longer possible.
-- Support for unicode characters
-- Segfault caused by leveldb not closing
-- Truncated values on chart
+- Support for unicode characters.
+- Segfault caused by LevelDB not closing the right way.
+- Coin prices lower than three decimals in the market chart should show correctly now.
+- Library dependencies when compiling from source are better documented.
+- (Most) popups and components should now properly handle focus and keyboard input.
+- Overview pie chart now uses up to 16 different colors for better readability.
 
 ### Changed
 - UI has a new design (thanks to Natalya Chavez for the work!).
-- Wallet addresses can now be displayed as QR codes.
-- Transaction history and token information are now stored in LevelDB instead of JSON files.
-  - This should make the wallet faster I/O-wise.
-  - Old history data for a given Account, if it exists, will be AUTOMATICALLY DELETED when choosing it.
+- LevelDB is now being used in place of JSON files for ARC20 tokens, transaction history, registered Ledger accounts, DApps and settings.
+  - This should make the wallet faster I/O-wise and fix a history duplication bug that happened with JSON files.
+  - **The old JSON history file from 1.2.0 and below, if it exists, will be AUTOMATICALLY DELETED when opening the Account in 2.0.0 and above.**
 - Code is now separated in a more logical way in the `src` folder.
 - OpenSSL was moved to the depends system instead of being a git submodule.
 - A new API for network requests is being used, with support for multiple requests (thanks to Markus for the work!).
@@ -34,7 +39,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Price history for assets can now be set to 1 week, 1 month or 3 months.
 - Transactions which are likely to fail are now logged to the wallet's `debug.log`.
 - API and Graph request loggings were disabled, which should make `debug.log` grow less over time.
-- QmlSystem reverted to being rootContext of the engine
+- Transactions now have an extra progress step (build, sign, send and **confirm**).
+- Transactions can now be optionally retried with a higher fee if they fail.
+- Some hardcoded gas limits for certain operations were revised.
 
 ### Removed
 - CLI executable for testing/debugging.
