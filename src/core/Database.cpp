@@ -247,6 +247,63 @@ std::vector<std::string> Database::getAllAppDBValues() {
 }
 
 // ======================================================================
+// CONTACTS DATABASE FUNCTIONS
+// ======================================================================
+
+bool Database::openAddressDB() {
+  std::string path = Utils::walletFolderPath.string() + "/wallet/c-avax/contacts";
+  if (!exists(path)) { create_directories(path); }
+  this->addressStatus = leveldb::DB::Open(this->addressOpts, path, &this->addressDB);
+  return this->addressStatus.ok();
+}
+
+std::string Database::getAddressDBStatus() {
+  return this->addressStatus.ToString();
+}
+
+void Database::closeAddressDB() {
+  delete this->addressDB;
+  this->addressDB = NULL;
+}
+
+bool Database::isAddressDBOpen() {
+  return (this->addressDB != NULL);
+}
+
+bool Database::addressDBKeyExists(std::string key) {
+  leveldb::Iterator* it = this->addressDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    if (it->key().ToString() == key) return true;
+  }
+  return false;
+}
+
+std::string Database::getAddressDBValue(std::string key) {
+  this->addressStatus = this->addressDB->Get(leveldb::ReadOptions(), key, &this->addressValue);
+  return (this->addressStatus.ok()) ? this->addressValue : this->addressStatus.ToString();
+}
+
+bool Database::putAddressDBValue(std::string key, std::string value) {
+  this->addressStatus = this->addressDB->Put(leveldb::WriteOptions(), key, value);
+  return this->addressStatus.ok();
+}
+
+bool Database::deleteAddressDBValue(std::string key) {
+  this->addressStatus = this->addressDB->Delete(leveldb::WriteOptions(), key);
+  return this->addressStatus.ok();
+}
+
+std::vector<std::string> Database::getAllAddressDBValues() {
+  std::vector<std::string> ret;
+  leveldb::Iterator* it = this->addressDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    ret.push_back(it->value().ToString());
+  }
+  delete it;
+  return ret;
+}
+
+// ======================================================================
 // SETTINGS DATABASE FUNCTIONS
 // ======================================================================
 

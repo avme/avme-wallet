@@ -137,11 +137,13 @@ class Wallet {
     bool loadHistoryDB(std::string address);
     bool loadLedgerDB();
     bool loadAppDB();
+    bool loadAddressDB();
     bool loadConfigDB();
     void closeTokenDB();
     void closeHistoryDB();
     void closeLedgerDB();
     void closeAppDB();
+    void closeAddressDB();
     void closeConfigDB();
 
     // ======================================================================
@@ -264,6 +266,22 @@ class Wallet {
       int major, int minor, int patch
     );
     bool unregisterApp(std::string folder);
+
+    // ======================================================================
+    // CONTACTS MANAGEMENT
+    // ======================================================================
+
+    // Get the registered contacts in the Wallet.
+    std::map<std::string, std::string> getContacts();
+
+    // Add and remove a contact, respectively.
+    bool addContact(std::string name, std::string address);
+    bool removeContact(std::string address);
+
+    // Import contacts from/Export contacts to a JSON file, respectively.
+    // Return the number of imported/exported contacts.
+    int importContacts(std::string file);
+    int exportContacts(std::string file);
 
     // ======================================================================
     // TRANSACTION MANAGEMENT

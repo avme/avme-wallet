@@ -68,6 +68,7 @@ class QmlSystem : public QObject {
       this->w.closeTokenDB();
       this->w.closeHistoryDB();
       this->w.closeAppDB();
+      this->w.closeAddressDB();
       stopWSServer();
     }
     // Clean database, threads, etc before closing the program
@@ -76,6 +77,7 @@ class QmlSystem : public QObject {
       this->w.closeHistoryDB();
       this->w.closeLedgerDB();
       this->w.closeAppDB();
+      this->w.closeAddressDB();
       this->w.closeConfigDB();
       stopWSServer();
       return;
@@ -193,6 +195,9 @@ class QmlSystem : public QObject {
     // Check if a URL exists (has data in it).
     Q_INVOKABLE void checkIfUrlExists(QUrl url);
 
+    // Get the user's contacts.
+    // TODO
+
     // Get/Set a given value in the Settings screen.
     Q_INVOKABLE QString getConfigValue(QString key);
     Q_INVOKABLE bool setConfigValue(QString key, QString value);
@@ -262,10 +267,8 @@ class QmlSystem : public QObject {
     // Emits accountCreated() on success, accountCreationFailed() on failure
     Q_INVOKABLE void createAccount(QString seed, int index, QString name, QString pass);
 
-    // Import a Ledger account to the Wallet DB
+    // Import and delete a Ledger account to/from the Wallet DB, respectively.
     Q_INVOKABLE void importLedgerAccount(QString address, QString path);
-
-    // Delete a ledger account on the wallet DB
     Q_INVOKABLE bool deleteLedgerAccount(QString address);
 
     // Erase an Account
@@ -291,6 +294,7 @@ class QmlSystem : public QObject {
     Q_INVOKABLE bool loadHistoryDB(QString address);
     Q_INVOKABLE bool loadLedgerDB();
     Q_INVOKABLE bool loadAppDB();
+    Q_INVOKABLE bool loadAddressDB();
     Q_INVOKABLE bool loadConfigDB();
 
     // Set/Create default folder path when loading with Ledger.
@@ -377,15 +381,13 @@ class QmlSystem : public QObject {
 
     // Make a transaction with the collected data.
     // Emits txBuilt(), txSigned(), txSent() and txRetry()
-
     Q_INVOKABLE void makeTransaction(
       QString operation, QString from, QString to,
       QString value, QString txData, QString gas,
       QString gasPrice, QString pass, QString txNonce, QString randomID
     );
 
-    // Check if the transaction was confirmed or not, and even if transaction was "stuck"
-
+    // Check if the transaction was confirmed or not, and if it's "stuck"
     Q_INVOKABLE void checkTransactionFor15s(QString txid, QString randomID);
 
     // ======================================================================
@@ -444,7 +446,7 @@ class QmlSystem : public QObject {
     // Ask for user input to approve/refuse a transaction
     Q_INVOKABLE void addToPermissionList(QString website, bool allow);
 
-    Q_INVOKABLE void loadPermisionList();
+    Q_INVOKABLE void loadPermissionList();
 
     Q_INVOKABLE void requestedTransactionStatus(bool approved, QString txid);
 

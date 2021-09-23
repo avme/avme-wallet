@@ -5,7 +5,6 @@
 #include <qmlwrap/QmlSystem.h>
 #include <network/Server.h> // https://stackoverflow.com/a/4964508
 
-
 void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> session_) {
   // Run answer in another thread to allow the Server to take more inputs
   std::cout << "Server Handler request!" << std::endl;
@@ -24,29 +23,29 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
     response["jsonrpc"] = "2.0";
     response["id"] = request["id"];
     if (request["method"] == "eth_chainId") {
-        response["result"] = "0xa86a";
-        requirePermission = false;
+      response["result"] = "0xa86a";
+      requirePermission = false;
     } else if (request["method"] == "net_version") {
-        response["result"] = "43114";
-        requirePermission = false;
+      response["result"] = "43114";
+      requirePermission = false;
     } else if(request["method"] == "eth_requestAccounts" || request["method"] == "eth_accounts") {
-        response["result"] = json::array();
-        response["result"].push_back(this->getCurrentAccount().toStdString());   
-        requirePermission = true;
+      response["result"] = json::array();
+      response["result"].push_back(this->getCurrentAccount().toStdString());
+    requirePermission = true;
     } else if(request["method"] == "eth_subscribe") {
-        response["error"]["code"] = -32601;
-        response["error"]["message"] = "Method not found";
-        requirePermission = false;
+      response["error"]["code"] = -32601;
+      response["error"]["message"] = "Method not found";
+      requirePermission = false;
     } else if (request["method"] == "eth_sendTransaction") {
-      // We cannot request the transaction here, we need to wait until it checks 
+      // We cannot request the transaction here, we need to wait until it checks
       // Against websites permissions.
       // It is a mess, I do agree with you, but it is effective
       requestTransaction = true;
       requirePermission = true;
     } else {
-        // Route any future request to the avalanche PUBLIC API.
-        response = json::parse(API::httpGetRequest(request.dump()));
-        requirePermission = false;
+      // Route any future request to the avalanche PUBLIC API.
+      response = json::parse(API::httpGetRequest(request.dump()));
+      requirePermission = false;
     }
     if (request["method"] != "eth_call" &&
         request["method"] != "eth_chainId" &&
@@ -57,11 +56,11 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
         request["method"] != "eth_accounts" &&
         request["method"] != "eth_syncing" &&
         request["method"] != "eth_getBalance"
-        ) { // eth_call is garbage for us, do not print it
-          std::cout << "Request: " << request.dump(2) << std::endl;
-          std::cout << "Response: " << response.dump(2) << std::endl;
+       ) { // eth_call is garbage for us, do not print it
+      std::cout << "Request: " << request.dump(2) << std::endl;
+      std::cout << "Response: " << response.dump(2) << std::endl;
     }
-    
+
     // This section below is confusing
     // Due to the nature of being asynchronous
     // We need to wait until the user have provided permission
@@ -87,7 +86,7 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
         emit askForPermission(QString::fromStdString(website));
         PLuserInputAnswer.lock();
         PLuserInputAnswer.lock(); // Wait until user completed the input
-        // The reason to lock twice, is to give "control" of this thread to 
+        // The reason to lock twice, is to give "control" of this thread to
         // The function "addToPermissionList", which will unlock this thread after
         // user input.
         // Check what permission he gave for the website.
@@ -105,12 +104,11 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       this->permissionListMutex.unlock();
       if (permission == false) {
         session_->close(); // Close the session if not permitted.
-        return; // We should not answer the website 
-      }      
+        return; // We should not answer the website
+      }
     }
 
     // Process with a transaction request.
-
     if (requestTransaction) {
       std::cout << "Lock global TX" << std::endl;
       globalUserInputRequest.lock();
@@ -137,7 +135,7 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
         QString::fromStdString(to),
         QString::fromStdString(value),
         QString::fromStdString(website)
-        );
+      );
       RTuserInputAnswer.lock(); // We lock twice for the same reason as above
       if (RTtxid == "") { // Treat "refused" response
         // 4001 	User Rejected Request 	The user rejected the request.
@@ -171,12 +169,11 @@ Q_INVOKABLE void QmlSystem::startWSServer() {
   });
 }
 
-
 Q_INVOKABLE void QmlSystem::stopWSServer() {
   this->s.stop();
 }
 
-Q_INVOKABLE void QmlSystem::loadPermisionList() {
+Q_INVOKABLE void QmlSystem::loadPermissionList() {
   // No lock required as there will be only one thread reading/writing to the permission list
   std::string configValue  = getConfigValue(QString::fromStdString("websitePermissions")).toStdString();
   if (!(configValue.find("NotFound") != std::string::npos)) {
@@ -203,7 +200,7 @@ Q_INVOKABLE void QmlSystem::addToPermissionList(QString website, bool allow) {
   }
   storedPermissionList[website.toStdString()] = allow;
   setConfigValue(QString::fromStdString("websitePermissions"), QString::fromStdString(storedPermissionList.dump()));
-  loadPermisionList();
+  loadPermissionList();
   PLuserInputAnswer.unlock(); // Unlock for handleServer self-lock.
 }
 
@@ -219,16 +216,14 @@ Q_INVOKABLE void QmlSystem::requestedTransactionStatus(bool approved, QString tx
 
 QString QmlSystem::getWebsitePermissionList() {
   json ret;
-
   for (auto permission : permissionList) {
     ret[permission.first] = permission.second;
   }
-
   return QString::fromStdString(ret.dump());
 }
 
 void QmlSystem::clearWebsitePermissionList() {
   json cleanJson;
   setConfigValue(QString::fromStdString("websitePermissions"), QString::fromStdString(cleanJson.dump()));
-  loadPermisionList();
+  loadPermissionList();
 }

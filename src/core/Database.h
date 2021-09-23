@@ -44,6 +44,12 @@ class Database {
     leveldb::Status appStatus;
     std::string appValue;
 
+    // The contacts database, options, status and value.
+    leveldb::DB* addressDB;
+    leveldb::Options addressOpts;
+    leveldb::Status addressStatus;
+    std::string addressValue;
+
     // The settings database, options, status and value.
     leveldb::DB* configDB;
     leveldb::Options configOpts;
@@ -57,8 +63,9 @@ class Database {
       this->historyOpts.create_if_missing = true;
       this->ledgerOpts.create_if_missing = true;
       this->appOpts.create_if_missing = true;
+      this->addressOpts.create_if_missing = true;
       this->configOpts.create_if_missing = true;
-      tokenDB = historyDB = ledgerDB = appDB = configDB = NULL;
+      tokenDB = historyDB = ledgerDB = appDB = addressDB = configDB = NULL;
     }
 
     // Token database functions.
@@ -104,6 +111,17 @@ class Database {
     bool putAppDBValue(std::string key, std::string value);
     bool deleteAppDBValue(std::string key);
     std::vector<std::string> getAllAppDBValues();
+
+    // Contacts database functions.
+    bool openAddressDB();
+    std::string getAddressDBStatus();
+    void closeAddressDB();
+    bool isAddressDBOpen();
+    bool addressDBKeyExists(std::string key);
+    std::string getAddressDBValue(std::string key);
+    bool putAddressDBValue(std::string key, std::string value);
+    bool deleteAddressDBValue(std::string key);
+    std::vector<std::string> getAllAddressDBValues();
 
     // Settings database functions.
     bool openConfigDB();

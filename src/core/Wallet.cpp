@@ -114,6 +114,11 @@ bool Wallet::loadAppDB() {
   return this->db.openAppDB();
 }
 
+bool Wallet::loadAddressDB() {
+  if (this->db.isAddressDBOpen()) { this->db.closeAddressDB(); }
+  return this->db.openAddressDB();
+}
+
 bool Wallet::loadConfigDB() {
   if (this->db.isConfigDBOpen()) { this->db.closeConfigDB(); }
   return this->db.openConfigDB();
@@ -123,6 +128,7 @@ void Wallet::closeTokenDB() { this->db.closeTokenDB(); }
 void Wallet::closeHistoryDB() { this->db.closeHistoryDB(); }
 void Wallet::closeLedgerDB() { this->db.closeLedgerDB(); }
 void Wallet::closeAppDB() { this->db.closeAppDB(); }
+void Wallet::closeAddressDB() { this->db.closeAddressDB(); }
 void Wallet::closeConfigDB() { this->db.closeConfigDB(); }
 
 void Wallet::loadARC20Tokens() {
@@ -307,6 +313,56 @@ bool Wallet::registerApp(
 
 bool Wallet::unregisterApp(std::string folder) {
   return this->db.deleteAppDBValue(folder);
+}
+
+std::map<std::string, std::string> Wallet::getContacts() {
+  std::map<std::string, std::string> ret;
+  std::vector<std::string> contacts = this->db.getAllAddressDBValues();
+  for (std::string contact : contacts) {
+    json contactJson = json::parse(contact);
+    ret.emplace(contactJson["address"], contactJson["name"]);
+  }
+  return ret;
+}
+
+bool Wallet::addContact(std::string name, std::string address) {
+  json contact = json::object();
+  contact["address"] = address;
+  contact["name"] = name;
+  return this->db.putAddressDBValue(address, contact.dump());
+}
+
+bool Wallet::removeContact(std::string address) {
+  return this->db.deleteAddressDBValue(address);
+}
+
+int Wallet::importContacts(std::string file) {
+  int ret = 0;
+  boost::filesystem::path filePath = file;
+  if (!boost::filesystem::exists(filePath)) { return ret; }
+  json contacts = json::parse(Utils::readJSONFile(filePath))["contacts"];
+  for (json contact : contacts) {
+    ret += this->db.putAddressDBValue(contact["address"], contact.dump());
+  }
+  return ret;
+}
+
+int Wallet::exportContacts(std::string file) {
+  int ret = 0;
+  boost::filesystem::path filePath = file;
+  if (!boost::filesystem::exists(filePath.parent_path)) {
+    boost::filesystem::create_directories(filePath.parent_path());
+  }
+  std::vector<std::string> contacts = this->db.getAllAddressDBValues();
+  json contactObj = json::object();
+  contactObj["contacts"] = json::array();
+  for (std::string contact : contacts) {
+    json contactJson = json::parse(contact);
+    contactObj["contacts"].push_back(contactJson);
+    ret++;
+  }
+  std::string success = Utils::writeJSONFile(contactObj, filePath);
+  return (success.empty()) ? ret : 0;
 }
 
 TransactionSkeleton Wallet::buildTransaction(
