@@ -3,8 +3,10 @@
    file LICENSE or http://www.opensource.org/licenses/mit-license.php. */
 import QtQuick 2.9
 import QtQuick.Controls 2.2
+import Qt.labs.platform 1.0
 
 import "qrc:/qml/components"
+import "qrc:/qml/popups"
 
 // Screen for managing contacts.
 Item {
@@ -34,6 +36,7 @@ Item {
     radius: 5
     color: "#4458A0C9"
 
+    // TODO: sort by address
     AVMEContactsList {
       id: contactsList
       anchors.fill: parent
@@ -149,15 +152,52 @@ Item {
         id: importBtn
         width: parent.width
         text: "Import Contacts"
-        onClicked: {} // TODO
+        onClicked: importDialog.visible = true
       }
 
       AVMEButton {
         id: exportBtn
         width: parent.width
         text: "Export Contacts"
-        onClicked: {} // TODO
+        enabled: (contactsList.count > 0)
+        onClicked: exportDialog.visible = true
       }
     }
+  }
+
+  // Dialogs for importing/exporting contacts
+  FileDialog {
+    id: importDialog
+    title: "Choose a file to import"
+    onAccepted: {
+      contactInfoPopup.isImporting = true
+      contactInfoPopup.result = qmlSystem.importContacts(
+        qmlSystem.cleanPath(importDialog.file.toString())
+      )
+      contactInfoPopup.open()
+    }
+  }
+  FolderDialog {
+    id: exportDialog
+    title: "Choose a folder to export"
+    onAccepted: {
+      contactInfoPopup.isImporting = false
+      contactInfoPopup.result = qmlSystem.exportContacts(
+        qmlSystem.cleanPath(exportDialog.folder.toString() + "/contacts.json")
+      )
+      contactInfoPopup.open()
+    }
+  }
+
+  // Info popup for import/export results
+  AVMEPopupInfo {
+    id: contactInfoPopup
+    property int result
+    property bool isImporting
+    icon: (result > 0) ? "qrc:/img/ok.png" : "qrc:/img/no.png"
+    info: (result > 0)
+    ? (result + " contacts " + (isImporting ? "imported" : "exported"))
+    : ("Failed to " + (isImporting ? "import" : "export") + " contacts, please try again.")
+    onAboutToHide: reloadContacts()
   }
 }
