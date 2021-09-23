@@ -36,19 +36,18 @@ using tcp = boost::asio::ip::tcp;
 
 // Handles all received WebSocket messages.
 class session : public std::enable_shared_from_this<session> {
-  // Pointer to QmlSystem
-  QmlSystem* sys_;
+  QmlSystem* sys_;  // Pointer to QmlSystem
   beast::flat_buffer buffer_;
   beast::flat_buffer answerBuffer_;
   websocket::stream<beast::tcp_stream> ws_;
-  // Pointer to list of sessions
-  // Session needs access to it for insert itself in the list
+  // Pointer to list of sessions.
+  // Session needs access to it for inserting itself in the list
   std::unordered_set<std::shared_ptr<session>> *sessions_;
-  // Lock for thread safety.
-  std::mutex m_lock;
+  std::mutex m_lock;  // Lock for thread safety.
+
   public:
     websocket::stream<beast::tcp_stream>::executor_type get_executor() { return ws_.get_executor(); };
- 
+
     // Take ownership of the socket.
     explicit session(tcp::socket&& socket, std::unordered_set<std::shared_ptr<session>> *sessions, QmlSystem *sys) : ws_(std::move(socket)), sessions_(sessions), sys_(sys) {}
     // Get on the correct executor.
@@ -89,11 +88,11 @@ class Server {
     std::unordered_set<std::shared_ptr<listener>> *listeners_;
     // Lock for thread safety.
     std::mutex m_lock;
-    
+
     public:
       auto get_executor() { return acceptor_.get_executor(); };
       // Constructor.
-      listener(net::io_context& ioc, tcp::endpoint endpoint, std::unordered_set<std::shared_ptr<session>> *sessions, std::unordered_set<std::shared_ptr<listener>> *listeners, QmlSystem *sys) 
+      listener(net::io_context& ioc, tcp::endpoint endpoint, std::unordered_set<std::shared_ptr<session>> *sessions, std::unordered_set<std::shared_ptr<listener>> *listeners, QmlSystem *sys)
         : ioc_(ioc), acceptor_(ioc), sessions_(sessions), listeners_(listeners), sys_(sys) {
         beast::error_code ec;
         acceptor_.open(endpoint.protocol(), ec);  // Open the acceptor
@@ -131,6 +130,10 @@ class Server {
     std::unordered_set<std::shared_ptr<listener>> listeners_;
     // TODO: This might be not the correct way to do this.
     // But it was the way that I found... :shrug:
+
+    boost::asio::ip::address address = boost::asio::ip::make_address("127.0.0.1");
+    unsigned short port = 4812;
+    unsigned short threads = 8;
 
   public:
     // Create and launch a listening port, and run the I/O service.

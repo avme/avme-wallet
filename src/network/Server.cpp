@@ -6,7 +6,6 @@
 
 #include <qmlwrap/QmlSystem.h> // https://stackoverflow.com/a/4964508
 
-
 void session::run() {
   net::dispatch(ws_.get_executor(), beast::bind_front_handler(
     &session::on_run, shared_from_this()
@@ -85,10 +84,10 @@ void session::on_write(beast::error_code ec, std::size_t bytes_transferred) {
   if (ec) { return Server::fail(ec, "write"); }
 }
 
-void Server::listener::run() { 
+void Server::listener::run() {
   // Insert itself on the list
   listeners_->insert(shared_from_this());
-  do_accept(); 
+  do_accept();
 }
 
 void Server::listener::do_accept() {
@@ -119,19 +118,18 @@ void Server::listener::stop() {
 }
 
 void Server::start() {
-  auto const address = boost::asio::ip::make_address("127.0.0.1");
-  auto const port = static_cast<unsigned short>(std::atoi("1248"));
-  auto const threads = 8;
-  // Restart is needed in order to .run() the ioc again. otherwise .run() will return instantly.
+  // Restart is needed to .run() the ioc again, otherwise it returns instantly.
   ioc.restart();
-  std::make_shared<listener>(ioc, tcp::endpoint{address, port}, &sessions_, &listeners_, sys_)->run();
+  std::make_shared<listener>(
+    ioc, tcp::endpoint{this->address, this->port}, &sessions_, &listeners_, sys_
+  )->run();
   std::vector<std::thread> v;
-  v.reserve(threads - 1);
-  for (auto i = threads - 1; i > 0; --i) { v.emplace_back([this]{ ioc.run(); }); }
+  v.reserve(this->threads - 1);
+  for (auto i = this->threads - 1; i > 0; --i) { v.emplace_back([this]{ ioc.run(); }); }
   ioc.run();
 }
 
-void Server::stop() { 
+void Server::stop() {
   for (auto session_ : sessions_) {
     // Send a post message to the thread running the session.
     // Telling it to close
