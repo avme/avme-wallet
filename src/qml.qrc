@@ -9,6 +9,7 @@
         <file>qml/screens/OverviewScreen.qml</file>
         <file>qml/screens/TokensScreen.qml</file>
         <file>qml/screens/HistoryScreen.qml</file>
+        <file>qml/screens/ContactsScreen.qml</file>
         <file>qml/screens/SendScreen.qml</file>
         <file>qml/screens/ExchangeScreen.qml</file>
         <file>qml/screens/LiquidityScreen.qml</file>
@@ -61,6 +62,7 @@
         <file>qml/components/AVMESideMenu.qml</file>
         <file>qml/components/AVMEAccountHeader.qml</file>
         <file>qml/components/AVMEWalletList.qml</file>
+        <file>qml/components/AVMEContactsList.qml</file>
         <file>qml/components/AVMEAccountSeedList.qml</file>
         <file>qml/components/AVMETxHistoryList.qml</file>
         <file>qml/components/AVMEPopup.qml</file>

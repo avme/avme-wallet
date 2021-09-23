@@ -9,7 +9,7 @@ void QmlSystem::listAccountTransactions(QString address) {
     json ret = json::array();
     this->w.updateAllTxStatus();
     this->w.loadTxHistory();
-    
+
     for (TxData tx : this->w.getCurrentAccountHistory()) {
       json obj;
       obj["txlink"] = tx.txlink;

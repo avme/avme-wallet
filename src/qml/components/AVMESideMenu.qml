@@ -99,6 +99,18 @@ Rectangle {
     }
 
     AVMEButton {
+      id: itemContacts
+      width: (parent.width * 0.8)
+      anchors.horizontalCenter: parent.horizontalCenter
+      text: "Contacts"
+      enabled: enableBtn
+      onClicked: {
+        itemSelection.y = items.y + y
+        changeScreen("Contacts")
+      }
+    }
+
+    AVMEButton {
       id: itemSend
       width: (parent.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter

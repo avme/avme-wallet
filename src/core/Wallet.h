@@ -275,7 +275,7 @@ class Wallet {
     std::map<std::string, std::string> getContacts();
 
     // Add and remove a contact, respectively.
-    bool addContact(std::string name, std::string address);
+    bool addContact(std::string address, std::string name);
     bool removeContact(std::string address);
 
     // Import contacts from/Export contacts to a JSON file, respectively.

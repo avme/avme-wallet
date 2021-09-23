@@ -195,9 +195,6 @@ class QmlSystem : public QObject {
     // Check if a URL exists (has data in it).
     Q_INVOKABLE void checkIfUrlExists(QUrl url);
 
-    // Get the user's contacts.
-    // TODO
-
     // Get/Set a given value in the Settings screen.
     Q_INVOKABLE QString getConfigValue(QString key);
     Q_INVOKABLE bool setConfigValue(QString key, QString value);
@@ -347,6 +344,19 @@ class QmlSystem : public QObject {
     // List the Account's transactions, updating their statuses on the spot if required.
     // Emits historyLoaded()
     Q_INVOKABLE void listAccountTransactions(QString address);
+
+    // ======================================================================
+    // CONTACTS SCREEN FUNCTIONS
+    // ======================================================================
+
+    // List the Wallet's contacts.
+    Q_INVOKABLE QVariantList listWalletContacts();
+
+    // Add, remove, import and export contacts, respectively.
+    Q_INVOKABLE bool addContact(QString address, QString name);
+    Q_INVOKABLE bool removeContact(QString address);
+    Q_INVOKABLE int importContacts(QString file);
+    Q_INVOKABLE int exportContacts(QString file);
 
     // ======================================================================
     // TRANSACTION RELATED FUNCTIONS

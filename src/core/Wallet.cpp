@@ -325,7 +325,7 @@ std::map<std::string, std::string> Wallet::getContacts() {
   return ret;
 }
 
-bool Wallet::addContact(std::string name, std::string address) {
+bool Wallet::addContact(std::string address, std::string name) {
   json contact = json::object();
   contact["address"] = address;
   contact["name"] = name;
