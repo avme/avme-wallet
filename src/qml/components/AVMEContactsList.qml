@@ -90,7 +90,10 @@ ListView {
       MouseArea {
         id: delegateMouseArea
         anchors.fill: parent
-        onClicked: contactsList.currentIndex = index
+        onClicked: {
+          contactsList.currentIndex = index
+          contactsList.forceActiveFocus()
+        }
       }
     }
   }

@@ -20,6 +20,7 @@ Item {
     for (var i = 0; i < contacts.length; i++) {
       contactsModel.append(contacts[i])
     }
+    contactsModel.sortByAddress()
   }
 
   // The list itself
@@ -36,11 +37,19 @@ Item {
     radius: 5
     color: "#4458A0C9"
 
-    // TODO: sort by address
     AVMEContactsList {
       id: contactsList
       anchors.fill: parent
-      model: ListModel { id: contactsModel }
+      model: ListModel {
+        id: contactsModel
+        function sortByAddress() {
+          for (var i = 0; i < count; i++) {
+            for (var j = 0; j < i; j++) {
+              if (get(i).address < get(j).address) { move(i, j, 1) }
+            }
+          }
+        }
+      }
     }
   }
 
