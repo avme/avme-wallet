@@ -10,6 +10,7 @@ import "qrc:/qml/components"
 Rectangle {
   id: sideMenu
   property string currentScreen
+  property int currentSelectionOffset
   width: 200
   height: parent.height
   color: "#1C2029"
@@ -20,7 +21,7 @@ Rectangle {
   Connections {
     target: qmlSystem
     function onGoToOverview() {
-      itemSelection.y = items.y + itemOverview.y
+      currentSelectionOffset = 0
       changeScreen("Overview")
     }
   }
@@ -38,7 +39,7 @@ Rectangle {
     height: 40
     visible: (currentScreen != "Settings" && currentScreen != "About")
     anchors.left: parent.left
-    y: items.y
+    y: items.y + sideMenu.currentSelectionOffset
     color: "#AD00FA"
   }
 
@@ -69,7 +70,7 @@ Rectangle {
       text: "Overview"
       enabled: enableBtn
       onClicked: {
-        itemSelection.y = items.y + y
+        sideMenu.currentSelectionOffset = y
         changeScreen("Overview")
       }
     }
@@ -81,7 +82,7 @@ Rectangle {
       text: "Tokens"
       enabled: enableBtn
       onClicked: {
-        itemSelection.y = items.y + y
+        sideMenu.currentSelectionOffset = y
         changeScreen("Tokens")
       }
     }
@@ -93,7 +94,7 @@ Rectangle {
       text: "History"
       enabled: enableBtn
       onClicked: {
-        itemSelection.y = items.y + y
+        sideMenu.currentSelectionOffset = y
         changeScreen("History")
       }
     }
@@ -105,7 +106,7 @@ Rectangle {
       text: "Contacts"
       enabled: enableBtn
       onClicked: {
-        itemSelection.y = items.y + y
+        sideMenu.currentSelectionOffset = y
         changeScreen("Contacts")
       }
     }
@@ -117,7 +118,7 @@ Rectangle {
       text: "Send"
       enabled: enableBtn
       onClicked: {
-        itemSelection.y = items.y + y
+        sideMenu.currentSelectionOffset = y
         changeScreen("Send")
       }
     }
@@ -129,7 +130,7 @@ Rectangle {
       text: "Exchange"
       enabled: enableBtn
       onClicked: {
-        itemSelection.y = items.y + y
+        sideMenu.currentSelectionOffset = y
         changeScreen("Exchange")
       }
     }
@@ -141,7 +142,7 @@ Rectangle {
       text: "Liquidity"
       enabled: enableBtn
       onClicked: {
-        itemSelection.y = items.y + y
+        sideMenu.currentSelectionOffset = y
         changeScreen("Liquidity")
       }
     }
@@ -153,7 +154,7 @@ Rectangle {
       text: "Staking"
       enabled: enableBtn
       onClicked: {
-        itemSelection.y = items.y + y
+        sideMenu.currentSelectionOffset = y
         changeScreen("Staking")
       }
     }
@@ -165,7 +166,7 @@ Rectangle {
       text: "Applications"
       enabled: enableBtn
       onClicked: {
-        itemSelection.y = items.y + y
+        sideMenu.currentSelectionOffset = y
         changeScreen("Applications")
       }
     }
@@ -190,9 +191,7 @@ Rectangle {
       smooth: true
       MouseArea {
         anchors.fill: parent
-        onClicked: {
-          changeScreen("Settings")
-        }
+        onClicked: changeScreen("Settings")
       }
     }
 
@@ -214,9 +213,7 @@ Rectangle {
       smooth: true
       MouseArea {
         anchors.fill: parent
-        onClicked: {
-          changeScreen("About")
-        }
+        onClicked: changeScreen("About")
       }
     }
   }
