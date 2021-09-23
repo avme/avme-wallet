@@ -350,7 +350,7 @@ int Wallet::importContacts(std::string file) {
 int Wallet::exportContacts(std::string file) {
   int ret = 0;
   boost::filesystem::path filePath = file;
-  if (!boost::filesystem::exists(filePath.parent_path)) {
+  if (!boost::filesystem::exists(filePath.parent_path())) {
     boost::filesystem::create_directories(filePath.parent_path());
   }
   std::vector<std::string> contacts = this->db.getAllAddressDBValues();
