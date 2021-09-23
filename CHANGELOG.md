@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Component for loading async images (AVMEAsyncImage).
 - Support for 24-word seed phrases and QR codes for addresses.
 - (Opt-in) Setting for remembering the Wallet's passphrase for a given time when making transactions.
+- Contact list for sending transactions.
 
 ### Fixed
 - Existing accounts no longer have a chance to be rewritten when creating new ones.
