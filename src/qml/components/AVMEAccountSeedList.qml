@@ -95,7 +95,7 @@ ListView {
       readonly property string itemIndex: idx
       readonly property string itemAccount: account
       readonly property string itemBalance: balance
-      width: parent.width
+      width: accountSeedList.width
       height: 30
 
       Rectangle {

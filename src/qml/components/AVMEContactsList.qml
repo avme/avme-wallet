@@ -63,7 +63,7 @@ ListView {
       id: listItem
       readonly property string itemAddress: address
       readonly property string itemName: name
-      width: parent.width
+      width: contactsList.width
       height: 30
 
       Text {

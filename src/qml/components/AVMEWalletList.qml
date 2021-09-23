@@ -16,7 +16,6 @@ import QtQuick.Controls 2.2
  */
 ListView {
   id: walletList
-
   width: parent.width
   height: parent.height
   focus: true
@@ -36,7 +35,6 @@ ListView {
 
 	delegate: Component {
 		id: listDelegate
-
     Item {
 			id: listItem
       readonly property string itemName: name
@@ -45,8 +43,8 @@ ListView {
       readonly property string itemCoinValue: coinValue
       readonly property bool itemIsLedger: isLedger
       readonly property string itemDerivationPath: derivationPath
-			width: parent.parent.width / 4
-      height: parent.height
+			width: walletList.width * 0.25
+      height: walletList.height
 
 			Rectangle {
         id: delegateRectangle
@@ -88,8 +86,8 @@ ListView {
 					id: delegateName
           anchors {
             horizontalCenter: parent.horizontalCenter
-					  top: parent.top
-					  topMargin: parent.height * 0.4
+            top: parent.top
+            topMargin: parent.height * 0.4
           }
           text: (itemName) ? itemName : "-unnamed-"
           width: parent.width * 0.9
