@@ -29,6 +29,7 @@
         <file>qml/popups/AVMEPopupViewSeed.qml</file>
         <file>qml/popups/AVMEPopupViewPrivKey.qml</file>
         <file>qml/popups/AVMEPopupAssetSelect.qml</file>
+        <file>qml/popups/AVMEPopupContactSelect.qml</file>
         <file>qml/popups/AVMEPopupTokenAdd.qml</file>
         <file>qml/popups/AVMEPopupTokenAddList.qml</file>
         <file>qml/popups/AVMEPopupQRCode.qml</file>
@@ -69,6 +70,7 @@
         <file>qml/components/AVMEPopupLedger.qml</file>
         <file>qml/components/AVMECoinList.qml</file>
         <file>qml/components/AVMETokenList.qml</file>
+        <file>qml/components/AVMEContactsPopupList.qml</file>
         <file>qml/components/AVMETokenGrid.qml</file>
         <file>qml/components/AVMEAccountQRCode.qml</file>
         <file>qml/components/AVMEOverviewBalance.qml</file>

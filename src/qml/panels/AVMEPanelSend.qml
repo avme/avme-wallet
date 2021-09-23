@@ -26,6 +26,7 @@ AVMEPanel {
   property string gas: txGasLimitInput.text
   property string gasPrice: txGasPriceInput.text
   property bool automaticGas
+  property alias toInput: txToInput.text
   property alias sendBtn: btnMakeTx
 
   Connections {
@@ -58,14 +59,14 @@ AVMEPanel {
   }
 
   function updateTxCost() {
-    if (autoGasCheck.checked) { 
-        var calculatedGasPrice = +accountHeader.gasPrice + 15
-        if (calculatedGasPrice > 225) {
-          txGasPriceInput.text = 225
-        } else {
-          txGasPriceInput.text = calculatedGasPrice
-        }
+    if (autoGasCheck.checked) {
+      var calculatedGasPrice = +accountHeader.gasPrice + 15
+      if (calculatedGasPrice > 225) {
+        txGasPriceInput.text = 225
+      } else {
+        txGasPriceInput.text = calculatedGasPrice
       }
+    }
     if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {  // Coin
       automaticGas = false;
       if (autoLimitCheck.checked) { txGasLimitInput.text = "21000" }
@@ -169,11 +170,28 @@ AVMEPanel {
 
     AVMEInput {
       id: txToInput
-      width: parent.width
-      anchors.horizontalCenter: parent.horizontalCenter
+      width: (parent.width * 0.9)
+      anchors.left: parent.left
       validator: RegExpValidator { regExp: /0x[0-9a-fA-F]{40}/ }
       label: "To"
       placeholder: "Receiver address - e.g. 0x123456789ABCDEF..."
+      AVMEButton {
+        id: txContactsBtn
+        width: (parent.parent.width * 0.1) - anchors.leftMargin
+        height: parent.height
+        anchors.left: parent.right
+        anchors.leftMargin: 10
+        text: ""
+        onClicked: contactSelectPopup.open()
+        Image {
+          anchors.fill: parent
+          anchors.margins: 10
+          source: "qrc:/img/icons/inboxesSelect.png"
+          antialiasing: true
+          smooth: true
+          fillMode: Image.PreserveAspectFit
+        }
+      }
     }
 
     AVMEInput {

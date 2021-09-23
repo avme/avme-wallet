@@ -84,6 +84,11 @@ Item {
     onAboutToHide: { sendPanel.updateTxCost(); sendPanel.refreshAssetBalance() }
   }
 
+  // Popup for choosing a contact
+  AVMEPopupContactSelect {
+    id: contactSelectPopup
+  }
+
   // Popup for confirming transaction
   AVMEPopupConfirmTx {
     id: confirmTxPopup

@@ -118,14 +118,14 @@ AVMEPopup {
         sendText.text = "Transaction nonce is too low, or a transaction with"
         + "<br>the same hash was already imported. Retrying..."
       }
-      function onLedgerRequired(randomID) { 
-        if (randomID == randomID_) { 
-          ledgerStatusPopup.open() 
+      function onLedgerRequired(randomID) {
+        if (randomID == randomID_) {
+          ledgerStatusPopup.open()
         }
       }
-      function onLedgerDone(randomID) { 
-        if (randomID == randomID_) { 
-          ledgerStatusPopup.close() 
+      function onLedgerDone(randomID) {
+        if (randomID == randomID_) {
+          ledgerStatusPopup.close()
         }
       }
     }
@@ -188,14 +188,14 @@ AVMEPopup {
     // Enter/Numpad enter key override
     Keys.onPressed: {
       if ((event.key == Qt.Key_Return) || (event.key == Qt.Key_Enter)) {
-        if (btnClose.visible) { 
+        if (btnClose.visible) {
           if (!alreadyTransmitted) {
             // Unlock the mutex if the transaction was not transmitted to the plugin
             console.log("unlocking mutex")
             qmlSystem.requestedTransactionStatus(false, "")
-            txProgressPopup.close() 
+            txProgressPopup.close()
           } else {
-            txProgressPopup.close() 
+            txProgressPopup.close()
           }
         }
       }
@@ -356,14 +356,12 @@ AVMEPopup {
     onClicked: {
       var networkGasPrice = accountHeader.gasPrice
       if (+networkGasPrice > +gasPrice) {
-        gasPrice = +networkGasPrice + 25 
-        if (+gasPrice > 225) {
-          gasPrice = 225
-        }
+        gasPrice = +networkGasPrice + 25
+        if (+gasPrice > 225) gasPrice = 225
       }
       txStart(operation, from, to, value, txData, gas, gasPrice, pass, randomID)
       resetStatuses();
-    } // TODO
+    }
   }
 
   AVMEButton {
@@ -381,9 +379,9 @@ AVMEPopup {
         // Unlock the mutex if the transaction was not transmitted to the plugin
         console.log("unlocking mutex")
         qmlSystem.requestedTransactionStatus(false, "")
-        txProgressPopup.close() 
+        txProgressPopup.close()
       } else {
-        txProgressPopup.close() 
+        txProgressPopup.close()
       }
     }
   }
