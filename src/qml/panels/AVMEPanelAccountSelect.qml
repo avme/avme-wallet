@@ -17,6 +17,13 @@ AVMEPanel {
   property alias btnCreateLedger: createLedgerBtn
   title: "Accounts"
 
+  // Enter/Return key override
+  Keys.onPressed: {
+    if ((event.key == Qt.Key_Return) || (event.key == Qt.Key_Enter)) {
+      if (btnSelect.enabled) { chooseSelectedAccount() }
+    }
+  }
+
   Rectangle {
     id: selectWalletAccountRect
     color: "transparent"

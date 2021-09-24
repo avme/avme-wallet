@@ -148,11 +148,9 @@ class QmlSystem : public QObject {
     Q_INVOKABLE QString getCurrentHardwareAccountPath() { return currentHardwareAccountPath; }
     void setEngine(QQmlApplicationEngine *targetEngine) { engine = targetEngine;}; // INVOKATION FROM QML SHOULD *NOT* BE ALLOWED!
 
-    // Trim component cache
-    // Removes *only* the data not being used
-    Q_INVOKABLE void trimComponentCache() {
-      engine->trimComponentCache();
-    }
+    // Trim component cache. Removes *only* the data not being used.
+    Q_INVOKABLE void trimComponentCache() { engine->trimComponentCache(); }
+
     // Get the project's version
     Q_INVOKABLE QString getProjectVersion();
 

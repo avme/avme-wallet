@@ -92,7 +92,10 @@ Item {
     anchors.centerIn: parent
     btnCreate.onClicked: chooseAccountPopup.open()
     btnImport.onClicked: seedPopup.open()
-    btnSelect.onClicked: {
+    btnSelect.onClicked: chooseSelectedAccount()
+    btnCreateLedger.onClicked: checkLedger()
+    btnErase.onClicked: confirmErasePopup.open()
+    function chooseSelectedAccount() {
       if (accountList.currentItem.itemIsLedger) {
         qmlSystem.setLedgerFlag(true);
         qmlSystem.setCurrentHardwareAccount(accountList.currentItem.itemAddress)
@@ -115,8 +118,6 @@ Item {
       qmlSystem.goToOverview()
       qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
     }
-    btnCreateLedger.onClicked: checkLedger()
-    btnErase.onClicked: confirmErasePopup.open()
   }
 
   // Popup for waiting for Accounts to be created/imported/erased, respectively

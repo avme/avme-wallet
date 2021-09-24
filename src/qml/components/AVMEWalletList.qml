@@ -26,12 +26,10 @@ ListView {
   snapMode: ListView.SnapToItem
   spacing: 40
   orientation: ListView.Horizontal
-  highlight: Rectangle {
-    color: "#342e43";
-    radius: 10;
-    anchors.verticalCenter: walletList.currentItem.verticalCenter
-  }
+  highlight: Rectangle { color: "#342E43"; radius: 10 }
   highlightMoveVelocity: 1500
+
+  Component.onCompleted: forceActiveFocus()
 
 	delegate: Component {
 		id: listDelegate
@@ -91,7 +89,7 @@ ListView {
           }
           text: (itemName) ? itemName : "-unnamed-"
           width: parent.width * 0.9
-          color: "#ffffff"
+          color: "#FFFFFF"
 					font.pixelSize: 18.0
           font.bold: true
           elide: Text.ElideRight
@@ -140,7 +138,14 @@ ListView {
 				MouseArea {
           id: delegateMouseArea
           anchors.fill: parent
-          onClicked: walletList.currentIndex = index
+          onClicked: {
+            walletList.currentIndex = index
+            walletList.forceActiveFocus()
+          }
+          onDoubleClicked: {
+            walletList.currentIndex = index
+            accountSelectPanel.chooseSelectedAccount()
+          }
 				}
 			}
 		}

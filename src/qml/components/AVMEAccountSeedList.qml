@@ -148,7 +148,10 @@ ListView {
       MouseArea {
         id: delegateMouseArea
         anchors.fill: parent
-        onClicked: accountSeedList.currentIndex = index
+        onClicked: {
+          accountSeedList.currentIndex = index
+          accountSeedList.forceActiveFocus()
+        }
       }
     }
   }
