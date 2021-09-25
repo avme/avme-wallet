@@ -358,9 +358,10 @@ AVMEPanel {
   function swapTx(amountIn, amountOut) {
     to = qmlSystem.getContract("router")
     gas = 500000
-    info = "You will Swap <b>" + amountIn + " " + fromAssetPopup.chosenAssetSymbol + "<\b> to <b>"
-    info += amountOut + " " + toAssetPopup.chosenAssetSymbol + "<\b> on Pangolin"
-    historyInfo = "Swap <b>" + fromAssetPopup.chosenAssetSymbol + "<\b> to <b>" + toAssetPopup.chosenAssetSymbol + "<\b>"
+    info = "You will Swap <b>" + amountIn + " " + ((!isInverse) ? fromAssetPopup.chosenAssetSymbol : toAssetPopup.chosenAssetSymbol) + "<\b> to <b>" +
+    amountOut + " " + ((!isInverse) ? toAssetPopup.chosenAssetSymbol : fromAssetPopup.chosenAssetSymbol)  + "<\b> on Pangolin"
+    historyInfo = "Swap <b>" + ((!isInverse) ? fromAssetPopup.chosenAssetSymbol : toAssetPopup.chosenAssetSymbol) +
+    "<\b> to <b>" + ((!isInverse) ? toAssetPopup.chosenAssetSymbol : fromAssetPopup.chosenAssetSymbol) + "<\b>"
     if ((fromAssetPopup.chosenAssetSymbol == "AVAX" && !isInverse) || (toAssetPopup.chosenAssetSymbol == "AVAX" && isInverse)) {
       coinValue = String(amountIn)
       var ethCallJson = ({})
@@ -537,8 +538,8 @@ AVMEPanel {
       horizontalAlignment: Text.AlignHCenter
       color: "#FFFFFF"
       font.pixelSize: 14.0
-      text: "You will swap from <b>" + fromAssetPopup.chosenAssetSymbol
-      + "</b> to <b>" + toAssetPopup.chosenAssetSymbol + "</b>"
+      text: "You will swap from <b>" + ((!isInverse) ? fromAssetPopup.chosenAssetSymbol : toAssetPopup.chosenAssetSymbol) 
+      + "</b> to <b>" + ((!isInverse) ? toAssetPopup.chosenAssetSymbol : fromAssetPopup.chosenAssetSymbol)  + "</b>"
     }
 
     Row {
