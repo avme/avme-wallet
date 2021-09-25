@@ -127,6 +127,9 @@ void Server::start() {
   v.reserve(this->threads - 1);
   for (auto i = this->threads - 1; i > 0; --i) { v.emplace_back([this]{ ioc.run(); }); }
   ioc.run();
+  // Block until all the threads exit
+  for(auto& t : v)
+      t.join();
 }
 
 void Server::stop() {
