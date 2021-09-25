@@ -15,8 +15,11 @@ AVMEPopup {
   heightPct: 0.6
   property string info
   property string fullInfo: info
-    + "<br>Gas Limit: <b> " + gas + " AVAX</b>"
+    + "<br>Gas Limit: <b> " + gas + "</b>"
     + "<br>Gas Price: <b>" + gasPrice + "</b>"
+    + "<br>Fee Cost: <b>"
+    + qmlApi.weiToFixedPoint(qmlApi.mul(qmlApi.fixedPointToWei(gasPrice, 9),gas),18)
+    + " AVAX</b>"
   property alias pass: passInput.text
   property alias passFocus: passInput.focus
   property alias timer: infoTimer
@@ -27,8 +30,8 @@ AVMEPopup {
   property string to
   property string value // Not WEI value!
   property string txData
-  property string gas // gasLimit
-  property string gasPrice // GWEI value, dynamic
+  property string gas: "0" // gasLimit // Initialize value to not throw bad_lexical_cast when starting the wallet
+  property string gasPrice: "0" // GWEI value, dynamic
   property string randomID: ""
   property bool loadingFees
   property bool automaticGas
@@ -37,6 +40,11 @@ AVMEPopup {
   onAboutToShow: {
     if (qmlSystem.getLedgerFlag()) {  // Ledger doesn't need password
       passInfo.visible = passInput.visible = false
+      btnOk.enabled = true  // This "workaround" is done due to a confirmTx component
+                            // being located on accountHeader
+                            // Which is loaded on the wallet 
+                            // Setting itself enabled to be always the second condition of the 
+                            // ternary operator.
     } else {
       if (+qmlSystem.getConfigValue("storePass") > 0) { // Set to store pass
         passInput.text = qmlSystem.retrievePass()
@@ -233,7 +241,7 @@ AVMEPopup {
 
       AVMEButton {
         id: btnOk
-        text: "OK"
+        text: "Ok"
         enabled: (qmlSystem.getLedgerFlag()) ? true : (passInput.text !== "" && !loadingFees)
         onClicked: handleConfirm()
         function handleConfirm() {
