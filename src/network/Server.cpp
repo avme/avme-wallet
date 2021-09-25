@@ -104,7 +104,9 @@ void Server::listener::on_accept(beast::error_code ec, tcp::socket socket) {
     fail(ec, "accept");
     return; // Close the listener regardless of the error
   } else {
-    std::make_shared<session>(std::move(socket),sessions_,sys_)->run();
+    if (socket.remote_endpoint().address().to_string() == "127.0.0.1") {
+      std::make_shared<session>(std::move(socket),sessions_,sys_)->run();
+    }
   }
   m_lock.unlock();
   do_accept();
