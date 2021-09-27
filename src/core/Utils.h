@@ -187,9 +187,9 @@ namespace Utils {
   std::string writeJSONFile(json obj, boost::filesystem::path filePath);
 
   /**
-   * Properly convert any json type when using json::get() to std::string
+   * Properly convert any json type when using json::get() to std::string.
    * *not* to be confused with json::dump()
-   */ 
+   */
   std::string jsonToStr(json& obj);
 };
 

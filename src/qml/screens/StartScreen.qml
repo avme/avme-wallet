@@ -9,8 +9,7 @@ import "qrc:/qml/components"
 import "qrc:/qml/panels"
 import "qrc:/qml/popups"
 
-// Starting screen (for managing Wallets)
-
+// Starting screen (for managing Wallets).
 Item {
   id: startScreen
   property bool createAndLoad
@@ -33,6 +32,12 @@ Item {
     function onWalletLoaded(success) {
       if (success) {
         qmlSystem.setLedgerFlag(false)
+        if (
+          createWalletPopup.saveWallet.checked ||
+          (loadWalletPopup.saveWallet.enabled && loadWalletPopup.saveWallet.checked)
+        ) {
+          qmlSystem.saveLastWalletPath()
+        }
         if (createAndLoad) {
           infoPopup.info = "Creating an Account<br>for the new Wallet..."
           qmlSystem.createAccount(
@@ -63,6 +68,17 @@ Item {
         walletFailPopup.info = "Error on Account creation."
         walletFailPopup.open()
       }
+    }
+  }
+
+  Component.onCompleted: {
+    var lastWallet = qmlSystem.getLastWalletPath()
+    console.log(lastWallet)
+    if (lastWallet != "") {
+      loadWalletPopup.folder = lastWallet
+      loadWalletPopup.saveWallet.visible = false
+      loadWalletPopup.saveWallet.enabled = false
+      loadWalletPopup.open()
     }
   }
 
@@ -138,7 +154,7 @@ Item {
   AVMEPopupCreateWallet {
     id: createWalletPopup
     widthPct: 0.4
-    heightPct: 0.6
+    heightPct: 0.7
     createBtn.onClicked: createWallet()
     function createWallet() {
       infoPopup.info = ((seed) ? "Importing" : "Creating") + " Wallet,<br>please wait..."
@@ -151,7 +167,7 @@ Item {
   AVMEPopupLoadWallet {
     id: loadWalletPopup
     widthPct: 0.4
-    heightPct: 0.5
+    heightPct: 0.6
     loadBtn.onClicked: loadWallet()
     function loadWallet() {
       createAndLoad = false

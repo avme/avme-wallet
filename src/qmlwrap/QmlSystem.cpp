@@ -4,6 +4,36 @@
 
 #include <qmlwrap/QmlSystem.h>
 
+QString QmlSystem::getLastWalletPath() {
+  QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+  if (path.isEmpty()) return "";
+  boost::filesystem::path walletPath = path.toStdString() + "/lastWallet.json";
+  if (!boost::filesystem::exists(walletPath)) return "";
+  boost::filesystem::path lastWallet = json::parse(
+    Utils::readJSONFile(walletPath)
+  )["path"].get<std::string>();
+  if (!boost::filesystem::exists(lastWallet)) { return ""; }
+  return QString::fromStdString(lastWallet.string());
+}
+
+bool QmlSystem::saveLastWalletPath() {
+  QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+  if (path.isEmpty()) return false;
+  boost::filesystem::path walletPath = path.toStdString() + "/lastWallet.json";
+  if (!boost::filesystem::exists(walletPath.parent_path())) {
+    boost::filesystem::create_directories(walletPath.parent_path());
+  };
+  if (boost::filesystem::exists(walletPath)) { boost::filesystem::remove(walletPath); }
+  json lastWallet = json::object();
+  lastWallet["path"] = Utils::walletFolderPath.string();
+  return (Utils::writeJSONFile(lastWallet, walletPath) == "");
+}
+
+bool QmlSystem::deleteLastWalletPath() {
+  QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+  return boost::filesystem::remove(path.toStdString() + "/lastWallet.json");
+}
+
 QString QmlSystem::getProjectVersion() {
   return QString::fromStdString(PROJECT_VERSION);
 }

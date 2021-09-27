@@ -23,6 +23,7 @@ AVMEPopup {
   property string seed
   property bool walletExists
   property alias createBtn: btnCreate
+  property alias saveWallet: saveWalletCheck.checked
 
   onAboutToShow: {
     createFolderInput.text = qmlSystem.getDefaultWalletPath()
@@ -35,6 +36,7 @@ AVMEPopup {
     createFolderInput.text = ""
     createPassInput.text = ""
     createPassCheckInput.text = ""
+    saveWalletCheck.checked = false
   }
 
   Column {
@@ -160,6 +162,33 @@ AVMEPopup {
             source: "qrc:/img/no.png"
           }
         }
+      }
+    }
+
+    CheckBox {
+      id: saveWalletCheck
+      checked: false
+      anchors.horizontalCenter: parent.horizontalCenter
+      text: "Always open this Wallet at startup"
+      contentItem: Text {
+        text: parent.text
+        font.pixelSize: 14.0
+        color: parent.checked ? "#FFFFFF" : "#888888"
+        verticalAlignment: Text.AlignVCenter
+        leftPadding: parent.indicator.width + parent.spacing
+      }
+      ToolTip {
+        id: saveWalletTooltip
+        visible: parent.hovered
+        delay: 500
+        text: "Checking this will automatically open this Wallet"
+        + "<br>when the program starts, until it is closed manually."
+        contentItem: Text {
+          font.pixelSize: 12.0
+          color: "#FFFFFF"
+          text: saveWalletTooltip.text
+        }
+        background: Rectangle { color: "#1C2029" }
       }
     }
 

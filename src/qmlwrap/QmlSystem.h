@@ -7,6 +7,7 @@
 #include <QtConcurrent/qtconcurrentrun.h>
 #include <QtCore/QDateTime>
 #include <QtCore/QFile>
+#include <QtCore/QStandardPaths>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
 #include <QtCore/QUrl>
@@ -147,6 +148,12 @@ class QmlSystem : public QObject {
     Q_INVOKABLE void setCurrentHardwareAccountPath(QString b) { currentHardwareAccountPath = b; }
     Q_INVOKABLE QString getCurrentHardwareAccountPath() { return currentHardwareAccountPath; }
     void setEngine(QQmlApplicationEngine *targetEngine) { engine = targetEngine;}; // INVOKATION FROM QML SHOULD *NOT* BE ALLOWED!
+
+    // Get, save and delete the path for the last opened Wallet, respectively.
+    // Get returns an empty string if the path doesn't exist.
+    Q_INVOKABLE QString getLastWalletPath();
+    Q_INVOKABLE bool saveLastWalletPath();
+    Q_INVOKABLE bool deleteLastWalletPath();
 
     // Trim component cache. Removes *only* the data not being used.
     Q_INVOKABLE void trimComponentCache() { engine->trimComponentCache(); }

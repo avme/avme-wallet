@@ -269,6 +269,7 @@ Rectangle {
     text: "Change Wallet"
     onClicked: {
       qmlSystem.setLedgerFlag(false)
+      qmlSystem.deleteLastWalletPath()
       qmlSystem.hideMenu()
       qmlSystem.cleanAndClose()
       qmlSystem.setScreen(content, "qml/screens/StartScreen.qml")

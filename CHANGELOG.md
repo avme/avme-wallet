@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for 24-word seed phrases and QR codes for addresses.
 - (Opt-in) Setting for remembering the Wallet's passphrase for a given time when making transactions.
 - Contact list for sending transactions.
+- Checkbox for auto-loading last opened Wallet at program startup.
 
 ### Fixed
 - Existing accounts no longer have a chance to be rewritten when creating new ones.
