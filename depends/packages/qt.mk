@@ -8,7 +8,7 @@ $(package)_dependencies=zlib openssl
 $(package)_linux_dependencies=freetype fontconfig libxcb libxkbcommon libxcb_util libxcb_util_render libxcb_util_keysyms libxcb_util_image libxcb_util_wm
 $(package)_qt_libs=corelib concurrent network widgets gui plugins testlib qlalr
 $(package)_patches=fix_qt_pkgconfig.patch mac-qmake.conf fix_no_printer.patch no-xlib.patch
-$(package)_patches+= fix_android_jni_static.patch dont_hardcode_pwd.patch
+$(package)_patches+= fix_android_jni_static.patch dont_hardcode_pwd.patch fix_fxc_mingw.patch
 $(package)_patches+= drop_lrelease_dependency.patch fix_qpainter_non_determinism.patch
 $(package)_patches+= no_sdk_version_check.patch fix_limits_header.patch openssl-qt-crosscompile.patch
 
@@ -253,6 +253,7 @@ endef
 define $(package)_preprocess_cmds
   patch -p1 -i $($(package)_patch_dir)/drop_lrelease_dependency.patch && \
   patch -p1 -i $($(package)_patch_dir)/dont_hardcode_pwd.patch && \
+  patch -p1 -i $($(package)_patch_dir)/fix_fxc_mingw.patch && \
   patch -p1 -i $($(package)_patch_dir)/fix_qt_pkgconfig.patch && \
   patch -p1 -i $($(package)_patch_dir)/fix_no_printer.patch && \
   patch -p1 -i $($(package)_patch_dir)/fix_android_jni_static.patch && \

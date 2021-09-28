@@ -1,0 +1,10 @@
+Adapted from https://aur.archlinux.org/cgit/aur.git/tree/0003-Disable-d3d12-requiring-fxc.exe.patch?h=mingw-w64-qt5-declarative-static
+
+--- old/qtdeclarative/src/plugins/scenegraph/scenegraph.pro
++++ new/qtdeclarative/src/plugins/scenegraph/scenegraph.pro
+@@ -1,5 +1,4 @@
+ TEMPLATE = subdirs
+ QT_FOR_CONFIG += quick
+-qtConfig(d3d12): SUBDIRS += d3d12
+ qtConfig(openvg): SUBDIRS += openvg
+ 
