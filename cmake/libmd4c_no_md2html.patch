@@ -1,0 +1,10 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cab797e..1f81c38 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -56,4 +56,4 @@ endif()
+ include(GNUInstallDirs)
+ 
+ add_subdirectory(src)
+-add_subdirectory(md2html)
++## add_subdirectory(md2html)

@@ -20,6 +20,7 @@ ExternalProject_Add(
     DOWNLOAD_NO_PROGRESS 1
     URL https://github.com/mity/md4c/archive/release-0.4.8.zip
     URL_HASH SHA256=bc7910a0ac6ca4863353d585a1ddc150d1e9b9c4dd02bc55520c5a6620e1e211
+    PATCH_COMMAND patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/cmake/libmd4c_no_md2html.patch
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> 
                -DBUILD_SHARED_LIBS=OFF
                -DCMAKE_POSITION_INDEPENDENT_CODE=${BUILD_SHARED_LIBS}
