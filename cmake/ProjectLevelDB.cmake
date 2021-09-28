@@ -30,6 +30,7 @@ ExternalProject_Add(
   ${_overwrite_install_command}
   LOG_INSTALL 1
   BUILD_BYPRODUCTS "${LEVELDB_BYPRODUCTS}"
+  DEPENDS snappy
 )
 
 # Create imported library
@@ -38,4 +39,4 @@ file(MAKE_DIRECTORY "${LEVELDB_INCLUDE_DIR}")  # Must exist.
 set_property(TARGET LevelDB PROPERTY IMPORTED_CONFIGURATIONS Release)
 set_property(TARGET LevelDB PROPERTY IMPORTED_LOCATION_RELEASE "${LEVELDB_LIBRARY}")
 set_property(TARGET LevelDB PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${LEVELDB_INCLUDE_DIR}")
-add_dependencies(LevelDB leveldb ${LEVELDB_BYPRODUCTS})
+add_dependencies(LevelDB leveldb snappy ${LEVELDB_BYPRODUCTS})

@@ -6,7 +6,7 @@ if (MSVC)
 endif()
 
 set(prefix "${CMAKE_BINARY_DIR}/deps")
-set(MD4C_LIBRARY "${prefix}/lib/md4c/${CMAKE_STATIC_LIBRARY_PREFIX}md4c${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set(MD4C_LIBRARY "${prefix}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}md4c${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set(MD4C_INCLUDE_DIR "${prefix}/include")
 
 ExternalProject_Add(
@@ -16,7 +16,15 @@ ExternalProject_Add(
     DOWNLOAD_NO_PROGRESS 1
     URL https://github.com/mity/md4c/archive/release-0.4.8.zip
     URL_HASH SHA256=bc7910a0ac6ca4863353d585a1ddc150d1e9b9c4dd02bc55520c5a6620e1e211
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> -DBUILD_SHARED_LIBS=OFF
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> 
+               -DBUILD_SHARED_LIBS=OFF
+               -DCMAKE_POSITION_INDEPENDENT_CODE=${BUILD_SHARED_LIBS}
+               -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+               -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+               -DCMAKE_C_FLAGS=-I${MD4C_INCLUDE_DIR}
+               -DCMAKE_CXX_FLAGS=-I${MD4C_INCLUDE_DIR}\ -I${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/include\ ${CMAKE_CXX_FLAGS}
+               ${_only_release_configuration}
+               -DCMAKE_INSTALL_LIBDIR=lib
     LOG_CONFIGURE 1
     ${_overwrite_install_command}
     BUILD_BYPRODUCTS "${MD4C_LIBRARY}"

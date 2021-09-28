@@ -62,6 +62,7 @@ find_package(libscrypt CONFIG REQUIRED)
 
 # Add external modules
 include(ProjectEthash)
+include(ProjectSnappy)
 include(ProjectLevelDB)
 include(ProjectSecp256k1)
 include(ProjectToolbox)
@@ -116,7 +117,7 @@ add_library(avme-lib
 )
 target_link_libraries(avme-lib PUBLIC
   devcore devcrypto ethcore ledger ${ETHASH_BYPRODUCTS} Ethash
-  toolbox bip39 LevelDB ${BOOST_LIBS} ssl crypto -lsnappy
+  toolbox bip39 LevelDB ${BOOST_LIBS} ssl crypto md4c snappy
 )
 
 # Set the project version as a macro in a header file
