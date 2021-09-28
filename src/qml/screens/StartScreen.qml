@@ -73,7 +73,6 @@ Item {
 
   Component.onCompleted: {
     var lastWallet = qmlSystem.getLastWalletPath()
-    console.log(lastWallet)
     if (lastWallet != "") {
       loadWalletPopup.folder = lastWallet
       loadWalletPopup.saveWallet.visible = false

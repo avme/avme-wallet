@@ -480,6 +480,20 @@ AVMEPanel {
       anchors.left: parent.left
       anchors.margins: 20
       enabled: (pairAllowance != "" || asset1Reserves != "" || asset2Reserves != "" || pairBalance != "")
+      background: Rectangle {
+        x: liquidityLPSlider.leftPadding
+        y: liquidityLPSlider.topPadding + (liquidityLPSlider.availableHeight / 2) - (height / 2)
+        width: liquidityLPSlider.availableWidth
+        height: liquidityLPSlider.availableHeight * 0.1
+        radius: 5
+        color: "#888888"
+        Rectangle {
+          width: liquidityLPSlider.visualPosition * parent.width
+          height: parent.height
+          color: "#AD00FA"
+          radius: 5
+        }
+      }
       onMoved: {
         var estimates = qmlSystem.calculateRemoveLiquidityAmount(
           userAsset1Reserves, userAsset2Reserves, value, pairBalance
