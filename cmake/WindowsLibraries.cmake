@@ -1,6 +1,6 @@
 # TODO: revise library order, it's very messy
 SET(QT_LIBS "")
-LIST(APPEND QT_LIBS "-limm32 -ldwmapi -lwinmm -lversion -lwtsapi32 -lmincore -luserenv -lnetui1 -lnetapi32 -ldxgi -ld3d11 -lsetupapi")
+LIST(APPEND QT_LIBS "-limm32 -ldwmapi -lwinmm -lversion -lwtsapi32 -lmincore -luserenv -lnetui1 -lnetapi32 -ldxgi -ld3d11 -lsetupapi -fstack-protector")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Network.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Gui.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Qml.a")
