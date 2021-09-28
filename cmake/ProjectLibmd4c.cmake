@@ -5,8 +5,12 @@ if (MSVC)
     set(_overwrite_install_command INSTALL_COMMAND cmake --build <BINARY_DIR> --config Release --target install)
 endif()
 
+if (DEPENDS_PREFIX STREQUAL "x86_64-w64-mingw32")
+  set(_windows_configuration -DCMAKE_CROSSCOMPILING=1 -DRUN_HAVE_STD_REGEX=0  -DRUN_HAVE_POSIX_REGEX=0 -DWIN32=ON)
+endif()
+
 set(prefix "${CMAKE_BINARY_DIR}/deps")
-set(MD4C_LIBRARY "${prefix}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}md4c${CMAKE_STATIC_LIBRARY_SUFFIX}")
+set(MD4C_LIBRARY "${prefix}/lib/md4c/${CMAKE_STATIC_LIBRARY_PREFIX}md4c${CMAKE_STATIC_LIBRARY_SUFFIX}")
 set(MD4C_INCLUDE_DIR "${prefix}/include")
 
 ExternalProject_Add(
@@ -24,7 +28,8 @@ ExternalProject_Add(
                -DCMAKE_C_FLAGS=-I${MD4C_INCLUDE_DIR}
                -DCMAKE_CXX_FLAGS=-I${MD4C_INCLUDE_DIR}\ -I${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/include\ ${CMAKE_CXX_FLAGS}
                ${_only_release_configuration}
-               -DCMAKE_INSTALL_LIBDIR=lib
+               ${_windows_configuration}
+               -DCMAKE_INSTALL_LIBDIR=lib/md4c
     LOG_CONFIGURE 1
     ${_overwrite_install_command}
     BUILD_BYPRODUCTS "${MD4C_LIBRARY}"
