@@ -144,8 +144,8 @@ namespace Utils {
    * uintToHex should work with uint<M>, bytes and bool.
    * addressToHex is solely for address.
    * Returns the hex string.
-   * bytesToHex converts a string of characters to a byte array
-   * returns the respective byte array with left-padding
+   * bytesToHex converts a string of characters to a byte array, and
+   * returns the respective byte array with left-padding.
    */
   std::string uintToHex(std::string input, bool isPadded = true);
   std::string addressToHex(std::string input);
@@ -157,7 +157,7 @@ namespace Utils {
    */
   std::string uintFromHex(std::string hex);
   std::string addressFromHex(std::string hex);
-  std::string stringFromHex(std::string hex);
+  std::string bytesFromHex(std::string hex);
 
   /**
    * Rounds a number to the nearest multiple.

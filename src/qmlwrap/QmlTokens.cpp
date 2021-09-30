@@ -148,8 +148,8 @@ QVariantMap QmlSystem::getARC20TokenData(QString address) {
   pairHex = pairRespJson["result"].get<std::string>();
   ARC20Token token;
   token.address = addressStr;
-  token.name = Utils::stringFromHex(nameHex);
-  token.symbol = Utils::stringFromHex(symbolHex);
+  token.name = Utils::bytesFromHex(nameHex);
+  token.symbol = Utils::bytesFromHex(symbolHex);
   token.decimals = boost::lexical_cast<int>(Utils::uintFromHex(decimalsHex));
   token.avaxPairContract = Utils::addressFromHex(pairHex);
   QVariantMap tokenObj;

@@ -183,7 +183,7 @@ class QmlSystem : public QObject {
 
     // Convert fixed point to Wei and vice-versa
     Q_INVOKABLE QString fixedPointToWei(QString amount, int decimals);
-    Q_INVOKABLE QString weiToFixedPoint(QString amount, int digits);
+    Q_INVOKABLE QString weiToFixedPoint(QString amount, int decimals);
 
     // Check if a balance is zero or higher than another, respectively
     Q_INVOKABLE bool balanceIsZero(QString amount, int decimals);

@@ -186,8 +186,7 @@ std::string Utils::uintToHex(std::string input, bool isPadded) {
     }
   }
 
-  if (!isPadded)
-    return valueHex;
+  if (!isPadded) { return valueHex; }
 
   // Insert value into padding from right to left
   for (size_t i = (valueHex.size() - 1), x = (padding.size() - 1),
@@ -233,7 +232,7 @@ std::string Utils::addressFromHex(std::string hex) {
   return ret;
 }
 
-std::string Utils::stringFromHex(std::string hex) {
+std::string Utils::bytesFromHex(std::string hex) {
   std::string ret, offset, len, hexStr;
   if (hex.substr(0, 2) == "0x") { hex = hex.substr(2); } // Remove the "0x"
 

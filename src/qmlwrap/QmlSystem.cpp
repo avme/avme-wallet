@@ -78,9 +78,9 @@ QString QmlSystem::fixedPointToWei(QString amount, int decimals) {
   );
 }
 
-QString QmlSystem::weiToFixedPoint(QString amount, int digits) {
+QString QmlSystem::weiToFixedPoint(QString amount, int decimals) {
   return QString::fromStdString(
-    Utils::weiToFixedPoint(amount.toStdString(), digits)
+    Utils::weiToFixedPoint(amount.toStdString(), decimals)
   );
 }
 

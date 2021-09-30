@@ -34,19 +34,6 @@ void QmlApi::clearAPIRequests(QString requestID) {
   requestListLock.unlock();
 }
 
-QStringList QmlApi::parseHex(QString hexStr, QStringList types) {
-  std::vector<std::string> typesVec, parsed;
-  QStringList ret;
-  for (QString type : types) { typesVec.push_back(type.toStdString()); }
-  try {
-    parsed = Pangolin::parseHex(hexStr.toStdString(), typesVec);
-  } catch (std::exception &e) {
-    Utils::logToDebug(std::string("parseHex: ") + e.what());
-  }
-  for (std::string value : parsed) { ret << QString::fromStdString(value); }
-  return ret;
-}
-
 void QmlApi::buildGetBalanceReq(QString address, QString requestID) {
   requestListLock.lock();
   Request req{
@@ -57,12 +44,12 @@ void QmlApi::buildGetBalanceReq(QString address, QString requestID) {
   requestListLock.unlock();
 }
 
-void QmlApi::buildGetTokenBalanceReq(QString contract, QString address, QString requestID) {
+void QmlApi::buildGetTokenBalanceReq(QString tokenContract, QString address, QString requestID) {
   std::string addressStr = address.toStdString();
   if (addressStr.substr(0,2) == "0x") { addressStr = addressStr.substr(2); }
   json params;
   json array = json::array();
-  params["to"] = contract.toStdString();
+  params["to"] = tokenContract.toStdString();
   params["data"] = "0x70a08231000000000000000000000000" + addressStr;
   array.push_back(params);
   array.push_back("latest");
@@ -94,11 +81,11 @@ void QmlApi::buildGetCurrentBlockNumberReq(QString requestID) {
   requestListLock.unlock();
 }
 
-void QmlApi::buildGetTxReceiptReq(std::string txidHex, QString requestID) {
+void QmlApi::buildGetTxReceiptReq(QString txidHex, QString requestID) {
   requestListLock.lock();
   Request req{
     this->requestList[requestID].size() + size_t(1), "2.0", "eth_getTransactionReceipt",
-    {"0x" + txidHex}
+    {"0x" + txidHex.toStdString()}
   };
   this->requestList[requestID].push_back(req);
   requestListLock.unlock();
@@ -117,13 +104,13 @@ void QmlApi::buildGetEstimateGasLimitReq(QString jsonStr, QString requestID) {
   return;
 }
 
-void QmlApi::buildARC20TokenExistsReq(std::string address, QString requestID) {
+void QmlApi::buildARC20TokenExistsReq(QString address, QString requestID) {
   json supplyJson, balanceJson;
   json supplyJsonArr = json::array();
   json balanceJsonArr = json::array();
-  supplyJson["to"] = balanceJson["to"] = address;
+  supplyJson["to"] = balanceJson["to"] = address.toStdString();
   supplyJson["data"] = Pangolin::ERC20Funcs["totalSupply"];
-  balanceJson["data"] = Pangolin::ERC20Funcs["balanceOf"] + Utils::addressToHex(address);
+  balanceJson["data"] = Pangolin::ERC20Funcs["balanceOf"] + Utils::addressToHex(address.toStdString());
   supplyJsonArr.push_back(supplyJson);
   supplyJsonArr.push_back("latest");
   balanceJsonArr.push_back(supplyJson);
@@ -136,10 +123,10 @@ void QmlApi::buildARC20TokenExistsReq(std::string address, QString requestID) {
   requestListLock.unlock();
 }
 
-void QmlApi::buildGetARC20TokenDataReq(std::string address, QString requestID) {
+void QmlApi::buildGetARC20TokenDataReq(QString address, QString requestID) {
   json nameJson, symbolJson, decimalsJson;
   json nameJsonArr, symbolJsonArr, decimalsJsonArr;
-  nameJson["to"] = symbolJson["to"] = decimalsJson["to"] = address;
+  nameJson["to"] = symbolJson["to"] = decimalsJson["to"] = address.toStdString();
   nameJson["data"] = Pangolin::ERC20Funcs["name"];
   symbolJson["data"] = Pangolin::ERC20Funcs["symbol"];
   decimalsJson["data"] = Pangolin::ERC20Funcs["decimals"];
@@ -161,12 +148,6 @@ void QmlApi::buildGetARC20TokenDataReq(std::string address, QString requestID) {
   this->requestList[requestID].push_back(symbolReq);
   this->requestList[requestID].push_back(decimalsReq);
   requestListLock.unlock();
-}
-
-void QmlApi::getTokenPriceHistory(QString address, int days, QString requestID) {
-  QtConcurrent::run([=](){
-    emit tokenPriceHistoryAnswered(QString::fromStdString(Graph::getTokenPriceHistory(address.toStdString(), days).dump()), requestID, days);
-  });
 }
 
 void QmlApi::buildGetAllowanceReq(QString receiver, QString owner, QString spender, QString requestID) {
@@ -224,29 +205,64 @@ void QmlApi::buildCustomEthCallReq(QString contract, QString ABI, QString reques
   requestListLock.unlock();
 }
 
+QStringList QmlApi::parseHex(QString hexStr, QStringList types) {
+  std::vector<std::string> typesVec, parsed;
+  QStringList ret;
+  for (QString type : types) { typesVec.push_back(type.toStdString()); }
+  try {
+    parsed = Pangolin::parseHex(hexStr.toStdString(), typesVec);
+  } catch (std::exception &e) {
+    Utils::logToDebug(std::string("parseHex: ") + e.what());
+  }
+  for (std::string value : parsed) { ret << QString::fromStdString(value); }
+  return ret;
+}
+
 QString QmlApi::getFirstFromPair(QString assetAddressA, QString assetAddressB) {
   return QString::fromStdString(
     Pangolin::getFirstFromPair(assetAddressA.toStdString(), assetAddressB.toStdString())
   );
 }
 
+void QmlApi::getTokenPriceHistory(QString address, int days, QString requestID) {
+  QtConcurrent::run([=](){
+    emit tokenPriceHistoryAnswered(QString::fromStdString(Graph::getTokenPriceHistory(address.toStdString(), days).dump()), requestID, days);
+  });
+}
+
 QString QmlApi::buildCustomABI(QString input) {
   return QString::fromStdString(ABI::encodeABIfromJson(input.toStdString()));
 }
 
-QString QmlApi::weiToFixedPoint(QString amount, int digits) {
-  return QString::fromStdString(Utils::weiToFixedPoint(amount.toStdString(), digits));
+QString QmlApi::weiToFixedPoint(QString amount, int decimals) {
+  return QString::fromStdString(Utils::weiToFixedPoint(amount.toStdString(), decimals));
 }
 QString QmlApi::fixedPointToWei(QString amount, int decimals) {
   return QString::fromStdString(Utils::fixedPointToWei(amount.toStdString(), decimals));
 }
 
-QString QmlApi::uintToHex(QString input) {
-  return QString::fromStdString(Utils::uintToHex(input.toStdString(), false));
+QString QmlApi::uintToHex(QString input, bool isPadded) {
+  return QString::fromStdString(Utils::uintToHex(input.toStdString(), isPadded));
 }
 
 QString QmlApi::uintFromHex(QString hex) {
   return QString::fromStdString(Utils::uintFromHex(hex.toStdString()));
+}
+
+QString QmlApi::addressToHex(QString input) {
+  return QString::fromStdString(Utils::addressToHex(input.toStdString()));
+}
+
+QString QmlApi::addressFromHex(QString hex) {
+  return QString::fromStdString(Utils::addressFromHex(hex.toStdString()));
+}
+
+QString QmlApi::bytesToHex(QString input, bool isUint) {
+  return QString::fromStdString(Utils::bytesToHex(input.toStdString(), isUint));
+}
+
+QString QmlApi::bytesFromHex(QString hex) {
+  return QString::fromStdString(Utils::bytesFromHex(hex.toStdString()));
 }
 
 QString QmlApi::MAX_U256_VALUE() {

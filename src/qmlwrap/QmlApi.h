@@ -42,6 +42,10 @@ class QmlApi : public QObject {
     void tokenPriceHistoryAnswered(QString answer, QString requestID, int days);
 
   public:
+    // ======================================================================
+    // REQUEST BUILDERS
+    // ======================================================================
+
     /**
      * Call every request under requestList in a single connection.
      * Automatically clears the requestList when done.
@@ -54,16 +58,10 @@ class QmlApi : public QObject {
     Q_INVOKABLE void clearAPIRequests(QString requestID);
 
     /**
-     * Parse a given hex string according to the values given.
-     * Accepted values are: uint, bool, address.
-     */
-    Q_INVOKABLE QStringList parseHex(QString hexStr, QStringList types);
-
-    /**
      * Build requests for getting the AVAX and a given token's balance, respectively.
      */
     Q_INVOKABLE void buildGetBalanceReq(QString address, QString requestID);
-    Q_INVOKABLE void buildGetTokenBalanceReq(QString contract, QString address, QString requestID);
+    Q_INVOKABLE void buildGetTokenBalanceReq(QString tokenContract, QString address, QString requestID);
 
     /**
      * Build request for getting the total LP supply of a pair.
@@ -79,7 +77,7 @@ class QmlApi : public QObject {
      * Build request for getting the receipt (details) of a transaction.
      * e.g. blockNumber, status, etc.
      */
-    Q_INVOKABLE void buildGetTxReceiptReq(std::string txidHex, QString requestID);
+    Q_INVOKABLE void buildGetTxReceiptReq(QString txidHex, QString requestID);
 
     /**
      * Build request for getting the estimated gas limit.
@@ -98,17 +96,12 @@ class QmlApi : public QObject {
     /**
      * Build request for querying if an ARC20 token exists.
      */
-    Q_INVOKABLE void buildARC20TokenExistsReq(std::string address, QString requestID);
+    Q_INVOKABLE void buildARC20TokenExistsReq(QString address, QString requestID);
 
     /**
-     * Get an ARC20 token's data.
+     * Build request for getting an ARC20 token's data.
      */
-    Q_INVOKABLE void buildGetARC20TokenDataReq(std::string address, QString requestID);
-
-    /**
-     * Get the fiat price history of the last X days for a given ARC20 token.
-     */
-    Q_INVOKABLE void getTokenPriceHistory(QString address, int days, QString requestID);
+    Q_INVOKABLE void buildGetARC20TokenDataReq(QString address, QString requestID);
 
     /**
      * Build request for getting the allowance amount between owner and spender
@@ -127,21 +120,44 @@ class QmlApi : public QObject {
     Q_INVOKABLE void buildGetReservesReq(QString pairAddress, QString requestID);
 
     /**
-     * Functions for appending custom ABI calls.
+     * Build custom eth_call request.
      */
     Q_INVOKABLE void buildCustomEthCallReq(QString contract, QString ABI, QString requestID);
-    Q_INVOKABLE QString buildCustomABI(QString input);
 
-    // Get the first (lower) address from a pair
-    Q_INVOKABLE QString getFirstFromPair(QString assetAddressA, QString assetAddressB);
+    // ======================================================================
+    // HELPER FUNCTIONS
+    // ======================================================================
 
     /**
-     * Wrappers for utils functions
+     * Parse a given ABI hex string according to the values given.
+     * Accepted values from the ABI are:
+     * * uint
+     * * bool
+     * * address
      */
-    Q_INVOKABLE QString weiToFixedPoint(QString amount, int digits);
+    Q_INVOKABLE QStringList parseHex(QString hexStr, QStringList types);
+
+    // Get the first (lower) address from a pair.
+    Q_INVOKABLE QString getFirstFromPair(QString assetAddressA, QString assetAddressB);
+
+    // Get the fiat price history of the last X days for a given ARC20 token.
+    Q_INVOKABLE void getTokenPriceHistory(QString address, int days, QString requestID);
+
+    /**
+     * Convert `input` to a custom ABI bytecode.
+     * Returns the encoded ABI bytecode as a string.
+     */
+    Q_INVOKABLE QString buildCustomABI(QString input);
+
+    // Wrappers for Utils functions.
+    Q_INVOKABLE QString weiToFixedPoint(QString amount, int decimals);
     Q_INVOKABLE QString fixedPointToWei(QString amount, int decimals);
-    Q_INVOKABLE QString uintToHex(QString input);
+    Q_INVOKABLE QString uintToHex(QString input, bool isPadded = true);
     Q_INVOKABLE QString uintFromHex(QString hex);
+    Q_INVOKABLE QString addressToHex(QString input);
+    Q_INVOKABLE QString addressFromHex(QString hex);
+    Q_INVOKABLE QString bytesToHex(QString input, bool isUint);
+    Q_INVOKABLE QString bytesFromHex(QString hex);
     Q_INVOKABLE QString MAX_U256_VALUE();
     Q_INVOKABLE QString getCurrentUnixTime();
     Q_INVOKABLE void logToDebug(QString log) { Utils::logToDebug(log.toStdString()); };
@@ -150,10 +166,9 @@ class QmlApi : public QObject {
     Q_INVOKABLE QString getRandomID();
 
     /**
-     * Math functions to avoid scientific notation using QML JS
-     * Logic done using strings and bigfloat
+     * Math functions to avoid scientific notation using QML/JS.
+     * Logic done using strings and bigfloat.
      */
-
     Q_INVOKABLE QString sum(QString a, QString b);
     Q_INVOKABLE QString sub(QString a, QString b);
     Q_INVOKABLE QString mul(QString a, QString b);
@@ -161,7 +176,6 @@ class QmlApi : public QObject {
     Q_INVOKABLE QString round(QString a);
     Q_INVOKABLE QString floor(QString a);
     Q_INVOKABLE QString ceil(QString a);
-
 };
 
 #endif // QMLAPI_H
