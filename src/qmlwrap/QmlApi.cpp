@@ -330,3 +330,9 @@ QString QmlApi::ceil(QString a) {
   result = boost::multiprecision::ceil(an);
   return QString::fromStdString(boost::lexical_cast<std::string>(result.str(256)));
 }
+
+QRegExp QmlApi::createRegExp(QString desiredRegex) {
+  QRegExp rx;
+  rx.setPattern(desiredRegex);
+  return rx;
+}

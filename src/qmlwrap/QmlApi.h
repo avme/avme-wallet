@@ -137,6 +137,10 @@ class QmlApi : public QObject {
      */
     Q_INVOKABLE QStringList parseHex(QString hexStr, QStringList types);
 
+    // Create a QRegExp based on the QString input
+
+    Q_INVOKABLE QRegExp createRegExp(QString desiredRegex);
+
     // Get the first (lower) address from a pair.
     Q_INVOKABLE QString getFirstFromPair(QString assetAddressA, QString assetAddressB);
 
