@@ -20,10 +20,7 @@ Rectangle {
 
   Connections {
     target: qmlSystem
-    function onGoToOverview() {
-      currentSelectionOffset = 0
-      changeScreen("Overview")
-    }
+    function onGoToOverview() { changeScreen("Overview") }
   }
 
   function changeScreen(name) {
@@ -33,23 +30,13 @@ Rectangle {
     content.active = true
   }
 
-  Rectangle {
-    id: itemSelection
-    width: (parent.width * 0.05)
-    height: 40
-    visible: (currentScreen != "Settings" && currentScreen != "About")
-    anchors.left: parent.left
-    y: items.y + sideMenu.currentSelectionOffset
-    color: "#AD00FA"
-  }
-
   Image {
     id: logo
     height: 50
     anchors {
       top: parent.top
+      topMargin: 10
       horizontalCenter: parent.horizontalCenter
-      topMargin: 20
     }
     source: "qrc:/img/Welcome_Logo_AVME.png"
     fillMode: Image.PreserveAspectFit
@@ -57,163 +44,340 @@ Rectangle {
     smooth: true
   }
 
-  Column {
-    id: items
+  Text {
+    id: versionText
+    color: "#FFFFFF"
+    font.bold: true
+    font.pixelSize: 14.0
+    anchors {
+      top: logo.bottom
+      topMargin: 10
+      horizontalCenter: parent.horizontalCenter
+    }
+    text: "v" + qmlSystem.getProjectVersion()
+  }
+
+  // TODO: proper item selection at startup, disabling logic
+  ListView {
+    id: menu
+    property string expandedSection: ""
     width: parent.width
-    anchors.verticalCenter: parent.verticalCenter
-    spacing: 10
-
-    AVMEButton {
-      id: itemOverview
-      width: (parent.width * 0.8)
-      anchors.horizontalCenter: parent.horizontalCenter
-      text: "Overview"
-      enabled: enableBtn
-      onClicked: {
-        sideMenu.currentSelectionOffset = y
-        changeScreen("Overview")
+    interactive: false  // Disable flicking
+    anchors {
+      horizontalCenter: parent.horizontalCenter
+      top: versionText.bottom
+      bottom: parent.bottom
+      topMargin: 10
+      bottomMargin: 10
+    }
+    model: ListModel {
+      id: menuModel
+      ListElement {
+        type: "Wallet"; name: "Create/Import"; screen: "Start";
+        icon: "qrc:/img/icons/plus.png";
+        iconSelect: "qrc:/img/icons/plusSelect.png";
+        isEnabled: true; isVisible: false;
+      }
+      // TODO: split create and load screens
+      ListElement {
+        type: "Wallet"; name: "Load"; screen: "Start";
+        icon: "qrc:/img/icons/upload.png";
+        iconSelect: "qrc:/img/icons/uploadSelect.png";
+        isEnabled: true; isVisible: false;
+      }
+      ListElement {
+        type: "Wallet"; name: "Accounts"; screen: "Accounts";
+        icon: "qrc:/img/icons/inboxes.png";
+        iconSelect: "qrc:/img/icons/inboxesSelect.png";
+        isEnabled: true; isVisible: false;
+      }
+      ListElement {
+        type: "Wallet"; name: "Contacts"; screen: "Contacts";
+        icon: "qrc:/img/icons/bookmark.png";
+        iconSelect: "qrc:/img/icons/bookmarkSelect.png";
+        isEnabled: true; isVisible: false;
+      }
+      ListElement {
+        // TODO: rename "TokensScreen" to "AssetsScreen"
+        type: "Wallet"; name: "Assets"; screen: "Tokens";
+        icon: "qrc:/img/icons/coin.png";
+        iconSelect: "qrc:/img/icons/coinSelect.png";
+        isEnabled: true; isVisible: false;
+      }
+      ListElement {
+        type: "Wallet"; name: "Applications"; screen: "Applications";
+        icon: "qrc:/img/icons/grid.png";
+        iconSelect: "qrc:/img/icons/gridSelect.png";
+        isEnabled: true; isVisible: false;
+      }
+      ListElement {
+        type: "This Account"; name: "Overview"; screen: "Overview";
+        icon: "qrc:/img/icons/pie-chart-alt.png";
+        iconSelect: "qrc:/img/icons/pie-chart-altSelect.png";
+        isEnabled: true; isVisible: false;
+      }
+      // TODO: split asset prices and overview screens
+      ListElement {
+        type: "This Account"; name: "Asset Prices"; screen: "Overview";
+        icon: "qrc:/img/icons/activity.png";
+        iconSelect: "qrc:/img/icons/activitySelect.png";
+        isEnabled: true; isVisible: false;
+      }
+      ListElement {
+        type: "This Account"; name: "Tx History"; screen: "History";
+        icon: "qrc:/img/icons/history.png";
+        iconSelect: "qrc:/img/icons/historySelect.png";
+        isEnabled: true; isVisible: false;
+      }
+      ListElement {
+        type: "Operations"; name: "Send"; screen: "Send";
+        icon: "qrc:/img/icons/paper-plane.png";
+        iconSelect: "qrc:/img/icons/paper-planeSelect.png";
+        isEnabled: true; isVisible: false;
+      }
+      ListElement {
+        type: "Operations"; name: "Exchange"; screen: "Exchange";
+        icon: "qrc:/img/icons/directions.png";
+        iconSelect: "qrc:/img/icons/directionsSelect.png";
+        isEnabled: true; isVisible: false;
+      }
+      ListElement {
+        type: "Operations"; name: "Add Liquidity"; screen: "Liquidity";
+        icon: "qrc:/img/icons/log-in.png";
+        iconSelect: "qrc:/img/icons/log-inSelect.png";
+        isEnabled: true; isVisible: false;
+      }
+      // TODO: split add and remove liquidity screens
+      ListElement {
+        type: "Operations"; name: "Remove Liquidity"; screen: "Liquidity";
+        icon: "qrc:/img/icons/log-out.png";
+        iconSelect: "qrc:/img/icons/log-outSelect.png";
+        isEnabled: true; isVisible: false;
+      }
+      ListElement {
+        type: "Operations"; name: "Staking"; screen: "Staking";
+        icon: "qrc:/img/icons/credit-card.png";
+        iconSelect: "qrc:/img/icons/credit-cardSelect.png";
+        isEnabled: true; isVisible: false;
+      }
+      // TODO: split staking and compound screens
+      ListElement {
+        type: "Operations"; name: "YY Compound"; screen: "Staking";
+        icon: "qrc:/img/icons/credit-card-f.png";
+        iconSelect: "qrc:/img/icons/credit-card-fSelect.png";
+        isEnabled: true; isVisible: false;
       }
     }
-
-    AVMEButton {
-      id: itemTokens
-      width: (parent.width * 0.8)
-      anchors.horizontalCenter: parent.horizontalCenter
-      text: "Tokens"
-      enabled: enableBtn
-      onClicked: {
-        sideMenu.currentSelectionOffset = y
-        changeScreen("Tokens")
+    section.property: "type"
+    section.delegate: Component {
+      id: header
+      Rectangle {
+        id: headerRect
+        property bool isExpanded: false
+        property string currentExpandedSection: ListView.view.expandedSection
+        width: parent.width
+        height: 40
+        color: "transparent"
+        Image {
+          id: dropdown
+          width: 16
+          height: 16
+          anchors {
+            left: parent.left
+            leftMargin: 10
+            verticalCenter: parent.verticalCenter
+          }
+          antialiasing: true
+          smooth: true
+          fillMode: Image.PreserveAspectFit
+          source: (isExpanded) ? "qrc:/img/icons/chevron-downSelect.png" : "qrc:/img/icons/chevron-down.png"
+          rotation: (isExpanded) ? -180 : 0 // Counter-clockwise
+          Behavior on rotation { SmoothedAnimation { duration: 200 } }
+        }
+        Text {
+          id: headerText
+          color: (isExpanded) ? "#AD00FA" : "#FFFFFF"
+          font.pixelSize: 14.0
+          font.bold: true
+          text: section
+          anchors {
+            left: dropdown.right
+            leftMargin: 10
+            verticalCenter: parent.verticalCenter
+          }
+        }
+        MouseArea {
+          anchors.fill: parent
+          hoverEnabled: true
+          onEntered: { headerRect.color = "#444444" }
+          onExited: { headerRect.color = "transparent" }
+          onClicked: {
+            headerRect.color = "transparent"
+            headerRect.isExpanded = !headerRect.isExpanded
+          }
+        }
+        onCurrentExpandedSectionChanged: isExpanded = (currentExpandedSection === section)
+        onIsExpandedChanged: {
+          if (isExpanded) ListView.view.expandedSection = section
+          for (var i = 0; i < menuModel.count; i++) {
+            var item = menuModel.get(i);
+            if (item.type !== "" && section === item.type) {
+              item.isVisible = headerRect.isExpanded
+            }
+          }
+        }
       }
     }
-
-    AVMEButton {
-      id: itemHistory
-      width: (parent.width * 0.8)
-      anchors.horizontalCenter: parent.horizontalCenter
-      text: "History"
-      enabled: enableBtn
-      onClicked: {
-        sideMenu.currentSelectionOffset = y
-        changeScreen("History")
-      }
-    }
-
-    AVMEButton {
-      id: itemContacts
-      width: (parent.width * 0.8)
-      anchors.horizontalCenter: parent.horizontalCenter
-      text: "Contacts"
-      enabled: enableBtn
-      onClicked: {
-        sideMenu.currentSelectionOffset = y
-        changeScreen("Contacts")
-      }
-    }
-
-    AVMEButton {
-      id: itemSend
-      width: (parent.width * 0.8)
-      anchors.horizontalCenter: parent.horizontalCenter
-      text: "Send"
-      enabled: enableBtn
-      onClicked: {
-        sideMenu.currentSelectionOffset = y
-        changeScreen("Send")
-      }
-    }
-
-    AVMEButton {
-      id: itemExchange
-      width: (parent.width * 0.8)
-      anchors.horizontalCenter: parent.horizontalCenter
-      text: "Exchange"
-      enabled: enableBtn
-      onClicked: {
-        sideMenu.currentSelectionOffset = y
-        changeScreen("Exchange")
-      }
-    }
-
-    AVMEButton {
-      id: itemLiquidity
-      width: (parent.width * 0.8)
-      anchors.horizontalCenter: parent.horizontalCenter
-      text: "Liquidity"
-      enabled: enableBtn
-      onClicked: {
-        sideMenu.currentSelectionOffset = y
-        changeScreen("Liquidity")
-      }
-    }
-
-    AVMEButton {
-      id: itemStaking
-      width: (parent.width * 0.8)
-      anchors.horizontalCenter: parent.horizontalCenter
-      text: "Staking"
-      enabled: enableBtn
-      onClicked: {
-        sideMenu.currentSelectionOffset = y
-        changeScreen("Staking")
-      }
-    }
-
-    AVMEButton {
-      id: itemApplications
-      width: (parent.width * 0.8)
-      anchors.horizontalCenter: parent.horizontalCenter
-      text: "Applications"
-      enabled: enableBtn
-      onClicked: {
-        sideMenu.currentSelectionOffset = y
-        changeScreen("Applications")
+    delegate: Component {
+      id: listDelegate
+      Rectangle {
+        id: menuItem
+        property bool selected: ListView.isCurrentItem
+        width: parent.width
+        color: "transparent"
+        visible: (isVisible && isEnabled)
+        enabled: isEnabled
+        onVisibleChanged: height = (visible) ? 40 : 0
+        Behavior on height { SmoothedAnimation { duration: 200 } }
+        Image {
+          id: itemIcon
+          width: 16
+          height: 16
+          anchors {
+            left: parent.left
+            leftMargin: 20
+            verticalCenter: parent.verticalCenter
+          }
+          antialiasing: true
+          smooth: true
+          fillMode: Image.PreserveAspectFit
+          source: (parent.selected) ? iconSelect : icon
+        }
+        Text {
+          id: text
+          color: {
+            if (!parent.enabled) color: "#88000000"
+            else if (parent.selected) color: "#AD00FA"
+            else color: "#FFFFFF"
+          }
+          font.pixelSize: 14.0
+          font.bold: true
+          text: name
+          anchors {
+            left: itemIcon.right
+            leftMargin: 10
+            verticalCenter: parent.verticalCenter
+          }
+        }
+        Rectangle {
+          id: selection
+          width: 5
+          color: "#AD00FA"
+          visible: parent.selected
+          anchors {
+            right: parent.right
+            top: parent.top
+            bottom: parent.bottom
+          }
+        }
+        MouseArea {
+          anchors.fill: parent
+          hoverEnabled: true
+          onEntered: { menuItem.color = "#444444" }
+          onExited: { menuItem.color = "transparent" }
+          onClicked: {
+            menuItem.color = "transparent"
+            menu.currentIndex = index
+            settingsItem.selected = aboutItem.selected = false
+            changeScreen(screen)
+          }
+        }
       }
     }
   }
 
-  Row {
-    id: statsRow
-    anchors {
-      bottom: parent.bottom
-      horizontalCenter: parent.horizontalCenter
-      bottomMargin: 20
-    }
-    spacing: 20
-
+  Rectangle {
+    id: settingsItem
+    property bool selected: false
+    width: parent.width
+    height: 40
+    anchors.bottom: aboutItem.top
+    color: "transparent"
     Image {
-      id: itemSettings
-      height: 24
-      source: (currentScreen == "Settings")
-        ? "qrc:/img/icons/Icon_Settings_On.png" : "qrc:/img/icons/Icon_Settings.png"
+      id: settingsIcon; width: 16; height: 16
+      anchors { left: parent.left; leftMargin: 20; verticalCenter: parent.verticalCenter }
+      antialiasing: true; smooth: true
       fillMode: Image.PreserveAspectFit
-      antialiasing: true
-      smooth: true
-      MouseArea {
-        anchors.fill: parent
-        onClicked: changeScreen("Settings")
+      source: (parent.selected) ? "qrc:/img/icons/cogSelect.png" : "qrc:/img/icons/cog.png"
+    }
+    Text {
+      id: settingsText
+      color: (parent.selected) ? "#AD00FA" : "#FFFFFF"
+      font.bold: true; font.pixelSize: 14.0
+      text: "Settings"
+      anchors { left: settingsIcon.right; leftMargin: 10; verticalCenter: parent.verticalCenter }
+    }
+    Rectangle {
+      id: settingsSelection
+      width: 5
+      color: "#AD00FA"
+      visible: parent.selected
+      anchors { right: parent.right; top: parent.top; bottom: parent.bottom }
+    }
+    MouseArea {
+      anchors.fill: parent
+      hoverEnabled: true
+      onEntered: { settingsItem.color = "#444444" }
+      onExited: { settingsItem.color = "transparent" }
+      onClicked: {
+        settingsItem.color = "transparent"
+        parent.selected = true
+        aboutItem.selected = false
+        menu.currentIndex = -1
+        changeScreen("Settings")
       }
     }
+  }
 
-    Text {
-      id: versionText
-      color: "#FFFFFF"
-      font.pixelSize: 14.0
-      anchors.verticalCenter: parent.verticalCenter
-      text: "v" + qmlSystem.getProjectVersion()
-    }
-
+  Rectangle {
+    id: aboutItem
+    property bool selected: false
+    width: parent.width
+    height: 40
+    anchors.bottom: parent.bottom
+    color: "transparent"
     Image {
-      id: itemAbout
-      height: 24
-      source: (currentScreen == "About")
-        ? "qrc:/img/icons/Icon_Info_On.png" : "qrc:/img/icons/Icon_Info.png"
+      id: aboutIcon; width: 16; height: 16
+      anchors { left: parent.left; leftMargin: 20; verticalCenter: parent.verticalCenter }
+      antialiasing: true; smooth: true
       fillMode: Image.PreserveAspectFit
-      antialiasing: true
-      smooth: true
-      MouseArea {
-        anchors.fill: parent
-        onClicked: changeScreen("About")
+      source: (parent.selected) ? "qrc:/img/icons/infoSelect.png" : "qrc:/img/icons/info.png"
+    }
+    Text {
+      id: aboutText
+      color: (parent.selected) ? "#AD00FA" : "#FFFFFF"
+      font.bold: true; font.pixelSize: 14.0
+      text: "About"
+      anchors { left: aboutIcon.right; leftMargin: 10; verticalCenter: parent.verticalCenter }
+    }
+    Rectangle {
+      id: aboutSelection
+      width: 5
+      color: "#AD00FA"
+      visible: parent.selected
+      anchors { right: parent.right; top: parent.top; bottom: parent.bottom }
+    }
+    MouseArea {
+      anchors.fill: parent
+      hoverEnabled: true
+      onEntered: { aboutItem.color = "#444444" }
+      onExited: { aboutItem.color = "transparent" }
+      onClicked: {
+        aboutItem.color = "transparent"
+        parent.selected = true
+        settingsItem.selected = false
+        menu.currentIndex = -1
+        changeScreen("About")
       }
     }
   }

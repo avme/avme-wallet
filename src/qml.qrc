@@ -93,44 +93,55 @@
         <file>img/unknown_token.png</file>
 
         <file>img/icons/Icon_Profile_White.png</file>
-        <file>img/icons/Icon_Info.png</file>
-        <file>img/icons/Icon_Info_On.png</file>
         <file>img/icons/Icon_Settings.png</file>
-        <file>img/icons/Icon_Settings_On.png</file>
         <file>img/icons/Icon_Clipboard.png</file>
         <file>img/icons/Icon_Clipboard_On.png</file>
 
-        <file>img/icons/create.png</file>
-        <file>img/icons/save.png</file>
-        <file>img/icons/eye-f.png</file>
-        <file>img/icons/eye-close-f.png</file>
-        <file>img/icons/folder.png</file>
+        <file>img/icons/activity.png</file>
+        <file>img/icons/activitySelect.png</file>
+        <file>img/icons/arrow.png</file>
+        <file>img/icons/backArrow.png</file>
+        <file>img/icons/bookmark.png</file>
+        <file>img/icons/bookmarkSelect.png</file>
+        <file>img/icons/chevron-down.png</file>
+        <file>img/icons/chevron-downSelect.png</file>
         <file>img/icons/cog.png</file>
         <file>img/icons/cogSelect.png</file>
         <file>img/icons/coin.png</file>
         <file>img/icons/coinSelect.png</file>
+        <file>img/icons/credit-card-f.png</file>
+        <file>img/icons/credit-card-fSelect.png</file>
         <file>img/icons/credit-card.png</file>
         <file>img/icons/credit-cardSelect.png</file>
         <file>img/icons/directions.png</file>
         <file>img/icons/directionsSelect.png</file>
+        <file>img/icons/eye-close-f.png</file>
+        <file>img/icons/eye-f.png</file>
+        <file>img/icons/folder.png</file>
         <file>img/icons/grid.png</file>
         <file>img/icons/gridSelect.png</file>
-        <file>img/icons/inboxes.png</file>
-        <file>img/icons/inboxesSelect.png</file>
+        <file>img/icons/history.png</file>
+        <file>img/icons/historySelect.png</file>
         <file>img/icons/info.png</file>
         <file>img/icons/infoSelect.png</file>
+        <file>img/icons/inboxes.png</file>
+        <file>img/icons/inboxesSelect.png</file>
+        <file>img/icons/ledgerIcon.png</file>
+        <file>img/icons/loading.png</file>
+        <file>img/icons/log-in.png</file>
+        <file>img/icons/log-inSelect.png</file>
         <file>img/icons/log-out.png</file>
         <file>img/icons/log-outSelect.png</file>
-        <file>img/icons/microchip.png</file>
-        <file>img/icons/microchipSelect.png</file>
-        <file>img/icons/loading.png</file>
-        <file>img/icons/upload.png</file>
-        <file>img/icons/uploadSelect.png</file>
+        <file>img/icons/paper-plane.png</file>
+        <file>img/icons/paper-planeSelect.png</file>
+        <file>img/icons/pie-chart-alt.png</file>
+        <file>img/icons/pie-chart-altSelect.png</file>
+        <file>img/icons/plus.png</file>
+        <file>img/icons/plusSelect.png</file>
         <file>img/icons/qrcode.png</file>
         <file>img/icons/qrcodeSelect.png</file>
-        <file>img/icons/arrow.png</file>
-        <file>img/icons/backArrow.png</file>
-        <file>img/icons/ledgerIcon.png</file>
+        <file>img/icons/upload.png</file>
+        <file>img/icons/uploadSelect.png</file>
 
         <file>fonts/IBMPlexMono-Bold.ttf</file>
         <file>fonts/IBMPlexMono-Italic.ttf</file>
