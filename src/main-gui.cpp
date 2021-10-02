@@ -4,10 +4,10 @@
 #include "main-gui.h"
 
 // Implementation of AVME Wallet as a GUI (Qt) program.
-
 int main(int argc, char *argv[]) {
-  // Setup boost::filesystem environment
+  // Setup boost::filesystem environment and Qt's <APPNAME> for QStandardPaths
   boost::nowide::nowide_filesystem();
+  QApplication::setApplicationName("AVME");
 
   // Get the system's DPI scale using a dummy temp QApplication
   QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
