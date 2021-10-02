@@ -94,8 +94,6 @@
 
         <file>img/icons/Icon_Profile_White.png</file>
         <file>img/icons/Icon_Settings.png</file>
-        <file>img/icons/Icon_Clipboard.png</file>
-        <file>img/icons/Icon_Clipboard_On.png</file>
 
         <file>img/icons/activity.png</file>
         <file>img/icons/activitySelect.png</file>
@@ -105,6 +103,8 @@
         <file>img/icons/bookmarkSelect.png</file>
         <file>img/icons/chevron-down.png</file>
         <file>img/icons/chevron-downSelect.png</file>
+        <file>img/icons/clipboard.png</file>
+        <file>img/icons/clipboardSelect.png</file>
         <file>img/icons/cog.png</file>
         <file>img/icons/cogSelect.png</file>
         <file>img/icons/coin.png</file>

@@ -11,7 +11,8 @@ import "qrc:/qml/popups"
  * Header that shows the current Account and stores details about it
  * (e.g. balances, QR code, buttons for changing Account/Wallet, etc.)
  */
-Rectangle {
+//Rectangle {
+Item {
   id: accountHeader
   property string currentAddress
   property string coinRawBalance
@@ -25,9 +26,9 @@ Rectangle {
   property bool isLedger: qmlSystem.getLedgerFlag()
   property var tokenList: ({})
 
-  height: 50
-  radius: 10
-  color: "transparent"
+  //height: 50
+  //radius: 10
+  //color: "transparent"
   signal updatedBalances()
 
   Timer { id: addressTimer; interval: 1000 }
@@ -87,11 +88,10 @@ Rectangle {
       confirmRT.open()
       window.requestActivate()
     }
-    function onAccountNonceUpdate(nonce) {
-      accountNonce = nonce
-    }
+    function onAccountNonceUpdate(nonce) { accountNonce = nonce }
   }
 
+  // TODO: find a way to remove this
   function getAddress() {
     currentAddress = qmlSystem.getCurrentAccount()
     refreshBalances()
@@ -113,134 +113,8 @@ Rectangle {
     }
   }
 
-  function qrEncode() {
-    qrcodePopup.qrModel.clear()
-    var qrData = qmlSystem.getQRCodeFromAddress(currentAddress)
-    for (var i = 0; i < qrData.length; i++) {
-      qrcodePopup.qrModel.set(i, JSON.parse(qrData[i]))
-    }
-  }
-
-  Rectangle {
-    id: qrCodeRect
-    anchors {
-      top: parent.top
-      left: parent.left
-      leftMargin: 10
-      verticalCenter: parent.verticalCenter
-    }
-    color: "transparent"
-    radius: 5
-    height: addressText.height
-    width: height
-
-    Image {
-      id: qrCodeImage
-      anchors.centerIn: parent
-      height: parent.height * 0.8
-      width: parent.width * 0.8
-      fillMode: Image.PreserveAspectFit
-      antialiasing: true
-      smooth: true
-      source: "qrc:/img/icons/qrcode.png"
-    }
-    MouseArea {
-      id: qrCodeMouseArea
-      anchors.fill: parent
-      hoverEnabled: true
-      onEntered: {
-        parent.color = "#3F434C"
-        qrCodeImage.source = "qrc:/img/icons/qrcodeSelect.png"
-      }
-      onExited: {
-        parent.color = "transparent"
-        qrCodeImage.source = "qrc:/img/icons/qrcode.png"
-      }
-      onClicked: {
-        qrEncode()
-        qrcodePopup.open()
-      }
-    }
-  }
-
-  Rectangle {
-    id: copyClipRect
-    anchors {
-      top: parent.top
-      left: qrCodeRect.right
-      leftMargin: 10
-      verticalCenter: parent.verticalCenter
-    }
-    enabled: (!addressTimer.running)
-    color: "transparent"
-    radius: 5
-    height: addressText.height
-    width: height
-
-    Image {
-      id: copyClipImage
-      anchors.centerIn: parent
-      height: parent.height * 0.8
-      width: parent.width * 0.8
-      fillMode: Image.PreserveAspectFit
-      antialiasing: true
-      smooth: true
-      source: "qrc:/img/icons/Icon_Clipboard.png"
-    }
-    MouseArea {
-      id: copyClipMouseArea
-      anchors.fill: parent
-      hoverEnabled: true
-      onEntered: {
-        parent.color = "#3F434C"
-        copyClipImage.source = "qrc:/img/icons/Icon_Clipboard_On.png"
-      }
-      onExited: {
-        parent.color = "transparent"
-        copyClipImage.source = "qrc:/img/icons/Icon_Clipboard.png"
-      }
-      onClicked: {
-        qmlSystem.copyToClipboard(currentAddress)
-        addressTimer.start()
-      }
-    }
-  }
-
-  Text {
-    id: addressText
-    anchors {
-      verticalCenter: parent.verticalCenter
-      left: copyClipRect.right
-      leftMargin: 10
-    }
-    color: "#FFFFFF"
-    text: (!addressTimer.running) ? currentAddress : "Copied to clipboard!"
-    font.bold: true
-    font.pixelSize: 17.0
-
-    Rectangle {
-      id: addressRect
-      anchors.fill: parent
-      anchors.margins: -10
-      color: "transparent"
-      z: parent.z - 1
-      radius: 5
-      MouseArea {
-        id: addressMouseArea
-        anchors.fill: parent
-        hoverEnabled: true
-        enabled: (!addressTimer.running)
-        onEntered: parent.color = "#3F434C"
-        onExited: parent.color = "transparent"
-        onClicked: {
-          parent.color = "transparent"
-          qmlSystem.copyToClipboard(currentAddress)
-          addressTimer.start()
-        }
-      }
-    }
-  }
-
+  // TODO: remove those and migrate their actions somewhere else
+  /*
   AVMEButton {
     id: btnChangeAccount
     width: parent.width * 0.15
@@ -275,6 +149,7 @@ Rectangle {
       qmlSystem.setScreen(content, "qml/screens/StartScreen.qml")
     }
   }
+  */
 
   // Popup for Ledger accounts
   AVMEPopupLedger {
@@ -287,13 +162,6 @@ Rectangle {
     icon: "qrc:/img/warn.png"
     onAboutToHide: ledgerRetryTimer.stop()
     okBtn.text: "Close"
-  }
-
-  // "qrcodeWidth = 0" makes the program not even open, so leave it at 1
-  AVMEPopupQRCode {
-    id: qrcodePopup
-    qrcodeWidth: (currentAddress != "") ? qmlSystem.getQRCodeSize(currentAddress) : 1
-    textAddress.text: currentAddress
   }
 
   AVMEPopup {
@@ -339,6 +207,7 @@ Rectangle {
       }
     }
   }
+
   AVMEPopupConfirmTx {
     id: confirmRT
     backBtn.onClicked: {
