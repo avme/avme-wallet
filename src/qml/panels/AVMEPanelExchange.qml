@@ -281,16 +281,19 @@ AVMEPanel {
     qmlApi.buildGetPairReq(
       fromAssetPopup.chosenAssetAddress,
       toAssetPopup.chosenAssetAddress,
+      "0xefa94DE7a4656D787667C749f7E1223D71E9FD88",
       "QmlExchange_fetchAllowance"
     )
     qmlApi.buildGetPairReq(
       fromAssetPopup.chosenAssetAddress,
       qmlSystem.getContract("AVAX"),
+      "0xefa94DE7a4656D787667C749f7E1223D71E9FD88",
       "QmlExchange_fetchAllowance"
     )
     qmlApi.buildGetPairReq(
       qmlSystem.getContract("AVAX"),
       toAssetPopup.chosenAssetAddress,
+      "0xefa94DE7a4656D787667C749f7E1223D71E9FD88",
       "QmlExchange_fetchAllowance"
     )
     // id 1: allowance for inToken

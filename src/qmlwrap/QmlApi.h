@@ -112,7 +112,7 @@ class QmlApi : public QObject {
     /**
      * Build request for getting the pair address for two given assets.
      */
-    Q_INVOKABLE void buildGetPairReq(QString assetAddress1, QString assetAddress2, QString requestID);
+    Q_INVOKABLE void buildGetPairReq(QString assetAddress1, QString assetAddress2, QString factoryContract, QString requestID);
 
     /**
      * Build request for getting the reserves for the given pair address.

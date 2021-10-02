@@ -152,6 +152,7 @@ AVMEPanel {
     qmlApi.buildGetPairReq(
       addAsset1Popup.chosenAssetAddress,
       addAsset2Popup.chosenAssetAddress,
+      "0xefa94DE7a4656D787667C749f7E1223D71E9FD88",
       "QmlAddLiquidity_fetchAllowancesAndPair"
     )
     qmlApi.buildGetAllowanceReq(

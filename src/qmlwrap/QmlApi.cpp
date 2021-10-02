@@ -164,10 +164,10 @@ void QmlApi::buildGetAllowanceReq(QString receiver, QString owner, QString spend
   requestListLock.unlock();
 }
 
-void QmlApi::buildGetPairReq(QString assetAddress1, QString assetAddress2, QString requestID) {
+void QmlApi::buildGetPairReq(QString assetAddress1, QString assetAddress2, QString factoryContract,QString requestID) {
   json params;
   json array = json::array();
-  params["to"] = Pangolin::contracts["factory"];
+  params["to"] = factoryContract.toStdString();
   params["data"] = Pangolin::factoryFuncs["getPair"]
     + Utils::addressToHex(assetAddress1.toStdString())
     + Utils::addressToHex(assetAddress2.toStdString());
