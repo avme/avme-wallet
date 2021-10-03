@@ -9,8 +9,8 @@ import "qrc:/qml/components"
 // Side panel that acts as a "global menu"
 Rectangle {
   id: sideMenu
+  property string currentSubmenu
   property string currentScreen
-  property int currentSelectionOffset
   width: 200
   height: parent.height
   color: "#1C2029"
@@ -18,10 +18,15 @@ Rectangle {
   // TODO: Using this if condition is a workaround, find a better solution
   property bool enableBtn: accountHeader.coinRawBalance
 
-  function changeScreen(name) {
+  function changeScreen(screen) {
     content.active = false
-    currentScreen = name
-    qmlSystem.setScreen(content, "qml/screens/" + name + "Screen.qml")
+    currentSubmenu = ""
+    for (var i = 0; i < menuModel.count; i++) {
+      var item = menuModel.get(i);
+      if (item.screen == screen) currentSubmenu = item.type
+    }
+    currentScreen = screen
+    qmlSystem.setScreen(content, "qml/screens/" + screen + "Screen.qml")
     content.active = true
   }
 
@@ -52,10 +57,10 @@ Rectangle {
     text: "v" + qmlSystem.getProjectVersion()
   }
 
-  // TODO: proper item selection at startup, disabling logic
+  // TODO: disabling logic
   ListView {
     id: menu
-    property string expandedSection: ""
+    property string expandedSection: currentSubmenu
     width: parent.width
     interactive: false  // Disable flicking
     anchors {
@@ -92,8 +97,7 @@ Rectangle {
         isEnabled: true; isVisible: false;
       }
       ListElement {
-        // TODO: rename "TokensScreen" to "AssetsScreen"
-        type: "Wallet"; name: "Assets"; screen: "Tokens";
+        type: "Wallet"; name: "Tokens"; screen: "Tokens";
         icon: "qrc:/img/icons/coin.png";
         iconSelect: "qrc:/img/icons/coinSelect.png";
         isEnabled: true; isVisible: false;
@@ -129,6 +133,7 @@ Rectangle {
         iconSelect: "qrc:/img/icons/paper-planeSelect.png";
         isEnabled: true; isVisible: false;
       }
+      // TODO: remove exchange & both liquidity screens when DApps are finished
       ListElement {
         type: "Operations"; name: "Exchange"; screen: "Exchange";
         icon: "qrc:/img/icons/directions.png";
@@ -141,7 +146,6 @@ Rectangle {
         iconSelect: "qrc:/img/icons/log-inSelect.png";
         isEnabled: true; isVisible: false;
       }
-      // TODO: split add and remove liquidity screens
       ListElement {
         type: "Operations"; name: "Remove Liquidity"; screen: "Liquidity";
         icon: "qrc:/img/icons/log-out.png";
@@ -154,7 +158,6 @@ Rectangle {
         iconSelect: "qrc:/img/icons/credit-cardSelect.png";
         isEnabled: true; isVisible: false;
       }
-      // TODO: split staking and compound screens
       ListElement {
         type: "Operations"; name: "YY Compound"; screen: "Staking";
         icon: "qrc:/img/icons/credit-card-f.png";
@@ -167,8 +170,7 @@ Rectangle {
       id: header
       Rectangle {
         id: headerRect
-        property bool isExpanded: false
-        property string currentExpandedSection: ListView.view.expandedSection
+        property bool isExpanded: (ListView.view.expandedSection === section)
         width: parent.width
         height: 40
         color: "transparent"
@@ -207,17 +209,13 @@ Rectangle {
           onExited: { headerRect.color = "transparent" }
           onClicked: {
             headerRect.color = "transparent"
-            headerRect.isExpanded = !headerRect.isExpanded
+            currentSubmenu = section
           }
         }
-        onCurrentExpandedSectionChanged: isExpanded = (currentExpandedSection === section)
         onIsExpandedChanged: {
-          if (isExpanded) ListView.view.expandedSection = section
           for (var i = 0; i < menuModel.count; i++) {
             var item = menuModel.get(i);
-            if (item.type !== "" && section === item.type) {
-              item.isVisible = headerRect.isExpanded
-            }
+            if (item.type === section) { item.isVisible = headerRect.isExpanded }
           }
         }
       }
@@ -226,7 +224,8 @@ Rectangle {
       id: listDelegate
       Rectangle {
         id: menuItem
-        property bool selected: ListView.isCurrentItem
+        //property bool selected: ListView.isCurrentItem
+        property bool selected: (screen === currentScreen)
         width: parent.width
         color: "transparent"
         visible: (isVisible && isEnabled)

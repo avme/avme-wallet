@@ -78,10 +78,11 @@ Item {
   AVMEPopupChooseAccount { id: chooseAccountPopup }
   AVMEPopupSeed { id: seedPopup }
 
+  // TODO: fix importing Accounts from seed
   AVMEPanelAccountSelect {
     id: accountSelectPanel
+    width: parent.width * 0.95
     height: parent.height * 0.9
-    width: parent.width * 0.9
     anchors.centerIn: parent
     btnCreate.onClicked: chooseAccountPopup.open()
     btnImport.onClicked: seedPopup.open()

@@ -62,28 +62,28 @@ AVMEPanel {
 
     AVMEButton {
       id: selectBtn
-      width: (accountSelectPanel.width * 0.15)
+      width: (accountSelectPanel.width * 0.15) + (parent.spacing)
       text: "Select This Account"
     }
     AVMEButton {
       id: createBtn
-      width: (accountSelectPanel.width * 0.15)
+      width: (accountSelectPanel.width * 0.15) + (parent.spacing)
       text: "Create New Account"
     }
     AVMEButton {
       id: importBtn
-      width: (accountSelectPanel.width * 0.15)
+      width: (accountSelectPanel.width * 0.15) + (parent.spacing)
       text: "Import From Seed"
     }
     AVMEButton {
       id: eraseBtn
-      width: (accountSelectPanel.width * 0.15)
+      width: (accountSelectPanel.width * 0.15) + (parent.spacing)
       text: "Erase This Account"
     }
 
     AVMEButton {
       id: createLedgerBtn
-      width: (accountSelectPanel.width * 0.15)
+      width: (accountSelectPanel.width * 0.15) + (parent.spacing)
       text: "Import Ledger Account"
     }
   }

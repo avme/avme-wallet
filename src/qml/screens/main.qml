@@ -24,12 +24,17 @@ ApplicationWindow {
   minimumHeight: 720
   visible: true
 
-  Component.onCompleted: {
+  function startup() {
     var lastPath = qmlSystem.getLastWalletPath()
     var defaultPath = qmlSystem.defaultWalletPathExists()
     var screen = (lastPath != "" || defaultPath) ? "LoadWallet" : "CreateWallet"
     menu.changeScreen(screen)
   }
+
+  Component.onCompleted: menuTimer.start()
+
+  // Timer for preventing side menu items from getting all squashed
+  Timer { id: menuTimer; interval: 1; onTriggered: startup() }
 
   Rectangle {
     id: bg
