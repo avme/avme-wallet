@@ -230,6 +230,16 @@ void QmlApi::getTokenPriceHistory(QString address, int days, QString requestID) 
   });
 }
 
+QString QmlApi::getARC20TokenImage(QString address) {
+  boost::filesystem::path filePath = Utils::walletFolderPath.string()
+    + "/wallet/c-avax/tokens/icons/" + address.toStdString() + ".png";
+  if (boost::filesystem::exists(filePath)) {
+    return QString::fromStdString(filePath.string());
+  } else {
+    return "";
+  }
+}
+
 QString QmlApi::buildCustomABI(QString input) {
   return QString::fromStdString(ABI::encodeABIfromJson(input.toStdString()));
 }

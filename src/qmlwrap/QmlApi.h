@@ -147,6 +147,10 @@ class QmlApi : public QObject {
     // Get the fiat price history of the last X days for a given ARC20 token.
     Q_INVOKABLE void getTokenPriceHistory(QString address, int days, QString requestID);
 
+    // Get image path for ARC20 token
+
+    Q_INVOKABLE QString getARC20TokenImage(QString address);
+
     /**
      * Convert `input` to a custom ABI bytecode.
      * Returns the encoded ABI bytecode as a string.
