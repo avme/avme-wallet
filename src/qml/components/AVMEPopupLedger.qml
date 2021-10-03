@@ -57,7 +57,7 @@ Popup {
 
   width: window.width * 0.9
   height: 700
-  x: (window.width * 0.1) / ((window.menuToggle) ? (width / 2) : 2)
+  x: (window.width * 0.1) / 2
   y: (window.height * 0.5) - (height / 2)
   modal: true
   focus: true

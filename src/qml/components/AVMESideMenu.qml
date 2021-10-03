@@ -18,11 +18,6 @@ Rectangle {
   // TODO: Using this if condition is a workaround, find a better solution
   property bool enableBtn: accountHeader.coinRawBalance
 
-  Connections {
-    target: qmlSystem
-    function onGoToOverview() { changeScreen("Overview") }
-  }
-
   function changeScreen(name) {
     content.active = false
     currentScreen = name
@@ -73,14 +68,13 @@ Rectangle {
     model: ListModel {
       id: menuModel
       ListElement {
-        type: "Wallet"; name: "Create/Import"; screen: "Start";
+        type: "Wallet"; name: "Create/Import"; screen: "CreateWallet";
         icon: "qrc:/img/icons/plus.png";
         iconSelect: "qrc:/img/icons/plusSelect.png";
         isEnabled: true; isVisible: false;
       }
-      // TODO: split create and load screens
       ListElement {
-        type: "Wallet"; name: "Load"; screen: "Start";
+        type: "Wallet"; name: "Load"; screen: "LoadWallet";
         icon: "qrc:/img/icons/upload.png";
         iconSelect: "qrc:/img/icons/uploadSelect.png";
         isEnabled: true; isVisible: false;

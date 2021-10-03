@@ -61,7 +61,11 @@ QStringList QmlSystem::copySeedFromClipboard() {
 }
 
 QString QmlSystem::getDefaultWalletPath() {
-  return QString::fromStdString(Utils::getDataDir().string());
+  return QString::fromStdString(Utils::getDefaultDataDir().string());
+}
+
+bool QmlSystem::defaultWalletPathExists() {
+  return boost::filesystem::exists(Utils::getDefaultDataDir().string());
 }
 
 QString QmlSystem::cleanPath(QString path) {

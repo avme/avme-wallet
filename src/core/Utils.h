@@ -174,7 +174,6 @@ namespace Utils {
   boost::filesystem::path GetSpecialFolderPath(int nFolder, bool fCreate = true);
   #endif
   boost::filesystem::path getDefaultDataDir();
-  boost::filesystem::path getDataDir();
 
   /**
    * Read from/write to a JSON file, respectively.

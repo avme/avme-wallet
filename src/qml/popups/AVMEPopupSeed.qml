@@ -6,22 +6,22 @@ import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
 
-/**
- * Popup for inserting a BIP39 seed.
- * Requires a "useSeed()" function defined outside, which would copy the
- * fullSeed parameter below to the desired place where it will be used.
- * Parameters:
- * - fullSeed: the validated seed in a single string, words separated by space
- */
+// Popup for inserting a BIP39 seed.
 AVMEPopup {
   id: seedPopup
   widthPct: 0.4
-  heightPct: 0.9
+  heightPct: 0.95
   property string fullSeed
   property alias phraseValue: phraseSize.currentValue
 
   onAboutToShow: seedLabel1.forceActiveFocus()
-  onAboutToHide: seedPopup.clean()
+  onAboutToHide: {
+    var leftCol = seedColLeft.children
+    var rightCol = seedColRight.children
+    for (var i = 0; i < (+phraseValue/2); i++) {
+      leftCol[i].text = ""; rightCol[i].text = ""
+    }
+  }
 
   function handlePaste(event) {
     if ((event.key == Qt.Key_V) && (event.modifiers & Qt.ControlModifier)) {
@@ -53,20 +53,10 @@ AVMEPopup {
       if (i != ignoreValue) { fullSeed += " " }
     }
     if (qmlSystem.seedIsValid(fullSeed)) {
-      useSeed()
+      seedPopup.close()
     } else {
       fullSeed = ""
       seedFailPopup.open()
-    }
-  }
-
-  function clean() {
-    fullSeed = ""
-    var leftCol = seedColLeft.children
-    var rightCol = seedColRight.children
-    for (var i = 0; i < (+phraseValue/2); i++) {
-      leftCol[i].text = ""
-      rightCol[i].text = ""
     }
   }
 
@@ -76,7 +66,7 @@ AVMEPopup {
     height: parent.height * 0.85
     anchors.top: parent.top
     anchors.topMargin: 20
-    spacing: 30
+    spacing: 20
 
     // Enter/Numpad enter key override
     Keys.onPressed: {
@@ -94,17 +84,14 @@ AVMEPopup {
       color: "#FFFFFF"
       font.pixelSize: 14.0
       height: parent.height * 0.05
-      text: "Enter your 12-word seed. Phrase Size:"
+      text: "Enter your seed. Phrase Size:"
       ComboBox {
         id: phraseSize
         anchors.left: parent.right
         anchors.leftMargin: parent.width * 0.025
         height: parent.height
         font.pixelSize: parent.font.pixelSize
-        model: [
-          "12",
-          "24",
-        ]
+        model: ["12", "24"]
       }
     }
 
@@ -112,13 +99,14 @@ AVMEPopup {
       id: seedInputs
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: spacing
+
       Column {
         id: seedColLeft
         anchors.verticalCenter: parent.verticalCenter
         spacing: 5
         AVMEInput {
           id: seedInput1
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
@@ -135,7 +123,7 @@ AVMEPopup {
         }
         AVMEInput {
           id: seedInput2
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
@@ -152,7 +140,7 @@ AVMEPopup {
         }
         AVMEInput {
           id: seedInput3
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
@@ -169,7 +157,7 @@ AVMEPopup {
         }
         AVMEInput {
           id: seedInput4
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
@@ -186,7 +174,7 @@ AVMEPopup {
         }
         AVMEInput {
           id: seedInput5
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
@@ -203,7 +191,7 @@ AVMEPopup {
         }
         AVMEInput {
           id: seedInput6
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
@@ -220,7 +208,7 @@ AVMEPopup {
         }
         AVMEInput {
           id: seedInput13 // Actually 7
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           visible: (phraseValue == 24) ? true : false
@@ -239,7 +227,7 @@ AVMEPopup {
         AVMEInput {
           id: seedInput14 // Actually 8
           visible: (phraseValue == 24) ? true : false
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
@@ -257,7 +245,7 @@ AVMEPopup {
         AVMEInput {
           id: seedInput15 // Actually 9
           visible: (phraseValue == 24) ? true : false
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
@@ -275,7 +263,7 @@ AVMEPopup {
         AVMEInput {
           id: seedInput16 // Actually 10
           visible: (phraseValue == 24) ? true : false
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
@@ -293,7 +281,7 @@ AVMEPopup {
         AVMEInput {
           id: seedInput17 // Actually 11
           visible: (phraseValue == 24) ? true : false
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
@@ -311,7 +299,7 @@ AVMEPopup {
         AVMEInput {
           id: seedInput18 // Actually 12
           visible: (phraseValue == 24) ? true : false
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
@@ -335,7 +323,7 @@ AVMEPopup {
         AVMEInput {
           id: seedInput7 // 7 AND 13 at the same time, depending on combobox
           width: (seedItems.width * 0.35)
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           Keys.onReleased: handlePaste(event)
           Text {
             id: seedLabel7
@@ -352,7 +340,7 @@ AVMEPopup {
         AVMEInput {
           id: seedInput8 // 8 AND 14 at the same time, depending on combobox
           width: (seedItems.width * 0.35)
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           Keys.onReleased: handlePaste(event)
           Text {
             id: seedLabel8
@@ -369,7 +357,7 @@ AVMEPopup {
         AVMEInput {
           id: seedInput9 // 9 AND 15 at the same time, depending on combobox
           width: (seedItems.width * 0.35)
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           Keys.onReleased: handlePaste(event)
           Text {
             id: seedLabel9
@@ -386,7 +374,7 @@ AVMEPopup {
         AVMEInput {
           id: seedInput10 // 10 AND 16 at the same time, depending on combobox
           width: (seedItems.width * 0.35)
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           Keys.onReleased: handlePaste(event)
           Text {
             id: seedLabel10
@@ -403,7 +391,7 @@ AVMEPopup {
         AVMEInput {
           id: seedInput11 // 11 AND 17 at the same time, depending on combobox
           width: (seedItems.width * 0.35)
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           Keys.onReleased: handlePaste(event)
           Text {
             id: seedLabel11
@@ -420,7 +408,7 @@ AVMEPopup {
         AVMEInput {
           id: seedInput12 // 12 AND 18 at the same time, depending on combobox
           width: (seedItems.width * 0.35)
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           Keys.onReleased: handlePaste(event)
           Text {
             id: seedLabel12
@@ -436,7 +424,7 @@ AVMEPopup {
         }
         AVMEInput {
           id: seedInput19 // Actually 19
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           visible: (phraseValue == 24) ? true : false
@@ -455,7 +443,7 @@ AVMEPopup {
         AVMEInput {
           id: seedInput20 // Actually 20
           visible: (phraseValue == 24) ? true : false
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
@@ -473,7 +461,7 @@ AVMEPopup {
         AVMEInput {
           id: seedInput21 // Actually 21
           visible: (phraseValue == 24) ? true : false
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
@@ -491,7 +479,7 @@ AVMEPopup {
         AVMEInput {
           id: seedInput22 // Actually 22
           visible: (phraseValue == 24) ? true : false
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
@@ -509,7 +497,7 @@ AVMEPopup {
         AVMEInput {
           id: seedInput23 // Actually 23
           visible: (phraseValue == 24) ? true : false
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
@@ -527,7 +515,7 @@ AVMEPopup {
         AVMEInput {
           id: seedInput24 // Actually 24
           visible: (phraseValue == 24) ? true : false
-          height: seedItems.height/20
+          height: (seedItems.height / 20)
           width: (seedItems.width * 0.35)
           Keys.onReleased: handlePaste(event)
           Text {
@@ -551,8 +539,8 @@ AVMEPopup {
     width: parent.width
     height: parent.height * 0.15
     anchors.bottom: parent.bottom
-    anchors.bottomMargin: 20
-    spacing: 20
+    anchors.bottomMargin: 50
+    spacing: 10
 
     AVMEButton {
       id: btnOk
@@ -585,11 +573,28 @@ AVMEPopup {
     }
 
     AVMEButton {
+      id: btnClear
+      width: (seedItems.width * 0.9)
+      anchors.horizontalCenter: parent.horizontalCenter
+      text: "Clear Seed"
+      onClicked: {
+        seedPopup.fullSeed = ""
+        seedPopup.close()
+      }
+    }
+
+    AVMEButton {
       id: btnClose
       width: (seedItems.width * 0.9)
       anchors.horizontalCenter: parent.horizontalCenter
       text: "Back"
       onClicked: seedPopup.close()
     }
+  }
+
+  AVMEPopupInfo {
+    id: seedFailPopup; icon: "qrc:/img/warn.png"
+    widthPct: 0.9
+    info: "Seed is invalid.<br>Please check if typing is correct."
   }
 }

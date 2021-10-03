@@ -4,7 +4,8 @@
 <RCC>
     <qresource prefix="/">
         <file>qml/screens/main.qml</file>
-        <file>qml/screens/StartScreen.qml</file>
+        <file>qml/screens/CreateWalletScreen.qml</file>
+        <file>qml/screens/LoadWalletScreen.qml</file>
         <file>qml/screens/AccountsScreen.qml</file>
         <file>qml/screens/OverviewScreen.qml</file>
         <file>qml/screens/TokensScreen.qml</file>
@@ -21,8 +22,6 @@
 
         <file>qml/popups/AVMEPopupInfo.qml</file>
         <file>qml/popups/AVMEPopupYesNo.qml</file>
-        <file>qml/popups/AVMEPopupCreateWallet.qml</file>
-        <file>qml/popups/AVMEPopupLoadWallet.qml</file>
         <file>qml/popups/AVMEPopupNewWalletSeed.qml</file>
         <file>qml/popups/AVMEPopupSeed.qml</file>
         <file>qml/popups/AVMEPopupChooseAccount.qml</file>
@@ -140,6 +139,7 @@
         <file>img/icons/plusSelect.png</file>
         <file>img/icons/qrcode.png</file>
         <file>img/icons/qrcodeSelect.png</file>
+        <file>img/icons/seed.png</file>
         <file>img/icons/upload.png</file>
         <file>img/icons/uploadSelect.png</file>
 

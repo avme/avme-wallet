@@ -11,7 +11,6 @@ import "qrc:/qml/popups"
  * Header that shows the current Account and stores details about it
  * (e.g. balances, QR code, buttons for changing Account/Wallet, etc.)
  */
-//Rectangle {
 Item {
   id: accountHeader
   property string currentAddress
@@ -26,9 +25,6 @@ Item {
   property bool isLedger: qmlSystem.getLedgerFlag()
   property var tokenList: ({})
 
-  //height: 50
-  //radius: 10
-  //color: "transparent"
   signal updatedBalances()
 
   Timer { id: addressTimer; interval: 1000 }
@@ -91,7 +87,6 @@ Item {
     function onAccountNonceUpdate(nonce) { accountNonce = nonce }
   }
 
-  // TODO: find a way to remove this
   function getAddress() {
     currentAddress = qmlSystem.getCurrentAccount()
     refreshBalances()
@@ -112,44 +107,6 @@ Item {
       ledgerRetryTimer.start()
     }
   }
-
-  // TODO: remove those and migrate their actions somewhere else
-  /*
-  AVMEButton {
-    id: btnChangeAccount
-    width: parent.width * 0.15
-    anchors {
-      verticalCenter: parent.verticalCenter
-      right: btnChangeWallet.left
-      rightMargin: 10
-    }
-    text: "Change Account"
-    onClicked: {
-      qmlSystem.setLedgerFlag(false)
-      qmlSystem.hideMenu()
-      qmlSystem.cleanAndCloseAccount()
-      qmlSystem.setScreen(content, "qml/screens/AccountsScreen.qml")
-    }
-  }
-
-  AVMEButton {
-    id: btnChangeWallet
-    width: parent.width * 0.15
-    anchors {
-      verticalCenter: parent.verticalCenter
-      right: parent.right
-      rightMargin: 10
-    }
-    text: "Change Wallet"
-    onClicked: {
-      qmlSystem.setLedgerFlag(false)
-      qmlSystem.deleteLastWalletPath()
-      qmlSystem.hideMenu()
-      qmlSystem.cleanAndClose()
-      qmlSystem.setScreen(content, "qml/screens/StartScreen.qml")
-    }
-  }
-  */
 
   // Popup for Ledger accounts
   AVMEPopupLedger {

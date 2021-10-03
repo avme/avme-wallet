@@ -44,7 +44,6 @@ class QmlSystem : public QObject {
     Wallet w;
     Server s;
     ledger::device ledgerDevice;
-    bool firstLoad;
     bool ledgerFlag = false;
     QString currentHardwareAccount;
     QString currentHardwareAccountPath;
@@ -65,6 +64,7 @@ class QmlSystem : public QObject {
     std::string RTtxid = "";
 
   public slots:
+    // Clean database, threads, etc before changing the Account and Wallet, respectively
     void cleanAndCloseAccount() {
       this->w.closeTokenDB();
       this->w.closeHistoryDB();
@@ -72,7 +72,6 @@ class QmlSystem : public QObject {
       this->w.closeAddressDB();
       stopWSServer();
     }
-    // Clean database, threads, etc before closing the program
     void cleanAndClose() {
       this->w.closeTokenDB();
       this->w.closeHistoryDB();
@@ -86,8 +85,6 @@ class QmlSystem : public QObject {
 
   signals:
     // Common signals
-    void hideMenu();
-    void goToOverview();
     void urlChecked(QString link, bool b);
 
     // Start/Wallet screen signals
@@ -139,8 +136,6 @@ class QmlSystem : public QObject {
     // ======================================================================
 
     // Getters/Setters for private vars
-    Q_INVOKABLE bool getFirstLoad() { return firstLoad; }
-    Q_INVOKABLE void setFirstLoad(bool b) { firstLoad = b; }
     Q_INVOKABLE bool getLedgerFlag() { return ledgerFlag; }
     Q_INVOKABLE void setLedgerFlag(bool b) { ledgerFlag = b; }
     Q_INVOKABLE void setCurrentHardwareAccount(QString b) { currentHardwareAccount = b; }
@@ -177,6 +172,9 @@ class QmlSystem : public QObject {
 
     // Get the default path for the Wallet
     Q_INVOKABLE QString getDefaultWalletPath();
+
+    // Check if the default Wallet path exists
+    Q_INVOKABLE bool defaultWalletPathExists();
 
     // Remove the "file://" prefix from a folder path
     Q_INVOKABLE QString cleanPath(QString path);
@@ -298,9 +296,6 @@ class QmlSystem : public QObject {
     Q_INVOKABLE bool loadAppDB();
     Q_INVOKABLE bool loadAddressDB();
     Q_INVOKABLE bool loadConfigDB();
-
-    // Set/Create default folder path when loading with Ledger.
-    Q_INVOKABLE void setDefaultPathFolders();
 
     // ======================================================================
     // OVERVIEW SCREEN FUNCTIONS

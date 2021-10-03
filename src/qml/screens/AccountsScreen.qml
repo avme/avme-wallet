@@ -60,13 +60,6 @@ Item {
     qmlSystem.getAllAVAXBalances(addList)
   }
 
-  function useSeed() {
-    chooseAccountPopup.foreignSeed = seedPopup.fullSeed
-    seedPopup.clean()
-    seedPopup.close()
-    chooseAccountPopup.open()
-  }
-
   function checkLedger() {
     var data = qmlSystem.checkForLedger()
     if (data.state) {
@@ -97,15 +90,15 @@ Item {
     btnErase.onClicked: confirmErasePopup.open()
     function chooseSelectedAccount() {
       if (accountList.currentItem.itemIsLedger) {
-        qmlSystem.setLedgerFlag(true);
+        qmlSystem.setLedgerFlag(true)
         qmlSystem.setCurrentHardwareAccount(accountList.currentItem.itemAddress)
         qmlSystem.setCurrentHardwareAccountPath(accountList.currentItem.itemDerivationPath)
-        qmlSystem.importLedgerAccount(qmlSystem.getCurrentHardwareAccount(), qmlSystem.getCurrentHardwareAccountPath());
-        qmlSystem.setDefaultPathFolders()
+        qmlSystem.importLedgerAccount(qmlSystem.getCurrentHardwareAccount(), qmlSystem.getCurrentHardwareAccountPath())
       } else {
-        qmlSystem.setLedgerFlag(false);
+        qmlSystem.setLedgerFlag(false)
         qmlSystem.setCurrentAccount(accountList.currentItem.itemAddress)
       }
+      qmlSystem.cleanAndCloseAccount()
       qmlSystem.loadTokenDB()
       qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
       qmlSystem.loadAppDB()
@@ -113,10 +106,9 @@ Item {
       qmlSystem.loadConfigDB()
       qmlSystem.loadPermissionList()
       qmlSystem.loadARC20Tokens()
-      accountHeader.getAddress()
       qmlSystem.startWSServer()
-      qmlSystem.goToOverview()
-      qmlSystem.setScreen(content, "qml/screens/OverviewScreen.qml")
+      accountHeader.getAddress()
+      window.menu.changeScreen("Overview")
     }
   }
 

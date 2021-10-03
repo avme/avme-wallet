@@ -12,8 +12,8 @@ import "qrc:/qml/components"
 // The main window
 ApplicationWindow {
   id: window
-  property bool menuToggle: false
-  property alias menuSize: sideMenu.width
+  property alias infoPopup: infoPopup
+  property alias menu: sideMenu
 
   QmlApi { id: qmlApi }
 
@@ -24,48 +24,13 @@ ApplicationWindow {
   minimumHeight: 720
   visible: true
 
-  Connections {
-    target: qmlSystem
-    function onHideMenu() { menuToggle = false }
-    function onGoToOverview() { menuToggle = true }
+  Component.onCompleted: {
+    var lastPath = qmlSystem.getLastWalletPath()
+    var defaultPath = qmlSystem.defaultWalletPathExists()
+    var screen = (lastPath != "" || defaultPath) ? "LoadWallet" : "CreateWallet"
+    menu.changeScreen(screen)
   }
 
-  // States for menu visibility and loader anchoring
-  StateGroup {
-    id: menuStates
-    states: [
-      State {
-        name: "menuHide"; when: !menuToggle
-        PropertyChanges { target: sideMenu; visible: false }
-        PropertyChanges { target: accountHeader; visible: false }
-        AnchorChanges {
-          target: content;
-          anchors {
-            left: parent.left
-            right: parent.right
-            top: parent.top
-            bottom: parent.bottom
-          }
-        }
-      },
-      State {
-        name: "menuShow"; when: menuToggle
-        PropertyChanges { target: sideMenu; visible: true }
-        PropertyChanges { target: accountHeader; visible: true }
-        AnchorChanges {
-          target: content;
-          anchors {
-            left: sideMenu.right
-            right: parent.right
-            top: accountHeader.bottom
-            bottom: parent.bottom
-          }
-        }
-      }
-    ]
-  }
-
-  // Background w/ logo image
   Rectangle {
     id: bg
     anchors.fill: parent
@@ -73,16 +38,11 @@ ApplicationWindow {
       GradientStop { position: 0.0; color: "#0F0C18" }
       GradientStop { position: 1.0; color: "#190B25" }
     }
-
     Image {
       id: logoBg
       width: 1000
       height: 1000
-      anchors {
-        right: parent.right
-        bottom: parent.bottom
-        margins: -300
-      }
+      anchors { right: parent.right; bottom: parent.bottom; margins: -300 }
       opacity: 0.15
       antialiasing: true
       smooth: true
@@ -91,32 +51,39 @@ ApplicationWindow {
     }
   }
 
-  // Side menu
   AVMESideMenu {
     id: sideMenu
-    anchors {
-      left: parent.left
-      top: parent.top
-      bottom: parent.bottom
-    }
+    anchors { left: parent.left; top: parent.top; bottom: parent.bottom }
   }
 
-  // Account header
-  AVMEAccountHeader {
-    id: accountHeader
-    anchors {
-      top: parent.top
-      left: sideMenu.right
-      right: parent.right
-      margins: 10
+  AVMEAccountHeader { id: accountHeader }
+
+  AVMEPopup {
+    id: infoPopup
+    property alias info: infoText.text
+    x: ((parent.width / 2) - (width / 2)) + (sideMenu.width / 2)  // Override
+    widthPct: 0.2
+    heightPct: 0.1
+    onAboutToHide: info = ""
+    Text {
+      id: infoText
+      color: "#FFFFFF"
+      horizontalAlignment: Text.AlignHCenter
+      anchors.centerIn: parent
+      font.pixelSize: 14.0
     }
   }
 
   // Dynamic screen loader (used in setScreen(id, screenpath))
   Loader {
     id: content
+    anchors {
+      top: parent.top
+      bottom: parent.bottom
+      left: sideMenu.right
+      right: parent.right
+    }
     antialiasing: true
     smooth: true
-    source: "qrc:/qml/screens/StartScreen.qml"
   }
 }
