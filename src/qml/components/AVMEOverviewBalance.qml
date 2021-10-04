@@ -4,8 +4,6 @@
 import QtQuick 2.15 // Gradient.orientation requires QtQuick 2.15
 import QtQuick.Controls 2.2
 
-import "qrc:/qml/popups"
-
 // Template for basic info/data/etc.
 Rectangle {
   id: overviewBalance
@@ -156,12 +154,5 @@ Rectangle {
         onClicked: { qrEncode(); qrcodePopup.open() }
       }
     }
-  }
-
-  // "qrcodeWidth = 0" doesn't let the program open, leave it at 1
-  AVMEPopupQRCode {
-    id: qrcodePopup
-    qrcodeWidth: (currentAccount != "") ? qmlSystem.getQRCodeSize(currentAccount) : 1
-    textAddress.text: currentAccount
   }
 }

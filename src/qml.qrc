@@ -7,16 +7,20 @@
         <file>qml/screens/CreateWalletScreen.qml</file>
         <file>qml/screens/LoadWalletScreen.qml</file>
         <file>qml/screens/AccountsScreen.qml</file>
-        <file>qml/screens/OverviewScreen.qml</file>
-        <file>qml/screens/TokensScreen.qml</file>
-        <file>qml/screens/HistoryScreen.qml</file>
         <file>qml/screens/ContactsScreen.qml</file>
+        <file>qml/screens/TokensScreen.qml</file>
+        <file>qml/screens/ApplicationsScreen.qml</file>
+        <file>qml/screens/AppScreen.qml</file>
+
+        <file>qml/screens/OverviewScreen.qml</file>
+        <file>qml/screens/OverviewAssetsScreen.qml</file>
+        <file>qml/screens/HistoryScreen.qml</file>
+
         <file>qml/screens/SendScreen.qml</file>
         <file>qml/screens/ExchangeScreen.qml</file>
         <file>qml/screens/LiquidityScreen.qml</file>
         <file>qml/screens/StakingScreen.qml</file>
-        <file>qml/screens/ApplicationsScreen.qml</file>
-        <file>qml/screens/AppScreen.qml</file>
+
         <file>qml/screens/SettingsScreen.qml</file>
         <file>qml/screens/AboutScreen.qml</file>
 

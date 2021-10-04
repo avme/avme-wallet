@@ -42,7 +42,7 @@ AVMEPanel {
 
   Rectangle {
     id: accountChartRect
-    height: (parent.height * 0.5) - anchors.topMargin
+    height: (parent.height * 0.6) - anchors.topMargin
     anchors {
       top: parent.top
       left: parent.left
@@ -85,7 +85,7 @@ AVMEPanel {
         id: accountPiePercentageText
         anchors {
           top: parent.top
-          topMargin: parent.height * 0.35
+          topMargin: parent.height * 0.5
           horizontalCenter: parent.horizontalCenter
         }
         font.pixelSize: 18.0
@@ -96,7 +96,7 @@ AVMEPanel {
         id: accountPieValueText
         anchors {
           bottom: parent.bottom
-          bottomMargin: parent.height * 0.35
+          bottomMargin: parent.height * 0.5
           horizontalCenter: parent.horizontalCenter
         }
         font.pixelSize: 18.0
@@ -116,7 +116,7 @@ AVMEPanel {
       margins: 20
     }
     clip: true
-    cellWidth: width / 4
+    cellWidth: width * 0.2
     cellHeight: 40
     delegate: Component {
       id: accountChartLegendDelegate

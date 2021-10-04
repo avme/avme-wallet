@@ -45,6 +45,7 @@ Rectangle {
           item.isEnabled = walletIsLoaded; break;
         case "Applications":
         case "Overview":
+        case "OverviewAssets":
         case "History":
         case "Send":
         case "Exchange":
@@ -142,9 +143,8 @@ Rectangle {
         iconSelect: "qrc:/img/icons/pie-chart-altSelect.png";
         isEnabled: false; isVisible: false;
       }
-      // TODO: split asset prices and overview screens
       ListElement {
-        type: "This Account"; name: "Asset Prices"; screen: "Overview";
+        type: "This Account"; name: "Asset Prices"; screen: "OverviewAssets";
         icon: "qrc:/img/icons/activity.png";
         iconSelect: "qrc:/img/icons/activitySelect.png";
         isEnabled: false; isVisible: false;

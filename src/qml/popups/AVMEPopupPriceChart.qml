@@ -13,9 +13,9 @@ AVMEPopup {
   id: pricechartPopup
   widthPct: 0.8
   heightPct: 0.75
-  property string contractAddress
-  property string nameAsset
-  property string currentAssetPrice
+  property string contractAddress: ""
+  property string nameAsset: ""
+  property string currentAssetPrice: ""
 
   Connections {
     target: chartPeriod

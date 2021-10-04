@@ -7,46 +7,39 @@ import QtCharts 2.2
 
 import "qrc:/qml/components"
 import "qrc:/qml/panels"
+import "qrc:/qml/popups"
 
-// Screen for showing an overview for the Wallet, Account, etc.
+// Screen for showing a general overview for the chosen Account.
 Item {
   id: overviewScreen
 
-  // Rectangle for the Account's general balances
   AVMEOverviewBalance {
     id: overviewBalance
-    width: (parent.width * 0.5) - (anchors.margins / 2)
-    height: parent.height * 0.2
+    width: (parent.width * 0.6)
+    height: (parent.height * 0.2)
     anchors {
       top: parent.top
-      left: parent.left
+      horizontalCenter: parent.horizontalCenter
       margins: 10
     }
   }
 
-  // Panel with the Account balances chart
   AVMEPanelOverview {
     id: overviewPanel
-    width: (parent.width * 0.5) - (anchors.margins / 2)
+    width: (parent.width * 0.6)
+    height: (parent.height * 0.75)
     anchors {
-      top: overviewBalance.bottom
       bottom: parent.bottom
-      left: parent.left
+      horizontalCenter: parent.horizontalCenter
       margins: 10
     }
-    rightRadius: false
   }
 
-  // Panel with each asset, balances and market data registered in the Account
-  AVMEPanelOverviewAssets {
-    id: assetsPanel
-    width: (parent.width * 0.5) - (anchors.margins * 2)
-    anchors {
-      top: parent.top
-      bottom: parent.bottom
-      right: parent.right
-      margins: 10
-    }
-    leftRadius: false
+  // "qrcodeWidth = 0" doesn't let the program open, leave it at 1
+  AVMEPopupQRCode {
+    id: qrcodePopup
+    qrcodeWidth: (overviewBalance.currentAccount != "")
+    ? qmlSystem.getQRCodeSize(overviewBalance.currentAccount) : 1
+    textAddress.text: overviewBalance.currentAccount
   }
 }

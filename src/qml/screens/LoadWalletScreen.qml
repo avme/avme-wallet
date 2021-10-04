@@ -62,8 +62,8 @@ Item {
 
   AVMEPanel {
     id: loadPanel
-    width: (parent.width * 0.6)
-    height: (parent.height * 0.6)
+    width: (parent.width * 0.5)
+    height: (parent.height * 0.5)
     anchors.centerIn: parent
     title: ""
 
