@@ -90,6 +90,7 @@ Item {
     btnCreateLedger.onClicked: checkLedger()
     btnErase.onClicked: confirmErasePopup.open()
     function chooseSelectedAccount() {
+      qmlSystem.cleanAndCloseAccount()
       if (accountList.currentItem.itemIsLedger) {
         qmlSystem.setLedgerFlag(true)
         qmlSystem.setCurrentHardwareAccount(accountList.currentItem.itemAddress)
@@ -99,14 +100,7 @@ Item {
         qmlSystem.setLedgerFlag(false)
         qmlSystem.setCurrentAccount(accountList.currentItem.itemAddress)
       }
-      qmlSystem.cleanAndCloseAccount()
-      qmlSystem.loadTokenDB()
       qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
-      qmlSystem.loadAppDB()
-      qmlSystem.loadAddressDB()
-      qmlSystem.loadConfigDB()
-      qmlSystem.loadPermissionList()
-      qmlSystem.loadARC20Tokens()
       qmlSystem.startWSServer()
       accountHeader.getAddress()
       window.menu.changeScreen("Overview")

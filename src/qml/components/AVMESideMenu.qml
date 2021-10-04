@@ -11,6 +11,8 @@ Rectangle {
   id: sideMenu
   property string currentSubmenu
   property string currentScreen
+  property bool walletIsLoaded: false
+  property bool accountIsLoaded: (accountHeader.currentAddress != "")
   width: 200
   height: parent.height
   color: "#1C2029"
@@ -29,6 +31,33 @@ Rectangle {
     qmlSystem.setScreen(content, "qml/screens/" + screen + "Screen.qml")
     content.active = true
   }
+
+  function toggleMenuOptions() {
+    for (var i = 0; i < menuModel.count; i++) {
+      var item = menuModel.get(i);
+      switch (item.screen) {
+        case "CreateWallet":
+        case "LoadWallet":
+          item.isEnabled = true; break;
+        case "Accounts":
+        case "Contacts":
+        case "Tokens":
+          item.isEnabled = walletIsLoaded; break;
+        case "Applications":
+        case "Overview":
+        case "History":
+        case "Send":
+        case "Exchange":
+        case "Liquidity":
+        case "Staking":
+          item.isEnabled = (walletIsLoaded && accountIsLoaded); break;
+      }
+    }
+  }
+
+  Component.onCompleted: toggleMenuOptions()
+  onWalletIsLoadedChanged: toggleMenuOptions()
+  onAccountIsLoadedChanged: toggleMenuOptions()
 
   Image {
     id: logo
@@ -57,7 +86,6 @@ Rectangle {
     text: "v" + qmlSystem.getProjectVersion()
   }
 
-  // TODO: disabling logic
   ListView {
     id: menu
     property string expandedSection: currentSubmenu
@@ -76,93 +104,93 @@ Rectangle {
         type: "Wallet"; name: "Create/Import"; screen: "CreateWallet";
         icon: "qrc:/img/icons/plus.png";
         iconSelect: "qrc:/img/icons/plusSelect.png";
-        isEnabled: true; isVisible: false;
+        isEnabled: false; isVisible: false;
       }
       ListElement {
         type: "Wallet"; name: "Load"; screen: "LoadWallet";
         icon: "qrc:/img/icons/upload.png";
         iconSelect: "qrc:/img/icons/uploadSelect.png";
-        isEnabled: true; isVisible: false;
+        isEnabled: false; isVisible: false;
       }
       ListElement {
         type: "Wallet"; name: "Accounts"; screen: "Accounts";
         icon: "qrc:/img/icons/inboxes.png";
         iconSelect: "qrc:/img/icons/inboxesSelect.png";
-        isEnabled: true; isVisible: false;
+        isEnabled: false; isVisible: false;
       }
       ListElement {
         type: "Wallet"; name: "Contacts"; screen: "Contacts";
         icon: "qrc:/img/icons/bookmark.png";
         iconSelect: "qrc:/img/icons/bookmarkSelect.png";
-        isEnabled: true; isVisible: false;
+        isEnabled: false; isVisible: false;
       }
       ListElement {
         type: "Wallet"; name: "Tokens"; screen: "Tokens";
         icon: "qrc:/img/icons/coin.png";
         iconSelect: "qrc:/img/icons/coinSelect.png";
-        isEnabled: true; isVisible: false;
+        isEnabled: false; isVisible: false;
       }
       ListElement {
         type: "Wallet"; name: "Applications"; screen: "Applications";
         icon: "qrc:/img/icons/grid.png";
         iconSelect: "qrc:/img/icons/gridSelect.png";
-        isEnabled: true; isVisible: false;
+        isEnabled: false; isVisible: false;
       }
       ListElement {
         type: "This Account"; name: "Overview"; screen: "Overview";
         icon: "qrc:/img/icons/pie-chart-alt.png";
         iconSelect: "qrc:/img/icons/pie-chart-altSelect.png";
-        isEnabled: true; isVisible: false;
+        isEnabled: false; isVisible: false;
       }
       // TODO: split asset prices and overview screens
       ListElement {
         type: "This Account"; name: "Asset Prices"; screen: "Overview";
         icon: "qrc:/img/icons/activity.png";
         iconSelect: "qrc:/img/icons/activitySelect.png";
-        isEnabled: true; isVisible: false;
+        isEnabled: false; isVisible: false;
       }
       ListElement {
         type: "This Account"; name: "Tx History"; screen: "History";
         icon: "qrc:/img/icons/history.png";
         iconSelect: "qrc:/img/icons/historySelect.png";
-        isEnabled: true; isVisible: false;
+        isEnabled: false; isVisible: false;
       }
       ListElement {
         type: "Operations"; name: "Send"; screen: "Send";
         icon: "qrc:/img/icons/paper-plane.png";
         iconSelect: "qrc:/img/icons/paper-planeSelect.png";
-        isEnabled: true; isVisible: false;
+        isEnabled: false; isVisible: false;
       }
       // TODO: remove exchange & both liquidity screens when DApps are finished
       ListElement {
         type: "Operations"; name: "Exchange"; screen: "Exchange";
         icon: "qrc:/img/icons/directions.png";
         iconSelect: "qrc:/img/icons/directionsSelect.png";
-        isEnabled: true; isVisible: false;
+        isEnabled: false; isVisible: false;
       }
       ListElement {
         type: "Operations"; name: "Add Liquidity"; screen: "Liquidity";
         icon: "qrc:/img/icons/log-in.png";
         iconSelect: "qrc:/img/icons/log-inSelect.png";
-        isEnabled: true; isVisible: false;
+        isEnabled: false; isVisible: false;
       }
       ListElement {
         type: "Operations"; name: "Remove Liquidity"; screen: "Liquidity";
         icon: "qrc:/img/icons/log-out.png";
         iconSelect: "qrc:/img/icons/log-outSelect.png";
-        isEnabled: true; isVisible: false;
+        isEnabled: false; isVisible: false;
       }
       ListElement {
         type: "Operations"; name: "Staking"; screen: "Staking";
         icon: "qrc:/img/icons/credit-card.png";
         iconSelect: "qrc:/img/icons/credit-cardSelect.png";
-        isEnabled: true; isVisible: false;
+        isEnabled: false; isVisible: false;
       }
       ListElement {
         type: "Operations"; name: "YY Compound"; screen: "Staking";
         icon: "qrc:/img/icons/credit-card-f.png";
         iconSelect: "qrc:/img/icons/credit-card-fSelect.png";
-        isEnabled: true; isVisible: false;
+        isEnabled: false; isVisible: false;
       }
     }
     section.property: "type"
@@ -224,7 +252,6 @@ Rectangle {
       id: listDelegate
       Rectangle {
         id: menuItem
-        //property bool selected: ListView.isCurrentItem
         property bool selected: (screen === currentScreen)
         width: parent.width
         color: "transparent"
@@ -248,11 +275,7 @@ Rectangle {
         }
         Text {
           id: text
-          color: {
-            if (!parent.enabled) color: "#88000000"
-            else if (parent.selected) color: "#AD00FA"
-            else color: "#FFFFFF"
-          }
+          color: (parent.selected) ? "#AD00FA" : "#FFFFFF"
           font.pixelSize: 14.0
           font.bold: true
           text: name
@@ -294,6 +317,8 @@ Rectangle {
     property bool selected: false
     width: parent.width
     height: 40
+    enabled: (walletIsLoaded && accountIsLoaded)
+    visible: enabled
     anchors.bottom: aboutItem.top
     color: "transparent"
     Image {

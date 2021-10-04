@@ -18,12 +18,10 @@ Item {
   property alias saveWallet: saveWalletCheck.checked
   property string seed: seedPopup.fullSeed
   property bool walletExists
-  property bool createAndLoad
 
   Connections {
     target: qmlSystem
     function onWalletCreated(success) {
-      createAndLoad = true
       if (success) {
         window.infoPopup.info = "Loading Wallet,<br>please wait..."
         if (qmlSystem.isWalletLoaded()) { qmlSystem.closeWallet() }
@@ -37,7 +35,10 @@ Item {
       }
     }
     function onWalletLoaded(success) {
+      window.menu.walletIsLoaded = success
+      accountHeader.currentAddress = ""
       if (success) {
+        qmlSystem.cleanAndCloseWallet()
         qmlSystem.setLedgerFlag(false)
         qmlSystem.deleteLastWalletPath()
         if (saveWallet) { qmlSystem.saveLastWalletPath() }
@@ -58,7 +59,6 @@ Item {
       } else {
         // TODO: this is a silent fail, we should avoid that
         window.infoPopup.close()
-        qmlSystem.cleanAndClose()
         qmlSystem.loadAccounts()
         qmlSystem.startWSServer()
         window.menu.changeScreen("Accounts")
@@ -306,12 +306,12 @@ Item {
     okBtn.onClicked: {
       newWalletSeedPopup.clean()
       newWalletSeedPopup.close()
-      qmlSystem.cleanAndClose()
       qmlSystem.loadTokenDB()
       qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
       qmlSystem.loadAppDB()
       qmlSystem.loadAddressDB()
       qmlSystem.loadConfigDB()
+      qmlSystem.loadPermissionList()
       qmlSystem.loadARC20Tokens()
       accountHeader.getAddress()
       window.menu.changeScreen("Overview")

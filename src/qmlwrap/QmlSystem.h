@@ -52,7 +52,7 @@ class QmlSystem : public QObject {
     // Permission list of websites allowed to join.
     std::vector<std::pair<std::string,bool>> permissionList;
 
-    // Mutex locks for when dealing with WS Server
+    // Mutex locks for when dealing with WS Server.
     std::mutex permissionListMutex;
     std::mutex globalUserInputRequest;
     std::mutex PLuserInputRequest;
@@ -60,19 +60,17 @@ class QmlSystem : public QObject {
     std::mutex requestTransactionMutex;
     std::mutex RTuserInputRequest;
     std::mutex RTuserInputAnswer;
-    // String that will hold the TXID of a approved transaction
+
+    // String that will hold the TXID of an approved transaction.
     std::string RTtxid = "";
 
   public slots:
     // Clean database, threads, etc before changing the Account and Wallet, respectively
     void cleanAndCloseAccount() {
-      this->w.closeTokenDB();
       this->w.closeHistoryDB();
-      this->w.closeAppDB();
-      this->w.closeAddressDB();
       stopWSServer();
     }
-    void cleanAndClose() {
+    void cleanAndCloseWallet() {
       this->w.closeTokenDB();
       this->w.closeHistoryDB();
       this->w.closeLedgerDB();

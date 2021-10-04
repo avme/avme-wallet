@@ -21,13 +21,21 @@ Item {
   Connections {
     target: qmlSystem
     function onWalletLoaded(success) {
+      window.menu.walletIsLoaded = success
+      accountHeader.currentAddress = ""
       if (success) {
+        qmlSystem.cleanAndCloseWallet()
         qmlSystem.setLedgerFlag(false)
         qmlSystem.deleteLastWalletPath()
         if (saveWallet) { qmlSystem.saveLastWalletPath() }
         window.infoPopup.close()
-        qmlSystem.cleanAndClose()
+        qmlSystem.loadTokenDB()
+        qmlSystem.loadAppDB()
+        qmlSystem.loadAddressDB()
+        qmlSystem.loadConfigDB()
         qmlSystem.loadAccounts()
+        qmlSystem.loadPermissionList()
+        qmlSystem.loadARC20Tokens()
         qmlSystem.startWSServer()
         window.menu.changeScreen("Accounts")
       } else {
