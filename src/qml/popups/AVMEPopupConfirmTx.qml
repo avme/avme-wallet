@@ -111,9 +111,9 @@ AVMEPopup {
       var Params = ({})
       Params["from"] = from
       Params["to"] = to
-      Params["gas"] = "0x" + qmlApi.uintToHex(gas)
-      Params["gasPrice"] = "0x" + qmlApi.uintToHex(qmlApi.fixedPointToWei(gasPrice, 9))
-      Params["value"] = "0x" + qmlApi.uintToHex(qmlApi.fixedPointToWei(value, 18))
+      Params["gas"] = "0x" + qmlApi.uintToHex(gas, false)
+      Params["gasPrice"] = "0x" + qmlApi.uintToHex(qmlApi.fixedPointToWei(gasPrice, 9), false)
+      Params["value"] = "0x" + qmlApi.uintToHex(qmlApi.fixedPointToWei(value, 18), false)
       Params["data"] = txData
       qmlApi.buildGetEstimateGasLimitReq(JSON.stringify(Params), "PopupConfirmTxGas_"+randomID)
       qmlApi.doAPIRequests("PopupConfirmTxGas_"+randomID)
