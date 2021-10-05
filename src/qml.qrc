@@ -63,6 +63,8 @@
 
         <file>qml/components/AVMEButton.qml</file>
         <file>qml/components/AVMEInput.qml</file>
+        <file>qml/components/AVMECheckbox.qml</file>
+        <file>qml/components/AVMESpinbox.qml</file>
         <file>qml/components/AVMEPanel.qml</file>
         <file>qml/components/AVMESideMenu.qml</file>
         <file>qml/components/AVMEAccountHeader.qml</file>
@@ -105,6 +107,7 @@
         <file>img/icons/backArrow.png</file>
         <file>img/icons/bookmark.png</file>
         <file>img/icons/bookmarkSelect.png</file>
+        <file>img/icons/check.png</file>
         <file>img/icons/chevron-down.png</file>
         <file>img/icons/chevron-downSelect.png</file>
         <file>img/icons/clipboard.png</file>

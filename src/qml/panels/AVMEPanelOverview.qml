@@ -37,7 +37,6 @@ AVMEPanel {
   }
 
   // Only load chart if everything is loaded
-  // TODO: Using this if condition is a workaround, find a better solution
   Component.onCompleted: if (accountHeader.coinRawBalance) { accountPie.refresh(); loadingPng.visible = false }
 
   Rectangle {

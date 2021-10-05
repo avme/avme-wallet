@@ -13,7 +13,6 @@ Rectangle {
   property string currentScreen
   property bool walletIsLoaded: false
   property bool accountIsLoaded: (accountHeader.currentAddress != "")
-  // TODO: Using this if condition is a workaround, find a better solution
   property bool balanceIsLoaded: (accountHeader.coinRawBalance)
   width: 200
   height: parent.height

@@ -250,21 +250,13 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
-      CheckBox {
+      AVMECheckbox {
         id: autoLimitCheck
         property string prev
         width: (parent.parent.width * 0.5) - parent.spacing
         checked: true
         enabled: true
         text: "Automatic gas limit"
-        font.pixelSize: 14.0
-        contentItem: Text {
-          text: parent.text
-          font.pixelSize: 14.0
-          color: parent.checked ? "#FFFFFF" : "#888888"
-          verticalAlignment: Text.AlignVCenter
-          leftPadding: parent.indicator.width + parent.spacing
-        }
         onClicked: {
           if (!txGasLimitInput.enabled) { // Disabled field (auto limit on)
             txGasLimitInput.text = prev
@@ -275,21 +267,13 @@ AVMEPanel {
         }
       }
 
-      CheckBox {
+      AVMECheckbox {
         id: autoGasCheck
         property string prev
         width: (parent.parent.width * 0.5) - parent.spacing
         checked: true
         enabled: true
         text: "Recommended fees"
-        font.pixelSize: 14.0
-        contentItem: Text {
-          text: parent.text
-          font.pixelSize: 14.0
-          color: parent.checked ? "#FFFFFF" : "#888888"
-          verticalAlignment: Text.AlignVCenter
-          leftPadding: parent.indicator.width + parent.spacing
-        }
         onClicked: {
           if (!txGasPriceInput.enabled) { // Disabled field (auto fee on)
             txGasPriceInput.text = prev

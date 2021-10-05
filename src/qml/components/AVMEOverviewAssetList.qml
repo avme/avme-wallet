@@ -25,7 +25,6 @@ ListView {
     function onUpdatedBalances() { reloadAssets(); loadingPng.visible = false }
   }
 
-  // TODO: Using this if condition is a workaround, find a better solution
   Component.onCompleted: if (accountHeader.coinRawBalance) { reloadAssets(); loadingPng.visible = false }
 
   function reloadAssets() {
