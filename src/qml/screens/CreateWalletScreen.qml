@@ -28,9 +28,8 @@ Item {
         qmlSystem.loadWallet(folder, pass)
       } else {
         window.infoPopup.close()
-        errorPopup.info = (seed)
-          ? "Error on Wallet importing."
-          : "Error on Wallet creation."
+        errorPopup.info = "Could not " + ((seed) ? "import" : "create")
+        + " the Wallet.<br>Please try again."
         errorPopup.open()
       }
     }
@@ -46,7 +45,7 @@ Item {
         qmlSystem.createAccount(seed, 0, "default", pass)
       } else {
         window.infoPopup.close()
-        errorPopup.info = "Error on Wallet loading.<br>Please try loading it manually."
+        errorPopup.info = "Could not load the Wallet.<br>Please try loading it manually."
         errorPopup.open()
       }
     }
@@ -57,15 +56,10 @@ Item {
         newWalletSeedPopup.showSeed(pass)
         newWalletSeedPopup.open()
       } else {
-        // TODO: this is a silent fail, we should avoid that
         window.infoPopup.close()
-        qmlSystem.loadAccounts()
-        qmlSystem.startWSServer()
-        window.menu.changeScreen("Accounts")
-        // TODO: also a silent fail in a way, if it fails it should just go straight to the Accounts screen
-        //window.infoPopup.close()
-        //errorPopup.info = "Error on Account creation."
-        //errorPopup.open()
+        errorPopup.info = "Could not create an Account automatically.<br>Please try creating it manually."
+        errorPopup.goToAccounts = true
+        errorPopup.open()
       }
     }
   }
@@ -298,7 +292,19 @@ Item {
   }
 
   AVMEPopupSeed { id: seedPopup }
-  AVMEPopupInfo { id: errorPopup; icon: "qrc:/img/warn.png" }
+  AVMEPopupInfo { // Overriding default popup actions
+    id: errorPopup
+    property bool goToAccounts: false
+    icon: "qrc:/img/warn.png"
+    okBtn.onClicked: {
+      errorPopup.close()
+      if (goToAccounts) {
+        qmlSystem.loadAccounts()
+        qmlSystem.startWSServer()
+        window.menu.changeScreen("Accounts")
+      }
+    }
+  }
   AVMEPopupNewWalletSeed {
     id: newWalletSeedPopup
     widthPct: 0.9
