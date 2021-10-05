@@ -9,9 +9,9 @@ import "qrc:/qml/components"
 import "qrc:/qml/panels"
 import "qrc:/qml/popups"
 
-// Screen for staking AVME with a given Account (classic)
+// Screen for staking AVME with a given Account (YieldYak Compound)
 Item {
-  id: stakingScreen
+  id: compoundScreen
   property bool isStaking: true
 
   // op = "approval" or "stake"
@@ -34,8 +34,8 @@ Item {
 
   Timer { id: ledgerRetryTimer; interval: 250; onTriggered: parent.checkLedger() }
 
-  AVMEPanelStaking {
-    id: stakingPanel
+  AVMEPanelCompound {
+    id: compoundPanel
     width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
       top: parent.top
@@ -45,8 +45,8 @@ Item {
     }
   }
 
-  AVMEPanelStakingRewards {
-    id: stakingRewardsPanel
+  AVMEPanelCompoundRewards {
+    id: compoundRewardsPanel
     width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
       top: parent.top

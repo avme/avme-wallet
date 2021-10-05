@@ -54,6 +54,7 @@ Rectangle {
         case "Exchange":
         case "Liquidity":
         case "Staking":
+        case "Compound":
           item.isEnabled = (walletIsLoaded && accountIsLoaded && balanceIsLoaded);
           break;
       }
@@ -192,7 +193,7 @@ Rectangle {
         isEnabled: false; isVisible: false;
       }
       ListElement {
-        type: "Operations"; name: "YY Compound"; screen: "Staking";
+        type: "Operations"; name: "YY Compound"; screen: "Compound";
         icon: "qrc:/img/icons/credit-card-f.png";
         iconSelect: "qrc:/img/icons/credit-card-fSelect.png";
         isEnabled: false; isVisible: false;

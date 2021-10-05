@@ -38,7 +38,7 @@ Item {
 
   AVMEPanelAddLiquidity {
     id: addLiquidityPanel
-    width: (parent.width * 0.5) - (anchors.margins / 2)
+    width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
       top: parent.top
       left: parent.left
@@ -49,7 +49,7 @@ Item {
 
   AVMEPanelRemoveLiquidity {
     id: removeLiquidityPanel
-    width: (parent.width * 0.5) - (anchors.margins / 2)
+    width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
       top: parent.top
       right: parent.right
