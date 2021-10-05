@@ -10,9 +10,10 @@ import "qrc:/qml/components"
 AVMEPopup {
   id: seedPopup
   widthPct: 0.4
-  heightPct: 0.95
+  heightPct: 0.9
   property string fullSeed
   property alias phraseValue: phraseSize.currentValue
+  property alias clearBtn: btnClear
 
   onAboutToShow: seedLabel1.forceActiveFocus()
   onAboutToHide: {
@@ -63,7 +64,7 @@ AVMEPopup {
   Column {
     id: seedItems
     width: parent.width
-    height: parent.height * 0.85
+    height: parent.height * 0.8
     anchors.top: parent.top
     anchors.topMargin: 20
     spacing: 20
@@ -537,9 +538,11 @@ AVMEPopup {
   Column {
     id: seedBtnCol
     width: parent.width
-    height: parent.height * 0.15
-    anchors.bottom: parent.bottom
-    anchors.bottomMargin: 50
+    height: parent.height * 0.2
+    anchors {
+      bottom: parent.bottom
+      bottomMargin: (btnClear.visible) ? btnClear.height : 0
+    }
     spacing: 10
 
     AVMEButton {
@@ -577,17 +580,14 @@ AVMEPopup {
       width: (seedItems.width * 0.9)
       anchors.horizontalCenter: parent.horizontalCenter
       text: "Clear Seed"
-      onClicked: {
-        seedPopup.fullSeed = ""
-        seedPopup.close()
-      }
+      onClicked: { seedPopup.fullSeed = ""; seedPopup.close() }
     }
 
     AVMEButton {
       id: btnClose
       width: (seedItems.width * 0.9)
       anchors.horizontalCenter: parent.horizontalCenter
-      text: "Back"
+      text: "Close"
       onClicked: seedPopup.close()
     }
   }

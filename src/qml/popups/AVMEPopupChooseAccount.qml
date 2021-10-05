@@ -25,7 +25,7 @@ AVMEPopup {
   heightPct: 0.95
   property int startingIndex: -1
   property bool isWaiting: false
-  property string foreignSeed
+  property string foreignSeed: seedPopup.fullSeed
   property alias seedList: chooseAccountList
   property alias chooseBtn: btnChoose
   property alias infoTimer: infoPassTimer
@@ -69,7 +69,7 @@ AVMEPopup {
     accountList.clear()
     startingIndex = -1
     isWaiting = false
-    nameInput.text = passInput.text = foreignSeed = ""
+    nameInput.text = passInput.text = ""
   }
 
   Column {
@@ -86,11 +86,11 @@ AVMEPopup {
       font.pixelSize: 14.0
       text: {
         if (infoPassTimer.running) {
-          text: "Wrong password, please try again"
+          text: "Wrong password, please try again."
         } else if (infoSeedTimer.running) {
-          text: "Seed is invalid, please try another"
+          text: "Seed is invalid, please try another."
         } else if (infoAddressTimer.running) {
-          text: "Address is already in Wallet, please try another"
+          text: "Address is already in Wallet, please try another."
         } else if (isWaiting) {
           text: "Generating Accounts... this may take a while, please wait..."
         } else if (chooseAccountList.currentIndex > -1) {
@@ -107,15 +107,15 @@ AVMEPopup {
     Rectangle {
       id: listRect
       anchors.horizontalCenter: parent.horizontalCenter
-      width: (parent.width * 0.7)
+      width: (parent.width * 0.9)
       height: (parent.height * 0.6)
       radius: 5
       color: "#16141F"
 
       AVMEAccountSeedList {
         id: chooseAccountList
-        height: parent.height
         width: parent.width
+        height: parent.height
         anchors.fill: parent
         model: ListModel { id: accountList }
       }
@@ -127,7 +127,7 @@ AVMEPopup {
 
       AVMEInput {
         id: nameInput
-        width: (chooseAccountPopup.width * 0.4)
+        width: (chooseAccountPopup.width * 0.45)
         enabled: (!isWaiting && chooseAccountList.currentIndex > -1)
         label: "(Optional) Name"
         placeholder: "Name for your Account"
@@ -135,7 +135,7 @@ AVMEPopup {
 
       AVMEInput {
         id: passInput
-        width: (chooseAccountPopup.width * 0.4)
+        width: (chooseAccountPopup.width * 0.45)
         enabled: (!isWaiting)
         echoMode: TextInput.Password
         passwordCharacter: "*"
@@ -150,7 +150,7 @@ AVMEPopup {
 
       AVMEButton {
         id: btnChoose
-        width: (chooseAccountPopup.width * 0.4)
+        width: (chooseAccountPopup.width * 0.45)
         enabled: (!isWaiting && passInput.text != "" && chooseAccountList.currentIndex > -1)
         text: "Choose this Account"
         onClicked: {
@@ -169,7 +169,7 @@ AVMEPopup {
 
       AVMEButton {
         id: btnMore
-        width: (chooseAccountPopup.width * 0.4)
+        width: (chooseAccountPopup.width * 0.45)
         enabled: (!isWaiting && passInput.text != "")
         text: "Generate +10 Accounts"
         onClicked: {
@@ -186,11 +186,11 @@ AVMEPopup {
     }
 
     AVMEButton {
-      id: btnBack
-      width: (chooseAccountPopup.width * 0.8)
+      id: btnClose
+      width: (chooseAccountPopup.width * 0.9)
       anchors.horizontalCenter: parent.horizontalCenter
       enabled: (!isWaiting)
-      text: "Back"
+      text: "Close"
       onClicked: {
         chooseAccountPopup.clean()
         chooseAccountPopup.close()
