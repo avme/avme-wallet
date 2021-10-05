@@ -38,7 +38,7 @@ Item {
   AVMEPopup {
     id: infoPopup
     property alias info: infoText.text
-    widthPct: 0.2
+    widthPct: 0.25
     heightPct: 0.1
     Text {
       id: infoText

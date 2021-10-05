@@ -47,7 +47,7 @@ Item {
   // Transaction list
   Row {
     id: listBtnRow
-    width: (parent.width * 0.4) - (anchors.margins * 2)
+    width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
       top: parent.top
       left: parent.left
@@ -67,7 +67,7 @@ Item {
 
     AVMEButton {
       id: btnRefresh
-      width: parent.width * 0.3
+      width: (parent.width * 0.3)
       text: "Refresh"
       onClicked: reloadTransactions()
     }
@@ -76,7 +76,7 @@ Item {
   // The list itself
   Rectangle {
     id: listRect
-    width: (parent.width * 0.4) - (anchors.margins * 2)
+    width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
       top: listBtnRow.bottom
       bottom: parent.bottom
@@ -96,7 +96,7 @@ Item {
   // Transaction details panel
   AVMEPanel {
     id: historyPanel
-    width: (parent.width * 0.6) - (anchors.margins * 2)
+    width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
       top: parent.top
       bottom: parent.bottom

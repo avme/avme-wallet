@@ -32,7 +32,7 @@ AVMEPopup {
       top: parent.top
       topMargin: parent.height / 6
       left: parent.left
-      leftMargin: parent.width * 0.2
+      leftMargin: parent.width * 0.15
     }
     color: "#FFFFFF"
     font.pixelSize: 14.0
@@ -47,7 +47,7 @@ AVMEPopup {
       top: parent.top
       topMargin: parent.height / 6
       right: parent.right
-      rightMargin: parent.width * 0.2
+      rightMargin: parent.width * 0.15
     }
     inputMask: "00.00;"
     text: "1.0"

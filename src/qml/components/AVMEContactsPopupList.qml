@@ -46,7 +46,7 @@ ListView {
         Text {
           id: delegateAddress
           anchors.verticalCenter: parent.verticalCenter
-          width: (parent.width * 0.7)
+          width: (parent.width * 0.6)
           color: "white"
           font.pixelSize: 14.0
           padding: 5
@@ -56,7 +56,7 @@ ListView {
         Text {
           id: delegateName
           anchors.verticalCenter: parent.verticalCenter
-          width: (parent.width * 0.3)
+          width: (parent.width * 0.4)
           x: delegateAddress.width
           color: "white"
           font.pixelSize: 14.0

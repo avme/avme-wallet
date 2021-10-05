@@ -186,7 +186,7 @@ AVMEPanel {
         Image {
           anchors.fill: parent
           anchors.margins: 10
-          source: "qrc:/img/icons/inboxesSelect.png"
+          source: "qrc:/img/icons/inboxes.png"
           antialiasing: true
           smooth: true
           fillMode: Image.PreserveAspectFit

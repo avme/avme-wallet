@@ -13,12 +13,11 @@ Rectangle {
   property string currentScreen
   property bool walletIsLoaded: false
   property bool accountIsLoaded: (accountHeader.currentAddress != "")
+  // TODO: Using this if condition is a workaround, find a better solution
+  property bool balanceIsLoaded: (accountHeader.coinRawBalance)
   width: 200
   height: parent.height
   color: "#1C2029"
-
-  // TODO: Using this if condition is a workaround, find a better solution
-  property bool enableBtn: accountHeader.coinRawBalance
 
   function changeScreen(screen) {
     content.active = false
@@ -38,20 +37,25 @@ Rectangle {
       switch (item.screen) {
         case "CreateWallet":
         case "LoadWallet":
-          item.isEnabled = true; break;
+          item.isEnabled = true;
+          break;
         case "Accounts":
         case "Contacts":
         case "Tokens":
-          item.isEnabled = walletIsLoaded; break;
+          item.isEnabled = walletIsLoaded;
+          break;
         case "Applications":
         case "Overview":
         case "OverviewAssets":
         case "History":
+          item.isEnabled = (walletIsLoaded && accountIsLoaded);
+          break;
         case "Send":
         case "Exchange":
         case "Liquidity":
         case "Staking":
-          item.isEnabled = (walletIsLoaded && accountIsLoaded); break;
+          item.isEnabled = (walletIsLoaded && accountIsLoaded && balanceIsLoaded);
+          break;
       }
     }
   }
@@ -59,6 +63,7 @@ Rectangle {
   Component.onCompleted: toggleMenuOptions()
   onWalletIsLoadedChanged: toggleMenuOptions()
   onAccountIsLoadedChanged: toggleMenuOptions()
+  onBalanceIsLoadedChanged: toggleMenuOptions()
 
   Image {
     id: logo

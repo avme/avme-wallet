@@ -61,6 +61,7 @@ Item {
   // Popups for choosing the assets for adding/removing liquidity.
   // Defaults to the "AVAX/AVME" pool for both cases.
   Item {
+    anchors.fill: parent
     property bool addAsset1Loaded: false
     property bool addAsset2Loaded: false
     function checkPopups() {
@@ -100,6 +101,7 @@ Item {
   }
 
   Item {
+    anchors.fill: parent
     property bool removeAsset1Loaded: false
     property bool removeAsset2Loaded: false
     function checkPopups() {

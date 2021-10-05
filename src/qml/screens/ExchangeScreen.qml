@@ -122,6 +122,7 @@ Item {
   // Popups for choosing the asset going "in"/"out".
   // Defaults to "from AVAX to AVME".
   Item {
+    anchors.fill: parent
     property bool fromAssetLoaded: false
     property bool toAssetLoaded: false
     function checkPopups() {

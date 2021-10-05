@@ -6,19 +6,14 @@ import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
 
-
+// Popup for showing a list of permitted websites in the websocket server.
 AVMEPopup {
   id: websitePermissionPopup
   widthPct: 0.4
-  heightPct: 0.8
+  heightPct: 0.95
 
-  onAboutToShow: {
-    refreshPermissionList()
-  }
-
-  onAboutToHide: {
-    websitePermissionListModel.clear()
-  }
+  onAboutToShow: refreshPermissionList()
+  onAboutToHide: websitePermissionListModel.clear()
 
   function refreshPermissionList() {
     var permissionList = JSON.parse(qmlSystem.getWebsitePermissionList())
@@ -33,26 +28,26 @@ AVMEPopup {
 
   Column {
     id: websitePermissionColumn
-    height: parent.height * 0.8
     width: parent.width
     anchors.verticalCenter: parent.verticalCenter
-    spacing: 25
-    Text {  
+    spacing: 20
+
+    Text {
       id: permissionListHeader
       anchors.horizontalCenter: parent.horizontalCenter
       color: "white"
-      font.pixelSize: 20.0
-      text: "Permission List"
+      font.pixelSize: 14.0
+      text: "List of permitted websites"
     }
 
     Rectangle {
       id: listRect
       anchors.horizontalCenter: parent.horizontalCenter
       width: (parent.width * 0.9)
-      height: (parent.height * 0.7)
+      height: (parent.height * 0.75)
       radius: 5
       color: "#16141F"
-      ListView { 
+      ListView {
         id: websitePermissionList
         anchors.fill: parent
         spacing: parent.height * 0.01
@@ -104,13 +99,14 @@ AVMEPopup {
         }
       }
     }
+
     AVMEButton {
       id: btnClearPermission
       width: (parent.width * 0.9)
       anchors.horizontalCenter: parent.horizontalCenter
       text: "Clear Permission List"
       onClicked: {
-        qmlSystem.clearWebsitePermissionList();
+        qmlSystem.clearWebsitePermissionList()
         refreshPermissionList()
       }
     }
