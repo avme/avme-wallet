@@ -86,11 +86,12 @@ AVMEPopup {
       font.pixelSize: 14.0
       height: parent.height * 0.05
       text: "Enter your seed. Phrase Size:"
-      ComboBox {
+      AVMECombobox {
         id: phraseSize
+        width: 80
+        height: parent.height
         anchors.left: parent.right
         anchors.leftMargin: parent.width * 0.025
-        height: parent.height
         font.pixelSize: parent.font.pixelSize
         model: ["12", "24"]
       }

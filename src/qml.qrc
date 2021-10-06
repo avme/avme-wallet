@@ -65,6 +65,7 @@
         <file>qml/components/AVMEInput.qml</file>
         <file>qml/components/AVMECheckbox.qml</file>
         <file>qml/components/AVMESpinbox.qml</file>
+        <file>qml/components/AVMECombobox.qml</file>
         <file>qml/components/AVMEPanel.qml</file>
         <file>qml/components/AVMESideMenu.qml</file>
         <file>qml/components/AVMEAccountHeader.qml</file>

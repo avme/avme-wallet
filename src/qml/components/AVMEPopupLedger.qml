@@ -55,10 +55,10 @@ Popup {
     chosenPath = ""
   }
 
-  width: window.width * 0.9
-  height: 700
-  x: (window.width * 0.1) / 2
-  y: (window.height * 0.5) - (height / 2)
+  width: (parent.width * 0.9)
+  height: (parent.height * 0.9)
+  x: (parent.width * 0.1) / 2
+  y: (parent.height * 0.5) - (height / 2)
   modal: true
   focus: true
   padding: 0  // Remove white borders
@@ -87,7 +87,7 @@ Popup {
         }
       }
     }
-    ComboBox {
+    AVMECombobox {
       id: ledgerPath
       anchors.verticalCenter: infoLabel.verticalCenter
       width: 300

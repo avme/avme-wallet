@@ -254,7 +254,7 @@ AVMEPopup {
     }
   }
 
-  ComboBox {
+  AVMECombobox {
     id: chartPeriod
     anchors {
       bottom: parent.bottom
