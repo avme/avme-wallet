@@ -9,7 +9,6 @@ import "qrc:/qml/components"
 // Side panel that acts as a "global menu"
 Rectangle {
   id: sideMenu
-  property string currentSubmenu
   property string currentScreen
   property bool walletIsLoaded: false
   property bool accountIsLoaded: (accountHeader.currentAddress != "")
@@ -20,11 +19,6 @@ Rectangle {
 
   function changeScreen(screen) {
     content.active = false
-    currentSubmenu = ""
-    for (var i = 0; i < menuModel.count; i++) {
-      var item = menuModel.get(i);
-      if (item.screen == screen) currentSubmenu = item.type
-    }
     currentScreen = screen
     qmlSystem.setScreen(content, "qml/screens/" + screen + "Screen.qml")
     content.active = true
@@ -65,45 +59,67 @@ Rectangle {
   onAccountIsLoadedChanged: toggleMenuOptions()
   onBalanceIsLoadedChanged: toggleMenuOptions()
 
-  Image {
-    id: logo
-    height: 50
-    anchors {
-      top: parent.top
-      topMargin: 10
-      horizontalCenter: parent.horizontalCenter
-    }
-    source: "qrc:/img/Welcome_Logo_AVME.png"
-    fillMode: Image.PreserveAspectFit
-    antialiasing: true
-    smooth: true
-  }
+  Rectangle {
+    id: topRect
+    width: parent.width
+    height: (logo.height + versionText.height)
+    color: parent.color
+    anchors.top: parent.top
+    z: 2
 
-  Text {
-    id: versionText
-    color: "#FFFFFF"
-    font.bold: true
-    font.pixelSize: 14.0
-    anchors {
-      top: logo.bottom
-      topMargin: 10
-      horizontalCenter: parent.horizontalCenter
+    Image {
+      id: logo
+      height: 48
+      anchors {
+        top: parent.top
+        topMargin: 5
+        horizontalCenter: parent.horizontalCenter
+      }
+      source: "qrc:/img/Welcome_Logo_AVME.png"
+      fillMode: Image.PreserveAspectFit
+      antialiasing: true
+      smooth: true
     }
-    text: "v" + qmlSystem.getProjectVersion()
+    Text {
+      id: versionText
+      height: 20
+      color: "#FFFFFF"
+      font.bold: true
+      font.pixelSize: 14.0
+      anchors {
+        bottom: parent.bottom
+        horizontalCenter: parent.horizontalCenter
+      }
+      text: "v" + qmlSystem.getProjectVersion()
+    }
   }
 
   ListView {
     id: menu
-    property string expandedSection: currentSubmenu
     width: parent.width
-    interactive: false  // Disable flicking
+    z: 1
     anchors {
       horizontalCenter: parent.horizontalCenter
-      top: versionText.bottom
-      bottom: parent.bottom
-      topMargin: 10
-      bottomMargin: 10
+      top: topRect.bottom
+      bottom: bottomRect.top
     }
+    Rectangle {
+      id: topBorder
+      width: parent.width * 0.9
+      anchors.bottom: parent.bottom
+      anchors.horizontalCenter: parent.horizontalCenter
+      height: 1
+      color: "#FFFFFF"
+    }
+    Rectangle {
+      id: bottomBorder
+      width: parent.width * 0.9
+      anchors.top: parent.top
+      anchors.horizontalCenter: parent.horizontalCenter
+      height: 1
+      color: "#FFFFFF"
+    }
+
     model: ListModel {
       id: menuModel
       ListElement {
@@ -203,7 +219,7 @@ Rectangle {
       id: header
       Rectangle {
         id: headerRect
-        property bool isExpanded: (ListView.view.expandedSection === section)
+        property bool isExpanded: false
         width: parent.width
         height: 40
         color: "transparent"
@@ -238,12 +254,11 @@ Rectangle {
         MouseArea {
           anchors.fill: parent
           hoverEnabled: true
-          onEntered: { headerRect.color = "#444444" }
-          onExited: { headerRect.color = "transparent" }
-          onClicked: {
-            headerRect.color = "transparent"
-            currentSubmenu = section
-          }
+          Timer { id: t; interval: 1; onTriggered: headerRect.isExpanded = true }
+          Component.onCompleted: t.start()
+          onEntered: headerRect.color = "#444444"
+          onExited: headerRect.color = "transparent"
+          onClicked: headerRect.isExpanded = !headerRect.isExpanded
         }
         onIsExpandedChanged: {
           for (var i = 0; i < menuModel.count; i++) {
@@ -318,89 +333,97 @@ Rectangle {
   }
 
   Rectangle {
-    id: settingsItem
-    property bool selected: false
+    id: bottomRect
     width: parent.width
-    height: 40
-    enabled: (walletIsLoaded && accountIsLoaded)
-    visible: enabled
-    anchors.bottom: aboutItem.top
-    color: "transparent"
-    Image {
-      id: settingsIcon; width: 16; height: 16
-      anchors { left: parent.left; leftMargin: 20; verticalCenter: parent.verticalCenter }
-      antialiasing: true; smooth: true
-      fillMode: Image.PreserveAspectFit
-      source: (parent.selected) ? "qrc:/img/icons/cogSelect.png" : "qrc:/img/icons/cog.png"
-    }
-    Text {
-      id: settingsText
-      color: (parent.selected) ? "#AD00FA" : "#FFFFFF"
-      font.bold: true; font.pixelSize: 14.0
-      text: "Settings"
-      anchors { left: settingsIcon.right; leftMargin: 10; verticalCenter: parent.verticalCenter }
-    }
+    height: (settingsItem.height + aboutItem.height)
+    color: parent.color
+    anchors.bottom: parent.bottom
+    z: 2
+
     Rectangle {
-      id: settingsSelection
-      width: 5
-      color: "#AD00FA"
-      visible: parent.selected
-      anchors { right: parent.right; top: parent.top; bottom: parent.bottom }
-    }
-    MouseArea {
-      anchors.fill: parent
-      hoverEnabled: true
-      onEntered: { settingsItem.color = "#444444" }
-      onExited: { settingsItem.color = "transparent" }
-      onClicked: {
-        settingsItem.color = "transparent"
-        parent.selected = true
-        aboutItem.selected = false
-        menu.currentIndex = -1
-        changeScreen("Settings")
+      id: settingsItem
+      property bool selected: false
+      width: parent.width
+      height: 40
+      enabled: (walletIsLoaded && accountIsLoaded)
+      visible: enabled
+      anchors.bottom: aboutItem.top
+      color: "transparent"
+      Image {
+        id: settingsIcon; width: 16; height: 16
+        anchors { left: parent.left; leftMargin: 20; verticalCenter: parent.verticalCenter }
+        antialiasing: true; smooth: true
+        fillMode: Image.PreserveAspectFit
+        source: (parent.selected) ? "qrc:/img/icons/cogSelect.png" : "qrc:/img/icons/cog.png"
+      }
+      Text {
+        id: settingsText
+        color: (parent.selected) ? "#AD00FA" : "#FFFFFF"
+        font.bold: true; font.pixelSize: 14.0
+        text: "Settings"
+        anchors { left: settingsIcon.right; leftMargin: 10; verticalCenter: parent.verticalCenter }
+      }
+      Rectangle {
+        id: settingsSelection
+        width: 5
+        color: "#AD00FA"
+        visible: parent.selected
+        anchors { right: parent.right; top: parent.top; bottom: parent.bottom }
+      }
+      MouseArea {
+        anchors.fill: parent
+        hoverEnabled: true
+        onEntered: { settingsItem.color = "#444444" }
+        onExited: { settingsItem.color = "transparent" }
+        onClicked: {
+          settingsItem.color = "transparent"
+          parent.selected = true
+          aboutItem.selected = false
+          menu.currentIndex = -1
+          changeScreen("Settings")
+        }
       }
     }
-  }
-
-  Rectangle {
-    id: aboutItem
-    property bool selected: false
-    width: parent.width
-    height: 40
-    anchors.bottom: parent.bottom
-    color: "transparent"
-    Image {
-      id: aboutIcon; width: 16; height: 16
-      anchors { left: parent.left; leftMargin: 20; verticalCenter: parent.verticalCenter }
-      antialiasing: true; smooth: true
-      fillMode: Image.PreserveAspectFit
-      source: (parent.selected) ? "qrc:/img/icons/infoSelect.png" : "qrc:/img/icons/info.png"
-    }
-    Text {
-      id: aboutText
-      color: (parent.selected) ? "#AD00FA" : "#FFFFFF"
-      font.bold: true; font.pixelSize: 14.0
-      text: "About"
-      anchors { left: aboutIcon.right; leftMargin: 10; verticalCenter: parent.verticalCenter }
-    }
     Rectangle {
-      id: aboutSelection
-      width: 5
-      color: "#AD00FA"
-      visible: parent.selected
-      anchors { right: parent.right; top: parent.top; bottom: parent.bottom }
-    }
-    MouseArea {
-      anchors.fill: parent
-      hoverEnabled: true
-      onEntered: { aboutItem.color = "#444444" }
-      onExited: { aboutItem.color = "transparent" }
-      onClicked: {
-        aboutItem.color = "transparent"
-        parent.selected = true
-        settingsItem.selected = false
-        menu.currentIndex = -1
-        changeScreen("About")
+      id: aboutItem
+      property bool selected: false
+      width: parent.width
+      height: 40
+      anchors.bottom: parent.bottom
+      color: "transparent"
+      Image {
+        id: aboutIcon; width: 16; height: 16
+        anchors { left: parent.left; leftMargin: 20; verticalCenter: parent.verticalCenter }
+        antialiasing: true; smooth: true
+        fillMode: Image.PreserveAspectFit
+        source: (parent.selected) ? "qrc:/img/icons/infoSelect.png" : "qrc:/img/icons/info.png"
+      }
+      Text {
+        id: aboutText
+        color: (parent.selected) ? "#AD00FA" : "#FFFFFF"
+        font.bold: true; font.pixelSize: 14.0
+        text: "About"
+        anchors { left: aboutIcon.right; leftMargin: 10; verticalCenter: parent.verticalCenter }
+      }
+      Rectangle {
+        id: aboutSelection
+        width: 5
+        color: "#AD00FA"
+        visible: parent.selected
+        anchors { right: parent.right; top: parent.top; bottom: parent.bottom }
+      }
+      MouseArea {
+        anchors.fill: parent
+        hoverEnabled: true
+        onEntered: { aboutItem.color = "#444444" }
+        onExited: { aboutItem.color = "transparent" }
+        onClicked: {
+          aboutItem.color = "transparent"
+          parent.selected = true
+          settingsItem.selected = false
+          menu.currentIndex = -1
+          changeScreen("About")
+        }
       }
     }
   }
