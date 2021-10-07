@@ -20,6 +20,7 @@ Item {
           historyModel.append(data[i])
         }
         historyModel.sortByTimestamp()
+        historyList.currentIndex = 0
       }
       if (historyList.count == 0) {
         infoText.text = "No transactions made yet.<br>Once you make one, it'll appear here."

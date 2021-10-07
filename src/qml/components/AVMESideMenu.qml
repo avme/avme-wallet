@@ -39,7 +39,6 @@ Rectangle {
           break;
         case "Applications":
         case "Overview":
-        case "OverviewAssets":
         case "History":
           item.isEnabled = (walletIsLoaded && accountIsLoaded);
           break;
@@ -69,11 +68,12 @@ Rectangle {
 
     Image {
       id: logo
-      height: 48
+      height: 50
       anchors {
         top: parent.top
         topMargin: 5
         horizontalCenter: parent.horizontalCenter
+        horizontalCenterOffset: -5  // Logo is a bit off-center
       }
       source: "qrc:/img/Welcome_Logo_AVME.png"
       fillMode: Image.PreserveAspectFit
@@ -82,12 +82,13 @@ Rectangle {
     }
     Text {
       id: versionText
-      height: 20
+      height: 30
       color: "#FFFFFF"
       font.bold: true
       font.pixelSize: 14.0
       anchors {
         bottom: parent.bottom
+        bottomMargin: -5
         horizontalCenter: parent.horizontalCenter
       }
       text: "v" + qmlSystem.getProjectVersion()
@@ -162,12 +163,6 @@ Rectangle {
         type: "This Account"; name: "Overview"; screen: "Overview";
         icon: "qrc:/img/icons/pie-chart-alt.png";
         iconSelect: "qrc:/img/icons/pie-chart-altSelect.png";
-        isEnabled: false; isVisible: false;
-      }
-      ListElement {
-        type: "This Account"; name: "Asset Prices"; screen: "OverviewAssets";
-        icon: "qrc:/img/icons/activity.png";
-        iconSelect: "qrc:/img/icons/activitySelect.png";
         isEnabled: false; isVisible: false;
       }
       ListElement {

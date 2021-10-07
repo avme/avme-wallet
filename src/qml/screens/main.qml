@@ -58,10 +58,13 @@ ApplicationWindow {
 
   AVMESideMenu {
     id: sideMenu
-    anchors { left: parent.left; top: parent.top; bottom: parent.bottom }
+    anchors { top: parent.top; left: parent.left; bottom: parent.bottom }
   }
 
-  AVMEAccountHeader { id: accountHeader }
+  AVMEAccountHeader {
+    id: accountHeader
+    anchors { top: parent.top; topMargin: 10; horizontalCenter: content.horizontalCenter }
+  }
 
   AVMEPopup {
     id: infoPopup
@@ -83,7 +86,7 @@ ApplicationWindow {
   Loader {
     id: content
     anchors {
-      top: parent.top
+      top: accountHeader.bottom
       bottom: parent.bottom
       left: sideMenu.right
       right: parent.right

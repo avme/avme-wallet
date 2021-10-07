@@ -10,7 +10,7 @@ import "qrc:/qml/components"
 AVMEPopup {
   id: websitePermissionPopup
   widthPct: 0.4
-  heightPct: 0.95
+  heightPct: 0.9
 
   onAboutToShow: refreshPermissionList()
   onAboutToHide: websitePermissionListModel.clear()
@@ -44,7 +44,7 @@ AVMEPopup {
       id: listRect
       anchors.horizontalCenter: parent.horizontalCenter
       width: (parent.width * 0.9)
-      height: (parent.height * 0.75)
+      height: (parent.height * 0.7)
       radius: 5
       color: "#16141F"
       ListView {

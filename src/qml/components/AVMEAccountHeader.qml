@@ -11,7 +11,7 @@ import "qrc:/qml/popups"
  * Header that shows the current Account and stores details about it
  * (e.g. balances, QR code, buttons for changing Account/Wallet, etc.)
  */
-Item {
+Rectangle {
   id: accountHeader
   property string currentAddress
   property string coinRawBalance
@@ -24,10 +24,13 @@ Item {
   property string website
   property bool isLedger: qmlSystem.getLedgerFlag()
   property var tokenList: ({})
+  width: 600
+  height: 48
+  color: "#1C2029"
+  radius: 5
 
   signal updatedBalances()
 
-  Timer { id: addressTimer; interval: 1000 }
   Timer { id: balancesTimer; interval: 1000; repeat: true; onTriggered: refreshBalances() }
   // TODO: Remove all "useless" ledger calls
   Timer { id: ledgerRetryTimer; interval: 250; onTriggered: checkLedger() }
@@ -87,6 +90,14 @@ Item {
     function onAccountNonceUpdate(nonce) { accountNonce = nonce }
   }
 
+  function qrEncode() {
+    qrcodePopup.qrModel.clear()
+    var qrData = qmlSystem.getQRCodeFromAddress(currentAddress)
+    for (var i = 0; i < qrData.length; i++) {
+      qrcodePopup.qrModel.set(i, JSON.parse(qrData[i]))
+    }
+  }
+
   function getAddress() {
     currentAddress = qmlSystem.getCurrentAccount()
     refreshBalances()
@@ -105,6 +116,87 @@ Item {
     } else {
       ledgerFailPopup.info = data.message
       ledgerRetryTimer.start()
+    }
+  }
+
+  Rectangle {
+    id: copyClipRect
+    property alias timer: addressTimer
+    enabled: (!addressTimer.running)
+    visible: (currentAddress != "")
+    color: "transparent"
+    radius: 5
+    width: 32
+    height: 32
+    anchors { left: parent.left; leftMargin: 10; verticalCenter: parent.verticalCenter }
+    Timer { id: addressTimer; interval: 1000 }
+    ToolTip {
+      id: copyClipTooltip
+      parent: copyClipRect
+      visible: copyClipRect.timer.running
+      text: "Copied!"
+      contentItem: Text {
+        font.pixelSize: 12.0
+        color: "#FFFFFF"
+        text: copyClipTooltip.text
+      }
+      background: Rectangle { color: "#1C2029" }
+    }
+    Image {
+      id: copyClipImage
+      anchors.centerIn: parent
+      width: parent.width
+      height: parent.height
+      fillMode: Image.PreserveAspectFit
+      antialiasing: true
+      smooth: true
+      source: "qrc:/img/icons/clipboard.png"
+    }
+    MouseArea {
+      id: copyClipMouseArea
+      anchors.fill: parent
+      hoverEnabled: true
+      onEntered: { copyClipImage.source = "qrc:/img/icons/clipboardSelect.png" }
+      onExited: { copyClipImage.source = "qrc:/img/icons/clipboard.png" }
+      onClicked: { qmlSystem.copyToClipboard(currentAddress); parent.timer.start() }
+    }
+  }
+
+  Text {
+    id: account
+    anchors.centerIn: parent
+    color: "#FFFFFF"
+    font.pixelSize: 18.0
+    font.bold: true
+    text: (currentAddress != "") ? currentAddress : "No account selected."
+  }
+
+  Rectangle {
+    id: qrCodeRect
+    color: "transparent"
+    radius: 5
+    width: 32
+    height: 32
+    visible: (currentAddress != "")
+    anchors { right: parent.right; rightMargin: 10; verticalCenter: parent.verticalCenter }
+
+    Image {
+      id: qrCodeImage
+      anchors.centerIn: parent
+      height: parent.height
+      width: parent.width
+      fillMode: Image.PreserveAspectFit
+      antialiasing: true
+      smooth: true
+      source: "qrc:/img/icons/qrcode.png"
+    }
+    MouseArea {
+      id: qrCodeMouseArea
+      anchors.fill: parent
+      hoverEnabled: true
+      onEntered: { qrCodeImage.source = "qrc:/img/icons/qrcodeSelect.png" }
+      onExited: { qrCodeImage.source = "qrc:/img/icons/qrcode.png" }
+      onClicked: { qrEncode(); qrcodePopup.open() }
     }
   }
 
@@ -163,6 +255,18 @@ Item {
         }
       }
     }
+  }
+
+  // "qrcodeWidth = 0" doesn't let the program open, leave it at 1.
+  // width/height/y are overrides to properly size the popup.
+  AVMEPopupQRCode {
+    id: qrcodePopup
+    width: window.width * 0.3
+    height: window.height * 0.6
+    y: ((window.height / 2) - (height / 2))
+    qrcodeWidth: (currentAddress != "")
+    ? qmlSystem.getQRCodeSize(currentAddress) : 1
+    textAddress.text: currentAddress
   }
 
   AVMEPopupConfirmTx {

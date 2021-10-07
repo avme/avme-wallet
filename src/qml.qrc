@@ -13,7 +13,6 @@
         <file>qml/screens/AppScreen.qml</file>
 
         <file>qml/screens/OverviewScreen.qml</file>
-        <file>qml/screens/OverviewAssetsScreen.qml</file>
         <file>qml/screens/HistoryScreen.qml</file>
         <file>qml/screens/SendScreen.qml</file>
         <file>qml/screens/StakingScreen.qml</file>

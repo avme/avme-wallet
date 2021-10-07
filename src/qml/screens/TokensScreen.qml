@@ -44,14 +44,14 @@ Item {
   AVMEPopupTokenAddList {
     id: addListTokenPopup
     widthPct: 0.5
-    heightPct: 0.95
+    heightPct: 1.0
     onAboutToHide: tokensPanel.reloadTokens()
   }
 
   // Popup for adding a new token from a given address
   AVMEPopupTokenAdd {
     id: addTokenPopup
-    widthPct: 0.5
+    widthPct: 0.4
     heightPct: 0.4
     onAboutToHide: tokensPanel.reloadTokens()
   }

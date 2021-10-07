@@ -34,11 +34,11 @@ ListView {
   header: Rectangle {
     id: listHeader
     width: parent.width
-    height: parent.parent.height * 0.15
+    height: parent.parent.height * 0.1
     color: "#201E2B"
     z: 2
     anchors.horizontalCenter: parent.horizontalCenter
-      Rectangle {
+    Rectangle {
       id: listHeaderBg
       width: parent.width
       height: parent.height * 0.666
@@ -82,7 +82,7 @@ ListView {
           text: "AVAX Balance"
         }
       }
-    // Spacing between header and list itself
+      // Spacing between header and list itself
     }
   }
   headerPositioning: ListView.OverlayHeader // Prevent header scrolling along

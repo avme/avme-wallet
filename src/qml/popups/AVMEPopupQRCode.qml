@@ -8,8 +8,6 @@ import "qrc:/qml/components"
 
 AVMEPopup {
   id: qrcodePopup
-  widthPct: 0.35
-  heightPct: 0.6
   property real qrcodeWidth: 29
   property alias qrModel: modelQr
   property alias textAddress: addressText

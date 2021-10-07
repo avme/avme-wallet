@@ -79,7 +79,7 @@ Item {
   AVMEPanel {
     id: createPanel
     width: (parent.width * 0.6)
-    height: (parent.height * 0.7)
+    height: (parent.height * 0.75)
     anchors.centerIn: parent
     title: ""
 

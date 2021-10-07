@@ -76,7 +76,7 @@ AVMEPopup {
     id: items
     width: parent.width
     anchors.verticalCenter: parent.verticalCenter
-    spacing: 30
+    spacing: 20
 
     Text {
       id: infoLabel

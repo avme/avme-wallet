@@ -104,7 +104,7 @@ Item {
   AVMEPopup {
     id: addAccountSelectPopup
     widthPct: 0.4
-    heightPct: 0.4
+    heightPct: 0.45
     Column {
       width: parent.width * 0.9
       height: parent.height * 0.9

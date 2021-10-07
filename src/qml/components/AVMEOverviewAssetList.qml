@@ -108,7 +108,7 @@ ListView {
       readonly property var itemPriceChart: priceChart
       readonly property string itemUSDPrice: USDPrice
       width: assetList.width
-      height: assetList.height * 0.25
+      height: assetList.height * 0.275
       visible: false
 
       Rectangle {

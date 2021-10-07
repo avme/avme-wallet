@@ -15,31 +15,38 @@ Item {
 
   AVMEOverviewBalance {
     id: overviewBalance
-    width: (parent.width * 0.6)
-    height: (parent.height * 0.2)
+    width: (parent.width * 0.5) - (anchors.margins * 2)
+    height: (parent.height * 0.15)
     anchors {
       top: parent.top
-      horizontalCenter: parent.horizontalCenter
+      left: parent.left
       margins: 10
     }
   }
 
   AVMEPanelOverview {
     id: overviewPanel
-    width: (parent.width * 0.6)
-    height: (parent.height * 0.75)
+    width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
+      top: overviewBalance.bottom
       bottom: parent.bottom
-      horizontalCenter: parent.horizontalCenter
+      left: parent.left
       margins: 10
     }
   }
 
-  // "qrcodeWidth = 0" doesn't let the program open, leave it at 1
-  AVMEPopupQRCode {
-    id: qrcodePopup
-    qrcodeWidth: (overviewBalance.currentAccount != "")
-    ? qmlSystem.getQRCodeSize(overviewBalance.currentAccount) : 1
-    textAddress.text: overviewBalance.currentAccount
+  AVMEPanelOverviewAssets {
+    id: assetsPanel
+    width: (parent.width * 0.5) - (anchors.margins * 2)
+    anchors {
+      top: parent.top
+      bottom: parent.bottom
+      right: parent.right
+      margins: 10
+    }
+  }
+
+  AVMEPopupPriceChart {
+    id: pricechartPopup
   }
 }

@@ -109,7 +109,7 @@ Popup {
       right: parent.right
       margins: 20
     }
-    height: (parent.height * 0.8)
+    height: (parent.height * 0.75)
     radius: 5
     color: "#4458A0C9"
 
