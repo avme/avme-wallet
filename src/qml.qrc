@@ -15,10 +15,7 @@
         <file>qml/screens/OverviewScreen.qml</file>
         <file>qml/screens/OverviewAssetsScreen.qml</file>
         <file>qml/screens/HistoryScreen.qml</file>
-
         <file>qml/screens/SendScreen.qml</file>
-        <file>qml/screens/ExchangeScreen.qml</file>
-        <file>qml/screens/LiquidityScreen.qml</file>
         <file>qml/screens/StakingScreen.qml</file>
         <file>qml/screens/CompoundScreen.qml</file>
 
@@ -32,7 +29,6 @@
         <file>qml/popups/AVMEPopupChooseAccount.qml</file>
         <file>qml/popups/AVMEPopupViewSeed.qml</file>
         <file>qml/popups/AVMEPopupViewPrivKey.qml</file>
-        <file>qml/popups/AVMEPopupAssetSelect.qml</file>
         <file>qml/popups/AVMEPopupContactSelect.qml</file>
         <file>qml/popups/AVMEPopupTokenAdd.qml</file>
         <file>qml/popups/AVMEPopupTokenAddList.qml</file>
@@ -75,7 +71,7 @@
         <file>qml/components/AVMETxHistoryList.qml</file>
         <file>qml/components/AVMEPopup.qml</file>
         <file>qml/components/AVMEPopupLedger.qml</file>
-        <file>qml/components/AVMECoinList.qml</file>
+        <file>qml/components/AVMEAssetCombobox.qml</file>
         <file>qml/components/AVMETokenList.qml</file>
         <file>qml/components/AVMEContactsPopupList.qml</file>
         <file>qml/components/AVMETokenGrid.qml</file>

@@ -79,24 +79,13 @@ ListView {
         Text {
           id: delegateName
           anchors.verticalCenter: parent.verticalCenter
-          width: (parent.width * 0.3)
+          width: (parent.width * 0.7)
           x: delegateImage.width + delegateSymbol.width
           color: "white"
           font.pixelSize: 14.0
           padding: 5
           elide: Text.ElideRight
           text: itemName
-        }
-        Text {
-          id: delegateBalance
-          anchors.verticalCenter: parent.verticalCenter
-          anchors.right: parent.right
-          anchors.rightMargin: (parent.width * 0.05)
-          width: (parent.width * 0.3)
-          color: "white"
-          font.pixelSize: 14.0
-          elide: Text.ElideRight
-          text: itemBalance
         }
       }
       MouseArea {

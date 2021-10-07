@@ -177,38 +177,19 @@ Rectangle {
         isEnabled: false; isVisible: false;
       }
       ListElement {
-        type: "Operations"; name: "Send"; screen: "Send";
+        type: "This Account"; name: "Send"; screen: "Send";
         icon: "qrc:/img/icons/paper-plane.png";
         iconSelect: "qrc:/img/icons/paper-planeSelect.png";
         isEnabled: false; isVisible: false;
       }
-      // TODO: remove exchange & both liquidity screens when DApps are finished
       ListElement {
-        type: "Operations"; name: "Exchange"; screen: "Exchange";
-        icon: "qrc:/img/icons/directions.png";
-        iconSelect: "qrc:/img/icons/directionsSelect.png";
-        isEnabled: false; isVisible: false;
-      }
-      ListElement {
-        type: "Operations"; name: "Add Liquidity"; screen: "Liquidity";
-        icon: "qrc:/img/icons/log-in.png";
-        iconSelect: "qrc:/img/icons/log-inSelect.png";
-        isEnabled: false; isVisible: false;
-      }
-      ListElement {
-        type: "Operations"; name: "Remove Liquidity"; screen: "Liquidity";
-        icon: "qrc:/img/icons/log-out.png";
-        iconSelect: "qrc:/img/icons/log-outSelect.png";
-        isEnabled: false; isVisible: false;
-      }
-      ListElement {
-        type: "Operations"; name: "Staking"; screen: "Staking";
+        type: "This Account"; name: "Staking"; screen: "Staking";
         icon: "qrc:/img/icons/credit-card.png";
         iconSelect: "qrc:/img/icons/credit-cardSelect.png";
         isEnabled: false; isVisible: false;
       }
       ListElement {
-        type: "Operations"; name: "YY Compound"; screen: "Compound";
+        type: "This Account"; name: "YY Compound"; screen: "Compound";
         icon: "qrc:/img/icons/credit-card-f.png";
         iconSelect: "qrc:/img/icons/credit-card-fSelect.png";
         isEnabled: false; isVisible: false;

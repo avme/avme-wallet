@@ -14,7 +14,7 @@ Item {
   id: sendScreen
 
   function checkTransactionFunds() {
-    if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {  // Coin
+    if (sendPanel.chosenAsset.symbol == "AVAX") {  // Coin
       var hasCoinFunds = !qmlSystem.hasInsufficientFunds(
         accountHeader.coinRawBalance, qmlSystem.calculateTransactionCost(
           sendPanel.coinValue, sendPanel.gasLimit, sendPanel.gasPrice
@@ -28,8 +28,8 @@ Item {
         ), 18
       )
       var hasTokenFunds = !qmlSystem.hasInsufficientFunds(
-        accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]["rawBalance"],
-        sendPanel.tokenValue, chooseAssetPopup.chosenAssetDecimals
+        accountHeader.tokenList[sendPanel.chosenAsset.address]["rawBalance"],
+        sendPanel.tokenValue, sendPanel.chosenAsset.decimals
       )
       return (hasCoinFunds && hasTokenFunds)
     }
@@ -76,12 +76,6 @@ Item {
         }
       }
     }
-  }
-
-  // Popup for choosing an asset to send
-  AVMEPopupAssetSelect {
-    id: chooseAssetPopup
-    onAboutToHide: { sendPanel.updateTxCost(); sendPanel.refreshAssetBalance() }
   }
 
   // Popup for choosing a contact

@@ -4,9 +4,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 
-/**
- * Stylized combobox.
- */
+// Stylized combobox.
 ComboBox {
   id: combobox
   width: 160
@@ -51,7 +49,7 @@ ComboBox {
     width: combobox.width
     implicitHeight: contentItem.implicitHeight
     padding: 1
-    background: Rectangle { color: "transparent" }
+    background: Rectangle { color: "#3F3F4B" }
     contentItem: ListView {
       clip: true
       implicitHeight: contentHeight
@@ -69,7 +67,7 @@ ComboBox {
     contentItem: Text {
       text: modelData
       color: (highlighted) ? "#2BE8F4" : "#FFFFFF"
-      font: combobox.font
+      font.pixelSize: 14.0
       elide: Text.ElideRight
       verticalAlignment: Text.AlignVCenter
     }
