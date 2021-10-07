@@ -16,15 +16,10 @@ Item {
     function onHistoryLoaded(dataStr) {
       if (dataStr != null) {
         var data = JSON.parse(dataStr)
-        if (sortByNew) {
-          for (var i = (data.length - 1); i >= 0; i--) {
-            historyModel.append(data[i])
-          }
-        } else {
-          for (var i = 0; i < data.length; i++) {
-            historyModel.append(data[i])
-          }
+        for (var i = 0; i < data.length; i++) {
+          historyModel.append(data[i])
         }
+        historyModel.sortByTimestamp()
       }
       if (historyList.count == 0) {
         infoText.text = "No transactions made yet.<br>Once you make one, it'll appear here."
@@ -44,41 +39,12 @@ Item {
     qmlSystem.listAccountTransactions(qmlSystem.getCurrentAccount())
   }
 
-  // Transaction list
-  Row {
-    id: listBtnRow
-    width: (parent.width * 0.5) - (anchors.margins * 2)
-    anchors {
-      top: parent.top
-      left: parent.left
-      margins: 10
-    }
-    spacing: 10
-
-    AVMEButton {
-      id: btnSort
-      width: (parent.width * 0.7) - parent.spacing
-      text: (sortByNew) ? "Sorted by Newer" : "Sorted by Older"
-      onClicked: {
-        sortByNew = !sortByNew
-        reloadTransactions()
-      }
-    }
-
-    AVMEButton {
-      id: btnRefresh
-      width: (parent.width * 0.3)
-      text: "Refresh"
-      onClicked: reloadTransactions()
-    }
-  }
-
   // The list itself
   Rectangle {
     id: listRect
     width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
-      top: listBtnRow.bottom
+      top: parent.top
       bottom: parent.bottom
       left: parent.left
       margins: 10
@@ -89,7 +55,16 @@ Item {
     AVMETxHistoryList {
       id: historyList
       anchors.fill: parent
-      model: ListModel { id: historyModel }
+      model: ListModel {
+        id: historyModel
+        function sortByTimestamp() {
+          for (var i = 0; i < count; i++) {
+            for (var j = 0; j < i; j++) {
+              if (get(i).unixtime > get(j).unixtime) { move(i, j, 1) }
+            }
+          }
+        }
+      }
     }
   }
 

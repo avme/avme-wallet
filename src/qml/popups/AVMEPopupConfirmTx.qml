@@ -11,7 +11,7 @@ import QmlApi 1.0
 // Popup for confirming a transaction with user input.
 AVMEPopup {
   id: confirmTxPopup
-  widthPct: 0.6
+  widthPct: 0.7
   heightPct: 0.6
   property string info
   property string fullInfo: info
@@ -42,8 +42,8 @@ AVMEPopup {
       passInfo.visible = passInput.visible = false
       btnOk.enabled = true  // This "workaround" is done due to a confirmTx component
                             // being located on accountHeader
-                            // Which is loaded on the wallet 
-                            // Setting itself enabled to be always the second condition of the 
+                            // Which is loaded on the wallet
+                            // Setting itself enabled to be always the second condition of the
                             // ternary operator.
     } else {
       if (+qmlSystem.getConfigValue("storePass") > 0) { // Set to store pass
@@ -268,6 +268,8 @@ AVMEPopup {
   // Info popup for if communication with Ledger fails
   AVMEPopupInfo {
     id: ledgerFailPopup
+    widthPct: 0.6
+    heightPct: 0.4
     icon: "qrc:/img/warn.png"
     onAboutToHide: ledgerRetryTimer.stop()
     okBtn.text: "Close"
@@ -275,8 +277,10 @@ AVMEPopup {
 
   AVMEPopupInfo {
     id: transactionFailPopup
+    widthPct: 0.6
+    heightPct: 0.4
     icon: "qrc:/img/warn.png"
-    info: "Transaction Likely to fail, please check your input"
+    info: "Transaction likely to fail,<br>please check your input."
     okBtn.text: "Close"
   }
 }
