@@ -15,6 +15,7 @@ import "qrc:/qml/components"
 Item {
   id: asyncImageItem
   property alias imageSource: asyncImage.source
+  property alias imageOpacity: asyncImage.opacity
   property bool loading: true
 
   Image {
