@@ -38,6 +38,13 @@ class QmlApi : public QObject {
      */
     void apiRequestAnswered(QString answer, QString requestID);
 
+
+    /**
+     * Same as above, but for custom requests made by the DAPP developer to their own API
+     */
+
+    void customApiRequestAnswered(QString answer, QString requestID);
+
     // The same goes for graph requests.
     void tokenPriceHistoryAnswered(QString answer, QString requestID, int days);
 
@@ -123,6 +130,21 @@ class QmlApi : public QObject {
      * Build custom eth_call request.
      */
     Q_INVOKABLE void buildCustomEthCallReq(QString contract, QString ABI, QString requestID);
+
+    /**
+     * Do a custom API request towards *any* API
+     * reqBody      : the body of the HTTP request
+     * host         : IP or DNS name of the target
+     * port         : target Port
+     * target       : target
+     * requestType  : type of the HTTP request, AVAILABLE: "POST" OR "GET"
+     * contentType  : body content type, normally "application/json"
+     * requestID    : ID of the request which will be emitted later with the answer
+     */
+    Q_INVOKABLE void doCustomHttpRequest(QString reqBody, 
+      QString host, QString port, QString target, 
+      QString requestType, QString contentType, QString requestID
+      );
 
     // ======================================================================
     // HELPER FUNCTIONS

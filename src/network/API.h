@@ -48,6 +48,14 @@ class API {
     static std::string httpGetRequest(std::string reqBody, bool usePublic = false);
 
     /**
+     * Sends a HTTP GET/POST request to host/port/target filled by the caller
+     * this function serves as a easy-to-access method for developers building their own applications inside the wallet
+     * but require to use their own API servers.
+     */
+
+    static std::string customHttpRequest(std::string reqBody, std::string host, std::string port, std::string target, std::string requestType, std::string contentType);
+
+    /**
      * Downloads a file from a given host URL and a given path (e.g. "/file.txt")
      * to a given target path in the filesystem.
      */
