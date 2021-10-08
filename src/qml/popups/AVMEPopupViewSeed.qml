@@ -9,8 +9,8 @@ import "qrc:/qml/components"
 // Popup for viewing the Wallet's seed.
 AVMEPopup {
   id: viewSeedPopup
-  widthPct: 0.7
-  heightPct: 0.6
+  widthPct: 0.75
+  heightPct: 0.65
   property string newWalletPass
   property string newWalletSeed
   property color popupBgColor: "#1C2029"

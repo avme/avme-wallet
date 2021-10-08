@@ -25,18 +25,6 @@ void Wallet::stopPassThread() {
   this->storedPassDeadline = 0;  // This ensures the thread will be terminated
 }
 
-void Wallet::setDefaultPathFolders() {
-  auto defaultPath = Utils::getDataDir();
-  boost::filesystem::path walletFile = defaultPath.string() + "/wallet/c-avax/wallet.info";
-  boost::filesystem::path secretsFolder = defaultPath.string() + "/wallet/c-avax/accounts/secrets";
-  boost::filesystem::path historyFolder = defaultPath.string() + "/wallet/c-avax/accounts/transactions";
-  if (!exists(walletFile.parent_path())) { create_directories(walletFile.parent_path()); }
-  if (!exists(secretsFolder)) { create_directories(secretsFolder); }
-  if (!exists(historyFolder)) { create_directories(historyFolder); }
-  Utils::walletFolderPath = defaultPath;
-  return;
-}
-
 bool Wallet::create(boost::filesystem::path folder, std::string pass) {
   // Create the paths if they don't exist yet
   boost::filesystem::path walletFile = folder.string() + "/wallet/c-avax/wallet.info";
@@ -124,12 +112,29 @@ bool Wallet::loadConfigDB() {
   return this->db.openConfigDB();
 }
 
-void Wallet::closeTokenDB() { this->db.closeTokenDB(); }
-void Wallet::closeHistoryDB() { this->db.closeHistoryDB(); }
-void Wallet::closeLedgerDB() { this->db.closeLedgerDB(); }
-void Wallet::closeAppDB() { this->db.closeAppDB(); }
-void Wallet::closeAddressDB() { this->db.closeAddressDB(); }
-void Wallet::closeConfigDB() { this->db.closeConfigDB(); }
+void Wallet::closeTokenDB() {
+  if (this->db.isTokenDBOpen()) { this->db.closeTokenDB(); }
+}
+
+void Wallet::closeHistoryDB() {
+  if (this->db.isHistoryDBOpen()) { this->db.closeHistoryDB(); }
+}
+
+void Wallet::closeLedgerDB() {
+  if (this->db.isLedgerDBOpen()) { this->db.closeLedgerDB(); }
+}
+
+void Wallet::closeAppDB() {
+  if (this->db.isAppDBOpen()) { this->db.closeAppDB(); }
+}
+
+void Wallet::closeAddressDB() {
+  if (this->db.isAddressDBOpen()) { this->db.closeAddressDB(); }
+}
+
+void Wallet::closeConfigDB() {
+  if (this->db.isConfigDBOpen()) { this->db.closeConfigDB(); }
+}
 
 void Wallet::loadARC20Tokens() {
   this->ARC20Tokens.clear();

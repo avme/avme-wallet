@@ -7,18 +7,18 @@ import QtQuick.Controls 2.2
 /**
  * Template for creating popups.
  * Parameters:
- * - widthPct: width percentage (0.0 - 1.0)
- * - heightPct: height percentage (0.0 - 1.0)
+ * - widthPct: width percentage relative to the parent (0.0 - 1.0)
+ * - heightPct: height percentage relative to the parent (0.0 - 1.0)
  */
 Popup {
   id: popup
   property real widthPct
   property real heightPct
 
-  width: window.width * widthPct
-  height: window.height * heightPct
-  x: ((window.width / 2) - (width / 2)) + ((window.menuToggle) ? -200 : 0)
-  y: ((window.height / 2) - (height / 2)) + ((window.menuToggle) ? -50 : 0)
+  width: parent.width * widthPct
+  height: parent.height * heightPct
+  x: ((parent.width / 2) - (width / 2))
+  y: ((parent.height / 2) - (height / 2))
   background: Rectangle { anchors.fill: parent; color: "#1C2029"; radius: 10 }
   modal: true
   focus: true

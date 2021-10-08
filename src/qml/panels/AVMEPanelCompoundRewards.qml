@@ -94,7 +94,7 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       color: "#FFFFFF"
       font.pixelSize: 14.0
-      text: "<b>Reinvest AVME</b>(optional)"
+      text: "You will <b>reinvest AVME</b> (optional)"
     }
 
     Image {

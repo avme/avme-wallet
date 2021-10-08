@@ -37,7 +37,7 @@ ListView {
     Text {
       id: headerAddress
       anchors.verticalCenter: parent.verticalCenter
-      width: (parent.width * 0.6)
+      width: (parent.width * 0.65)
       color: "white"
       font.pixelSize: 14.0
       padding: 5
@@ -46,7 +46,7 @@ ListView {
     Text {
       id: headerName
       anchors.verticalCenter: parent.verticalCenter
-      width: (parent.width * 0.4)
+      width: (parent.width * 0.35)
       x: headerAddress.x + headerAddress.width
       color: "white"
       font.pixelSize: 14.0
@@ -69,7 +69,7 @@ ListView {
       Text {
         id: delegateAddress
         anchors.verticalCenter: parent.verticalCenter
-        width: (parent.width * 0.6)
+        width: (parent.width * 0.65)
         color: "white"
         font.pixelSize: 14.0
         padding: 5
@@ -79,7 +79,7 @@ ListView {
       Text {
         id: delegateName
         anchors.verticalCenter: parent.verticalCenter
-        width: (parent.width * 0.4)
+        width: (parent.width * 0.35)
         x: delegateAddress.x + delegateAddress.width
         color: "white"
         font.pixelSize: 14.0

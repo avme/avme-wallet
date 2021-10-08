@@ -319,15 +319,6 @@ boost::filesystem::path Utils::getDefaultDataDir() {
   #endif
 }
 
-boost::filesystem::path Utils::getDataDir() {
-  boost::filesystem::path dataPath = getDefaultDataDir();
-  try {
-    if (!boost::filesystem::exists(dataPath))
-      boost::filesystem::create_directory(dataPath);
-    } catch (...) {}
-  return dataPath;
-}
-
 std::string Utils::readJSONFile(boost::filesystem::path filePath) {
   json returnData;
   storageThreadLock.lock();

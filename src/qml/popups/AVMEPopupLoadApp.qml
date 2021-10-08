@@ -27,7 +27,7 @@ AVMEPopup {
     id: items
     width: parent.width
     anchors.verticalCenter: parent.verticalCenter
-    spacing: 30
+    spacing: 20
 
     // Enter/Numpad enter key override
     Keys.onPressed: {

@@ -38,7 +38,7 @@ Item {
   AVMEPopup {
     id: infoPopup
     property alias info: infoText.text
-    widthPct: 0.2
+    widthPct: 0.25
     heightPct: 0.1
     Text {
       id: infoText
@@ -52,8 +52,8 @@ Item {
   // Popup for loading a local application (for developers)
   AVMEPopupLoadApp {
     id: loadAppPopup
-    widthPct: 0.4
-    heightPct: 0.4
+    widthPct: 0.5
+    heightPct: 0.35
     loadBtn.onClicked: loadLocalApp()
     function loadLocalApp() {
       qmlSystem.setScreen(content, "qml/screens/AppScreen.qml")

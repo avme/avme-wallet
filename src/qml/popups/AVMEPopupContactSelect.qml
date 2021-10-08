@@ -12,7 +12,7 @@ import "qrc:/qml/components"
 AVMEPopup {
   id: chooseContactPopup
   widthPct: 0.5
-  heightPct: 0.95
+  heightPct: 1.0
   property var contacts: null
   property var chosenContact: ""
 

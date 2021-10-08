@@ -12,8 +12,7 @@ Rectangle {
   property alias totalTokenBalance: tokenBalance.text
 
   // Due to usage of global variables, we can only tell the screen
-  // to read from them in the appropriate time
-  // Using a signal
+  // to read from them in the appropriate time using a signal
   Component.onCompleted: {
     if (!accountHeader.coinRawBalance) {
       totalFiatBalance = "Loading..."
@@ -23,7 +22,7 @@ Rectangle {
   }
   Connections {
     target: accountHeader
-      function onUpdatedBalances() { updateBalances() }
+    function onUpdatedBalances() { updateBalances() }
   }
 
   function updateBalances() {
@@ -41,7 +40,6 @@ Rectangle {
     totalTokenBalance = totalTokenWorth + " AVAX (Tokens)"
   }
 
-
   implicitWidth: 500
   implicitHeight: 120
   gradient: Gradient {
@@ -52,33 +50,17 @@ Rectangle {
   radius: 10
 
   Column {
+    id: dataCol
+    width: parent.width * 0.8
     anchors {
       left: parent.left
-      right: parent.right
       verticalCenter: parent.verticalCenter
       margins: 10
     }
-    spacing: 10
+    spacing: 5
 
-    Text {
-      id: fiatBalance
-      color: "white"
-      font.pixelSize: 24.0
-      font.bold: true
-    }
-
-    Text {
-      id: coinBalance
-      color: "white"
-      font.pixelSize: 18.0
-      font.bold: true
-    }
-
-    Text {
-      id: tokenBalance
-      color: "white"
-      font.pixelSize: 18.0
-      font.bold: true
-    }
+    Text { id: fiatBalance; color: "white"; font.pixelSize: 24.0; font.bold: true }
+    Text { id: coinBalance; color: "white"; font.pixelSize: 18.0; font.bold: true }
+    Text { id: tokenBalance; color: "white"; font.pixelSize: 18.0; font.bold: true }
   }
 }

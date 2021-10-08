@@ -43,8 +43,8 @@ Item {
   // Popup for adding a new token from the repo
   AVMEPopupTokenAddList {
     id: addListTokenPopup
-    widthPct: 0.4
-    heightPct: 0.95
+    widthPct: 0.5
+    heightPct: 1.0
     onAboutToHide: tokensPanel.reloadTokens()
   }
 

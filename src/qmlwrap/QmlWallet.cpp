@@ -74,10 +74,6 @@ bool QmlSystem::seedIsValid(QString seed) {
   return true;
 }
 
-void QmlSystem::setDefaultPathFolders() {
-  this->w.setDefaultPathFolders();
-}
-
 bool QmlSystem::checkForApp(QString folder) {
   QString appFile = QString(folder + "/main.qml");
   return QFile::exists(appFile);

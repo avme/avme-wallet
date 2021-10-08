@@ -94,12 +94,6 @@ class Wallet {
     void stopPassThread();
 
     /**
-     * Create/Set the folder path for the wallet
-     * Used when loading ledger.
-     */
-    void setDefaultPathFolders();
-
-    /**
      * Create a new Wallet, which should be loaded manually afterwards.
      * Automatically hashes+salts the passphrase and stores both.
      * Returns true on success, false on failure.

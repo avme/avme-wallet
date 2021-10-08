@@ -84,7 +84,7 @@ Item {
         font.pixelSize: 14.0
         text: "Remember password after next transaction for (0 = do not remember)"
 
-        SpinBox {
+        AVMESpinbox {
           id: storePassBox
           width: settingsCol.width * 0.15
           anchors {
@@ -99,7 +99,8 @@ Item {
             id: storePassRect
             property alias timer: storePassRectTimer
             anchors.fill: parent
-            color: "#58A0C9"
+            color: "#8858A0C9"
+            radius: 5
             visible: storePassRectTimer.running
             Timer { id: storePassRectTimer; interval: 250 }
           }
@@ -139,7 +140,7 @@ Item {
         font.pixelSize: 14.0
         text: "Enable loading DApps from a local folder (FOR EXPERTS/DEVELOPERS ONLY!)"
 
-        CheckBox {
+        AVMECheckbox {
           id: developerCheck
           checked: false
           width: settingsCol.width * 0.25
@@ -148,13 +149,6 @@ Item {
             left: parent.right
           }
           text: "Developer Mode"
-          contentItem: Text {
-            text: parent.text
-            font.pixelSize: 14.0
-            color: parent.checked ? "#FFFFFF" : "#888888"
-            verticalAlignment: Text.AlignVCenter
-            leftPadding: parent.indicator.width + parent.spacing
-          }
           Component.onCompleted: {
             var toggled = qmlSystem.getConfigValue("devMode")
             if (toggled == "true") { checked = true }
@@ -164,7 +158,7 @@ Item {
         }
       }
       Text {
-        id: viewWesbitePermission
+        id: viewWebsitePermission
         width: settingsCol.width * 0.75
         color: "#FFFFFF"
         font.pixelSize: 14.0

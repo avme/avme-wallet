@@ -13,15 +13,16 @@ AVMEPanel {
   property string txTotalCoinStr
   property string info
   property string historyInfo
-  property string to: (chooseAssetPopup.isToken)
-    ? chooseAssetPopup.chosenAssetAddress : txToInput.text
-  property string coinValue: (chooseAssetPopup.isToken)
+  property alias chosenAsset: assetCombobox.chosenAsset
+  property string to: (chosenAsset.symbol != "AVAX")
+    ? chosenAsset.address : txToInput.text
+  property string coinValue: (chosenAsset.symbol != "AVAX")
     ? "0.000000000000000000" : txAmountInput.text
-  property string tokenValue: (chooseAssetPopup.isToken)
+  property string tokenValue: (chosenAsset.symbol != "AVAX")
     ? txAmountInput.text : "0.000000000000000000"
-  property string txData: (chooseAssetPopup.isToken)
+  property string txData: (chosenAsset.symbol != "AVAX")
     ? buildTokenTransferData(
-      txToInput.text, txAmountInput.text, chooseAssetPopup.chosenAssetDecimals
+      txToInput.text, txAmountInput.text, chosenAsset.decimals
     ) : ""
   property string gas: txGasLimitInput.text
   property string gasPrice: txGasPriceInput.text
@@ -33,8 +34,6 @@ AVMEPanel {
     target: accountHeader
     function onUpdatedBalances() { refreshAssetBalance() }
   }
-
-  Component.onCompleted: { updateTxCost(); refreshAssetBalance() }
 
   function buildTokenTransferData(to, value, decimals) {
     var ethCallJson = ({})
@@ -52,10 +51,11 @@ AVMEPanel {
   }
 
   function updateInfo() {
-    info = "You will send "
-    chooseAssetPopup.isToken ? info += "<b>" + tokenValue : info += "<b>" + coinValue
-    info += " " + chooseAssetPopup.chosenAssetSymbol + "</b><br>to the address <b>" + to + "</b>"
-    historyInfo = "Sent " + chooseAssetPopup.chosenAssetSymbol
+    info = "You will send <b>"
+      + ((chosenAsset.symbol != "AVAX") ? tokenValue : coinValue)
+      + " " + chosenAsset.symbol
+      + "</b><br>to the address <b>" + to + "</b>"
+    historyInfo = "Sent " + chosenAsset.symbol
   }
 
   function updateTxCost() {
@@ -67,7 +67,7 @@ AVMEPanel {
         txGasPriceInput.text = calculatedGasPrice
       }
     }
-    if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {  // Coin
+    if (chosenAsset.symbol == "AVAX") {  // Coin
       automaticGas = false;
       if (autoLimitCheck.checked) { txGasLimitInput.text = "21000" }
       txTotalCoinStr = qmlSystem.calculateTransactionCost(
@@ -83,15 +83,15 @@ AVMEPanel {
   }
 
   function refreshAssetBalance() {
-    if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {
+    if (chosenAsset.symbol == "AVAX") {
       assetBalance.text = (accountHeader.coinRawBalance != "")
       ? "Balance: <b>" + accountHeader.coinRawBalance + " AVAX</b>"
       : "Loading asset balance..."
     } else {
-      var asset = accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]
+      var asset = accountHeader.tokenList[chosenAsset.address]
       assetBalance.text = (asset != undefined)
       ? "Balance: <b>" + asset["rawBalance"]
-      + " " + chooseAssetPopup.chosenAssetSymbol + "</b>"
+      + " " + chosenAsset.symbol + "</b>"
       : "Loading asset balance..."
     }
   }
@@ -123,39 +123,10 @@ AVMEPanel {
         font.pixelSize: 14.0
         text: "You will send"
       }
-      Image {
-        id: assetImage
-        anchors.verticalCenter: parent.verticalCenter
-        height: 48
-        antialiasing: true
-        smooth: true
-        fillMode: Image.PreserveAspectFit
-        source: {
-          var avmeAddress = qmlSystem.getContract("AVME")
-          if (chooseAssetPopup.chosenAssetSymbol == "AVAX") {
-            source: "qrc:/img/avax_logo.png"
-          } else if (chooseAssetPopup.chosenAssetAddress == avmeAddress) {
-            source: "qrc:/img/avme_logo.png"
-          } else {
-            var img = qmlSystem.getARC20TokenImage(chooseAssetPopup.chosenAssetAddress)
-            source: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
-          }
-        }
-      }
-      Text {
-        id: assetSymbol
-        anchors.verticalCenter: parent.verticalCenter
-        verticalAlignment: Text.AlignVCenter
-        color: "#FFFFFF"
-        font.bold: true
-        font.pixelSize: 14.0
-        text: chooseAssetPopup.chosenAssetSymbol
-      }
-      AVMEButton {
-        id: assetBtn
-        anchors.verticalCenter: parent.verticalCenter
-        text: "Change Asset"
-        onClicked: chooseAssetPopup.open()
+      AVMEAssetCombobox {
+        id: assetCombobox
+        Component.onCompleted: { updateTxCost(); refreshAssetBalance() }
+        onActivated: { updateTxCost(); refreshAssetBalance() }
       }
     }
 
@@ -186,7 +157,7 @@ AVMEPanel {
         Image {
           anchors.fill: parent
           anchors.margins: 10
-          source: "qrc:/img/icons/inboxesSelect.png"
+          source: "qrc:/img/icons/inboxes.png"
           antialiasing: true
           smooth: true
           fillMode: Image.PreserveAspectFit
@@ -199,7 +170,7 @@ AVMEPanel {
       width: (parent.width * 0.8)
       anchors.left: parent.left
       validator: RegExpValidator {
-        regExp: qmlSystem.createTxRegExp(chooseAssetPopup.chosenAssetDecimals)
+        regExp: qmlSystem.createTxRegExp(chosenAsset.decimals)
       }
       label: "Amount"
       placeholder: "Fixed point amount (e.g. 0.5)"
@@ -214,11 +185,11 @@ AVMEPanel {
         }
         text: "Max"
         onClicked: {
-          txAmountInput.text = (chooseAssetPopup.chosenAssetSymbol == "AVAX")
+          txAmountInput.text = (chosenAsset.symbol == "AVAX")
           ? qmlSystem.getRealMaxAVAXAmount(
             accountHeader.coinRawBalance, txGasLimitInput.text, sendPanel.gasPrice
           )
-          : (accountHeader.tokenList[chooseAssetPopup.chosenAssetAddress]["rawBalance"])
+          : (accountHeader.tokenList[chosenAsset.address]["rawBalance"])
           updateTxCost()
         }
       }
@@ -250,21 +221,13 @@ AVMEPanel {
       anchors.horizontalCenter: parent.horizontalCenter
       spacing: 10
 
-      CheckBox {
+      AVMECheckbox {
         id: autoLimitCheck
         property string prev
         width: (parent.parent.width * 0.5) - parent.spacing
         checked: true
         enabled: true
         text: "Automatic gas limit"
-        font.pixelSize: 14.0
-        contentItem: Text {
-          text: parent.text
-          font.pixelSize: 14.0
-          color: parent.checked ? "#FFFFFF" : "#888888"
-          verticalAlignment: Text.AlignVCenter
-          leftPadding: parent.indicator.width + parent.spacing
-        }
         onClicked: {
           if (!txGasLimitInput.enabled) { // Disabled field (auto limit on)
             txGasLimitInput.text = prev
@@ -275,21 +238,13 @@ AVMEPanel {
         }
       }
 
-      CheckBox {
+      AVMECheckbox {
         id: autoGasCheck
         property string prev
         width: (parent.parent.width * 0.5) - parent.spacing
         checked: true
         enabled: true
         text: "Recommended fees"
-        font.pixelSize: 14.0
-        contentItem: Text {
-          text: parent.text
-          font.pixelSize: 14.0
-          color: parent.checked ? "#FFFFFF" : "#888888"
-          verticalAlignment: Text.AlignVCenter
-          leftPadding: parent.indicator.width + parent.spacing
-        }
         onClicked: {
           if (!txGasPriceInput.enabled) { // Disabled field (auto fee on)
             txGasPriceInput.text = prev

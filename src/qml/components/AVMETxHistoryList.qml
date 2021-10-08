@@ -39,7 +39,7 @@ ListView {
     Text {
       id: headerDateTime
       anchors.verticalCenter: parent.verticalCenter
-      width: parent.width / 2
+      width: (parent.width * 0.4)
       x: 16 + 5
       color: "white"
       font.pixelSize: 14.0
@@ -49,7 +49,7 @@ ListView {
     Text {
       id: headerOperation
       anchors.verticalCenter: parent.verticalCenter
-      width: parent.width / 2
+      width: (parent.width * 0.6)
       x: headerDateTime.x + headerDateTime.width
       color: "white"
       font.pixelSize: 14.0
@@ -99,7 +99,7 @@ ListView {
       Text {
         id: delegateDateTime
         anchors.verticalCenter: parent.verticalCenter
-        width: parent.width / 2
+        width: (parent.width * 0.4)
         x: delegateConfirmed.x + delegateConfirmed.width
         color: "white"
         font.pixelSize: 14.0
@@ -110,7 +110,7 @@ ListView {
       Text {
         id: delegateOperation
         anchors.verticalCenter: parent.verticalCenter
-        width: parent.width / 2
+        width: (parent.width * 0.6)
         x: delegateDateTime.x + delegateDateTime.width
         color: "white"
         font.pixelSize: 14.0

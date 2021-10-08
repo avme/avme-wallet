@@ -55,10 +55,10 @@ Popup {
     chosenPath = ""
   }
 
-  width: window.width * 0.9
-  height: 700
-  x: (window.width * 0.1) / ((window.menuToggle) ? (width / 2) : 2)
-  y: (window.height * 0.5) - (height / 2)
+  width: (parent.width * 0.9)
+  height: (parent.height * 0.9)
+  x: (parent.width * 0.1) / 2
+  y: (parent.height * 0.5) - (height / 2)
   modal: true
   focus: true
   padding: 0  // Remove white borders
@@ -87,7 +87,7 @@ Popup {
         }
       }
     }
-    ComboBox {
+    AVMECombobox {
       id: ledgerPath
       anchors.verticalCenter: infoLabel.verticalCenter
       width: 300
@@ -109,7 +109,7 @@ Popup {
       right: parent.right
       margins: 20
     }
-    height: (parent.height * 0.8)
+    height: (parent.height * 0.75)
     radius: 5
     color: "#4458A0C9"
 

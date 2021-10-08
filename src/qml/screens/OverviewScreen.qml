@@ -7,16 +7,16 @@ import QtCharts 2.2
 
 import "qrc:/qml/components"
 import "qrc:/qml/panels"
+import "qrc:/qml/popups"
 
-// Screen for showing an overview for the Wallet, Account, etc.
+// Screen for showing a general overview for the chosen Account.
 Item {
   id: overviewScreen
 
-  // Rectangle for the Account's general balances
   AVMEOverviewBalance {
     id: overviewBalance
-    width: (parent.width * 0.5) - (anchors.margins / 2)
-    height: parent.height * 0.2
+    width: (parent.width * 0.5) - (anchors.margins * 2)
+    height: (parent.height * 0.15)
     anchors {
       top: parent.top
       left: parent.left
@@ -24,20 +24,17 @@ Item {
     }
   }
 
-  // Panel with the Account balances chart
   AVMEPanelOverview {
     id: overviewPanel
-    width: (parent.width * 0.5) - (anchors.margins / 2)
+    width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
       top: overviewBalance.bottom
       bottom: parent.bottom
       left: parent.left
       margins: 10
     }
-    rightRadius: false
   }
 
-  // Panel with each asset, balances and market data registered in the Account
   AVMEPanelOverviewAssets {
     id: assetsPanel
     width: (parent.width * 0.5) - (anchors.margins * 2)
@@ -47,6 +44,9 @@ Item {
       right: parent.right
       margins: 10
     }
-    leftRadius: false
+  }
+
+  AVMEPopupPriceChart {
+    id: pricechartPopup
   }
 }

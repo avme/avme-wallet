@@ -9,11 +9,10 @@ import "qrc:/qml/components"
 import "qrc:/qml/panels"
 import "qrc:/qml/popups"
 
-// Screen for staking AVME with a given Account
+// Screen for staking AVME with a given Account (classic)
 Item {
   id: stakingScreen
   property bool isStaking: true
-  property bool isClassic: true
 
   // op = "approval" or "stake"
   function checkLedger(op) {
@@ -35,49 +34,11 @@ Item {
 
   Timer { id: ledgerRetryTimer; interval: 250; onTriggered: parent.checkLedger() }
 
-
-  // Panel for selecting Classic x Compound
-  AVMEPanel {
-    id: stakingSelectPanel
-    width: (parent.width - (anchors.margins * 2))
-    height: (parent.height * 0.075)
-    title: ""
-    anchors {
-      top: parent.top
-      horizontalCenter: parent.horizontalCenter
-      margins: 10
-    }
-
-    AVMEButton {
-      id: btnSwitchClassic
-      width: parent.width * 0.25
-      anchors {
-        horizontalCenter: parent.horizontalCenter
-        verticalCenter: parent.verticalCenter
-        horizontalCenterOffset: -(parent.width / 4)
-      }
-      text: "Classic"
-      onClicked: isClassic = true
-    }
-    AVMEButton {
-      id: btnSwitchYYCompound
-      width: parent.width * 0.25
-      anchors {
-        horizontalCenter: parent.horizontalCenter
-        verticalCenter: parent.verticalCenter
-        horizontalCenterOffset: parent.width / 4
-      }
-      text: "YieldYak Compound"
-      onClicked: isClassic = false
-    }
-  }
-
   AVMEPanelStaking {
     id: stakingPanel
-    width: (parent.width * 0.5) - (anchors.margins / 2)
-    visible: isClassic
+    width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
-      top: stakingSelectPanel.bottom
+      top: parent.top
       left: parent.left
       bottom: parent.bottom
       margins: 10
@@ -86,64 +47,24 @@ Item {
 
   AVMEPanelStakingRewards {
     id: stakingRewardsPanel
-    visible: isClassic
-    width: (parent.width * 0.5) - (anchors.margins / 2)
+    width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
-      top: stakingSelectPanel.bottom
+      top: parent.top
       right: parent.right
       bottom: parent.bottom
       margins: 10
     }
   }
 
-  AVMEPanelCompound {
-    id: compoundPanel
-    width: (parent.width * 0.5) - (anchors.margins / 2)
-    visible: !isClassic
-    anchors {
-      top: stakingSelectPanel.bottom
-      left: parent.left
-      bottom: parent.bottom
-      margins: 10
-    }
-  }
-
-  AVMEPanelCompoundRewards {
-    id: compoundRewardsPanel
-    visible: !isClassic
-    width: (parent.width * 0.5) - (anchors.margins / 2)
-    anchors {
-      top: stakingSelectPanel.bottom
-      right: parent.right
-      bottom: parent.bottom
-      margins: 10
-    }
-  }
-
-  // Popup for insufficient funds
+  AVMEPopupConfirmTx { id: confirmApprovalPopup }
+  AVMEPopupConfirmTx { id: confirmStakePopup }
+  AVMEPopupConfirmTx { id: confirmRewardPopup }
+  AVMEPopupTxProgress { id: txProgressPopup }
   AVMEPopupInfo {
     id: fundsPopup
     icon: "qrc:/img/warn.png"
     info: "Insufficient funds. Please check your inputs."
   }
-
-  // Popups for staking approval and confirmation, respectively
-  AVMEPopupConfirmTx {
-    id: confirmApprovalPopup
-  }
-  AVMEPopupConfirmTx {
-    id: confirmStakePopup
-  }
-
-  AVMEPopupConfirmTx {
-    id: confirmRewardPopup
-  }
-
-  AVMEPopupTxProgress {
-    id: txProgressPopup
-  }
-
-  // Info popup for if communication with Ledger fails
   AVMEPopupInfo {
     id: ledgerFailPopup
     icon: "qrc:/img/warn.png"
