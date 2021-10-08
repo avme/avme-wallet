@@ -20,6 +20,7 @@ AVMECombobox {
       symbol: "AVAX",
       name: "Avalanche",
       decimals: 18,
+      address: "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7",
       balance: accountHeader.coinRawBalance
     })
     var tokens = accountHeader.tokenList
