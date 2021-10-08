@@ -111,7 +111,7 @@ ListView {
       Text {
         id: delegateOperation
         anchors.verticalCenter: parent.verticalCenter
-        width: (parent.width * 0.6)
+        width: (parent.width * 0.5)
         x: delegateDateTime.x + delegateDateTime.width
         color: "white"
         font.pixelSize: 14.0
