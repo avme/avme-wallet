@@ -523,11 +523,16 @@ bool Wallet::updateAllTxStatus() {
     if (!tx.invalid && !tx.confirmed) {
       const auto p1 = std::chrono::system_clock::now();
       uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
-      std::string status = API::getTxStatus(tx.hex);
-      if (status == "0x1") tx.confirmed = true;
-      if (status == "0x0") {
-        u256 transactionBlock = boost::lexical_cast<HexTo<u256>>(API::getTxBlock(tx.hex));
-        tx.invalid = (currentBlock > transactionBlock);
+      json apiAnswer = json::parse(API::getTxStatus(tx.hex));
+      if (apiAnswer["result"].contains("status")) {
+        std::string status = apiAnswer["status"];
+        if (status == "0x1") tx.confirmed = true;
+        if (status == "0x0") {
+          u256 transactionBlock = boost::lexical_cast<HexTo<u256>>(API::getTxBlock(apiAnswer["result"]["blockNumber"]));
+          tx.invalid = (currentBlock > transactionBlock);
+        }
+      } else {
+        tx.invalid = ((now + 300) > tx.unixDate);
       }
     }
     saveTxToHistory(tx);

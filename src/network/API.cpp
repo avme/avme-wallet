@@ -213,16 +213,17 @@ std::string API::getCurrentBlock() {
 std::string API::getTxStatus(std::string txidHex) {
   Request req{1, "2.0", "eth_getTransactionReceipt", {"0x" + txidHex}};
   std::string query = buildRequest(req);
+  std::cout << query << std::endl;
   std::string resp = httpGetRequest(query);
+  std::cout << resp << std::endl;
   json respJson = json::parse(resp);
-  return respJson["result"]["status"].get<std::string>();
+  return respJson["result"].dump(); 
 }
 
 std::string API::getTxBlock(std::string txidHex) {
   Request req{1, "2.0", "eth_getTransactionReceipt", {"0x" + txidHex}};
   std::string query = buildRequest(req);
   std::string resp = httpGetRequest(query);
-  json respJson = json::parse(resp);
-  return respJson["result"]["blockNumber"].get<std::string>();
+  return resp;
 }
 
