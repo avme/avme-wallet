@@ -215,8 +215,9 @@ Rectangle {
 
   AVMEPopup {
     id: confirmWebsiteAllowance
-    width: parent.width * 0.66
-    height: parent.width * 0.1
+    width: window.width * 0.66
+    height: window.height * 0.1
+    y: ((window.height / 2) - (height / 2))
     z: 9999
     Column {
       id: confirmWebsiteAllowanceColumn
@@ -271,6 +272,9 @@ Rectangle {
 
   AVMEPopupConfirmTx {
     id: confirmRT
+    width: window.width * 0.6
+    height: window.height * 0.7
+    y: ((window.height / 2) - (height / 2))
     backBtn.onClicked: {
       confirmRT.close()
       qmlSystem.requestedTransactionStatus(false, "")
@@ -278,6 +282,9 @@ Rectangle {
   }
 
   AVMEPopupTxProgress {
+    width: window.width * 0.7
+    height: window.height * 0.8
+    y: ((window.height / 2) - (height / 2))
     id: txProgressPopup
     requestedFromWS: true
   }
