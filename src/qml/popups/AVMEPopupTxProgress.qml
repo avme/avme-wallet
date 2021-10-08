@@ -9,8 +9,8 @@ import "qrc:/qml/components"
 // Popup for showing the progress of a transaction. Has to be opened manually.
 AVMEPopup {
   id: txProgressPopup
-  widthPct: 0.8
-  heightPct: 0.8
+  widthPct: 0.9
+  heightPct: 0.9
   property color popupBgColor: "#1C2029"
   property bool requestedFromWS: false
   property bool alreadyTransmitted: false

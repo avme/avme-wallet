@@ -67,7 +67,8 @@ AVMEPanel {
           append("AVAX", accountHeader.coinFiatValue)
           for (var token in accountHeader.tokenList) {
             var sym = accountHeader.tokenList[token].symbol
-            var bal = accountHeader.tokenList[token].fiatValue
+            var bal = +accountHeader.tokenList[token].fiatValue
+            bal = bal.toFixed(2)
             append(sym, bal)
           }
           var colorCt = 0

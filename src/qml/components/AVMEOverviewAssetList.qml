@@ -50,7 +50,8 @@ ListView {
       var asset = ({})
       asset["assetAddress"] = token
       asset["assetName"] = tokens[token]["symbol"]
-      asset["coinAmount"] = tokens[token]["coinWorth"]
+      asset["coinAmount"] = (+tokens[token]["rawBalance"] * +tokens[token]["derivedValue"])
+      asset["coinAmount"] = asset["coinAmount"].toFixed(18)
       asset["tokenAmount"] = tokens[token]["rawBalance"]
       asset["isToken"] = true
       asset["fiatAmount"] = "$" + tokens[token]["fiatValue"]

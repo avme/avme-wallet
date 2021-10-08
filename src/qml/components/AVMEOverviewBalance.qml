@@ -34,10 +34,10 @@ Rectangle {
       +accountHeader.tokenList[token]["derivedValue"])
       // Due to some unknown reason, if you sum something to 0, it will return 0
       // So we need to check if the currentTokenWorth is not 0
-      if (+currentTokenWorth != 0)
-        totalTokenWorth += +currentTokenWorth
+      if (+currentTokenWorth != 0) totalTokenWorth += +currentTokenWorth
     }
-    totalTokenBalance = totalTokenWorth + " AVAX (Tokens)"
+    totalTokenWorth = totalTokenWorth.toFixed(18)
+    totalTokenBalance = totalTokenWorth + " AVAX (in tokens)"
   }
 
   implicitWidth: 500

@@ -51,17 +51,18 @@ Rectangle {
         for (var i = 0; i < tokenJsonList.length; ++i) {
           var tokenInformation = ({})
           tokenInformation["rawBalance"] = tokenJsonList[i]["tokenRawBalance"]
-          tokenInformation["fiatValue"] = tokenJsonList[i]["tokenFiatValue"]
+          tokenInformation["fiatValue"] = +tokenJsonList[i]["tokenFiatValue"]
+          tokenInformation["fiatValue"] = tokenInformation["fiatValue"].toFixed(2)
           tokenInformation["derivedValue"] = tokenJsonList[i]["tokenDerivedValue"]
           tokenInformation["symbol"] = tokenJsonList[i]["tokenSymbol"]
-          tokenInformation["coinWorth"] = tokenJsonList[i]["coinWorth"]
           tokenInformation["chartData"] = tokenJsonList[i]["tokenChartData"]
           tokenInformation["USDprice"] = tokenJsonList[i]["tokenUSDPrice"]
           tokenInformation["decimals"] = tokenJsonList[i]["tokenDecimals"]
           tokenInformation["name"] = tokenJsonList[i]["tokenName"]
           tokenList[tokenJsonList[i]["tokenAddress"]] = tokenInformation
-          // Use only two digits precision.
-          totalFiatBalance = Math.round((+totalFiatBalance + +tokenInformation["fiatValue"]) * 100) / 100
+          totalFiatBalance = (Math.round(
+            (+totalFiatBalance + +tokenInformation["fiatValue"]) * 100
+          ) / 100).toFixed(2) // Use only two digits precision for fiat
         }
         gasPrice = String(Math.round(+gasPriceStr))
         updatedBalances()
