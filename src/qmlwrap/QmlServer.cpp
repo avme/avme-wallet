@@ -118,9 +118,19 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       RTuserInputRequest.lock();
       RTuserInputAnswer.lock();
       std::string data, from, gas, to, website, value;
-      data = request["params"][0]["data"];
+      // Optional! empty if there is none
+      if (request["params"][0].contains("data")) {
+        data = request["params"][0]["data"];
+      } else {
+        data = "";
+      }
       from = request["params"][0]["from"];
-      gas = request["params"][0]["gas"];
+      // Optional! defaults to 500000
+      if (request["params"][0].contains("gas")) { 
+        gas = request["params"][0]["gas"];
+      } else {
+        gas = "0x7a120";
+      }
       to = request["params"][0]["to"];
       website = request["__frameOrigin"];
       if (request["params"][0].contains("value")) { // Value input is optional! check if exists to set it properly.
