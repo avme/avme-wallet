@@ -135,6 +135,9 @@ class Server {
     unsigned short port = 4812;
     unsigned short threads = 8;
 
+    // Mutex to wait until server was succesfully stopped
+    std::mutex running;
+
   public:
     // Create and launch a listening port, and run the I/O service.
     // The io_context is required for all I/O.

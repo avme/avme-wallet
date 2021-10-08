@@ -114,13 +114,18 @@ void Server::listener::on_accept(beast::error_code ec, tcp::socket socket) {
 
 void Server::listener::stop() {
   m_lock.lock();
+  #ifdef __MINGW32__
+  #else
+  // Cancel is not available under windows systems
   acceptor_.cancel(); // Cancel the acceptor.
+  #endif
   acceptor_.close(); // Close the acceptor.
   m_lock.unlock();
 }
 
 void Server::start() {
   // Restart is needed to .run() the ioc again, otherwise it returns instantly.
+  running.lock();
   ioc.restart();
   std::make_shared<listener>(
     ioc, tcp::endpoint{this->address, this->port}, &sessions_, &listeners_, sys_
@@ -132,6 +137,8 @@ void Server::start() {
   // Block until all the threads exit
   for(auto& t : v)
       t.join();
+
+  running.unlock();
 }
 
 void Server::stop() {
@@ -165,6 +172,8 @@ void Server::stop() {
   // "run" again so it can fully stop
   ioc.run();
   ioc.restart();
+  running.lock(); // Wait until the thread running the Server::start to unlock before declaring the server as "open start again"
+  running.unlock();
 }
 
 void Server::setQmlSystem(QmlSystem* sys) { this->sys_ = sys; }
