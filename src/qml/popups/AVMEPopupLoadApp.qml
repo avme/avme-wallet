@@ -65,7 +65,7 @@ AVMEPopup {
         onClicked: loadAppDialog.visible = true
         Image {
           anchors.fill: parent
-          anchors.margins: 10
+          anchors.margins: 5
           source: "qrc:/img/icons/folder.png"
           antialiasing: true
           smooth: true

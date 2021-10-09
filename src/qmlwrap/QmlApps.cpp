@@ -13,7 +13,7 @@ void QmlSystem::downloadAppList() {
     API::httpGetFile(
       "raw.githubusercontent.com",
       "/avme/avme-wallet-applications/main/applist.json",
-      filePath.string() + "/applist.json"
+      filePath.string()
     );
     if (boost::filesystem::exists(filePath)) {
       emit appListDownloaded();
@@ -69,79 +69,93 @@ bool QmlSystem::appIsInstalled(QString folder) {
   return this->w.appIsRegistered(folder.toStdString());
 }
 
-bool QmlSystem::installApp(QVariantMap data) {
-  // Retrieve DApp info
-  json app;
-  app["chainId"] = data["chainId"].toInt();
-  app["folder"] = data["folder"].toString().toStdString();
-  app["name"] = data["name"].toString().toStdString();
-  app["major"] = data["major"].toInt();
-  app["minor"] = data["minor"].toInt();
-  app["patch"] = data["patch"].toInt();
+void QmlSystem::installApp(QVariantMap data) {
+  QtConcurrent::run([=](){
+    // Retrieve DApp info
+    json app;
+    app["chainId"] = data["chainId"].toInt();
+    app["folder"] = data["folder"].toString().toStdString();
+    app["name"] = data["name"].toString().toStdString();
+    app["major"] = data["major"].toInt();
+    app["minor"] = data["minor"].toInt();
+    app["patch"] = data["patch"].toInt();
 
-  // Set up required variables
-  boost::filesystem::path appPath = Utils::walletFolderPath.string()
-    + "/wallet/c-avax/apps/" + std::to_string(app["chainId"].get<int>())
-    + "/" + app["folder"].get<std::string>();
-  if (!boost::filesystem::exists(appPath)) { boost::filesystem::create_directories(appPath); }
-  json fileList = json::array();  // List of files to download
-  int progress, totalProgress = 0;  // Counters for file download progress
-  int downloadRetries = 5;  // Attempts to download a file before giving up
+    // Set up required variables
+    boost::filesystem::path appPath = Utils::walletFolderPath.string()
+      + "/wallet/c-avax/apps/" + std::to_string(app["chainId"].get<int>())
+      + "/" + app["folder"].get<std::string>();
+    if (!boost::filesystem::exists(appPath)) { boost::filesystem::create_directories(appPath); }
+    json fileList = json::array();  // List of files to download
+    int progress = 0, totalProgress = 0;  // Counters for file download progress
+    int downloadRetries = 5;  // Attempts to download a file before giving up
 
-  // Get the file list from files.json
-  for (int i = 0; i < downloadRetries; i++) {
-    boost::filesystem::path fileJsonPath = appPath.string() + "/files.json";
-    API::httpGetFile(
-      "raw.githubusercontent.com",
-      "/avme/avme-applications/main/apps/" + std::to_string(app["chainId"].get<int>())
-        + "/" + app["folder"].get<std::string>() + "/files.json",
-      fileJsonPath.string()
-    );
-    if (boost::filesystem::exists(fileJsonPath)) {
-      json fileListJson = json::parse(Utils::readJSONFile(fileJsonPath))["apps"];
-      fileList.push_back("main.qml"); totalProgress++;
-      fileList.push_back("icon.png"); totalProgress++;
-      fileList.push_back("files.json"); totalProgress++;
-      for (std::string file : fileListJson) { fileList.push_back(file); totalProgress++; }
-      boost::filesystem::remove(fileJsonPath); // For progress calculation purposes
-      break;
-    } else if (i == downloadRetries - 1) {  // Last retry failed
-      boost::filesystem::remove_all(appPath);
-      return false;
-    }
-  }
-
-  // Download all the files
-  for (std::string file : fileList) {
+    // Get the file list from files.json
     for (int i = 0; i < downloadRetries; i++) {
-      boost::filesystem::path filePath = appPath.string() + "/" + file;
-      if (!boost::filesystem::exists(filePath.parent_path())) {
-        boost::filesystem::create_directories(filePath.parent_path());
-      }
+      boost::filesystem::path fileJsonPath = appPath.string() + "/files.json";
       API::httpGetFile(
         "raw.githubusercontent.com",
-        "/avme/avme-applications/main/apps/" + std::to_string(app["chainId"].get<int>())
-          + "/" + app["folder"].get<std::string>() + "/" + file,
-        filePath.string()
+        "/avme/avme-wallet-applications/main/apps/"
+          + std::to_string(app["chainId"].get<int>()) + "/"
+          + app["folder"].get<std::string>() + "/files.json",
+        fileJsonPath.string()
       );
-      if (boost::filesystem::exists(filePath)) {
-        emit appDownloadProgressUpdated(++progress, totalProgress);
-        break;
+      if (boost::filesystem::exists(fileJsonPath)) {
+        if (!boost::filesystem::is_empty(fileJsonPath)) {
+          json fileListJson = json::parse(Utils::readJSONFile(fileJsonPath))["files"];
+          fileList.push_back("main.qml"); totalProgress++;
+          fileList.push_back("icon.png"); totalProgress++;
+          fileList.push_back("files.json"); totalProgress++;
+          for (std::string file : fileListJson) { fileList.push_back(file); totalProgress++; }
+          boost::filesystem::remove(fileJsonPath); // For progress calculation purposes
+          break;
+        } else {
+          boost::filesystem::remove(fileJsonPath);
+        }
       } else if (i == downloadRetries - 1) {  // Last retry failed
         boost::filesystem::remove_all(appPath);
-        return false;
+        emit appInstalled(false);
+        return;
       }
     }
-  }
 
-  // Register the DApp in the database
-  bool success = this->w.registerApp(
-    app["chainId"].get<int>(), app["folder"].get<std::string>(),
-    app["name"].get<std::string>(), app["major"].get<int>(),
-    app["minor"].get<int>(), app["patch"].get<int>()
-  );
-  if (!success) { boost::filesystem::remove_all(appPath); }
-  return success;
+    // Download all the files
+    for (std::string file : fileList) {
+      for (int i = 0; i < downloadRetries; i++) {
+        boost::filesystem::path filePath = appPath.string() + "/" + file;
+        if (!boost::filesystem::exists(filePath.parent_path())) {
+          boost::filesystem::create_directories(filePath.parent_path());
+        }
+        API::httpGetFile(
+          "raw.githubusercontent.com",
+          "/avme/avme-wallet-applications/main/apps/"
+            + std::to_string(app["chainId"].get<int>()) + "/"
+            + app["folder"].get<std::string>() + "/" + file,
+          filePath.string()
+        );
+        if (boost::filesystem::exists(filePath)) {
+          if (!boost::filesystem::is_empty(filePath)) {
+            emit appDownloadProgressUpdated(++progress, totalProgress);
+            break;
+          } else {
+            boost::filesystem::remove(filePath);
+          }
+        } else if (i == downloadRetries - 1) {  // Last retry failed
+          boost::filesystem::remove_all(appPath);
+          emit appInstalled(false);
+          return;
+        }
+      }
+    }
+
+    // Register the DApp in the database
+    bool success = this->w.registerApp(
+      app["chainId"].get<int>(), app["folder"].get<std::string>(),
+      app["name"].get<std::string>(), app["major"].get<int>(),
+      app["minor"].get<int>(), app["patch"].get<int>()
+    );
+    if (!success) { boost::filesystem::remove_all(appPath); }
+    emit appInstalled(success);
+  });
 }
 
 bool QmlSystem::uninstallApp(QVariantMap data) {
@@ -152,7 +166,6 @@ bool QmlSystem::uninstallApp(QVariantMap data) {
   boost::filesystem::path appPath = Utils::walletFolderPath.string()
     + "/wallet/c-avax/apps/" + std::to_string(app["chainId"].get<int>())
     + "/" + app["folder"].get<std::string>();
-
   // Delete the DApp contents and unregister it from the database
   if (boost::filesystem::exists(appPath)) {
     boost::filesystem::remove_all(appPath); // Contents first...

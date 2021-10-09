@@ -51,7 +51,7 @@ ListView {
           id: delegateImage
           property var imgUrl: "https://raw.githubusercontent.com"
             + "/avme/avme-wallet-applications/main/apps/"
-            + itemFolder + "/icon.png"
+            + itemChainId + "/" + itemFolder + "/icon.png"
           anchors.verticalCenter: parent.verticalCenter
           width: parent.height * 0.9
           height: width

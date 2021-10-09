@@ -40,7 +40,7 @@ AVMEPanel {
       }
     }
     function onAppDownloadProgressUpdated(progress, total) {
-      infoPopup.text = "Downloading app,<br>please wait... (" + progress + "/" + total + ")"
+      infoPopup.info = "Downloading app, please wait...<br>(" + progress + "/" + total + ")"
     }
   }
 
@@ -50,7 +50,7 @@ AVMEPanel {
     installedApps = qmlSystem.loadInstalledApps()
     for (var i = 0; i < installedApps.length; i++) {
       if (filterInput.text == "" ||
-        apps[i].name.toUpperCase().includes(filterInput.text.toUpperCase())
+        installedApps[i].name.toUpperCase().includes(filterInput.text.toUpperCase())
       ) {
         var matchedApp = null
         for (var j = 0; j < availableApps.length; j++) {

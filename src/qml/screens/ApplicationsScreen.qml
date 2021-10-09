@@ -12,6 +12,18 @@ import "qrc:/qml/popups"
 Item {
   id: applicationsScreen
 
+  Connections {
+    target: qmlSystem
+    function onAppInstalled(success) {
+      infoPopup.close()
+      if (success) {
+        appsPanel.refreshGrid()
+      } else {
+        installFailPopup.open()
+      }
+    }
+  }
+
   AVMEPanelApps {
     id: appsPanel
     width: (parent.width * 0.7)
@@ -49,6 +61,9 @@ Item {
     }
   }
 
+  // Popup for selecting a DApp from the repo
+  AVMEPopupAppSelect { id: appSelectPopup }
+
   // Popup for loading a local application (for developers)
   AVMEPopupLoadApp {
     id: loadAppPopup
@@ -61,31 +76,16 @@ Item {
     }
   }
 
-  // Popup for selecting a DApp from the repo
-  AVMEPopupAppSelect {
-    id: appSelectPopup
-    installBtn.onClicked: {
-      if (!qmlSystem.appIsInstalled(appList.currentItem.itemFolder)) {
-        var app = ({})
-        app["chainId"] = appList.currentItem.itemChainId
-        app["folder"] = appList.currentItem.itemFolder
-        app["name"] = appList.currentItem.itemName
-        app["major"] = appList.currentItem.itemMajor
-        app["minor"] = appList.currentItem.itemMinor
-        app["patch"] = appList.currentItem.itemPatch
-        qmlSystem.installApp(app)
-        appSelectPopup.close()
-        appsPanel.refreshGrid()
-      } else {
-        infoTimer.start()
-      }
-    }
+  // Popup for warning about application install failure
+  AVMEPopupInfo {
+    id: installFailPopup; icon: "qrc:/img/warn.png"
+    info: "Application install failed.<br>Please try again."
   }
 
   // Popup for confirming app uninstallation
   AVMEPopupYesNo {
     id: confirmUninstallAppPopup
-    widthPct: 0.4
+    widthPct: 0.5
     heightPct: 0.25
     icon: "qrc:/img/warn.png"
     info: "Are you sure you want to remove this application?"

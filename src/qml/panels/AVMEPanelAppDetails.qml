@@ -29,6 +29,8 @@ AVMEPanel {
       id: appIcon
       property var imgUrl: "https://raw.githubusercontent.com"
         + "/avme/avme-wallet-applications/main/apps/"
+        + ((appsPanel.selectedApp != null) ? appsPanel.selectedApp.itemChainId : "")
+        + "/"
         + ((appsPanel.selectedApp != null) ? appsPanel.selectedApp.itemFolder : "")
         + "/icon.png"
       width: 128
@@ -106,8 +108,6 @@ AVMEPanel {
       visible: (appsPanel.selectedApp != null && !appsPanel.selectedApp.itemIsUpdated)
       text: "Update Application"
       onClicked: {
-        infoPopup.info = "Downloading app,<br>please wait..."
-        infoPopup.open()
         var app = ({})
         app["chainId"] = appsPanel.selectedApp.itemChainId
         app["folder"] = appsPanel.selectedApp.itemFolder
@@ -116,9 +116,12 @@ AVMEPanel {
         app["minor"] = appsPanel.selectedApp.itemMinor
         app["patch"] = appsPanel.selectedApp.itemPatch
         qmlSystem.uninstallApp(app)
+        app["major"] = appsPanel.selectedApp.itemNextMajor
+        app["minor"] = appsPanel.selectedApp.itemNextMinor
+        app["patch"] = appsPanel.selectedApp.itemNextPatch
+        infoPopup.info = "Downloading app,<br>please wait..."
+        infoPopup.open()
         qmlSystem.installApp(app)
-        infoPopup.close()
-        appsPanel.refreshGrid()
       }
     }
     AVMEButton {

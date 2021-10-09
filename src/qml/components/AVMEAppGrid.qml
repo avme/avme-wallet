@@ -56,7 +56,7 @@ GridView {
           id: appImage
           property var imgUrl: "https://raw.githubusercontent.com"
             + "/avme/avme-wallet-applications/main/apps/"
-            + itemFolder + "/icon.png"
+            + itemChainId + "/" + itemFolder + "/icon.png"
           width: 64
           height: 64
           anchors.horizontalCenter: parent.horizontalCenter

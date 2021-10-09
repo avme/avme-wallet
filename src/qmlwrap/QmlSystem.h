@@ -120,6 +120,7 @@ class QmlSystem : public QObject {
     void appListDownloaded();
     void appListDownloadFailed();
     void appDownloadProgressUpdated(int progress, int total);
+    void appInstalled(bool success);
     void appLoaded(QString folderPath);
 
     // Signal for request user input to give permission for said website
@@ -482,7 +483,7 @@ class QmlSystem : public QObject {
     // Installs are atomic - either all files are downloaded and the DApp is
     // properly registered in the database, or the install fails altogether.
     Q_INVOKABLE bool appIsInstalled(QString folder);
-    Q_INVOKABLE bool installApp(QVariantMap data);
+    Q_INVOKABLE void installApp(QVariantMap data);
     Q_INVOKABLE bool uninstallApp(QVariantMap data);
 };
 

@@ -39,6 +39,24 @@ AVMEPopup {
     appList.currentIndex = -1
   }
 
+  function handleInstall() {
+    if (!qmlSystem.appIsInstalled(appList.currentItem.itemFolder)) {
+      var app = ({})
+      app["chainId"] = appList.currentItem.itemChainId
+      app["folder"] = appList.currentItem.itemFolder
+      app["name"] = appList.currentItem.itemName
+      app["major"] = appList.currentItem.itemMajor
+      app["minor"] = appList.currentItem.itemMinor
+      app["patch"] = appList.currentItem.itemPatch
+      infoPopup.info = "Downloading app, please wait..."
+      infoPopup.open()
+      appSelectPopup.close()
+      qmlSystem.installApp(app)
+    } else {
+      infoTimer.start()
+    }
+  }
+
   Column {
     id: items
     width: parent.width
@@ -48,7 +66,7 @@ AVMEPopup {
     // Enter/Return key override
     Keys.onPressed: {
       if ((event.key == Qt.Key_Return) || (event.key == Qt.Key_Enter)) {
-        if (btnOk.enabled) { btnOk.handleInstall() }
+        if (btnInstall.enabled) { handleInstall() }
       }
     }
 
@@ -104,6 +122,7 @@ AVMEPopup {
       anchors.horizontalCenter: parent.horizontalCenter
       enabled: (appList.currentItem != null)
       text: "Install Application"
+      onClicked: handleInstall()
     }
 
     AVMEButton {
