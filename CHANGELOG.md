@@ -27,9 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Library dependencies when compiling from source are better documented.
 - (Most) popups and components should now properly handle focus and keyboard input.
 - Overview pie chart now uses up to 16 different colors for better readability.
+- Fiat and raw balance values in the Overview screen should be properly truncated now.
 
 ### Changed
 - UI has a new design (thanks to Natalya Chavez for the work!).
+  - Most controls were customized to fit better with the theming.
+  - **Exchange and Liquidity screens were removed and converted to a DApp ("Pangolin DEX").**
 - LevelDB is now being used in place of JSON files for ARC20 tokens, transaction history, registered Ledger accounts, DApps and settings.
   - This should make the wallet faster I/O-wise and fix a history duplication bug that happened with JSON files.
   - **The old JSON history file from 1.2.0 and below, if it exists, will be AUTOMATICALLY DELETED when opening the Account in 2.0.0 and above.**
@@ -44,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Transactions now have an extra progress step (build, sign, send and **confirm**).
 - Transactions can now be optionally retried with a higher fee if they fail.
 - Some hardcoded gas limits for certain operations were revised.
+- Amount inputs should now permit values starting with a dot (e.g. ".01").
 
 ### Removed
 - CLI executable for testing/debugging.
