@@ -324,7 +324,7 @@ AVMEPanel {
       width: (parent.width * 0.8)
       anchors.left: parent.left
       enabled: (allowance != "")
-      validator: RegExpValidator { regExp: /[0-9]{1,}(?:\.[0-9]{1,18})?/ }
+      validator: RegExpValidator { regExp: /(?:[0-9]{1,})?(?:\.[0-9]{1,18})?/ }
       label: "Amount of AVAX/AVME LP to " + ((isStaking) ? "stake" : "unstake")
       placeholder: "Fixed point amount (e.g. 0.5)"
 
