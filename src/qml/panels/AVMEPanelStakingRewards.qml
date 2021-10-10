@@ -58,7 +58,7 @@ AVMEPanel {
     to = qmlSystem.getContract("staking")
     coinValue = 0
     gas = 400000
-    info = "You will harvest <b> " + qmlApi.weiToFixedPoint(reward, 18) + " AVME <\b> "
+    info = "You will harvest <b> " + qmlApi.weiToFixedPoint(reward, 18) + " AVME </b> "
     + "<br> and withdraw <b>" + qmlApi.weiToFixedPoint(lockedBalance, 18) + " AVME/AVAX LP "
     + "</b><br> on Classic Staking Contract"
     historyInfo = "Exit Classic Staking Contract"
@@ -75,7 +75,7 @@ AVMEPanel {
     to = qmlSystem.getContract("staking")
     coinValue = 0
     gas = 250000
-    info = "You will harvest <b> " + qmlApi.weiToFixedPoint(reward, 18) + " AVME <\b>"
+    info = "You will harvest <b> " + qmlApi.weiToFixedPoint(reward, 18) + " AVME </b>"
     + "</b><br> on Classic Staking Contract"
     historyInfo = "Harves Classic Staking Contract"
     var ethCallJson = ({})

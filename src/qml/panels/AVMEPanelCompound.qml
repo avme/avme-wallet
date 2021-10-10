@@ -158,8 +158,8 @@ AVMEPanel {
     to = pairAddress
     coinValue = 0
     gas = 100000
-    info = "You will approve <b> AVME/AVAX LP <\b> on Compound Staking Contract"
-    historyInfo = "Approve <b> AVME/AVAX LP <\b> on Compound Staking Contract"
+    info = "You will approve <b> AVME/AVAX LP </b> on Compound Staking Contract"
+    historyInfo = "Approve <b> AVME/AVAX LP </b> on Compound Staking Contract"
 
     var ethCallJson = ({})
     ethCallJson["function"] = "approve(address,uint256)"
@@ -178,8 +178,8 @@ AVMEPanel {
     to = qmlSystem.getContract("compound")
     coinValue = 0
     gas = 200000
-    info = "You will stake <b> " + stakeInput.text + " AVME/AVAX LP <\b> on Compound Staking"
-    historyInfo = "Stake <b> AVME/AVAX LP <\b> on Compound Staking"
+    info = "You will stake <b> " + stakeInput.text + " AVME/AVAX LP </b> on Compound Staking"
+    historyInfo = "Stake <b> AVME/AVAX LP </b> on Compound Staking"
     var ethCallJson = ({})
     ethCallJson["function"] = "deposit(uint256)"
     ethCallJson["args"] = []
@@ -195,8 +195,8 @@ AVMEPanel {
     to = qmlSystem.getContract("compound")
     coinValue = 0
     gas = 200000
-    info = "You will unstake <b> " + stakeInput.text + " AVME/AVAX LP <\b> on Compound Staking"
-    historyInfo = "Unstake <b> AVME/AVAX LP <\b> on Compound Staking"
+    info = "You will unstake <b> " + stakeInput.text + " AVME/AVAX LP </b> on Compound Staking"
+    historyInfo = "Unstake <b> AVME/AVAX LP </b> on Compound Staking"
     var ethCallJson = ({})
     ethCallJson["function"] = "withdraw(uint256)"
     ethCallJson["args"] = []
