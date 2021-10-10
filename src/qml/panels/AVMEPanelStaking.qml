@@ -135,7 +135,7 @@ AVMEPanel {
     to = pairAddress
     coinValue = 0
     gas = 100000
-    info = "You will Approve <b> AVME/AVAX LP <\b> on Classic Staking Contract"
+    info = "You will approve <b> AVME/AVAX LP <\b> on Classic Staking Contract"
     historyInfo = "Approve <b> AVME/AVAX LP <\b> on Classic Staking Contract"
 
     var ethCallJson = ({})
@@ -155,7 +155,7 @@ AVMEPanel {
     to = qmlSystem.getContract("staking")
     coinValue = 0
     gas = 300000
-    info = "You will stake <b> " + qmlApi.weiToFixedPoint(stakeInput.text, 18) + " AVME/AVAX LP <\b> on Classic Staking"
+    info = "You will stake <b> " + stakeInput.text + " AVME/AVAX LP <\b> on Classic Staking"
     historyInfo = "Stake <b> AVME/AVAX LP <\b> on Classic Staking"
     var ethCallJson = ({})
     ethCallJson["function"] = "stake(uint256)"
@@ -172,7 +172,7 @@ AVMEPanel {
     to = qmlSystem.getContract("staking")
     coinValue = 0
     gas = 300000
-    info = "You will unstake <b> " + qmlApi.weiToFixedPoint(stakeInput.text, 18) + " AVME/AVAX LP <\b> on Classic Staking"
+    info = "You will unstake <b> " + stakeInput.text + " AVME/AVAX LP <\b> on Classic Staking"
     historyInfo = "Unstake <b> AVME/AVAX LP <\b> on Classic Staking"
     var ethCallJson = ({})
     ethCallJson["function"] = "withdraw(uint256)"
