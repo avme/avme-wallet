@@ -36,7 +36,7 @@ AVMEPanel {
       width: 128
       height: 128
       anchors.horizontalCenter: parent.horizontalCenter
-      Component.onCompleted: { qmlSystem.checkIfUrlExists(Qt.resolvedUrl(imgUrl)) }
+      onImgUrlChanged: qmlSystem.checkIfUrlExists(Qt.resolvedUrl(imgUrl))
       Connections {
         target: qmlSystem
         function onUrlChecked(link, b) {
