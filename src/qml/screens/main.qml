@@ -34,7 +34,7 @@ ApplicationWindow {
   Component.onCompleted: menuTimer.start()
 
   // Timer for preventing side menu items from getting all squashed
-  Timer { id: menuTimer; interval: 1; onTriggered: startup() }
+  Timer { id: menuTimer; interval: 100; onTriggered: startup() }
 
   Rectangle {
     id: bg

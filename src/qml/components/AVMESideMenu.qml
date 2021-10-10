@@ -230,7 +230,7 @@ Rectangle {
         MouseArea {
           anchors.fill: parent
           hoverEnabled: true
-          Timer { id: t; interval: 1; onTriggered: headerRect.isExpanded = true }
+          Timer { id: t; interval: 100; onTriggered: headerRect.isExpanded = true }
           Component.onCompleted: t.start()
           onEntered: headerRect.color = "#444444"
           onExited: headerRect.color = "transparent"
