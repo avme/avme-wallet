@@ -75,64 +75,10 @@ std::vector<std::string> Pangolin::parseHex(std::string hexStr, std::vector<std:
   return ret;
 }
 
-std::string Pangolin::getPair(std::string tokenAddressA, std::string tokenAddressB) {
-  json reqJson;
-  std::string query, resp, hex;
-  reqJson["to"] = Pangolin::contracts["factory"];
-  reqJson["data"] = Pangolin::factoryFuncs["getPair"] + Utils::addressToHex(tokenAddressA) + Utils::addressToHex(tokenAddressB);
-  json reqJsonArr = json::array();
-  reqJsonArr.push_back(reqJson);
-
-  Request req{1, "2.0", "eth_call", reqJsonArr};
-  query = API::buildRequest(req);
-  resp = API::httpGetRequest(query);
-  json respJson = json::parse(resp);
-  hex = respJson["result"].get<std::string>();
-  return Utils::addressFromHex(hex);
-}
-
-std::string Pangolin::getAVAXPair(std::string tokenAddress) {
-  return getPair(Pangolin::contracts["AVAX"], tokenAddress);
-}
-
 std::string Pangolin::getFirstFromPair(std::string tokenAddressA, std::string tokenAddressB) {
   u256 valueA = boost::lexical_cast<HexTo<u256>>(tokenAddressA);
   u256 valueB = boost::lexical_cast<HexTo<u256>>(tokenAddressB);
   return (valueA < valueB) ? tokenAddressA : tokenAddressB;
-}
-
-std::string Pangolin::totalSupply(std::string tokenNameA, std::string tokenNameB) {
-  json params;
-  json array = json::array();
-  params["to"] = Pangolin::getPair(tokenNameA, tokenNameB);
-  params["data"] = pairFuncs["totalSupply"];
-  array.push_back(params);
-  array.push_back("latest");
-  Request req{1, "2.0", "eth_call", array};
-  std::string query = API::buildRequest(req);
-  std::string resp = API::httpGetRequest(query);
-  json respJson = json::parse(resp);
-  std::string result = respJson["result"].get<std::string>();
-  if (result == "0x" || result == "") { return {}; }
-  result = result.substr(2); // Remove the "0x"
-  return Pangolin::parseHex(result, {"uint"})[0];
-}
-
-std::vector<std::string> Pangolin::getReserves(std::string tokenNameA, std::string tokenNameB) {
-  json params;
-  json array = json::array();
-  params["to"] = Pangolin::getPair(tokenNameA, tokenNameB);
-  params["data"] = pairFuncs["getReserves"];
-  array.push_back(params);
-  array.push_back("latest");
-  Request req{1, "2.0", "eth_call", array};
-  std::string query = API::buildRequest(req);
-  std::string resp = API::httpGetRequest(query);
-  json respJson = json::parse(resp);
-  std::string result = respJson["result"].get<std::string>();
-  if (result == "0x" || result == "") { return {}; }
-  result = result.substr(2); // Remove the "0x"
-  return Pangolin::parseHex(result, {"uint", "uint", "uint"});
 }
 
 std::string Pangolin::calcExchangeAmountOut(
@@ -171,74 +117,3 @@ std::string Pangolin::calcLiquidityAmountOut(
 
   return boost::lexical_cast<std::string>(numerator / denominator);
 }
-
-std::string Pangolin::approve(std::string spender) {
-  std::string dataHex = Pangolin::ERC20Funcs["approve"] + Utils::addressToHex(spender)
-    + Utils::uintToHex(boost::lexical_cast<std::string>(Utils::MAX_U256_VALUE()));
-  return dataHex;
-}
-
-std::string Pangolin::transfer(std::string to, std::string value) {
-  std::string dataHex = Pangolin::ERC20Funcs["transfer"]
-    + Utils::addressToHex(to) + Utils::uintToHex(value);
-  return dataHex;
-}
-
-std::string Pangolin::addLiquidityAVAX(
-  std::string tokenAddress, std::string amountTokenDesired,
-  std::string amountTokenMin, std::string amountAVAXMin,
-  std::string to, std::string deadline
-) {
-  std::string dataHex = Pangolin::routerFuncs["addLiquidityAVAX"]
-    + Utils::addressToHex(tokenAddress) + Utils::uintToHex(amountTokenDesired)
-    + Utils::uintToHex(amountTokenMin) + Utils::uintToHex(amountAVAXMin)
-    + Utils::addressToHex(to) + Utils::uintToHex(deadline);
-  return dataHex;
-}
-
-std::string Pangolin::removeLiquidityAVAX(
-  std::string tokenAddress, std::string liquidity,
-  std::string amountTokenMin, std::string amountAVAXMin,
-  std::string to, std::string deadline
-) {
-  std::string dataHex = Pangolin::routerFuncs["removeLiquidityAVAX"]
-    + Utils::addressToHex(tokenAddress) + Utils::uintToHex(liquidity)
-    + Utils::uintToHex(amountTokenMin) + Utils::uintToHex(amountAVAXMin)
-    + Utils::addressToHex(to) + Utils::uintToHex(deadline);
-  return dataHex;
-}
-
-std::string Pangolin::swapExactAVAXForTokens(
-  std::string amountOutMin, std::vector<std::string> path,
-  std::string to, std::string deadline
-) {
-  std::string pathStr = "";
-  int pathCt = 0;
-  for (std::string p : path) {
-    pathStr += Utils::addressToHex(p);
-    pathCt++;
-  }
-  std::string dataHex = Pangolin::routerFuncs["swapExactAVAXForTokens"]
-    + Utils::uintToHex(amountOutMin) + Utils::uintToHex("128")
-    + Utils::addressToHex(to) + Utils::uintToHex(deadline)
-    + Utils::uintToHex(boost::lexical_cast<std::string>(pathCt)) + pathStr;
-  return dataHex;
-}
-
-std::string Pangolin::swapExactTokensForAVAX(
-  std::string amountIn, std::string amountOutMin, std::vector<std::string> path,
-  std::string to, std::string deadline
-) {
-  std::string pathStr = "";
-  int pathCt = 0;
-  for (std::string p : path) {
-    pathStr += Utils::addressToHex(p);
-    pathCt++;
-  }
-  std::string dataHex = Pangolin::routerFuncs["swapExactTokensForAVAX"]
-    + Utils::uintToHex(amountIn) + Utils::uintToHex(amountOutMin)
-    + Utils::uintToHex("160") + Utils::addressToHex(to) + Utils::uintToHex(deadline)
-    + Utils::uintToHex(boost::lexical_cast<std::string>(pathCt)) + pathStr;
-  return dataHex;
-}
-
