@@ -123,13 +123,11 @@ Item {
           height: createFolderInput.height
           text: ""
           onClicked: createFolderDialog.visible = true
-          Image {
+          AVMEAsyncImage {
             anchors.fill: parent
             anchors.margins: 5
-            source: "qrc:/img/icons/folder.png"
-            antialiasing: true
-            smooth: true
-            fillMode: Image.PreserveAspectFit
+            loading: false
+            imageSource: "qrc:/img/icons/folder.png"
           }
         }
         FolderDialog {
@@ -166,13 +164,11 @@ Item {
           anchors.verticalCenter: seedLabel.verticalCenter
           text: ""
           onClicked: seedPopup.open()
-          Image {
+          AVMEAsyncImage {
             anchors.fill: parent
             anchors.margins: 5
-            source: "qrc:/img/icons/seed.png"
-            antialiasing: true
-            smooth: true
-            fillMode: Image.PreserveAspectFit
+            loading: false
+            imageSource: "qrc:/img/icons/seed.png"
           }
         }
       }
@@ -197,13 +193,12 @@ Item {
           height: createPassInput.height
           text: ""
           onClicked: view = !view
-          Image {
+          AVMEAsyncImage {
             anchors.fill: parent
             anchors.margins: 5
-            source: (parent.view) ? "qrc:/img/icons/eye-f.png" : "qrc:/img/icons/eye-close-f.png"
-            antialiasing: true
-            smooth: true
-            fillMode: Image.PreserveAspectFit
+            loading: false
+            imageSource: (parent.view)
+            ? "qrc:/img/icons/eye-f.png" : "qrc:/img/icons/eye-close-f.png"
           }
         }
       }
@@ -222,20 +217,18 @@ Item {
           placeholder: "Your Wallet's passphrase"
         }
 
-        Image {
+        AVMEAsyncImage {
           id: createPassCheckIcon
           width: (items.width * 0.1)
           height: createPassCheckInput.height
-          antialiasing: true
-          smooth: true
-          fillMode: Image.PreserveAspectFit
-          source: {
+          loading: false
+          imageSource: {
             if (createPassInput.text == "" || createPassCheckInput.text == "") {
-              source: ""
+              imageSource: ""
             } else if (createPassInput.text == createPassCheckInput.text) {
-              source: "qrc:/img/ok.png"
+              imageSource: "qrc:/img/ok.png"
             } else {
-              source: "qrc:/img/no.png"
+              imageSource: "qrc:/img/no.png"
             }
           }
         }

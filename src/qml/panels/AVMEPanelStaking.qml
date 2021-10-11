@@ -65,6 +65,7 @@ AVMEPanel {
           stakingDetailsColumn.visible = false
           stakingApprovalColumn.visible = true
           loading = false
+          stakingLoadingPng.visible = false
           return
         }
 
@@ -89,6 +90,7 @@ AVMEPanel {
         userHigherShares = shares.asset2
         userLPShares = shares.liquidity
         loading = false
+        stakingLoadingPng.visible = false
         stakingApprovalColumn.visible = false
         stakingDetailsColumn.visible = true
       }
@@ -188,7 +190,8 @@ AVMEPanel {
   Component.onCompleted: {
     stakingDetailsColumn.visible = false
     stakingApprovalColumn.visible = false
-    loading = true;
+    loading = true
+    stakingLoadingPng.visible = true
     reservesTimer.start()
   }
   Column {
@@ -201,7 +204,7 @@ AVMEPanel {
       leftMargin: 40
       rightMargin: 40
     }
-    spacing: 30
+    spacing: 20
 
     Row {
       anchors.horizontalCenter: parent.horizontalCenter
@@ -226,14 +229,13 @@ AVMEPanel {
       }
     }
 
-    Image {
+    AVMEAsyncImage {
       id: stakeLogo
+      width: 64
+      height: 64
+      loading: false
       anchors.horizontalCenter: parent.horizontalCenter
-      height: 48
-      antialiasing: true
-      smooth: true
-      fillMode: Image.PreserveAspectFit
-      source: "qrc:/img/pangolin.png"
+      imageSource: "qrc:/img/pangolin.png"
     }
 
     Text {
@@ -395,9 +397,8 @@ AVMEPanel {
     }
     }
   }
-  Image {
+  AVMEAsyncImage {
     id: stakingLoadingPng
-    visible: loading
     anchors {
       top: stakingHeaderColumn.bottom
       bottom: parent.bottom
@@ -406,8 +407,8 @@ AVMEPanel {
       topMargin: parent.height * 0.1
       bottomMargin: parent.height * 0.1
     }
-    fillMode: Image.PreserveAspectFit
-    source: "qrc:/img/icons/loading.png"
+    visible: loading
+    imageSource: "qrc:/img/icons/loading.png"
     RotationAnimator {
       target: stakingLoadingPng
       from: 0

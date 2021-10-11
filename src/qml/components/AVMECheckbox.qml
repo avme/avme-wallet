@@ -20,14 +20,13 @@ CheckBox {
     opacity: enabled ? 1.0 : 0.3
     color: "transparent"
     border.color: checkbox.down ? "#2BE8F4" : "#FFFFFF"
-    Image {
-      width: parent.width / 2
-      height: parent.height / 2
+    AVMEAsyncImage {
+      width: (parent.width / 2)
+      height: (parent.height / 2)
       anchors.centerIn: parent
+      loading: false
       visible: checkbox.checked
-      antialiasing: true
-      smooth: true
-      source: "qrc:/img/icons/check.png"
+      imageSource: "qrc:/img/icons/check.png"
     }
   }
 

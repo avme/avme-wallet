@@ -128,8 +128,9 @@ ListView {
 
           AVMEAsyncImage {
             id: listAssetImage
-            height: 48
             width: 48
+            height: 48
+            loading: false
             imageSource: imagePath
             Text {
               id: listAssetName

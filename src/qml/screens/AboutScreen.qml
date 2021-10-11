@@ -26,14 +26,13 @@ Item {
       anchors.centerIn: parent
       spacing: 40
 
-      Image {
+      AVMEAsyncImage {
         id: logo
+        width: 256
         height: 256
+        loading: false
         anchors.horizontalCenter: parent.horizontalCenter
-        antialiasing: true
-        smooth: true
-        source: "qrc:/img/avme_logo_hd.png"
-        fillMode: Image.PreserveAspectFit
+        imageSource: "qrc:/img/avme_logo_hd.png"
       }
 
       Text {

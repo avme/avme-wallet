@@ -3,15 +3,14 @@
    file LICENSE or http://www.opensource.org/licenses/mit-license.php. */
 import QtQuick 2.9
 import QtQuick.Controls 2.2
+import QtQuick.Window 2.2
 
 import "qrc:/qml/components"
 
-  /**
-   *  This component is required for loading images asynchronously;
-   *  While displaying a "loading" icon for the user;
-   *  Creating a component allows to be used easily across the program code.
-   */
-
+/**
+ * Component for loading images asynchronously.
+ * Displays a "loading" icon while the image isn't fully loaded.
+ */
 Item {
   id: asyncImageItem
   property alias imageSource: asyncImage.source
@@ -24,19 +23,25 @@ Item {
     asynchronous: true
     width: parent.width
     height: parent.height
+    sourceSize.width: width * Screen.devicePixelRatio
+    sourceSize.height: height * Screen.devicePixelRatio
+    antialiasing: true
+    smooth: true
+    mipmap: true
     fillMode: Image.PreserveAspectFit
-    onStatusChanged: {
-      if (asyncImage.status == Image.Ready) {
-        loading = false;
-      }
-    }
+    onStatusChanged: if (asyncImage.status == Image.Ready) loading = false
   }
 
   Image {
-    id: asyncImageLoading 
+    id: asyncImageLoading
     visible: (loading)
     width: parent.width
     height: parent.height
+    sourceSize.width: width * Screen.devicePixelRatio
+    sourceSize.height: height * Screen.devicePixelRatio
+    antialiasing: true
+    smooth: true
+    mipmap: true
     source: "qrc:/img/icons/loading.png"
     fillMode: Image.PreserveAspectFit
     RotationAnimator {

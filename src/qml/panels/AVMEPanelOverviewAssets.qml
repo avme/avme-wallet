@@ -26,14 +26,12 @@ AVMEPanel {
     }
   }
 
-  Image {
+  AVMEAsyncImage {
     id: loadingPng
-    height: parent.width * 0.3
     width: height
-    anchors.verticalCenter: parent.verticalCenter
-    anchors.horizontalCenter: parent.horizontalCenter
-    fillMode: Image.PreserveAspectFit
-    source: "qrc:/img/icons/loading.png"
+    height: (parent.width / 3)
+    anchors.centerIn: parent
+    imageSource: "qrc:/img/icons/loading.png"
     RotationAnimator {
       target: loadingPng
       from: 0

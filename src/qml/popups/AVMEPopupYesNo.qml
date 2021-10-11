@@ -31,14 +31,13 @@ AVMEPopup {
     }
     spacing: 10
 
-    Image {
+    AVMEAsyncImage {
       id: png
+      width: 50
       height: 50
+      loading: false
       anchors.verticalCenter: parent.verticalCenter
-      fillMode: Image.PreserveAspectFit
-      antialiasing: true
-      smooth: true
-      source: icon
+      imageSource: icon
     }
 
     Text {

@@ -187,14 +187,13 @@ AVMEPopup {
       text: fullInfo
     }
 
-    Image {
+    AVMEAsyncImage {
       id: loadingPng
-      height: 50
       width: 50
+      height: 50
       anchors.horizontalCenter: parent.horizontalCenter
-      fillMode: Image.PreserveAspectFit
       visible: loadingFees
-      source: "qrc:/img/icons/loading.png"
+      imageSource: "qrc:/img/icons/loading.png"
       RotationAnimator {
         target: loadingPng
         from: 0

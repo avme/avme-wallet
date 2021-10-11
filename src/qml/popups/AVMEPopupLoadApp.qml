@@ -63,13 +63,11 @@ AVMEPopup {
         height: loadAppInput.height
         text: ""
         onClicked: loadAppDialog.visible = true
-        Image {
+        AVMEAsyncImage {
           anchors.fill: parent
           anchors.margins: 5
-          source: "qrc:/img/icons/folder.png"
-          antialiasing: true
-          smooth: true
-          fillMode: Image.PreserveAspectFit
+          loading: false
+          imageSource: "qrc:/img/icons/folder.png"
         }
       }
       FolderDialog {

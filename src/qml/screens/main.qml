@@ -43,16 +43,14 @@ ApplicationWindow {
       GradientStop { position: 0.0; color: "#0F0C18" }
       GradientStop { position: 1.0; color: "#190B25" }
     }
-    Image {
+    AVMEAsyncImage {
       id: logoBg
       width: 1000
       height: 1000
+      loading: false
       anchors { right: parent.right; bottom: parent.bottom; margins: -300 }
-      opacity: 0.15
-      antialiasing: true
-      smooth: true
-      fillMode: Image.PreserveAspectFit
-      source: "qrc:/img/avme_logo_hd.png"
+      imageOpacity: 0.15
+      imageSource: "qrc:/img/avme_logo_hd.png"
     }
   }
 

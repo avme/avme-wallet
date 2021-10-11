@@ -66,19 +66,18 @@ Rectangle {
     anchors.top: parent.top
     z: 2
 
-    Image {
+    AVMEAsyncImage {
       id: logo
+      width: 200
       height: 50
+      loading: false
       anchors {
         top: parent.top
         topMargin: 5
         horizontalCenter: parent.horizontalCenter
         horizontalCenterOffset: -5  // Logo is a bit off-center
       }
-      source: "qrc:/img/Welcome_Logo_AVME.png"
-      fillMode: Image.PreserveAspectFit
-      antialiasing: true
-      smooth: true
+      imageSource: "qrc:/img/Welcome_Logo_AVME.png"
     }
     Text {
       id: versionText
@@ -199,19 +198,19 @@ Rectangle {
         width: parent.width
         height: 40
         color: "transparent"
-        Image {
+        AVMEAsyncImage {
           id: dropdown
           width: 16
           height: 16
+          loading: false
           anchors {
             left: parent.left
             leftMargin: 10
             verticalCenter: parent.verticalCenter
           }
-          antialiasing: true
-          smooth: true
-          fillMode: Image.PreserveAspectFit
-          source: (isExpanded) ? "qrc:/img/icons/chevron-downSelect.png" : "qrc:/img/icons/chevron-down.png"
+          imageSource: (isExpanded)
+          ? "qrc:/img/icons/chevron-downSelect.png"
+          : "qrc:/img/icons/chevron-down.png"
           rotation: (isExpanded) ? -180 : 0 // Counter-clockwise
           Behavior on rotation { SmoothedAnimation { duration: 200 } }
         }
@@ -255,19 +254,17 @@ Rectangle {
         enabled: isEnabled
         onVisibleChanged: height = (visible) ? 40 : 0
         Behavior on height { SmoothedAnimation { duration: 200 } }
-        Image {
+        AVMEAsyncImage {
           id: itemIcon
           width: 16
           height: 16
+          loading: false
           anchors {
             left: parent.left
             leftMargin: 20
             verticalCenter: parent.verticalCenter
           }
-          antialiasing: true
-          smooth: true
-          fillMode: Image.PreserveAspectFit
-          source: (parent.selected) ? iconSelect : icon
+          imageSource: (parent.selected) ? iconSelect : icon
         }
         Text {
           id: text
@@ -325,12 +322,18 @@ Rectangle {
       visible: enabled
       anchors.bottom: aboutItem.top
       color: "transparent"
-      Image {
-        id: settingsIcon; width: 16; height: 16
-        anchors { left: parent.left; leftMargin: 20; verticalCenter: parent.verticalCenter }
-        antialiasing: true; smooth: true
-        fillMode: Image.PreserveAspectFit
-        source: (parent.selected) ? "qrc:/img/icons/cogSelect.png" : "qrc:/img/icons/cog.png"
+      AVMEAsyncImage {
+        id: settingsIcon
+        width: 16
+        height: 16
+        loading: false
+        anchors {
+          left: parent.left
+          leftMargin: 20
+          verticalCenter: parent.verticalCenter
+        }
+        imageSource: (parent.selected)
+        ? "qrc:/img/icons/cogSelect.png" : "qrc:/img/icons/cog.png"
       }
       Text {
         id: settingsText
@@ -367,12 +370,18 @@ Rectangle {
       height: 40
       anchors.bottom: parent.bottom
       color: "transparent"
-      Image {
-        id: aboutIcon; width: 16; height: 16
-        anchors { left: parent.left; leftMargin: 20; verticalCenter: parent.verticalCenter }
-        antialiasing: true; smooth: true
-        fillMode: Image.PreserveAspectFit
-        source: (parent.selected) ? "qrc:/img/icons/infoSelect.png" : "qrc:/img/icons/info.png"
+      AVMEAsyncImage {
+        id: aboutIcon
+        width: 16
+        height: 16
+        loading: false
+        anchors {
+          left: parent.left
+          leftMargin: 20
+          verticalCenter: parent.verticalCenter
+        }
+        imageSource: (parent.selected)
+        ? "qrc:/img/icons/infoSelect.png" : "qrc:/img/icons/info.png"
       }
       Text {
         id: aboutText

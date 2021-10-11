@@ -104,7 +104,7 @@ AVMEPanel {
       leftMargin: 40
       rightMargin: 40
     }
-    spacing: 30
+    spacing: 20
 
     Text {
       id: harvestTitle
@@ -114,14 +114,13 @@ AVMEPanel {
       text: "You will <b>harvest AVME</b> rewards"
     }
 
-    Image {
+    AVMEAsyncImage {
       id: harvestTokenLogo
+      width: 64
+      height: 64
       anchors.horizontalCenter: parent.horizontalCenter
-      height: 48
-      antialiasing: true
-      smooth: true
-      fillMode: Image.PreserveAspectFit
-      source: "qrc:/img/avme_logo.png"
+      loading: false
+      imageSource: "qrc:/img/avme_logo.png"
     }
 
     Text {
@@ -183,9 +182,8 @@ AVMEPanel {
       text: "Harvest AVME"
     }
   }
-  Image {
+  AVMEAsyncImage {
     id: stakingLoadingPng
-    visible: loading
     anchors {
       top: stakingRewardsDetailsColumn.bottom
       bottom: parent.bottom
@@ -194,8 +192,8 @@ AVMEPanel {
       topMargin: parent.height * 0.1
       bottomMargin: parent.height * 0.1
     }
-    fillMode: Image.PreserveAspectFit
-    source: "qrc:/img/icons/loading.png"
+    visible: loading
+    imageSource: "qrc:/img/icons/loading.png"
     RotationAnimator {
       target: stakingLoadingPng
       from: 0

@@ -88,14 +88,15 @@ ListView {
       width: historyList.width
       height: 30
 
-      Image {
+      AVMEAsyncImage {
         id: delegateConfirmed
         width: 16
         height: 16
         x: 5
+        loading: false
         visible: false  // TODO: enable only for debug for now
         anchors.verticalCenter: parent.verticalCenter
-        source: (itemConfirmed) ? "qrc:/img/ok.png" : "qrc:/img/no.png"
+        imageSource: (itemConfirmed) ? "qrc:/img/ok.png" : "qrc:/img/no.png"
       }
       Text {
         id: delegateDateTime

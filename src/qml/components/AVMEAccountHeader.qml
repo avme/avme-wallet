@@ -143,22 +143,20 @@ Rectangle {
       }
       background: Rectangle { color: "#1C2029" }
     }
-    Image {
+    AVMEAsyncImage {
       id: copyClipImage
-      anchors.centerIn: parent
       width: parent.width
       height: parent.height
-      fillMode: Image.PreserveAspectFit
-      antialiasing: true
-      smooth: true
-      source: "qrc:/img/icons/clipboard.png"
+      loading: false
+      anchors.centerIn: parent
+      imageSource: "qrc:/img/icons/clipboard.png"
     }
     MouseArea {
       id: copyClipMouseArea
       anchors.fill: parent
       hoverEnabled: true
-      onEntered: { copyClipImage.source = "qrc:/img/icons/clipboardSelect.png" }
-      onExited: { copyClipImage.source = "qrc:/img/icons/clipboard.png" }
+      onEntered: { copyClipImage.imageSource = "qrc:/img/icons/clipboardSelect.png" }
+      onExited: { copyClipImage.imageSource = "qrc:/img/icons/clipboard.png" }
       onClicked: { qmlSystem.copyToClipboard(currentAddress); parent.timer.start() }
     }
   }
@@ -181,22 +179,20 @@ Rectangle {
     visible: (currentAddress != "")
     anchors { right: parent.right; rightMargin: 10; verticalCenter: parent.verticalCenter }
 
-    Image {
+    AVMEAsyncImage {
       id: qrCodeImage
-      anchors.centerIn: parent
-      height: parent.height
       width: parent.width
-      fillMode: Image.PreserveAspectFit
-      antialiasing: true
-      smooth: true
-      source: "qrc:/img/icons/qrcode.png"
+      height: parent.height
+      loading: false
+      anchors.centerIn: parent
+      imageSource: "qrc:/img/icons/qrcode.png"
     }
     MouseArea {
       id: qrCodeMouseArea
       anchors.fill: parent
       hoverEnabled: true
-      onEntered: { qrCodeImage.source = "qrc:/img/icons/qrcodeSelect.png" }
-      onExited: { qrCodeImage.source = "qrc:/img/icons/qrcode.png" }
+      onEntered: { qrCodeImage.imageSource = "qrc:/img/icons/qrcodeSelect.png" }
+      onExited: { qrCodeImage.imageSource = "qrc:/img/icons/qrcode.png" }
       onClicked: { qrEncode(); qrcodePopup.open() }
     }
   }

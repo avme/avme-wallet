@@ -120,15 +120,13 @@ Popup {
     }
   }
 
-  Image {
+  AVMEAsyncImage {
     id: ledgerLoadingPng
-    visible: isWaiting
-    width: parent.height * 0.25
+    width: (parent.height * 0.25)
     height: width
-    anchors.horizontalCenter: parent.horizontalCenter
-    anchors.verticalCenter: parent.verticalCenter
-    fillMode: Image.PreserveAspectFit
-    source: "qrc:/img/icons/loading.png"
+    anchors.centerIn: parent
+    visible: isWaiting
+    imageSource: "qrc:/img/icons/loading.png"
     RotationAnimator {
       target: ledgerLoadingPng
       from: 0

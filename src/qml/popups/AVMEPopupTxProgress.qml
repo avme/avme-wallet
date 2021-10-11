@@ -36,13 +36,13 @@ AVMEPopup {
         if (b) {
           buildText.color = "limegreen"
           buildText.text = "Transaction built!"
-          buildPng.source = "qrc:/img/ok.png"
+          buildPng.imageSource = "qrc:/img/ok.png"
           signText.color = "#FFFFFF"
           signPngRotate.start()
         } else {
           buildText.color = "crimson"
           buildText.text = "Error on building transaction."
-          buildPng.source = "qrc:/img/no.png"
+          buildPng.imageSource = "qrc:/img/no.png"
           btnClose.visible = true
           btnRetry.visible = false
         }
@@ -55,13 +55,13 @@ AVMEPopup {
         if (b) {
           signText.color = "limegreen"
           signText.text = msg
-          signPng.source = "qrc:/img/ok.png"
+          signPng.imageSource = "qrc:/img/ok.png"
           sendText.color = "#FFFFFF"
           sendPngRotate.start()
         } else {
           signText.color = "crimson"
           signText.text = msg
-          signPng.source = "qrc:/img/no.png"
+          signPng.imageSource = "qrc:/img/no.png"
           btnClose.visible = true
           btnRetry.visible = false
           qmlApi.logToDebug("Transaction Error: " + msg)
@@ -76,7 +76,7 @@ AVMEPopup {
           btnOpenLink.linkUrl = linkUrl
           sendText.color = "limegreen"
           sendText.text = "Transaction sent!"
-          sendPng.source = "qrc:/img/ok.png"
+          sendPng.imageSource = "qrc:/img/ok.png"
           confirmText.color = "#FFFFFF"
           confirmPngRotate.start()
           btnOpenLink.visible = true
@@ -84,7 +84,7 @@ AVMEPopup {
         } else {
           sendText.color = "crimson"
           sendText.text = "Error on sending transaction.<br> " + msg
-          sendPng.source = "qrc:/img/no.png"
+          sendPng.imageSource = "qrc:/img/no.png"
           btnClose.visible = true
           btnRetry.visible = true
           qmlApi.logToDebug("Transaction Error: " + msg)
@@ -98,7 +98,7 @@ AVMEPopup {
         if (b) {
           confirmText.color = "limegreen"
           confirmText.text = "Transaction confirmed!"
-          confirmPng.source = "qrc:/img/ok.png"
+          confirmPng.imageSource = "qrc:/img/ok.png"
           if (requestedFromWS) {
             qmlSystem.requestedTransactionStatus(true, txid)
             alreadyTransmitted = true
@@ -107,7 +107,7 @@ AVMEPopup {
         } else {
           confirmText.color = "crimson"
           confirmText.text = "Transaction not confirmed.<br><b>Retrying will attempt a higher fee. (Recommended)</b>"
-          confirmPng.source = "qrc:/img/no.png"
+          confirmPng.imageSource = "qrc:/img/no.png"
           btnRetry.visible = true
         }
         btnClose.visible = true
@@ -140,7 +140,10 @@ AVMEPopup {
     signText.text = "Signing transaction..."
     sendText.text = "Broadcasting transaction..."
     confirmText.text = "Confirming transaction..."
-    buildPng.source = signPng.source = sendPng.source = confirmPng.source = "qrc:/img/icons/loading.png"
+    buildPng.imageSource = "qrc:/img/icons/loading.png"
+    signPng.imageSource = "qrc:/img/icons/loading.png"
+    sendPng.imageSource = "qrc:/img/icons/loading.png"
+    confirmPng.imageSource = "qrc:/img/icons/loading.png"
     buildPngRotate.start()
     btnOpenLink.visible = false
     btnClose.visible = false
@@ -207,12 +210,13 @@ AVMEPopup {
       height: 70
       spacing: 40
 
-      Image {
+      AVMEAsyncImage {
         id: buildPng
+        width: 64
         height: 64
         anchors.verticalCenter: buildText.verticalCenter
-        fillMode: Image.PreserveAspectFit
-        source: "qrc:/img/icons/loading.png"
+        loading: false
+        imageSource: "qrc:/img/icons/loading.png"
         RotationAnimator {
           id: buildPngRotate
           target: buildPng
@@ -239,12 +243,13 @@ AVMEPopup {
       height: 70
       spacing: 40
 
-      Image {
+      AVMEAsyncImage {
         id: signPng
+        width: 64
         height: 64
         anchors.verticalCenter: signText.verticalCenter
-        fillMode: Image.PreserveAspectFit
-        source: "qrc:/img/icons/loading.png"
+        loading: false
+        imageSource: "qrc:/img/icons/loading.png"
         RotationAnimator {
           id: signPngRotate
           target: signPng
@@ -271,12 +276,13 @@ AVMEPopup {
       height: 70
       spacing: 40
 
-      Image {
+      AVMEAsyncImage {
         id: sendPng
+        width: 64
         height: 64
         anchors.verticalCenter: sendText.verticalCenter
-        fillMode: Image.PreserveAspectFit
-        source: "qrc:/img/icons/loading.png"
+        loading: false
+        imageSource: "qrc:/img/icons/loading.png"
         RotationAnimator {
           id: sendPngRotate
           target: sendPng
@@ -303,12 +309,13 @@ AVMEPopup {
       height: 70
       spacing: 40
 
-      Image {
+      AVMEAsyncImage {
         id: confirmPng
+        width: 64
         height: 64
         anchors.verticalCenter: confirmText.verticalCenter
-        fillMode: Image.PreserveAspectFit
-        source: "qrc:/img/icons/loading.png"
+        loading: false
+        imageSource: "qrc:/img/icons/loading.png"
         RotationAnimator {
           id: confirmPngRotate
           target: confirmPng

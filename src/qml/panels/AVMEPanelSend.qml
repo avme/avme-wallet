@@ -154,13 +154,11 @@ AVMEPanel {
         anchors.leftMargin: 10
         text: ""
         onClicked: contactSelectPopup.open()
-        Image {
+        AVMEAsyncImage {
           anchors.fill: parent
           anchors.margins: 10
-          source: "qrc:/img/icons/inboxes.png"
-          antialiasing: true
-          smooth: true
-          fillMode: Image.PreserveAspectFit
+          loading: false
+          imageSource: "qrc:/img/icons/inboxes.png"
         }
       }
     }

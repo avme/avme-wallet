@@ -15,23 +15,21 @@ AVMEPanel {
     anchors.centerIn: parent
     spacing: 20
 
-    Image {
+    AVMEAsyncImage {
       id: tokenImage
+      width: 128
       height: 128
       anchors.horizontalCenter: parent.horizontalCenter
-      antialiasing: true
-      smooth: true
-      fillMode: Image.PreserveAspectFit
-      source: {
+      imageSource: {
         if (tokensPanel.selectedToken != null) {
           if (tokensPanel.selectedToken.itemAddress == qmlSystem.getContract("AVME")) {
-            source: "qrc:/img/avme_logo.png"
+            imageSource: "qrc:/img/avme_logo.png"
           } else {
             var img = qmlSystem.getARC20TokenImage(tokensPanel.selectedToken.itemAddress)
-            source: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
+            imageSource: (img != "") ? "file:" + img : "qrc:/img/unknown_token.png"
           }
         } else {
-          source: ""
+          imageSource: ""
         }
       }
     }
