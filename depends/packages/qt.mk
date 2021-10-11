@@ -8,9 +8,9 @@ $(package)_dependencies=zlib openssl
 $(package)_linux_dependencies=freetype fontconfig libxcb libxkbcommon libxcb_util libxcb_util_render libxcb_util_keysyms libxcb_util_image libxcb_util_wm
 $(package)_qt_libs=corelib concurrent network widgets gui plugins testlib qlalr
 $(package)_patches=fix_qt_pkgconfig.patch mac-qmake.conf fix_no_printer.patch no-xlib.patch
-$(package)_patches+= fix_android_jni_static.patch dont_hardcode_pwd.patch fix_fxc_mingw.patch
-$(package)_patches+= drop_lrelease_dependency.patch fix_qpainter_non_determinism.patch
-$(package)_patches+= no_sdk_version_check.patch fix_limits_header.patch openssl-qt-crosscompile.patch
+$(package)_patches+=fix_android_jni_static.patch dont_hardcode_pwd.patch fix_fxc_mingw.patch
+$(package)_patches+=drop_lrelease_dependency.patch fix_qpainter_non_determinism.patch
+$(package)_patches+=no_sdk_version_check.patch fix_limits_header.patch openssl-qt-crosscompile.patch
 
 $(package)_qttranslations_file_name=qttranslations-$($(package)_suffix)
 $(package)_qttranslations_sha256_hash=d5788e86257b21d5323f1efd94376a213e091d1e5e03b45a95dd052b5f570db8
@@ -27,11 +27,15 @@ $(package)_qtquickcontrols2_sha256_hash=671b6ce5f4b8ecc94db622d5d5fb29ef4ff92819
 $(package)_qtcharts_file_name=qtcharts-$($(package)_suffix)
 $(package)_qtcharts_sha256_hash=e0750e4195bd8a8b9758ab4d98d437edbe273cd3d289dd6a8f325df6d13f3d11
 
+$(package)_qtsvg_file_name=qtsvg-$($(package)_suffix)
+$(package)_qtsvg_sha256_hash=8bc3c2c1bc2671e9c67d4205589a8309b57903721ad14c60ea21a5d06acb585e
+
 $(package)_extra_sources  = $($(package)_qttranslations_file_name)
 $(package)_extra_sources += $($(package)_qttools_file_name)
 $(package)_extra_sources += $($(package)_qtdeclarative_file_name)
 $(package)_extra_sources += $($(package)_qtquickcontrols2_file_name)
 $(package)_extra_sources += $($(package)_qtcharts_file_name)
+$(package)_extra_sources += $($(package)_qtsvg_file_name)
 
 define $(package)_set_vars
 $(package)_config_opts_release = -release
@@ -202,7 +206,8 @@ $(call fetch_file,$(package),$($(package)_download_path),$($(package)_qttranslat
 $(call fetch_file,$(package),$($(package)_download_path),$($(package)_qttools_file_name),$($(package)_qttools_file_name),$($(package)_qttools_sha256_hash)) && \
 $(call fetch_file,$(package),$($(package)_download_path),$($(package)_qtdeclarative_file_name),$($(package)_qtdeclarative_file_name),$($(package)_qtdeclarative_sha256_hash)) && \
 $(call fetch_file,$(package),$($(package)_download_path),$($(package)_qtquickcontrols2_file_name),$($(package)_qtquickcontrols2_file_name),$($(package)_qtquickcontrols2_sha256_hash)) && \
-$(call fetch_file,$(package),$($(package)_download_path),$($(package)_qtcharts_file_name),$($(package)_qtcharts_file_name),$($(package)_qtcharts_sha256_hash))
+$(call fetch_file,$(package),$($(package)_download_path),$($(package)_qtcharts_file_name),$($(package)_qtcharts_file_name),$($(package)_qtcharts_sha256_hash)) && \
+$(call fetch_file,$(package),$($(package)_download_path),$($(package)_qtsvg_file_name),$($(package)_qtsvg_file_name),$($(package)_qtsvg_sha256_hash))
 endef
 
 define $(package)_extract_cmds
@@ -213,6 +218,7 @@ define $(package)_extract_cmds
   echo "$($(package)_qtdeclarative_sha256_hash)  $($(package)_source_dir)/$($(package)_qtdeclarative_file_name)" >> $($(package)_extract_dir)/.$($(package)_file_name).hash && \
   echo "$($(package)_qtquickcontrols2_sha256_hash)  $($(package)_source_dir)/$($(package)_qtquickcontrols2_file_name)" >> $($(package)_extract_dir)/.$($(package)_file_name).hash && \
   echo "$($(package)_qtcharts_sha256_hash)  $($(package)_source_dir)/$($(package)_qtcharts_file_name)" >> $($(package)_extract_dir)/.$($(package)_file_name).hash && \
+  echo "$($(package)_qtsvg_sha256_hash)  $($(package)_source_dir)/$($(package)_qtsvg_file_name)" >> $($(package)_extract_dir)/.$($(package)_file_name).hash && \
   $(build_SHA256SUM) -c $($(package)_extract_dir)/.$($(package)_file_name).hash && \
   mkdir qtbase && \
   tar --no-same-owner --strip-components=1 -xf $($(package)_source) -C qtbase && \
@@ -225,7 +231,9 @@ define $(package)_extract_cmds
   mkdir qtquickcontrols2 && \
   tar --no-same-owner --strip-components=1 -xf $($(package)_source_dir)/$($(package)_qtquickcontrols2_file_name) -C qtquickcontrols2 && \
   mkdir qtcharts && \
-  tar --no-same-owner --strip-components=1 -xf $($(package)_source_dir)/$($(package)_qtcharts_file_name) -C qtcharts
+  tar --no-same-owner --strip-components=1 -xf $($(package)_source_dir)/$($(package)_qtcharts_file_name) -C qtcharts && \
+  mkdir qtsvg && \
+  tar --no-same-owner --strip-components=1 -xf $($(package)_source_dir)/$($(package)_qtsvg_file_name) -C qtsvg
 endef
 
 # Preprocessing steps work as follows:
@@ -300,7 +308,8 @@ define $(package)_config_cmds
   qtbase/bin/qmake -o qttranslations/translations/Makefile qttranslations/translations/translations.pro && \
   qtbase/bin/qmake -o qttools/src/linguist/lrelease/Makefile qttools/src/linguist/lrelease/lrelease.pro && \
   qtbase/bin/qmake -o qttools/src/linguist/lupdate/Makefile qttools/src/linguist/lupdate/lupdate.pro && \
-	qtbase/bin/qmake -o qtdeclarative/Makefile qtdeclarative/qtdeclarative.pro
+	qtbase/bin/qmake -o qtdeclarative/Makefile qtdeclarative/qtdeclarative.pro && \
+	qtbase/bin/qmake -o qtsvg/Makefile qtsvg/qtsvg.pro
 endef
 
 define $(package)_build_cmds
@@ -314,7 +323,8 @@ define $(package)_build_cmds
   $(MAKE) -C qtquickcontrols2 && \
 	cp -r qtquickcontrols2/mkspecs qtcharts/mkspecs && \
 	qtbase/bin/qmake -o qtcharts/Makefile qtcharts/qtcharts.pro && \
-	$(MAKE) -C qtcharts
+	$(MAKE) -C qtcharts && \
+	$(MAKE) -C qtsvg
 endef
 
 define $(package)_stage_cmds
@@ -324,7 +334,8 @@ define $(package)_stage_cmds
   $(MAKE) -C qttranslations INSTALL_ROOT=$($(package)_staging_dir) install_subtargets && \
   $(MAKE) -C qtdeclarative INSTALL_ROOT=$($(package)_staging_dir) install_subtargets && \
   $(MAKE) -C qtquickcontrols2 INSTALL_ROOT=$($(package)_staging_dir) install_subtargets && \
-  $(MAKE) -C qtcharts INSTALL_ROOT=$($(package)_staging_dir) install_subtargets
+  $(MAKE) -C qtcharts INSTALL_ROOT=$($(package)_staging_dir) install_subtargets && \
+  $(MAKE) -C qtsvg INSTALL_ROOT=$($(package)_staging_dir) install_subtargets
 endef
 
 define $(package)_postprocess_cmds
