@@ -53,6 +53,7 @@ Q_IMPORT_PLUGIN(QtChartsQml2Plugin)
 #include <network/Graph.h>
 #include <network/Pangolin.h>
 #include <network/Staking.h>
+#include <network/ParaSwap.h>
 
 #include <qmlwrap/QmlSystem.h>
 #include <qmlwrap/QmlApi.h>

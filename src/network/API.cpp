@@ -191,12 +191,21 @@ std::string API::customHttpRequest(std::string reqBody, std::string host, std::s
 
     // Set up an HTTP POST/GET request message
     http::request<http::string_body> req{(requestType == "POST") ? http::verb::post : http::verb::get, target, 11};
-    req.set(http::field::host, host);
-    req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
-    req.set(http::field::content_type, contentType);
-    req.body() = reqBody;
-    req.prepare_payload();
-
+    if (requestType == "GET") {
+      req.set(http::field::host, host);
+      req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+      req.set(http::field::content_type, contentType);
+      req.body() = reqBody;
+      req.prepare_payload();
+    } else if (requestType == "POST") {
+      req.set(http::field::host, host);
+      req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+      req.set(http::field::accept, "application/json");
+      req.set(http::field::content_type, contentType);
+      req.body() = reqBody;
+      req.prepare_payload();
+    } 
+    
     // Send the HTTP request to the remote host
     http::write(stream, req);
     boost::beast::flat_buffer buffer;
