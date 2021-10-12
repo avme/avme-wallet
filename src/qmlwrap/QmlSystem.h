@@ -28,6 +28,7 @@
 #include <network/Graph.h>
 #include <network/Pangolin.h>
 #include <network/Staking.h>
+#include <network/ParaSwap.h>
 
 #include "version.h"
 
@@ -128,6 +129,12 @@ class QmlSystem : public QObject {
 
     // Signal to request user to sign a given transaction
     void askForTransaction(QString data, QString from, QString gas, QString to, QString value, QString website_);
+
+    // Signals for ParaSwap exchanging
+
+    void gotParaSwapTokenPrices(QString priceRoute);
+                          
+    void gotParaSwapTransactionData(QString transactionData);
 
   public:
     // ======================================================================
@@ -435,6 +442,18 @@ class QmlSystem : public QObject {
     Q_INVOKABLE QVariantMap calculatePoolSharesForTokenValue(
       QString lowerReserves, QString higherReserves, QString totalLiquidity, QString LPTokenValue
     );
+
+    Q_INVOKABLE void getParaSwapTokenPrices(QString srcToken, 
+                             QString srcDecimal, 
+                             QString destToken,
+                             QString destDecimals,
+                             QString weiAmount,
+                             QString chainID);
+                          
+    Q_INVOKABLE void getParaSwapTransactionData(QString priceRouteStr, 
+                                                QString slippage, 
+                                                QString userAddress, 
+                                                QString fee);
 
     // ======================================================================
     // WEBSOCKET SERVER FUNCTIONS

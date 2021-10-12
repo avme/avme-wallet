@@ -134,3 +134,36 @@ QVariantMap QmlSystem::calculatePoolSharesForTokenValue(
   ret.insert("liquidity", QString::fromStdString(liquidity));
   return ret;
 }
+
+
+void  QmlSystem::getParaSwapTokenPrices(QString srcToken, 
+                             QString srcDecimal, 
+                             QString destToken,
+                             QString destDecimals,
+                             QString weiAmount,
+                             QString chainID) {
+  QtConcurrent::run([=](){
+    std::string ret = ParaSwap::getTokenPrices(srcToken.toStdString(), 
+                             srcDecimal.toStdString(), 
+                             destToken.toStdString(),
+                             destDecimals.toStdString(),
+                             weiAmount.toStdString(),
+                             chainID.toStdString());
+
+    emit gotParaSwapTokenPrices(QString::fromStdString(ret));
+  });   
+}
+                          
+void QmlSystem::getParaSwapTransactionData(QString priceRouteStr, 
+                                                QString slippage, 
+                                                QString userAddress, 
+                                                QString fee) {
+  QtConcurrent::run([=](){
+    std::string ret = ParaSwap::getTransactionData(priceRouteStr.toStdString(),
+                                                   slippage.toStdString(),
+                                                   userAddress.toStdString(),
+                                                   fee.toStdString());
+
+    emit gotParaSwapTransactionData(QString::fromStdString(ret));
+  });                                         
+}
