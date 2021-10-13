@@ -137,7 +137,7 @@ QVariantMap QmlSystem::calculatePoolSharesForTokenValue(
 
 
 void  QmlSystem::getParaSwapTokenPrices(QString srcToken, 
-                             QString srcDecimal, 
+                             QString srcDecimals, 
                              QString destToken,
                              QString destDecimals,
                              QString weiAmount,
@@ -145,15 +145,25 @@ void  QmlSystem::getParaSwapTokenPrices(QString srcToken,
                              QString side,
                              QString id) {
   QtConcurrent::run([=](){
+    json request;
+
+    request["srcToken"] = srcToken.toStdString();
+    request["srcDecimals"] = srcDecimals.toStdString();
+    request["destToken"] = destToken.toStdString();
+    request["destDecimals"] = destDecimals.toStdString();
+    request["weiAmount"] = weiAmount.toStdString();
+    request["side"] = side.toStdString();
+    request["chainID"] = chainID.toStdString();
+
     std::string ret = ParaSwap::getTokenPrices(srcToken.toStdString(), 
-                             srcDecimal.toStdString(), 
+                             srcDecimals.toStdString(), 
                              destToken.toStdString(),
                              destDecimals.toStdString(),
                              weiAmount.toStdString(),
                              side.toStdString(),
                              chainID.toStdString());
 
-    emit gotParaSwapTokenPrices(QString::fromStdString(ret), id);
+    emit gotParaSwapTokenPrices(QString::fromStdString(ret), id, QString::fromStdString(request.dump()));
   });   
 }
                           
@@ -163,11 +173,18 @@ void QmlSystem::getParaSwapTransactionData(QString priceRouteStr,
                                                 QString fee,
                                                 QString id) {
   QtConcurrent::run([=](){
+    json request;
+
+    request["priceRouteStr"] = priceRouteStr.toStdString();
+    request["slippage"] = slippage.toStdString();
+    request["userAddress"] = userAddress.toStdString();
+    request["fee"] = fee.toStdString();
+
     std::string ret = ParaSwap::getTransactionData(priceRouteStr.toStdString(),
                                                    slippage.toStdString(),
                                                    userAddress.toStdString(),
                                                    fee.toStdString());
 
-    emit gotParaSwapTransactionData(QString::fromStdString(ret), id);
+    emit gotParaSwapTransactionData(QString::fromStdString(ret), id, QString::fromStdString(request.dump()));
   });                                         
 }

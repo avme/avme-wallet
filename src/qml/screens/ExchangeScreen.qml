@@ -14,15 +14,15 @@ Item {
 
   property string augustusSwapper: "0xDEF171Fe48CF0115B1d80b88dc8eAB59176FEe57"
   property string tokenProxy: "0x216B4B4Ba9F3e719726886d34a177484278Bfcae"
-  /* AVMEAsyncImage {
+  AVMEAsyncImage {
     id: logoBg
-    width: 500
-    height: 500
+    width: 400
+    height: 400
     z: 0
-    anchors { left: parent.left; bottom: parent.bottom; margins: 50 }
+    anchors { left: parent.left; bottom: parent.bottom }
     imageOpacity: 0.15
-    imageSource: "images/exchangeLogo.png"
-  } */
+    imageSource: "qrc:/img/ParaSwap_logo.png"
+  }
 
   AVMEPopupInfo {
     id: fundsPopup; icon: "qrc:/img/warn.png"
@@ -34,7 +34,7 @@ Item {
   
   AVMEPanelExchange {
     id: exchangePanel
-    height: parent.height
+    height: parent.height * 0.8
     width: parent.width * 0.4
     anchors.centerIn: parent
 

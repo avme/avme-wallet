@@ -69,16 +69,57 @@ AVMEPanel {
   // Timers for constantly updating values
   Timer { id: allowanceTimer; interval: 100; repeat: true; onTriggered: fetchAllowance(false) }
   Timer { id: getPriceOnEditLeftTimer; interval: 500; repeat: false; onTriggered: getPriceOnEditLeft() }
+  Timer { id: getPriceOnEditRightTimer; interval: 500; repeat: false; onTriggered: getPriceOnEditRight() }
   Timer { id: balanceTimer; interval: 10; repeat: true; onTriggered: updateBalances() }
 
   Connections {
     target: qmlSystem
-    function onGotParaSwapTokenPrices(answer, answerId) {
+    function onGotParaSwapTokenPrices(answer, answerId, request) {
       if (answerId == "ExchangeGetPrice" + randomID) { 
         var priceRoute = JSON.parse(answer)
+        if (priceRoute["error"]) {
+          if(priceRoute["error"].includes("Destination Amount Mismatch") ||
+            priceRoute["error"].includes("Invalid Amount") || 
+            priceRoute["error"].includes("computePrice Error")) {
+            rightInput.enabled = true
+            leftInput.enabled = true
+            leftInput.text = ""
+            rightInput.text = ""
+            transactionReady = false
+            loading = false
+            return;
+          }
+          var jsonRequest = JSON.parse(request)
+          qmlSystem.getParaSwapTokenPrices(jsonRequest["srcToken"],
+                                           jsonRequest["srcDecimals"],
+                                           jsonRequest["destToken"],
+                                           jsonRequest["destDecimals"],
+                                           jsonRequest["weiAmount"],
+                                           jsonRequest["chainID"],
+                                           jsonRequest["side"],
+                                           "ExchangeGetPrice" + randomID)
+          return
+        }
+
+        if (priceRoute["priceRoute"]["side"] == "BUY") {
+          // Request again, now with correct siding...
+          qmlSystem.getParaSwapTokenPrices(exchangeInfo["left"]["contract"],
+                                           exchangeInfo["left"]["decimals"],
+                                           exchangeInfo["right"]["contract"],
+                                           exchangeInfo["right"]["decimals"],
+                                           priceRoute["priceRoute"]["srcAmount"],
+                                           "43114",
+                                           "SELL",
+                                           "ExchangeGetPrice" + randomID
+          )
+          return
+        }
         rightInput.enabled = true
+        leftInput.enabled = true
+        leftInput.text = qmlApi.weiToFixedPoint(priceRoute["priceRoute"]["srcAmount"],priceRoute["priceRoute"]["srcDecimals"])
         rightInput.text = qmlApi.weiToFixedPoint(priceRoute["priceRoute"]["destAmount"],priceRoute["priceRoute"]["destDecimals"])
         transactionReady = false
+        loading = false
 
         if (!priceRoute["priceRoute"]["maxImpactReached"]) {
           qmlSystem.getParaSwapTransactionData(answer,
@@ -91,17 +132,38 @@ AVMEPanel {
         }
       }
     }
-    function onGotParaSwapTransactionData(answer, answerId) {
+    function onGotParaSwapTransactionData(answer, answerId, request) {
       if (answerId == "ExchangeGetTransaction" + randomID) {
+
         var transactionData = JSON.parse(answer)
+        if (transactionData["error"]) {
+          if(transactionData["error"].includes("Destination Amount Mismatch") ||
+            transactionData["error"].includes("Invalid Amount") || 
+            transactionData["error"].includes("computePrice Error")) {
+            rightInput.enabled = true
+            leftInput.enabled = true
+            leftInput.text = ""
+            rightInput.text = ""
+            transactionReady = false
+            loading = false
+            return;
+          }
+          var jsonRequest = JSON.parse(request)
+          qmlSystem.getParaSwapTokenPrices(jsonRequest["priceRouteStr"],
+                                           jsonRequest["slippage"],
+                                           jsonRequest["userAddress"],
+                                           jsonRequest["fee"],
+                                           "ExchangeGetPrice" + randomID)
+          return
+        }
         to = transactionData["to"]
-        console.log(transactionData["value"])
         coinValue = qmlApi.weiToFixedPoint(transactionData["value"], 18)
         txData = transactionData["data"]
         info = "Swap <b>" + leftInput.text + exchangeInfo["left"]["symbol"] + "<\b> to <b>" + rightInput.text + exchangeInfo["right"]["symbol"] + "<\b>"
         historyInfo = "Swap <b>" + exchangeInfo["left"]["symbol"] + "<\b> to <b>" + exchangeInfo["right"]["symbol"]
         gas = 750000
         transactionReady = true
+        loading = false
       }
     }
   }
@@ -117,14 +179,19 @@ AVMEPanel {
         for (var answerItem in respArr) {
           if (respArr[answerItem]["id"] == 1) {
             // Allowance for leftAsset
-            leftAllowance = qmlApi.parseHex(respArr[answerItem].result, ["uint"])
+            leftAllowance = qmlApi.parseHex(respArr[answerItem].result, ["uint"])[0]
           }
           if (respArr[answerItem]["id"] == 2) {
             // Allowance for rightAsset
-            rightAllowance = qmlApi.parseHex(respArr[answerItem].result, ["uint"])
+            rightAllowance = qmlApi.parseHex(respArr[answerItem].result, ["uint"])[0]
           }
         }
-
+        if (!leftAllowance) {
+          leftAllowance = "0"
+        }
+        if (!rightAllowance) {
+          rightAllowance = "0"
+        }
         exchangeInfo["left"]["allowance"] = leftAllowance
         exchangeInfo["right"]["allowance"] = rightAllowance
         if (!(exchangeInfo["left"]["symbol"] == "AVAX")) {
@@ -135,7 +202,7 @@ AVMEPanel {
             exchangeInfo["left"]["approved"] = true
           }
         } else {
-          // WAVAX does not require approval
+          exchangeInfo["left"]["allowance"] = "115792089237316195423570985008687907853269984665640564039457584007913129639935"
           exchangeInfo["left"]["approved"] = true
         }
 
@@ -144,6 +211,7 @@ AVMEPanel {
           if (+qmlApi.fixedPointToWei(asset["rawBalance"], asset["decimals"]) >= +rightAllowance) {
             exchangeInfo["right"]["approved"] = false
           } else {
+            exchangeInfo["right"]["allowance"] = "115792089237316195423570985008687907853269984665640564039457584007913129639935"
             exchangeInfo["right"]["approved"] = true
           }
         } else {
@@ -165,6 +233,7 @@ AVMEPanel {
           exchangePanelLoadingPng.visible = false
           allowanceTimer.stop()
         }
+        loading = false
       }
     }
   }
@@ -378,6 +447,7 @@ AVMEPanel {
   }
 
   function swapOrder() {
+    randomID = qmlApi.getRandomID()
     var tmpLeft = ({})
     var tmpRight = ({})
     tmpLeft = exchangeInfo["right"]
@@ -395,11 +465,20 @@ AVMEPanel {
     exchangeLeftAssetCombobox.currentIndex = rightIndex
     exchangeRightAssetCombobox.currentIndex = leftIndex
 
+    rightInput.text = ""
+    leftInput.text = ""
+
+    rightInput.placeholder = "Amount (e.g. 0.5)"
+    leftInput.placeholder = "Amount (e.g. 0.5)"
+
+
+
     updateDisplay()
   }
 
   function getPriceOnEditLeft() {
     randomID = qmlApi.getRandomID()
+    loading = true
     rightInput.enabled = false
     rightInput.text = ""
     rightInput.placeholder = "Loading..."
@@ -414,11 +493,30 @@ AVMEPanel {
                                      "ExchangeGetPrice" + randomID
     )
   }
+
+  function getPriceOnEditRight() {
+    randomID = qmlApi.getRandomID()
+    loading = true
+    leftInput.enabled = false
+    leftInput.text = ""
+    leftInput.placeholder = "Loading..."
+
+    qmlSystem.getParaSwapTokenPrices(exchangeInfo["left"]["contract"],
+                                     exchangeInfo["left"]["decimals"],
+                                     exchangeInfo["right"]["contract"],
+                                     exchangeInfo["right"]["decimals"],
+                                     qmlApi.fixedPointToWei(rightInput.text, exchangeInfo["right"]["decimals"]),
+                                     "43114",
+                                     "BUY",
+                                     "ExchangeGetPrice" + randomID
+    )
+  }
   // ======================================================================
   // TRANSACTION RELATED FUNCTIONS
   // ======================================================================
 
   function approveTx() {
+    allowanceTimer.start()
     to = exchangeInfo["left"]["contract"]
     coinValue = 0
     gas = 70000
@@ -437,10 +535,6 @@ AVMEPanel {
     var ethCallString = JSON.stringify(ethCallJson)
     var ABI = qmlApi.buildCustomABI(ethCallString)
     txData = ABI
-  }
-
-  function swapTx(amountIn, amountOut) {
-
   }
 
   function calculateTransactionCost(gasLimit, amountIn) {
@@ -727,7 +821,12 @@ AVMEPanel {
       label: rightSymbol + " Amount"
       validator: RegExpValidator { regExp: qmlApi.createRegExp("[0-9]{1,99}(?:\\.[0-9]{1," + rightDecimals + "})?") }
       placeholder: "Amount (e.g. 0.5)"
-      onTextEdited: { }
+      onTextEdited: { 
+        transactionReady = false
+        reachedPriceImpact = false
+        getPriceOnEditRightTimer.stop()
+        getPriceOnEditRightTimer.start()
+      }
     }
 
     AVMEButton {
@@ -738,7 +837,6 @@ AVMEPanel {
       enabled: ((rightInput.acceptableInput && (swapImpact <= 10.0 || ignoreImpactCheck.checked)) && +rightInput.text != 0 && transactionReady)
       text: (!reachedPriceImpact) ? "Make Swap" : "Price impact too high"
       onClicked: {
-        swapTx(leftInput.text, rightInput.text)
         if (calculateTransactionCost(500000, leftInput.text)) {
           confirmTransactionPopup.setData(
             to,

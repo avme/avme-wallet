@@ -20,7 +20,7 @@ namespace ParaSwap {
     request << "amount=" << weiAmount << "&";
     request << "srcDecimals=" << srcDecimal << "&";
     request << "destDecimals=" << destDecimals << "&";
-    request << side << "&";
+    request << "side=" << side << "&";
     request << "network=" << chainID << "&";
     request << "otherExchangePrices=true" << "&";
     request << "partner=paraswap.io";
@@ -53,9 +53,10 @@ namespace ParaSwap {
     request["userAddress"] = userAddress;
     request["srcDecimals"] = priceRoute["priceRoute"]["srcDecimals"];
     request["destDecimals"] = priceRoute["priceRoute"]["destDecimals"];
-    request["partnerAddress"] = "0x1ECd47FF4d9598f89721A2866BFEb99505a413Ed";
+    request["partnerAddress"] = "0xB82589A8F551Cd999d9cE882e1112F6b584C0f53";
     request["partnerFeeBps"] = fee;
 
+    std::cout << request.dump(2) << std::endl;
     std::string ret = API::customHttpRequest(request.dump(),
                                             "apiv5.paraswap.io",
                                             "443",
