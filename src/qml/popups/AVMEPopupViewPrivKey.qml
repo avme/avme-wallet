@@ -9,9 +9,6 @@ import "qrc:/qml/components"
 // Popup for viewing an Account's private key. Has to be opened manually.
 AVMEPopup {
   id: viewPrivKeyPopup
-  widthPct: 0.7
-  heightPct: 0.6
-  property string account
   readonly property alias pass: keyPassInput.text
   property alias showBtn: btnShow
   property color popupBgColor: "#1C2029"
@@ -26,7 +23,7 @@ AVMEPopup {
 
   function showPrivKey() {
     if (keyText.timer.running) { keyText.timer.stop() }
-    keyText.text = qmlSystem.getPrivateKeys(account, keyPassInput.text)
+    keyText.text = qmlSystem.getPrivateKeys(accountHeader.currentAddress, keyPassInput.text)
     btnCopy.enabled = true
   }
 
@@ -37,7 +34,6 @@ AVMEPopup {
   }
 
   function clean() {
-    account = ""
     keyPassInput.text = ""
     keyText.text = ""
     btnCopy.enabled = false
@@ -63,7 +59,7 @@ AVMEPopup {
       color: "#FFFFFF"
       font.pixelSize: 14.0
       text: "Please authenticate to view the private key for the Account:<br>"
-      + "<b>" + account + "</b>"
+      + "<b>" + accountHeader.currentAddress + "</b>"
       + "<br><br><b>YOU ARE FULLY RESPONSIBLE FOR GUARDING YOUR PRIVATE KEYS."
       + "<br>KEEP THEM AWAY FROM PRYING EYES AND DO NOT SHARE THEM WITH ANYONE."
       + "<br>WE ARE NOT HELD LIABLE FOR ANY POTENTIAL FUND LOSSES CAUSED BY THIS."

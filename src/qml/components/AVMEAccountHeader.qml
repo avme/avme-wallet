@@ -24,7 +24,7 @@ Rectangle {
   property string website
   property bool isLedger: qmlSystem.getLedgerFlag()
   property var tokenList: ({})
-  width: 600
+  width: 750
   height: 48
   color: "#1C2029"
   radius: 5
@@ -129,7 +129,11 @@ Rectangle {
     radius: 5
     width: 32
     height: 32
-    anchors { left: parent.left; leftMargin: 10; verticalCenter: parent.verticalCenter }
+    anchors {
+      left: parent.left
+      leftMargin: 10
+      verticalCenter: parent.verticalCenter
+    }
     Timer { id: addressTimer; interval: 1000 }
     ToolTip {
       id: copyClipTooltip
@@ -155,9 +159,39 @@ Rectangle {
       id: copyClipMouseArea
       anchors.fill: parent
       hoverEnabled: true
-      onEntered: { copyClipImage.imageSource = "qrc:/img/icons/clipboardSelect.png" }
-      onExited: { copyClipImage.imageSource = "qrc:/img/icons/clipboard.png" }
+      onEntered: copyClipImage.imageSource = "qrc:/img/icons/clipboardSelect.png"
+      onExited: copyClipImage.imageSource = "qrc:/img/icons/clipboard.png"
       onClicked: { qmlSystem.copyToClipboard(currentAddress); parent.timer.start() }
+    }
+  }
+
+  Rectangle {
+    id: qrCodeRect
+    color: "transparent"
+    radius: 5
+    width: 32
+    height: 32
+    visible: (currentAddress != "")
+    anchors {
+      left: copyClipRect.right
+      leftMargin: 10
+      verticalCenter: parent.verticalCenter
+    }
+    AVMEAsyncImage {
+      id: qrCodeImage
+      width: parent.width
+      height: parent.height
+      loading: false
+      anchors.centerIn: parent
+      imageSource: "qrc:/img/icons/qrcode.png"
+    }
+    MouseArea {
+      id: qrCodeMouseArea
+      anchors.fill: parent
+      hoverEnabled: true
+      onEntered: qrCodeImage.imageSource = "qrc:/img/icons/qrcodeSelect.png"
+      onExited: qrCodeImage.imageSource = "qrc:/img/icons/qrcode.png"
+      onClicked: { qrEncode(); qrcodePopup.open() }
     }
   }
 
@@ -171,29 +205,92 @@ Rectangle {
   }
 
   Rectangle {
-    id: qrCodeRect
+    id: websiteRect
     color: "transparent"
     radius: 5
     width: 32
     height: 32
     visible: (currentAddress != "")
-    anchors { right: parent.right; rightMargin: 10; verticalCenter: parent.verticalCenter }
-
+    anchors {
+      right: privKeyRect.left
+      rightMargin: 10
+      verticalCenter: parent.verticalCenter
+    }
     AVMEAsyncImage {
-      id: qrCodeImage
+      id: websiteImage
       width: parent.width
       height: parent.height
       loading: false
       anchors.centerIn: parent
-      imageSource: "qrc:/img/icons/qrcode.png"
+      imageSource: "qrc:/img/icons/world.png"
     }
     MouseArea {
-      id: qrCodeMouseArea
+      id: websiteMouseArea
       anchors.fill: parent
       hoverEnabled: true
-      onEntered: { qrCodeImage.imageSource = "qrc:/img/icons/qrcodeSelect.png" }
-      onExited: { qrCodeImage.imageSource = "qrc:/img/icons/qrcode.png" }
-      onClicked: { qrEncode(); qrcodePopup.open() }
+      onEntered: websiteImage.imageSource = "qrc:/img/icons/worldSelect.png"
+      onExited: websiteImage.imageSource = "qrc:/img/icons/world.png"
+      onClicked: viewWebsitePermissionPopup.open()
+    }
+  }
+
+  Rectangle {
+    id: privKeyRect
+    color: "transparent"
+    radius: 5
+    width: 32
+    height: 32
+    visible: (currentAddress != "")
+    anchors {
+      right: seedRect.left
+      rightMargin: 10
+      verticalCenter: parent.verticalCenter
+    }
+    AVMEAsyncImage {
+      id: privKeyImage
+      width: parent.width
+      height: parent.height
+      loading: false
+      anchors.centerIn: parent
+      imageSource: "qrc:/img/icons/key-f.png"
+    }
+    MouseArea {
+      id: privKeyMouseArea
+      anchors.fill: parent
+      hoverEnabled: true
+      onEntered: privKeyImage.imageSource = "qrc:/img/icons/key-fSelect.png"
+      onExited: privKeyImage.imageSource = "qrc:/img/icons/key-f.png"
+      onClicked: viewPrivKeyPopup.open()
+    }
+  }
+
+  Rectangle {
+    id: seedRect
+    color: "transparent"
+    radius: 5
+    width: 32
+    height: 32
+    visible: (currentAddress != "")
+    anchors {
+      right: parent.right
+      rightMargin: 10
+      verticalCenter: parent.verticalCenter
+    }
+    AVMEAsyncImage {
+      id: seedImage
+      width: parent.width
+      height: parent.height
+      loading: false
+      anchors.centerIn: parent
+      imageSource: "qrc:/img/icons/seed.png"
+    }
+    MouseArea {
+      id: seedMouseArea
+      anchors.fill: parent
+      hoverEnabled: true
+      onEntered: seedImage.imageSource = "qrc:/img/icons/seedSelect.png"
+      onExited: seedImage.imageSource = "qrc:/img/icons/seed.png"
+      onClicked: viewSeedPopup.open()
     }
   }
 
@@ -265,6 +362,28 @@ Rectangle {
     qrcodeWidth: (currentAddress != "")
     ? qmlSystem.getQRCodeSize(currentAddress) : 1
     textAddress.text: currentAddress
+  }
+
+
+  AVMEPopupViewPrivKey {
+    id: viewPrivKeyPopup
+    width: window.width * 0.7
+    height: window.height * 0.6
+    y: ((window.height / 2) - (height / 2))
+  }
+
+  AVMEPopupViewSeed {
+    id: viewSeedPopup
+    width: window.width * 0.75
+    height: window.height * 0.6
+    y: ((window.height / 2) - (height / 2))
+  }
+
+  AVMEPopupWebsitePermission {
+    id: viewWebsitePermissionPopup
+    width: window.width * 0.4
+    height: window.height * 0.9
+    y: ((window.height / 2) - (height / 2))
   }
 
   AVMEPopupConfirmTx {

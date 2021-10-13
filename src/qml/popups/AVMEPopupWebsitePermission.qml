@@ -9,8 +9,6 @@ import "qrc:/qml/components"
 // Popup for showing a list of permitted websites in the websocket server.
 AVMEPopup {
   id: websitePermissionPopup
-  widthPct: 0.4
-  heightPct: 0.9
 
   onAboutToShow: refreshPermissionList()
   onAboutToHide: websitePermissionListModel.clear()

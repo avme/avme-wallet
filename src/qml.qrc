@@ -91,6 +91,7 @@
         <file>img/ok.png</file>
         <file>img/no.png</file>
         <file>img/pangolin.png</file>
+        <file>img/ParaSwap_logo.png</file>
         <file>img/yieldyak.png</file>
         <file>img/unknown_token.png</file>
 
@@ -129,6 +130,8 @@
         <file>img/icons/infoSelect.png</file>
         <file>img/icons/inboxes.png</file>
         <file>img/icons/inboxesSelect.png</file>
+        <file>img/icons/key-f.png</file>
+        <file>img/icons/key-fSelect.png</file>
         <file>img/icons/ledgerIcon.png</file>
         <file>img/icons/loading.png</file>
         <file>img/icons/log-in.png</file>
@@ -144,9 +147,11 @@
         <file>img/icons/qrcode.png</file>
         <file>img/icons/qrcodeSelect.png</file>
         <file>img/icons/seed.png</file>
+        <file>img/icons/seedSelect.png</file>
         <file>img/icons/upload.png</file>
         <file>img/icons/uploadSelect.png</file>
-        <file>img/ParaSwap_logo.png</file>
+        <file>img/icons/world.png</file>
+        <file>img/icons/worldSelect.png</file>
 
         <file>fonts/IBMPlexMono-Bold.ttf</file>
         <file>fonts/IBMPlexMono-Italic.ttf</file>

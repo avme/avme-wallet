@@ -37,47 +37,6 @@ Item {
       spacing: 40
 
       Text {
-        id: viewPrivKeyText
-        width: settingsCol.width * 0.75
-        color: "#FFFFFF"
-        font.pixelSize: 14.0
-        text: "View/Export the private key for this Account"
-
-        AVMEButton {
-          id: btnViewPrivKey
-          width: settingsCol.width * 0.25
-          anchors {
-            verticalCenter: parent.verticalCenter
-            left: parent.right
-          }
-          text: "View Private Key"
-          onClicked: {
-            viewPrivKeyPopup.account = accountHeader.currentAddress
-            viewPrivKeyPopup.open()
-          }
-        }
-      }
-
-      Text {
-        id: viewSeedText
-        width: settingsCol.width * 0.75
-        color: "#FFFFFF"
-        font.pixelSize: 14.0
-        text: "View/Export the BIP39 seed for this Wallet"
-
-        AVMEButton {
-          id: btnViewSeed
-          width: settingsCol.width * 0.25
-          anchors {
-            verticalCenter: parent.verticalCenter
-            left: parent.right
-          }
-          text: "View Wallet Seed"
-          onClicked: viewSeedPopup.open()
-        }
-      }
-
-      Text {
         id: storePassText
         width: settingsCol.width * 0.75
         color: "#FFFFFF"
@@ -157,29 +116,6 @@ Item {
           onToggled: qmlSystem.setConfigValue("devMode", (checked) ? "true" : "false")
         }
       }
-      Text {
-        id: viewWebsitePermission
-        width: settingsCol.width * 0.75
-        color: "#FFFFFF"
-        font.pixelSize: 14.0
-        text: "View Website permission list"
-
-        AVMEButton {
-          id: btnViewWebsitePermission
-          width: settingsCol.width * 0.25
-          anchors {
-            verticalCenter: parent.verticalCenter
-            left: parent.right
-          }
-          text: "Open Permission List"
-          onClicked: viewWebsitePermissionPopup.open()
-        }
-      }
     }
   }
-
-  // Popups for viewing the Account's private key and seed, respectively
-  AVMEPopupViewPrivKey { id: viewPrivKeyPopup }
-  AVMEPopupViewSeed { id: viewSeedPopup }
-  AVMEPopupWebsitePermission { id: viewWebsitePermissionPopup }
 }
