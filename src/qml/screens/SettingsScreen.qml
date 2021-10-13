@@ -22,6 +22,38 @@ Item {
     }
     title: "General Settings"
 
+    // Get stored configs
+    Component.onCompleted: {
+      // Remember password for X minutes
+      var storedValue = qmlSystem.getConfigValue("storePass")
+      storedValue = (+storedValue >= 0) ? storedValue : "0"
+      storePassBox.value = +storedValue
+
+      // Developer Mode checkbox
+      var toggled = qmlSystem.getConfigValue("devMode")
+      if (toggled == "true") { developerCheck.checked = true }
+      else if (toggled == "false") { developerCheck.checked = false }
+
+      // Custom Wallet API inputs
+      var walletAPIStr = qmlSystem.getConfigValue("customWalletAPI")
+      if (walletAPIStr != "NotFound: ") {
+        var walletAPIJson = JSON.parse(walletAPIStr)
+        customWalletAPIHost.text = walletAPIJson["host"]
+        customWalletAPIPort.text = walletAPIJson["port"]
+        customWalletAPITarget.text = walletAPIJson["target"]
+      }
+
+      // Custom Websocket API inputs
+      var websocketAPIStr = qmlSystem.getConfigValue("customWebsocketAPI")
+      if (websocketAPIStr != "NotFound: ") {
+        var websocketAPIJson = JSON.parse(websocketAPIStr)
+        customWebsocketAPIHost.text = websocketAPIJson["host"]
+        customWebsocketAPIPort.text = websocketAPIJson["port"]
+        customWebsocketAPITarget.text = websocketAPIJson["target"]
+        customWebsocketAPIPluginPort.text = websocketAPIJson["pluginPort"]
+      }
+    }
+
     Column {
       id: settingsCol
       anchors {
@@ -34,7 +66,7 @@ Item {
         leftMargin: 40
         rightMargin: 40
       }
-      spacing: 40
+      spacing: 30
 
       Text {
         id: storePassText
@@ -76,11 +108,6 @@ Item {
             verticalAlignment: Text.AlignVCenter
             text: "minutes"
           }
-          Component.onCompleted: {
-            var storedValue = qmlSystem.getConfigValue("storePass")
-            storedValue = (+storedValue >= 0) ? storedValue : "0"
-            storePassBox.value = +storedValue
-          }
           onValueModified: {
             qmlSystem.resetPass()
             var storedValue = storePassBox.value.toString()
@@ -108,12 +135,129 @@ Item {
             left: parent.right
           }
           text: "Developer Mode"
-          Component.onCompleted: {
-            var toggled = qmlSystem.getConfigValue("devMode")
-            if (toggled == "true") { checked = true }
-            else if (toggled == "false") { checked = false }
-          }
           onToggled: qmlSystem.setConfigValue("devMode", (checked) ? "true" : "false")
+        }
+      }
+
+      Text {
+        id: customAPIText
+        width: settingsCol.width
+        horizontalAlignment: Text.AlignHCenter
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        text: "Set custom endpoints for: (blank = default)"
+      }
+
+      Text {
+        id: customWalletAPIText
+        width: settingsCol.width * 0.1
+        height: customWalletAPIHost.height
+        verticalAlignment: Text.AlignVCenter
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        text: "Wallet API"
+
+        AVMEInput {
+          id: customWalletAPIHost
+          width: settingsCol.width * 0.2
+          anchors.left: parent.right
+          anchors.leftMargin: 10
+          label: "Host"
+          placeholder: "e.g. api.avme.io"
+        }
+        AVMEInput {
+          id: customWalletAPIPort
+          width: settingsCol.width * 0.1
+          anchors.left: customWalletAPIHost.right
+          anchors.leftMargin: 10
+          label: "Port"
+          placeholder: "e.g. 443"
+          validator: RegExpValidator { regExp: /[0-9]{0,}/ }
+        }
+        AVMEInput {
+          id: customWalletAPITarget
+          width: settingsCol.width * 0.2
+          anchors.left: customWalletAPIPort.right
+          anchors.leftMargin: 10
+          label: "Target"
+          placeholder: "e.g. /"
+        }
+        AVMEButton {
+          id: customWalletAPISaveBtn
+          width: settingsCol.width * 0.1
+          anchors.left: customWalletAPITarget.right
+          anchors.leftMargin: 10
+          text: "Save"
+          onClicked: {
+            var json = {
+              host: customWalletAPIHost.text,
+              port: customWalletAPIPort.text,
+              target: customWalletAPITarget.text
+            }
+            qmlSystem.setConfigValue("customWalletAPI", JSON.stringify(json))
+          }
+        }
+      }
+
+      Text {
+        id: customWebsocketAPIText
+        width: settingsCol.width * 0.1
+        height: customWebsocketAPIHost.height
+        verticalAlignment: Text.AlignVCenter
+        color: "#FFFFFF"
+        font.pixelSize: 14.0
+        text: "Websocket"
+
+        AVMEInput {
+          id: customWebsocketAPIHost
+          width: settingsCol.width * 0.2
+          anchors.left: parent.right
+          anchors.leftMargin: 10
+          label: "Host"
+          placeholder: "e.g. api.avax.network"
+        }
+        AVMEInput {
+          id: customWebsocketAPIPort
+          width: settingsCol.width * 0.1
+          anchors.left: customWebsocketAPIHost.right
+          anchors.leftMargin: 10
+          label: "Port"
+          placeholder: "e.g. 443"
+          validator: RegExpValidator { regExp: /[0-9]{0,}/ }
+        }
+        AVMEInput {
+          id: customWebsocketAPITarget
+          width: settingsCol.width * 0.2
+          anchors.left: customWebsocketAPIPort.right
+          anchors.leftMargin: 10
+          label: "Target"
+          placeholder: "e.g. /ext/bc/C/rpc"
+        }
+        AVMEInput {
+          id: customWebsocketAPIPluginPort
+          width: settingsCol.width * 0.1
+          anchors.left: customWebsocketAPITarget.right
+          anchors.leftMargin: 10
+          label: "Plugin Port"
+          placeholder: "e.g. 4812"
+          validator: RegExpValidator { regExp: /[0-9]{0,}/ }
+        }
+        AVMEButton {
+          id: customWebsocketAPISaveBtn
+          width: settingsCol.width * 0.2
+          anchors.left: customWebsocketAPIPluginPort.right
+          anchors.leftMargin: 10
+          text: "Save & Reload Server"
+          onClicked: {
+            var json = {
+              host: customWebsocketAPIHost.text,
+              port: customWebsocketAPIPort.text,
+              target: customWebsocketAPITarget.text,
+              pluginPort: customWebsocketAPIPluginPort.text
+            }
+            qmlSystem.setConfigValue("customWebsocketAPI", JSON.stringify(json))
+            // TODO: reload server here
+          }
         }
       }
     }
