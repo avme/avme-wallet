@@ -20,6 +20,7 @@ namespace ParaSwap {
                              std::string destToken,
                              std::string destDecimals,
                              std::string weiAmount,
+                             std::string side,
                              std::string chainID = "43114");
 
   std::string getTransactionData(std::string priceRouteStr, 

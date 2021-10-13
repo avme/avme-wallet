@@ -141,29 +141,33 @@ void  QmlSystem::getParaSwapTokenPrices(QString srcToken,
                              QString destToken,
                              QString destDecimals,
                              QString weiAmount,
-                             QString chainID) {
+                             QString chainID,
+                             QString side,
+                             QString id) {
   QtConcurrent::run([=](){
     std::string ret = ParaSwap::getTokenPrices(srcToken.toStdString(), 
                              srcDecimal.toStdString(), 
                              destToken.toStdString(),
                              destDecimals.toStdString(),
                              weiAmount.toStdString(),
+                             side.toStdString(),
                              chainID.toStdString());
 
-    emit gotParaSwapTokenPrices(QString::fromStdString(ret));
+    emit gotParaSwapTokenPrices(QString::fromStdString(ret), id);
   });   
 }
                           
 void QmlSystem::getParaSwapTransactionData(QString priceRouteStr, 
                                                 QString slippage, 
                                                 QString userAddress, 
-                                                QString fee) {
+                                                QString fee,
+                                                QString id) {
   QtConcurrent::run([=](){
     std::string ret = ParaSwap::getTransactionData(priceRouteStr.toStdString(),
                                                    slippage.toStdString(),
                                                    userAddress.toStdString(),
                                                    fee.toStdString());
 
-    emit gotParaSwapTransactionData(QString::fromStdString(ret));
+    emit gotParaSwapTransactionData(QString::fromStdString(ret), id);
   });                                         
 }

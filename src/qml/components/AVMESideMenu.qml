@@ -44,8 +44,6 @@ Rectangle {
           break;
         case "Send":
         case "Exchange":
-        case "Liquidity":
-        case "Staking":
         case "Compound":
           item.isEnabled = (walletIsLoaded && accountIsLoaded && balanceIsLoaded);
           break;
@@ -174,6 +172,12 @@ Rectangle {
         type: "This Account"; name: "Send"; screen: "Send";
         icon: "qrc:/img/icons/paper-plane.png";
         iconSelect: "qrc:/img/icons/paper-planeSelect.png";
+        isEnabled: false; isVisible: false;
+      }
+      ListElement {
+        type: "This Account"; name: "Exchange"; screen: "Exchange";
+        icon: "qrc:/img/icons/directions.png";
+        iconSelect: "qrc:/img/icons/directionsSelect.png";
         isEnabled: false; isVisible: false;
       }
       ListElement {

@@ -132,9 +132,9 @@ class QmlSystem : public QObject {
 
     // Signals for ParaSwap exchanging
 
-    void gotParaSwapTokenPrices(QString priceRoute);
+    void gotParaSwapTokenPrices(QString priceRoute, QString id);
                           
-    void gotParaSwapTransactionData(QString transactionData);
+    void gotParaSwapTransactionData(QString transactionData, QString id);
 
   public:
     // ======================================================================
@@ -448,12 +448,15 @@ class QmlSystem : public QObject {
                              QString destToken,
                              QString destDecimals,
                              QString weiAmount,
-                             QString chainID);
+                             QString chainID,
+                             QString side,
+                             QString id);
                           
     Q_INVOKABLE void getParaSwapTransactionData(QString priceRouteStr, 
                                                 QString slippage, 
                                                 QString userAddress, 
-                                                QString fee);
+                                                QString fee,
+                                                QString id);
 
     // ======================================================================
     // WEBSOCKET SERVER FUNCTIONS

@@ -11,6 +11,7 @@ namespace ParaSwap {
                              std::string destToken,
                              std::string destDecimals,
                              std::string weiAmount,
+                             std::string side,
                              std::string chainID) {
     std::stringstream request;
 
@@ -19,15 +20,16 @@ namespace ParaSwap {
     request << "amount=" << weiAmount << "&";
     request << "srcDecimals=" << srcDecimal << "&";
     request << "destDecimals=" << destDecimals << "&";
-    request << "side=SELL" << "&";
+    request << side << "&";
     request << "network=" << chainID << "&";
     request << "otherExchangePrices=true" << "&";
     request << "partner=paraswap.io";
 
+    std::cout << request.str() << std::endl;
     std::string ret = API::customHttpRequest("",
                                             "apiv5.paraswap.io",
                                             "443",
-                                            "/prices?" + request.str(),
+                                            "/prices/?" + request.str(),
                                             "GET",
                                             "application/json");
 
