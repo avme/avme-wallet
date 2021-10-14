@@ -31,21 +31,24 @@ typedef struct Request {
 } Request;
 
 /**
- * Class for API/ethcall-related functions (e.g. getting current balances, fees,
+ * Namespace for API/ethcall-related functions (e.g. getting current balances, fees,
  * block and nonce, broadcasting a transaction, etc).
  */
-class API {
-  private:
+namespace API {
     // Strings for the API's host and port, respectively.
-    static std::string host;
-    static std::string port;
-
-  public:
+    static std::string apiHost;
+    static std::string apiPort;
+    static std::string apiTarget;
+    static std::string webSocketHost;
+    static std::string webSocketPort;
+    static std::string webSocketTarget;
+    // Mutex to prevent concurrent threads to access the static members above at the same time.
+    static std::mutex apiMutex;
     /**
      * Send an HTTP GET Request to the API.
      * Returns the requested pure JSON data, or an empty string at connection failure.
      */
-    static std::string httpGetRequest(std::string reqBody, bool usePublic = false);
+    std::string httpGetRequest(std::string reqBody, bool isWebSocket = false);
 
     /**
      * Sends a HTTP GET/POST request to host/port/target filled by the caller
@@ -53,51 +56,55 @@ class API {
      * but require to use their own API servers.
      */
 
-    static std::string customHttpRequest(std::string reqBody, std::string host, std::string port, std::string target, std::string requestType, std::string contentType);
+    std::string customHttpRequest(std::string reqBody, std::string host, std::string port, std::string target, std::string requestType, std::string contentType);
 
     /**
      * Downloads a file from a given host URL and a given path (e.g. "/file.txt")
      * to a given target path in the filesystem.
      */
-    static void httpGetFile(std::string host, std::string get, std::string target);
+    void httpGetFile(std::string host, std::string get, std::string target);
 
     /**
      * Build one or multiple JSON requests to be sent to the API, respectively.
      * Returns the streamlined JSON string.
      */
-    static std::string buildRequest(Request req);
-    static std::string buildMultiRequest(std::vector<Request> reqs);
+    std::string buildRequest(Request req);
+    std::string buildMultiRequest(std::vector<Request> reqs);
 
     /**
      * Broadcast a signed transaction to the blockchain.
      * Returns a link to the successful transaction, or an empty string on failure.
      */
-    static std::string broadcastTx(std::string txidHex);
+    std::string broadcastTx(std::string txidHex);
 
     /**
      * Get the highest available nonce for an address from the blockchain API.
      * Returns the nonce, or an empty string on failure.
      */
-    static std::string getNonce(std::string address);
+    std::string getNonce(std::string address);
 
     /**
      * Get the current block number in the blockchain.
      * Returns the number.
      */
-    static std::string getCurrentBlock();
+    std::string getCurrentBlock();
 
     /**
      * Get the transaction status from the API to check if it has been confirmed.
      * Returns the confirmation status in Hex ("0x1 true, 0x0 false"),
      * or an empty string on failure.
      */
-    static std::string getTxStatus(std::string txidHex);
+    std::string getTxStatus(std::string txidHex);
 
     /**
      * Get the block number for the given transaction.
      * Returns the number.
      */
-    static std::string getTxBlock(std::string txidHex);
+    std::string getTxBlock(std::string txidHex);
+
+    void setDefaultAPI(std::string desiredHost, std::string desiredPort, std::string desiredTarget);
+    
+    void setWebSocketAPI(std::string desiredHost, std::string desiredPort, std::string desiredTarget); 
 };
 
 #endif // API_H

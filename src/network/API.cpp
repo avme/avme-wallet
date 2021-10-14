@@ -3,10 +3,7 @@
 // file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "API.h"
 
-std::string API::host = "api.avme.io";
-std::string API::port = "443";
-
-std::string API::httpGetRequest(std::string reqBody, bool usePublic) {
+std::string API::httpGetRequest(std::string reqBody, bool isWebSocket) {
   std::string result = "";
   using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
   namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
@@ -16,19 +13,21 @@ std::string API::httpGetRequest(std::string reqBody, bool usePublic) {
   //std::cout << "REQUEST BODY: \n" << reqBody << std::endl;  // Uncomment for debugging
   //Utils::logToDebug("API Request ID " + RequestID + " : " + reqBody);
 
-  std::string host;
+  std::string host; 
   std::string port;
   std::string target;
 
-  if (usePublic) {
-    host = "api.avax.network";
-    port = "443";
-    target = "/ext/bc/C/rpc";
+  apiMutex.lock();
+  if (isWebSocket) {
+    host = webSocketHost;
+    port = webSocketPort;
+    target = webSocketTarget;
   } else {
-    host = API::host;
-    port = "443";
-    target = "/";
+    host = apiHost;
+    port = apiPort;
+    target = apiTarget;
   }
+  apiMutex.unlock();
 
   try {
     // Create context and load certificates into it
@@ -84,7 +83,8 @@ std::string API::httpGetRequest(std::string reqBody, bool usePublic) {
     if (ec)
       throw boost::system::system_error{ec};
   } catch (std::exception const& e) {
-    //Utils::logToDebug("API ID " + RequestID + " ERROR:" + e.what());
+    std::cout << "Error: " << e.what() << std::endl;
+    Utils::logToDebug("API ID " + RequestID + " ERROR:" + e.what());
     return "";
   }
 
@@ -105,7 +105,7 @@ void API::httpGetFile(std::string host, std::string get, std::string target) {
   boost::asio::io_context io_context;
   ssl_socket socket(io_context, ctx);
   tcp::resolver resolver(io_context);
-  tcp::resolver::query query(host, API::port);
+  tcp::resolver::query query(host, "443"); // Always https
   boost::asio::connect(socket.lowest_layer(), resolver.resolve(query));
   socket.lowest_layer().set_option(tcp::no_delay(true));
 
@@ -307,3 +307,18 @@ std::string API::getTxBlock(std::string txidHex) {
   return resp;
 }
 
+void API::setDefaultAPI(std::string desiredHost, std::string desiredPort, std::string desiredTarget) {
+  apiMutex.lock();
+  apiHost = desiredHost;
+  apiPort = desiredPort;
+  apiTarget = desiredTarget;
+  apiMutex.unlock();
+}
+
+void API::setWebSocketAPI(std::string desiredHost, std::string desiredPort, std::string desiredTarget) {
+  apiMutex.lock();
+  webSocketHost = desiredHost;
+  webSocketPort = desiredPort;
+  webSocketTarget = desiredTarget;
+  apiMutex.unlock();
+}
