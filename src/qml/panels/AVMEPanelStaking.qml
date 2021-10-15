@@ -229,13 +229,25 @@ AVMEPanel {
       }
     }
 
-    AVMEAsyncImage {
-      id: stakeLogo
-      width: 64
-      height: 64
-      loading: false
+    Row {
+      id: stakeIconRow
       anchors.horizontalCenter: parent.horizontalCenter
-      imageSource: "qrc:/img/pangolin.png"
+      spacing: 10
+
+      AVMEAsyncImage {
+        id: stakeAvaxLogo
+        width: 64
+        height: 64
+        loading: false
+        imageSource: "qrc:/img/avax_logo.png"
+      }
+      AVMEAsyncImage {
+        id: stakeAvmeLogo
+        width: 64
+        height: 64
+        loading: false
+        imageSource: "qrc:/img/avme_logo.png"
+      }
     }
 
     Text {
