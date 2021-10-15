@@ -20,7 +20,7 @@ Item {
       bottom: parent.bottom
       margins: 10
     }
-    title: "General Settings"
+    title: "Advanced Settings"
 
     // Get stored configs
     Component.onCompleted: {
@@ -74,6 +74,41 @@ Item {
         color: "#FFFFFF"
         font.pixelSize: 14.0
         text: "Remember password after next transaction for (0 = do not remember)"
+
+        AVMEAsyncImage {
+          id: storePassAlertImg
+          width: 32
+          height: 32
+          loading: false
+          anchors {
+            right: parent.right
+            rightMargin: 10
+            verticalCenter: parent.verticalCenter
+          }
+          imageSource: "qrc:/img/icons/alert-f.png"
+          MouseArea {
+            id: storePassAlertImgMousearea
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered: {
+              storePassAlertImg.imageSource = "qrc:/img/icons/alert-fSelect.png"
+              storePassAlertImgTooltip.visible = true
+            }
+            onExited: {
+              storePassAlertImg.imageSource = "qrc:/img/icons/alert-f.png"
+              storePassAlertImgTooltip.visible = false
+            }
+          }
+          ToolTip {
+            id: storePassAlertImgTooltip
+            background: Rectangle { color: "#1C2029" }
+            contentItem: Text {
+              font.pixelSize: 12.0
+              color: "#FFFFFF"
+              text: "Keep in mind your password will be unprotected if you use this!"
+            }
+          }
+        }
 
         AVMESpinbox {
           id: storePassBox
@@ -283,7 +318,7 @@ Item {
         if (success) {
           if (type == "walletAPI") {
             qmlSystem.setWalletAPI(walletAPIHost.text, walletAPIPort.text, walletAPITarget.text)
-          } 
+          }
           if (type == "websocketAPI") {
             qmlSystem.setWebSocketAPI(websocketAPIHost.text, websocketAPIPort.text, websocketAPITarget.text, websocketAPIPluginPort.text)
           }
