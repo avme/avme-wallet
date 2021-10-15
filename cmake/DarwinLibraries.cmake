@@ -1,6 +1,7 @@
 #TODO: Fix library order, it is very messy currently
 SET(QT_LIBS "")
 LIST(APPEND QT_LIBS "-lc++ -lSystem -lobjc")
+LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/plugins/imageformats/libqgif.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Network.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Gui.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Qml.a")
@@ -43,6 +44,8 @@ LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libzmq.a"
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libprotobuf.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libusb-1.0.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libhidapi.a")
+LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/plugins/imageformats/libqsvg.a")
+LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Svg.a")
 LIST(APPEND QT_LIBS "-framework AppKit -framework ApplicationServices -framework Carbon -framework CoreFoundation -framework CoreGraphics -framework CoreServices -framework CoreText -framework CoreVideo -framework Foundation -framework ImageIO -framework IOKit -framework IOSurface -framework Metal -framework Security -framework QuartzCore -framework Cocoa -framework Kerberos -framework GSS -framework CFNetwork -framework Network -framework System -framework SystemConfiguration")
 
 
