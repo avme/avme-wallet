@@ -78,6 +78,7 @@ class Database {
     bool putTokenDBValue(std::string key, std::string value);
     bool deleteTokenDBValue(std::string key);
     std::vector<std::string> getAllTokenDBValues();
+    void deleteAllTokenDBKeys();
 
     // Tx history database functions.
     bool openHistoryDB(std::string address);
@@ -89,6 +90,7 @@ class Database {
     bool putHistoryDBValue(std::string key, std::string value);
     bool deleteHistoryDBValue(std::string key);
     std::vector<std::string> getAllHistoryDBValues();
+    void deleteAllHistoryDBKeys();
 
     // Ledger account database functions.
     bool openLedgerDB();
@@ -100,6 +102,7 @@ class Database {
     bool putLedgerDBValue(std::string key, std::string value);
     bool deleteLedgerDBValue(std::string key);
     std::vector<std::string> getAllLedgerDBValues();
+    void deleteAllLedgerDBKeys();
 
     // DApp database functions.
     bool openAppDB();
@@ -111,6 +114,7 @@ class Database {
     bool putAppDBValue(std::string key, std::string value);
     bool deleteAppDBValue(std::string key);
     std::vector<std::string> getAllAppDBValues();
+    void deleteAllAppDBKeys();
 
     // Contacts database functions.
     bool openAddressDB();
@@ -122,6 +126,7 @@ class Database {
     bool putAddressDBValue(std::string key, std::string value);
     bool deleteAddressDBValue(std::string key);
     std::vector<std::string> getAllAddressDBValues();
+    void deleteAllAddressDBKeys();
 
     // Settings database functions.
     bool openConfigDB();
@@ -133,6 +138,7 @@ class Database {
     bool putConfigDBValue(std::string key, std::string value);
     bool deleteConfigDBValue(std::string key);
     std::vector<std::string> getAllConfigDBValues();
+    void deleteAllConfigDBKeys();
 };
 
 #endif  // DATABASE_H

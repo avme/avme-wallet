@@ -72,6 +72,14 @@ std::vector<std::string> Database::getAllTokenDBValues() {
   return ret;
 }
 
+void Database::deleteAllTokenDBKeys() {
+  leveldb::Iterator* it = this->tokenDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    this->tokenDB->Delete(leveldb::WriteOptions(), it->key().ToString());
+  }
+  delete it;
+}
+
 // ======================================================================
 // TX HISTORY DATABASE FUNCTIONS
 // ======================================================================
@@ -134,6 +142,14 @@ std::vector<std::string> Database::getAllHistoryDBValues() {
   return ret;
 }
 
+void Database::deleteAllHistoryDBKeys() {
+  leveldb::Iterator* it = this->historyDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    this->historyDB->Delete(leveldb::WriteOptions(), it->key().ToString());
+  }
+  delete it;
+}
+
 // ======================================================================
 // LEDGER DATABASE FUNCTIONS
 // ======================================================================
@@ -190,6 +206,14 @@ std::vector<std::string> Database::getAllLedgerDBValues() {
   }
   delete it;
   return ret;
+}
+
+void Database::deleteAllLedgerDBKeys() {
+  leveldb::Iterator* it = this->ledgerDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    this->ledgerDB->Delete(leveldb::WriteOptions(), it->key().ToString());
+  }
+  delete it;
 }
 
 // ======================================================================
@@ -250,6 +274,14 @@ std::vector<std::string> Database::getAllAppDBValues() {
   return ret;
 }
 
+void Database::deleteAllAppDBKeys() {
+  leveldb::Iterator* it = this->appDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    this->appDB->Delete(leveldb::WriteOptions(), it->key().ToString());
+  }
+  delete it;
+}
+
 // ======================================================================
 // CONTACTS DATABASE FUNCTIONS
 // ======================================================================
@@ -306,6 +338,14 @@ std::vector<std::string> Database::getAllAddressDBValues() {
   }
   delete it;
   return ret;
+}
+
+void Database::deleteAllAddressDBKeys() {
+  leveldb::Iterator* it = this->addressDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    this->addressDB->Delete(leveldb::WriteOptions(), it->key().ToString());
+  }
+  delete it;
 }
 
 // ======================================================================
@@ -365,3 +405,12 @@ std::vector<std::string> Database::getAllConfigDBValues() {
   delete it;
   return ret;
 }
+
+void Database::deleteAllConfigDBKeys() {
+  leveldb::Iterator* it = this->configDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    this->configDB->Delete(leveldb::WriteOptions(), it->key().ToString());
+  }
+  delete it;
+}
+

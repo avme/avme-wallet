@@ -5,6 +5,7 @@ import QtQuick 2.9
 import QtQuick.Controls 2.2
 
 import "qrc:/qml/components"
+import "qrc:/qml/popups"
 
 // Screen for showing the transaction history for the Account
 Item {
@@ -14,6 +15,7 @@ Item {
   Connections {
     target: qmlSystem
     function onHistoryLoaded(dataStr) {
+      console.log("signal ok")
       historyModel.clear()
       if (dataStr != null) {
         var data = JSON.parse(dataStr)
@@ -23,11 +25,12 @@ Item {
         historyModel.sortByTimestamp()
         historyList.currentIndex = 0
       }
-      if (historyList.count == 0) {
-        infoText.text = "No transactions made yet.<br>Once you make one, it'll appear here."
-      } else {
+      if (historyModel.count > 0) {
         infoText.text = ""
         infoText.visible = false
+      } else {
+        infoText.text = "No transactions made yet.<br>Once you make one, it'll appear here."
+        infoText.visible = true
       }
     }
   }
@@ -41,12 +44,25 @@ Item {
     qmlSystem.listAccountTransactions(qmlSystem.getCurrentAccount())
   }
 
+  AVMEButton {
+    id: eraseAllBtn
+    width: (parent.width * 0.5) - (anchors.margins * 2)
+    enabled: (historyModel.count > 0)
+    anchors {
+      top: parent.top
+      left: parent.left
+      margins: 10
+    }
+    text: "Erase All History"
+    onClicked: eraseHistoryPopup.open()
+  }
+
   // The list itself
   Rectangle {
     id: listRect
     width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
-      top: parent.top
+      top: eraseAllBtn.bottom
       bottom: parent.bottom
       left: parent.left
       margins: 10
@@ -142,5 +158,20 @@ Item {
         : ""
       }
     }
+  }
+
+  AVMEPopupYesNo {
+    id: eraseHistoryPopup
+    widthPct: 0.55
+    heightPct: 0.25
+    icon: "qrc:/img/warn.png"
+    info: "Are you sure you want to erase your transaction history?"
+    + "<br>All data will be <b>permanently lost</b>."
+    yesBtn.onClicked: {
+      qmlSystem.eraseAllHistory()
+      eraseHistoryPopup.close()
+      qmlSystem.listAccountTransactions(qmlSystem.getCurrentAccount())
+    }
+    noBtn.onClicked: eraseHistoryPopup.close()
   }
 }

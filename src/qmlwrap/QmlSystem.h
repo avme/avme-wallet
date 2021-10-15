@@ -356,6 +356,9 @@ class QmlSystem : public QObject {
     // Update a given transaction's status.
     Q_INVOKABLE void updateTxStatus(QString txHash);
 
+    // Erase the whole transaction history.
+    Q_INVOKABLE void eraseAllHistory();
+
     // ======================================================================
     // CONTACTS SCREEN FUNCTIONS
     // ======================================================================

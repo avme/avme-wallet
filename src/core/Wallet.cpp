@@ -546,3 +546,6 @@ bool Wallet::setConfigValue(std::string key, std::string value) {
   return this->db.putConfigDBValue(key, value);
 }
 
+void Wallet::eraseAllHistory() {
+  this->db.deleteAllHistoryDBKeys();
+}

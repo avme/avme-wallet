@@ -33,3 +33,7 @@ void QmlSystem::listAccountTransactions(QString address) {
 void QmlSystem::updateTxStatus(QString txHash) {
   this->w.updateTxStatus(txHash.toStdString());
 }
+
+void QmlSystem::eraseAllHistory() {
+  this->w.eraseAllHistory();
+}

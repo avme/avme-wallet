@@ -333,6 +333,11 @@ class Wallet {
      */
     void updateTxStatus(std::string txHash);
 
+    /**
+     * Erase all the entries from the tx history database.
+     */
+    void eraseAllHistory();
+
     // ======================================================================
     // SETTINGS MANAGEMENT
     // ======================================================================
