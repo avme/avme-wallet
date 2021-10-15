@@ -77,7 +77,7 @@ ListView {
       //readonly property string itemNonce: nonce
       readonly property string itemGas: gas
       readonly property string itemPrice: price
-      //readonly property string itemHash: hash
+      readonly property string itemHash: hash
       //readonly property string itemV: v
       //readonly property string itemR: r
       //readonly property string itemS: s

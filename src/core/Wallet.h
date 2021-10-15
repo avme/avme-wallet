@@ -328,11 +328,10 @@ class Wallet {
     bool saveTxToHistory(TxData tx);
 
     /**
-     * Query the confirmed status of *all* transactions made from the
-     * current Account in the API and update accordingly, then reload the list.
-     * Returns true on success, false on failure.
+     * Update the confirmed status of a given transaction
+     * made from the current Account in the API.
      */
-    bool updateAllTxStatus();
+    void updateTxStatus(std::string txHash);
 
     // ======================================================================
     // SETTINGS MANAGEMENT

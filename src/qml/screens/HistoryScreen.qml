@@ -14,6 +14,7 @@ Item {
   Connections {
     target: qmlSystem
     function onHistoryLoaded(dataStr) {
+      historyModel.clear()
       if (dataStr != null) {
         var data = JSON.parse(dataStr)
         for (var i = 0; i < data.length; i++) {
@@ -110,6 +111,17 @@ Item {
         visible: (historyList.currentItem)
         text: "Open Transaction in Block Explorer"
         onClicked: Qt.openUrlExternally(historyList.currentItem.itemTxLink)
+      }
+
+      AVMEButton {
+        id: btnCheckStatus
+        width: parent.width
+        visible: (historyList.currentItem)
+        text: "Refresh Transaction Status"
+        onClicked: {
+          qmlSystem.updateTxStatus(historyList.currentItem.itemHash)
+          qmlSystem.listAccountTransactions(qmlSystem.getCurrentAccount())
+        }
       }
 
       Text {

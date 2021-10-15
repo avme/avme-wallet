@@ -353,6 +353,9 @@ class QmlSystem : public QObject {
     // Emits historyLoaded()
     Q_INVOKABLE void listAccountTransactions(QString address);
 
+    // Update a given transaction's status.
+    Q_INVOKABLE void updateTxStatus(QString txHash);
+
     // ======================================================================
     // CONTACTS SCREEN FUNCTIONS
     // ======================================================================

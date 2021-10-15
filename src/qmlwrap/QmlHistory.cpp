@@ -7,7 +7,6 @@
 void QmlSystem::listAccountTransactions(QString address) {
   QtConcurrent::run([=](){
     json ret = json::array();
-    this->w.updateAllTxStatus();
     this->w.loadTxHistory();
 
     for (TxData tx : this->w.getCurrentAccountHistory()) {
@@ -20,6 +19,7 @@ void QmlSystem::listAccountTransactions(QString address) {
       obj["value"] = tx.value;
       obj["gas"] = tx.gas;
       obj["price"] = tx.price;
+      obj["hash"] = tx.hash;
       obj["datetime"] = tx.humanDate;
       obj["unixtime"] = std::to_string(tx.unixDate);
       obj["confirmed"] = tx.confirmed;
@@ -30,3 +30,6 @@ void QmlSystem::listAccountTransactions(QString address) {
   });
 }
 
+void QmlSystem::updateTxStatus(QString txHash) {
+  this->w.updateTxStatus(txHash.toStdString());
+}

@@ -516,28 +516,26 @@ bool Wallet::saveTxToHistory(TxData tx) {
   return this->db.putHistoryDBValue(tx.hash, transaction.dump());
 }
 
-bool Wallet::updateAllTxStatus() {
-  loadTxHistory();
-  u256 currentBlock = boost::lexical_cast<HexTo<u256>>(API::getCurrentBlock());
-  for (TxData &tx : this->currentAccountHistory) {
-    if (!tx.invalid && !tx.confirmed) {
-      const auto p1 = std::chrono::system_clock::now();
-      uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
-      json apiAnswer = json::parse(API::getTxStatus(tx.hex));
-      if (apiAnswer.contains("status")) {
-        std::string status = apiAnswer["status"];
-        if (status == "0x1") tx.confirmed = true;
-        if (status == "0x0") {
-          u256 transactionBlock = boost::lexical_cast<HexTo<u256>>(API::getTxBlock(apiAnswer["result"]["blockNumber"]));
-          tx.invalid = (currentBlock > transactionBlock);
-        }
-      } else {
-        tx.invalid = ((now + 300) > tx.unixDate);
-      }
-    }
-    saveTxToHistory(tx);
+void Wallet::updateTxStatus(std::string txHash) {
+  TxData tx;
+  for (TxData savedTxData : this->currentAccountHistory) {
+    if (savedTxData.hash == txHash) { tx = savedTxData; break; }
   }
-  return true;
+  u256 currentBlock = boost::lexical_cast<HexTo<u256>>(API::getCurrentBlock());
+  const auto p1 = std::chrono::system_clock::now();
+  uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
+  json apiAnswer = json::parse(API::getTxStatus(tx.hex));
+  if (apiAnswer.contains("status")) {
+    std::string status = apiAnswer["status"];
+    if (status == "0x1") tx.confirmed = true;
+    if (status == "0x0") {
+      u256 transactionBlock = boost::lexical_cast<HexTo<u256>>(API::getTxBlock(apiAnswer["result"]["blockNumber"]));
+      tx.invalid = (currentBlock > transactionBlock);
+    }
+  } else {
+    tx.invalid = ((now + 300) > tx.unixDate);
+  }
+  saveTxToHistory(tx);
 }
 
 std::string Wallet::getConfigValue(std::string key) {
