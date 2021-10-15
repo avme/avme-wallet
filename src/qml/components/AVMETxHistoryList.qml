@@ -94,7 +94,6 @@ ListView {
         height: 16
         x: 5
         loading: false
-        visible: false  // TODO: enable only for debug for now
         anchors.verticalCenter: parent.verticalCenter
         imageSource: (itemConfirmed) ? "qrc:/img/ok.png" : "qrc:/img/no.png"
       }

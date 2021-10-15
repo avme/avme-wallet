@@ -524,7 +524,7 @@ bool Wallet::updateAllTxStatus() {
       const auto p1 = std::chrono::system_clock::now();
       uint64_t now = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
       json apiAnswer = json::parse(API::getTxStatus(tx.hex));
-      if (apiAnswer["result"].contains("status")) {
+      if (apiAnswer.contains("status")) {
         std::string status = apiAnswer["status"];
         if (status == "0x1") tx.confirmed = true;
         if (status == "0x0") {
