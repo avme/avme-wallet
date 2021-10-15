@@ -7,8 +7,8 @@
 
 void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> session_) {
   // Run answer in another thread to allow the Server to take more inputs
-  std::cout << "Server Handler request!" << std::endl;
-  std::cout << inputStr << std::endl;
+  //std::cout << "Server Handler request!" << std::endl;
+  //std::cout << inputStr << std::endl;
   QtConcurrent::run([=](){
     json request = json::parse(inputStr);
     json response;
@@ -57,8 +57,8 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
         request["method"] != "eth_syncing" &&
         request["method"] != "eth_getBalance"
        ) { // eth_call is garbage for us, do not print it
-      std::cout << "Request: " << request.dump(2) << std::endl;
-      std::cout << "Response: " << response.dump(2) << std::endl;
+      //std::cout << "Request: " << request.dump(2) << std::endl;
+      //std::cout << "Response: " << response.dump(2) << std::endl;
     }
 
     // This section below is confusing
@@ -77,9 +77,9 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       }
       if (!found) {
         // Ask user to give permission or not.
-        std::cout << "Lock global" << std::endl;
+        //std::cout << "Lock global" << std::endl;
         globalUserInputRequest.lock();
-        std::cout << "Global locked" << std::endl;
+        //std::cout << "Global locked" << std::endl;
         PLuserInputRequest.lock();
         // Tell QML to show and ask for permission for given website
         std::string website = request["__frameOrigin"];
@@ -96,9 +96,9 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
         }
         PLuserInputAnswer.unlock();
         PLuserInputRequest.unlock();
-        std::cout << "Unlock global" << std::endl;
+        //std::cout << "Unlock global" << std::endl;
         globalUserInputRequest.unlock();
-        std::cout << "Global unlocked" << std::endl;
+        //std::cout << "Global unlocked" << std::endl;
       }
 
       this->permissionListMutex.unlock();
@@ -110,9 +110,9 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
 
     // Process with a transaction request.
     if (requestTransaction) {
-      std::cout << "Lock global TX" << std::endl;
+      //std::cout << "Lock global TX" << std::endl;
       globalUserInputRequest.lock();
-      std::cout << "Global locked TX" << std::endl;
+      //std::cout << "Global locked TX" << std::endl;
       requestTransactionMutex.lock();
       // 4001 	User Rejected Request 	The user rejected the request.
       RTuserInputRequest.lock();
@@ -126,7 +126,7 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       }
       from = request["params"][0]["from"];
       // Optional! defaults to 500000
-      if (request["params"][0].contains("gas")) { 
+      if (request["params"][0].contains("gas")) {
         gas = request["params"][0]["gas"];
       } else {
         gas = "0x7a120";
@@ -157,11 +157,11 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       RTuserInputAnswer.unlock();
       RTuserInputRequest.unlock();
       requestTransactionMutex.unlock();
-      std::cout << "Unlock global TX" << std::endl;
+      //std::cout << "Unlock global TX" << std::endl;
       globalUserInputRequest.unlock();
-      std::cout << "Global unlocked TX" << std::endl;
+      //std::cout << "Global unlocked TX" << std::endl;
     }
-    std::cout << "Writing back: " << response.dump() << std::endl;
+    //std::cout << "Writing back: " << response.dump() << std::endl;
     session_->do_write(response.dump());
   });
   return;

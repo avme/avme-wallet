@@ -376,10 +376,10 @@ TransactionSkeleton Wallet::buildTransaction(
 ) {
   TransactionSkeleton txSkel;
 
-  std::cout << txNonce << std::endl;
   // Building the transaction structure
+  //std::cout << txNonce << std::endl;
+  //std::cout << "from: " << from << std::endl;
   txSkel.creation = false;
-  std::cout << "from: " << from << std::endl;
   txSkel.from = toAddress(from);
   txSkel.to = toAddress(to);
   txSkel.value = u256(value);
@@ -392,8 +392,8 @@ TransactionSkeleton Wallet::buildTransaction(
 }
 
 std::string Wallet::signTransaction(TransactionSkeleton txSkel, std::string pass) {
-  std::cout << "Sign from: " << txSkel.from << std::endl;
-  std::cout << "Password: " << pass << std::endl;
+  //std::cout << "Sign from: " << txSkel.from << std::endl;
+  //std::cout << "Password: " << pass << std::endl;
   Secret s = getSecret("0x" + boost::lexical_cast<std::string>(txSkel.from), pass);
   std::stringstream txHexBuffer;
 

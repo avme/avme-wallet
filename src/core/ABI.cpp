@@ -79,7 +79,7 @@ std::string ABI::encodeABIfromJson(std::string jsonStr) {
       }
     }
   } catch (std::exception &e) {
-    std::cout << e.what() << std::endl;
+    //std::cout << e.what() << std::endl;
     Utils::logToDebug(std::string(e.what()));
   }
   ret += arrays;

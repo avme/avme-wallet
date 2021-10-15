@@ -157,14 +157,15 @@ void QmlSystem::checkTransactionFor15s(QString txid, QString randomID) {
       }
 
       json result = json::parse(API::httpGetRequest(API::buildRequest(transactionReceipt)));
-      std::cout << result.dump(2) << std::endl;
+      //std::cout << result.dump(2) << std::endl;
       std::string status = "";
 
-
-      if (result.contains("result"))
-        if (result["result"].contains("status"))
-          status = result["result"]["status"];
       // Check if transaction was included in a block, a.k.a confirmed
+      if (result.contains("result")) {
+        if (result["result"].contains("status")) {
+          status = result["result"]["status"];
+        }
+      }
       if (status != "") {
         emit txConfirmed(true, txid, randomID);
         break;

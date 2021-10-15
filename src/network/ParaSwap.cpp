@@ -4,17 +4,12 @@
 #include "ParaSwap.h"
 
 namespace ParaSwap {
-
-
-  std::string getTokenPrices(std::string srcToken, 
-                             std::string srcDecimal, 
-                             std::string destToken,
-                             std::string destDecimals,
-                             std::string weiAmount,
-                             std::string side,
-                             std::string chainID) {
+  std::string getTokenPrices(
+    std::string srcToken, std::string srcDecimal,
+    std::string destToken, std::string destDecimals,
+    std::string weiAmount, std::string side, std::string chainID
+  ) {
     std::stringstream request;
-
     request << "srcToken=" << srcToken << "&";
     request << "destToken=" << destToken << "&";
     request << "amount=" << weiAmount << "&";
@@ -24,30 +19,26 @@ namespace ParaSwap {
     request << "network=" << chainID << "&";
     request << "otherExchangePrices=true" << "&";
     request << "partner=paraswap.io";
-
-    std::cout << request.str() << std::endl;
-    std::string ret = API::customHttpRequest("",
-                                            "apiv5.paraswap.io",
-                                            "443",
-                                            "/prices/?" + request.str(),
-                                            "GET",
-                                            "application/json");
-
+    //std::cout << request.str() << std::endl;
+    std::string ret = API::customHttpRequest(
+      "", "apiv5.paraswap.io", "443",
+      "/prices/?" + request.str(), "GET", "application/json"
+    );
     return ret;
   }
 
-  std::string getTransactionData(std::string priceRouteStr, 
-                                 std::string slippage, 
-                                 std::string userAddress, 
-                                 std::string fee) {
+  std::string getTransactionData(
+    std::string priceRouteStr, std::string slippage,
+    std::string userAddress, std::string fee
+  ) {
     nlohmann::ordered_json request;
     nlohmann::ordered_json priceRoute = nlohmann::ordered_json::parse(priceRouteStr);
     request["srcToken"] = priceRoute["priceRoute"]["srcToken"];
     request["destToken"] = priceRoute["priceRoute"]["destToken"];
     request["srcAmount"] = priceRoute["priceRoute"]["srcAmount"];
     bigfloat destAmount = boost::multiprecision::floor(
-        boost::lexical_cast<bigfloat>(priceRoute["priceRoute"]["destAmount"].get<std::string>()) * boost::lexical_cast<bigfloat>(slippage)
-      );
+      boost::lexical_cast<bigfloat>(priceRoute["priceRoute"]["destAmount"].get<std::string>()) * boost::lexical_cast<bigfloat>(slippage)
+    );
     request["destAmount"] = destAmount.str(256);
     request["priceRoute"] = priceRoute["priceRoute"];
     request["userAddress"] = userAddress;
@@ -55,15 +46,14 @@ namespace ParaSwap {
     request["destDecimals"] = priceRoute["priceRoute"]["destDecimals"];
     request["partnerAddress"] = "0xB82589A8F551Cd999d9cE882e1112F6b584C0f53";
     request["partnerFeeBps"] = fee;
-
-    std::cout << request.dump(2) << std::endl;
-    std::string ret = API::customHttpRequest(request.dump(),
-                                            "apiv5.paraswap.io",
-                                            "443",
-                                            "/transactions/" + Utils::jsonToStr(json::parse(priceRouteStr)["priceRoute"]["network"]) + "?ignoreChecks=true",
-                                            "POST",
-                                            "application/json");
-
+    //std::cout << request.dump(2) << std::endl;
+    std::string ret = API::customHttpRequest(
+      request.dump(), "apiv5.paraswap.io", "443",
+      "/transactions/" + Utils::jsonToStr(
+        json::parse(priceRouteStr)["priceRoute"]["network"]
+      ) + "?ignoreChecks=true",
+      "POST", "application/json"
+    );
     return ret;
   }
 }

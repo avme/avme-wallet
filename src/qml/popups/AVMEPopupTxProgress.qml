@@ -194,7 +194,7 @@ AVMEPopup {
         if (btnClose.visible) {
           if (!alreadyTransmitted) {
             // Unlock the mutex if the transaction was not transmitted to the plugin
-            console.log("unlocking mutex")
+            //console.log("unlocking mutex")
             qmlSystem.requestedTransactionStatus(false, "")
             txProgressPopup.close()
           } else {
@@ -384,7 +384,7 @@ AVMEPopup {
     onClicked: {
       if (!alreadyTransmitted) {
         // Unlock the mutex if the transaction was not transmitted to the plugin
-        console.log("unlocking mutex")
+        //console.log("unlocking mutex")
         qmlSystem.requestedTransactionStatus(false, "")
         txProgressPopup.close()
       } else {

@@ -13,7 +13,7 @@ std::string API::httpGetRequest(std::string reqBody, bool isWebSocket) {
   //std::cout << "REQUEST BODY: \n" << reqBody << std::endl;  // Uncomment for debugging
   //Utils::logToDebug("API Request ID " + RequestID + " : " + reqBody);
 
-  std::string host; 
+  std::string host;
   std::string port;
   std::string target;
 
@@ -83,7 +83,7 @@ std::string API::httpGetRequest(std::string reqBody, bool isWebSocket) {
     if (ec)
       throw boost::system::system_error{ec};
   } catch (std::exception const& e) {
-    std::cout << "Error: " << e.what() << std::endl;
+    //std::cout << "Error: " << e.what() << std::endl;
     Utils::logToDebug("API ID " + RequestID + " ERROR:" + e.what());
     return "";
   }
@@ -204,8 +204,8 @@ std::string API::customHttpRequest(std::string reqBody, std::string host, std::s
       req.set(http::field::content_type, contentType);
       req.body() = reqBody;
       req.prepare_payload();
-    } 
-    
+    }
+
     // Send the HTTP request to the remote host
     http::write(stream, req);
     boost::beast::flat_buffer buffer;
@@ -293,11 +293,11 @@ std::string API::getCurrentBlock() {
 std::string API::getTxStatus(std::string txidHex) {
   Request req{1, "2.0", "eth_getTransactionReceipt", {"0x" + txidHex}};
   std::string query = buildRequest(req);
-  std::cout << query << std::endl;
+  //std::cout << query << std::endl;
   std::string resp = httpGetRequest(query);
-  std::cout << resp << std::endl;
+  //std::cout << resp << std::endl;
   json respJson = json::parse(resp);
-  return respJson["result"].dump(); 
+  return respJson["result"].dump();
 }
 
 std::string API::getTxBlock(std::string txidHex) {

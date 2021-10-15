@@ -51,13 +51,13 @@ void session::do_read() {
 
 void session::on_read(beast::error_code ec, std::size_t bytes_transferred) {
   boost::ignore_unused(bytes_transferred);
-  std::cout << "Request received!" << std::endl;
+  //std::cout << "Request received!" << std::endl;
   if (ec == websocket::error::closed) { Server::fail(ec, "read"); return; } // This indicates the session was closed
   if (ec.value() == 125) { Server::fail(ec, "read"); return; } // Operation cancelled
   if (ec.value() == 995) { Server::fail(ec, "read"); return; } // Interrupted by host
   if (ec) { Server::fail(ec, "read"); }
   // Send the message for another thread to parse it.
-  std::cout << "Passing it to our handler" << std::endl;
+  //std::cout << "Passing it to our handler" << std::endl;
   // Run in another thread natively.
   QtConcurrent::run(sys_, &QmlSystem::handleServer,boost::beast::buffers_to_string(buffer_.data()),shared_from_this());
   buffer_.consume(buffer_.size());

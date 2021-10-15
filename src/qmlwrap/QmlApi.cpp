@@ -23,22 +23,16 @@ void QmlApi::doAPIRequests(QString requestID) {
   });
 }
 
-Q_INVOKABLE void QmlApi::doCustomHttpRequest(QString reqBody, 
-      QString host, QString port, QString target, 
-      QString requestType, QString contentType, QString requestID
-      ) {
+Q_INVOKABLE void QmlApi::doCustomHttpRequest(
+  QString reqBody, QString host, QString port, QString target,
+  QString requestType, QString contentType, QString requestID
+) {
   QtConcurrent::run([=](){
     std::string ret;
     ret = API::customHttpRequest(
-      reqBody.toStdString(),
-      host.toStdString(),
-      port.toStdString(),
-      target.toStdString(),
-      requestType.toStdString(),
-      contentType.toStdString()
+      reqBody.toStdString(), host.toStdString(), port.toStdString(),
+      target.toStdString(), requestType.toStdString(), contentType.toStdString()
     );
-
-
     emit customApiRequestAnswered(QString::fromStdString(ret), requestID);
   });
 }
@@ -49,7 +43,7 @@ void QmlApi::clearAPIRequests(QString requestID) {
       this->requestList[requestID].clear();
       this->requestList.erase(requestID);
     } catch (std::exception &e) {
-      std::cout << e.what() << std::endl;
+      //std::cout << e.what() << std::endl;
     }
   requestListLock.unlock();
 }
