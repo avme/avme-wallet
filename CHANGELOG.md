@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Checkbox for auto-loading last opened Wallet at program startup.
 - Support for using custom APIs for the Wallet and the Websocket server.
 - Support for GIFs and SVGs (for DApp development).
+- Right-click menu for enabled and writable inputs (cut/copy/paste, password inputs can only paste).
 
 ### Fixed
 - Existing accounts no longer have a chance to be rewritten when creating new ones.
@@ -56,6 +57,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Some hardcoded gas limits for certain operations were revised.
 - Amount inputs should now permit values starting with a dot (e.g. ".01").
 - Private key, Wallet seed and website permission popups were moved from the Settings screen to the Account header.
+- Transaction statuses are now checked manually, and the history can be fully wiped with the press of a button.
+- Token icons on Staking/Compound screens were changed to avoid confusion.
 
 ### Removed
 - CLI executable for testing/debugging.
