@@ -41,8 +41,9 @@ bool Database::isTokenDBOpen() {
 bool Database::tokenDBKeyExists(std::string key) {
   leveldb::Iterator* it = this->tokenDB->NewIterator(leveldb::ReadOptions());
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
-    if (it->key().ToString() == key) return true;
+    if (it->key().ToString() == key) { delete it; return true; }
   }
+  delete it;
   return false;
 }
 
@@ -102,8 +103,9 @@ bool Database::isHistoryDBOpen() {
 bool Database::historyDBKeyExists(std::string key) {
   leveldb::Iterator* it = this->historyDB->NewIterator(leveldb::ReadOptions());
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
-    if (it->key().ToString() == key) return true;
+    if (it->key().ToString() == key) { delete it; return true; }
   }
+  delete it;
   return false;
 }
 
@@ -159,8 +161,9 @@ bool Database::isLedgerDBOpen() {
 bool Database::ledgerDBKeyExists(std::string key) {
   leveldb::Iterator* it = this->ledgerDB->NewIterator(leveldb::ReadOptions());
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
-    if (it->key().ToString() == key) return true;
+    if (it->key().ToString() == key) { delete it; return true; }
   }
+  delete it;
   return false;
 }
 
@@ -216,8 +219,9 @@ bool Database::isAppDBOpen() {
 bool Database::appDBKeyExists(std::string key) {
   leveldb::Iterator* it = this->appDB->NewIterator(leveldb::ReadOptions());
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
-    if (it->key().ToString() == key) return true;
+    if (it->key().ToString() == key) { delete it; return true; }
   }
+  delete it;
   return false;
 }
 
@@ -273,8 +277,9 @@ bool Database::isAddressDBOpen() {
 bool Database::addressDBKeyExists(std::string key) {
   leveldb::Iterator* it = this->addressDB->NewIterator(leveldb::ReadOptions());
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
-    if (it->key().ToString() == key) return true;
+    if (it->key().ToString() == key) { delete it; return true; }
   }
+  delete it;
   return false;
 }
 
@@ -330,8 +335,9 @@ bool Database::isConfigDBOpen() {
 bool Database::configDBKeyExists(std::string key) {
   leveldb::Iterator* it = this->configDB->NewIterator(leveldb::ReadOptions());
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
-    if (it->key().ToString() == key) return true;
+    if (it->key().ToString() == key) { delete it; return true; }
   }
+  delete it;
   return false;
 }
 
