@@ -35,22 +35,22 @@ Item {
       else if (toggled == "false") { developerCheck.checked = false }
 
       // Custom Wallet API inputs
-      var walletAPIStr = qmlSystem.getConfigValue("customWalletAPI")
+      var walletAPIStr = qmlSystem.getConfigValue("walletAPI")
       if (walletAPIStr != "NotFound: ") {
         var walletAPIJson = JSON.parse(walletAPIStr)
-        customWalletAPIHost.text = walletAPIJson["host"]
-        customWalletAPIPort.text = walletAPIJson["port"]
-        customWalletAPITarget.text = walletAPIJson["target"]
+        walletAPIHost.text = walletAPIJson["host"]
+        walletAPIPort.text = walletAPIJson["port"]
+        walletAPITarget.text = walletAPIJson["target"]
       }
 
       // Custom Websocket API inputs
-      var websocketAPIStr = qmlSystem.getConfigValue("customWebsocketAPI")
+      var websocketAPIStr = qmlSystem.getConfigValue("websocketAPI")
       if (websocketAPIStr != "NotFound: ") {
         var websocketAPIJson = JSON.parse(websocketAPIStr)
-        customWebsocketAPIHost.text = websocketAPIJson["host"]
-        customWebsocketAPIPort.text = websocketAPIJson["port"]
-        customWebsocketAPITarget.text = websocketAPIJson["target"]
-        customWebsocketAPIPluginPort.text = websocketAPIJson["pluginPort"]
+        websocketAPIHost.text = websocketAPIJson["host"]
+        websocketAPIPort.text = websocketAPIJson["port"]
+        websocketAPITarget.text = websocketAPIJson["target"]
+        websocketAPIPluginPort.text = websocketAPIJson["pluginPort"]
       }
     }
 
@@ -149,16 +149,16 @@ Item {
       }
 
       Text {
-        id: customWalletAPIText
+        id: walletAPIText
         width: settingsCol.width * 0.1
-        height: customWalletAPIHost.height
+        height: walletAPIHost.height
         verticalAlignment: Text.AlignVCenter
         color: "#FFFFFF"
         font.pixelSize: 14.0
         text: "Wallet API"
 
         AVMEInput {
-          id: customWalletAPIHost
+          id: walletAPIHost
           width: settingsCol.width * 0.2
           anchors.left: parent.right
           anchors.leftMargin: 10
@@ -166,50 +166,49 @@ Item {
           placeholder: "e.g. api.avme.io"
         }
         AVMEInput {
-          id: customWalletAPIPort
+          id: walletAPIPort
           width: settingsCol.width * 0.1
-          anchors.left: customWalletAPIHost.right
+          anchors.left: walletAPIHost.right
           anchors.leftMargin: 10
           label: "Port"
           placeholder: "e.g. 443"
           validator: RegExpValidator { regExp: /[0-9]{0,}/ }
         }
         AVMEInput {
-          id: customWalletAPITarget
+          id: walletAPITarget
           width: settingsCol.width * 0.2
-          anchors.left: customWalletAPIPort.right
+          anchors.left: walletAPIPort.right
           anchors.leftMargin: 10
           label: "Target"
           placeholder: "e.g. /"
         }
         AVMEButton {
-          id: customWalletAPISaveBtn
+          id: walletAPISaveBtn
           width: settingsCol.width * 0.1
-          anchors.left: customWalletAPITarget.right
+          anchors.left: walletAPITarget.right
           anchors.leftMargin: 10
           text: "Save"
           onClicked: {
-            var json = {
-              host: customWalletAPIHost.text,
-              port: customWalletAPIPort.text,
-              target: customWalletAPITarget.text
-            }
-            qmlSystem.setConfigValue("customWalletAPI", JSON.stringify(json))
+            var host = walletAPIHost.text
+            var port = walletAPIPort.text
+            var target = walletAPITarget.text
+            apiCheckPopup.open()
+            qmlSystem.testAPI(host, port, target, "walletAPI")
           }
         }
       }
 
       Text {
-        id: customWebsocketAPIText
+        id: websocketAPIText
         width: settingsCol.width * 0.1
-        height: customWebsocketAPIHost.height
+        height: websocketAPIHost.height
         verticalAlignment: Text.AlignVCenter
         color: "#FFFFFF"
         font.pixelSize: 14.0
         text: "Websocket"
 
         AVMEInput {
-          id: customWebsocketAPIHost
+          id: websocketAPIHost
           width: settingsCol.width * 0.2
           anchors.left: parent.right
           anchors.leftMargin: 10
@@ -217,49 +216,125 @@ Item {
           placeholder: "e.g. api.avax.network"
         }
         AVMEInput {
-          id: customWebsocketAPIPort
+          id: websocketAPIPort
           width: settingsCol.width * 0.1
-          anchors.left: customWebsocketAPIHost.right
+          anchors.left: websocketAPIHost.right
           anchors.leftMargin: 10
           label: "Port"
           placeholder: "e.g. 443"
           validator: RegExpValidator { regExp: /[0-9]{0,}/ }
         }
         AVMEInput {
-          id: customWebsocketAPITarget
+          id: websocketAPITarget
           width: settingsCol.width * 0.2
-          anchors.left: customWebsocketAPIPort.right
+          anchors.left: websocketAPIPort.right
           anchors.leftMargin: 10
           label: "Target"
           placeholder: "e.g. /ext/bc/C/rpc"
         }
         AVMEInput {
-          id: customWebsocketAPIPluginPort
+          id: websocketAPIPluginPort
           width: settingsCol.width * 0.1
-          anchors.left: customWebsocketAPITarget.right
+          anchors.left: websocketAPITarget.right
           anchors.leftMargin: 10
           label: "Plugin Port"
           placeholder: "e.g. 4812"
           validator: RegExpValidator { regExp: /[0-9]{0,}/ }
         }
         AVMEButton {
-          id: customWebsocketAPISaveBtn
+          id: websocketAPISaveBtn
           width: settingsCol.width * 0.2
-          anchors.left: customWebsocketAPIPluginPort.right
+          anchors.left: websocketAPIPluginPort.right
           anchors.leftMargin: 10
           text: "Save & Reload Server"
           onClicked: {
-            var json = {
-              host: customWebsocketAPIHost.text,
-              port: customWebsocketAPIPort.text,
-              target: customWebsocketAPITarget.text,
-              pluginPort: customWebsocketAPIPluginPort.text
-            }
-            qmlSystem.setConfigValue("customWebsocketAPI", JSON.stringify(json))
-            // TODO: reload server here
+            var host = websocketAPIHost.text
+            var port = websocketAPIPort.text
+            var target = websocketAPITarget.text
+            var pluginPort = websocketAPIPluginPort.text
+            apiCheckPopup.open()
+            qmlSystem.testAPI(host, port, target, "websocketAPI")
           }
         }
       }
+    }
+  }
+
+  AVMEPopup {
+    id: apiCheckPopup
+    widthPct: 0.4
+    heightPct: 0.5
+    onAboutToShow: {
+      apiCheckImg.imageSource = "qrc:/img/icons/loading.png"
+      apiCheckImgRotate.start()
+      apiCheckText.text = "Testing connection to the API..."
+      apiCheckCloseBtn.visible = false
+    }
+    Connections {
+      target: qmlSystem
+      function onApiReturnedSuccessfully(success, type) {
+        apiCheckImgRotate.restart()
+        apiCheckImgRotate.stop()
+        apiCheckCloseBtn.visible = true
+        apiCheckImg.imageSource = "qrc:/img/" + ((success) ? "ok.png" : "no.png")
+        apiCheckText.text = (success)
+          ? "Connection successful!<br>API is working."
+          : "Connection failed.<br>Please check if API details are correct.<br> Errors are logged in your debug.log"
+        if (success) {
+          if (type == "walletAPI") {
+            qmlSystem.setWalletAPI(walletAPIHost.text, walletAPIPort.text, walletAPITarget.text)
+          } 
+          if (type == "websocketAPI") {
+            qmlSystem.setWebSocketAPI(websocketAPIHost.text, websocketAPIPort.text, websocketAPITarget.text, websocketAPIPluginPort.text)
+          }
+        }
+      }
+    }
+
+    AVMEAsyncImage {
+      id: apiCheckImg
+      width: 128
+      height: 128
+      anchors {
+        horizontalCenter: parent.horizontalCenter
+        top: parent.top
+        topMargin: 30
+      }
+      loading: false
+      RotationAnimator {
+        id: apiCheckImgRotate
+        target: apiCheckImg
+        from: 0
+        to: 360
+        duration: 1000
+        loops: Animation.Infinite
+        easing.type: Easing.InOutQuad
+        running: false
+      }
+    }
+
+    Text {
+      id: apiCheckText
+      anchors {
+        horizontalCenter: parent.horizontalCenter
+        top: apiCheckImg.bottom
+        topMargin: 30
+      }
+      horizontalAlignment: Text.AlignHCenter
+      color: "#FFFFFF"
+      font.pointSize: 12.0
+    }
+
+    AVMEButton {
+      id: apiCheckCloseBtn
+      width: parent.width * 0.25
+      anchors {
+        horizontalCenter: parent.horizontalCenter
+        bottom: parent.bottom
+        bottomMargin: 30
+      }
+      text: "Close"
+      onClicked: apiCheckPopup.close()
     }
   }
 }

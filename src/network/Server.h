@@ -149,6 +149,9 @@ class Server {
     // Set a pointer to the QmlSystem object.
     void setQmlSystem(QmlSystem* sys);
 
+    // Set a port to the server
+    void setPort(unsigned short desiredPort) { this->port = desiredPort; };
+
     // Report a failure.
     static void fail(beast::error_code ec, char const* what);
 };

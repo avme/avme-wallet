@@ -142,3 +142,111 @@ bool QmlSystem::setConfigValue(QString key, QString value) {
   return this->w.setConfigValue(key.toStdString(), value.toStdString());
 }
 
+bool QmlSystem::loadConfigDB() {
+  auto status = this->w.loadConfigDB(); 
+  if (!status) {
+    return status;
+  }
+  // Check if default config exists, if does not, set it
+  std::string walletAPIStr = this->getConfigValue("walletAPI").toStdString();
+  std::string websocketAPIStr = this->getConfigValue("websocketAPI").toStdString();
+  if (walletAPIStr == "NotFound: ") {
+    json walletAPI;
+    walletAPI["host"] = "api.avme.io";
+    walletAPI["port"] = "443";
+    walletAPI["target"] = "/";
+    this->setConfigValue("walletAPI", QString::fromStdString(walletAPI.dump()));
+  }
+
+  if (websocketAPIStr == "NotFound: ") {
+    json websocketAPI;
+    websocketAPI["host"] = "api.avax.network";
+    websocketAPI["port"] = "443";
+    websocketAPI["target"] = "/ext/bc/C/rpc";
+    websocketAPI["pluginPort"] = "4812";
+    this->setConfigValue("websocketAPI", QString::fromStdString(websocketAPI.dump()));
+  }
+
+  // Set the API to use the values from the configuration
+  json walletAPI = json::parse(this->getConfigValue("walletAPI").toStdString());
+  json websocketAPI = json::parse(this->getConfigValue("websocketAPI").toStdString());
+
+  this->s.setPort(boost::lexical_cast<unsigned short>(websocketAPI["pluginPort"].get<std::string>()));
+
+  API::apiMutex.lock();
+  API::setDefaultAPI(walletAPI["host"], walletAPI["port"], walletAPI["target"]);
+  API::setWebSocketAPI(websocketAPI["host"], websocketAPI["port"], websocketAPI["target"]);
+  API::apiMutex.unlock();
+
+  return status;
+}
+
+void QmlSystem::setWalletAPI(QString host, QString port, QString target) {
+  QtConcurrent::run([=](){
+    API::apiMutex.lock();
+    json walletAPI;
+    walletAPI["host"] = host.toStdString();
+    walletAPI["port"] = port.toStdString();
+    walletAPI["target"] = target.toStdString();
+    this->setConfigValue("walletAPI", QString::fromStdString(walletAPI.dump()));
+    API::setDefaultAPI(walletAPI["host"], walletAPI["port"], walletAPI["target"]);
+    API::apiMutex.unlock();
+  });
+}
+
+void QmlSystem::setWebSocketAPI(QString host, QString port, QString target, QString pluginPort) {
+  QtConcurrent::run([=](){
+    json websocketAPI;
+    websocketAPI["host"] = host.toStdString();
+    websocketAPI["port"] = port.toStdString();
+    websocketAPI["target"] = target.toStdString();
+    websocketAPI["pluginPort"] = pluginPort.toStdString();
+
+    this->stopWSServer();
+    this->s.setPort(boost::lexical_cast<unsigned short>(pluginPort.toStdString()));
+    this->startWSServer();
+
+    API::apiMutex.lock();
+    this->setConfigValue("websocketAPI", QString::fromStdString(websocketAPI.dump()));
+    API::setWebSocketAPI(websocketAPI["host"], websocketAPI["port"], websocketAPI["target"]);
+    API::apiMutex.unlock();
+  });
+}
+
+void QmlSystem::testAPI(QString host, QString port, QString target, QString type) {
+  // Test it agaisnt the default API.
+  QtConcurrent::run([=](){
+
+    Request req{1, "2.0", "eth_getBalance",{this->getCurrentAccount().toStdString(), "latest"}};
+    std::string request = API::buildRequest(req);
+
+    std::string walletAPIResponse = API::httpGetRequest(request);
+    std::string desiredAPIResponse = API::customHttpRequest(request,
+                                                            host.toStdString(),
+                                                            port.toStdString(),
+                                                            target.toStdString(),
+                                                            "POST",
+                                                            "application/json");
+    // Both answers for a simple request should be equal.
+    try {
+      // Parse to JSON's to have the same output
+      json walletAPI = json::parse(walletAPIResponse);
+      json desiredAPI = json::parse(desiredAPIResponse);
+      if (walletAPI == desiredAPI) {
+        emit apiReturnedSuccessfully(true, type);
+      } else {
+        emit apiReturnedSuccessfully(false, type);
+        std::stringstream reason;
+        reason << "Desired Answer: " << walletAPIResponse;
+        reason << "Custom API Answer: " << desiredAPIResponse;
+        Utils::logToDebug(reason.str());
+      }
+    } catch (std::exception &e) {
+      emit apiReturnedSuccessfully(false, type); 
+      std::stringstream reason;
+      reason << "Desired Answer: " << walletAPIResponse;
+      reason << "Custom API Answer: " << desiredAPIResponse;
+      Utils::logToDebug(reason.str());      
+    }
+  });
+}

@@ -134,6 +134,10 @@ class QmlSystem : public QObject {
     void gotParaSwapTokenPrices(QString priceRoute, QString id, QString request);
     void gotParaSwapTransactionData(QString transactionData, QString id, QString request);
 
+    // Signals for when testing a user typed API
+
+    void apiReturnedSuccessfully(bool status, QString type);
+
   public:
     // ======================================================================
     // COMMON FUNCTIONS
@@ -478,6 +482,12 @@ class QmlSystem : public QObject {
     Q_INVOKABLE QString getWebsitePermissionList();
 
     Q_INVOKABLE void clearWebsitePermissionList();
+
+    Q_INVOKABLE void testAPI(QString host, QString port, QString target, QString type);
+
+    Q_INVOKABLE void setWalletAPI(QString host, QString port, QString target);
+
+    Q_INVOKABLE void setWebSocketAPI(QString host, QString port, QString target, QString pluginPort);
 
     // ======================================================================
     // APPLICATIONS SCREEN FUNCTIONS
