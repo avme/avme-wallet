@@ -44,6 +44,7 @@ Rectangle {
           break;
         case "Send":
         case "Exchange":
+        case "Staking":
         case "Compound":
           item.isEnabled = (walletIsLoaded && accountIsLoaded && balanceIsLoaded);
           break;
