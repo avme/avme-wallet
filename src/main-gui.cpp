@@ -18,19 +18,17 @@ int main(int argc, char *argv[]) {
     qputenv("QT_SCALE_FACTOR", QByteArray::number(scaleFactor));
   #endif
 
-  // Create the actual application and register our custom classes into it
+  // Create the actual application, register our custom classes into it and
+  // initialize the global thread pool to 128 threads.
+  // We should never reach this limit, but a high thread count should
+  // avoid taking too long to answer towards the websocket server.
   QApplication app(argc, argv);
   QQmlApplicationEngine engine;
-
   QmlSystem qmlsystem;
   qmlsystem.setEngine(&engine);
-  // Initialize the global thread pool to 64 threads.
-  // We should never reach this limit, but it is to avoid
-  // Taking to long to answer towards the websocket server
-  QThreadPool::globalInstance()->setMaxThreadCount(256);
-
   engine.rootContext()->setContextProperty("qmlSystem", &qmlsystem);
   qmlRegisterType<QmlApi>("QmlApi", 1, 0, "QmlApi");
+  QThreadPool::globalInstance()->setMaxThreadCount(128);
 
   // Set the app's text font and icon
   QFontDatabase::addApplicationFont(":/fonts/IBMPlexMono-Bold.ttf");
