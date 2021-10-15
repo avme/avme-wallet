@@ -32,7 +32,7 @@ Item {
         height: 256
         loading: false
         anchors.horizontalCenter: parent.horizontalCenter
-        imageSource: "qrc:/img/avme_logo_hd.png"
+        imageSource: "qrc:/img/avme_logo.png"
       }
 
       Text {

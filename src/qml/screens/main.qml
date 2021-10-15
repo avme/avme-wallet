@@ -50,7 +50,7 @@ ApplicationWindow {
       loading: false
       anchors { right: parent.right; bottom: parent.bottom; margins: -300 }
       imageOpacity: 0.15
-      imageSource: "qrc:/img/avme_logo_hd.png"
+      imageSource: "qrc:/img/avme_logo.png"
     }
   }
 
