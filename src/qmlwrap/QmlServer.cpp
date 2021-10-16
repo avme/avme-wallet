@@ -44,7 +44,7 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       requirePermission = true;
     } else {
       // Route any future request to the avalanche PUBLIC API.
-      response = json::parse(API::httpGetRequest(request.dump()));
+      response = json::parse(API::httpGetRequest(request.dump(), true));
       requirePermission = false;
     }
     if (request["method"] != "eth_call" &&
