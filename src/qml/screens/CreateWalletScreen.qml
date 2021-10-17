@@ -283,7 +283,7 @@ Item {
   AVMEPopupNewWalletSeed {
     id: newWalletSeedPopup
     widthPct: 0.9
-    heightPct: 0.5
+    heightPct: 0.6
     okBtn.onClicked: {
       newWalletSeedPopup.clean()
       newWalletSeedPopup.close()

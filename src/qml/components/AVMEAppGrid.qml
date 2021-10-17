@@ -94,6 +94,12 @@ GridView {
           appGrid.currentIndex = index
           forceActiveFocus()
         }
+        onDoubleClicked: {
+          qmlSystem.setScreen(content, "qml/screens/AppScreen.qml")
+          qmlSystem.appLoaded(qmlSystem.getAppFolderPath(
+            appsPanel.selectedApp.itemChainId, appsPanel.selectedApp.itemFolder
+          ))
+        }
       }
     }
   }
