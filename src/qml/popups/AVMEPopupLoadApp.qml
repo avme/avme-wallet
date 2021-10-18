@@ -85,7 +85,7 @@ AVMEPopup {
       width: (items.width * 0.9)
       anchors.horizontalCenter: parent.horizontalCenter
       enabled: (loadAppInput.text != "" && appExists)
-      text: (appExists) ? "Load DApp" : "DApp found"
+      text: (appExists) ? "Load DApp" : "DApp not found"
     }
 
     AVMEButton {
