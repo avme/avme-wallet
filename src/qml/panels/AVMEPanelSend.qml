@@ -158,7 +158,7 @@ AVMEPanel {
           anchors.fill: parent
           anchors.margins: 10
           loading: false
-          imageSource: "qrc:/img/icons/inboxes.png"
+          imageSource: "qrc:/img/icons/users.png"
         }
       }
     }

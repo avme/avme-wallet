@@ -141,8 +141,8 @@ Rectangle {
       }
       ListElement {
         type: "Wallet"; name: "Contacts"; screen: "Contacts";
-        icon: "qrc:/img/icons/bookmark.png";
-        iconSelect: "qrc:/img/icons/bookmarkSelect.png";
+        icon: "qrc:/img/icons/users.png";
+        iconSelect: "qrc:/img/icons/usersSelect.png";
         isEnabled: false; isVisible: false;
       }
       ListElement {
@@ -152,7 +152,7 @@ Rectangle {
         isEnabled: false; isVisible: false;
       }
       ListElement {
-        type: "Wallet"; name: "Applications"; screen: "Applications";
+        type: "Wallet"; name: "DApps"; screen: "Applications";
         icon: "qrc:/img/icons/grid.png";
         iconSelect: "qrc:/img/icons/gridSelect.png";
         isEnabled: false; isVisible: false;
@@ -176,19 +176,19 @@ Rectangle {
         isEnabled: false; isVisible: false;
       }
       ListElement {
-        type: "This Account"; name: "Exchange"; screen: "Exchange";
+        type: "This Account"; name: "ParaSwap Exchange"; screen: "Exchange";
         icon: "qrc:/img/icons/directions.png";
         iconSelect: "qrc:/img/icons/directionsSelect.png";
         isEnabled: false; isVisible: false;
       }
       ListElement {
-        type: "This Account"; name: "Staking"; screen: "Staking";
+        type: "This Account"; name: "AVME Staking"; screen: "Staking";
         icon: "qrc:/img/icons/credit-card.png";
         iconSelect: "qrc:/img/icons/credit-cardSelect.png";
         isEnabled: false; isVisible: false;
       }
       ListElement {
-        type: "This Account"; name: "YY Compound"; screen: "Compound";
+        type: "This Account"; name: "YieldYak Compound"; screen: "Compound";
         icon: "qrc:/img/icons/credit-card-f.png";
         iconSelect: "qrc:/img/icons/credit-card-fSelect.png";
         isEnabled: false; isVisible: false;

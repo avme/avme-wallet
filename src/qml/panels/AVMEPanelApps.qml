@@ -10,14 +10,14 @@ import "qrc:/qml/popups"
 // Panel for accessing DApps.
 AVMEPanel {
   id: appsPanel
-  title: "Applications"
+  title: "Installed DApps"
   property alias selectedApp: appGrid.currentItem
   property var availableApps: null
   property var installedApps: null
   property int downloadRetries: 5
 
   Component.onCompleted: {
-    infoPopup.info = "Downloading app list,<br>please wait..."
+    infoPopup.info = "Downloading DApp list,<br>please wait..."
     infoPopup.open()
     qmlSystem.downloadAppList()
   }
@@ -40,7 +40,7 @@ AVMEPanel {
       }
     }
     function onAppDownloadProgressUpdated(progress, total) {
-      infoPopup.info = "Downloading app, please wait...<br>(" + progress + "/" + total + ")"
+      infoPopup.info = "Downloading DApp, please wait...<br>(" + progress + "/" + total + ")"
     }
   }
 
@@ -105,7 +105,7 @@ AVMEPanel {
     AVMEButton {
       id: btnAdd
       width: appsPanel.width * 0.2
-      text: "Add Application"
+      text: "Install DApp"
       onClicked: appSelectPopup.open()
     }
     AVMEInput {
@@ -118,7 +118,7 @@ AVMEPanel {
       id: btnOpenLocal
       visible: (qmlSystem.getConfigValue("devMode") == "true")
       width: appsPanel.width * 0.2
-      text: "Open Local App"
+      text: "Open Local DApp"
       onClicked: loadAppPopup.open()
     }
   }

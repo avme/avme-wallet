@@ -75,11 +75,11 @@ AVMEPanel {
   Connections {
     target: qmlSystem
     function onGotParaSwapTokenPrices(answer, answerId, request) {
-      if (answerId == "ExchangeGetPrice" + randomID) { 
+      if (answerId == "ExchangeGetPrice" + randomID) {
         var priceRoute = JSON.parse(answer)
         if (priceRoute["error"]) {
           if(priceRoute["error"].includes("Destination Amount Mismatch") ||
-            priceRoute["error"].includes("Invalid Amount") || 
+            priceRoute["error"].includes("Invalid Amount") ||
             priceRoute["error"].includes("computePrice Error")) {
             rightInput.enabled = true
             leftInput.enabled = true
@@ -138,7 +138,7 @@ AVMEPanel {
         var transactionData = JSON.parse(answer)
         if (transactionData["error"]) {
           if(transactionData["error"].includes("Destination Amount Mismatch") ||
-            transactionData["error"].includes("Invalid Amount") || 
+            transactionData["error"].includes("Invalid Amount") ||
             transactionData["error"].includes("computePrice Error")) {
             rightInput.enabled = true
             leftInput.enabled = true
@@ -247,7 +247,7 @@ AVMEPanel {
       }
 
       // Edge case for WAVAX
-      if (exchangeInfo["left"]["contract"] == "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE" && 
+      if (exchangeInfo["left"]["contract"] == "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE" &&
           exchangeLeftAssetCombobox.chosenAsset.address == "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7") {
         return
       }
@@ -300,7 +300,7 @@ AVMEPanel {
       }
 
       // Edge case for WAVAX
-      if (exchangeInfo["right"]["contract"] == "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE" && 
+      if (exchangeInfo["right"]["contract"] == "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE" &&
           exchangeRightAssetCombobox.chosenAsset.address == "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7") {
         return
       }
@@ -784,7 +784,7 @@ AVMEPanel {
       label: leftSymbol + " Amount"
       validator: RegExpValidator { regExp: qmlApi.createRegExp("[0-9]{1,99}(?:\\.[0-9]{1," + leftDecimals + "})?") }
       placeholder: "Amount (e.g. 0.5)"
-      onTextEdited: { 
+      onTextEdited: {
         transactionReady = false
         reachedPriceImpact = false
         getPriceOnEditLeftTimer.stop()
@@ -821,7 +821,7 @@ AVMEPanel {
       label: rightSymbol + " Amount"
       validator: RegExpValidator { regExp: qmlApi.createRegExp("[0-9]{1,99}(?:\\.[0-9]{1," + rightDecimals + "})?") }
       placeholder: "Amount (e.g. 0.5)"
-      onTextEdited: { 
+      onTextEdited: {
         transactionReady = false
         reachedPriceImpact = false
         getPriceOnEditRightTimer.stop()

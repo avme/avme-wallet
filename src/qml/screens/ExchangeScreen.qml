@@ -10,10 +10,10 @@ import "qrc:/qml/popups"
 
 Item {
   id: exchangeScreen
-  anchors.fill: parent
-
   property string augustusSwapper: "0xDEF171Fe48CF0115B1d80b88dc8eAB59176FEe57"
   property string tokenProxy: "0x216B4B4Ba9F3e719726886d34a177484278Bfcae"
+  anchors.fill: parent
+
   AVMEAsyncImage {
     id: logoBg
     width: 400
@@ -24,19 +24,18 @@ Item {
     imageSource: "qrc:/img/ParaSwap_logo.png"
   }
 
-  AVMEPopupInfo {
-    id: fundsPopup; icon: "qrc:/img/warn.png"
-    info: "Insufficient funds. Please check your inputs."
-  }
-  AVMEPopupExchangeSettings { id: slippageSettings }
-  AVMEPopupConfirmTx { id: confirmTransactionPopup }
-  AVMEPopupTxProgress { id: txProgressPopup }
-  
   AVMEPanelExchange {
     id: exchangePanel
     height: parent.height * 0.8
     width: parent.width * 0.4
     anchors.centerIn: parent
+  }
 
+  AVMEPopupExchangeSettings { id: slippageSettings }
+  AVMEPopupConfirmTx { id: confirmTransactionPopup }
+  AVMEPopupTxProgress { id: txProgressPopup }
+  AVMEPopupInfo {
+    id: fundsPopup; icon: "qrc:/img/warn.png"
+    info: "Insufficient funds. Please check your inputs."
   }
 }

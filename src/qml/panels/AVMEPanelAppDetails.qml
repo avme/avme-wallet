@@ -9,7 +9,7 @@ import "qrc:/qml/components"
 // Panel for showing a given DApp's details.
 AVMEPanel {
   id: appDetailsPanel
-  title: "Application Details"
+  title: "DApp Details"
 
   Text {
     visible: (appsPanel.selectedApp == null)
@@ -17,7 +17,7 @@ AVMEPanel {
     horizontalAlignment: Text.AlignHCenter
     color: "#FFFFFF"
     font.pixelSize: 24.0
-    text: "No applications<br>selected."
+    text: "No DApps<br>selected."
   }
 
   Column {
@@ -93,7 +93,7 @@ AVMEPanel {
       width: (appDetailsPanel.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
       visible: (appsPanel.selectedApp != null && appsPanel.selectedApp.itemIsUpdated)
-      text: "Open Application"
+      text: "Open DApp"
       onClicked: {
         qmlSystem.setScreen(content, "qml/screens/AppScreen.qml")
         qmlSystem.appLoaded(qmlSystem.getAppFolderPath(
@@ -106,7 +106,7 @@ AVMEPanel {
       width: (appDetailsPanel.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
       visible: (appsPanel.selectedApp != null && !appsPanel.selectedApp.itemIsUpdated)
-      text: "Update Application"
+      text: "Update DApp"
       onClicked: {
         var app = ({})
         app["chainId"] = appsPanel.selectedApp.itemChainId
@@ -119,7 +119,7 @@ AVMEPanel {
         app["major"] = appsPanel.selectedApp.itemNextMajor
         app["minor"] = appsPanel.selectedApp.itemNextMinor
         app["patch"] = appsPanel.selectedApp.itemNextPatch
-        infoPopup.info = "Downloading app,<br>please wait..."
+        infoPopup.info = "Downloading DApp,<br>please wait..."
         infoPopup.open()
         qmlSystem.installApp(app)
       }
@@ -128,7 +128,7 @@ AVMEPanel {
       id: btnUninstall
       width: (appDetailsPanel.width * 0.8)
       anchors.horizontalCenter: parent.horizontalCenter
-      text: "Remove Application"
+      text: "Uninstall DApp"
       onClicked: confirmUninstallAppPopup.open()
     }
   }

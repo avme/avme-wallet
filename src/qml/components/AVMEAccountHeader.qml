@@ -138,12 +138,11 @@ Rectangle {
     ToolTip {
       id: copyClipTooltip
       parent: copyClipRect
-      visible: copyClipRect.timer.running
-      text: "Copied!"
+      visible: (copyClipMouseArea.hovering || copyClipRect.timer.running)
       contentItem: Text {
         font.pixelSize: 12.0
         color: "#FFFFFF"
-        text: copyClipTooltip.text
+        text: (copyClipRect.timer.running) ? "Copied!" : "Copy to Clipboard"
       }
       background: Rectangle { color: "#1C2029" }
     }
@@ -157,11 +156,21 @@ Rectangle {
     }
     MouseArea {
       id: copyClipMouseArea
+      property bool hovering
       anchors.fill: parent
       hoverEnabled: true
-      onEntered: copyClipImage.imageSource = "qrc:/img/icons/clipboardSelect.png"
-      onExited: copyClipImage.imageSource = "qrc:/img/icons/clipboard.png"
-      onClicked: { qmlSystem.copyToClipboard(currentAddress); parent.timer.start() }
+      onEntered: {
+        copyClipImage.imageSource = "qrc:/img/icons/clipboardSelect.png"
+        hovering = true
+      }
+      onExited: {
+        copyClipImage.imageSource = "qrc:/img/icons/clipboard.png"
+        hovering = false
+      }
+      onClicked: {
+        qmlSystem.copyToClipboard(currentAddress)
+        parent.timer.start()
+      }
     }
   }
 
@@ -177,6 +186,16 @@ Rectangle {
       leftMargin: 10
       verticalCenter: parent.verticalCenter
     }
+    ToolTip {
+      id: qrCodeTooltip
+      parent: qrCodeRect
+      contentItem: Text {
+        font.pixelSize: 12.0
+        color: "#FFFFFF"
+        text: "Show QR Code"
+      }
+      background: Rectangle { color: "#1C2029" }
+    }
     AVMEAsyncImage {
       id: qrCodeImage
       width: parent.width
@@ -189,9 +208,18 @@ Rectangle {
       id: qrCodeMouseArea
       anchors.fill: parent
       hoverEnabled: true
-      onEntered: qrCodeImage.imageSource = "qrc:/img/icons/qrcodeSelect.png"
-      onExited: qrCodeImage.imageSource = "qrc:/img/icons/qrcode.png"
-      onClicked: { qrEncode(); qrcodePopup.open() }
+      onEntered: {
+        qrCodeImage.imageSource = "qrc:/img/icons/qrcodeSelect.png"
+        qrCodeTooltip.visible = true
+      }
+      onExited: {
+        qrCodeImage.imageSource = "qrc:/img/icons/qrcode.png"
+        qrCodeTooltip.visible = false
+      }
+      onClicked: {
+        qrEncode()
+        qrcodePopup.open()
+      }
     }
   }
 
@@ -216,6 +244,16 @@ Rectangle {
       rightMargin: 10
       verticalCenter: parent.verticalCenter
     }
+    ToolTip {
+      id: websiteTooltip
+      parent: websiteRect
+      contentItem: Text {
+        font.pixelSize: 12.0
+        color: "#FFFFFF"
+        text: "Show Website Permissions"
+      }
+      background: Rectangle { color: "#1C2029" }
+    }
     AVMEAsyncImage {
       id: websiteImage
       width: parent.width
@@ -228,8 +266,14 @@ Rectangle {
       id: websiteMouseArea
       anchors.fill: parent
       hoverEnabled: true
-      onEntered: websiteImage.imageSource = "qrc:/img/icons/worldSelect.png"
-      onExited: websiteImage.imageSource = "qrc:/img/icons/world.png"
+      onEntered: {
+        websiteImage.imageSource = "qrc:/img/icons/worldSelect.png"
+        websiteTooltip.visible = true
+      }
+      onExited: {
+        websiteImage.imageSource = "qrc:/img/icons/world.png"
+        websiteTooltip.visible = false
+      }
       onClicked: viewWebsitePermissionPopup.open()
     }
   }
@@ -246,6 +290,16 @@ Rectangle {
       rightMargin: 10
       verticalCenter: parent.verticalCenter
     }
+    ToolTip {
+      id: privKeyTooltip
+      parent: privKeyRect
+      contentItem: Text {
+        font.pixelSize: 12.0
+        color: "#FFFFFF"
+        text: "Show Private Key"
+      }
+      background: Rectangle { color: "#1C2029" }
+    }
     AVMEAsyncImage {
       id: privKeyImage
       width: parent.width
@@ -258,8 +312,14 @@ Rectangle {
       id: privKeyMouseArea
       anchors.fill: parent
       hoverEnabled: true
-      onEntered: privKeyImage.imageSource = "qrc:/img/icons/key-fSelect.png"
-      onExited: privKeyImage.imageSource = "qrc:/img/icons/key-f.png"
+      onEntered: {
+        privKeyImage.imageSource = "qrc:/img/icons/key-fSelect.png"
+        privKeyTooltip.visible = true
+      }
+      onExited: {
+        privKeyImage.imageSource = "qrc:/img/icons/key-f.png"
+        privKeyTooltip.visible = false
+      }
       onClicked: viewPrivKeyPopup.open()
     }
   }
@@ -276,6 +336,16 @@ Rectangle {
       rightMargin: 10
       verticalCenter: parent.verticalCenter
     }
+    ToolTip {
+      id: seedTooltip
+      parent: seedRect
+      contentItem: Text {
+        font.pixelSize: 12.0
+        color: "#FFFFFF"
+        text: "Show Wallet Seed"
+      }
+      background: Rectangle { color: "#1C2029" }
+    }
     AVMEAsyncImage {
       id: seedImage
       width: parent.width
@@ -288,8 +358,14 @@ Rectangle {
       id: seedMouseArea
       anchors.fill: parent
       hoverEnabled: true
-      onEntered: seedImage.imageSource = "qrc:/img/icons/seedSelect.png"
-      onExited: seedImage.imageSource = "qrc:/img/icons/seed.png"
+      onEntered: {
+        seedImage.imageSource = "qrc:/img/icons/seedSelect.png"
+        seedTooltip.visible = true
+      }
+      onExited: {
+        seedImage.imageSource = "qrc:/img/icons/seed.png"
+        seedTooltip.visible = false
+      }
       onClicked: viewSeedPopup.open()
     }
   }

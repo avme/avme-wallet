@@ -48,7 +48,7 @@ AVMEPopup {
       app["major"] = appList.currentItem.itemMajor
       app["minor"] = appList.currentItem.itemMinor
       app["patch"] = appList.currentItem.itemPatch
-      infoPopup.info = "Downloading app, please wait..."
+      infoPopup.info = "Downloading DApp, please wait..."
       infoPopup.open()
       appSelectPopup.close()
       qmlSystem.installApp(app)
@@ -77,8 +77,8 @@ AVMEPopup {
       color: "#FFFFFF"
       font.pixelSize: 14.0
       text: (!infoTimer.running)
-      ? "Choose an application from the list."
-      : "Application already installed, please try another."
+      ? "Choose a DApp from the list."
+      : "DApp already installed, please try another."
       Timer { id: infoTimer; interval: 2000 }
     }
 
@@ -121,7 +121,7 @@ AVMEPopup {
       width: (parent.width * 0.9)
       anchors.horizontalCenter: parent.horizontalCenter
       enabled: (appList.currentItem != null)
-      text: "Install Application"
+      text: "Install this DApp"
       onClicked: handleInstall()
     }
 

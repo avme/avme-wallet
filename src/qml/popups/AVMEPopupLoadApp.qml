@@ -42,7 +42,7 @@ AVMEPopup {
       anchors.horizontalCenter: parent.horizontalCenter
       color: "#FFFFFF"
       font.pixelSize: 14.0
-      text: "Enter the path to your application's folder."
+      text: "Enter the path to your DApp's folder."
     }
 
     Row {
@@ -54,8 +54,8 @@ AVMEPopup {
         id: loadAppInput
         width: (items.width * 0.9) - (loadAppDialogBtn.width + parent.spacing)
         readOnly: true
-        label: "App folder"
-        placeholder: "Your application's folder"
+        label: "DApp folder"
+        placeholder: "Your DApp's folder"
       }
       AVMEButton {
         id: loadAppDialogBtn
@@ -72,7 +72,7 @@ AVMEPopup {
       }
       FolderDialog {
         id: loadAppDialog
-        title: "Choose your app folder"
+        title: "Choose your DApp folder"
         onAccepted: {
           loadAppInput.text = qmlSystem.cleanPath(loadAppDialog.folder)
           appExists = qmlSystem.checkForApp(loadAppInput.text)
@@ -85,7 +85,7 @@ AVMEPopup {
       width: (items.width * 0.9)
       anchors.horizontalCenter: parent.horizontalCenter
       enabled: (loadAppInput.text != "" && appExists)
-      text: (appExists) ? "Load Application" : "Application not found"
+      text: (appExists) ? "Load DApp" : "DApp found"
     }
 
     AVMEButton {

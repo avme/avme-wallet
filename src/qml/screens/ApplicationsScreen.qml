@@ -79,7 +79,7 @@ Item {
   // Popup for warning about application install failure
   AVMEPopupInfo {
     id: installFailPopup; icon: "qrc:/img/warn.png"
-    info: "Application install failed.<br>Please try again."
+    info: "DApp install failed.<br>Please try again."
   }
 
   // Popup for confirming app uninstallation
@@ -88,7 +88,7 @@ Item {
     widthPct: 0.5
     heightPct: 0.25
     icon: "qrc:/img/warn.png"
-    info: "Are you sure you want to remove this application?"
+    info: "Are you sure you want to remove this DApp?"
     yesBtn.onClicked: {
       var app = ({})
       app["chainId"] = appsPanel.selectedApp.itemChainId
