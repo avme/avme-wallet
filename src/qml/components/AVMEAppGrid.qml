@@ -20,6 +20,18 @@ GridView {
 
   Component.onCompleted: forceActiveFocus()
 
+  // Enter/Numpad enter key override
+  Keys.onPressed: {
+    if ((event.key == Qt.Key_Return) || (event.key == Qt.Key_Enter)) {
+      if (currentIndex != -1) {
+        qmlSystem.setScreen(content, "qml/screens/AppScreen.qml")
+        qmlSystem.appLoaded(qmlSystem.getAppFolderPath(
+          appsPanel.selectedApp.itemChainId, appsPanel.selectedApp.itemFolder
+        ))
+      }
+    }
+  }
+
   delegate: Component {
     id: gridDelegate
     Item {
