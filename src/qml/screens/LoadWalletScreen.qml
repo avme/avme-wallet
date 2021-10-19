@@ -36,7 +36,6 @@ Item {
         qmlSystem.loadAccounts()
         qmlSystem.loadPermissionList()
         qmlSystem.loadARC20Tokens()
-        qmlSystem.startWSServer()
         window.menu.changeScreen("Accounts")
       } else {
         window.infoPopup.close()

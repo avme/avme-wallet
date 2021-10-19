@@ -275,7 +275,6 @@ Item {
       errorPopup.close()
       if (goToAccounts) {
         qmlSystem.loadAccounts()
-        qmlSystem.startWSServer()
         window.menu.changeScreen("Accounts")
       }
     }
