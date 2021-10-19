@@ -87,7 +87,7 @@ std::string Graph::httpGetRequest(std::string reqBody) {
 std::string Graph::getAVAXPriceUSD() {
   std::stringstream query;
   query << "{\"query\": \"{"
-        << "pair(id: \\\"0x9ee0a4e21bd333a6bb2ab298194320b8daa26516\\\")"
+        << "pair(id: \\\"0xe28984e1EE8D431346D32BeC9Ec800Efb643eef4\\\")"
         << "{token0 {symbol} token1 {symbol} token0Price token1Price}"
         << "}\"}";
   std::string resp = httpGetRequest(query.str());
@@ -113,7 +113,7 @@ json Graph::avaxUSDData(int days) {
   std::stringstream query;
   // Get USD AVAX price with ID USDAVAX.
   query << "{\"query\": \"{"
-      << "USDAVAX: pair(id: \\\"0x9ee0a4e21bd333a6bb2ab298194320b8daa26516\\\")"
+      << "USDAVAX: pair(id: \\\"0xe28984e1EE8D431346D32BeC9Ec800Efb643eef4\\\")"
       << "{token0 {symbol} token1 {symbol} token0Price token1Price}"
   // Put the chart data into AVAXUSDCHART:
       << "AVAXUSDCHART: tokenDayDatas(first: " << days << ", orderBy: date, orderDirection: desc, where: {"
@@ -156,7 +156,7 @@ json Graph::getAccountPrices(std::vector<ARC20Token> tokenList) {
 
   // Get USD AVAX price with ID USDAVAX.
   query << "{\"query\": \"{"
-        << "USDAVAX: pair(id: \\\"0x9ee0a4e21bd333a6bb2ab298194320b8daa26516\\\")"
+        << "USDAVAX: pair(id: \\\"0xe28984e1EE8D431346D32BeC9Ec800Efb643eef4\\\")"
         << "{token0 {symbol} token1 {symbol} token0Price token1Price}";
 
   // Request USD Price for each token. Using token_contract as ID
