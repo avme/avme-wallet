@@ -272,7 +272,6 @@ void QmlSystem::getAccountAllBalances(QString address) {
       json resultArr = json::parse(resp);
       // Request the prices of all the tokens to the GraphQL API
       auto tokensPrices = Graph::getAccountPrices(tokenList);
-
       bigfloat avaxUSDPrice = boost::lexical_cast<bigfloat>(Graph::parseAVAXPriceUSD(tokensPrices));
       // Calculate the fiat value for each token
       for (auto id : idList) {
@@ -287,7 +286,12 @@ void QmlSystem::getAccountAllBalances(QString address) {
             }
             // Due to GraphQL limitations, we need convert everything to lowercase
             id.second = Utils::toLowerCaseAddress(id.second);
-            std::string tokenDerivedPriceStr = tokensPrices["data"][id.second]["derivedETH"].get<std::string>();
+            std::string tokenDerivedPriceStr;
+            if (tokensPrices["data"][id.second].type() != json::value_t::null) {
+              tokenDerivedPriceStr = tokensPrices["data"][id.second]["derivedETH"].get<std::string>();
+            } else {
+              tokenDerivedPriceStr = "0";
+            }
             bigfloat tokenDerivedPrice = boost::lexical_cast<bigfloat>(tokenDerivedPriceStr);
             std::string hexBal = balance["result"].get<std::string>();
             u256 tokenWeiBal = boost::lexical_cast<HexTo<u256>>(hexBal);
