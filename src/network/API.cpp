@@ -92,71 +92,68 @@ std::string API::httpGetRequest(std::string reqBody, bool isWebSocket) {
 }
 
 void API::httpGetFile(std::string host, std::string get, std::string target) {
-  using boost::asio::ip::tcp;
-  namespace ssl = boost::asio::ssl;
+  using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
+  namespace ssl = boost::asio::ssl;       // from <boost/asio/ssl.hpp>
+  namespace http = boost::beast::http;    // from <boost/beast/http.hpp>
   typedef ssl::stream<tcp::socket> ssl_socket;
   boost::system::error_code error;
 
-  // Create a context that uses the default paths for finding CA certificates.
-  ssl::context ctx(ssl::context::sslv23);
-  ctx.set_default_verify_paths();
+  try {
+    // Create context and load certificates into it
+    boost::asio::io_context ioc;
+    ssl::context ctx{ssl::context::sslv23_client};
+    load_root_certificates(ctx);
 
-  // Open a socket and connect it to the remote host.
-  boost::asio::io_context io_context;
-  ssl_socket socket(io_context, ctx);
-  tcp::resolver resolver(io_context);
-  tcp::resolver::query query(host, "443"); // Always https
-  boost::asio::connect(socket.lowest_layer(), resolver.resolve(query));
-  socket.lowest_layer().set_option(tcp::no_delay(true));
+    tcp::resolver resolver{ioc};
+    ssl::stream<tcp::socket> stream{ioc, ctx};
 
-  // Perform SSL handshake and verify the remote host's certificate.
-  socket.set_verify_mode(ssl::verify_none);
-  socket.handshake(ssl_socket::client);
+    // Set SNI Hostname (many hosts need this to handshake successfully)
+    if (!SSL_set_tlsext_host_name(stream.native_handle(), host.c_str())) {
+      boost::system::error_code ec{static_cast<int>(::ERR_get_error()), boost::asio::error::get_ssl_category()};
+      throw boost::system::system_error{ec};
+    }
+    auto const results = resolver.resolve(host, "443"); // Always HTTPS
 
-  // Make and send the request.
-  boost::asio::streambuf request;
-  std::ostream request_stream(&request);
-  request_stream << "GET " << get << " HTTP/1.0\r\n";
-  request_stream << "Host: " << host << "\r\n";
-  request_stream << "Accept: */*\r\n";
-  request_stream << "Connection: close\r\n\r\n";
-  //std::string out {buffers_begin(request.data()), buffers_end(request.data())};
-  //std::cout << out << std::endl;
-  boost::asio::write(socket, request);
+    // Connect and Handshake
+    boost::asio::connect(stream.next_layer(), results.begin(), results.end());
+    stream.handshake(ssl::stream_base::client);
 
-  // Read the response status line.
-  boost::asio::streambuf response;
-  boost::asio::read_until(socket, response, "\r\n");
-  //std::string out2 {buffers_begin(response.data()), buffers_end(response.data())};
-  //std::cout << out2 << std::endl;
+    // Set up an HTTP GET request message
+    http::request<http::string_body> req{http::verb::get, get, 11};
+    req.set(http::field::host, host);
+    req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
+    req.set(http::field::content_type, "application/octet-stream");
+    req.prepare_payload();
 
-  // Check that response is OK.
-  std::istream response_stream(&response);
-  std::string http_version;
-  response_stream >> http_version;
-  unsigned int status_code;
-  response_stream >> status_code;
-  if (status_code == 404) { return; } // Abort if file is not found
-  std::string status_message;
-  std::getline(response_stream, status_message);
-  //std::cout << host << get << std::endl;
-  //std::cout << status_code << status_message << std::endl;
+    // Send the HTTP request to the remote host
+    http::write(stream, req);
+    boost::beast::flat_buffer buffer;
 
-  // Read and process the response headers, which are terminated by a blank line.
-  boost::asio::read_until(socket, response, "\r\n\r\n");
-  std::string header;
-  while (std::getline(response_stream, header) && header != "\r") {}
+    // Declare a container to hold the response
+    http::response<http::dynamic_body> res;
 
-  // Write whatever content we already have to output, and read until EOF,
-  // writing data to output as we go.
-  boost::nowide::ofstream outFile(target, std::ofstream::out | std::ofstream::binary);
-  if (response.size() > 0) {
-    outFile << &response;
+    // Receive the HTTP response
+    http::read(stream, buffer, res);
+
+    // Write only the body answer to output
+    std::string body { boost::asio::buffers_begin(res.body().data()),boost::asio::buffers_end(res.body().data()) };
+    boost::nowide::ofstream outFile(target, std::ofstream::out | std::ofstream::binary);
+    outFile << body;
+    outFile.close();
+
+    boost::system::error_code ec;
+    stream.shutdown(ec);
+
+    // SSL Connections return stream_truncated when closed.
+    // For that reason, we need to treat this as an error.
+    if (ec == boost::asio::error::eof || boost::asio::ssl::error::stream_truncated)
+      ec.assign(0, ec.category());
+    if (ec)
+      throw boost::system::system_error{ec};
+  } catch (std::exception const& e) {
+    //std::cout << "ERROR downloading file: " << e.what() << std::endl;
+    Utils::logToDebug(std::string("ERROR downloading file: ") + e.what());
   }
-  while (boost::asio::read(socket, response, boost::asio::transfer_at_least(1), error)) {
-    outFile << &response;
-  }
-  outFile.close();
 }
 
 std::string API::customHttpRequest(std::string reqBody, std::string host, std::string port, std::string target, std::string requestType, std::string contentType) {
