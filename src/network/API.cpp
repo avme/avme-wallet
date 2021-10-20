@@ -135,21 +135,19 @@ void API::httpGetFile(std::string host, std::string get, std::string target) {
     // Receive the HTTP response
     http::read(stream, buffer, res);
 
-    // Write only the body answer to output
-    std::string body { boost::asio::buffers_begin(res.body().data()),boost::asio::buffers_end(res.body().data()) };
-    boost::nowide::ofstream outFile(target, std::ofstream::out | std::ofstream::binary);
-    outFile << body;
-    outFile.close();
-
-    boost::system::error_code ec;
-    stream.shutdown(ec);
-
+    // Write only the body answer to output.
     // SSL Connections return stream_truncated when closed.
     // For that reason, we need to treat this as an error.
+    std::string body { boost::asio::buffers_begin(res.body().data()),boost::asio::buffers_end(res.body().data()) };
+    boost::system::error_code ec;
+    stream.shutdown(ec);
     if (ec == boost::asio::error::eof || boost::asio::ssl::error::stream_truncated)
       ec.assign(0, ec.category());
     if (ec)
       throw boost::system::system_error{ec};
+    boost::nowide::ofstream outFile(target, std::ofstream::out | std::ofstream::binary);
+    outFile << body;
+    outFile.close();
   } catch (std::exception const& e) {
     //std::cout << "ERROR downloading file: " << e.what() << std::endl;
     Utils::logToDebug(std::string("ERROR downloading file: ") + e.what());
