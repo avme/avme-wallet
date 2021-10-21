@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fiat and raw balance values in the Overview screen should be properly truncated now.
 - Images are now properly antialiased.
 - Amount displays for Staking/Compound were corrected.
+- Importing a Ledger account that was already imported should be no longer possible.
 
 ### Changed
 - UI has a new design (thanks to Natalya Chavez for the work!).
