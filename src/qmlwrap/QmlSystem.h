@@ -287,6 +287,9 @@ class QmlSystem : public QObject {
     // Check if Account exists
     Q_INVOKABLE bool accountExists(QString account);
 
+    // Same as above but for Ledger accounts
+    Q_INVOKABLE bool ledgerAccountExists(QString account);
+
     // Get an Account's private keys
     Q_INVOKABLE QString getPrivateKeys(QString account, QString pass);
 

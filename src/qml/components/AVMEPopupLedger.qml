@@ -29,6 +29,7 @@ Popup {
   property alias index: ledgerAccountList.currentIndex
   property alias item: ledgerAccountList.currentItem
   property alias pathValue: ledgerPath.currentValue
+  property alias addressTimer: infoAddressTimer
   property color popupBgColor: "#1C2029"
 
   Connections {
@@ -80,12 +81,15 @@ Popup {
       color: "#FFFFFF"
       font.pixelSize: 14.0
       text: {
-        if (isWaiting) {
+        if (infoAddressTimer.running) {
+          text: "Account is already in Wallet, please try another."
+        } else if (isWaiting) {
           text: "Generating Accounts..."
         } else {
           text: "Choose a derivation path:"
         }
       }
+      Timer { id: infoAddressTimer; interval: 2000 }
     }
     AVMECombobox {
       id: ledgerPath
@@ -163,7 +167,14 @@ Popup {
       enabled: (!isWaiting && ledgerAccountList.currentIndex > -1)
       text: "Choose this Account"
       onClicked: {
-        qmlSystem.importLedgerAccount(ledgerList.currentItem.itemAccount, ledgerPopup.pathValue + ledgerPopup.index);
+        if (qmlSystem.ledgerAccountExists(ledgerList.currentItem.itemAccount)) {
+          addressTimer.start()
+        } else {
+          qmlSystem.importLedgerAccount(
+            ledgerList.currentItem.itemAccount,
+            ledgerPopup.pathValue + ledgerPopup.index
+          );
+        }
       }
     }
     AVMEButton {

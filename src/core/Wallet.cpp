@@ -229,11 +229,11 @@ std::vector<ledger::account> Wallet::getAllLedgerAccounts() {
   return ret;
 }
 
-
 bool Wallet::deleteLedgerAccount(std::string address) {
   bool success = this->db.deleteLedgerDBValue(address);
   return success;
 }
+
 bool Wallet::eraseAccount(std::string address) {
   if (accountExists(address)) {
     this->km.kill(userToAddress(address));
@@ -245,6 +245,10 @@ bool Wallet::eraseAccount(std::string address) {
 
 bool Wallet::accountExists(std::string address) {
   return (this->accounts.find(address) != this->accounts.end());
+}
+
+bool Wallet::ledgerAccountExists(std::string address) {
+  return this->db.ledgerDBKeyExists(address);
 }
 
 void Wallet::setCurrentAccount(std::string address) {

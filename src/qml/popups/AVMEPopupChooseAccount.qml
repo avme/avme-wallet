@@ -90,7 +90,7 @@ AVMEPopup {
         } else if (infoSeedTimer.running) {
           text: "Seed is invalid, please try another."
         } else if (infoAddressTimer.running) {
-          text: "Address is already in Wallet, please try another."
+          text: "Account is already in Wallet, please try another."
         } else if (isWaiting) {
           text: "Generating Accounts... this may take a while, please wait..."
         } else if (chooseAccountList.currentIndex > -1) {

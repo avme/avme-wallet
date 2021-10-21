@@ -216,6 +216,12 @@ class Wallet {
     bool accountExists(std::string address);
 
     /**
+     * Same as above but for Ledger accounts.
+     * The logic is different since Ledger accounts are stored in the database.
+     */
+    bool ledgerAccountExists(std::string address);
+
+    /**
      * Set the current Account to be used by the Wallet.
      */
     void setCurrentAccount(std::string address);

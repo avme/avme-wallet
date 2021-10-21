@@ -130,7 +130,6 @@ void QmlSystem::createAccount(QString seed, int index, QString name, QString pas
 
 void QmlSystem::importLedgerAccount(QString address, QString path) {
   QVariantMap obj;
-  // TODO: avoid same account to be imported multiple times
   bool success = this->w.importLedgerAccount(address.toStdString(), path.toStdString());
   if (!success) {
     emit accountCreated(false, obj);
@@ -150,6 +149,10 @@ bool QmlSystem::eraseAccount(QString account) {
 
 bool QmlSystem::accountExists(QString account) {
   return this->w.accountExists(account.toStdString());
+}
+
+bool QmlSystem::ledgerAccountExists(QString account) {
+  return this->w.ledgerAccountExists(account.toStdString());
 }
 
 QString QmlSystem::getPrivateKeys(QString account, QString pass) {
