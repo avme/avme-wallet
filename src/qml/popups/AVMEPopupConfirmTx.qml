@@ -259,7 +259,7 @@ AVMEPopup {
             confirmTxPopup.close()
             txProgressPopup.open()
           }
-        } // TODO: ADD A ERROR HANDLER FOR INSUFICIENT BALANCE!!!
+        } // TODO: add an error handler for insufficient balance (edge case)
       }
     }
   }

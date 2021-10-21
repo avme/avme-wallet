@@ -60,7 +60,6 @@ AVMEPanel {
             pairUserLockedBalance = qmlApi.parseHex(resp[item].result, ["uint"])
           }
         }
-        // TODO: check edge case of allowance and balance both being zero
         if (+allowance <= +pairUserBalance) {
           stakingDetailsColumn.visible = false
           stakingApprovalColumn.visible = true
