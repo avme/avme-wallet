@@ -43,6 +43,20 @@ Popup {
     }
   }
 
+  Connections {
+    target: ledgerCustomPathPopup
+      function onAboutToHide() {
+        var pattern = /m\/((\d*)'?\/){1,10}/
+        if (pattern.test(ledgerCustomPathPopup.customPath)) {
+          var customPathJson = ([])
+          ledgerPath.model.append({ text: ledgerCustomPathPopup.customPath })
+          ledgerPath.currentIndex = ledgerPath.model.count - 1
+        } else {
+          invalidCustomPath.open()
+        }
+      }
+  }
+
   function refreshList() {
     qmlSystem.generateLedgerAccounts(chosenPath, startingIndex)
     isWaiting = true
@@ -95,15 +109,18 @@ Popup {
       id: ledgerPath
       anchors.verticalCenter: infoLabel.verticalCenter
       width: 300
-      model: [
-        "m/44'/60'/0'/0/",
-        "m/44'/60'/0'/",
-        "m/44'/60'/160720'/0'/",
-        "m/44'/1'/0'/0/",
-        "m/44'/60'/0'/0/0/",
-      ]
+      editable: true
+      model: ListModel {
+        id: model
+        ListElement { text: "m/44'/60'/0'/0/" }
+        ListElement { text: "m/44'/60'/0'/" }
+        ListElement { text: "m/44'/60'/160720'/0'/" }
+        ListElement { text: "m/44'/1'/0'/0/" }
+        ListElement { text: "m/44'/60'/0'/0/0/" }
+      }
       onActivated: {
         qmlSystem.cleanLedgerAccounts()
+        accountList.clear()
         startingIndex = -1
       }
     }

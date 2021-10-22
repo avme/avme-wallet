@@ -370,11 +370,6 @@ Rectangle {
     }
   }
 
-  // Popup for Ledger accounts
-  AVMEPopupLedger {
-    id: ledgerPopup
-  }
-
   // Info popup for if communication with Ledger fails
   AVMEPopupInfo {
     id: ledgerFailPopup

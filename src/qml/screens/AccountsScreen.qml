@@ -227,5 +227,16 @@ Item {
     onAboutToHide: ledgerRetryTimer.stop()
     okBtn.text: "Close"
   }
+
+  AVMEPopupInfo {
+    id: invalidCustomPath
+    icon: "qrc:/img/warn.png"
+    info: "Invalid custom derivation path!"
+    okBtn.text: "Close"
+  }
+
+  AVMEPopupCustomPath {
+    id: ledgerCustomPathPopup
+  }
 }
 
