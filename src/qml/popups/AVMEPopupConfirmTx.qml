@@ -33,6 +33,7 @@ AVMEPopup {
   property string gas: "0" // gasLimit // Initialize value to not throw bad_lexical_cast when starting the wallet
   property string gasPrice: "0" // GWEI value, dynamic
   property string randomID: ""
+  property string failReason: ""
   property bool loadingFees
   property bool automaticGas
   property bool isSameAddress: false
@@ -84,6 +85,7 @@ AVMEPopup {
           if (answerJson[0]["error"]["message"].includes("max fee per gas less than block base fee")) {
             calculateGas(true)
           } else {
+            failReason = answerJson[0]["error"]["message"];
             transactionFailPopup.open();
             loadingFees = false
           }
@@ -276,10 +278,31 @@ AVMEPopup {
 
   AVMEPopupInfo {
     id: transactionFailPopup
-    widthPct: 0.6
-    heightPct: 0.4
+    widthPct: 0.8
+    heightPct: 0.8
     icon: "qrc:/img/warn.png"
     info: "Transaction likely to fail,<br>please check your input."
+    Rectangle {
+	  color: "#0f0c18"
+      anchors.verticalCenter: parent.verticalCenter
+	  anchors.horizontalCenter: parent.horizontalCenter
+      radius: 5
+      width: parent.width * 0.8
+      height: parent.height * 0.33
+	  Text {
+	  	id: failedTransactionText
+		anchors.verticalCenter: parent.verticalCenter
+		anchors.horizontalCenter: parent.horizontalCenter
+		height: parent.height * 0.9
+		width: parent.width * 0.9
+		text: "Reason: " + failReason
+		horizontalAlignment: Text.AlignHCenter 
+		verticalAlignment: Text.AlignVCenter 
+      	color: "#FFFFFF"
+      	font.pixelSize: 12.0
+		wrapMode: Text.Wrap
+	  }
+    }
     okBtn.text: "Close"
   }
 }
