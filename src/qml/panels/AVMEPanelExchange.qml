@@ -121,11 +121,19 @@ AVMEPanel {
         transactionReady = false
         loading = false
 
+        var srcUSD = priceRoute["priceRoute"]["srcUSD"]
+        var fee = 15
+        if (+srcUSD > 100) {
+          fee = 10
+        }
+        if (+srcUSD > 500) {
+          fee = 5
+        }
         if (!priceRoute["priceRoute"]["maxImpactReached"]) {
           qmlSystem.getParaSwapTransactionData(answer,
                                                desiredSlippage,
                                                accountHeader.currentAddress,
-                                               15,
+                                               fee,
                                                "ExchangeGetTransaction" + randomID)
         } else {
           reachedPriceImpact = true
