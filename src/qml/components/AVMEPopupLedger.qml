@@ -96,12 +96,21 @@ Popup {
       anchors.verticalCenter: infoLabel.verticalCenter
       width: 300
       model: [
-        "m/44'/60'/0'/",
         "m/44'/60'/0'/0/",
+        "m/44'/60'/0'/",
         "m/44'/60'/160720'/0'/",
         "m/44'/1'/0'/0/",
         "m/44'/60'/0'/0/0/",
       ]
+      onActivated: {
+        qmlSystem.cleanLedgerAccounts()
+        startingIndex = -1
+      }
+    }
+    AVMEButton {
+      anchors.verticalCenter: infoLabel.verticalCenter
+      text: "Custom Path"
+      onClicked: ledgerCustomPathPopup.open()
     }
   }
 
