@@ -125,11 +125,11 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
         data = "";
       }
       from = request["params"][0]["from"];
-      // Optional! defaults to 500000
+      // Optional! defaults to 800000
       if (request["params"][0].contains("gas")) {
         gas = request["params"][0]["gas"];
       } else {
-        gas = "0x7a120";
+        gas = "0xc3500";
       }
       to = request["params"][0]["to"];
       website = request["__frameOrigin"];
