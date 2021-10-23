@@ -29,8 +29,12 @@ AVMEPopup {
       var clip = qmlSystem.copySeedFromClipboard()
       var leftCol = seedColLeft.children
       var rightCol = seedColRight.children
+      // Clean all fields first
+      for (var i = 0; i < (+phraseValue/2); i++) {
+        leftCol[i].text = ""; rightCol[i].text = ""
+      }
+      // Remove unnecessary spaces and invisible newlines from each word
       for (var i = 0; i < (+phraseValue); i++) {
-        // Remove unnecessary spaces and invisible newlines from each word
         var word = clip[i]
         word = word.replace(" ", "")
         word = word.replace("\n", "")
@@ -94,6 +98,14 @@ AVMEPopup {
         anchors.leftMargin: parent.width * 0.025
         font.pixelSize: parent.font.pixelSize
         model: ["12", "24"]
+        onActivated: {
+          // Always clean all fields when changing phrase size
+          var leftCol = seedColLeft.children
+          var rightCol = seedColRight.children
+          for (var i = 0; i < (+phraseValue/2); i++) {
+            leftCol[i].text = ""; rightCol[i].text = ""
+          }
+        }
       }
     }
 
