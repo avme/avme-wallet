@@ -69,8 +69,8 @@ GridView {
           property var imgUrl: "https://raw.githubusercontent.com"
             + "/avme/avme-wallet-applications/main/apps/"
             + itemChainId + "/" + itemFolder + "/icon.png"
-          width: 64
-          height: 64
+          width: 96
+          height: 96
           anchors.horizontalCenter: parent.horizontalCenter
           Component.onCompleted: { qmlSystem.checkIfUrlExists(Qt.resolvedUrl(imgUrl)) }
           Connections {
