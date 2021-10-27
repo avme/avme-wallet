@@ -87,29 +87,66 @@ bool QmlSystem::removeARC20Token(QString address) {
 
 bool QmlSystem::ARC20TokenExists(QString address) {
   std::string addressStr = Utils::toCamelCaseAddress(address.toStdString());
-  json supplyJson, balanceJson;
+  json supplyJson, balanceJson, nameJson, symbolJson, decimalsJson;
   json supplyJsonArr = json::array();
   json balanceJsonArr = json::array();
+  json nameJsonArr = json::array();
+  json symbolJsonArr = json::array();
+  json decimalsJsonArr = json::array();
   supplyJson["to"] = balanceJson["to"] = addressStr;
+  nameJson["to"] = symbolJson["to"] = decimalsJson["to"] = addressStr;
   supplyJson["data"] = Pangolin::ERC20Funcs["totalSupply"];
   balanceJson["data"] = Pangolin::ERC20Funcs["balanceOf"] + Utils::addressToHex(addressStr);
+  nameJson["data"] = Pangolin::ERC20Funcs["name"];
+  symbolJson["data"] = Pangolin::ERC20Funcs["symbol"];
+  decimalsJson["data"] = Pangolin::ERC20Funcs["decimals"];
   supplyJsonArr.push_back(supplyJson);
   supplyJsonArr.push_back("latest");
-  balanceJsonArr.push_back(supplyJson);
+  balanceJsonArr.push_back(balanceJson);
   balanceJsonArr.push_back("latest");
+  nameJsonArr.push_back(nameJson);
+  nameJsonArr.push_back("latest");
+  symbolJsonArr.push_back(symbolJson);
+  symbolJsonArr.push_back("latest");
+  decimalsJsonArr.push_back(decimalsJson);
+  decimalsJsonArr.push_back("latest");
   Request supplyReq{1, "2.0", "eth_call", supplyJsonArr};
   Request balanceReq{1, "2.0", "eth_call", balanceJsonArr};
-  std::string supplyQuery, supplyResp, supplyHex, balanceQuery, balanceResp, balanceHex;
+  Request nameReq{1, "2.0", "eth_call", nameJsonArr};
+  Request symbolReq{1, "2.0", "eth_call", symbolJsonArr};
+  Request decimalsReq{1, "2.0", "eth_call", decimalsJsonArr};
+  std::string supplyQuery, supplyResp, supplyHex;
+  std::string balanceQuery, balanceResp, balanceHex;
+  std::string nameQuery, nameResp, nameHex;
+  std::string symbolQuery, symbolResp, symbolHex;
+  std::string decimalsQuery, decimalsResp, decimalsHex;
   supplyQuery = API::buildRequest(supplyReq);
   balanceQuery = API::buildRequest(balanceReq);
+  nameQuery = API::buildRequest(nameReq);
+  symbolQuery = API::buildRequest(symbolReq);
+  decimalsQuery = API::buildRequest(decimalsReq);
   supplyResp = API::httpGetRequest(supplyQuery);
   balanceResp = API::httpGetRequest(balanceQuery);
+  nameResp = API::httpGetRequest(nameQuery);
+  symbolResp = API::httpGetRequest(symbolQuery);
+  decimalsResp = API::httpGetRequest(decimalsQuery);
   json supplyRespJson = json::parse(supplyResp);
   json balanceRespJson = json::parse(balanceResp);
-  supplyHex = supplyRespJson["result"].get<std::string>();
-  balanceHex = balanceRespJson["result"].get<std::string>();
+  json nameRespJson = json::parse(nameResp);
+  json symbolRespJson = json::parse(symbolResp);
+  json decimalsRespJson = json::parse(decimalsResp);
+  try {
+    supplyHex = supplyRespJson["result"].get<std::string>();
+    balanceHex = balanceRespJson["result"].get<std::string>();
+    nameHex = nameRespJson["result"].get<std::string>();
+    symbolHex = symbolRespJson["result"].get<std::string>();
+    decimalsHex = decimalsRespJson["result"].get<std::string>();
+  } catch (...) { return false; }
   if (supplyHex == "0x" || supplyHex == "") { return false; }
   if (balanceHex == "0x" || balanceHex == "") { return false; }
+  if (nameHex == "0x" || nameHex == "") { return false; }
+  if (symbolHex == "0x" || symbolHex == "") { return false; }
+  if (decimalsHex == "0x" || decimalsHex == "") { return false; }
   return true;
 }
 

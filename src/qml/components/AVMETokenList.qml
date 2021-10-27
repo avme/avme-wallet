@@ -12,7 +12,6 @@ ListView {
   property color listHighlightColor: "#9400F6"
   property color listBgColor: "#16141F"
   property color listHoverColor: "#2E2C3D"
-  signal grabFocus()
 
   implicitWidth: 500
   implicitHeight: 500
@@ -93,7 +92,7 @@ ListView {
         anchors.fill: parent
         onClicked: {
           tokenSelectList.currentIndex = index
-          grabFocus()
+          tokenSelectList.forceActiveFocus()
         }
       }
     }
