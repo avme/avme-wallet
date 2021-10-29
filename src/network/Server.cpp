@@ -134,45 +134,29 @@ void Server::start() {
   v.reserve(this->threads - 1);
   for (auto i = this->threads - 1; i > 0; --i) { v.emplace_back([this]{ ioc.run(); }); }
   ioc.run();
-  // Block until all the threads exit
-  for(auto& t : v)
-      t.join();
-
+  for (auto& t : v) t.join(); // Wait for all threads to exit
   running.unlock();
 }
 
 void Server::stop() {
+  // Send a post message to close each session thread, then clear the session list.
+  // After that, do the same with each listener thread and the listener list.
+  // We need to bind_front_handler to the actual object running inside the thread.
   for (auto session_ : sessions_) {
-    // Send a post message to the thread running the session.
-    // Telling it to close
-    // We need to bind_front_handler to the actual object running inside the thread.
     auto session_executor = session_->get_executor();
-    net::post(
-          session_executor,
-          beast::bind_front_handler(
-              &session::close,
-              session_));
+    net::post(session_executor, beast::bind_front_handler(&session::close, session_));
   }
-  // Clear session list
   sessions_.clear();
-  // After closing the sessions, you can succesfully close the listeners
   for (auto listener_ : listeners_) {
-    // Same as above, but for the listener
     auto listener_executor = listener_->get_executor();
-    net::post(
-          listener_executor,
-          beast::bind_front_handler(
-            &listener::stop,
-            listener_));
+    net::post(listener_executor, beast::bind_front_handler(&listener::stop, listener_));
   }
-  // Clear listener list
   listeners_.clear();
-  // Restart is needed in order to .run() the ioc again in the future.
+
+  // Signal the ioc to stop and wait for the thread running
+  // Server::start to unlock before declaring the server ready to start again.
   ioc.stop();
-  // "run" again so it can fully stop
-  ioc.run();
-  ioc.restart();
-  running.lock(); // Wait until the thread running the Server::start to unlock before declaring the server as "open start again"
+  running.lock();
   running.unlock();
 }
 
