@@ -4,10 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.0.1] - Unreleased
 ### Fixed
 - Seed words should be pasted correctly now regardless of which field it is pasted into.
 - Seed words should be cleaned correctly now when changing phrase size.
+- DApp and token select popups should now allow up/down keyboard input.
+- Rules for checking if a token exists were revised to allow only *real* tokens.
+  - `totalSupply()`, `balance()`, `name()`, `symbol()` and `decimals()` are *all* checked now.
+  - This fixes a bug where smart contracts could have some of those functions but not all, thus being wrongly added as a token.
+- Websocket server should now properly close when closing the program, fixing the "zombie process" issue.
+- Websocket server should not crash anymore when switching between Accounts.
+
+### Changed
+- Buttons are now round to fit better with the UI.
+- DApp grid icons are now bigger, looking closer to the token grid ones.
 
 ## [2.0.0] - 22/10/2021
 ### Added
