@@ -155,6 +155,9 @@ void Server::stop() {
 
   // Signal the ioc to stop and wait for the thread running
   // Server::start to unlock before declaring the server ready to start again.
+  // HACK(?): one nanosecond delay to prevent "bind: address already in use".
+  // I'm laughing so hard that it works, I'll just keep it like this :risitas:
+  boost::this_thread::sleep_for(boost::chrono::nanoseconds(1));
   ioc.stop();
   running.lock();
   running.unlock();
