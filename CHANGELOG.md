@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Buttons are now round to fit better with the UI.
 - DApp grid icons are now bigger, looking closer to the token grid ones.
+- Transaction links now open in [Snowtrace](https://snowtrace.io) due to the [legacy C-Chain Explorer](https://cchain.explorer.avax.network) being shutdown.
 
 ## [2.0.0] - 22/10/2021
 ### Added
