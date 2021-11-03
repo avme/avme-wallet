@@ -11,8 +11,8 @@ void QmlSystem::listAccountTransactions(QString address) {
 
     for (TxData tx : this->w.getCurrentAccountHistory()) {
       json obj;
-      obj["txlink"] = tx.txlink;
       obj["operation"] = tx.operation;
+      obj["hex"] = tx.hex;
       obj["txdata"] = tx.data;
       obj["from"] = tx.from;
       obj["to"] = tx.to;

@@ -135,7 +135,7 @@ void QmlSystem::makeTransaction(
       msg = transactionResult["error"]["message"] .get<std::string>();
       emit txSent(false, "", "", QString::fromStdString(msg), randomID);
     } else {
-      std::string txLink = std::string("https://cchain.explorer.avax.network/tx/") + transactionResult["result"].get<std::string>();
+      std::string txLink = std::string("https://snowtrace.io/tx/") + transactionResult["result"].get<std::string>();
       emit txSent(true, QString::fromStdString(txLink), QString::fromStdString(transactionResult["result"]), QString::fromStdString(msg), randomID);
     }
     // Confirming the transaction should happen OUTSIDE this function!

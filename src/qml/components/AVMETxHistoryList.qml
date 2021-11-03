@@ -64,9 +64,8 @@ ListView {
     id: listDelegate
     Item {
       id: listItem
-      readonly property string itemTxLink: txlink
       readonly property string itemOperation: operation
-      //readonly property string itemHex: hex
+      readonly property string itemHex: hex
       //readonly property string itemType: type
       //readonly property string itemCode: code
       readonly property string itemFrom: from

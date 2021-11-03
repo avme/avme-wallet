@@ -66,7 +66,6 @@ typedef struct ARC20Token {
 
 // Struct for a single Transaction.
 typedef struct TxData {
-  std::string txlink;
   std::string operation;
   std::string hex;
   std::string type;

@@ -15,7 +15,6 @@ Item {
   Connections {
     target: qmlSystem
     function onHistoryLoaded(dataStr) {
-      console.log("signal ok")
       historyModel.clear()
       if (dataStr != null) {
         var data = JSON.parse(dataStr)
@@ -126,7 +125,9 @@ Item {
         width: parent.width
         visible: (historyList.currentItem)
         text: "Open Transaction in Block Explorer"
-        onClicked: Qt.openUrlExternally(historyList.currentItem.itemTxLink)
+        onClicked: Qt.openUrlExternally(
+          "https://snowtrace.io/tx/0x" + historyList.currentItem.itemHex
+        )
       }
 
       AVMEButton {

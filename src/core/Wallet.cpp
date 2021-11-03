@@ -424,9 +424,7 @@ json Wallet::sendTransaction(std::string txidHex, std::string operation) {
    * already confirmed even immediately after sending it.
    */
   if (transactionResult.contains("result")) {
-    std::string txLink = "https://cchain.explorer.avax.network/tx/" + transactionResult["result"].get<std::string>();
     TxData txData = Utils::decodeRawTransaction(txidHex);
-    txData.txlink = txLink;
     txData.operation = operation;
     saveTxToHistory(txData);
   }
@@ -437,7 +435,6 @@ json Wallet::txDataToJSON() {
   json transactionsArray;
   for (TxData savedTxData : this->currentAccountHistory) {
     json savedTransaction;
-    savedTransaction["txlink"] = savedTxData.txlink;
     savedTransaction["operation"] = savedTxData.operation;
     savedTransaction["hex"] = savedTxData.hex;
     savedTransaction["type"] = savedTxData.type;
@@ -469,7 +466,6 @@ void Wallet::loadTxHistory() {
   for (std::string txStr : txData) {
     json tx = json::parse(txStr);
     TxData txData;
-    txData.txlink = tx["txlink"].get<std::string>();
     txData.operation = tx["operation"].get<std::string>();
     txData.hex = tx["hex"].get<std::string>();
     txData.type = tx["type"].get<std::string>();
@@ -496,7 +492,6 @@ void Wallet::loadTxHistory() {
 
 bool Wallet::saveTxToHistory(TxData tx) {
   json transaction;
-  transaction["txlink"] = tx.txlink;
   transaction["operation"] = tx.operation;
   transaction["hex"] = tx.hex;
   transaction["type"] = tx.type;
