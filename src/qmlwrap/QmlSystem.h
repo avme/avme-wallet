@@ -140,6 +140,10 @@ class QmlSystem : public QObject {
 
     void apiReturnedSuccessfully(bool status, QString type);
 
+    // Signal for letting the user know there is a update
+
+    void walletRequireUpdate();
+
   public:
     // ======================================================================
     // COMMON FUNCTIONS
@@ -211,6 +215,9 @@ class QmlSystem : public QObject {
     // Get/Set a given value in the Settings screen.
     Q_INVOKABLE QString getConfigValue(QString key);
     Q_INVOKABLE bool setConfigValue(QString key, QString value);
+
+    // Check if wallet is on the most updated version
+    Q_INVOKABLE void checkWalletVersion();
 
     // ======================================================================
     // START/WALLET SCREEN FUNCTIONS

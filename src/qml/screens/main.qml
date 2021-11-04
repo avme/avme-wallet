@@ -8,6 +8,7 @@ import QtQuick.Window 2.2
 import QmlApi 1.0
 
 import "qrc:/qml/components"
+import "qrc:/qml/popups"
 
 // The main window
 ApplicationWindow {
@@ -24,7 +25,15 @@ ApplicationWindow {
   minimumHeight: 720
   visible: true
 
+  Connections {
+    target: qmlSystem
+      function onWalletRequireUpdate() {
+        walletRequireUpdate.open()
+      }
+  }
+
   function startup() {
+    qmlSystem.checkWalletVersion()
     var lastPath = qmlSystem.getLastWalletPath()
     var defaultPath = qmlSystem.defaultWalletPathExists()
     var screen = (lastPath != "" || defaultPath) ? "LoadWallet" : "CreateWallet"
@@ -79,6 +88,16 @@ ApplicationWindow {
       font.pixelSize: 14.0
     }
   }
+
+  AVMEPopupInfo {
+    id: walletRequireUpdate
+    widthPct: 0.4
+    heightPct: 0.3
+    icon: "qrc:/img/warn.png"
+    info: "Please update your wallet to the latest version."
+    okBtn.text: "Close"
+  }
+
 
   // Dynamic screen loader (used in setScreen(id, screenpath))
   Loader {

@@ -38,6 +38,24 @@ QString QmlSystem::getProjectVersion() {
   return QString::fromStdString(PROJECT_VERSION);
 }
 
+void QmlSystem::checkWalletVersion() {
+  QtConcurrent::run([=](){
+    std::string version = PROJECT_VERSION;
+    json currentVersion = json::parse(API::customHttpRequest("",
+                                                        "raw.githubusercontent.com",
+                                                        "443",
+                                                        "/avme/avme-wallet/main/VERSION",
+                                                        "GET",
+                                                        ""
+    ));
+    if (version != currentVersion["currentVersion"].get<std::string>()) {
+      emit walletRequireUpdate();
+    }
+  });
+
+  return;
+}
+
 void QmlSystem::openQtAbout() {
   QApplication::aboutQt();
 }

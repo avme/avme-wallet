@@ -13,6 +13,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/nowide/filesystem.hpp>
 #include <boost/nowide/fstream.hpp>
+#include <boost/algorithm/string.hpp>
 #include <qrencode.h>
 
 #ifdef __MINGW32__
