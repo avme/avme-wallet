@@ -56,6 +56,11 @@ std::string Utils::randomHexBytes() {
   ).substr(0,16);
 }
 
+bool Utils::isHex(std::string hex) {
+  if (hex.substr(0, 2) == "0x") { hex = hex.substr(2); }
+  return (hex.find_first_not_of("0123456789abcdefABCDEF") == std::string::npos);
+}
+
 TxData Utils::decodeRawTransaction(std::string rawTxHex) {
   TransactionBase transaction = TransactionBase(fromHex(rawTxHex), CheckTransaction::None);
   TxData ret;

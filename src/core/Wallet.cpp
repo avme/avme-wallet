@@ -210,6 +210,21 @@ std::pair<std::string, std::string> Wallet::createAccount(
   return std::make_pair(k.address().hex(), name);
 }
 
+std::pair<std::string, std::string> Wallet::createAccount(
+  std::string &privKey, std::string name, std::string &pass
+) {
+  KeyPair k(Secret::fromString(privKey));
+  h128 u = this->km.import(k.secret(), name, pass, "");
+  loadAccounts();
+  return std::make_pair(k.address().hex(), name);
+}
+
+bool Wallet::isPrivKey(std::string privKey) {
+  privKey = Utils::toLowerCaseAddress(privKey);
+  if (privKey.substr(0, 2) == "0x") { privKey = privKey.substr(2); }
+  return (Utils::isHex(privKey) && privKey.length() == 64);
+}
+
 bool Wallet::importLedgerAccount(std::string address, std::string path) {
   json ledgerAccount;
   ledgerAccount["address"] = address;

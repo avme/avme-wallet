@@ -280,9 +280,13 @@ class QmlSystem : public QObject {
     // Clean up the Ledger account vector
     Q_INVOKABLE void cleanLedgerAccounts();
 
-    // Create a new Account.
+    // Create a new Account with seed + index, or private key, respectively.
     // Emits accountCreated() on success, accountCreationFailed() on failure
     Q_INVOKABLE void createAccount(QString seed, int index, QString name, QString pass);
+    Q_INVOKABLE void createAccount(QString privKey, QString name, QString pass);
+
+    // Check if a private key is valid.
+    Q_INVOKABLE bool isPrivateKey(QString privKey);
 
     // Import and delete a Ledger account to/from the Wallet DB, respectively.
     Q_INVOKABLE void importLedgerAccount(QString address, QString path);

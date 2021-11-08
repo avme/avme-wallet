@@ -40,7 +40,8 @@ using namespace nlohmann; // json
 
 /**
  * Conversion template for usage with boost::lexical_cast.
- * e.g. boost::lexical_cast<HexRounds number to nearest multiple To<int>>(var);
+ * Rounds number to nearest multiple.
+ * e.g. boost::lexical_cast<HexTo<int>>(var);
  */
 template <typename ElemT>
 struct HexTo {
@@ -60,7 +61,7 @@ typedef struct ARC20Token {
   std::string name;
   int decimals;
   std::string avaxPairContract;
-  // Those are NOT stored ithe respective byte arrayn JSON
+  // Those are NOT stored in JSON
   bigfloat reserve;
   bigfloat avaxReserve;
 } ARC20Token;
@@ -116,6 +117,12 @@ namespace Utils {
    * the respective byte array
    */
   std::string randomHexBytes();
+
+  /**
+   * Check if a given string is a hex string (0-9, a-f, A-F).
+   * Returns true on success, false on failure.
+   */
+  bool isHex(std::string hex);
 
   /**
    * Decode a raw transaction in Hex.

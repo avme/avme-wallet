@@ -179,13 +179,24 @@ class Wallet {
     void loadAccounts();
 
     /**
-     * Create/import an Account in the Wallet, based on a given seed and index.
+     * Create/import an Account in the Wallet, based on a given seed and index,
+     * or a given private key, respectively.
      * Automatically reloads the Account list on success.
      * Returns a pair with the address and name, or an empty pair on failure.
      */
     std::pair<std::string, std::string> createAccount(
       std::string &seed, int64_t index, std::string name, std::string &pass
     );
+    std::pair<std::string, std::string> createAccount(
+      std::string &privKey, std::string name, std::string &pass
+    );
+
+    /**
+     * Check if a given private key is valid.
+     * A private key is a hex string with a given size.
+     * Returns true on success, false on failure.
+     */
+    bool isPrivKey(std::string privKey);
 
     /**
      * Load all Ledger accounts stored in the Wallet.

@@ -128,6 +128,28 @@ void QmlSystem::createAccount(QString seed, int index, QString name, QString pas
   });
 }
 
+void QmlSystem::createAccount(QString privKey, QString name, QString pass) {
+  QtConcurrent::run([=](){
+    QVariantMap obj;
+    std::string privKeyStr = privKey.toStdString();
+    std::string nameStr = name.toStdString();
+    std::string passStr = pass.toStdString();
+    std::pair<std::string, std::string> a;
+    a = this->w.createAccount(privKeyStr, nameStr, passStr);
+    if (!a.first.empty()) {
+      obj.insert("accAddress", "0x" + QString::fromStdString(a.first));
+      obj.insert("accName", QString::fromStdString(a.second));
+      emit accountCreated(true, obj);
+    } else {
+      emit accountCreated(false, obj);
+    }
+  });
+}
+
+bool QmlSystem::isPrivateKey(QString privKey) {
+  return this->w.isPrivKey(privKey.toStdString());
+}
+
 void QmlSystem::importLedgerAccount(QString address, QString path) {
   QVariantMap obj;
   bool success = this->w.importLedgerAccount(address.toStdString(), path.toStdString());

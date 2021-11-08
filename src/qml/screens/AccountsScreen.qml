@@ -18,6 +18,7 @@ Item {
       if (success) {
         chooseAccountPopup.clean()
         chooseAccountPopup.close()
+        importPrivKeyPopup.close()
         accountInfoPopup.close()
         ledgerPopup.close()
         fetchAccounts()
@@ -104,7 +105,7 @@ Item {
   AVMEPopup {
     id: addAccountSelectPopup
     widthPct: 0.4
-    heightPct: 0.45
+    heightPct: 0.55
     Column {
       width: parent.width * 0.9
       height: parent.height * 0.9
@@ -141,6 +142,15 @@ Item {
         }
       }
       AVMEButton {
+        id: addPrivKeyBtn
+        width: parent.width
+        text: "Import Account From Private Key"
+        onClicked: {
+          addAccountSelectPopup.close()
+          importPrivKeyPopup.open()
+        }
+      }
+      AVMEButton {
         id: addLedgerBtn
         width: parent.width
         text: "Import Account From Ledger"
@@ -159,6 +169,7 @@ Item {
   }
 
   AVMEPopupChooseAccount { id: chooseAccountPopup }
+  AVMEPopupImportPrivKey { id: importPrivKeyPopup }
   AVMEPopupSeed { id: seedPopup; clearBtn.visible: false }
   AVMEPopupLedger { id: ledgerPopup }
 
@@ -190,7 +201,7 @@ Item {
 
   AVMEPopupYesNo {
     id: confirmErasePopup
-    widthPct: 0.4
+    widthPct: 0.45
     heightPct: 0.25
     icon: "qrc:/img/warn.png"
     info: "Are you sure you want to erase this Account?"

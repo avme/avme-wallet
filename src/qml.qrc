@@ -28,6 +28,7 @@
         <file>qml/popups/AVMEPopupNewWalletSeed.qml</file>
         <file>qml/popups/AVMEPopupSeed.qml</file>
         <file>qml/popups/AVMEPopupChooseAccount.qml</file>
+        <file>qml/popups/AVMEPopupImportPrivKey.qml</file>
         <file>qml/popups/AVMEPopupViewSeed.qml</file>
         <file>qml/popups/AVMEPopupViewPrivKey.qml</file>
         <file>qml/popups/AVMEPopupContactSelect.qml</file>

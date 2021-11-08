@@ -153,13 +153,13 @@ public:
 
     void CreatePrivFromString(std::string my_passphrase)
     {
-		for (auto& i: m_data) {
-			std::stringstream ss;
-			uint8_t byteValue;
-			ss << my_passphrase;
-			ss >> byteValue;
-			i = byteValue;
-		}
+      for (auto& i: m_data) {
+        std::stringstream ss;
+        uint8_t byteValue;
+        ss << my_passphrase;
+        ss >> byteValue;
+        i = byteValue;
+      }
     }
 	// TODO: not sure if the correct implementation of writing an array to another array is correct... maybe this lead to an overflow?
 	void CreateFromBip3x(bip3x::bytes_array<32> bip32) {
