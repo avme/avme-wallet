@@ -173,6 +173,10 @@ bool QmlSystem::accountExists(QString account) {
   return this->w.accountExists(account.toStdString());
 }
 
+bool QmlSystem::privateKeyExists(QString privateKey) {
+  return this->w.privateKeyExists(privateKey.toStdString());
+}
+
 bool QmlSystem::ledgerAccountExists(QString account) {
   return this->w.ledgerAccountExists(account.toStdString());
 }

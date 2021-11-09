@@ -263,6 +263,12 @@ bool Wallet::accountExists(std::string address) {
   return (this->accounts.find(address) != this->accounts.end());
 }
 
+bool Wallet::privateKeyExists(std::string privKey) {
+  Secret s(dev::fromHex(privKey));
+  KeyPair k(s);
+  return accountExists("0x" + k.address().hex());
+}
+
 bool Wallet::ledgerAccountExists(std::string address) {
   return this->db.ledgerDBKeyExists(address);
 }

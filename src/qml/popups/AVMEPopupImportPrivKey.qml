@@ -15,6 +15,7 @@ AVMEPopup {
   property alias name: nameInput.text
   property alias pass: passInput.text
   property alias passTimer: infoPassTimer
+  property alias addressTimer: infoAddressTimer
   property alias keyTimer: infoKeyTimer
   property color popupBgColor: "#1C2029"
 
@@ -45,6 +46,8 @@ AVMEPopup {
       text: {
         if (infoPassTimer.running) {
           text: "Wrong password, please try again."
+        } else if (infoAddressTimer.running) {
+          text: "Account is already in Wallet, please try another."
         } else if (infoKeyTimer.running) {
           text: "Private key is invalid, please try another."
         } else {
@@ -52,6 +55,7 @@ AVMEPopup {
         }
       }
       Timer { id: infoPassTimer; interval: 2000 }
+      Timer { id: infoAddressTimer; interval: 2000 }
       Timer { id: infoKeyTimer; interval: 2000 }
     }
 
@@ -91,7 +95,9 @@ AVMEPopup {
         ? "Import Account" : "Invalid private key"
       onClicked: handleImport()
       function handleImport() {
-        if (!qmlSystem.isPrivateKey(privKeyInput.text)) {
+        if (qmlSystem.privateKeyExists(privKeyInput.text)) {
+          addressTimer.start()
+        } else if (!qmlSystem.isPrivateKey(privKeyInput.text)) {
           keyTimer.start()
         } else if (!qmlSystem.checkWalletPass(passInput.text)) {
           passTimer.start()

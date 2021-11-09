@@ -222,9 +222,12 @@ class Wallet {
 
     /**
      * Check if an Account exists (is loaded on the list).
+     * Checks both addresses and private keys.
+     * Addresses have to start with "0x".
      * Returns true on success, false on failure.
      */
     bool accountExists(std::string address);
+    bool privateKeyExists(std::string privKey);
 
     /**
      * Same as above but for Ledger accounts.
