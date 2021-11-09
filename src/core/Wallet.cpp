@@ -213,7 +213,8 @@ std::pair<std::string, std::string> Wallet::createAccount(
 std::pair<std::string, std::string> Wallet::createAccount(
   std::string &privKey, std::string name, std::string &pass
 ) {
-  KeyPair k(Secret::fromString(privKey));
+  Secret secret(dev::fromHex(privKey));
+  KeyPair k(secret);
   h128 u = this->km.import(k.secret(), name, pass, "");
   loadAccounts();
   return std::make_pair(k.address().hex(), name);
