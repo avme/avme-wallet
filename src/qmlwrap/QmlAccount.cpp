@@ -265,6 +265,13 @@ void QmlSystem::getAllAVAXBalances(QStringList addresses) {
   });
 }
 
+void QmlSystem::signMessage(QString address, QString data, QString password) {
+  std::cout << "signing" << std::endl;
+  std::string signature = w.signMessage(address.toStdString(), data.toStdString(), password.toStdString());
+  emit messageSigned(QString::fromStdString(signature));
+  return;
+}
+
 void QmlSystem::getAccountAllBalances(QString address) {
   QtConcurrent::run([=](){
     this->updateAccountNonce(address);

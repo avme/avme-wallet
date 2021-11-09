@@ -18,8 +18,8 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
     // Besides that, basic requests such as "eth_chainId"
     // DOES NOT contain "__frameOrigin" to define which website it came from.
     bool requirePermission = false;
-    bool requestTransaction = false; // Reason inside "eth_sendTransaction" if
-    // Initialize response with common information.
+    bool requestTransaction = false; // Reason inside "eth_sendTransaction" if Initialize response with common information.
+    bool requestSign = false;
     response["jsonrpc"] = "2.0";
     response["id"] = request["id"];
     if (request["method"] == "eth_chainId") {
@@ -42,6 +42,12 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       // It is a mess, I do agree with you, but it is effective
       requestTransaction = true;
       requirePermission = true;
+    } else if (request["method"] == "eth_sign") {
+      // Same as above.
+      requirePermission = true;
+      requestSign = true;
+    } else if (request["method"] == "personal_sign") {
+      std::cout << request.dump(2) << std::endl;
     } else {
       // Route any future request to the avalanche PUBLIC API.
       response = json::parse(API::httpGetRequest(request.dump(), true));
@@ -157,6 +163,42 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       RTuserInputAnswer.unlock();
       RTuserInputRequest.unlock();
       requestTransactionMutex.unlock();
+      //std::cout << "Unlock global TX" << std::endl;
+      globalUserInputRequest.unlock();
+      //std::cout << "Global unlocked TX" << std::endl;
+    }
+
+    if (requestSign) {
+      //std::cout << "Lock global TX" << std::endl;
+      globalUserInputRequest.lock();
+      //std::cout << "Global locked TX" << std::endl;
+      requestSignMutex.lock();
+      // 4001 	User Rejected Request 	The user rejected the request.
+      RSuserInputRequest.lock();
+      RSuserInputAnswer.lock();
+      // Address, Data and Website
+      std::string address = request["params"][0];
+      std::string data    = request["params"][1];
+      std::string website = request["__frameOrigin"];
+      std::cout << address << " " << data << " " << website << std::endl;
+      emit askForSign(
+        QString::fromStdString(address),
+        QString::fromStdString(data),
+        QString::fromStdString(website)
+      );
+      RSuserInputAnswer.lock(); // We lock twice for the same reason as above
+      /*
+      if (RTtxid == "") { // Treat "refused" response
+        // 4001 	User Rejected Request 	The user rejected the request.
+        response["error"]["code"] = 4001;
+        response["error"]["message"] = "The user rejected the request";
+      } else {
+        response["result"] = RTtxid;
+      }
+      */
+      RSuserInputAnswer.unlock();
+      RSuserInputRequest.unlock();
+      requestSignMutex.unlock();
       //std::cout << "Unlock global TX" << std::endl;
       globalUserInputRequest.unlock();
       //std::cout << "Global unlocked TX" << std::endl;

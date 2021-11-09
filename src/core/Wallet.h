@@ -321,6 +321,12 @@ class Wallet {
      */
     std::string signTransaction(TransactionSkeleton txSkel, std::string pass);
 
+    /** Sign a given message using user credentials.
+     * returns the signed message hex
+     */
+
+    std::string signMessage(std::string address, std::string message, std::string pass);
+
     /**
      * Send a signed transaction for broadcast and store it in history if successful.
      * Returns a link to the transaction in the blockchain, or an empty string on failure.

@@ -436,6 +436,16 @@ std::string Wallet::signTransaction(TransactionSkeleton txSkel, std::string pass
   return txHexBuffer.str();
 }
 
+std::string Wallet::signMessage(std::string address, std::string message, std::string pass) {
+  Secret s = getSecret(address, pass);
+  std::cout << "Address: " << dev::toAddress(dev::toPublic(s)) << std::endl;
+  h256 messageHash(dev::toHex(dev::sha3(message, true)));
+  std::cout << "messageHash: " << dev::toHex(dev::sha3(message, true)) << std::endl;
+  h520 signature = dev::sign(s, messageHash);
+  std::cout << "Signature: " << dev::toHex(signature) << std::endl;
+  return dev::toHex(signature);
+}
+
 json Wallet::sendTransaction(std::string txidHex, std::string operation) {
   // Send the transaction
   json transactionResult = json::parse(API::broadcastTx(txidHex));

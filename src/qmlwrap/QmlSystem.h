@@ -61,9 +61,14 @@ class QmlSystem : public QObject {
     std::mutex requestTransactionMutex;
     std::mutex RTuserInputRequest;
     std::mutex RTuserInputAnswer;
+    std::mutex requestSignMutex;
+    std::mutex RSuserInputRequest;
+    std::mutex RSuserInputAnswer;
 
     // String that will hold the TXID of an approved transaction.
     std::string RTtxid = "";
+    // String that will hold the signature of a sign request;
+    std::string RSmsg = "";
 
   public slots:
     // Clean database, threads, etc before changing the Account and Wallet, respectively
@@ -131,6 +136,9 @@ class QmlSystem : public QObject {
 
     // Signal to request user to sign a given transaction
     void askForTransaction(QString data, QString from, QString gas, QString to, QString value, QString website_);
+    
+    // Signal to request user to sign a message.
+    void askForSign(QString address, QString data, QString website_);
 
     // Signals for ParaSwap exchanging
     void gotParaSwapTokenPrices(QString priceRoute, QString id, QString request);
@@ -139,6 +147,9 @@ class QmlSystem : public QObject {
     // Signals for when testing a user typed API
 
     void apiReturnedSuccessfully(bool status, QString type);
+
+    // Signal for message has been signed.
+    void messageSigned(QString message);
 
     // Signal for letting the user know there is a update
 
@@ -430,6 +441,10 @@ class QmlSystem : public QObject {
 
     // Check if the transaction was confirmed or not, and if it's "stuck"
     Q_INVOKABLE void checkTransactionFor15s(QString txid, QString randomID);
+
+    // Sign a given message.
+
+    Q_INVOKABLE void signMessage(QString address, QString data, QString password);
 
     // ======================================================================
     // EXCHANGE/LIQUIDITY/STAKING SCREEN FUNCTIONS

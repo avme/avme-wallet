@@ -43,6 +43,7 @@
         <file>qml/popups/AVMEPopupAppSelect.qml</file>
         <file>qml/popups/AVMEPopupWebsitePermission.qml</file>
         <file>qml/popups/AVMEPopupCustomPath.qml</file>
+        <file>qml/popups/AVMEPopupConfirmSign.qml</file>
 
         <file>qml/panels/AVMEPanelAccountSelect.qml</file>
         <file>qml/panels/AVMEPanelOverview.qml</file>
