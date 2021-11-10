@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.1] - Unreleased
+## [2.0.1] - 09/11/2021
 ### Added
 - The wallet now checks and gives a warning if there's a newer version released.
 - Accounts can now be imported using their private keys.
