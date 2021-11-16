@@ -24,6 +24,7 @@ AVMEPanel {
   property string userLPShares
   property string lowerEstimate
   property string higherEstimate
+  property string lpUSDPrice
   property bool loading
   property string to
   property string coinValue
@@ -88,6 +89,23 @@ AVMEPanel {
         userLowerShares = shares.asset1
         userHigherShares = shares.asset2
         userLPShares = shares.liquidity
+
+        // 1 LP price calculation is done as follows:
+        // - Get the total AVAX reserves from the pool
+        // - Multiply that by the AVAX price in USD
+        // - Multiply by 2 (pools are always balanced 50/50)
+        // - Divide by the total LP supply
+        // - Truncate to 2 decimals ($x.xx)
+        lpUSDPrice = qmlSystem.weiToFixedPoint(
+          ((lowerToken == "AVAX") ? lowerReserves : higherReserves)
+        , 18)
+        lpUSDPrice = qmlApi.mul(lpUSDPrice, accountHeader.coinUSDPrice)
+        lpUSDPrice = qmlApi.mul(lpUSDPrice, "2")
+        lpUSDPrice = qmlApi.div(lpUSDPrice,
+          qmlSystem.weiToFixedPoint(pairTotalBalance, 18)
+        )
+        lpUSDPrice = lpUSDPrice.substr(0, lpUSDPrice.indexOf('.') + 3)
+
         loading = false
         stakingLoadingPng.visible = false
         stakingApprovalColumn.visible = false
@@ -396,16 +414,17 @@ AVMEPanel {
       color: "#1d1827"
       height: parent.height * 0.35
       width: parent.width
-    Text {
-      id: estimatedClassicLockedValueText
-      anchors.horizontalCenter: parent.horizontalCenter
-      anchors.verticalCenter: parent.verticalCenter
-      horizontalAlignment: Text.AlignHCenter
-      color: "#FFFFFF"
-      text: "Locked LP Estimates:"
-        + "<br><b>" + qmlSystem.weiToFixedPoint(userLowerShares, 18) + " " + lowerToken
-        + "<br><b>" + qmlSystem.weiToFixedPoint(userHigherShares, 18) + " " + higherToken
-    }
+      Text {
+        id: estimatedClassicLockedValueText
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.verticalCenter: parent.verticalCenter
+        horizontalAlignment: Text.AlignHCenter
+        color: "#FFFFFF"
+        text: "LP Price: <b>$" + lpUSDPrice + "/LP</b>"
+        + "<br>Locked LP Estimates:"
+        + "<br><b>" + (+qmlSystem.weiToFixedPoint(userLowerShares, 18)).toFixed(8) + " " + lowerToken
+        + "<br><b>" + (+qmlSystem.weiToFixedPoint(userHigherShares, 18)).toFixed(8) + " " + higherToken
+      }
     }
   }
   AVMEAsyncImage {
