@@ -20,16 +20,65 @@ Item {
     for (var i = 0; i < contacts.length; i++) {
       contactsModel.append(contacts[i])
     }
-    contactsModel.sortByAddress()
+    contactsModel.sortBy("addressAZ")
+  }
+
+  // Sort buttons for the list
+  Row {
+    id: sortBtnRow
+    anchors {
+      top: parent.top
+      left: parent.left
+      margins: 10
+    }
+    width: (parent.width * 0.55) - (anchors.margins * 2)
+    spacing: 10
+
+    Text {
+      id: sortText
+      width: (parent.width * 0.1)
+      anchors.verticalCenter: parent.verticalCenter
+      horizontalAlignment: Text.AlignHCenter
+      color: "#FFFFFF"
+      font.pixelSize: 14.0
+      text: "Sort:"
+    }
+    AVMEButton {
+      id: sortAddressAZBtn
+      width: (parent.width * 0.225) - (parent.anchors.margins)
+      enabled: (contactsModel.count > 0)
+      text: "Address (A-Z)"
+      onClicked: contactsModel.sortBy("addressAZ")
+    }
+    AVMEButton {
+      id: sortAddressZABtn
+      width: (parent.width * 0.225) - (parent.anchors.margins)
+      enabled: (contactsModel.count > 0)
+      text: "Address (Z-A)"
+      onClicked: contactsModel.sortBy("addressZA")
+    }
+    AVMEButton {
+      id: sortNameAZBtn
+      width: (parent.width * 0.225) - (parent.anchors.margins)
+      enabled: (contactsModel.count > 0)
+      text: "Name (A-Z)"
+      onClicked: contactsModel.sortBy("nameAZ")
+    }
+    AVMEButton {
+      id: sortNameZABtn
+      width: (parent.width * 0.225) - (parent.anchors.margins)
+      enabled: (contactsModel.count > 0)
+      text: "Name (Z-A)"
+      onClicked: contactsModel.sortBy("nameZA")
+    }
   }
 
   // The list itself
   Rectangle {
     id: listRect
     width: (parent.width * 0.55) - (anchors.margins * 2)
-    height: parent.height
     anchors {
-      top: parent.top
+      top: sortBtnRow.bottom
       bottom: parent.bottom
       left: parent.left
       margins: 10
@@ -42,10 +91,23 @@ Item {
       anchors.fill: parent
       model: ListModel {
         id: contactsModel
-        function sortByAddress() {
+        function sortBy(type) {
           for (var i = 0; i < count; i++) {
             for (var j = 0; j < i; j++) {
-              if (get(i).address < get(j).address) { move(i, j, 1) }
+              switch (type) {
+                case "addressAZ":
+                  if (get(i).address < get(j).address) { move(i, j, 1) }
+                  break
+                case "addressZA":
+                  if (get(i).address > get(j).address) { move(i, j, 1) }
+                  break
+                case "nameAZ":
+                  if (get(i).name.toUpperCase() < get(j).name.toUpperCase()) { move(i, j, 1) }
+                  break
+                case "nameZA":
+                  if (get(i).name.toUpperCase() > get(j).name.toUpperCase()) { move(i, j, 1) }
+                  break
+              }
             }
           }
         }
