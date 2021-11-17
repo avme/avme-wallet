@@ -73,7 +73,7 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
         request["method"] != "eth_syncing" &&
         request["method"] != "eth_getBalance"
        ) { // eth_call is garbage for us, do not print it
-      std::cout << "Request: " << request.dump(2) << std::endl;
+      //std::cout << "Request: " << request.dump(2) << std::endl;
       //std::cout << "Response: " << response.dump(2) << std::endl;
     }
 
@@ -189,19 +189,23 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       // Address, Data and Website
       std::string address;
       std::string data;
-      if (requestSignType == eth_sign) {
-        address = request["params"][0];
-        data = request["params"][1];
-      }
-      if (requestSignType == signTypedData || requestSignType == personal_sign ) {
+      // The location where the arguments for signing are located are different
+      // for different type of signatures requested. requiring us to manually filter them.
+      if (requestSignType == eth_sign || requestSignType == signTypedData) {
         address = request["params"][0];
         if (requestSignType == signTypedData) {
           data = request["params"][1].dump();
+          std::string tmpData = std::string("\x19") + "Ethereum Signed Message:\n" + boost::lexical_cast<std::string>(data.length()) + data;
+          data = dev::toHex(dev::sha3(tmpData));
         } else {
           data = request["params"][1];
         }
+      }
+      if (requestSignType == personal_sign ) {
+        address = request["params"][1];
+        data = request["params"][0];
         std::string tmpData = std::string("\x19") + "Ethereum Signed Message:\n" + boost::lexical_cast<std::string>(data.length()) + data;
-        data = dev::toHex(dev::sha3(tmpData, true));
+        data = dev::toHex(dev::sha3(tmpData));
       }
       std::string website = request["__frameOrigin"];
       emit askForSign(
