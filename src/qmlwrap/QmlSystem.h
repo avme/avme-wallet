@@ -149,7 +149,7 @@ class QmlSystem : public QObject {
     void apiReturnedSuccessfully(bool status, QString type);
 
     // Signal for message has been signed.
-    void messageSigned(QString message);
+    void messageSigned(QString message, bool webServer);
 
     // Signal for letting the user know there is a update
 
@@ -444,7 +444,7 @@ class QmlSystem : public QObject {
 
     // Sign a given message.
 
-    Q_INVOKABLE void signMessage(QString address, QString data, QString password);
+    Q_INVOKABLE void signMessage(QString address, QString data, QString password, bool webServer);
 
     // ======================================================================
     // EXCHANGE/LIQUIDITY/STAKING SCREEN FUNCTIONS
@@ -516,6 +516,8 @@ class QmlSystem : public QObject {
     Q_INVOKABLE void loadPermissionList();
 
     Q_INVOKABLE void requestedTransactionStatus(bool approved, QString txid);
+
+    Q_INVOKABLE void requestedSignStatus(bool hasSigned, QString signature);
 
     Q_INVOKABLE QString getWebsitePermissionList();
 

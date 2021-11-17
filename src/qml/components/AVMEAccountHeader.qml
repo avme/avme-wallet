@@ -487,6 +487,7 @@ Rectangle {
     id: confirmSign
     width: window.width * 0.6
     height: window.height * 0.7
+    isWebserver: true
     y: ((window.height / 2) - (height / 2))
     backBtn.onClicked: {
       confirmSign.close()

@@ -42,12 +42,10 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       // It is a mess, I do agree with you, but it is effective
       requestTransaction = true;
       requirePermission = true;
-    } else if (request["method"] == "eth_sign") {
+    } else if (request["method"] == "eth_sign" || request["method"] == "personal sign" || request["method"] == "personal_sign") {
       // Same as above.
       requirePermission = true;
       requestSign = true;
-    } else if (request["method"] == "personal_sign") {
-      std::cout << request.dump(2) << std::endl;
     } else {
       // Route any future request to the avalanche PUBLIC API.
       response = json::parse(API::httpGetRequest(request.dump(), true));
@@ -63,7 +61,7 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
         request["method"] != "eth_syncing" &&
         request["method"] != "eth_getBalance"
        ) { // eth_call is garbage for us, do not print it
-      //std::cout << "Request: " << request.dump(2) << std::endl;
+      std::cout << "Request: " << request.dump(2) << std::endl;
       //std::cout << "Response: " << response.dump(2) << std::endl;
     }
 
@@ -177,8 +175,15 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       RSuserInputRequest.lock();
       RSuserInputAnswer.lock();
       // Address, Data and Website
-      std::string address = request["params"][0];
-      std::string data    = request["params"][1];
+      std::string address;
+      std::string data;
+      for (std::string rawData : request["params"]) {
+        if (rawData.size() == 42) {
+          address = rawData;
+        } else {
+          data = rawData;
+        }
+      }
       std::string website = request["__frameOrigin"];
       std::cout << address << " " << data << " " << website << std::endl;
       emit askForSign(
@@ -187,15 +192,13 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
         QString::fromStdString(website)
       );
       RSuserInputAnswer.lock(); // We lock twice for the same reason as above
-      /*
-      if (RTtxid == "") { // Treat "refused" response
+      if (RSmsg == "") { // Treat "refused" response
         // 4001 	User Rejected Request 	The user rejected the request.
         response["error"]["code"] = 4001;
         response["error"]["message"] = "The user rejected the request";
       } else {
-        response["result"] = RTtxid;
+        response["result"] = RSmsg;
       }
-      */
       RSuserInputAnswer.unlock();
       RSuserInputRequest.unlock();
       requestSignMutex.unlock();
@@ -263,6 +266,16 @@ Q_INVOKABLE void QmlSystem::requestedTransactionStatus(bool approved, QString tx
   } else {
     RTtxid = "";
     RTuserInputAnswer.unlock();
+  }
+}
+
+Q_INVOKABLE void QmlSystem::requestedSignStatus(bool hasSigned, QString signature) {
+  if (hasSigned) {
+    RSmsg = signature.toStdString();
+    RSuserInputAnswer.unlock();
+  } else {
+    RSmsg = "";
+    RSuserInputAnswer.unlock();
   }
 }
 

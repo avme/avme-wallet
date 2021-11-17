@@ -265,10 +265,10 @@ void QmlSystem::getAllAVAXBalances(QStringList addresses) {
   });
 }
 
-void QmlSystem::signMessage(QString address, QString data, QString password) {
+void QmlSystem::signMessage(QString address, QString data, QString password, bool webServer) {
   std::cout << "signing" << std::endl;
   std::string signature = w.signMessage(address.toStdString(), data.toStdString(), password.toStdString());
-  emit messageSigned(QString::fromStdString(signature));
+  emit messageSigned(QString::fromStdString(signature), webServer);
   return;
 }
 

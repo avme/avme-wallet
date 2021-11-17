@@ -442,10 +442,9 @@ std::string Wallet::signMessage(std::string address, std::string message, std::s
   // CHECK V VALUE!!!
   // 00 IS NOT VALID UNDER SOLIDITY
   // USING A WORKAROUND AND ADDING 1B (27 HEX) WORKS!
-  
   Secret s = getSecret(address, pass);
   std::cout << "Address: " << dev::toAddress(dev::toPublic(s)) << std::endl;
-  h256 messageHash(dev::sha3(dev::fromHex(message)));
+  h256 messageHash(dev::fromHex(message));
   std::cout << dev::toHex(messageHash) << std::endl;
   std::cout << std::endl;
   h520 signature = dev::sign(s, messageHash);
@@ -453,10 +452,11 @@ std::string Wallet::signMessage(std::string address, std::string message, std::s
   std::cout << "Signature: " << dev::toHex(signature) << std::endl;
   std::cout << "Signature R: " << dev::toHex(sigStruct.r) << std::endl;
   std::cout << "Signature S: " << dev::toHex(sigStruct.s) << std::endl;
+  sigStruct.v = sigStruct.v + 27;
   std::cout << "Signature V: " << std::hex << (int)sigStruct.v << std::endl;
   auto publicKey = dev::recover(sigStruct, messageHash);
   std::cout << "Recovered Address: " << dev::toAddress(publicKey) << std::endl;
-  return dev::toHex(signature);
+  return dev::toHex(dev::Signature(sigStruct));
 }
 
 json Wallet::sendTransaction(std::string txidHex, std::string operation) {

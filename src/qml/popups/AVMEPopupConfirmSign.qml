@@ -22,6 +22,8 @@ AVMEPopup {
   property alias backBtn: btnBack
   property string address
   property string message
+  property bool isWebserver: false
+  property bool userHasSigned: false
 
   onAboutToShow: {
     if (qmlSystem.getLedgerFlag()) {  // Ledger doesn't need password
@@ -52,8 +54,14 @@ AVMEPopup {
 
   Connections {
     target: qmlSystem
-    function onMessageSigned(signature) {
-
+    function onMessageSigned(signature, webServer) {
+      if (isWebserver) {
+        if (webServer) {
+          userHasSigned = true
+          console.log("QML Signature: " + signature)
+          qmlSystem.requestedSignStatus(true, signature)
+        }
+      }
     }
   }
 
@@ -79,6 +87,9 @@ AVMEPopup {
 
   function clean() {
     passInput.text = ""
+    if (!userHasSigned) {
+      qmlSystem.requestedSignStatus(false, "")
+    }
   }
 
   Column {
@@ -148,7 +159,7 @@ AVMEPopup {
               qmlSystem.storePass(passInput.text)
             }
             // TODO: Sign Message
-            qmlSystem.signMessage(address, message, pass)
+            qmlSystem.signMessage(address, message, pass, isWebserver)
 
           }
         }
