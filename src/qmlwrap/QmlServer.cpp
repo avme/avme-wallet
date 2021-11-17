@@ -61,7 +61,7 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
         request["method"] != "eth_syncing" &&
         request["method"] != "eth_getBalance"
        ) { // eth_call is garbage for us, do not print it
-      std::cout << "Request: " << request.dump(2) << std::endl;
+      //std::cout << "Request: " << request.dump(2) << std::endl;
       //std::cout << "Response: " << response.dump(2) << std::endl;
     }
 
@@ -185,7 +185,6 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
         }
       }
       std::string website = request["__frameOrigin"];
-      std::cout << address << " " << data << " " << website << std::endl;
       emit askForSign(
         QString::fromStdString(address),
         QString::fromStdString(data),

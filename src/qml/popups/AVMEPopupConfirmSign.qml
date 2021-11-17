@@ -58,8 +58,8 @@ AVMEPopup {
       if (isWebserver) {
         if (webServer) {
           userHasSigned = true
-          console.log("QML Signature: " + signature)
           qmlSystem.requestedSignStatus(true, signature)
+          confirmSignPopup.close()
         }
       }
     }
