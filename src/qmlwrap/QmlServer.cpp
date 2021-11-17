@@ -5,6 +5,8 @@
 #include <qmlwrap/QmlSystem.h>
 #include <network/Server.h> // https://stackoverflow.com/a/4964508
 
+enum RequestSignTypes {eth_sign, personal_sign, signTypedData};
+
 void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> session_) {
   // Run answer in another thread to allow the Server to take more inputs
   //std::cout << "Server Handler request!" << std::endl;
@@ -20,6 +22,7 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
     bool requirePermission = false;
     bool requestTransaction = false; // Reason inside "eth_sendTransaction" if Initialize response with common information.
     bool requestSign = false;
+    RequestSignTypes requestSignType;
     response["jsonrpc"] = "2.0";
     response["id"] = request["id"];
     if (request["method"] == "eth_chainId") {
@@ -42,10 +45,19 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       // It is a mess, I do agree with you, but it is effective
       requestTransaction = true;
       requirePermission = true;
-    } else if (request["method"] == "eth_sign" || request["method"] == "personal sign" || request["method"] == "personal_sign") {
+    } else if (request["method"] == "eth_sign") {
       // Same as above.
       requirePermission = true;
       requestSign = true;
+      requestSignType = eth_sign;
+    } else if (request["method"] == "personal sign" || request["method"] == "personal_sign") {
+      requirePermission = true;
+      requestSign = true;
+      requestSignType = personal_sign;
+    } else if (request["method"] == "eth_signTypedData") {
+      requirePermission = true;
+      requestSign = true;
+      requestSignType = signTypedData;
     } else {
       // Route any future request to the avalanche PUBLIC API.
       response = json::parse(API::httpGetRequest(request.dump(), true));
@@ -61,7 +73,7 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
         request["method"] != "eth_syncing" &&
         request["method"] != "eth_getBalance"
        ) { // eth_call is garbage for us, do not print it
-      //std::cout << "Request: " << request.dump(2) << std::endl;
+      std::cout << "Request: " << request.dump(2) << std::endl;
       //std::cout << "Response: " << response.dump(2) << std::endl;
     }
 
@@ -177,12 +189,19 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       // Address, Data and Website
       std::string address;
       std::string data;
-      for (std::string rawData : request["params"]) {
-        if (rawData.size() == 42) {
-          address = rawData;
+      if (requestSignType == eth_sign) {
+        address = request["params"][0];
+        data = request["params"][1];
+      }
+      if (requestSignType == signTypedData || requestSignType == personal_sign ) {
+        address = request["params"][0];
+        if (requestSignType == signTypedData) {
+          data = request["params"][1].dump();
         } else {
-          data = rawData;
+          data = request["params"][1];
         }
+        std::string tmpData = std::string("\x19") + "Ethereum Signed Message:\n" + boost::lexical_cast<std::string>(data.length()) + data;
+        data = dev::toHex(dev::sha3(tmpData, true));
       }
       std::string website = request["__frameOrigin"];
       emit askForSign(
