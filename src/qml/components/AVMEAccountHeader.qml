@@ -88,10 +88,11 @@ Rectangle {
       confirmRT.open()
       window.requestActivate()
     }
-    function onAskForSign(address, message, _website) {
+    function onAskForSign(address, message, _website, requestType) {
       confirmSign.setData(
         address,
-        message
+        message,
+        requestType
       )
       confirmSign.open()
     }

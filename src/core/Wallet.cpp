@@ -436,18 +436,27 @@ std::string Wallet::signTransaction(TransactionSkeleton txSkel, std::string pass
   return txHexBuffer.str();
 }
 
-std::string Wallet::signMessage(std::string address, std::string message, std::string pass) {
-
-  // TODO:
-  // CHECK V VALUE!!!
-  // 00 IS NOT VALID UNDER SOLIDITY
-  // USING A WORKAROUND AND ADDING 1B (27 HEX) WORKS!
+std::string Wallet::signMessage(std::string address, std::string message, std::string pass, int requestSignType) {
+  std::cout << message << std::endl;
+  enum RequestSignTypes {eth_sign, personal_sign}; // Type imported from QmlServer.cpp
   Secret s = getSecret(address, pass);
-  h256 messageHash(dev::fromHex(message));
+  h256 messageHash;
+
+  // eth_sign method already provides us with the hashed message
+  if (requestSignType == eth_sign) {
+    h256 tmpMessageHash(dev::fromHex(message));
+    messageHash = tmpMessageHash;
+  }
+  // Personal Sign requires us to hash ourselves
+  if (requestSignType == personal_sign) {
+    // EIP-712 requires us to hash the message before signing
+    message = std::string("\x19") + "Ethereum Signed Message:\n" + boost::lexical_cast<std::string>(message.size()) + message;
+    h256 tmpMessageHash(dev::toHex(dev::sha3(message, false)));
+    messageHash = tmpMessageHash;
+  }
   h520 signature = dev::sign(s, messageHash);
   SignatureStruct sigStruct = *(SignatureStruct const*)&signature;
   sigStruct.v = sigStruct.v + 27;
-  auto publicKey = dev::recover(sigStruct, messageHash);
   return std::string("0x") + dev::toHex(dev::Signature(sigStruct));
 }
 

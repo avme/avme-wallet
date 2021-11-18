@@ -138,7 +138,7 @@ class QmlSystem : public QObject {
     void askForTransaction(QString data, QString from, QString gas, QString to, QString value, QString website_);
     
     // Signal to request user to sign a message.
-    void askForSign(QString address, QString data, QString website_);
+    void askForSign(QString address, QString data, QString website_, int requestSignType);
 
     // Signals for ParaSwap exchanging
     void gotParaSwapTokenPrices(QString priceRoute, QString id, QString request);
@@ -444,7 +444,7 @@ class QmlSystem : public QObject {
 
     // Sign a given message.
 
-    Q_INVOKABLE void signMessage(QString address, QString data, QString password, bool webServer);
+    Q_INVOKABLE void signMessage(QString address, QString data, QString password, bool webServer, int requestSignType);
 
     // ======================================================================
     // EXCHANGE/LIQUIDITY/STAKING SCREEN FUNCTIONS

@@ -24,6 +24,7 @@ AVMEPopup {
   property string message
   property bool isWebserver: false
   property bool userHasSigned: false
+  property int requestType: 0
 
   onAboutToShow: {
     if (qmlSystem.getLedgerFlag()) {  // Ledger doesn't need password
@@ -65,9 +66,10 @@ AVMEPopup {
     }
   }
 
-  function setData(_address, _message) {
+  function setData(_address, _message, _requestType) {
     address = _address
     message = _message
+    requestType = _requestType
     if (qmlSystem.getLedgerFlag()) {
       checkLedger()
     }
@@ -159,7 +161,7 @@ AVMEPopup {
               qmlSystem.storePass(passInput.text)
             }
             // TODO: Sign Message
-            qmlSystem.signMessage(address, message, pass, isWebserver)
+            qmlSystem.signMessage(address, message, pass, isWebserver, requestType)
 
           }
         }

@@ -5,7 +5,7 @@
 #include <qmlwrap/QmlSystem.h>
 #include <network/Server.h> // https://stackoverflow.com/a/4964508
 
-enum RequestSignTypes {eth_sign, personal_sign, signTypedData};
+enum RequestSignTypes {eth_sign, personal_sign};
 
 void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> session_) {
   // Run answer in another thread to allow the Server to take more inputs
@@ -54,10 +54,6 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       requirePermission = true;
       requestSign = true;
       requestSignType = personal_sign;
-    } else if (request["method"] == "eth_signTypedData") {
-      requirePermission = true;
-      requestSign = true;
-      requestSignType = signTypedData;
     } else {
       // Route any future request to the avalanche PUBLIC API.
       response = json::parse(API::httpGetRequest(request.dump(), true));
@@ -73,7 +69,7 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
         request["method"] != "eth_syncing" &&
         request["method"] != "eth_getBalance"
        ) { // eth_call is garbage for us, do not print it
-      //std::cout << "Request: " << request.dump(2) << std::endl;
+      std::cout << "Request: " << request.dump(2) << std::endl;
       //std::cout << "Response: " << response.dump(2) << std::endl;
     }
 
@@ -191,27 +187,28 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       std::string data;
       // The location where the arguments for signing are located are different
       // for different type of signatures requested. requiring us to manually filter them.
-      if (requestSignType == eth_sign || requestSignType == signTypedData) {
-        address = request["params"][0];
-        if (requestSignType == signTypedData) {
-          data = request["params"][1].dump();
-          std::string tmpData = std::string("\x19") + "Ethereum Signed Message:\n" + boost::lexical_cast<std::string>(data.length()) + data;
-          data = dev::toHex(dev::sha3(tmpData));
-        } else {
+      if (requestSignType == eth_sign) {
+          address = request["params"][0];
           data = request["params"][1];
-        }
       }
+      // Eth Sign provides us with the raw hex to sign
+      // Where personal_sign provides us with a hex-encoded string.
+      // We need to decode this string, concatenate it with a special string and hash it
+      // *then* sign the hash.
       if (requestSignType == personal_sign ) {
         address = request["params"][1];
         data = request["params"][0];
-        std::string tmpData = std::string("\x19") + "Ethereum Signed Message:\n" + boost::lexical_cast<std::string>(data.length()) + data;
-        data = dev::toHex(dev::sha3(tmpData));
+        if (data[0] == '0' || data[1] == 'x') {
+          data.erase(0,2);
+        }
+        data = Utils::hexToString(data); // Convert the hex-encoded string to plain string.
       }
       std::string website = request["__frameOrigin"];
       emit askForSign(
         QString::fromStdString(address),
         QString::fromStdString(data),
-        QString::fromStdString(website)
+        QString::fromStdString(website),
+        requestSignType
       );
       RSuserInputAnswer.lock(); // We lock twice for the same reason as above
       if (RSmsg == "") { // Treat "refused" response

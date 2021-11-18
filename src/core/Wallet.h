@@ -325,7 +325,7 @@ class Wallet {
      * returns the signed message hex
      */
 
-    std::string signMessage(std::string address, std::string message, std::string pass);
+    std::string signMessage(std::string address, std::string message, std::string pass, int requestSignType);
 
     /**
      * Send a signed transaction for broadcast and store it in history if successful.

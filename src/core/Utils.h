@@ -197,6 +197,12 @@ namespace Utils {
    * *not* to be confused with json::dump()
    */
   std::string jsonToStr(json& obj);
+
+  /**
+   *  Convert a hex string to a raw string
+   */
+
+  std::string hexToString(const std::string& input);
 };
 
 #endif  // UTILS_H
