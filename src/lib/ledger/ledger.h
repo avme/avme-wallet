@@ -48,6 +48,11 @@ namespace ledger {
         dev::eth::TransactionSkeleton transactionSkl, std::string path
       );
 
+      // Sign a personal message using the Ledger device.
+      std::pair<bool, std::string> signPersonalMessage(
+        std::string message, std::string path
+      );
+
       // Encode to JSON a account from the ledger struct
       json encodeToJson(account ledgerAccount);
 

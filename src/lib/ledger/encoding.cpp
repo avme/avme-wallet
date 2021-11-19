@@ -8,13 +8,13 @@ namespace ledger {
     /** BIP32 input data:
      *
      * |----------------------------------------------------------------|
-     * | Description                             | len  							   |
+     * | Description                             | len  							  |
      * |----------------------------------------------------------------|
-     * | Number of BIP 32 derivations to perform | 1 bytes						   |
+     * | Number of BIP 32 derivations to perform | 1 bytes						  |
      * |----------------------------------------------------------------|
      * | First derivation index                  | 4 bytes (big endian) |
      * |----------------------------------------------------------------|
-     * | ... 		                                | 4 bytes (big endian) |
+     * | ... 		                                 | 4 bytes (big endian) |
      * |----------------------------------------------------------------|
      * | Last derivation index                   | 4 bytes (big endian) |
      * |----------------------------------------------------------------|
@@ -153,6 +153,145 @@ namespace ledger {
         ss << std::hex << std::setfill('0');
         ss << std::hex << std::setw(1) << receiveBuffer[1][i];
         ret += ss.str();
+      }
+      return ret;
+    }
+
+    /** personal sign input data:
+     *
+     * |----------------------------------------------------------------|
+     * | Description                             | len  							  |
+     * |----------------------------------------------------------------|
+     * | Number of BIP 32 derivations to perform | 1 bytes						  |
+     * |----------------------------------------------------------------|
+     * | First derivation index                  | 4 bytes (big endian) |
+     * |----------------------------------------------------------------|
+     * | ... 		                                 | 4 bytes (big endian) |
+     * |----------------------------------------------------------------|
+     * | Last derivation index                   | 4 bytes (big endian) |
+     * |----------------------------------------------------------------|
+     * | Message length                          | 4 bytes (big endian) |
+     * |----------------------------------------------------------------|
+     * | Message chunk                           | 32 bytes (keccak256) |
+     * |----------------------------------------------------------------|
+     */
+    std::vector<sendBuf> encodePersonalSignMessage(std::string message, std::string addressPath) {
+      std::vector<sendBuf> ret;
+      sendBuf buffer = {0};
+      std::vector<unsigned char> bip32 = parsePath(addressPath);
+      std::vector<unsigned char> RLP;
+      std::vector<transactionPayload> txPayload;
+      bool firstMessage = true;
+      size_t messageIndex = 0;
+      auto messageBytes = dev::fromHex(dev::toHex(message));
+      unsigned char messageSize[4];
+      uint32_t messageSizeUint32_t = messageBytes.size();
+      std::memcpy(&messageSize, &messageSizeUint32_t, sizeof(messageSize));
+
+      while (messageIndex < messageBytes.size()) {
+        transactionPayload tmpTxPayload;
+        if ((messageIndex + bip32.size()) >= 150) {
+          tmpTxPayload.isHIDFirstMessage = false;
+        }
+
+        for (size_t i = 0; i < tmpTxPayload.firstMessage.size() && messageIndex < messageBytes.size(); ++i) {
+          tmpTxPayload.isFirstMessageEmpty = false;
+          if (tmpTxPayload.isHIDFirstMessage && i < bip32.size()) {
+            tmpTxPayload.firstMessage[i] = bip32[i];
+            ++tmpTxPayload.payloadSize;
+            continue;
+          }
+          if (tmpTxPayload.isHIDFirstMessage && i < (bip32.size() + 4)) {
+            tmpTxPayload.firstMessage[i] = messageSize[3 - (i - bip32.size())];
+            ++tmpTxPayload.payloadSize;
+            continue;
+          }
+          tmpTxPayload.firstMessage[i] = messageBytes[messageIndex];
+          ++messageIndex;
+          ++tmpTxPayload.payloadSize;
+        }
+        for (size_t i = 0; i < tmpTxPayload.secondMessage.size() && messageIndex < messageBytes.size(); ++i) {
+          tmpTxPayload.isSecondMessageEmpty = false;
+          tmpTxPayload.secondMessage[i] = messageBytes[messageIndex];
+          ++messageIndex;
+          ++tmpTxPayload.payloadSize;
+        }
+        for (size_t i = 0; i < tmpTxPayload.thirdMessage.size() && messageIndex < messageBytes.size(); ++i) {
+          tmpTxPayload.isThirdMessageEmpty = false;
+          tmpTxPayload.thirdMessage[i] = messageBytes[messageIndex];
+          ++messageIndex;
+          ++tmpTxPayload.payloadSize;
+        }
+        txPayload.push_back(tmpTxPayload);
+
+      }
+
+      for (auto txPayloadStruct : txPayload) {
+        buffer = {0};
+        if (!txPayloadStruct.isFirstMessageEmpty) {
+          std::vector<unsigned char> bufferVector;
+          APDUencoding APDUstructure;
+          APDUstructure.P1 = (txPayloadStruct.isHIDFirstMessage) ? 0x00 : 0x80;
+          APDUstructure.payload.insert(APDUstructure.payload.end(), txPayloadStruct.firstMessage.begin(), txPayloadStruct.firstMessage.end());
+          APDUstructure.LC = txPayloadStruct.payloadSize;
+
+          HIDencoding HIDstructure;
+          HIDstructure.payload.push_back(APDUstructure.CLA);
+          HIDstructure.payload.push_back(APDUstructure.INSsignPersonal32);
+          HIDstructure.payload.push_back(APDUstructure.P1);
+          HIDstructure.payload.push_back(APDUstructure.P2);
+          HIDstructure.payload.push_back(APDUstructure.LC);
+          HIDstructure.payload.insert(HIDstructure.payload.end(), APDUstructure.payload.begin(), APDUstructure.payload.end());
+
+          HIDstructure.length[1] = 5 + txPayloadStruct.payloadSize;
+
+          bufferVector.push_back(0x00);
+          bufferVector.insert(bufferVector.end(), HIDstructure.channelID.begin(), HIDstructure.channelID.end()); // ChannelID
+          bufferVector.push_back(HIDstructure.commandTag);
+          bufferVector.insert(bufferVector.end(), HIDstructure.index.begin(), HIDstructure.index.end());
+          bufferVector.insert(bufferVector.end(), HIDstructure.length.begin(), HIDstructure.length.end());
+          bufferVector.insert(bufferVector.end(), HIDstructure.payload.begin(), HIDstructure.payload.end());
+
+          for (size_t i = 0; i < bufferVector.size(); ++i) { buffer[i] = bufferVector[i]; }
+          ret.push_back(buffer);
+        }
+
+        /**
+         * Second and third messages only need a small HID structure containing
+         * Channel ID, Command and Index.
+         */
+        buffer = {0};
+        if (!txPayloadStruct.isSecondMessageEmpty) {
+          std::vector<unsigned char> bufferVector;
+          HIDencoding HIDstructure;
+          HIDstructure.index[1] = 0x01;
+          HIDstructure.payload.insert(HIDstructure.payload.end(), txPayloadStruct.secondMessage.begin(), txPayloadStruct.secondMessage.end());
+
+          bufferVector.push_back(0x00);
+          bufferVector.insert(bufferVector.end(), HIDstructure.channelID.begin(), HIDstructure.channelID.end()); // ChannelID
+          bufferVector.push_back(HIDstructure.commandTag);
+          bufferVector.insert(bufferVector.end(), HIDstructure.index.begin(), HIDstructure.index.end());
+          bufferVector.insert(bufferVector.end(), HIDstructure.payload.begin(), HIDstructure.payload.end());
+
+          for (size_t i = 0; i < bufferVector.size(); ++i) { buffer[i] = bufferVector[i]; }
+          ret.push_back(buffer);
+        }
+
+        buffer = {0};
+        if (!txPayloadStruct.isThirdMessageEmpty) {
+          std::vector<unsigned char> bufferVector;
+          HIDencoding HIDstructure;
+          HIDstructure.index[1] = 0x02;
+          HIDstructure.payload.insert(HIDstructure.payload.end(), txPayloadStruct.thirdMessage.begin(), txPayloadStruct.thirdMessage.end());
+
+          bufferVector.push_back(0x00);
+          bufferVector.insert(bufferVector.end(), HIDstructure.channelID.begin(), HIDstructure.channelID.end()); // ChannelID
+          bufferVector.push_back(HIDstructure.commandTag);
+          bufferVector.insert(bufferVector.end(), HIDstructure.index.begin(), HIDstructure.index.end());
+          bufferVector.insert(bufferVector.end(), HIDstructure.payload.begin(), HIDstructure.payload.end());
+          for (size_t i = 0; i < bufferVector.size(); ++i) { buffer[i] = bufferVector[i]; }
+          ret.push_back(buffer);
+        }
       }
       return ret;
     }

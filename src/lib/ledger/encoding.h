@@ -68,6 +68,7 @@ namespace ledger {
       // Message command. 0x02 for getting BIP32 address, 0x04 for signing transaction.
       unsigned char INSbip32 = 0x02;
       unsigned char INSsign32 = 0x04;
+      unsigned char INSsignPersonal32 = 0x08;
 
       // BIP32: 0x00 Return address, 0x01 Return address and ask user to confirm.
       // SIGNING: 0x00 for first message, 0x80 for subsequence messages. Fixed to 0x00 for convenience.
@@ -117,6 +118,9 @@ namespace ledger {
 
     // Decode the bip32 message from ledger, returning the address string or "" in failure.
     std::string decodeBip32Message(std::vector<receiveBuf> receiveBuffer);
+
+    // Encode a personal_sign message
+    std::vector<sendBuf> encodePersonalSignMessage(std::string message, std::string addressPath);
 
     std::vector<sendBuf> encodeSignEthMessage(dev::eth::TransactionBase& tb, std::string addressPath);
     dev::SignatureStruct decodeSignEthMessage(std::vector<receiveBuf> receiveBuffer);

@@ -97,6 +97,48 @@ namespace ledger {
     return ret;
   }
 
+  std::pair<bool, std::string> device::signPersonalMessage(
+    std::string message, std::string path
+  ) {
+    std::pair<bool, std::string> ret;
+
+    std::cout << "Checking connection..." << std::endl;
+    // Check if Ledger is connected.
+    auto deviceStatus = this->checkForDevice();
+    if (!deviceStatus.first) {
+      ret.first = false;
+      ret.second = deviceStatus.second;
+      return ret;
+    }
+
+    std::cout << "Trying to get address..." << std::endl;
+    // Check if address exists inside Ledger.
+    auto address = encoding::decodeBip32Message(
+      this->ledgerDevice.exchangeMessage(encoding::encodeBip32Message(path))
+    );
+    if (address.size() != 42) {
+      ret.first = false;
+      ret.second = "Error when getting address";
+      return ret;
+    }
+
+    // Personal Sign and transactions are decoded the same way.
+    std::cout << "Signing..." << std::endl;
+    auto signatureStruct = ledger::encoding::decodeSignEthMessage(
+      this->ledgerDevice.exchangeMessage(ledger::encoding::encodePersonalSignMessage(message, path))
+    );
+    if (!signatureStruct.isValid()) {
+      ret.first = false;
+      ret.second  = "Invalid signature";
+      return ret;
+    }
+    dev::h520 signature = dev::Signature(signatureStruct);
+    ret.first = true;
+    ret.second = dev::toHex(signature);
+
+    return ret;
+  }
+
   json encodeToJson(account ledgerAccount) {
     json ret;
     ret["address"] = ledgerAccount.address;
