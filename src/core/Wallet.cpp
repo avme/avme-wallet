@@ -437,7 +437,6 @@ std::string Wallet::signTransaction(TransactionSkeleton txSkel, std::string pass
 }
 
 std::string Wallet::signMessage(std::string address, std::string message, std::string pass, int requestSignType) {
-  std::cout << message << std::endl;
   enum RequestSignTypes {eth_sign, personal_sign}; // Type imported from QmlServer.cpp
   Secret s = getSecret(address, pass);
   h256 messageHash;

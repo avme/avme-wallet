@@ -266,8 +266,20 @@ void QmlSystem::getAllAVAXBalances(QStringList addresses) {
 }
 
 void QmlSystem::signMessage(QString address, QString data, QString password, bool webServer, int requestSignType) {
-  std::string signature = w.signMessage(address.toStdString(), data.toStdString(), password.toStdString(), requestSignType);
-  emit messageSigned(QString::fromStdString(signature), webServer);
+  QtConcurrent::run([=](){
+    if (!QmlSystem::getLedgerFlag()) {
+      std::string signature = w.signMessage(address.toStdString(), data.toStdString(), password.toStdString(), requestSignType);
+      emit messageSigned(QString::fromStdString(signature), webServer);
+    } else {
+      auto signStatus = this->ledgerDevice.signPersonalMessage(
+        data.toStdString(), this->getCurrentHardwareAccountPath().toStdString()
+      );
+      dev::h520 signature(signStatus.second);
+      SignatureStruct sigStruct = *(SignatureStruct const*)&signature;
+      sigStruct.v = sigStruct.v + 27;
+      emit messageSigned(QString::fromStdString(std::string("0x") + dev::toHex(dev::Signature(sigStruct))), webServer);
+    }
+  });
   return;
 }
 
