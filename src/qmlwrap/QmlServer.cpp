@@ -54,7 +54,15 @@ void QmlSystem::handleServer(std::string inputStr, std::shared_ptr<session> sess
       requirePermission = true;
       requestSign = true;
       requestSignType = personal_sign;
-    } else {
+    } else if (request["method"] == "wallet_addEthereumChain") {
+      // The method MUST return null if the request was successful, and an error otherwise.
+      // See https://eips.ethereum.org/EIPS/eip-3085
+      // TODO: When implementing multichain, ask the user to accept a new network from the website
+      if (request["params"][0]["chainId"] =! "0xa86a") {
+        response["error"]["code"] = -32601;
+        response["error"]["message"] = "Method not found";
+      }
+    } else { 
       // Route any future request to the avalanche PUBLIC API.
       response = json::parse(API::httpGetRequest(request.dump(), true));
       requirePermission = false;
