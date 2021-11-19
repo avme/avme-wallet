@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.0.2] - Unreleased
 ### Added
 - Contacts can now be sorted by address and name (both A-Z and vice-versa).
+- Support for [EIP-712](https://eips.ethereum.org/EIPS/eip-712) (hashing and signing messages using `eth_sign` and/or `personal_sign`).
+
+### Fixed
+- Websites that suggest adding a new chain ([EIP-3085](https://eips.ethereum.org/EIPS/eip-3085)) will have their requests automatically rejected (for now).
+  - This fixes strange behaviours like the browser plugin not receiving any requests after that, or websites wrongly stating that the wrong chain is being used.
 
 ### Changed
 - Staking and Compound now show the USD price for 1 LP.

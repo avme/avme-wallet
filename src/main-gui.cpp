@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
   boost::nowide::nowide_filesystem();
   QApplication::setApplicationName("AVME");
 
-  // Get the system's DPI scale using a dummy temp QApplicatiyyon
+  // Get the system's DPI scale using a dummy temp QApplication
   QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
   #if !defined(__APPLE__)
     QApplication* temp = new QApplication(argc, argv);
