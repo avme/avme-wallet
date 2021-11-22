@@ -61,8 +61,8 @@ AVMEPanel {
   function updateTxCost() {
     if (autoGasCheck.checked) {
       var calculatedGasPrice = +accountHeader.gasPrice + 15
-      if (calculatedGasPrice > 225) {
-        txGasPriceInput.text = 225
+      if (calculatedGasPrice > 1000) {
+        txGasPriceInput.text = 1000
       } else {
         txGasPriceInput.text = calculatedGasPrice
       }

@@ -170,8 +170,8 @@ AVMEPopup {
     // console.log(txData)
     // console.log(gas)
     // console.log(gasPrice)
-    if (+gasPrice > 225) {
-      gasPrice = 225
+    if (+gasPrice > 1000) {
+      gasPrice = 1000
     }
     resetStatuses()
     alreadyTransmitted = false;
@@ -364,7 +364,7 @@ AVMEPopup {
       var networkGasPrice = accountHeader.gasPrice
       if (+networkGasPrice > +gasPrice) {
         gasPrice = +networkGasPrice + 25
-        if (+gasPrice > 225) gasPrice = 225
+        if (+gasPrice > 1000) gasPrice = 1000
       }
       txStart(operation, from, to, value, txData, gas, gasPrice, pass, randomID)
       resetStatuses();

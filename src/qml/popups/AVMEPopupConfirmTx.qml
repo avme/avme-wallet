@@ -105,8 +105,8 @@ AVMEPopup {
     if (+gasPrice < +accountHeader.gasPrice) {
       gasPrice = qmlApi.sum(accountHeader.gasPrice, 30)
     }
-    if (+gasPrice > 225) {
-      gasPrice = 225
+    if (+gasPrice > 1000) {
+      gasPrice = 1000
     }
     if (automaticGas) {
       loadingFees = true
