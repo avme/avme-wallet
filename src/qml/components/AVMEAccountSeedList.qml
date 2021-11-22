@@ -30,62 +30,18 @@ ListView {
   clip: true
   boundsBehavior: Flickable.StopAtBounds
 
-  // Header (top bar)
-  header: Rectangle {
-    id: listHeader
-    width: parent.width
-    height: parent.parent.height * 0.1
-    color: "#201E2B"
-    z: 2
-    anchors.horizontalCenter: parent.horizontalCenter
-    Rectangle {
-      id: listHeaderBg
-      width: parent.width
-      height: parent.height * 0.666
-      anchors.horizontalCenter: parent.horizontalCenter
-      color: listBgColor
-      Rectangle {
-        id: listHeaderText
-        width: parent.width * 0.9
-        height: parent.height
-        anchors.horizontalCenter: parent.horizontalCenter
-        color: "transparent"
-        Text {
-          id: headerIndex
-          anchors.verticalCenter: parent.verticalCenter
-          width: (parent.width * 0.2)
-          color: "white"
-          font.pixelSize: 14.0
-          padding: 5
-          text: "Index"
-        }
-
-        Text {
-          id: headerAccount
-          anchors.verticalCenter: parent.verticalCenter
-          width: (parent.width * 0.5)
-          x: headerIndex.width
-          color: "white"
-          font.pixelSize: 14.0
-          padding: 5
-          text: "Account"
-        }
-
-        Text {
-          id: headerBalance
-          anchors.verticalCenter: parent.verticalCenter
-          width: (parent.width * 0.3)
-          x: headerIndex.width + headerAccount.width
-          color: "white"
-          font.pixelSize: 14.0
-          padding: 5
-          text: "AVAX Balance"
-        }
-      }
-      // Spacing between header and list itself
+  ScrollBar.vertical: ScrollBar {
+    id: scrollbar
+    active: true
+    orientation: Qt.Vertical
+    size: (accountSeedList.height / accountSeedList.contentHeight)
+    policy: (accountSeedList.count > 0) ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
+    anchors {
+      top: parent.top
+      right: parent.right
+      bottom: parent.bottom
     }
   }
-  headerPositioning: ListView.OverlayHeader // Prevent header scrolling along
 
   // Delegate (structure for each item in the list)
   delegate: Component {

@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Staking and Compound now show the USD price for 1 LP.
 - Staking and Compound estimates are now truncated to 8 digits.
+- Popups with lists now have scrollbars.
 
 ## [2.0.1] - 09/11/2021
 ### Added

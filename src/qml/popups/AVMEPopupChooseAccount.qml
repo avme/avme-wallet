@@ -105,10 +105,50 @@ AVMEPopup {
     }
 
     Rectangle {
+      id: listHeader
+      width: parent.width * 0.8
+      height: parent.height * 0.05
+      color: "#16141F"
+      radius: 5
+      z: 2
+      anchors.horizontalCenter: parent.horizontalCenter
+
+      Text {
+        id: headerIndex
+        anchors.verticalCenter: parent.verticalCenter
+        width: (parent.width * 0.2)
+        color: "white"
+        font.pixelSize: 14.0
+        padding: 5
+        text: "Index"
+      }
+      Text {
+        id: headerAccount
+        anchors.verticalCenter: parent.verticalCenter
+        width: (parent.width * 0.5)
+        x: headerIndex.width
+        color: "white"
+        font.pixelSize: 14.0
+        padding: 5
+        text: "Account"
+      }
+      Text {
+        id: headerBalance
+        anchors.verticalCenter: parent.verticalCenter
+        width: (parent.width * 0.3)
+        x: headerIndex.width + headerAccount.width
+        color: "white"
+        font.pixelSize: 14.0
+        padding: 5
+        text: "AVAX Balance"
+      }
+    }
+
+    Rectangle {
       id: listRect
       anchors.horizontalCenter: parent.horizontalCenter
       width: (parent.width * 0.9)
-      height: (parent.height * 0.6)
+      height: (parent.height * 0.55)
       radius: 5
       color: "#16141F"
 

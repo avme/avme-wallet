@@ -26,6 +26,19 @@ ListView {
   clip: true
   boundsBehavior: Flickable.StopAtBounds
 
+  ScrollBar.vertical: ScrollBar {
+    id: scrollbar
+    active: true
+    orientation: Qt.Vertical
+    size: appSelectList.height / appSelectList.contentHeight
+    policy: ScrollBar.AlwaysOn
+    anchors {
+      top: parent.top
+      right: parent.right
+      bottom: parent.bottom
+    }
+  }
+
   delegate: Component {
     id: appSelectDelegate
     Item {

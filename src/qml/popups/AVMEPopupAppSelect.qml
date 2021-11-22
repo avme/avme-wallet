@@ -93,7 +93,7 @@ AVMEPopup {
       AVMEAppList {
         id: appList
         width: parent.width
-        height: (parent.height * 0.85)
+        height: parent.height
         anchors.horizontalCenter: parent.horizontalCenter
         model: ListModel {
           id: appModel
