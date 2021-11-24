@@ -27,9 +27,7 @@ ApplicationWindow {
 
   Connections {
     target: qmlSystem
-      function onWalletRequireUpdate() {
-        walletRequireUpdate.open()
-      }
+    function onWalletRequireUpdate() { walletRequireUpdate.open() }
   }
 
   function startup() {
@@ -97,7 +95,6 @@ ApplicationWindow {
     info: "Please update your wallet to the latest version."
     okBtn.text: "Close"
   }
-
 
   // Dynamic screen loader (used in setScreen(id, screenpath))
   Loader {

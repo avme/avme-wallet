@@ -10,7 +10,7 @@ import "qrc:/qml/components"
 AVMEPopup {
   id: txProgressPopup
   widthPct: 0.9
-  heightPct: 0.9
+  heightPct: 0.5
   property color popupBgColor: "#1C2029"
   property bool requestedFromWS: false
   property bool alreadyTransmitted: false
@@ -35,14 +35,17 @@ AVMEPopup {
         buildPng.rotation = 0
         if (b) {
           buildText.color = "limegreen"
-          buildText.text = "Transaction built!"
+          buildText.text = "Built!"
           buildPng.imageSource = "qrc:/img/ok.png"
+          buildRect.color = "#0B5418"
           signText.color = "#FFFFFF"
+          statusRect.width = statusRow.width * 0.33
           signPngRotate.start()
         } else {
           buildText.color = "crimson"
-          buildText.text = "Error on building transaction."
+          buildText.text = "Failed to build."
           buildPng.imageSource = "qrc:/img/no.png"
+          buildRect.color = "#4F1018"
           btnClose.visible = true
           btnRetry.visible = false
         }
@@ -54,17 +57,21 @@ AVMEPopup {
         signPng.rotation = 0
         if (b) {
           signText.color = "limegreen"
-          signText.text = msg
+          signText.text = "Signed!"
           signPng.imageSource = "qrc:/img/ok.png"
+          signRect.color = "#0B5418"
           sendText.color = "#FFFFFF"
+          statusRect.width = statusRow.width * 0.66
           sendPngRotate.start()
         } else {
           signText.color = "crimson"
-          signText.text = msg
+          signText.text = "Failed to sign."
           signPng.imageSource = "qrc:/img/no.png"
+          signRect.color = "#4F1018"
           btnClose.visible = true
           btnRetry.visible = false
           qmlApi.logToDebug("Transaction Error: " + msg)
+          msgText.text = msg
         }
       }
     }
@@ -75,19 +82,23 @@ AVMEPopup {
         if (b) {
           btnOpenLink.linkUrl = linkUrl
           sendText.color = "limegreen"
-          sendText.text = "Transaction sent!"
+          sendText.text = "Sent!"
           sendPng.imageSource = "qrc:/img/ok.png"
+          sendRect.color = "#0B5418"
           confirmText.color = "#FFFFFF"
+          statusRect.width = statusRow.width
           confirmPngRotate.start()
           btnOpenLink.visible = true
           qmlSystem.checkTransactionFor15s(txid, randomID);
         } else {
           sendText.color = "crimson"
-          sendText.text = "Error on sending transaction.<br> " + msg
+          sendText.text = "Failed to send."
           sendPng.imageSource = "qrc:/img/no.png"
+          sendRect.color = "#4F1018"
           btnClose.visible = true
           btnRetry.visible = true
           qmlApi.logToDebug("Transaction Error: " + msg)
+          msgText.text = msg
         }
       }
     }
@@ -97,26 +108,30 @@ AVMEPopup {
         confirmPng.rotation = 0
         if (b) {
           confirmText.color = "limegreen"
-          confirmText.text = "Transaction confirmed!"
+          confirmText.text = "Confirmed!"
           confirmPng.imageSource = "qrc:/img/ok.png"
+          confirmRect.color = "#0B5418"
           if (requestedFromWS) {
             qmlSystem.requestedTransactionStatus(true, txid)
             alreadyTransmitted = true
           }
           qmlSystem.updateAccountNonce(from);
+          btnClose.autoClose.start()
         } else {
           confirmText.color = "crimson"
-          confirmText.text = "Transaction not confirmed.<br><b>Retrying will attempt a higher fee. (Recommended)</b>"
+          confirmText.text = "Failed to confirm."
           confirmPng.imageSource = "qrc:/img/no.png"
+          confirmRect.color = "#4F1018"
           btnRetry.visible = true
+          msgText.text = "Retrying will attempt a higher fee (recommended)."
         }
         btnClose.visible = true
       }
     }
     function onTxRetry(randomID_) {
     if (randomID == randomID_) {
-        sendText.text = "Transaction nonce is too low, or a transaction with"
-        + "<br>the same hash was already imported. Retrying..."
+        msgText.text = "Transaction nonce is too low, or a transaction with"
+        + " the same hash was already imported. Retrying..."
       }
       function onLedgerRequired(randomID) {
         if (randomID == randomID_) {
@@ -136,14 +151,21 @@ AVMEPopup {
     signText.color = "#444444"
     sendText.color = "#444444"
     confirmText.color = "#444444"
-    buildText.text = "Building transaction..."
-    signText.text = "Signing transaction..."
-    sendText.text = "Broadcasting transaction..."
-    confirmText.text = "Confirming transaction..."
+    buildRect.color = "#0B1018"
+    signRect.color = "#0B1018"
+    sendRect.color = "#0B1018"
+    confirmRect.color = "#0B1018"
+    buildText.text = "Building..."
+    signText.text = "Signing..."
+    sendText.text = "Broadcasting..."
+    confirmText.text = "Confirming..."
     buildPng.imageSource = "qrc:/img/icons/loading.png"
     signPng.imageSource = "qrc:/img/icons/loading.png"
     sendPng.imageSource = "qrc:/img/icons/loading.png"
     confirmPng.imageSource = "qrc:/img/icons/loading.png"
+    msgText.text = ""
+    statusRect.width = 0
+    btnClose.secsToClose = 5
     buildPngRotate.start()
     btnOpenLink.visible = false
     btnClose.visible = false
@@ -170,9 +192,7 @@ AVMEPopup {
     // console.log(txData)
     // console.log(gas)
     // console.log(gasPrice)
-    if (+gasPrice > 1000) {
-      gasPrice = 1000
-    }
+    if (+gasPrice > 1000) { gasPrice = 1000 }
     resetStatuses()
     alreadyTransmitted = false;
     qmlSystem.makeTransaction(
@@ -180,13 +200,28 @@ AVMEPopup {
     )
   }
 
-  Column {
-    id: items
+  Rectangle {
+    id: statusRect
     anchors {
-      centerIn: parent
-      margins: 30
+      left: statusRow.left
+      verticalCenter: statusRow.verticalCenter
     }
-    spacing: 20
+    width: 0
+    height: 5
+    color: "#0B5418"
+    Behavior on width {
+      NumberAnimation { duration: 1000; easing.type: Easing.OutExpo }
+    }
+  }
+
+  Row {
+    id: statusRow
+    anchors {
+      horizontalCenter: parent.horizontalCenter
+      verticalCenter: parent.verticalCenter
+      verticalCenterOffset: -(parent.height * 0.25)
+    }
+    spacing: 100
 
     // Enter/Numpad enter key override
     Keys.onPressed: {
@@ -204,17 +239,17 @@ AVMEPopup {
       }
     }
 
-    Row {
-      id: buildRow
-      anchors.horizontalCenter: parent.horizontalCenter
-      height: 70
-      spacing: 40
-
+    Rectangle {
+      id: buildRect
+      width: 128
+      height: 128
+      radius: 128
+      color: "#0B1018"
       AVMEAsyncImage {
         id: buildPng
         width: 64
         height: 64
-        anchors.verticalCenter: buildText.verticalCenter
+        anchors.centerIn: parent
         loading: false
         imageSource: "qrc:/img/icons/loading.png"
         RotationAnimator {
@@ -228,26 +263,31 @@ AVMEPopup {
           running: false
         }
       }
-
       Text {
         id: buildText
-        font.pixelSize: 24.0
+        anchors {
+          top: parent.bottom
+          horizontalCenter: parent.horizontalCenter
+          topMargin: 10
+        }
+        font.pixelSize: 16.0
+        horizontalAlignment: Text.AlignHCenter
         color: "#FFFFFF"
-        text: "Building transaction..."
+        text: "Building..."
       }
     }
 
-    Row {
-      id: signRow
-      anchors.horizontalCenter: parent.horizontalCenter
-      height: 70
-      spacing: 40
-
+    Rectangle {
+      id: signRect
+      width: 128
+      height: 128
+      radius: 128
+      color: "#0B1018"
       AVMEAsyncImage {
         id: signPng
         width: 64
         height: 64
-        anchors.verticalCenter: signText.verticalCenter
+        anchors.centerIn: parent
         loading: false
         imageSource: "qrc:/img/icons/loading.png"
         RotationAnimator {
@@ -261,26 +301,31 @@ AVMEPopup {
           running: false
         }
       }
-
       Text {
         id: signText
-        font.pixelSize: 24.0
+        anchors {
+          top: parent.bottom
+          horizontalCenter: parent.horizontalCenter
+          topMargin: 10
+        }
+        font.pixelSize: 16.0
+        horizontalAlignment: Text.AlignHCenter
         color: "#444444"
-        text: "Signing transaction..."
+        text: "Signing..."
       }
     }
 
-    Row {
-      id: sendRow
-      anchors.horizontalCenter: parent.horizontalCenter
-      height: 70
-      spacing: 40
-
+    Rectangle {
+      id: sendRect
+      width: 128
+      height: 128
+      radius: 128
+      color: "#0B1018"
       AVMEAsyncImage {
         id: sendPng
         width: 64
         height: 64
-        anchors.verticalCenter: sendText.verticalCenter
+        anchors.centerIn: parent
         loading: false
         imageSource: "qrc:/img/icons/loading.png"
         RotationAnimator {
@@ -294,26 +339,31 @@ AVMEPopup {
           running: false
         }
       }
-
       Text {
         id: sendText
-        font.pixelSize: 24.0
+        anchors {
+          top: parent.bottom
+          horizontalCenter: parent.horizontalCenter
+          topMargin: 10
+        }
+        font.pixelSize: 16.0
+        horizontalAlignment: Text.AlignHCenter
         color: "#444444"
-        text: "Broadcasting transaction..."
+        text: "Sending..."
       }
     }
 
-    Row {
-      id: confirmRow
-      anchors.horizontalCenter: parent.horizontalCenter
-      height: 70
-      spacing: 40
-
+    Rectangle {
+      id: confirmRect
+      width: 128
+      height: 128
+      radius: 128
+      color: "#0B1018"
       AVMEAsyncImage {
         id: confirmPng
         width: 64
         height: 64
-        anchors.verticalCenter: confirmText.verticalCenter
+        anchors.centerIn: parent
         loading: false
         imageSource: "qrc:/img/icons/loading.png"
         RotationAnimator {
@@ -327,68 +377,93 @@ AVMEPopup {
           running: false
         }
       }
-
       Text {
         id: confirmText
-        font.pixelSize: 24.0
+        anchors {
+          top: parent.bottom
+          horizontalCenter: parent.horizontalCenter
+          topMargin: 10
+        }
+        font.pixelSize: 16.0
+        horizontalAlignment: Text.AlignHCenter
         color: "#444444"
-        text: "Confirming transaction..."
+        text: "Confirming..."
       }
     }
   }
 
-  AVMEButton {
-    id: btnOpenLink
-    property string linkUrl
-    width: parent.width * 0.5
+  Text {
+    id: msgText
     anchors {
-      bottom: btnClose.top
+      bottom: btnRow.top
       horizontalCenter: parent.horizontalCenter
-      margins: 20
+      bottomMargin: 20
     }
-    text: "Open Transaction in Block Explorer"
-    onClicked: Qt.openUrlExternally(linkUrl)
+    font.pixelSize: 14.0
+    horizontalAlignment: Text.AlignHCenter
+    elide: Text.ElideRight
+    color: "#FFFFFF"
   }
 
-  AVMEButton {
-    id: btnRetry
-    width: parent.width * 0.25
+  Row {
+    id: btnRow
     anchors {
-      bottom: parent.bottom
       horizontalCenter: parent.horizontalCenter
-      horizontalCenterOffset: -150
-      margins: 20
+      verticalCenter: parent.verticalCenter
+      verticalCenterOffset: (parent.height * 0.35)
     }
-    text: "Retry"
-    onClicked: {
-      var networkGasPrice = accountHeader.gasPrice
-      if (+networkGasPrice > +gasPrice) {
-        gasPrice = +networkGasPrice + 25
-        if (+gasPrice > 1000) gasPrice = 1000
+    spacing: 20
+
+    AVMEButton {
+      id: btnRetry
+      width: txProgressPopup.width * 0.2
+      text: "Retry"
+      onClicked: {
+        var networkGasPrice = accountHeader.gasPrice
+        if (+networkGasPrice > +gasPrice) {
+          gasPrice = +networkGasPrice + 25
+          if (+gasPrice > 1000) gasPrice = 1000
+        }
+        txStart(operation, from, to, value, txData, gas, gasPrice, pass, randomID)
+        resetStatuses();
       }
-      txStart(operation, from, to, value, txData, gas, gasPrice, pass, randomID)
-      resetStatuses();
     }
-  }
 
-  AVMEButton {
-    id: btnClose
-    width: parent.width * 0.25
-    anchors {
-      bottom: parent.bottom
-      horizontalCenter: parent.horizontalCenter
-      horizontalCenterOffset: 150
-      margins: 20
+    AVMEButton {
+      id: btnOpenLink
+      property string linkUrl
+      width: txProgressPopup.width * 0.4
+      text: "Open Transaction in Block Explorer"
+      onClicked: Qt.openUrlExternally(linkUrl)
     }
-    text: "Close"
-    onClicked: {
-      if (!alreadyTransmitted) {
-        // Unlock the mutex if the transaction was not transmitted to the plugin
-        //console.log("unlocking mutex")
-        qmlSystem.requestedTransactionStatus(false, "")
-        txProgressPopup.close()
-      } else {
-        txProgressPopup.close()
+
+    AVMEButton {
+      id: btnClose
+      property alias autoClose: autoCloseTimer
+      property var secsToClose: 5
+      width: txProgressPopup.width * 0.2
+      text: (autoCloseTimer.running) ? "Close (" + secsToClose + ")" : "Close"
+      Timer {
+        id: autoCloseTimer
+        interval: 1000
+        repeat: true
+        onTriggered: {
+          if (btnClose.secsToClose <= 0) {
+            stop(); txProgressPopup.close()
+          }
+          btnClose.secsToClose--
+        }
+      }
+      onClicked: {
+        if (autoCloseTimer.running) autoCloseTimer.stop()
+        if (!alreadyTransmitted) {
+          // Unlock the mutex if the transaction was not transmitted to the plugin
+          //console.log("unlocking mutex")
+          qmlSystem.requestedTransactionStatus(false, "")
+          txProgressPopup.close()
+        } else {
+          txProgressPopup.close()
+        }
       }
     }
   }
