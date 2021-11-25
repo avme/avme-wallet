@@ -24,7 +24,7 @@ Item {
       window.menu.walletIsLoaded = success
       accountHeader.currentAddress = ""
       if (success) {
-        qmlSystem.cleanAndCloseWallet()
+        qmlSystem.cleanAndCloseWallet() // TODO: find out why this line sometimes freezes the wallet
         qmlSystem.setLedgerFlag(false)
         qmlSystem.deleteLastWalletPath()
         if (saveWallet) { qmlSystem.saveLastWalletPath() }

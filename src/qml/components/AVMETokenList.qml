@@ -9,9 +9,11 @@ import QtQuick.Controls 2.2
  */
 ListView {
   id: tokenSelectList
+  property alias tokenModel: tokenSelectModel
   property color listHighlightColor: "#9400F6"
   property color listBgColor: "#16141F"
   property color listHoverColor: "#2E2C3D"
+  property int selectedTokens: 0
 
   implicitWidth: 500
   implicitHeight: 500
@@ -26,6 +28,18 @@ ListView {
   clip: true
   boundsBehavior: Flickable.StopAtBounds
 
+  signal updatedTokenSelection()
+
+  function updateSelectedTokens() {
+    selectedTokens = 0
+    for (var i = 0; i < tokenSelectModel.count; i++) {
+      if (tokenSelectModel.get(i).selected) {
+        selectedTokens++
+      }
+    }
+    updatedTokenSelection()
+  }
+
   ScrollBar.vertical: ScrollBar {
     id: scrollbar
     active: true
@@ -39,6 +53,39 @@ ListView {
     }
   }
 
+  model: ListModel {
+    id: tokenSelectModel
+    function selectToken(address) {
+      for (var i = 0; i < count; i++) {
+        if (get(i).address == address) {
+          get(i).selected = !get(i).selected
+          tokenSelectList.updateSelectedTokens()
+          break
+        }
+      }
+    }
+    function allTokensSelected() {
+      for (var i = 0; i < count; i++) {
+        if (!get(i).selected) return false
+      }
+      return true
+    }
+    function selectAllTokens() {
+      var check = allTokensSelected()
+      for (var i = 0; i < count; i++) {
+        get(i).selected = !check
+      }
+      tokenSelectList.updateSelectedTokens()
+    }
+    function sortBySymbol() {
+      for (var i = 0; i < count; i++) {
+        for (var j = 0; j < i; j++) {
+          if (get(i).symbol < get(j).symbol) { move(i, j, 1) }
+        }
+      }
+    }
+  }
+
   delegate: Component {
     id: tokenSelectDelegate
     Item {
@@ -49,17 +96,39 @@ ListView {
       readonly property string itemName: name
       readonly property string itemDecimals: decimals
       readonly property string itemBalance: balance
+      property bool itemSelected: selected
       width: tokenSelectList.width
       height: 50
 
+      AVMECheckbox {
+        id: delegateCheckbox
+        anchors {
+          left: parent.left
+          leftMargin: 20
+          verticalCenter: parent.verticalCenter
+        }
+        checked: itemSelected
+        onClicked: tokenSelectModel.selectToken(itemAddress)
+      }
+
       Rectangle {
         id: delegateRectangle
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.horizontalCenter: parent.horizontalCenter
-        color: (tokenSelectList.currentIndex == index) ? "#9400F6" : "#2E2C3D"
+        anchors {
+          left: delegateCheckbox.right
+          verticalCenter: parent.verticalCenter
+        }
+        color: {
+          if (tokenSelectList.currentIndex == index) {
+            color: "#9400F6"
+          } else if (itemSelected) {
+            color: "#0993A2"
+          } else {
+            color: "#2E2C3D"
+          }
+        }
         radius: 5
         height: parent.height
-        width: parent.width * 0.9
+        width: parent.width * 0.8
         AVMEAsyncImage {
           id: delegateImage
           anchors.verticalCenter: parent.verticalCenter
@@ -99,13 +168,13 @@ ListView {
           elide: Text.ElideRight
           text: itemName
         }
-      }
-      MouseArea {
-        id: delegateMouseArea
-        anchors.fill: parent
-        onClicked: {
-          tokenSelectList.currentIndex = index
-          tokenSelectList.forceActiveFocus()
+        MouseArea {
+          id: delegateMouseArea
+          anchors.fill: parent
+          onClicked: {
+            tokenSelectList.currentIndex = index
+            tokenSelectList.forceActiveFocus()
+          }
         }
       }
     }

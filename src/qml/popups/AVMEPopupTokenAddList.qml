@@ -12,28 +12,52 @@ AVMEPopup {
   property var tokens: null
 
   onAboutToShow: {
-    tokens = qmlSystem.getARC20TokenList()
-    refreshList("")
+    tokenList.tokenModel.clear()
+    tokens = null
     filterInput.text = ""
-    filterInput.forceActiveFocus()
+    qmlSystem.getARC20TokenList()
   }
   onAboutToHide: {
-    tokenModel.clear()
+    tokenList.tokenModel.clear()
     tokens = null
     filterInput.text = ""
   }
 
+  Connections {
+    target: tokenList
+    function onUpdatedTokenSelection() {
+      selectAllCheckbox.checked = tokenList.tokenModel.allTokensSelected()
+    }
+  }
+
+  Connections {
+    target: qmlSystem
+    function onGotTokenList(tokenData) {
+      tokens = tokenData
+      refreshList("")
+    }
+    function onUpdateAddTokenProgress(current, total) {
+      window.infoPopup.info = "Adding tokens... "
+      + "(" + current + "/" + total + ")" + "<br>This may take a while."
+    }
+    function onAddedTokens() {
+      window.infoPopup.close()
+      addListTokenPopup.close()
+    }
+  }
+
   function refreshList(filter) {
-    tokenModel.clear()
+    // TODO: redo this - clearing the model clears the selections, that shouldn't happen
+    tokenList.tokenModel.clear()
     for (var i = 0; i < tokens.length; i++) {
       var nameMatch = tokens[i]["name"].toUpperCase().includes(filter.toUpperCase())
       var symbolMatch = tokens[i]["symbol"].toUpperCase().includes(filter.toUpperCase())
       if (filter == "" || nameMatch || symbolMatch) {
         tokens[i]["balance"] = ""
-        tokenModel.append(tokens[i])
+        tokenList.tokenModel.append(tokens[i])
       }
     }
-    tokenModel.sortBySymbol()
+    tokenList.tokenModel.sortBySymbol()
     tokenList.currentIndex = -1
   }
 
@@ -43,8 +67,13 @@ AVMEPopup {
     anchors.verticalCenter: parent.verticalCenter
     spacing: 20
 
-    // Enter/Return key override
+    // Enter/Return and Space key override
     Keys.onPressed: {
+      if (event.key == Qt.Key_Space) {
+        if (tokenList.currentItem != null) {
+          tokenList.tokenModel.selectToken(tokenList.currentItem.itemAddress)
+        }
+      }
       if ((event.key == Qt.Key_Return) || (event.key == Qt.Key_Enter)) {
         if (btnOk.enabled) { btnOk.handleAdd() }
       }
@@ -57,7 +86,7 @@ AVMEPopup {
       color: "#FFFFFF"
       font.pixelSize: 14.0
       text: (tokens != null)
-      ? "Choose a token from the list." : "Fetching token list, please wait..."
+      ? "Choose one or more tokens from the list." : "Fetching token list, please wait..."
     }
 
     Rectangle {
@@ -71,42 +100,51 @@ AVMEPopup {
       AVMETokenList {
         id: tokenList
         anchors.fill: parent
-        model: ListModel {
-          id: tokenModel
-          function sortBySymbol() {
-            for (var i = 0; i < count; i++) {
-              for (var j = 0; j < i; j++) {
-                if (get(i).symbol < get(j).symbol) { move(i, j, 1) }
-              }
-            }
-          }
-        }
       }
     }
 
-    AVMEInput {
-      id: filterInput
+    Row {
+      id: filterRow
       width: (parent.width * 0.9)
       anchors.horizontalCenter: parent.horizontalCenter
-      label: "Filter by symbol or name"
-      onTextEdited: addListTokenPopup.refreshList(filterInput.text)
+      spacing: 10
+
+      AVMECheckbox {
+        id: selectAllCheckbox
+        width: (parent.width * 0.5) - (parent.spacing / 2)
+        anchors.verticalCenter: parent.verticalCenter
+        enabled: (tokens != null)
+        text: "Select/Unselect All"
+        onClicked: tokenList.tokenModel.selectAllTokens()
+      }
+      AVMEInput {
+        id: filterInput
+        width: (parent.width * 0.5) - (parent.spacing / 2)
+        anchors.verticalCenter: parent.verticalCenter
+        enabled: (tokens != null)
+        label: "Filter by Symbol or Name"
+        onTextEdited: addListTokenPopup.refreshList(filterInput.text)
+      }
     }
 
     AVMEButton {
       id: btnOk
       width: (parent.width * 0.9)
       anchors.horizontalCenter: parent.horizontalCenter
-      enabled: (tokenList.currentItem != null)
-      text: "Add token"
+      enabled: (tokenList.selectedTokens > 0)
+      text: "Add Selected Tokens"
       onClicked: handleAdd()
       function handleAdd() {
-        var tokenData = qmlSystem.getARC20TokenData(tokenList.currentItem.itemAddress)
-        qmlSystem.addARC20Token(
-          tokenData.address, tokenData.symbol, tokenData.name,
-          tokenData.decimals, tokenData.avaxPairContract
-        )
-        qmlSystem.downloadARC20TokenImage(tokenData.address)
-        addListTokenPopup.close()
+        var tokenArr = []
+        for (var i = 0; i < tokenList.tokenModel.count; i++) {
+          if (tokenList.tokenModel.get(i).selected) {
+            tokenArr.push(tokenList.tokenModel.get(i).address)
+          }
+        }
+        window.infoPopup.info = "Adding tokens...<br>This may take a while."
+        window.infoPopup.open()
+        qmlSystem.addARC20Tokens(tokenArr)
+        // TODO: parallelize adding tokens
       }
     }
 

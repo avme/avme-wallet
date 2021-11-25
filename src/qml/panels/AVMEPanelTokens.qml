@@ -20,7 +20,7 @@ AVMEPanel {
     qmlSystem.loadARC20Tokens()
     var tokens = qmlSystem.getARC20Tokens()
     for (var i = 0; i < tokens.length; i++) {
-      tokenList.append(tokens[i]);
+      tokenList.append(tokens[i])
     }
     tokenList.sortBySymbol()
   }
@@ -63,12 +63,12 @@ AVMEPanel {
     AVMEButton {
       id: btnAddList
       width: (tokensPanel.width * 0.275)
-      text: "Add new token"
+      text: "Add Tokens"
     }
     AVMEButton {
       id: btnAddToken
       width: (tokensPanel.width * 0.275)
-      text: "Add token from address"
+      text: "Add Token From Address"
     }
     AVMEButton {
       id: btnRemoveToken
@@ -77,7 +77,7 @@ AVMEPanel {
         tokenGrid.currentItem != null &&
         tokenGrid.currentItem.itemAddress != qmlSystem.getContract("AVME")
       )
-      text: (enabled) ? "Remove token" : "Can't remove"
+      text: (enabled) ? "Remove Token" : "Can't Remove"
     }
   }
 }

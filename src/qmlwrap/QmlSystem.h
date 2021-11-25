@@ -97,6 +97,11 @@ class QmlSystem : public QObject {
     void walletCreated(bool success);
     void walletLoaded(bool success);
 
+    // Tokens screen signals
+    void gotTokenList(QVariantList tokenData);
+    void updateAddTokenProgress(int current, int total);
+    void addedTokens();
+
     // Account screen signals
     void accountGenerated(QVariantMap data);
     void ledgerAccountGenerated(QString dataStr);
@@ -131,28 +136,26 @@ class QmlSystem : public QObject {
     void appInstalled(bool success);
     void appLoaded(QString folderPath);
 
-    // Signal for request user input to give permission for said website
+    // Signal for requesting user input to give permission for said website
     void askForPermission(QString website_);
 
-    // Signal to request user to sign a given transaction
+    // Signal for requesting user to sign a given transaction
     void askForTransaction(QString data, QString from, QString gas, QString to, QString value, QString website_);
     
-    // Signal to request user to sign a message.
+    // Signal for requesting user to sign a message
     void askForSign(QString address, QString data, QString website_, int requestSignType);
 
     // Signals for ParaSwap exchanging
     void gotParaSwapTokenPrices(QString priceRoute, QString id, QString request);
     void gotParaSwapTransactionData(QString transactionData, QString id, QString request);
 
-    // Signals for when testing a user typed API
-
+    // Signal for testing a custom/user-typed API
     void apiReturnedSuccessfully(bool status, QString type);
 
-    // Signal for message has been signed.
+    // Signal for when a message has been signed
     void messageSigned(QString message, bool webServer);
 
-    // Signal for letting the user know there is a update
-
+    // Signal for letting the user know there is a wallet update
     void walletRequireUpdate();
 
   public:
@@ -356,7 +359,7 @@ class QmlSystem : public QObject {
     Q_INVOKABLE QString getARC20TokenImage(QString address);
 
     // Get the ARC20 token list from the repo.
-    Q_INVOKABLE QVariantList getARC20TokenList();
+    Q_INVOKABLE void getARC20TokenList();
 
     // Add and remove a token from the list, respectively.
     Q_INVOKABLE bool addARC20Token(
@@ -372,6 +375,9 @@ class QmlSystem : public QObject {
 
     // Check if a token was already added in the Wallet.
     Q_INVOKABLE bool ARC20TokenWasAdded(QString address);
+
+    // Add multiple tokens from an address list.
+    Q_INVOKABLE void addARC20Tokens(QVariantList addresses);
 
     // ======================================================================
     // HISTORY SCREEN FUNCTIONS

@@ -47,29 +47,32 @@ QString QmlSystem::getARC20TokenImage(QString address) {
   }
 }
 
-QVariantList QmlSystem::getARC20TokenList() {
-  QVariantList ret;
-  boost::filesystem::path filePath = Utils::walletFolderPath.string()
-    + "/wallet/c-avax/tokenlist.json";
-  // Always force-refresh the list
-  if (boost::filesystem::exists(filePath)) { boost::filesystem::remove(filePath); }
-  API::httpGetFile(
-    "raw.githubusercontent.com",
-    "/avme/avme-wallet-tokenlist/main/tokenlist.json",
-    filePath.string()
-  );
-  json tokenlist = json::parse(Utils::readJSONFile(filePath));
-  json tokens = tokenlist["tokens"];
-  for (auto& token : tokens) {
-    QVariantMap tokenObj;
-    tokenObj["address"] = QString::fromStdString(token["contract-address"].get<std::string>());
-    tokenObj["name"] = QString::fromStdString(token["name"].get<std::string>());
-    tokenObj["symbol"] = QString::fromStdString(token["symbol"].get<std::string>());
-    tokenObj["decimals"] = token["decimals"].get<int>();
-    tokenObj["icon"] = QString::fromStdString(token["logoURI"].get<std::string>());
-    ret << tokenObj;
-  }
-  return ret;
+void QmlSystem::getARC20TokenList() {
+  QtConcurrent::run([=](){
+    QVariantList ret;
+    boost::filesystem::path filePath = Utils::walletFolderPath.string()
+      + "/wallet/c-avax/tokenlist.json";
+    // Always force-refresh the list
+    if (boost::filesystem::exists(filePath)) { boost::filesystem::remove(filePath); }
+    API::httpGetFile(
+      "raw.githubusercontent.com",
+      "/avme/avme-wallet-tokenlist/main/tokenlist.json",
+      filePath.string()
+    );
+    json tokenlist = json::parse(Utils::readJSONFile(filePath));
+    json tokens = tokenlist["tokens"];
+    for (auto& token : tokens) {
+      QVariantMap tokenObj;
+      tokenObj["address"] = QString::fromStdString(token["contract-address"].get<std::string>());
+      tokenObj["name"] = QString::fromStdString(token["name"].get<std::string>());
+      tokenObj["symbol"] = QString::fromStdString(token["symbol"].get<std::string>());
+      tokenObj["decimals"] = token["decimals"].get<int>();
+      tokenObj["icon"] = QString::fromStdString(token["logoURI"].get<std::string>());
+      tokenObj["selected"] = false;
+      ret << tokenObj;
+    }
+    emit gotTokenList(ret);
+  });
 }
 
 bool QmlSystem::addARC20Token(
@@ -203,4 +206,21 @@ bool QmlSystem::ARC20TokenWasAdded(QString address) {
   std::string avmeStr = Pangolin::contracts["AVME"];
   if (addressStr == avmeStr) { return true; }
   return QmlSystem::w.ARC20TokenWasAdded(addressStr);
+}
+
+void QmlSystem::addARC20Tokens(QVariantList addresses) {
+  QtConcurrent::run([=](){
+    int tokenCt = addresses.count();
+    for (int i = 0; i < tokenCt; i++) {
+      emit updateAddTokenProgress(i + 1, tokenCt);
+      QVariantMap tokenData = getARC20TokenData(addresses[i].toString());
+      addARC20Token(
+        tokenData["address"].toString(), tokenData["symbol"].toString(),
+        tokenData["name"].toString(), tokenData["decimals"].toInt(),
+        tokenData["avaxPairContract"].toString()
+      );
+      downloadARC20TokenImage(tokenData["address"].toString());
+    }
+    emit addedTokens();
+  });
 }
