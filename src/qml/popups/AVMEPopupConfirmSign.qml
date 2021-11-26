@@ -13,8 +13,6 @@ AVMEPopup {
   id: confirmSignPopup
   widthPct: 0.7
   heightPct: 0.6
-  property string fullInfo: "Sign the following message: <br><b>" + message + "</b>" +
-  "<br>With the address <b>" + address + "</b>"
   property alias pass: passInput.text
   property alias passFocus: passInput.focus
   property alias timer: infoTimer
@@ -106,12 +104,24 @@ AVMEPopup {
     }
 
     Text {
-      id: summaryInfo
+      id: summaryHeader
       anchors.horizontalCenter: parent.horizontalCenter
       horizontalAlignment: Text.AlignHCenter
       color: "#FFFFFF"
       font.pixelSize: 14.0
-      text: fullInfo
+      text: "Sign the following message with the address <br><b>" + address + "</b>:"
+    }
+
+    Text {
+      id: summaryInfo
+      width: (confirmSignPopup.width * 0.9)
+      anchors.horizontalCenter: parent.horizontalCenter
+      horizontalAlignment: Text.AlignHCenter
+      color: "#FFFFFF"
+      wrapMode: Text.WordWrap
+      font.bold: true
+      font.pixelSize: 14.0
+      text: message
     }
 
     Text {
