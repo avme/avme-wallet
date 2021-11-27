@@ -7,6 +7,8 @@
 #include <QtConcurrent/qtconcurrentrun.h>
 #include <QtCore/QDateTime>
 #include <QtCore/QFile>
+#include <QtCore/QFuture>
+#include <QtCore/QFutureSynchronizer>
 #include <QtCore/QStandardPaths>
 #include <QtCore/QString>
 #include <QtCore/QStringList>
@@ -84,7 +86,7 @@ class QmlSystem : public QObject {
       this->w.closeAddressDB();
       this->w.closeConfigDB();
       stopWSServer();
-      // Wait untill all threads from QtThreadPool exits
+      // Wait until all threads from QtThreadPool exit
       QThreadPool::globalInstance()->waitForDone(-1); // -1 to ignore timeout https://doc.qt.io/qt-5/qthreadpool.html#waitForDone
       return;
     }
@@ -99,7 +101,7 @@ class QmlSystem : public QObject {
 
     // Tokens screen signals
     void gotTokenList(QVariantList tokenData);
-    void updateAddTokenProgress(int current, int total);
+    void updateAddTokenProgress(int total);
     void addedTokens();
 
     // Account screen signals

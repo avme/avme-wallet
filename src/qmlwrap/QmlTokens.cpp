@@ -113,37 +113,36 @@ bool QmlSystem::ARC20TokenExists(QString address) {
   symbolJsonArr.push_back("latest");
   decimalsJsonArr.push_back(decimalsJson);
   decimalsJsonArr.push_back("latest");
+  std::vector<Request> reqVec;
   Request supplyReq{1, "2.0", "eth_call", supplyJsonArr};
-  Request balanceReq{1, "2.0", "eth_call", balanceJsonArr};
-  Request nameReq{1, "2.0", "eth_call", nameJsonArr};
-  Request symbolReq{1, "2.0", "eth_call", symbolJsonArr};
-  Request decimalsReq{1, "2.0", "eth_call", decimalsJsonArr};
-  std::string supplyQuery, supplyResp, supplyHex;
-  std::string balanceQuery, balanceResp, balanceHex;
-  std::string nameQuery, nameResp, nameHex;
-  std::string symbolQuery, symbolResp, symbolHex;
-  std::string decimalsQuery, decimalsResp, decimalsHex;
-  supplyQuery = API::buildRequest(supplyReq);
-  balanceQuery = API::buildRequest(balanceReq);
-  nameQuery = API::buildRequest(nameReq);
-  symbolQuery = API::buildRequest(symbolReq);
-  decimalsQuery = API::buildRequest(decimalsReq);
-  supplyResp = API::httpGetRequest(supplyQuery);
-  balanceResp = API::httpGetRequest(balanceQuery);
-  nameResp = API::httpGetRequest(nameQuery);
-  symbolResp = API::httpGetRequest(symbolQuery);
-  decimalsResp = API::httpGetRequest(decimalsQuery);
-  json supplyRespJson = json::parse(supplyResp);
-  json balanceRespJson = json::parse(balanceResp);
-  json nameRespJson = json::parse(nameResp);
-  json symbolRespJson = json::parse(symbolResp);
-  json decimalsRespJson = json::parse(decimalsResp);
+  Request balanceReq{2, "2.0", "eth_call", balanceJsonArr};
+  Request nameReq{3, "2.0", "eth_call", nameJsonArr};
+  Request symbolReq{4, "2.0", "eth_call", symbolJsonArr};
+  Request decimalsReq{5, "2.0", "eth_call", decimalsJsonArr};
+  reqVec.push_back(supplyReq);
+  reqVec.push_back(balanceReq);
+  reqVec.push_back(nameReq);
+  reqVec.push_back(symbolReq);
+  reqVec.push_back(decimalsReq);
+  std::string query = API::buildMultiRequest(reqVec);
+  std::string resp = API::httpGetRequest(query);
+  json resultArr = json::parse(resp);
+  std::string supplyHex, balanceHex, nameHex, symbolHex, decimalsHex;
   try {
-    supplyHex = supplyRespJson["result"].get<std::string>();
-    balanceHex = balanceRespJson["result"].get<std::string>();
-    nameHex = nameRespJson["result"].get<std::string>();
-    symbolHex = symbolRespJson["result"].get<std::string>();
-    decimalsHex = decimalsRespJson["result"].get<std::string>();
+    for (auto arrItem : resultArr) {
+      switch (arrItem["id"].get<int>()) {
+        case 1: // Supply
+          supplyHex = arrItem["result"].get<std::string>(); break;
+        case 2: // Balance
+          balanceHex = arrItem["result"].get<std::string>(); break;
+        case 3: // Name
+          nameHex = arrItem["result"].get<std::string>(); break;
+        case 4: // Symbol
+          symbolHex = arrItem["result"].get<std::string>(); break;
+        case 5: // Decimals
+          decimalsHex = arrItem["result"].get<std::string>(); break;
+      }
+    }
   } catch (...) { return false; }
   if (supplyHex == "0x" || supplyHex == "") { return false; }
   if (balanceHex == "0x" || balanceHex == "") { return false; }
@@ -164,28 +163,31 @@ QVariantMap QmlSystem::getARC20TokenData(QString address) {
   pairJson["data"] = Pangolin::factoryFuncs["getPair"]
     + Utils::addressToHex(addressStr)
     + Utils::addressToHex(Pangolin::contracts["AVAX"]);
+  std::vector<Request> reqVec;
   Request nameReq{1, "2.0", "eth_call", {nameJson, "latest"}};
-  Request symbolReq{1, "2.0", "eth_call", {symbolJson, "latest"}};
-  Request decimalsReq{1, "2.0", "eth_call", {decimalsJson, "latest"}};
-  Request pairReq{1, "2.0", "eth_call", {pairJson, "latest"}};
-  std::string nameQuery, nameResp, nameHex, symbolQuery, symbolResp, symbolHex,
-    decimalsQuery, decimalsResp, decimalsHex, pairQuery, pairResp, pairHex;
-  nameQuery = API::buildRequest(nameReq);
-  symbolQuery = API::buildRequest(symbolReq);
-  decimalsQuery = API::buildRequest(decimalsReq);
-  pairQuery = API::buildRequest(pairReq);
-  nameResp = API::httpGetRequest(nameQuery);
-  symbolResp = API::httpGetRequest(symbolQuery);
-  decimalsResp = API::httpGetRequest(decimalsQuery);
-  pairResp = API::httpGetRequest(pairQuery);
-  json nameRespJson = json::parse(nameResp);
-  json symbolRespJson = json::parse(symbolResp);
-  json decimalsRespJson = json::parse(decimalsResp);
-  json pairRespJson = json::parse(pairResp);
-  nameHex = nameRespJson["result"].get<std::string>();
-  symbolHex = symbolRespJson["result"].get<std::string>();
-  decimalsHex = decimalsRespJson["result"].get<std::string>();
-  pairHex = pairRespJson["result"].get<std::string>();
+  Request symbolReq{2, "2.0", "eth_call", {symbolJson, "latest"}};
+  Request decimalsReq{3, "2.0", "eth_call", {decimalsJson, "latest"}};
+  Request pairReq{4, "2.0", "eth_call", {pairJson, "latest"}};
+  reqVec.push_back(nameReq);
+  reqVec.push_back(symbolReq);
+  reqVec.push_back(decimalsReq);
+  reqVec.push_back(pairReq);
+  std::string query = API::buildMultiRequest(reqVec);
+  std::string resp = API::httpGetRequest(query);
+  json resultArr = json::parse(resp);
+  std::string nameHex, symbolHex, decimalsHex, pairHex;
+  for (auto arrItem : resultArr) {
+    switch (arrItem["id"].get<int>()) {
+      case 1: // Name
+        nameHex = arrItem["result"].get<std::string>(); break;
+      case 2: // Symbol
+        symbolHex = arrItem["result"].get<std::string>(); break;
+      case 3: // Decimals
+        decimalsHex = arrItem["result"].get<std::string>(); break;
+      case 4: // Pair
+        pairHex = arrItem["result"].get<std::string>(); break;
+    }
+  }
   ARC20Token token;
   token.address = addressStr;
   token.name = Utils::bytesFromHex(nameHex);
@@ -210,16 +212,26 @@ bool QmlSystem::ARC20TokenWasAdded(QString address) {
 
 void QmlSystem::addARC20Tokens(QVariantList addresses) {
   QtConcurrent::run([=](){
-    int tokenCt = addresses.count();
-    for (int i = 0; i < tokenCt; i++) {
-      emit updateAddTokenProgress(i + 1, tokenCt);
-      QVariantMap tokenData = getARC20TokenData(addresses[i].toString());
+    int tokenCt = 0;
+    QFutureSynchronizer<QVariantMap> sync;
+    QList<QFuture<QVariantMap>> syncList;
+    for (int i = 0; i < addresses.count(); i++) {
+      sync.addFuture(QtConcurrent::run([=](){
+        QVariantMap tokenData = getARC20TokenData(addresses[i].toString());
+        downloadARC20TokenImage(addresses[i].toString());
+        emit updateAddTokenProgress(addresses.count());
+        return tokenData;
+      }));
+    }
+    sync.waitForFinished();
+    syncList = sync.futures();
+    for (int i = 0; i < syncList.size(); i++) {
+      QVariantMap tokenData = syncList.at(i);
       addARC20Token(
         tokenData["address"].toString(), tokenData["symbol"].toString(),
         tokenData["name"].toString(), tokenData["decimals"].toInt(),
         tokenData["avaxPairContract"].toString()
       );
-      downloadARC20TokenImage(tokenData["address"].toString());
     }
     emit addedTokens();
   });

@@ -10,16 +10,21 @@ import "qrc:/qml/components"
 AVMEPopup {
   id: addListTokenPopup
   property var tokens: null
+  property var addedTokens: 0
 
   onAboutToShow: {
     tokenList.tokenModel.clear()
     tokens = null
+    addedTokens = 0
     filterInput.text = ""
+    selectAllCheckbox.checked = false
     qmlSystem.getARC20TokenList()
   }
   onAboutToHide: {
     tokenList.tokenModel.clear()
     tokens = null
+    addedTokens = 0
+    selectAllCheckbox.checked = false
     filterInput.text = ""
   }
 
@@ -36,9 +41,11 @@ AVMEPopup {
       tokens = tokenData
       refreshList("")
     }
-    function onUpdateAddTokenProgress(current, total) {
-      window.infoPopup.info = "Adding tokens... "
-      + "(" + current + "/" + total + ")" + "<br>This may take a while."
+    function onUpdateAddTokenProgress(total) {
+      addedTokens++
+      if (addedTokens > total) addedTokens = total
+      window.infoPopup.info = "Fetching tokens... " + "(" + addedTokens + "/" + total + ")"
+      + "<br>This may take a while."
     }
     function onAddedTokens() {
       window.infoPopup.close()
@@ -47,7 +54,6 @@ AVMEPopup {
   }
 
   function refreshList(filter) {
-    // TODO: redo this - clearing the model clears the selections, that shouldn't happen
     tokenList.tokenModel.clear()
     for (var i = 0; i < tokens.length; i++) {
       var nameMatch = tokens[i]["name"].toUpperCase().includes(filter.toUpperCase())
@@ -141,10 +147,9 @@ AVMEPopup {
             tokenArr.push(tokenList.tokenModel.get(i).address)
           }
         }
-        window.infoPopup.info = "Adding tokens...<br>This may take a while."
+        window.infoPopup.info = "Fetching tokens...<br>This may take a while."
         window.infoPopup.open()
         qmlSystem.addARC20Tokens(tokenArr)
-        // TODO: parallelize adding tokens
       }
     }
 

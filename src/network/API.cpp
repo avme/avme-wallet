@@ -66,6 +66,7 @@ std::string API::httpGetRequest(std::string reqBody, bool isWebSocket) {
 
     // Receive the HTTP response
     http::read(stream, buffer, res);
+    //std::cout << res.base().result() << std::endl;
 
     // Write only the body answer to output
     std::string body { boost::asio::buffers_begin(res.body().data()),boost::asio::buffers_end(res.body().data()) };
