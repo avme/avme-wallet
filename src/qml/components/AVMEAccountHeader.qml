@@ -241,58 +241,12 @@ Rectangle {
   }
 
   Rectangle {
-    id: websiteRect
-    color: "transparent"
-    radius: 5
-    width: 32
-    height: 32
-    visible: (currentAddress != "")
-    anchors {
-      right: privKeyRect.left
-      rightMargin: 10
-      verticalCenter: parent.verticalCenter
-    }
-    ToolTip {
-      id: websiteTooltip
-      parent: websiteRect
-      contentItem: Text {
-        font.pixelSize: 12.0
-        color: "#FFFFFF"
-        text: "Show Website Permissions"
-      }
-      background: Rectangle { color: "#1C2029" }
-    }
-    AVMEAsyncImage {
-      id: websiteImage
-      width: parent.width
-      height: parent.height
-      loading: false
-      anchors.centerIn: parent
-      imageSource: "qrc:/img/icons/world.png"
-    }
-    MouseArea {
-      id: websiteMouseArea
-      anchors.fill: parent
-      hoverEnabled: true
-      onEntered: {
-        websiteImage.imageSource = "qrc:/img/icons/worldSelect.png"
-        websiteTooltip.visible = true
-      }
-      onExited: {
-        websiteImage.imageSource = "qrc:/img/icons/world.png"
-        websiteTooltip.visible = false
-      }
-      onClicked: viewWebsitePermissionPopup.open()
-    }
-  }
-
-  Rectangle {
     id: privKeyRect
     color: "transparent"
     radius: 5
     width: 32
     height: 32
-    visible: (currentAddress != "")
+    visible: (currentAddress != "" && !isLedger)
     anchors {
       right: seedRect.left
       rightMargin: 10
@@ -340,7 +294,7 @@ Rectangle {
     height: 32
     visible: (currentAddress != "")
     anchors {
-      right: parent.right
+      right: websiteRect.left
       rightMargin: 10
       verticalCenter: parent.verticalCenter
     }
@@ -375,6 +329,52 @@ Rectangle {
         seedTooltip.visible = false
       }
       onClicked: viewSeedPopup.open()
+    }
+  }
+
+  Rectangle {
+    id: websiteRect
+    color: "transparent"
+    radius: 5
+    width: 32
+    height: 32
+    visible: (currentAddress != "")
+    anchors {
+      right: parent.right
+      rightMargin: 10
+      verticalCenter: parent.verticalCenter
+    }
+    ToolTip {
+      id: websiteTooltip
+      parent: websiteRect
+      contentItem: Text {
+        font.pixelSize: 12.0
+        color: "#FFFFFF"
+        text: "Show Website Permissions"
+      }
+      background: Rectangle { color: "#1C2029" }
+    }
+    AVMEAsyncImage {
+      id: websiteImage
+      width: parent.width
+      height: parent.height
+      loading: false
+      anchors.centerIn: parent
+      imageSource: "qrc:/img/icons/world.png"
+    }
+    MouseArea {
+      id: websiteMouseArea
+      anchors.fill: parent
+      hoverEnabled: true
+      onEntered: {
+        websiteImage.imageSource = "qrc:/img/icons/worldSelect.png"
+        websiteTooltip.visible = true
+      }
+      onExited: {
+        websiteImage.imageSource = "qrc:/img/icons/world.png"
+        websiteTooltip.visible = false
+      }
+      onClicked: viewWebsitePermissionPopup.open()
     }
   }
 
