@@ -3,6 +3,7 @@
    file LICENSE or http://www.opensource.org/licenses/mit-license.php. */
 import QtQuick 2.9
 import QtQuick.Controls 2.2
+import Qt.labs.platform 1.0
 
 import "qrc:/qml/components"
 import "qrc:/qml/popups"
@@ -10,6 +11,38 @@ import "qrc:/qml/popups"
 // Screen for showing general settings
 Item {
   id: settingsScreen
+
+  // Get stored configs
+  function reloadConfigs() {
+    // Remember password for X minutes
+    var storedValue = qmlSystem.getConfigValue("storePass")
+    storedValue = (+storedValue >= 0) ? storedValue : "0"
+    storePassBox.value = +storedValue
+
+    // Developer Mode checkbox
+    var toggled = qmlSystem.getConfigValue("devMode")
+    if (toggled == "true") { developerCheck.checked = true }
+    else if (toggled == "false") { developerCheck.checked = false }
+
+    // Custom Wallet API inputs
+    var walletAPIStr = qmlSystem.getConfigValue("walletAPI")
+    if (walletAPIStr != "NotFound: ") {
+      var walletAPIJson = JSON.parse(walletAPIStr)
+      walletAPIHost.text = walletAPIJson["host"]
+      walletAPIPort.text = walletAPIJson["port"]
+      walletAPITarget.text = walletAPIJson["target"]
+    }
+
+    // Custom Websocket API inputs
+    var websocketAPIStr = qmlSystem.getConfigValue("websocketAPI")
+    if (websocketAPIStr != "NotFound: ") {
+      var websocketAPIJson = JSON.parse(websocketAPIStr)
+      websocketAPIHost.text = websocketAPIJson["host"]
+      websocketAPIPort.text = websocketAPIJson["port"]
+      websocketAPITarget.text = websocketAPIJson["target"]
+      websocketAPIPluginPort.text = websocketAPIJson["pluginPort"]
+    }
+  }
 
   AVMEPanel {
     id: settingsPanel
@@ -22,43 +55,13 @@ Item {
     }
     title: "Advanced Settings"
 
-    // Get stored configs
-    Component.onCompleted: {
-      // Remember password for X minutes
-      var storedValue = qmlSystem.getConfigValue("storePass")
-      storedValue = (+storedValue >= 0) ? storedValue : "0"
-      storePassBox.value = +storedValue
-
-      // Developer Mode checkbox
-      var toggled = qmlSystem.getConfigValue("devMode")
-      if (toggled == "true") { developerCheck.checked = true }
-      else if (toggled == "false") { developerCheck.checked = false }
-
-      // Custom Wallet API inputs
-      var walletAPIStr = qmlSystem.getConfigValue("walletAPI")
-      if (walletAPIStr != "NotFound: ") {
-        var walletAPIJson = JSON.parse(walletAPIStr)
-        walletAPIHost.text = walletAPIJson["host"]
-        walletAPIPort.text = walletAPIJson["port"]
-        walletAPITarget.text = walletAPIJson["target"]
-      }
-
-      // Custom Websocket API inputs
-      var websocketAPIStr = qmlSystem.getConfigValue("websocketAPI")
-      if (websocketAPIStr != "NotFound: ") {
-        var websocketAPIJson = JSON.parse(websocketAPIStr)
-        websocketAPIHost.text = websocketAPIJson["host"]
-        websocketAPIPort.text = websocketAPIJson["port"]
-        websocketAPITarget.text = websocketAPIJson["target"]
-        websocketAPIPluginPort.text = websocketAPIJson["pluginPort"]
-      }
-    }
+    Component.onCompleted: reloadConfigs()
 
     Column {
       id: settingsCol
       anchors {
         top: parent.top
-        bottom: parent.bottom
+        bottom: exportBtnRow.top
         left: parent.left
         right: parent.right
         topMargin: 80
@@ -293,8 +296,68 @@ Item {
         }
       }
     }
+
+    Row {
+      id: exportBtnRow
+      anchors {
+        bottom: parent.bottom
+        bottomMargin: 20
+        horizontalCenter: parent.horizontalCenter
+      }
+      spacing: 10
+
+      AVMEButton {
+        id: importJSONBtn
+        width: settingsPanel.width * 0.25
+        text: "Import Settings from JSON"
+        onClicked: importDialog.visible = true
+      }
+      AVMEButton {
+        id: exportJSONBtn
+        width: settingsPanel.width * 0.25
+        text: "Export Settings to JSON"
+        onClicked: exportDialog.visible = true
+      }
+    }
   }
 
+  // Dialogs for importing/exporting configs
+  FileDialog {
+    id: importDialog
+    title: "Choose a file to import"
+    onAccepted: {
+      configInfoPopup.isImporting = true
+      configInfoPopup.success = qmlSystem.importConfigs(
+        qmlSystem.cleanPath(importDialog.file.toString())
+      )
+      if (configInfoPopup.success) { reloadConfigs() }
+      configInfoPopup.open()
+    }
+  }
+  FolderDialog {
+    id: exportDialog
+    title: "Choose a folder to export"
+    onAccepted: {
+      configInfoPopup.isImporting = false
+      configInfoPopup.success = qmlSystem.exportConfigs(
+        qmlSystem.cleanPath(exportDialog.folder.toString() + "/configs.json")
+      )
+      configInfoPopup.open()
+    }
+  }
+
+  // Info popup for import/export results
+  AVMEPopupInfo {
+    id: configInfoPopup
+    property bool success
+    property bool isImporting
+    icon: (success) ? "qrc:/img/ok.png" : "qrc:/img/no.png"
+    info: (success)
+    ? ("Settings successfully " + (isImporting ? "imported" : "exported"))
+    : ("Failed to " + (isImporting ? "import" : "export") + " settings, please try again.")
+  }
+
+  // Popup for checking the API
   AVMEPopup {
     id: apiCheckPopup
     widthPct: 0.4

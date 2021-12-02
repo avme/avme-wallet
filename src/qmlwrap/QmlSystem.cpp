@@ -160,8 +160,16 @@ bool QmlSystem::setConfigValue(QString key, QString value) {
   return this->w.setConfigValue(key.toStdString(), value.toStdString());
 }
 
+bool QmlSystem::importConfigs(QString file) {
+  return this->w.importConfigs(cleanPath(file).toStdString());
+}
+
+bool QmlSystem::exportConfigs(QString file) {
+  return this->w.exportConfigs(cleanPath(file).toStdString());
+}
+
 bool QmlSystem::loadConfigDB() {
-  auto status = this->w.loadConfigDB(); 
+  auto status = this->w.loadConfigDB();
   if (!status) {
     return status;
   }
@@ -232,22 +240,18 @@ void QmlSystem::setWebSocketAPI(QString host, QString port, QString target, QStr
 }
 
 void QmlSystem::testAPI(QString host, QString port, QString target, QString type) {
-  // Test it agaisnt the default API.
   QtConcurrent::run([=](){
-
-    Request req{1, "2.0", "eth_getBalance",{this->getCurrentAccount().toStdString(), "latest"}};
-    std::string request = API::buildRequest(req);
-
-    std::string walletAPIResponse = API::httpGetRequest(request);
-    std::string desiredAPIResponse = API::customHttpRequest(request,
-                                                            host.toStdString(),
-                                                            port.toStdString(),
-                                                            target.toStdString(),
-                                                            "POST",
-                                                            "application/json");
+    // Test against the default API.
     // Both answers for a simple request should be equal.
+    Request req{1, "2.0", "eth_getBalance", {this->getCurrentAccount().toStdString(), "latest"}};
+    std::string request = API::buildRequest(req);
+    std::string walletAPIResponse = API::httpGetRequest(request);
+    std::string desiredAPIResponse = API::customHttpRequest(
+      request, host.toStdString(), port.toStdString(), target.toStdString(),
+      "POST", "application/json"
+    );
     try {
-      // Parse to JSON's to have the same output
+      // Parse to JSON to have the same output.
       json walletAPI = json::parse(walletAPIResponse);
       json desiredAPI = json::parse(desiredAPIResponse);
       if (walletAPI == desiredAPI) {
@@ -260,11 +264,11 @@ void QmlSystem::testAPI(QString host, QString port, QString target, QString type
         Utils::logToDebug(reason.str());
       }
     } catch (std::exception &e) {
-      emit apiReturnedSuccessfully(false, type); 
+      emit apiReturnedSuccessfully(false, type);
       std::stringstream reason;
       reason << "Desired Answer: " << walletAPIResponse;
       reason << "Custom API Answer: " << desiredAPIResponse;
-      Utils::logToDebug(reason.str());      
+      Utils::logToDebug(reason.str());
     }
   });
 }
