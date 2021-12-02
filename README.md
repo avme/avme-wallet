@@ -13,8 +13,13 @@ Official wallet for the AVME Project.
 * For compiling LevelDB: **libsnappy**
 * For compiling Qt: **libdouble-conversion-dev**, **libkrb5-dev** and **libvulkan**
 
-Handy one-liner for **Debian 9 Stretch or newer**:
-* `sudo apt-get build-dep qtbase5-dev && sudo apt-get install build-essential make automake cmake curl g++-multilib mingw-w64 libtool binutils bsdmainutils pkg-config python3 patch bison gperf libdouble-conversion-dev libxcb-xinerama0-dev libkrb5-dev libsnappy-dev libvulkan-dev`
+### One-liners
+
+For **Debian 9 Stretch or newer**:
+* `sudo apt-get install qtbase5-dev build-essential make automake cmake curl g++-multilib mingw-w64 libtool binutils bsdmainutils pkg-config python3 patch bison gperf libdouble-conversion-dev libxcb-xinerama0-dev libkrb5-dev libsnappy-dev libvulkan-dev`
+
+For **Arch Linux** and derivatives (e.g. Manjaro):
+* `sudo pacman -S qt5-base gcc make automake autoconf cmake curl mingw-w64-gcc libtool binutils pkgconf python patch bison gperf double-conversion libxinerama krb5 snappy vulkan-headers`
 
 ### Known caveats
 

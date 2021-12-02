@@ -1,6 +1,6 @@
 # double-conversion is statically linked due to version differences between distros
 SET(QT_LIBS "")
-LIST(APPEND QT_LIBS "-ldl -lgssapi_krb5 -l:libdouble-conversion.a")
+LIST(APPEND QT_LIBS "-ldl -lgssapi_krb5 -ldouble-conversion")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/plugins/imageformats/libqgif.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Network.a")
 LIST(APPEND QT_LIBS "${CMAKE_SOURCE_DIR}/depends/${DEPENDS_PREFIX}/lib/libQt5Gui.a")
