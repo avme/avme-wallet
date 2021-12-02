@@ -3,6 +3,7 @@
    file LICENSE or http://www.opensource.org/licenses/mit-license.php. */
 import QtQuick 2.9
 import QtQuick.Controls 2.2
+import Qt.labs.platform 1.0
 
 import "qrc:/qml/components"
 import "qrc:/qml/popups"
@@ -10,6 +11,38 @@ import "qrc:/qml/popups"
 // Screen for showing general settings
 Item {
   id: settingsScreen
+
+  // Get stored configs
+  function reloadConfigs() {
+    // Remember password for X minutes
+    var storedValue = qmlSystem.getConfigValue("storePass")
+    storedValue = (+storedValue >= 0) ? storedValue : "0"
+    storePassBox.value = +storedValue
+
+    // Developer Mode checkbox
+    var toggled = qmlSystem.getConfigValue("devMode")
+    if (toggled == "true") { developerCheck.checked = true }
+    else if (toggled == "false") { developerCheck.checked = false }
+
+    // Custom Wallet API inputs
+    var walletAPIStr = qmlSystem.getConfigValue("walletAPI")
+    if (walletAPIStr != "NotFound: ") {
+      var walletAPIJson = JSON.parse(walletAPIStr)
+      walletAPIHost.text = walletAPIJson["host"]
+      walletAPIPort.text = walletAPIJson["port"]
+      walletAPITarget.text = walletAPIJson["target"]
+    }
+
+    // Custom Websocket API inputs
+    var websocketAPIStr = qmlSystem.getConfigValue("websocketAPI")
+    if (websocketAPIStr != "NotFound: ") {
+      var websocketAPIJson = JSON.parse(websocketAPIStr)
+      websocketAPIHost.text = websocketAPIJson["host"]
+      websocketAPIPort.text = websocketAPIJson["port"]
+      websocketAPITarget.text = websocketAPIJson["target"]
+      websocketAPIPluginPort.text = websocketAPIJson["pluginPort"]
+    }
+  }
 
   AVMEPanel {
     id: settingsPanel
@@ -22,43 +55,13 @@ Item {
     }
     title: "Advanced Settings"
 
-    // Get stored configs
-    Component.onCompleted: {
-      // Remember password for X minutes
-      var storedValue = qmlSystem.getConfigValue("storePass")
-      storedValue = (+storedValue >= 0) ? storedValue : "0"
-      storePassBox.value = +storedValue
-
-      // Developer Mode checkbox
-      var toggled = qmlSystem.getConfigValue("devMode")
-      if (toggled == "true") { developerCheck.checked = true }
-      else if (toggled == "false") { developerCheck.checked = false }
-
-      // Custom Wallet API inputs
-      var walletAPIStr = qmlSystem.getConfigValue("walletAPI")
-      if (walletAPIStr != "NotFound: ") {
-        var walletAPIJson = JSON.parse(walletAPIStr)
-        walletAPIHost.text = walletAPIJson["host"]
-        walletAPIPort.text = walletAPIJson["port"]
-        walletAPITarget.text = walletAPIJson["target"]
-      }
-
-      // Custom Websocket API inputs
-      var websocketAPIStr = qmlSystem.getConfigValue("websocketAPI")
-      if (websocketAPIStr != "NotFound: ") {
-        var websocketAPIJson = JSON.parse(websocketAPIStr)
-        websocketAPIHost.text = websocketAPIJson["host"]
-        websocketAPIPort.text = websocketAPIJson["port"]
-        websocketAPITarget.text = websocketAPIJson["target"]
-        websocketAPIPluginPort.text = websocketAPIJson["pluginPort"]
-      }
-    }
+    Component.onCompleted: reloadConfigs()
 
     Column {
       id: settingsCol
       anchors {
         top: parent.top
-        bottom: parent.bottom
+        bottom: exportBtnRow.top
         left: parent.left
         right: parent.right
         topMargin: 80
@@ -176,11 +179,21 @@ Item {
 
       Text {
         id: customAPIText
-        width: settingsCol.width
-        horizontalAlignment: Text.AlignHCenter
+        width: settingsCol.width * 0.75
         color: "#FFFFFF"
         font.pixelSize: 14.0
         text: "Set custom endpoints for: (blank = default)"
+
+        AVMEButton {
+          id: apiSaveBtn
+          width: settingsCol.width * 0.25
+          anchors {
+            verticalCenter: parent.verticalCenter
+            left: parent.right
+          }
+          text: "Save & Reload APIs"
+          onClicked: apiCheckPopup.open()
+        }
       }
 
       Text {
@@ -216,20 +229,6 @@ Item {
           anchors.leftMargin: 10
           label: "Target"
           placeholder: "e.g. /"
-        }
-        AVMEButton {
-          id: walletAPISaveBtn
-          width: settingsCol.width * 0.1
-          anchors.left: walletAPITarget.right
-          anchors.leftMargin: 10
-          text: "Save"
-          onClicked: {
-            var host = walletAPIHost.text
-            var port = walletAPIPort.text
-            var target = walletAPITarget.text
-            apiCheckPopup.open()
-            qmlSystem.testAPI(host, port, target, "walletAPI")
-          }
         }
       }
 
@@ -276,75 +275,248 @@ Item {
           placeholder: "e.g. 4812"
           validator: RegExpValidator { regExp: /[0-9]{0,}/ }
         }
-        AVMEButton {
-          id: websocketAPISaveBtn
-          width: settingsCol.width * 0.2
-          anchors.left: websocketAPIPluginPort.right
-          anchors.leftMargin: 10
-          text: "Save & Reload Server"
-          onClicked: {
-            var host = websocketAPIHost.text
-            var port = websocketAPIPort.text
-            var target = websocketAPITarget.text
-            var pluginPort = websocketAPIPluginPort.text
-            apiCheckPopup.open()
-            qmlSystem.testAPI(host, port, target, "websocketAPI")
-          }
-        }
+      }
+    }
+
+    Row {
+      id: exportBtnRow
+      anchors {
+        bottom: parent.bottom
+        bottomMargin: 20
+        horizontalCenter: parent.horizontalCenter
+      }
+      spacing: 10
+
+      AVMEButton {
+        id: importJSONBtn
+        width: settingsPanel.width * 0.25
+        text: "Import Settings from JSON"
+        onClicked: importDialog.visible = true
+      }
+      AVMEButton {
+        id: exportJSONBtn
+        width: settingsPanel.width * 0.25
+        text: "Export Settings to JSON"
+        onClicked: exportDialog.visible = true
       }
     }
   }
 
+  // Dialogs for importing/exporting configs
+  FileDialog {
+    id: importDialog
+    title: "Choose a file to import"
+    onAccepted: {
+      configInfoPopup.isImporting = true
+      configInfoPopup.success = qmlSystem.importConfigs(
+        qmlSystem.cleanPath(importDialog.file.toString())
+      )
+      if (configInfoPopup.success) { reloadConfigs() }
+      configInfoPopup.open()
+    }
+  }
+  FolderDialog {
+    id: exportDialog
+    title: "Choose a folder to export"
+    onAccepted: {
+      configInfoPopup.isImporting = false
+      configInfoPopup.success = qmlSystem.exportConfigs(
+        qmlSystem.cleanPath(exportDialog.folder.toString() + "/configs.json")
+      )
+      configInfoPopup.open()
+    }
+  }
+
+  // Info popup for import/export results
+  AVMEPopupInfo {
+    id: configInfoPopup
+    property bool success
+    property bool isImporting
+    icon: (success) ? "qrc:/img/ok.png" : "qrc:/img/no.png"
+    info: (success)
+    ? ("Settings successfully " + (isImporting ? "imported" : "exported"))
+    : ("Failed to " + (isImporting ? "import" : "export") + " settings, please try again.")
+    onAboutToHide: { if (success) apiCheckPopup.open() }
+  }
+
+  // Popup for checking the API
   AVMEPopup {
     id: apiCheckPopup
+    property bool walletChecked: false
+    property bool websocketChecked: false
+    property bool walletOK: false
+    property bool websocketOK: false
     widthPct: 0.4
-    heightPct: 0.5
+    heightPct: 0.55
     onAboutToShow: {
-      apiCheckImg.imageSource = "qrc:/img/icons/loading.png"
-      apiCheckImgRotate.start()
-      apiCheckText.text = "Testing connection to the API..."
+      walletApiCheckImg.imageSource = "qrc:/img/icons/loading.png"
+      walletApiCheckImgRotate.start()
+      websocketApiCheckImg.imageSource = "qrc:/img/icons/loading.png"
+      websocketApiCheckImgRotate.start()
+      apiCheckText.text = "Testing connections to the API..."
       apiCheckCloseBtn.visible = false
+      walletChecked = websocketChecked = walletOK = websocketOK = false
+      checkAPIs()
     }
+
+    function checkAPIs() {
+      qmlSystem.testAPI(
+        walletAPIHost.text, walletAPIPort.text,
+        walletAPITarget.text, "walletAPI"
+      )
+      qmlSystem.testAPI(
+        websocketAPIHost.text, websocketAPIPort.text,
+        websocketAPITarget.text, "websocketAPI"
+      )
+    }
+
     Connections {
       target: qmlSystem
       function onApiReturnedSuccessfully(success, type) {
-        apiCheckImgRotate.restart()
-        apiCheckImgRotate.stop()
-        apiCheckCloseBtn.visible = true
-        apiCheckImg.imageSource = "qrc:/img/" + ((success) ? "ok.png" : "no.png")
-        apiCheckText.text = (success)
-          ? "Connection successful!<br>API is working."
-          : "Connection failed.<br>Please check if API details are correct.<br> Errors are logged in your debug.log"
-        if (success) {
-          if (type == "walletAPI") {
-            qmlSystem.setWalletAPI(walletAPIHost.text, walletAPIPort.text, walletAPITarget.text)
+        if (type == "walletAPI") {
+          apiCheckPopup.walletChecked = true
+          walletApiCheckImgRotate.restart()
+          walletApiCheckImgRotate.stop()
+          walletApiCheckImg.imageSource = "qrc:/img/"
+            + ((success) ? "ok.png" : "no.png")
+          if (success) {
+            apiCheckPopup.walletOK = true
+            qmlSystem.setWalletAPI(
+              walletAPIHost.text, walletAPIPort.text, walletAPITarget.text
+            )
           }
-          if (type == "websocketAPI") {
-            qmlSystem.setWebSocketAPI(websocketAPIHost.text, websocketAPIPort.text, websocketAPITarget.text, websocketAPIPluginPort.text)
+        } else if (type == "websocketAPI") {
+          apiCheckPopup.websocketChecked = true
+          websocketApiCheckImgRotate.restart()
+          websocketApiCheckImgRotate.stop()
+          websocketApiCheckImg.imageSource = "qrc:/img/"
+            + ((success) ? "ok.png" : "no.png")
+          if (success) {
+            apiCheckPopup.websocketOK = true
+            qmlSystem.setWebSocketAPI(
+              websocketAPIHost.text, websocketAPIPort.text,
+              websocketAPITarget.text, websocketAPIPluginPort.text
+            )
           }
+        }
+        if (apiCheckPopup.walletChecked && apiCheckPopup.websocketChecked) {
+          apiCheckCloseBtn.visible = true
+          apiCheckText.text = (apiCheckPopup.walletOK && apiCheckPopup.websocketOK)
+          ? "Connections successful!<br>APIs are working."
+          : "One or more connections failed.<br>"
+          + "Please check if API details are correct.<br>"
+          + "Errors are logged in debug.log."
         }
       }
     }
 
-    AVMEAsyncImage {
-      id: apiCheckImg
-      width: 128
-      height: 128
-      anchors {
-        horizontalCenter: parent.horizontalCenter
-        top: parent.top
-        topMargin: 30
+    // Enter/Numpad enter key override
+    Item {
+      focus: true
+      Keys.onPressed: {
+        if ((event.key == Qt.Key_Return) || (event.key == Qt.Key_Enter)) {
+          if (apiCheckCloseBtn.visible) apiCheckPopup.close()
+        }
       }
-      loading: false
-      RotationAnimator {
-        id: apiCheckImgRotate
-        target: apiCheckImg
-        from: 0
-        to: 360
-        duration: 1000
-        loops: Animation.Infinite
-        easing.type: Easing.InOutQuad
-        running: false
+    }
+
+    Row {
+      id: apiCheckImgRow
+      anchors {
+        top: parent.top
+        topMargin: 20
+        horizontalCenter: parent.horizontalCenter
+      }
+      spacing: 50
+
+      Rectangle {
+        id: walletApiRect
+        width: 128
+        height: 128
+        radius: 128
+        color: {
+          if (apiCheckPopup.walletChecked && apiCheckPopup.walletOK) {
+            color: "#0B5418"
+          } else if (apiCheckPopup.walletChecked && !apiCheckPopup.walletOk) {
+            color: "#4F1018"
+          } else {
+            color: "#0B1018"
+          }
+        }
+        AVMEAsyncImage {
+          id: walletApiCheckImg
+          width: 64
+          height: 64
+          loading: false
+          anchors.centerIn: parent
+          RotationAnimator {
+            id: walletApiCheckImgRotate
+            target: walletApiCheckImg
+            from: 0
+            to: 360
+            duration: 1000
+            loops: Animation.Infinite
+            easing.type: Easing.InOutQuad
+            running: false
+          }
+        }
+        Text {
+          id: walletApiCheckText
+          anchors {
+            top: parent.bottom
+            topMargin: 10
+            horizontalCenter: parent.horizontalCenter
+          }
+          horizontalAlignment: Text.AlignHCenter
+          color: "#FFFFFF"
+          font.pointSize: 12.0
+          text: "Wallet API"
+        }
+      }
+
+      Rectangle {
+        id: websocketApiRect
+        width: 128
+        height: 128
+        radius: 128
+        color: {
+          if (apiCheckPopup.websocketChecked && apiCheckPopup.websocketOK) {
+            color: "#0B5418"
+          } else if (apiCheckPopup.websocketChecked && !apiCheckPopup.websocketOk) {
+            color: "#4F1018"
+          } else {
+            color: "#0B1018"
+          }
+        }
+        AVMEAsyncImage {
+          id: websocketApiCheckImg
+          width: 64
+          height: 64
+          loading: false
+          anchors.centerIn: parent
+          RotationAnimator {
+            id: websocketApiCheckImgRotate
+            target: websocketApiCheckImg
+            from: 0
+            to: 360
+            duration: 1000
+            loops: Animation.Infinite
+            easing.type: Easing.InOutQuad
+            running: false
+          }
+        }
+        Text {
+          id: websocketApiCheckText
+          anchors {
+            top: parent.bottom
+            topMargin: 10
+            horizontalCenter: parent.horizontalCenter
+          }
+          horizontalAlignment: Text.AlignHCenter
+          color: "#FFFFFF"
+          font.pointSize: 12.0
+          text: "Websocket API"
+        }
       }
     }
 
@@ -352,8 +524,8 @@ Item {
       id: apiCheckText
       anchors {
         horizontalCenter: parent.horizontalCenter
-        top: apiCheckImg.bottom
-        topMargin: 30
+        top: apiCheckImgRow.bottom
+        topMargin: 60
       }
       horizontalAlignment: Text.AlignHCenter
       color: "#FFFFFF"
@@ -366,7 +538,7 @@ Item {
       anchors {
         horizontalCenter: parent.horizontalCenter
         bottom: parent.bottom
-        bottomMargin: 30
+        bottomMargin: 20
       }
       text: "Close"
       onClicked: apiCheckPopup.close()

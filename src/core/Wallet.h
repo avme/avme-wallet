@@ -371,6 +371,11 @@ class Wallet {
     // Get/Set a given value in the Settings screen.
     std::string getConfigValue(std::string key);
     bool setConfigValue(std::string key, std::string value);
+
+    // Import settings from/Export settings to a JSON file, respectively.
+    // Return true on success, false on failure.
+    bool importConfigs(std::string file);
+    bool exportConfigs(std::string file);
 };
 
 #endif // WALLET_H
