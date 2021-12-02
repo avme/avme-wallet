@@ -582,6 +582,10 @@ void Wallet::updateTxStatus(std::string txHash) {
   saveTxToHistory(tx);
 }
 
+void Wallet::eraseAllHistory() {
+  this->db.deleteAllHistoryDBKeys();
+}
+
 std::string Wallet::getConfigValue(std::string key) {
   return this->db.getConfigDBValue(key);
 }
@@ -590,6 +594,25 @@ bool Wallet::setConfigValue(std::string key, std::string value) {
   return this->db.putConfigDBValue(key, value);
 }
 
-void Wallet::eraseAllHistory() {
-  this->db.deleteAllHistoryDBKeys();
+bool Wallet::importConfigs(std::string file) {
+  boost::filesystem::path filePath = file;
+  if (!boost::filesystem::exists(filePath)) { return false; }
+  json configs = json::parse(Utils::readJSONFile(filePath));
+  for (auto& config : configs.items()) {
+    this->db.putConfigDBValue(config.key(), config.value());
+  }
+  return true;
+}
+
+bool Wallet::exportConfigs(std::string file){
+  boost::filesystem::path filePath = file;
+  if (!boost::filesystem::exists(filePath.parent_path())) {
+    boost::filesystem::create_directories(filePath.parent_path());
+  }
+  std::map<std::string, std::string> configValues = this->db.getAllConfigDBPairs();
+  json configs = json::object();
+  for (std::pair<std::string, std::string> value : configValues) {
+    configs[value.first] = value.second;
+  }
+  return (Utils::writeJSONFile(configs, filePath) == "");
 }

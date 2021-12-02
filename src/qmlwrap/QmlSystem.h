@@ -143,7 +143,7 @@ class QmlSystem : public QObject {
 
     // Signal for requesting user to sign a given transaction
     void askForTransaction(QString data, QString from, QString gas, QString to, QString value, QString website_);
-    
+
     // Signal for requesting user to sign a message
     void askForSign(QString address, QString data, QString website_, int requestSignType);
 
@@ -231,6 +231,10 @@ class QmlSystem : public QObject {
     // Get/Set a given value in the Settings screen.
     Q_INVOKABLE QString getConfigValue(QString key);
     Q_INVOKABLE bool setConfigValue(QString key, QString value);
+
+    // Import/export config values from/to JSON.
+    Q_INVOKABLE bool importConfigs(QString file);
+    Q_INVOKABLE bool exportConfigs(QString file);
 
     // Check if wallet is on the most updated version
     Q_INVOKABLE void checkWalletVersion();

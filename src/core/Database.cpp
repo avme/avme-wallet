@@ -62,11 +62,31 @@ bool Database::deleteTokenDBValue(std::string key) {
   return this->tokenStatus.ok();
 }
 
+std::vector<std::string> Database::getAllTokenDBKeys() {
+  std::vector<std::string> ret;
+  leveldb::Iterator* it = this->tokenDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    ret.push_back(it->key().ToString());
+  }
+  delete it;
+  return ret;
+}
+
 std::vector<std::string> Database::getAllTokenDBValues() {
   std::vector<std::string> ret;
   leveldb::Iterator* it = this->tokenDB->NewIterator(leveldb::ReadOptions());
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
     ret.push_back(it->value().ToString());
+  }
+  delete it;
+  return ret;
+}
+
+std::map<std::string, std::string> Database::getAllTokenDBPairs() {
+  std::map<std::string, std::string> ret;
+  leveldb::Iterator* it = this->tokenDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    ret.emplace(it->key().ToString(), it->value().ToString());
   }
   delete it;
   return ret;
@@ -132,11 +152,31 @@ bool Database::deleteHistoryDBValue(std::string key) {
   return this->historyStatus.ok();
 }
 
+std::vector<std::string> Database::getAllHistoryDBKeys() {
+  std::vector<std::string> ret;
+  leveldb::Iterator* it = this->historyDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    ret.push_back(it->key().ToString());
+  }
+  delete it;
+  return ret;
+}
+
 std::vector<std::string> Database::getAllHistoryDBValues() {
   std::vector<std::string> ret;
   leveldb::Iterator* it = this->historyDB->NewIterator(leveldb::ReadOptions());
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
     ret.push_back(it->value().ToString());
+  }
+  delete it;
+  return ret;
+}
+
+std::map<std::string, std::string> Database::getAllHistoryDBPairs() {
+  std::map<std::string, std::string> ret;
+  leveldb::Iterator* it = this->historyDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    ret.emplace(it->key().ToString(), it->value().ToString());
   }
   delete it;
   return ret;
@@ -198,11 +238,31 @@ bool Database::deleteLedgerDBValue(std::string key) {
   return this->ledgerStatus.ok();
 }
 
+std::vector<std::string> Database::getAllLedgerDBKeys() {
+  std::vector<std::string> ret;
+  leveldb::Iterator* it = this->ledgerDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    ret.push_back(it->key().ToString());
+  }
+  delete it;
+  return ret;
+}
+
 std::vector<std::string> Database::getAllLedgerDBValues() {
   std::vector<std::string> ret;
   leveldb::Iterator* it = this->ledgerDB->NewIterator(leveldb::ReadOptions());
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
     ret.push_back(it->value().ToString());
+  }
+  delete it;
+  return ret;
+}
+
+std::map<std::string, std::string> Database::getAllLedgerDBPairs() {
+  std::map<std::string, std::string> ret;
+  leveldb::Iterator* it = this->ledgerDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    ret.emplace(it->key().ToString(), it->value().ToString());
   }
   delete it;
   return ret;
@@ -264,11 +324,31 @@ bool Database::deleteAppDBValue(std::string key) {
   return this->appStatus.ok();
 }
 
+std::vector<std::string> Database::getAllAppDBKeys() {
+  std::vector<std::string> ret;
+  leveldb::Iterator* it = this->appDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    ret.push_back(it->key().ToString());
+  }
+  delete it;
+  return ret;
+}
+
 std::vector<std::string> Database::getAllAppDBValues() {
   std::vector<std::string> ret;
   leveldb::Iterator* it = this->appDB->NewIterator(leveldb::ReadOptions());
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
     ret.push_back(it->value().ToString());
+  }
+  delete it;
+  return ret;
+}
+
+std::map<std::string, std::string> Database::getAllAppDBPairs() {
+  std::map<std::string, std::string> ret;
+  leveldb::Iterator* it = this->appDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    ret.emplace(it->key().ToString(), it->value().ToString());
   }
   delete it;
   return ret;
@@ -330,11 +410,31 @@ bool Database::deleteAddressDBValue(std::string key) {
   return this->addressStatus.ok();
 }
 
+std::vector<std::string> Database::getAllAddressDBKeys() {
+  std::vector<std::string> ret;
+  leveldb::Iterator* it = this->addressDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    ret.push_back(it->key().ToString());
+  }
+  delete it;
+  return ret;
+}
+
 std::vector<std::string> Database::getAllAddressDBValues() {
   std::vector<std::string> ret;
   leveldb::Iterator* it = this->addressDB->NewIterator(leveldb::ReadOptions());
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
     ret.push_back(it->value().ToString());
+  }
+  delete it;
+  return ret;
+}
+
+std::map<std::string, std::string> Database::getAllAddressDBPairs() {
+  std::map<std::string, std::string> ret;
+  leveldb::Iterator* it = this->addressDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    ret.emplace(it->key().ToString(), it->value().ToString());
   }
   delete it;
   return ret;
@@ -396,11 +496,31 @@ bool Database::deleteConfigDBValue(std::string key) {
   return this->configStatus.ok();
 }
 
+std::vector<std::string> Database::getAllConfigDBKeys() {
+  std::vector<std::string> ret;
+  leveldb::Iterator* it = this->configDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    ret.push_back(it->key().ToString());
+  }
+  delete it;
+  return ret;
+}
+
 std::vector<std::string> Database::getAllConfigDBValues() {
   std::vector<std::string> ret;
   leveldb::Iterator* it = this->configDB->NewIterator(leveldb::ReadOptions());
   for (it->SeekToFirst(); it->Valid(); it->Next()) {
     ret.push_back(it->value().ToString());
+  }
+  delete it;
+  return ret;
+}
+
+std::map<std::string, std::string> Database::getAllConfigDBPairs() {
+  std::map<std::string, std::string> ret;
+  leveldb::Iterator* it = this->configDB->NewIterator(leveldb::ReadOptions());
+  for (it->SeekToFirst(); it->Valid(); it->Next()) {
+    ret.emplace(it->key().ToString(), it->value().ToString());
   }
   delete it;
   return ret;
