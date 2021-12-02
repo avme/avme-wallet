@@ -28,7 +28,8 @@ $(package)_config_opts_riscv64_linux=linux-generic64
 $(package)_config_opts_mipsel_linux=linux-generic32
 $(package)_config_opts_mips_linux=linux-generic32
 $(package)_config_opts_powerpc_linux=linux-generic32
-$(package)_config_opts_x86_64_darwin=darwin64-x86_64-cc
+$(package)_config_opts_x86_64_darwin=--static darwin64-x86_64-cc
+$(package)_config_opts_arm_darwin=--static darwin64-arm64-cc no-asm
 $(package)_config_opts_mingw32=mingw64
 $(package)_config_opts_x86_64_freebsd=BSD-x86_64
 endef
