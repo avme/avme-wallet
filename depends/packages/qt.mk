@@ -129,7 +129,6 @@ $(package)_config_opts_darwin = -no-dbus
 $(package)_config_opts_darwin += -no-opengl
 $(package)_config_opts_darwin += -pch
 $(package)_config_opts_darwin += -device-option QMAKE_MACOSX_DEPLOYMENT_TARGET=$(OSX_MIN_VERSION)
-$(package)_config_opts_darwin += -openssl-linked
 $(package)_config_opts_darwin += -L $(host_prefix)/lib
 $(package)_config_opts_darwin += -I $(host_prefix)/include
 
@@ -145,9 +144,6 @@ $(package)_config_opts_darwin += -openssl-linked
 $(package)_config_opts_darwin += -L $(host_prefix)/lib
 $(package)_config_opts_darwin += -I $(host_prefix)/include
 endif
-
-# for macOS on Apple Silicon (ARM) see https://bugreports.qt.io/browse/QTBUG-85279
-$(package)_config_opts_arm_darwin += -device-option QMAKE_APPLE_DEVICE_ARCHS=arm64
 
 $(package)_config_opts_linux = -xcb
 $(package)_config_opts_linux += -no-xcb-xlib
