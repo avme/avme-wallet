@@ -77,7 +77,9 @@ class Database {
     std::string getTokenDBValue(std::string key);
     bool putTokenDBValue(std::string key, std::string value);
     bool deleteTokenDBValue(std::string key);
+    std::vector<std::string> getAllTokenDBKeys();
     std::vector<std::string> getAllTokenDBValues();
+    std::map<std::string, std::string> getAllTokenDBPairs();
     void deleteAllTokenDBKeys();
 
     // Tx history database functions.
@@ -89,7 +91,9 @@ class Database {
     std::string getHistoryDBValue(std::string key);
     bool putHistoryDBValue(std::string key, std::string value);
     bool deleteHistoryDBValue(std::string key);
+    std::vector<std::string> getAllHistoryDBKeys();
     std::vector<std::string> getAllHistoryDBValues();
+    std::map<std::string, std::string> getAllHistoryDBPairs();
     void deleteAllHistoryDBKeys();
 
     // Ledger account database functions.
@@ -101,7 +105,9 @@ class Database {
     std::string getLedgerDBValue(std::string key);
     bool putLedgerDBValue(std::string key, std::string value);
     bool deleteLedgerDBValue(std::string key);
+    std::vector<std::string> getAllLedgerDBKeys();
     std::vector<std::string> getAllLedgerDBValues();
+    std::map<std::string, std::string> getAllLedgerDBPairs();
     void deleteAllLedgerDBKeys();
 
     // DApp database functions.
@@ -113,7 +119,9 @@ class Database {
     std::string getAppDBValue(std::string key);
     bool putAppDBValue(std::string key, std::string value);
     bool deleteAppDBValue(std::string key);
+    std::vector<std::string> getAllAppDBKeys();
     std::vector<std::string> getAllAppDBValues();
+    std::map<std::string, std::string> getAllAppDBPairs();
     void deleteAllAppDBKeys();
 
     // Contacts database functions.
@@ -125,7 +133,9 @@ class Database {
     std::string getAddressDBValue(std::string key);
     bool putAddressDBValue(std::string key, std::string value);
     bool deleteAddressDBValue(std::string key);
+    std::vector<std::string> getAllAddressDBKeys();
     std::vector<std::string> getAllAddressDBValues();
+    std::map<std::string, std::string> getAllAddressDBPairs();
     void deleteAllAddressDBKeys();
 
     // Settings database functions.
@@ -137,7 +147,9 @@ class Database {
     std::string getConfigDBValue(std::string key);
     bool putConfigDBValue(std::string key, std::string value);
     bool deleteConfigDBValue(std::string key);
+    std::vector<std::string> getAllConfigDBKeys();
     std::vector<std::string> getAllConfigDBValues();
+    std::map<std::string, std::string> getAllConfigDBPairs();
     void deleteAllConfigDBKeys();
 };
 
