@@ -48,8 +48,8 @@ AVMEPopup {
       app["major"] = appList.currentItem.itemMajor
       app["minor"] = appList.currentItem.itemMinor
       app["patch"] = appList.currentItem.itemPatch
-      infoPopup.info = "Downloading DApp, please wait..."
-      infoPopup.open()
+      window.infoPopup.info = "Downloading DApp,<br>please wait..."
+      window.infoPopup.open()
       appSelectPopup.close()
       qmlSystem.installApp(app)
     } else {

@@ -17,30 +17,30 @@ AVMEPanel {
   property int downloadRetries: 5
 
   Component.onCompleted: {
-    infoPopup.info = "Downloading DApp list,<br>please wait..."
-    infoPopup.open()
+    window.infoPopup.info = "Downloading DApp list,<br>please wait..."
+    window.infoPopup.open()
     qmlSystem.downloadAppList()
   }
 
   Connections {
     target: qmlSystem
     function onAppListDownloaded() {
-      infoPopup.close()
+      window.infoPopup.close()
       refreshGrid()
     }
     function onAppListDownloadFailed() {
       if (downloadRetries > 0) {
-        infoPopup.info = "Download failed, re-trying...<br>"
+        window.infoPopup.info = "Download failed, retrying...<br>"
         + "(" + (downloadRetries) + " tries left)"
         downloadRetries -= 1
         qmlSystem.downloadAppList()
       } else {
-        infoPopup.close()
+        window.infoPopup.close()
         refreshGrid()
       }
     }
     function onAppDownloadProgressUpdated(progress, total) {
-      infoPopup.info = "Downloading DApp, please wait...<br>(" + progress + "/" + total + ")"
+      window.infoPopup.info = "Downloading DApp,<br>please wait... (" + progress + "/" + total + ")"
     }
   }
 

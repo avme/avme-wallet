@@ -75,14 +75,49 @@ ApplicationWindow {
     id: infoPopup
     property alias info: infoText.text
     x: ((parent.width / 2) - (width / 2)) + (sideMenu.width / 2)  // Override
-    widthPct: 0.2
+    widthPct: 0.25
     heightPct: 0.1
-    onAboutToHide: info = ""
+    onAboutToShow: {
+      loadingPngRotate.stop()
+      loadingPng.rotation = 0
+      loadingPngRotate.start()
+    }
+    onAboutToHide: {
+      loadingPngRotate.stop()
+      loadingPng.rotation = 0
+      info = ""
+    }
+    AVMEAsyncImage {
+      id: loadingPng
+      width: 48
+      height: 48
+      anchors {
+        left: parent.left
+        leftMargin: 10
+        verticalCenter: parent.verticalCenter
+      }
+      loading: false
+      imageSource: "qrc:/img/icons/loading.png"
+      RotationAnimator {
+        id: loadingPngRotate
+        target: loadingPng
+        from: 0
+        to: 360
+        duration: 1000
+        loops: Animation.Infinite
+        easing.type: Easing.InOutQuad
+        running: false
+      }
+    }
     Text {
       id: infoText
       color: "#FFFFFF"
       horizontalAlignment: Text.AlignHCenter
-      anchors.centerIn: parent
+      anchors {
+        horizontalCenter: parent.horizontalCenter
+        verticalCenter: parent.verticalCenter
+        horizontalCenterOffset: loadingPng.width * 0.5
+      }
       font.pixelSize: 14.0
     }
   }

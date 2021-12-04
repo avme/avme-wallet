@@ -59,7 +59,7 @@ Item {
   // Popup for confirming token removal
   AVMEPopupYesNo {
     id: confirmEraseTokenPopup
-    widthPct: 0.4
+    widthPct: 0.45
     heightPct: 0.25
     icon: "qrc:/img/warn.png"
     info: "Are you sure you want to remove this token?"

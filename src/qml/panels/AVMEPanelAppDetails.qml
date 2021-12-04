@@ -119,8 +119,8 @@ AVMEPanel {
         app["major"] = appsPanel.selectedApp.itemNextMajor
         app["minor"] = appsPanel.selectedApp.itemNextMinor
         app["patch"] = appsPanel.selectedApp.itemNextPatch
-        infoPopup.info = "Downloading DApp,<br>please wait..."
-        infoPopup.open()
+        window.infoPopup.info = "Downloading DApp,<br>please wait..."
+        window.infoPopup.open()
         qmlSystem.installApp(app)
       }
     }

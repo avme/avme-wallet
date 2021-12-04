@@ -15,7 +15,7 @@ Item {
   Connections {
     target: qmlSystem
     function onAppInstalled(success) {
-      infoPopup.close()
+      window.infoPopup.close()
       if (success) {
         appsPanel.refreshGrid()
       } else {
@@ -43,21 +43,6 @@ Item {
       right: parent.right
       bottom: parent.bottom
       margins: 10
-    }
-  }
-
-  // Info popup for download statuses
-  AVMEPopup {
-    id: infoPopup
-    property alias info: infoText.text
-    widthPct: 0.3
-    heightPct: 0.1
-    Text {
-      id: infoText
-      color: "#FFFFFF"
-      horizontalAlignment: Text.AlignHCenter
-      anchors.centerIn: parent
-      font.pixelSize: 14.0
     }
   }
 
