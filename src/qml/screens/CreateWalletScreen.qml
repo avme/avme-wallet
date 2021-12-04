@@ -39,8 +39,8 @@ Item {
       if (success) {
         qmlSystem.cleanAndCloseWallet()
         qmlSystem.setLedgerFlag(false)
-        qmlSystem.deleteLastWalletPath()
-        if (saveWallet) { qmlSystem.saveLastWalletPath() }
+        qmlSystem.deleteLastWallet()
+        if (saveWallet) { qmlSystem.saveLastWallet() }
         window.infoPopup.info = "Creating an Account<br>for the new Wallet..."
         qmlSystem.createAccount(seed, 0, "default", pass)
       } else {
@@ -294,6 +294,7 @@ Item {
       qmlSystem.loadPermissionList()
       qmlSystem.loadARC20Tokens()
       accountHeader.getAddress()
+      qmlSystem.saveLastAccount(qmlSystem.getCurrentAccount())
       window.menu.changeScreen("Overview")
     }
   }

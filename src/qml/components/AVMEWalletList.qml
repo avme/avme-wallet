@@ -40,6 +40,7 @@ ListView {
       readonly property string itemCoinAmount: coinAmount
       readonly property string itemCoinValue: coinValue
       readonly property bool itemIsLedger: isLedger
+      readonly property bool isFavorite: isFav
       readonly property string itemDerivationPath: derivationPath
       width: walletList.width * 0.25
       height: walletList.height
@@ -73,6 +74,20 @@ ListView {
         height: (parent.height * 0.95)
 
         AVMEAsyncImage {
+          id: delegateFavIcon
+          width: 32
+          height: 32
+          loading: false
+          visible: isFavorite
+          anchors {
+            top: parent.top
+            right: parent.right
+            margins: 10
+          }
+          imageSource: "qrc:/img/icons/star-f.png"
+        }
+        AVMEAsyncImage {
+          id: delegateIcon
           width: (parent.width / 3)
           height: width
           loading: false

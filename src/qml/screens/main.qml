@@ -32,7 +32,7 @@ ApplicationWindow {
 
   function startup() {
     qmlSystem.checkWalletVersion()
-    var lastPath = qmlSystem.getLastWalletPath()
+    var lastPath = qmlSystem.getLastWallet()
     var defaultPath = qmlSystem.defaultWalletPathExists()
     var screen = (lastPath != "" || defaultPath) ? "LoadWallet" : "CreateWallet"
     menu.changeScreen(screen)

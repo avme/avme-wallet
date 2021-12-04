@@ -12,6 +12,7 @@ AVMEPanel {
   property alias accountModel: walletModel
   property alias btnAdd: addBtn
   property alias btnSelect: selectBtn
+  property alias btnMark: markBtn
   property alias btnErase: eraseBtn
   title: "Your Accounts"
 
@@ -45,6 +46,18 @@ AVMEPanel {
             }
           }
         }
+        function updateFav() {
+          var acc = qmlSystem.getLastAccount()
+          for (var i = 0; i < count; i++) {
+            get(i).isFav = (get(i).address == acc)
+          }
+        }
+        function getFavIndex() {
+          for (var i = 0; i < count; i++) {
+            if (get(i).isFav) return i
+          }
+          return -1
+        }
       }
     }
   }
@@ -69,9 +82,18 @@ AVMEPanel {
       text: "Select This Account"
     }
     AVMEButton {
+      id: markBtn
+      width: (accountSelectPanel.width * 0.15) + (parent.spacing)
+      text: (
+        (walletList.currentItem != null && !walletList.currentItem.isFavorite)
+        ? "Mark" : "Unmark"
+      ) + " As Favorite"
+    }
+    AVMEButton {
       id: eraseBtn
       width: (accountSelectPanel.width * 0.15) + (parent.spacing)
-      text: "Erase This Account"
+      enabled: (walletList.currentItem != null && !walletList.currentItem.isFavorite)
+      text: (enabled) ? "Erase This Account" : "Can't Erase Favorite"
     }
   }
 }

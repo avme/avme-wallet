@@ -69,7 +69,7 @@ class QmlSystem : public QObject {
 
     // String that will hold the TXID of an approved transaction.
     std::string RTtxid = "";
-    // String that will hold the signature of a sign request;
+    // String that will hold the signature of a sign request.
     std::string RSmsg = "";
 
   public slots:
@@ -174,11 +174,15 @@ class QmlSystem : public QObject {
     Q_INVOKABLE QString getCurrentHardwareAccountPath() { return currentHardwareAccountPath; }
     void setEngine(QQmlApplicationEngine *targetEngine) { engine = targetEngine;}; // INVOKATION FROM QML SHOULD *NOT* BE ALLOWED!
 
-    // Get, save and delete the path for the last opened Wallet, respectively.
-    // Get returns an empty string if the path doesn't exist.
-    Q_INVOKABLE QString getLastWalletPath();
-    Q_INVOKABLE bool saveLastWalletPath();
-    Q_INVOKABLE bool deleteLastWalletPath();
+    // Get, save and delete the path for the last opened Wallet
+    // and the current Wallet's favorite Account, respectively.
+    // Get returns an empty string if the path or Account doesn't exist.
+    Q_INVOKABLE QString getLastWallet();
+    Q_INVOKABLE bool saveLastWallet();
+    Q_INVOKABLE bool deleteLastWallet();
+    Q_INVOKABLE QString getLastAccount();
+    Q_INVOKABLE bool saveLastAccount(QString account);
+    Q_INVOKABLE bool deleteLastAccount();
 
     // Trim component cache. Removes *only* the data not being used.
     Q_INVOKABLE void trimComponentCache() { engine->trimComponentCache(); }

@@ -27,6 +27,7 @@ QVariantList QmlSystem::listAccounts() {
     obj["address"] = a.first;
     obj["name"] = a.second;
     obj["isLedger"] = false;
+    obj["isFav"] = false;
     obj["derivationPath"] = "";
     ret << QString::fromStdString(obj.dump());
   }
@@ -38,6 +39,7 @@ QVariantList QmlSystem::listAccounts() {
     // Name for Ledger accounts??
     obj["name"] = "";
     obj["isLedger"] = true;
+    obj["isFav"] = false;
     obj["derivationPath"] = ledgerAccount.index;
     ret << QString::fromStdString(obj.dump());
   }

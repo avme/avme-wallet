@@ -58,6 +58,7 @@ Item {
       addList.push(accJson.address)
     }
     accountSelectPanel.accountModel.sortByAddress()
+    accountSelectPanel.accountModel.updateFav()
     qmlSystem.getAllAVAXBalances(addList)
   }
 
@@ -83,7 +84,16 @@ Item {
     anchors.centerIn: parent
     btnAdd.onClicked: addAccountSelectPopup.open()
     btnSelect.onClicked: chooseSelectedAccount()
+    btnMark.onClicked: markSelectedAccount()
     btnErase.onClicked: confirmErasePopup.open()
+    function markSelectedAccount() {
+      if (accountList.currentItem.isFavorite) {
+        qmlSystem.deleteLastAccount()
+      } else {
+        qmlSystem.saveLastAccount(accountList.currentItem.itemAddress)
+      }
+      accountSelectPanel.accountModel.updateFav()
+    }
     function chooseSelectedAccount() {
       qmlSystem.cleanAndCloseAccount()
       if (accountList.currentItem.itemIsLedger) {

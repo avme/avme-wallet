@@ -4,7 +4,7 @@
 
 #include <qmlwrap/QmlSystem.h>
 
-QString QmlSystem::getLastWalletPath() {
+QString QmlSystem::getLastWallet() {
   QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
   if (path.isEmpty()) return "";
   boost::filesystem::path walletPath = path.toStdString() + "/lastWallet.json";
@@ -16,7 +16,7 @@ QString QmlSystem::getLastWalletPath() {
   return QString::fromStdString(lastWallet.string());
 }
 
-bool QmlSystem::saveLastWalletPath() {
+bool QmlSystem::saveLastWallet() {
   QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
   if (path.isEmpty()) return false;
   boost::filesystem::path walletPath = path.toStdString() + "/lastWallet.json";
@@ -29,9 +29,66 @@ bool QmlSystem::saveLastWalletPath() {
   return (Utils::writeJSONFile(lastWallet, walletPath) == "");
 }
 
-bool QmlSystem::deleteLastWalletPath() {
+bool QmlSystem::deleteLastWallet() {
   QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
   return boost::filesystem::remove(path.toStdString() + "/lastWallet.json");
+}
+
+QString QmlSystem::getLastAccount() {
+  QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+  if (path.isEmpty()) return "";
+  boost::filesystem::path accountPath = path.toStdString() + "/lastAccount.json";
+  if (!boost::filesystem::exists(accountPath)) return "";
+  json lastAccountArr = json::parse(Utils::readJSONFile(accountPath))["paths"];
+  for (auto& lastAccount : lastAccountArr) {
+    if (lastAccount["wallet"].get<std::string>() == Utils::walletFolderPath.string()) {
+      return QString::fromStdString(lastAccount["account"].get<std::string>());
+    }
+  }
+  return "";
+}
+
+bool QmlSystem::saveLastAccount(QString account) {
+  QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+  if (path.isEmpty()) return false;
+  boost::filesystem::path accountPath = path.toStdString() + "/lastAccount.json";
+  if (!boost::filesystem::exists(accountPath.parent_path())) {
+    boost::filesystem::create_directories(accountPath.parent_path());
+  };
+  json lastAccountObj = (boost::filesystem::exists(accountPath))
+    ? json::parse(Utils::readJSONFile(accountPath)) : json::object();
+  if (lastAccountObj.empty()) lastAccountObj["paths"] = json::array();
+  bool foundAccount = false;
+  for (auto& lastAccount : lastAccountObj["paths"]) {
+    if (lastAccount["wallet"].get<std::string>() == Utils::walletFolderPath.string()) {
+      lastAccount["account"] = account.toStdString();
+      foundAccount = true;
+      break;
+    }
+  }
+  if (!foundAccount) {
+    json newLastAccount = json::object();
+    newLastAccount["wallet"] = Utils::walletFolderPath.string();
+    newLastAccount["account"] = account.toStdString();
+    lastAccountObj["paths"].push_back(newLastAccount);
+  }
+  return (Utils::writeJSONFile(lastAccountObj, accountPath) == "");
+}
+
+bool QmlSystem::deleteLastAccount() {
+  QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+  if (path.isEmpty()) return false;
+  boost::filesystem::path accountPath = path.toStdString() + "/lastAccount.json";
+  if (!boost::filesystem::exists(accountPath)) return false;
+  json lastAccountObj = json::parse(Utils::readJSONFile(accountPath));
+  for (int i = 0; i < lastAccountObj["paths"].size(); i++) {
+    json accObj = lastAccountObj["paths"][i];
+    if (accObj["wallet"].get<std::string>() == Utils::walletFolderPath.string()) {
+      lastAccountObj["paths"].erase(i);
+      break;
+    }
+  }
+  return (Utils::writeJSONFile(lastAccountObj, accountPath) == "");
 }
 
 QString QmlSystem::getProjectVersion() {
@@ -41,12 +98,9 @@ QString QmlSystem::getProjectVersion() {
 void QmlSystem::checkWalletVersion() {
   QtConcurrent::run([=](){
     std::string version = PROJECT_VERSION;
-    json currentVersion = json::parse(API::customHttpRequest("",
-                                                        "raw.githubusercontent.com",
-                                                        "443",
-                                                        "/avme/avme-wallet/main/VERSION",
-                                                        "GET",
-                                                        ""
+    json currentVersion = json::parse(API::customHttpRequest(
+      "", "raw.githubusercontent.com", "443",
+      "/avme/avme-wallet/main/VERSION", "GET", ""
     ));
     if (version != currentVersion["currentVersion"].get<std::string>()) {
       emit walletRequireUpdate();

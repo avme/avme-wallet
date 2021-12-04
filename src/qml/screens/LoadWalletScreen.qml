@@ -26,8 +26,8 @@ Item {
       if (success) {
         qmlSystem.cleanAndCloseWallet() // TODO: find out why this line sometimes freezes the wallet
         qmlSystem.setLedgerFlag(false)
-        qmlSystem.deleteLastWalletPath()
-        if (saveWallet) { qmlSystem.saveLastWalletPath() }
+        qmlSystem.deleteLastWallet()
+        if (saveWallet) { qmlSystem.saveLastWallet() }
         window.infoPopup.close()
         qmlSystem.loadTokenDB()
         qmlSystem.loadAppDB()
@@ -36,7 +36,15 @@ Item {
         qmlSystem.loadAccounts()
         qmlSystem.loadPermissionList()
         qmlSystem.loadARC20Tokens()
-        window.menu.changeScreen("Accounts")
+        var acc = qmlSystem.getLastAccount()
+        if (acc != "") {
+          qmlSystem.setCurrentAccount(acc)
+          qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
+          accountHeader.getAddress()
+          window.menu.changeScreen("Overview")
+        } else {
+          window.menu.changeScreen("Accounts")
+        }
       } else {
         window.infoPopup.close()
         errorPopup.open()
@@ -45,7 +53,7 @@ Item {
   }
 
   Component.onCompleted: {
-    var lastWallet = qmlSystem.getLastWalletPath()
+    var lastWallet = qmlSystem.getLastWallet()
     loadFolderInput.text = (lastWallet != "") ? lastWallet : qmlSystem.getDefaultWalletPath()
     saveWalletCheck.checked = (lastWallet != "")
     walletExists = qmlSystem.checkFolderForWallet(loadFolderInput.text)
