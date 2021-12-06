@@ -78,7 +78,6 @@
         <file>qml/components/AVMEContactsPopupList.qml</file>
         <file>qml/components/AVMETokenGrid.qml</file>
         <file>qml/components/AVMEAccountQRCode.qml</file>
-        <file>qml/components/AVMEOverviewBalance.qml</file>
         <file>qml/components/AVMEOverviewAssetList.qml</file>
         <file>qml/components/AVMEAppGrid.qml</file>
         <file>qml/components/AVMEAppList.qml</file>

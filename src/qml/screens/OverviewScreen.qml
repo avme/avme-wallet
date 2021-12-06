@@ -13,22 +13,11 @@ import "qrc:/qml/popups"
 Item {
   id: overviewScreen
 
-  AVMEOverviewBalance {
-    id: overviewBalance
-    width: (parent.width * 0.5) - (anchors.margins * 2)
-    height: (parent.height * 0.15)
-    anchors {
-      top: parent.top
-      left: parent.left
-      margins: 10
-    }
-  }
-
   AVMEPanelOverview {
     id: overviewPanel
     width: (parent.width * 0.5) - (anchors.margins * 2)
     anchors {
-      top: overviewBalance.bottom
+      top: parent.top
       bottom: parent.bottom
       left: parent.left
       margins: 10
