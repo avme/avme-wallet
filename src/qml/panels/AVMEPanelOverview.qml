@@ -7,7 +7,7 @@ import QtCharts 2.2
 
 import "qrc:/qml/components"
 
-// Panel for the Account's balance overview chart.
+// Panel for the Account's balance overview chart and detailed asset list.
 AVMEPanel {
   id: overviewPanel
   title: "Your Account"
@@ -39,79 +39,103 @@ AVMEPanel {
   // Only load chart if everything is loaded
   Component.onCompleted: if (accountHeader.coinRawBalance) { accountPie.refresh(); loadingPng.visible = false }
 
-  ChartView {
-    id: accountChart
-    anchors.fill: parent
-    anchors.margins: 60
-    backgroundColor: "transparent"
-    antialiasing: true
-    legend.visible: false
-    margins { left: 0; right: 0; top: 0; bottom: 0 }
+  Row {
+    id: accountPanelRow
+    anchors {
+      top: parent.top
+      bottom: parent.bottom
+      horizontalCenter: parent.horizontalCenter
+      topMargin: 80
+      bottomMargin: 20
+    }
+    spacing: 10
 
-    PieSeries {
-      id: accountPie
-      size: 1.0
-      holeSize: 0.9
-      onHovered: {
-        slice.borderWidth = state
-        slice.borderColor = (state) ? "white" : "transparent"
-        if (state) {
-          accountPieValueText.text = "$" + slice.value + " in " + slice.label
-          accountPiePercentageText.text = (+slice.percentage * 100).toFixed(2) + "%"
-        } else {
+    ChartView {
+      id: accountChart
+      width: (overviewPanel.width * 0.3) - (parent.spacing * 2)
+      anchors {
+        top: parent.top
+        bottom: parent.bottom
+      }
+      backgroundColor: "transparent"
+      antialiasing: true
+      legend.visible: false
+      margins { left: 0; right: 0; top: 0; bottom: 0 }
+
+      PieSeries {
+        id: accountPie
+        size: 1.0
+        holeSize: 0.9
+        onHovered: {
+          slice.borderWidth = state
+          slice.borderColor = (state) ? "white" : "transparent"
+          if (state) {
+            accountPieValueText.text = "$" + slice.value + " in " + slice.label
+            accountPiePercentageText.text = (+slice.percentage * 100).toFixed(2) + "%"
+          } else {
+            accountPieValueText.text = "$" + accountHeader.totalFiatBalance
+            accountPiePercentageText.text = (
+              Object.keys(accountHeader.tokenList).length + 1 // "+ 1" = AVAX
+            ) + " Assets"
+          }
+        }
+        function refresh() {
+          clear()
+          append("AVAX", accountHeader.coinFiatValue)
+          for (var token in accountHeader.tokenList) {
+            var sym = accountHeader.tokenList[token].symbol
+            var bal = +accountHeader.tokenList[token].fiatValue
+            bal = bal.toFixed(2)
+            append(sym, bal)
+          }
+          var colorCt = 0
+          for (var i = 0; i < count; i++) {
+            at(i).color = chartColors[colorCt]
+            colorCt++
+            if (colorCt >= chartColors.length) { colorCt = 0 }
+            at(i).borderColor = overviewPanel.color.toString()
+          }
           accountPieValueText.text = "$" + accountHeader.totalFiatBalance
           accountPiePercentageText.text = (
             Object.keys(accountHeader.tokenList).length + 1 // "+ 1" = AVAX
           ) + " Assets"
         }
       }
-      function refresh() {
-        clear()
-        append("AVAX", accountHeader.coinFiatValue)
-        for (var token in accountHeader.tokenList) {
-          var sym = accountHeader.tokenList[token].symbol
-          var bal = +accountHeader.tokenList[token].fiatValue
-          bal = bal.toFixed(2)
-          append(sym, bal)
+      Column {
+        id: accountPieDataCol
+        anchors.centerIn: parent
+        spacing: 5
+
+        Text {
+          id: accountPieValueText
+          anchors.horizontalCenter: parent.horizontalCenter
+          font.pixelSize: 18.0
+          font.bold: true
+          color: "#FFFFFF"
         }
-        var colorCt = 0
-        for (var i = 0; i < count; i++) {
-          at(i).color = chartColors[colorCt]
-          colorCt++
-          if (colorCt >= chartColors.length) { colorCt = 0 }
-          at(i).borderColor = overviewPanel.color.toString()
+        Text {
+          id: accountPiePercentageText
+          anchors.horizontalCenter: parent.horizontalCenter
+          font.pixelSize: 14.0
+          color: "#FFFFFF"
         }
-        accountPieValueText.text = "$" + accountHeader.totalFiatBalance
-        accountPiePercentageText.text = (
-          Object.keys(accountHeader.tokenList).length + 1 // "+ 1" = AVAX
-        ) + " Assets"
       }
     }
-    Column {
-      id: accountPieDataCol
-      anchors.centerIn: parent
-      spacing: 5
 
-      Text {
-        id: accountPieValueText
-        anchors.horizontalCenter: parent.horizontalCenter
-        font.pixelSize: 24.0
-        font.bold: true
-        color: "#FFFFFF"
-      }
-      Text {
-        id: accountPiePercentageText
-        anchors.horizontalCenter: parent.horizontalCenter
-        font.pixelSize: 18.0
-        color: "#FFFFFF"
+    AVMEOverviewAssetList {
+      id: assetList
+      width: (overviewPanel.width * 0.7) - (parent.spacing * 2)
+      anchors {
+        top: parent.top
+        bottom: parent.bottom
       }
     }
   }
 
   AVMEAsyncImage {
     id: loadingPng
-    width: height
-    height: (parent.width / 3)
+    width: parent.width * 0.25
+    height: parent.height * 0.25
     anchors.centerIn: parent
     imageSource: "qrc:/img/icons/loading.png"
     RotationAnimator {

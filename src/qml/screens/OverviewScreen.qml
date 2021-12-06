@@ -15,27 +15,9 @@ Item {
 
   AVMEPanelOverview {
     id: overviewPanel
-    width: (parent.width * 0.5) - (anchors.margins * 2)
-    anchors {
-      top: parent.top
-      bottom: parent.bottom
-      left: parent.left
-      margins: 10
-    }
+    anchors.fill: parent
+    anchors.margins: 10
   }
 
-  AVMEPanelOverviewAssets {
-    id: assetsPanel
-    width: (parent.width * 0.5) - (anchors.margins * 2)
-    anchors {
-      top: parent.top
-      bottom: parent.bottom
-      right: parent.right
-      margins: 10
-    }
-  }
-
-  AVMEPopupPriceChart {
-    id: pricechartPopup
-  }
+  AVMEPopupPriceChart { id: pricechartPopup }
 }

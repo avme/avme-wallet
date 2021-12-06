@@ -94,6 +94,20 @@ ListView {
   boundsBehavior: Flickable.StopAtBounds
   model: ListModel { id: assetListModel }
 
+  ScrollBar.vertical: ScrollBar {
+    id: scrollbar
+    active: true
+    visible: (assetListModel.count > 0)
+    orientation: Qt.Vertical
+    size: assetList.height / assetList.contentHeight
+    policy: ScrollBar.AlwaysOn
+    anchors {
+      top: parent.top
+      right: parent.right
+      bottom: parent.bottom
+    }
+  }
+
   // Delegate (structure for each item in the list)
   delegate: Component {
     id: listDelegate
@@ -114,7 +128,7 @@ ListView {
 
       Rectangle {
         id: assetRectangle
-        width: parent.width
+        width: (parent.width - (scrollbar.width * 2))
         height: parent.height
         radius: 5
         color: "#1D1827"

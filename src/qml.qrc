@@ -47,7 +47,6 @@
 
         <file>qml/panels/AVMEPanelAccountSelect.qml</file>
         <file>qml/panels/AVMEPanelOverview.qml</file>
-        <file>qml/panels/AVMEPanelOverviewAssets.qml</file>
         <file>qml/panels/AVMEPanelTokens.qml</file>
         <file>qml/panels/AVMEPanelTokenDetails.qml</file>
         <file>qml/panels/AVMEPanelSend.qml</file>
