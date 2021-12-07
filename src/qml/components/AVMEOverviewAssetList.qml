@@ -17,15 +17,8 @@ import QtCharts 2.9
  * - "imagePath": the asset's logo file path (string)
  */
 ListView {
-  id: assetList
-
-  Connections {
-    target: accountHeader
-    // Whatever happens first.
-    function onUpdatedBalances() { reloadAssets(); loadingPng.visible = false }
-  }
-
-  Component.onCompleted: if (accountHeader.coinRawBalance) { reloadAssets(); loadingPng.visible = false }
+  id: overviewAssetList
+  property alias assetModel: assetListModel
 
   function reloadAssets() {
     // AVAX is obligatory but not a token so it's not in tokenList
@@ -43,9 +36,11 @@ ListView {
     avax["imagePath"] = "qrc:/img/avax_logo.png"
     avax["priceChart"] = accountHeader.coinUSDPriceChart
     avax["USDPrice"] = accountHeader.coinUSDPrice
+    avax["rectColor"] = chartColors[0]
     assetList.push(avax)
 
     // Populate the token list
+    var colorCt = 1 // 0 = AVAX
     for (var token in tokens) {
       var asset = ({})
       asset["assetAddress"] = token
@@ -60,11 +55,13 @@ ListView {
       asset["imagePath"] = (tokens[token]["symbol"] == "AVME")
       ? "qrc:/img/avme_logo.png"
       : "file:" + qmlSystem.getARC20TokenImage(token)
-
-      // Account for unknown tokens image
-      if (asset["imagePath"] == "file:") {
+      if (asset["imagePath"] == "file:") {  // Token image not found
         asset["imagePath"] = "qrc:img/unknown_token.png"
       }
+      asset["rectColor"] = chartColors[colorCt]
+      asset["isSelected"] = false
+      colorCt++
+      if (colorCt >= chartColors.length) { colorCt = 0 }
       assetList.push(asset)
     }
 
@@ -86,6 +83,14 @@ ListView {
     }
   }
 
+  function toggleAsset(name, state) {
+    for (var i = 0; i < assetListModel.count; ++i) {
+      if (assetListModel.get(i).assetName == name) {
+        assetListModel.get(i).isSelected = state
+      }
+    }
+  }
+
   implicitWidth: 550
   implicitHeight: 600
   focus: true
@@ -99,7 +104,7 @@ ListView {
     active: true
     visible: (assetListModel.count > 0)
     orientation: Qt.Vertical
-    size: assetList.height / assetList.contentHeight
+    size: overviewAssetList.height / overviewAssetList.contentHeight
     policy: ScrollBar.AlwaysOn
     anchors {
       top: parent.top
@@ -122,15 +127,19 @@ ListView {
       readonly property string itemImagePath: imagePath
       readonly property var itemPriceChart: priceChart
       readonly property string itemUSDPrice: USDPrice
-      width: assetList.width
-      height: assetList.height * 0.125
+      readonly property string itemRectColor: rectColor
+      readonly property bool itemIsSelected: isSelected
+      width: overviewAssetList.width
+      height: overviewAssetList.height * 0.15
       visible: false
 
       Rectangle {
         id: assetRectangle
         width: (parent.width - (scrollbar.width * 2))
         height: parent.height
-        color: "#1D1827"
+        color: itemRectColor
+        border.width: 3
+        border.color: (itemIsSelected) ? "white" : "transparent"
         radius: 5
 
         AVMEAsyncImage {
@@ -181,9 +190,25 @@ ListView {
           }
         }
 
+        MouseArea {
+          id: assetRectMouseArea
+          anchors.fill: parent
+          hoverEnabled: true
+          onEntered: {
+            overviewPanel.selectedAsset = itemAssetName
+            toggleAsset(itemAssetName, true)
+            accountChart.toggleSlice(itemAssetName, true)
+          }
+          onExited: {
+            overviewPanel.selectedAsset = null
+            toggleAsset(itemAssetName, false)
+            accountChart.toggleSlice(itemAssetName, false)
+          }
+        }
+
         Rectangle {
           id: assetMarketChartRect
-          width: (parent.width * 0.2)
+          width: (parent.width * 0.25)
           height: (parent.height * 0.9)
           anchors {
             right: parent.right
