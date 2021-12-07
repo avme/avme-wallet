@@ -52,7 +52,7 @@ AVMEPanel {
 
     ChartView {
       id: accountChart
-      width: (overviewPanel.width * 0.3) - (parent.spacing * 2)
+      width: (overviewPanel.width * 0.4) - (parent.spacing * 2)
       anchors {
         top: parent.top
         bottom: parent.bottom
@@ -109,14 +109,14 @@ AVMEPanel {
         Text {
           id: accountPieValueText
           anchors.horizontalCenter: parent.horizontalCenter
-          font.pixelSize: 18.0
+          font.pixelSize: 24.0
           font.bold: true
           color: "#FFFFFF"
         }
         Text {
           id: accountPiePercentageText
           anchors.horizontalCenter: parent.horizontalCenter
-          font.pixelSize: 14.0
+          font.pixelSize: 18.0
           color: "#FFFFFF"
         }
       }
@@ -124,7 +124,7 @@ AVMEPanel {
 
     AVMEOverviewAssetList {
       id: assetList
-      width: (overviewPanel.width * 0.7) - (parent.spacing * 2)
+      width: (overviewPanel.width * 0.6) - (parent.spacing * 2)
       anchors {
         top: parent.top
         bottom: parent.bottom
@@ -134,8 +134,8 @@ AVMEPanel {
 
   AVMEAsyncImage {
     id: loadingPng
-    width: parent.width * 0.25
-    height: parent.height * 0.25
+    width: parent.width * 0.5
+    height: parent.height * 0.5
     anchors.centerIn: parent
     imageSource: "qrc:/img/icons/loading.png"
     RotationAnimator {

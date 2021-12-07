@@ -123,56 +123,49 @@ ListView {
       readonly property var itemPriceChart: priceChart
       readonly property string itemUSDPrice: USDPrice
       width: assetList.width
-      height: assetList.height * 0.275
+      height: assetList.height * 0.125
       visible: false
 
       Rectangle {
         id: assetRectangle
         width: (parent.width - (scrollbar.width * 2))
         height: parent.height
-        radius: 5
         color: "#1D1827"
+        radius: 5
+
+        AVMEAsyncImage {
+          id: listAssetImage
+          width: 48
+          height: 48
+          anchors {
+            left: parent.left
+            leftMargin: 10
+            verticalCenter: parent.verticalCenter
+          }
+          loading: false
+          imageSource: imagePath
+        }
 
         Column {
-          anchors.fill: parent
-          width: parent.width
-          height: parent.height
-          anchors.margins: 10
-          spacing: 5
-
-          AVMEAsyncImage {
-            id: listAssetImage
-            width: 48
-            height: 48
-            loading: false
-            imageSource: imagePath
-            Text {
-              id: listAssetName
-              anchors {
-                left: parent.right
-                leftMargin: 10
-                verticalCenter: parent.verticalCenter
-              }
-              font.pixelSize: 24.0
-              font.bold: true
-              color: "white"
-              text: itemAssetName
-            }
+          id: listAssetAmountCol
+          width: (parent.width * 0.5)
+          anchors {
+            left: listAssetImage.right
+            leftMargin: 10
+            verticalCenter: parent.verticalCenter
           }
+          spacing: 2
+
           Text {
             id: listAssetAmount
-            color: "white"
-            width: parent.width * 0.5
-            font.pixelSize: 18.0
+            font.pixelSize: 16.0
             font.bold: true
-            elide: Text.ElideRight
-            text: (isToken) ? itemTokenAmount : itemCoinAmount
-          }
-          Text {
-            id: listAssetFiatAmount
             color: "white"
-            font.pixelSize: 14.0
-            text: itemFiatAmount
+            elide: Text.ElideRight
+            text: (
+              ((isToken) ? itemTokenAmount : itemCoinAmount)
+              + " " + itemAssetName
+            )
           }
           Text {
             id: listAssetCoinAmount
@@ -180,95 +173,115 @@ ListView {
             font.pixelSize: 14.0
             text: (isToken) ? itemCoinAmount + " AVAX" : ""
           }
+          Text {
+            id: listAssetFiatAmount
+            color: "white"
+            font.pixelSize: 14.0
+            text: itemFiatAmount
+          }
         }
 
-        ChartView {
-          id: assetMarketChart
-          width: parent.width * 0.4
-          height: parent.height * 0.8
+        Rectangle {
+          id: assetMarketChartRect
+          width: (parent.width * 0.2)
+          height: (parent.height * 0.9)
           anchors {
             right: parent.right
-            rightMargin: 10
+            rightMargin: 5
             verticalCenter: parent.verticalCenter
           }
-          visible: true
-          antialiasing: true
-          backgroundColor: "white"
-          legend.visible: false
-          margins { right: 0; bottom: 0; left: 0; top: 0 }
-          plotArea {
-            width: assetMarketChart.width * 0.999
-            height: assetMarketChart.height * 0.99
-          }
-          SplineSeries {
-            id: marketLine
-            property int countX: 1
-            property alias minX: marketAxisX.min
-            property alias maxX: marketAxisX.max
-            property alias minY: marketAxisY.min
-            property alias maxY: marketAxisY.max
-            axisX: ValueAxis {
-              id: marketAxisX
-              labelsColor: "#FFFFFF"
-              gridLineColor: "#22FFFFFF"
-              tickCount: marketLine.countX
-              labelsVisible: false
-              lineVisible: false
-              visible: true
-            }
-            axisY: ValueAxis {
-              id: marketAxisY
-              labelsColor: "#FFFFFF"
-              gridLineColor: "#22FFFFFF"
-              labelsVisible: false
-              lineVisible: false
-              visible: true
-            }
-            Component.onCompleted: refresh()
-            function refresh() {
-              clear()
-              var jsonPriceChart = JSON.parse(itemPriceChart)
-              var start = 0
-              minY = -1
-              maxY = -1
-              for (var priceData in jsonPriceChart) {
-                if (start == 0) {
-                  marketLine.maxX = +jsonPriceChart[start]["date"]
-                }
-                if (start == (jsonPriceChart.length - 1)) {
-                  marketLine.minX = +jsonPriceChart[start]["date"]
-                }
-                minY = (minY == -1 || +jsonPriceChart[start]["priceUSD"] < minY) ? +jsonPriceChart[start]["priceUSD"] : minY
-                maxY = (maxY == -1 || +jsonPriceChart[start]["priceUSD"] > maxY) ? +jsonPriceChart[start]["priceUSD"] : maxY
-                marketLine.append(+jsonPriceChart[start]["date"], +jsonPriceChart[start]["priceUSD"])
-                ++start
-              }
-              marketLine.minY = (minY - 1 > 0) ? (minY - minY * 0.2) : 0
-              marketLine.maxY = maxY + (maxY * 0.2)
-              maxY = (+itemUSDPrice > maxY) ? (+itemUSDPrice + (+itemUSDPrice * 0.2)) : maxY
-              listDelegateItem.visible = true
-              assetMarketChart.visible = true
-            }
-          }
-          MouseArea {
-            id: assetChartMouseArea
+          color: "#0C0716"
+          radius: 5
+
+          ChartView {
+            id: assetMarketChart
             width: parent.width
             height: parent.height
-            hoverEnabled: true
-            z: parent.z - 1
-            Rectangle {
-              id: assetChartMouseAreaRect
-              anchors.fill: parent
-              visible: false
-              color: "#2E2938"
+            visible: true
+            antialiasing: true
+            legend.visible: false
+            margins { right: 0; bottom: 0; left: 0; top: 0 }
+            plotArea {
+              width: assetMarketChart.width * 0.999
+              height: assetMarketChart.height * 0.999
             }
-            onEntered: assetChartMouseAreaRect.visible = true
-            onExited: assetChartMouseAreaRect.visible = false
-            onClicked: {
-              pricechartPopup.contractAddress = itemAssetAddress
-              pricechartPopup.nameAsset = itemAssetName
-              pricechartPopup.currentAssetPrice = itemUSDPrice
-              pricechartPopup.open()
+            SplineSeries {
+              id: marketLine
+              property int countX: 1
+              property alias minX: marketAxisX.min
+              property alias maxX: marketAxisX.max
+              property alias minY: marketAxisY.min
+              property alias maxY: marketAxisY.max
+              axisX: ValueAxis {
+                id: marketAxisX
+                labelsVisible: false
+                lineVisible: false
+                gridVisible: false
+                visible: true
+              }
+              axisY: ValueAxis {
+                id: marketAxisY
+                labelsVisible: false
+                lineVisible: false
+                gridVisible: false
+                visible: true
+              }
+              Component.onCompleted: refresh()
+              function refresh() {
+                clear()
+                var jsonPriceChart = JSON.parse(itemPriceChart)
+                var start = 0, newer = 0, older = 0
+                minY = -1
+                maxY = -1
+                for (var priceData in jsonPriceChart) {
+                  if (start == 0) {
+                    marketLine.maxX = +jsonPriceChart[start]["date"]
+                    newer = +jsonPriceChart[start]["priceUSD"]
+                  }
+                  if (start == (jsonPriceChart.length - 1)) {
+                    marketLine.minX = +jsonPriceChart[start]["date"]
+                    older = +jsonPriceChart[start]["priceUSD"]
+                  }
+                  minY = (minY == -1 || +jsonPriceChart[start]["priceUSD"] < minY) ? +jsonPriceChart[start]["priceUSD"] : minY
+                  maxY = (maxY == -1 || +jsonPriceChart[start]["priceUSD"] > maxY) ? +jsonPriceChart[start]["priceUSD"] : maxY
+                  marketLine.append(+jsonPriceChart[start]["date"], +jsonPriceChart[start]["priceUSD"])
+                  ++start
+                }
+                marketLine.minY = (minY - 1 > 0) ? (minY - minY * 0.2) : 0
+                marketLine.maxY = maxY + (maxY * 0.2)
+                if (newer > older) {
+                  marketLine.color = "green"
+                } else if (newer < older) {
+                  marketLine.color = "red"
+                } else {
+                  marketLine.color = "deepskyblue"
+                }
+                maxY = (+itemUSDPrice > maxY) ? (+itemUSDPrice + (+itemUSDPrice * 0.2)) : maxY
+                listDelegateItem.visible = true
+                assetMarketChart.visible = true
+              }
+            }
+            MouseArea {
+              id: assetChartMouseArea
+              width: parent.width
+              height: parent.height
+              hoverEnabled: true
+              z: parent.z - 1
+              Rectangle {
+                id: assetChartMouseAreaRect
+                anchors.fill: parent
+                visible: false
+                color: "#2E2938"
+                radius: 5
+              }
+              onEntered: assetChartMouseAreaRect.visible = true
+              onExited: assetChartMouseAreaRect.visible = false
+              onClicked: {
+                pricechartPopup.contractAddress = itemAssetAddress
+                pricechartPopup.nameAsset = itemAssetName
+                pricechartPopup.currentAssetPrice = itemUSDPrice
+                pricechartPopup.open()
+              }
             }
           }
         }
