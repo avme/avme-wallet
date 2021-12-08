@@ -16,27 +16,34 @@ ChartView {
   margins { left: 0; right: 0; top: 0; bottom: 0 }
 
   function refresh() {
+    // Clear the chart if number of tokens has changed
+    if (accountPie.count != (accountHeader.tokenList.length + 1)) { // + 1 = AVAX
+      accountPie.clear()
+    }
+    // Append if chart is empty, update otherwise
     if (accountPie.count == 0) {
       accountPie.append("AVAX", accountHeader.coinFiatValue)
       for (var token in accountHeader.tokenList) {
-        var sym = accountHeader.tokenList[token].symbol
+        var add = token
         var bal = +accountHeader.tokenList[token].fiatValue
         bal = bal.toFixed(2)
-        accountPie.append(sym, bal)
+        accountPie.append(add, bal)
       }
     } else {
       accountPie.at(0).value = accountHeader.coinFiatValue
       for (var token in accountHeader.tokenList) {
-        var sym = accountHeader.tokenList[token].symbol
+        var add = token
         var bal = +accountHeader.tokenList[token].fiatValue
         bal = bal.toFixed(2)
-        if (accountPie.find(sym) != null) {
-          accountPie.find(sym).value = bal
+        if (accountPie.find(add) != null) {
+          accountPie.find(add).value = bal
         } else {
-          accountPie.remove(accountPie.find(sym))
+          accountPie.remove(accountPie.find(add))
         }
       }
     }
+    // Color each slice and list asset accordingly,
+    // then gather the rest of the data
     var colorCt = 0 // 0 = AVAX
     for (var i = 0; i < accountPie.count; i++) {
       accountPie.at(i).color = chartColors[colorCt]
@@ -59,8 +66,8 @@ ChartView {
     if (accountPie.find(label) == null) { return }
     accountPie.find(label).borderColor = (state) ? "white" : "transparent"
     if (state) {
-      accountPieValueText.text = "$" + accountPie.find(label).value
-        + " in " + accountPie.find(label).label
+      accountPieValueText.text = "$" + accountPie.find(label).value + " in "
+        + ((label == "AVAX") ? "AVAX" : accountHeader.tokenList[label].symbol)
       accountPiePercentageText.text = (
         +accountPie.find(label).percentage * 100
       ).toFixed(2) + "%"

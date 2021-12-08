@@ -40,8 +40,8 @@ AVMEPanel {
   Component.onCompleted: if (accountHeader.coinRawBalance) { reloadData() }
 
   function reloadData() {
-    accountChart.refresh()
     overviewAssetList.reloadAssets()
+    accountChart.refresh()
     loadingPng.visible = false
   }
 

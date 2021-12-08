@@ -25,6 +25,10 @@ ListView {
     var assetList = ([])
     var tokens = accountHeader.tokenList
     var avax = ({})
+    // Clear the list if number of tokens has changed
+    if (assetListModel.count != (Object.keys(tokens).length + 1)) { // + 1 = AVAX
+      assetListModel.clear()
+    }
 
     // Address here is WAVAX, for price history
     avax["assetAddress"] = "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7"
@@ -65,9 +69,12 @@ ListView {
       assetList.push(asset)
     }
 
-    // Append if loading the list for the first time, update otherwise.
+    // Append if list is empty, update otherwise
     if (assetListModel.count == 0) {
       assetListModel.append(assetList)
+      for (var i = 0; i < assetListModel.count; i++) {
+        toggleAsset(assetListModel.get(i).assetAddress, false)
+      }
     } else {
       for (var i = 0; i < assetListModel.count; ++i) {
         var listObject = assetListModel.get(i);
@@ -83,9 +90,11 @@ ListView {
     }
   }
 
-  function toggleAsset(name, state) {
-    for (var i = 0; i < assetListModel.count; ++i) {
-      if (assetListModel.get(i).assetName == name) {
+  function toggleAsset(address, state) {
+    for (var i = 0; i < assetListModel.count; i++) {
+      if (address == "AVAX") {
+        assetListModel.get(0).isSelected = state
+      } else if (assetListModel.get(i).assetAddress == address) {
         assetListModel.get(i).isSelected = state
       }
     }
@@ -137,10 +146,26 @@ ListView {
         id: assetRectangle
         width: (parent.width - (scrollbar.width * 2))
         height: parent.height
-        color: itemRectColor
+        color: "#1D1827"
         border.width: 3
         border.color: (itemIsSelected) ? "white" : "transparent"
         radius: 5
+
+        Rectangle {
+          id: assetColorCode
+          width: 5
+          height: parent.height
+          anchors.left: parent.left
+          color: itemRectColor
+          radius: 5
+          Rectangle {
+            width: 2
+            height: parent.height
+            anchors.right: parent.right
+            color: itemRectColor
+            radius: 0
+          }
+        }
 
         AVMEAsyncImage {
           id: listAssetImage
@@ -148,7 +173,7 @@ ListView {
           height: 48
           anchors {
             left: parent.left
-            leftMargin: 10
+            leftMargin: 15
             verticalCenter: parent.verticalCenter
           }
           loading: false
@@ -195,14 +220,25 @@ ListView {
           anchors.fill: parent
           hoverEnabled: true
           onEntered: {
-            overviewPanel.selectedAsset = itemAssetName
-            toggleAsset(itemAssetName, true)
-            accountChart.toggleSlice(itemAssetName, true)
+            if (itemAssetName == "AVAX") {
+              overviewPanel.selectedAsset = "AVAX"
+              toggleAsset("AVAX", true)
+              accountChart.toggleSlice("AVAX", true)
+            } else {
+              overviewPanel.selectedAsset = itemAssetAddress
+              toggleAsset(itemAssetAddress, true)
+              accountChart.toggleSlice(itemAssetAddress, true)
+            }
           }
           onExited: {
             overviewPanel.selectedAsset = null
-            toggleAsset(itemAssetName, false)
-            accountChart.toggleSlice(itemAssetName, false)
+            if (itemAssetName == "AVAX") {
+              toggleAsset("AVAX", false)
+              accountChart.toggleSlice("AVAX", false)
+            } else {
+              toggleAsset(itemAssetAddress, false)
+              accountChart.toggleSlice(itemAssetAddress, false)
+            }
           }
         }
 
