@@ -129,6 +129,7 @@ class QmlSystem : public QObject {
     void txRetry(QString randomID);
     void ledgerRequired(QString randomID);
     void ledgerDone(QString randomID);
+    void ledgerFlagSet(bool b);
     void accountNonceUpdate(QString nonce);
 
     // Applications screen signals
@@ -167,7 +168,7 @@ class QmlSystem : public QObject {
 
     // Getters/Setters for private vars
     Q_INVOKABLE bool getLedgerFlag() { return ledgerFlag; }
-    Q_INVOKABLE void setLedgerFlag(bool b) { ledgerFlag = b; }
+    Q_INVOKABLE void setLedgerFlag(bool b) { ledgerFlag = b; emit ledgerFlagSet(ledgerFlag); }
     Q_INVOKABLE void setCurrentHardwareAccount(QString b) { currentHardwareAccount = b; }
     Q_INVOKABLE QString getCurrentHardwareAccount() { return currentHardwareAccount; }
     Q_INVOKABLE void setCurrentHardwareAccountPath(QString b) { currentHardwareAccountPath = b; }

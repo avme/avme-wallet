@@ -22,7 +22,7 @@ Rectangle {
   property string accountNonce
   property string gasPrice
   property string website
-  property bool isLedger: qmlSystem.getLedgerFlag()
+  property bool isLedger
   property var tokenList: ({})
   width: 750
   height: 48
@@ -97,6 +97,7 @@ Rectangle {
       confirmSign.open()
     }
     function onAccountNonceUpdate(nonce) { accountNonce = nonce }
+    function onLedgerFlagSet(_isLedger) { isLedger = _isLedger }
   }
 
   function qrEncode() {
