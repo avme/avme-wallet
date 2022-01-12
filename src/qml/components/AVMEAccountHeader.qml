@@ -387,22 +387,20 @@ Rectangle {
   AVMEPopup {
     id: confirmWebsiteAllowance
     width: window.width * 0.66
-    height: window.height * 0.1
+    height: window.height * 0.2
     y: ((window.height / 2) - (height / 2))
     z: 9999
     onAboutToHide: qmlSystem.resetWindowFlags()
     Column {
       id: confirmWebsiteAllowanceColumn
       anchors.centerIn: parent
-      anchors.horizontalCenter: parent.horizontalCenter
       width: parent.width
-      height: parent.height * 0.9
       spacing: 30
       Text {
         anchors.horizontalCenter: parent.horizontalCenter
         id: websiteText
         color: "#FFFFFF"
-        font.pixelSize: 17.0
+        font.pixelSize: 14.0
         text: "Allow <b>" + website + "</b> to connect?"
       }
       Row {
@@ -410,7 +408,7 @@ Rectangle {
         spacing: confirmWebsiteAllowanceColumn.width * 0.1
         AVMEButton {
           id: refuseWebsiteBtn
-          width: confirmWebsiteAllowanceColumn.width * 0.4
+          width: confirmWebsiteAllowanceColumn.width * 0.25
           text: "No"
           onClicked: {
             qmlSystem.addToPermissionList(website, false)
@@ -419,7 +417,7 @@ Rectangle {
         }
         AVMEButton {
           id: approveWebsiteBtn
-          width: confirmWebsiteAllowanceColumn.width * 0.4
+          width: confirmWebsiteAllowanceColumn.width * 0.25
           text: "Yes"
           onClicked: {
             qmlSystem.addToPermissionList(website, true)
