@@ -15,10 +15,12 @@
 #include <QtCore/QUrl>
 #include <QtCore/QVariant>
 #include <QtGui/QClipboard>
+#include <QtGui/QWindow>
 #include <QtNetwork/QSslSocket>
 #include <QtQml/QQmlContext>
 #include <QtQml/QQmlApplicationEngine>
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QWidget>
 
 #include <lib/ledger/ledger.h>
 
@@ -51,6 +53,7 @@ class QmlSystem : public QObject {
     QString currentHardwareAccount;
     QString currentHardwareAccountPath;
     QQmlApplicationEngine *engine = nullptr;
+    QApplication *app = nullptr;
 
     // Permission list of websites allowed to join.
     std::vector<std::pair<std::string,bool>> permissionList;
@@ -142,10 +145,10 @@ class QmlSystem : public QObject {
     // Signal for requesting user input to give permission for said website
     void askForPermission(QString website_);
 
-    // Signal for requesting user to sign a given transaction
+    // Signal for requesting user to sign a given transaction from a website
     void askForTransaction(QString data, QString from, QString gas, QString to, QString value, QString website_);
 
-    // Signal for requesting user to sign a message
+    // Signal for requesting user to sign a message from a website
     void askForSign(QString address, QString data, QString website_, int requestSignType);
 
     // Signals for ParaSwap exchanging
@@ -173,7 +176,9 @@ class QmlSystem : public QObject {
     Q_INVOKABLE QString getCurrentHardwareAccount() { return currentHardwareAccount; }
     Q_INVOKABLE void setCurrentHardwareAccountPath(QString b) { currentHardwareAccountPath = b; }
     Q_INVOKABLE QString getCurrentHardwareAccountPath() { return currentHardwareAccountPath; }
-    void setEngine(QQmlApplicationEngine *targetEngine) { engine = targetEngine;}; // INVOKATION FROM QML SHOULD *NOT* BE ALLOWED!
+    // INVOKATION FROM QML SHOULD *NOT* BE ALLOWED FOR THE VARS BELOW!
+    void setEngine(QQmlApplicationEngine *targetEngine) { engine = targetEngine;};
+    void setApp(QApplication *targetApp) { app = targetApp; }
 
     // Get, save and delete the path for the last opened Wallet
     // and the current Wallet's favorite Account, respectively.
@@ -188,10 +193,37 @@ class QmlSystem : public QObject {
     // Trim component cache. Removes *only* the data not being used.
     Q_INVOKABLE void trimComponentCache() { engine->trimComponentCache(); }
 
-    // Get the project's version
+    // Bring the application window to the front.
+    // HACK: https://forum.qt.io/post/89160 and https://stackoverflow.com/a/41565553
+    Q_INVOKABLE void bringAppToFront() {
+      for (QWindow* appWindow : app->allWindows()) {
+        #ifdef __MINGW32__
+        ::SetWindowPos((HWND)appWindow->winId(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+        ::SetWindowPos((HWND)appWindow->winId(), HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+        #else
+        // This line hides the window bar on Windows
+        appWindow->setFlag(Qt::WindowStaysOnTopHint, true);
+        #endif
+        appWindow->raise();
+        appWindow->showNormal();
+        appWindow->requestActivate();
+      }
+    }
+
+    // Reset the application window's flags that were set in bringAppToFront().
+    // HACK: this isn't required for Windows and Mac but is done anyway
+    // because behaviour varies on different Linux DEs for some reason
+    // beyond my comprehension.
+    Q_INVOKABLE void resetWindowFlags() {
+      for (QWindow* appWindow : app->allWindows()) {
+        appWindow->setFlag(Qt::WindowStaysOnTopHint, false);
+      }
+    }
+
+    // Get the project's version.
     Q_INVOKABLE QString getProjectVersion();
 
-    // Open the "About Qt" window
+    // Open the "About Qt" window.
     Q_INVOKABLE void openQtAbout();
 
     // Change the current loaded screen from the qrc resource file or a

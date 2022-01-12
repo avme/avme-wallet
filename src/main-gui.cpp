@@ -7,7 +7,6 @@
 int main(int argc, char *argv[]) {
   // Setup boost::filesystem environment and Qt's <APPNAME> for QStandardPaths
   ledger::device ledgerDevice;
-  
   boost::nowide::nowide_filesystem();
   QApplication::setApplicationName("AVME");
 
@@ -28,6 +27,7 @@ int main(int argc, char *argv[]) {
   QQmlApplicationEngine engine;
   QmlSystem qmlsystem;
   qmlsystem.setEngine(&engine);
+  qmlsystem.setApp(&app);
   engine.rootContext()->setContextProperty("qmlSystem", &qmlsystem);
   qmlRegisterType<QmlApi>("QmlApi", 1, 0, "QmlApi");
   QThreadPool::globalInstance()->setMaxThreadCount(128);

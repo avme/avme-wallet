@@ -71,7 +71,7 @@ Rectangle {
     function onAskForPermission(website_) {
       website = website_
       confirmWebsiteAllowance.open()
-      window.requestActivate()
+      qmlSystem.bringAppToFront()
     }
     function onAskForTransaction(data,from,gas,to,value,website_) {
       confirmRT.setData(
@@ -86,15 +86,12 @@ Rectangle {
         "Tx from: <b> " + website_ + "</b>"
       )
       confirmRT.open()
-      window.requestActivate()
+      qmlSystem.bringAppToFront()
     }
     function onAskForSign(address, message, _website, requestType) {
-      confirmSign.setData(
-        address,
-        message,
-        requestType
-      )
+      confirmSign.setData(address, message, requestType)
       confirmSign.open()
+      qmlSystem.bringAppToFront()
     }
     function onAccountNonceUpdate(nonce) { accountNonce = nonce }
     function onLedgerFlagSet(_isLedger) { isLedger = _isLedger }
@@ -393,6 +390,7 @@ Rectangle {
     height: window.height * 0.1
     y: ((window.height / 2) - (height / 2))
     z: 9999
+    onAboutToHide: qmlSystem.resetWindowFlags()
     Column {
       id: confirmWebsiteAllowanceColumn
       anchors.centerIn: parent
@@ -471,6 +469,7 @@ Rectangle {
     width: window.width * 0.6
     height: window.height * 0.7
     y: ((window.height / 2) - (height / 2))
+    onAboutToHide: qmlSystem.resetWindowFlags()
     backBtn.onClicked: {
       confirmRT.close()
       qmlSystem.requestedTransactionStatus(false, "")
@@ -491,6 +490,7 @@ Rectangle {
     height: window.height * 0.7
     isWebserver: true
     y: ((window.height / 2) - (height / 2))
+    onAboutToHide: qmlSystem.resetWindowFlags()
     backBtn.onClicked: {
       confirmSign.close()
       qmlSystem.requestedTransactionStatus(false, "")
