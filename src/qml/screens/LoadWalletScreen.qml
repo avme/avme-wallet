@@ -40,6 +40,7 @@ Item {
         if (acc != "") {
           qmlSystem.setCurrentAccount(acc)
           qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
+          qmlSystem.startWSServer()
           accountHeader.getAddress()
           window.menu.changeScreen("Overview")
         } else {
