@@ -5,10 +5,14 @@
 
 // Implementation of AVME Wallet as a GUI (Qt) program.
 int main(int argc, char *argv[]) {
-  // Setup boost::filesystem environment and Qt's <APPNAME> for QStandardPaths
+  // Setup boost::filesystem environment, Qt's <APPNAME> for QStandardPaths
+  // and Linux's fontconfig path
   ledger::device ledgerDevice;
   boost::nowide::nowide_filesystem();
   QApplication::setApplicationName("AVME");
+  #ifdef __linux__
+  putenv((char*)("FONTCONFIG_PATH=/etc/fonts"));
+  #endif
 
   // Get the system's DPI scale using a dummy temp QApplication
   QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
