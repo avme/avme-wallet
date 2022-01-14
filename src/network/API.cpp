@@ -144,11 +144,12 @@ void API::httpGetFile(std::string host, std::string get, std::string target) {
     stream.shutdown(ec);
     if (ec == boost::asio::error::eof || boost::asio::ssl::error::stream_truncated)
       ec.assign(0, ec.category());
-    if (ec)
-      throw boost::system::system_error{ec};
-    boost::nowide::ofstream outFile(target, std::ofstream::out | std::ofstream::binary);
-    outFile << body;
-    outFile.close();
+    if (ec) throw boost::system::system_error{ec};
+    if (res.result_int() == 200) {
+      boost::nowide::ofstream outFile(target, std::ofstream::out | std::ofstream::binary);
+      outFile << body;
+      outFile.close();
+    }
   } catch (std::exception const& e) {
     //std::cout << "ERROR downloading file: " << e.what() << std::endl;
     Utils::logToDebug(std::string("ERROR downloading file: ") + e.what());
