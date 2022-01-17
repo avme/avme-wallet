@@ -34,8 +34,6 @@ Q_IMPORT_PLUGIN(QCocoaIntegrationPlugin)
 #else
 Q_IMPORT_PLUGIN(QXcbIntegrationPlugin)
 #endif
-#undef FONTCONFIG_PATH
-#define FONTCONFIG_PATH "/etc/fonts" // Redefine fontconfig path for the program.
 #endif
 Q_IMPORT_PLUGIN(QtQuick2Plugin)
 Q_IMPORT_PLUGIN(QtQuick2WindowPlugin)
