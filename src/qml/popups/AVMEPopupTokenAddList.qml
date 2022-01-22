@@ -19,6 +19,7 @@ AVMEPopup {
     filterInput.text = ""
     selectAllCheckbox.checked = false
     qmlSystem.getARC20TokenList()
+    tokenList.updateSelectedTokens()
   }
   onAboutToHide: {
     tokenList.tokenModel.clear()
@@ -26,6 +27,7 @@ AVMEPopup {
     addedTokens = 0
     selectAllCheckbox.checked = false
     filterInput.text = ""
+    tokenList.updateSelectedTokens()
   }
 
   Connections {
@@ -54,14 +56,27 @@ AVMEPopup {
   }
 
   function refreshList(filter) {
+    // Preserve previous selections
+    var selectStatus = []
+    for (var i = 0; i < tokenList.tokenModel.count; i++) {
+      var token = tokenList.tokenModel.get(i)
+      selectStatus[token.address] = token.selected
+    }
+    for (var i = 0; i < tokens.length; i++) {
+      if (tokens[i]["address"] in selectStatus) {
+        tokens[i]["selected"] = selectStatus[tokens[i]["address"]]
+      }
+    }
+    // Clear the model and re-add tokens based on filter/selection
     tokenList.tokenModel.clear()
     for (var i = 0; i < tokens.length; i++) {
       var nameMatch = tokens[i]["name"].toUpperCase().includes(filter.toUpperCase())
       var symbolMatch = tokens[i]["symbol"].toUpperCase().includes(filter.toUpperCase())
-      if (filter == "" || nameMatch || symbolMatch) {
+      if (filter == "" || nameMatch || symbolMatch || tokens[i]["selected"]) {
         tokens[i]["balance"] = ""
         tokenList.tokenModel.append(tokens[i])
       }
+      tokenList.updateSelectedTokens()
     }
     tokenList.tokenModel.sortBySymbol()
     tokenList.currentIndex = -1

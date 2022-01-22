@@ -33,9 +33,7 @@ ListView {
   function updateSelectedTokens() {
     selectedTokens = 0
     for (var i = 0; i < tokenSelectModel.count; i++) {
-      if (tokenSelectModel.get(i).selected) {
-        selectedTokens++
-      }
+      if (tokenSelectModel.get(i).selected) { selectedTokens++ }
     }
     updatedTokenSelection()
   }
@@ -65,22 +63,26 @@ ListView {
       }
     }
     function allTokensSelected() {
-      for (var i = 0; i < count; i++) {
-        if (!get(i).selected) return false
-      }
+      if (count == 0) return false
+      for (var i = 0; i < count; i++) { if (!get(i).selected) return false }
       return true
     }
     function selectAllTokens() {
       var check = allTokensSelected()
-      for (var i = 0; i < count; i++) {
-        get(i).selected = !check
-      }
+      for (var i = 0; i < count; i++) { get(i).selected = !check }
       tokenSelectList.updateSelectedTokens()
     }
     function sortBySymbol() {
+      // First, sort everything by symbol
       for (var i = 0; i < count; i++) {
         for (var j = 0; j < i; j++) {
           if (get(i).symbol < get(j).symbol) { move(i, j, 1) }
+        }
+      }
+      // Then, sort checked from unchecked
+      for (var i = 0; i < count; i++) {
+        for (var j = 0; j < i; j++) {
+          if (!get(j).selected && get(i).selected) { move(i, j, 1) }
         }
       }
     }
