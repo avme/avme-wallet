@@ -114,11 +114,8 @@ void Server::listener::on_accept(beast::error_code ec, tcp::socket socket) {
 
 void Server::listener::stop() {
   m_lock.lock();
-  #ifdef __MINGW32__
-  #else
   // Cancel is not available under windows systems
   acceptor_.cancel(); // Cancel the acceptor.
-  #endif
   acceptor_.close(); // Close the acceptor.
   m_lock.unlock();
 }
@@ -143,23 +140,23 @@ void Server::stop() {
   // After that, do the same with each listener thread and the listener list.
   // We need to bind_front_handler to the actual object running inside the thread.
   for (auto session_ : sessions_) {
-    auto session_executor = session_->get_executor();
-    net::post(session_executor, beast::bind_front_handler(&session::close, session_));
+    if (ioc.stopped()) { continue; };
+    ioc.dispatch(beast::bind_front_handler(&session::close, session_));
   }
   sessions_.clear();
   for (auto listener_ : listeners_) {
-    auto listener_executor = listener_->get_executor();
-    net::post(listener_executor, beast::bind_front_handler(&listener::stop, listener_));
+    if (ioc.stopped()) { continue; };
+    ioc.dispatch(beast::bind_front_handler(&listener::stop, listener_));
   }
   listeners_.clear();
 
   // Signal the ioc to stop and wait for the thread running
   // Server::start to unlock before declaring the server ready to start again.
-  // HACK(?): one nanosecond delay to prevent "bind: address already in use".
-  // I'm laughing so hard that it works, I'll just keep it like this :risitas:
-  boost::this_thread::sleep_for(boost::chrono::nanoseconds(1));
-  ioc.stop();
   running.lock();
+  for (uint64_t tries = 0; (!ioc.stopped()) && tries < 15; ++tries) {
+    ioc.stop();
+    boost::this_thread::sleep_for(boost::chrono::nanoseconds(10));
+  }
   running.unlock();
 }
 
