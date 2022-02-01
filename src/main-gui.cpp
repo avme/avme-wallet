@@ -51,7 +51,9 @@ int main(int argc, char *argv[]) {
 
   // Create Websocket server object and connect close button signal
   qmlsystem.setWSServer();
-  QObject::connect(&app, SIGNAL(aboutToQuit()), &qmlsystem, SLOT(cleanAndCloseWallet()));
-  return app.exec();
+  auto returnStatus = app.exec();
+  // Only after the wallet is closed...
+  qmlsystem.cleanAndCloseWallet();
+  return returnStatus;
 }
 

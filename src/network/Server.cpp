@@ -41,6 +41,8 @@ void session::on_run() {
 }
 
 void session::on_accept(beast::error_code ec) {
+  if (ec.value() == 125) { Server::fail(ec, "read"); return; } // Operation cancelled
+  if (ec.value() == 995) { Server::fail(ec, "read"); return; } // Interrupted by host
   if (ec) { return Server::fail(ec, "accept"); }
   do_read();
 }
@@ -115,7 +117,10 @@ void Server::listener::on_accept(beast::error_code ec, tcp::socket socket) {
 void Server::listener::stop() {
   m_lock.lock();
   // Cancel is not available under windows systems
+  #ifdef __MINGW32__
+  #else
   acceptor_.cancel(); // Cancel the acceptor.
+  #endif
   acceptor_.close(); // Close the acceptor.
   m_lock.unlock();
 }
