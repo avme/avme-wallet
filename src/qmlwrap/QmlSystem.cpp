@@ -36,19 +36,24 @@ bool QmlSystem::deleteLastWallet() {
 
 QString QmlSystem::getLastAccount() {
   QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-  if (path.isEmpty()) return "";
+  json accountJson;
+  accountJson["account"] = "";
+  if (path.isEmpty()) return QString::fromStdString(accountJson.dump());
   boost::filesystem::path accountPath = path.toStdString() + "/lastAccount.json";
-  if (!boost::filesystem::exists(accountPath)) return "";
+  if (!boost::filesystem::exists(accountPath)) return QString::fromStdString(accountJson.dump());
   json lastAccountArr = json::parse(Utils::readJSONFile(accountPath))["paths"];
   for (auto& lastAccount : lastAccountArr) {
     if (lastAccount["wallet"].get<std::string>() == Utils::walletFolderPath.string()) {
-      return QString::fromStdString(lastAccount["account"].get<std::string>());
+      accountJson["account"] = lastAccount["account"].get<std::string>();
+      if (lastAccount.contains("ledgerPath")) {
+        accountJson["ledgerPath"] = lastAccount["ledgerPath"];
+      }
     }
   }
-  return "";
+  return QString::fromStdString(accountJson.dump());
 }
 
-bool QmlSystem::saveLastAccount(QString account) {
+bool QmlSystem::saveLastAccount(QString account, bool isLedger, QString ledgerPath) {
   QString path = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
   if (path.isEmpty()) return false;
   boost::filesystem::path accountPath = path.toStdString() + "/lastAccount.json";
@@ -70,8 +75,12 @@ bool QmlSystem::saveLastAccount(QString account) {
     json newLastAccount = json::object();
     newLastAccount["wallet"] = Utils::walletFolderPath.string();
     newLastAccount["account"] = account.toStdString();
+    if (isLedger) {
+      newLastAccount["ledgerPath"] = ledgerPath.toStdString();
+    }
     lastAccountObj["paths"].push_back(newLastAccount);
   }
+
   return (Utils::writeJSONFile(lastAccountObj, accountPath) == "");
 }
 

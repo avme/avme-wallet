@@ -187,7 +187,7 @@ class QmlSystem : public QObject {
     Q_INVOKABLE bool saveLastWallet();
     Q_INVOKABLE bool deleteLastWallet();
     Q_INVOKABLE QString getLastAccount();
-    Q_INVOKABLE bool saveLastAccount(QString account);
+    Q_INVOKABLE bool saveLastAccount(QString account, bool isLedger, QString ledgerPath);
     Q_INVOKABLE bool deleteLastAccount();
 
     // Trim component cache. Removes *only* the data not being used.

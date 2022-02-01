@@ -90,7 +90,7 @@ Item {
       if (accountList.currentItem.isFavorite) {
         qmlSystem.deleteLastAccount()
       } else {
-        qmlSystem.saveLastAccount(accountList.currentItem.itemAddress)
+        qmlSystem.saveLastAccount(accountList.currentItem.itemAddress, accountList.currentItem.itemIsLedger, accountList.currentItem.itemDerivationPath)
       }
       accountSelectPanel.accountModel.updateFav()
     }

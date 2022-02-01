@@ -47,9 +47,9 @@ AVMEPanel {
           }
         }
         function updateFav() {
-          var acc = qmlSystem.getLastAccount()
+          var acc = JSON.parse(qmlSystem.getLastAccount())
           for (var i = 0; i < count; i++) {
-            get(i).isFav = (get(i).address == acc)
+            get(i).isFav = (get(i).address == acc["account"])
           }
         }
         function getFavIndex() {

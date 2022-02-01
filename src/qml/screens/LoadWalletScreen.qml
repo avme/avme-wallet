@@ -36,8 +36,15 @@ Item {
         qmlSystem.loadAccounts()
         qmlSystem.loadPermissionList()
         qmlSystem.loadARC20Tokens()
-        var acc = qmlSystem.getLastAccount()
-        if (acc != "") {
+        qmlSystem.loadLedgerDB()
+        var acc = JSON.parse(qmlSystem.getLastAccount())
+        if (acc["account"] != "") {
+          if (acc["ledgerPath"]) {
+            qmlSystem.setLedgerFlag(true)
+            qmlSystem.setCurrentHardwareAccount(acc["account"])
+            qmlSystem.setCurrentHardwareAccountPath(acc["ledgerPath"])
+            qmlSystem.importLedgerAccount(qmlSystem.getCurrentHardwareAccount(), qmlSystem.getCurrentHardwareAccountPath())
+          }
           qmlSystem.setCurrentAccount(acc)
           qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
           qmlSystem.startWSServer()

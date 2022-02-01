@@ -294,7 +294,7 @@ Item {
       qmlSystem.loadPermissionList()
       qmlSystem.loadARC20Tokens()
       accountHeader.getAddress()
-      qmlSystem.saveLastAccount(qmlSystem.getCurrentAccount())
+      qmlSystem.saveLastAccount(qmlSystem.getCurrentAccount(), false, "")
       qmlSystem.startWSServer()
       window.menu.changeScreen("Overview")
     }
