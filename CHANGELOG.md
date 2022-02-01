@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - Unreleased
+### Added
+- Wallet settings can now be imported/exported (#47)
+- Accounts can now be marked as favorite and automatically loaded when opening a Wallet (#44)
+- Multiple tokens can now be added at once (#43)
+
+### Changed
+- Tx Progress popup (#45) and Overview screen (#46) got a facelift
+- Small info popup now has a loading gif
+- Minor visual tweaks on other popups
+
+### Fixed
+- Word wrapping when signing a message
+- Ledger accounts should not show the "Export Private Key" icon anymore (#49)
+- Wallet should now pop to the front when approving transactions from websites (#48)
+- **Linux:** fontconfig default path is set up correctly now
+  - This makes the wallet open *much* faster, should be on par with Win/Mac builds
+- Some small fixes related to M1 Mac support
+- Websocket should be a bit more stable now (reduced threads)
+- Tokens added by hand (using addresses rather than the token list) should not download broken images anymore
+
 ## [2.0.2] - 22/11/2021
 ### Added
 - Contacts can now be sorted by address and name (both A-Z and vice-versa).
