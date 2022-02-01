@@ -25,7 +25,6 @@ Item {
       accountHeader.currentAddress = ""
       if (success) {
         qmlSystem.cleanAndCloseWallet() // TODO: find out why this line sometimes freezes the wallet
-        qmlSystem.setLedgerFlag(false)
         qmlSystem.deleteLastWallet()
         if (saveWallet) { qmlSystem.saveLastWallet() }
         window.infoPopup.close()
@@ -44,8 +43,10 @@ Item {
             qmlSystem.setCurrentHardwareAccount(acc["account"])
             qmlSystem.setCurrentHardwareAccountPath(acc["ledgerPath"])
             qmlSystem.importLedgerAccount(qmlSystem.getCurrentHardwareAccount(), qmlSystem.getCurrentHardwareAccountPath())
+          } else {
+            qmlSystem.setLedgerFlag(false)
+            qmlSystem.setCurrentAccount(acc["account"])
           }
-          qmlSystem.setCurrentAccount(acc)
           qmlSystem.loadHistoryDB(qmlSystem.getCurrentAccount())
           qmlSystem.startWSServer()
           accountHeader.getAddress()
