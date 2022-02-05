@@ -74,6 +74,7 @@ AVMEPopup {
           )
           qmlSystem.downloadARC20TokenImage(tokenData.address)
           addTokenPopup.close()
+          accountHeader.assetCt = tokensPanel.tokenCt + 1 // +1 = AVAX
         }
       }
     }

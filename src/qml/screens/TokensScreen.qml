@@ -12,6 +12,7 @@ import "qrc:/qml/popups"
 Item {
   id: tokensScreen
   property alias selectedToken: tokensPanel.selectedToken
+  property alias erasePopup: confirmEraseTokenPopup
 
   // Panel for managing the ARC20 tokens (view/add/remove)
   AVMEPanelTokens {
@@ -64,9 +65,10 @@ Item {
     icon: "qrc:/img/warn.png"
     info: "Are you sure you want to remove this token?"
     yesBtn.onClicked: {
-      qmlSystem.removeARC20Token(selectedToken.itemAddress);
+      qmlSystem.removeARC20Token(selectedToken.itemAddress)
       confirmEraseTokenPopup.close()
       tokensPanel.reloadTokens()
+      accountHeader.assetCt = tokensPanel.tokenCt + 1 // +1 = AVAX
     }
     noBtn.onClicked: {
       confirmEraseTokenPopup.close()

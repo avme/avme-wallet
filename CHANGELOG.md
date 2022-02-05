@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Some small fixes related to M1 Mac support
 - Websocket should be a bit more stable now (reduced threads)
 - Tokens added by hand (using addresses rather than the token list) should not download broken images anymore
+- Tokens can now be removed using keyboard input (Del)
 
 ## [2.0.2] - 22/11/2021
 ### Added

@@ -52,6 +52,7 @@ AVMEPopup {
     function onAddedTokens() {
       window.infoPopup.close()
       addListTokenPopup.close()
+      accountHeader.assetCt = tokensPanel.tokenCt + 1 // +1 = AVAX
     }
   }
 

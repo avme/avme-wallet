@@ -32,17 +32,26 @@ AVMEPanel {
     "#A9A9A9", // Grey
   ]
 
-  // Only load chart if everything is loaded
   Connections {
     target: accountHeader
     function onUpdatedBalances() { reloadData() }
   }
-  Component.onCompleted: if (accountHeader.coinRawBalance) { reloadData() }
 
+  Component.onCompleted: reloadData()
+
+  // Only load chart if everything is loaded, also reset loading gif status
+  // if one or more tokens are added/removed. +1 = AVAX
   function reloadData() {
-    overviewAssetList.reloadAssets()
-    accountChart.refresh()
-    loadingPng.visible = false
+    if (accountHeader.assetCt == 0) {
+      accountHeader.assetCt = qmlSystem.getARC20Tokens().length + 1
+    }
+    if ((Object.keys(accountHeader.tokenList).length + 1) == accountHeader.assetCt) {
+      overviewAssetList.reloadAssets()
+      accountChart.refresh()
+      loadingPng.visible = false
+    } else {
+      loadingPng.visible = true
+    }
   }
 
   Row {
@@ -59,6 +68,7 @@ AVMEPanel {
     AVMEOverviewPieChart {
       id: accountChart
       width: (overviewPanel.width * 0.4) - (parent.spacing * 2)
+      visible: !loadingPng.visible
       anchors {
         top: parent.top
         bottom: parent.bottom
@@ -68,6 +78,7 @@ AVMEPanel {
     AVMEOverviewAssetList {
       id: overviewAssetList
       width: (overviewPanel.width * 0.6) - (parent.spacing * 2)
+      visible: !loadingPng.visible
       anchors {
         top: parent.top
         bottom: parent.bottom

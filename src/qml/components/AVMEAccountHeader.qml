@@ -23,6 +23,7 @@ Rectangle {
   property string gasPrice
   property string website
   property bool isLedger
+  property int assetCt: 0
   property var tokenList: ({})
   width: 750
   height: 48

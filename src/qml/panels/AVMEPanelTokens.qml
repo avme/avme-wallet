@@ -10,6 +10,7 @@ import "qrc:/qml/components"
 AVMEPanel {
   id: tokensPanel
   title: "Token List"
+  property alias tokenCt: tokenList.count
   property alias selectedToken: tokenGrid.currentItem
   property alias addListBtn: btnAddList
   property alias addTokenBtn: btnAddToken
@@ -47,6 +48,12 @@ AVMEPanel {
             if (get(i).symbol < get(j).symbol) { move(i, j, 1) }
           }
         }
+      }
+    }
+    // Delete key override
+    Keys.onPressed: {
+      if ((event.key == Qt.Key_Delete)) {
+        if (btnRemoveToken.enabled) { tokensScreen.erasePopup.open() }
       }
     }
   }

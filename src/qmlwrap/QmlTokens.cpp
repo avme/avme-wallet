@@ -232,7 +232,8 @@ void QmlSystem::addARC20Tokens(QVariantList addresses) {
         tokenData["name"].toString(), tokenData["decimals"].toInt(),
         tokenData["avaxPairContract"].toString()
       );
+      tokenCt++;
     }
-    emit addedTokens();
+    emit addedTokens(tokenCt);
   });
 }

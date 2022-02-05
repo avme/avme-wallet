@@ -105,7 +105,7 @@ class QmlSystem : public QObject {
     // Tokens screen signals
     void gotTokenList(QVariantList tokenData);
     void updateAddTokenProgress(int total);
-    void addedTokens();
+    void addedTokens(int num);
 
     // Account screen signals
     void accountGenerated(QVariantMap data);
