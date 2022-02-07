@@ -444,7 +444,7 @@ Rectangle {
 
   AVMEPopupViewPrivKey {
     id: viewPrivKeyPopup
-    width: window.width * 0.7
+    width: window.width * 0.75
     height: window.height * 0.6
     y: ((window.height / 2) - (height / 2))
   }

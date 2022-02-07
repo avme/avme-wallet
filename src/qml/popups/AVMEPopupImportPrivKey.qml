@@ -22,6 +22,7 @@ AVMEPopup {
   onAboutToShow: privKeyInput.forceActiveFocus()
   onAboutToHide: {
     privKeyInput.text = nameInput.text = passInput.text = ""
+    passViewBtn.view = false
   }
 
   Column {
@@ -76,14 +77,34 @@ AVMEPopup {
       placeholder: "Name for your Account"
     }
 
-    AVMEInput {
-      id: passInput
-      width: (importPrivKeyPopup.width * 0.95)
+    Row {
+      id: passRow
       anchors.horizontalCenter: parent.horizontalCenter
-      echoMode: TextInput.Password
-      passwordCharacter: "*"
-      label: "Passphrase"
-      placeholder: "Your Wallet's passphrase"
+      spacing: 10
+
+      AVMEInput {
+        id: passInput
+        width: (importPrivKeyPopup.width * 0.85) - parent.spacing
+        echoMode: (passViewBtn.view) ? TextInput.Normal : TextInput.Password
+        passwordCharacter: "*"
+        label: "Passphrase"
+        placeholder: "Your Wallet's passphrase"
+      }
+      AVMEButton {
+        id: passViewBtn
+        property bool view: false
+        width: (importPrivKeyPopup.width * 0.1)
+        height: passInput.height
+        text: ""
+        onClicked: view = !view
+        AVMEAsyncImage {
+          anchors.fill: parent
+          anchors.margins: 5
+          loading: false
+          imageSource: (parent.view)
+          ? "qrc:/img/icons/eye-f.png" : "qrc:/img/icons/eye-close-f.png"
+        }
+      }
     }
 
     AVMEButton {

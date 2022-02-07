@@ -142,14 +142,34 @@ Item {
       }
 
       // Passphrase
-      AVMEInput {
-        id: loadPassInput
+      Row {
+        id: loadPassRow
         anchors.horizontalCenter: parent.horizontalCenter
-        width: (items.width * 0.9)
-        echoMode: TextInput.Password
-        passwordCharacter: "*"
-        label: "Passphrase"
-        placeholder: "Your Wallet's passphrase"
+        spacing: 10
+
+        AVMEInput {
+          id: loadPassInput
+          width: (items.width * 0.9) - (loadPassViewBtn.width + parent.spacing)
+          echoMode: (loadPassViewBtn.view) ? TextInput.Normal : TextInput.Password
+          passwordCharacter: "*"
+          label: "Passphrase"
+          placeholder: "Your Wallet's passphrase"
+        }
+        AVMEButton {
+          id: loadPassViewBtn
+          property bool view: false
+          width: (items.width * 0.1)
+          height: loadPassInput.height
+          text: ""
+          onClicked: view = !view
+          AVMEAsyncImage {
+            anchors.fill: parent
+            anchors.margins: 5
+            loading: false
+            imageSource: (parent.view)
+            ? "qrc:/img/icons/eye-f.png" : "qrc:/img/icons/eye-close-f.png"
+          }
+        }
       }
 
       AVMECheckbox {

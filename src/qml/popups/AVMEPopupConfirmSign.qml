@@ -47,7 +47,10 @@ AVMEPopup {
       }
     }
   }
-  onAboutToHide: confirmSignPopup.clean()
+  onAboutToHide: {
+    confirmSignPopup.clean()
+    passViewBtn.view = false
+  }
 
   Timer { id: ledgerRetryTimer; interval: 125; onTriggered: checkLedger() }
 
@@ -136,14 +139,34 @@ AVMEPopup {
       Timer { id: infoTimer; interval: 2000 }
     }
 
-    AVMEInput {
-      id: passInput
+    Row {
+      id: passRow
       anchors.horizontalCenter: parent.horizontalCenter
-      width: confirmSignPopup.width / 2
-      echoMode: TextInput.Password
-      passwordCharacter: "*"
-      label: "Passphrase"
-      placeholder: "Your Wallet's passphrase"
+      spacing: 10
+
+      AVMEInput {
+        id: passInput
+        width: (confirmSignPopup.width * 0.5)
+        echoMode: (passViewBtn.view) ? TextInput.Normal : TextInput.Password
+        passwordCharacter: "*"
+        label: "Passphrase"
+        placeholder: "Your Wallet's passphrase"
+      }
+      AVMEButton {
+        id: passViewBtn
+        property bool view: false
+        width: (confirmSignPopup.width * 0.1)
+        height: passInput.height
+        text: ""
+        onClicked: view = !view
+        AVMEAsyncImage {
+          anchors.fill: parent
+          anchors.margins: 5
+          loading: false
+          imageSource: (parent.view)
+          ? "qrc:/img/icons/eye-f.png" : "qrc:/img/icons/eye-close-f.png"
+        }
+      }
     }
 
     Row {

@@ -21,7 +21,7 @@ import "qrc:/qml/components"
  */
 AVMEPopup {
   id: chooseAccountPopup
-  widthPct: 0.5
+  widthPct: 0.6
   heightPct: 0.95
   property int startingIndex: -1
   property bool isWaiting: false
@@ -175,12 +175,28 @@ AVMEPopup {
 
       AVMEInput {
         id: passInput
-        width: (chooseAccountPopup.width * 0.45)
+        width: (chooseAccountPopup.width * 0.35)
         enabled: (!isWaiting)
-        echoMode: TextInput.Password
+        echoMode: (passViewBtn.view) ? TextInput.Normal : TextInput.Password
         passwordCharacter: "*"
         label: "Passphrase"
         placeholder: "Your Wallet's passphrase"
+      }
+
+      AVMEButton {
+        id: passViewBtn
+        property bool view: false
+        width: (chooseAccountPopup.width * 0.1)
+        height: passInput.height
+        text: ""
+        onClicked: view = !view
+        AVMEAsyncImage {
+          anchors.fill: parent
+          anchors.margins: 5
+          loading: false
+          imageSource: (parent.view)
+          ? "qrc:/img/icons/eye-f.png" : "qrc:/img/icons/eye-close-f.png"
+        }
       }
     }
 

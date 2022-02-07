@@ -61,7 +61,10 @@ AVMEPopup {
       }
     }
   }
-  onAboutToHide: confirmTxPopup.clean()
+  onAboutToHide: {
+    confirmTxPopup.clean()
+    passViewBtn.view = false
+  }
 
   Timer { id: ledgerRetryTimer; interval: 125; onTriggered: checkLedger() }
 
@@ -219,14 +222,34 @@ AVMEPopup {
       Timer { id: infoTimer; interval: 2000 }
     }
 
-    AVMEInput {
-      id: passInput
+    Row {
+      id: passRow
       anchors.horizontalCenter: parent.horizontalCenter
-      width: confirmTxPopup.width / 2
-      echoMode: TextInput.Password
-      passwordCharacter: "*"
-      label: "Passphrase"
-      placeholder: "Your Wallet's passphrase"
+      spacing: 10
+
+      AVMEInput {
+        id: passInput
+        width: (confirmTxPopup.width * 0.5)
+        echoMode: (passViewBtn.view) ? TextInput.Normal : TextInput.Password
+        passwordCharacter: "*"
+        label: "Passphrase"
+        placeholder: "Your Wallet's passphrase"
+      }
+      AVMEButton {
+        id: passViewBtn
+        property bool view: false
+        width: (confirmTxPopup.width * 0.1)
+        height: passInput.height
+        text: ""
+        onClicked: view = !view
+        AVMEAsyncImage {
+          anchors.fill: parent
+          anchors.margins: 5
+          loading: false
+          imageSource: (parent.view)
+          ? "qrc:/img/icons/eye-f.png" : "qrc:/img/icons/eye-close-f.png"
+        }
+      }
     }
 
     Row {
@@ -282,27 +305,27 @@ AVMEPopup {
     heightPct: 0.8
     icon: "qrc:/img/warn.png"
     info: "Transaction likely to fail,<br>please check your input."
+    okBtn.text: "Close"
     Rectangle {
-	  color: "#0f0c18"
+      color: "#0f0c18"
       anchors.verticalCenter: parent.verticalCenter
-	  anchors.horizontalCenter: parent.horizontalCenter
+      anchors.horizontalCenter: parent.horizontalCenter
       radius: 5
       width: parent.width * 0.8
       height: parent.height * 0.33
-	  Text {
-	  	id: failedTransactionText
-		anchors.verticalCenter: parent.verticalCenter
-		anchors.horizontalCenter: parent.horizontalCenter
-		height: parent.height * 0.9
-		width: parent.width * 0.9
-		text: "Reason: " + failReason
-		horizontalAlignment: Text.AlignHCenter 
-		verticalAlignment: Text.AlignVCenter 
-      	color: "#FFFFFF"
-      	font.pixelSize: 12.0
-		wrapMode: Text.Wrap
-	  }
+      Text {
+        id: failedTransactionText
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
+        height: parent.height * 0.9
+        width: parent.width * 0.9
+        text: "Reason: " + failReason
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        color: "#FFFFFF"
+        font.pixelSize: 12.0
+        wrapMode: Text.Wrap
+      }
     }
-    okBtn.text: "Close"
   }
 }

@@ -19,7 +19,10 @@ AVMEPopup {
     btnCopy.enabled = false
     keyPassInput.forceActiveFocus()
   }
-  onAboutToHide: viewPrivKeyPopup.clean()
+  onAboutToHide: {
+    viewPrivKeyPopup.clean()
+    keyPassViewBtn.view = false
+  }
 
   function showPrivKey() {
     if (keyText.timer.running) { keyText.timer.stop() }
@@ -66,14 +69,34 @@ AVMEPopup {
       + "<br>PROCEED AT YOUR OWN RISK.</b>"
     }
 
-    AVMEInput {
-      id: keyPassInput
+    Row {
+      id: keyPassRow
       anchors.horizontalCenter: parent.horizontalCenter
-      width: parent.width / 3
-      echoMode: TextInput.Password
-      passwordCharacter: "*"
-      label: "Passphrase"
-      placeholder: "Your Wallet's passphrase"
+      spacing: 10
+
+      AVMEInput {
+        id: keyPassInput
+        width: (items.width * 0.3)
+        echoMode: (keyPassViewBtn.view) ? TextInput.Normal : TextInput.Password
+        passwordCharacter: "*"
+        label: "Passphrase"
+        placeholder: "Your Wallet's passphrase"
+      }
+      AVMEButton {
+        id: keyPassViewBtn
+        property bool view: false
+        width: (items.width * 0.1)
+        height: keyPassInput.height
+        text: ""
+        onClicked: view = !view
+        AVMEAsyncImage {
+          anchors.fill: parent
+          anchors.margins: 5
+          loading: false
+          imageSource: (parent.view)
+          ? "qrc:/img/icons/eye-f.png" : "qrc:/img/icons/eye-close-f.png"
+        }
+      }
     }
 
     TextArea {
