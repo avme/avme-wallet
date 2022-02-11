@@ -2,7 +2,7 @@
 #
 
 set(CMAKE_SYSTEM_NAME Darwin)
-set(TOOLCHAIN_PREFIX arm-apple-darwin21.1.0)
+set(TOOLCHAIN_PREFIX arm-apple-darwin21.2.0)
 
 # cross compilers to use for C, C++ and Fortran
 set(CMAKE_C_COMPILER clang)
