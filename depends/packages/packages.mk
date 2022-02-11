@@ -1,7 +1,5 @@
 packages:=boost libevent openssl
 
-qt_packages = zlib
-
 qrencode_packages = qrencode
 
 hardware_packages := hidapi protobuf libusb

@@ -4,7 +4,7 @@ $(package)_download_path=https://download.qt.io/official_releases/qt/5.15/$($(pa
 $(package)_suffix=everywhere-src-$($(package)_version).tar.xz
 $(package)_file_name=qtbase-$($(package)_suffix)
 $(package)_sha256_hash=909fad2591ee367993a75d7e2ea50ad4db332f05e1c38dd7a5a274e156a4e0f8
-$(package)_dependencies=zlib openssl
+$(package)_dependencies=openssl
 $(package)_linux_dependencies=freetype fontconfig libxcb libxkbcommon libxcb_util libxcb_util_render libxcb_util_keysyms libxcb_util_image libxcb_util_wm
 $(package)_qt_libs=corelib concurrent network widgets gui plugins testlib qlalr
 $(package)_patches=fix_qt_pkgconfig.patch mac-qmake.conf fix_no_printer.patch no-xlib.patch
@@ -12,7 +12,6 @@ $(package)_patches+=fix_android_jni_static.patch dont_hardcode_pwd.patch fix_fxc
 $(package)_patches+=drop_lrelease_dependency.patch fix_qpainter_non_determinism.patch
 $(package)_patches+=no_sdk_version_check.patch fix_limits_header.patch openssl-qt-crosscompile.patch
 $(package)_patches+=fix_montery_include.patch
-
 $(package)_qttranslations_file_name=qttranslations-$($(package)_suffix)
 $(package)_qttranslations_sha256_hash=d5788e86257b21d5323f1efd94376a213e091d1e5e03b45a95dd052b5f570db8
 
@@ -80,6 +79,7 @@ $(package)_config_opts += -no-sql-sqlite2
 $(package)_config_opts += -no-system-proxies
 $(package)_config_opts += -no-use-gold-linker
 $(package)_config_opts += -no-zstd
+$(package)_config_opts += -no-zlib
 $(package)_config_opts += -nomake examples
 $(package)_config_opts += -nomake tests
 $(package)_config_opts += -opensource
@@ -89,7 +89,6 @@ $(package)_config_opts += -gif
 $(package)_config_opts += -qt-libpng
 $(package)_config_opts += -qt-pcre
 $(package)_config_opts += -qt-harfbuzz
-$(package)_config_opts += -system-zlib
 $(package)_config_opts += -static
 $(package)_config_opts += -v
 $(package)_config_opts += -no-feature-bearermanagement
@@ -298,7 +297,6 @@ define $(package)_config_cmds
   export PKG_CONFIG_PATH=$(host_prefix)/share/pkgconfig  && \
   cd qtbase && \
   ./configure $($(package)_config_opts) && \
-  echo "host_build: QT_CONFIG ~= s/system-zlib/zlib" >> mkspecs/qconfig.pri && \
   echo "CONFIG += force_bootstrap" >> mkspecs/qconfig.pri && \
   cd .. && \
   $(MAKE) -C qtbase sub-src-clean && \
