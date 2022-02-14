@@ -103,6 +103,8 @@ namespace ledger {
         res = hid_write(this->device_handle, sendBuffer, 65);
         if (res < 0) {
           std::cout << "Unable to write" << std::endl;
+          hid_close(this->device_handle);
+          hid_exit();
           return {};
         }
       }
@@ -115,7 +117,7 @@ namespace ledger {
       for (size_t i = 0; i < 64; ++i) { tmpRet[i] = receiveBuffer[i]; }
       ret.push_back(tmpRet);
       // If input was wrong, the first message will always have the error code.
-      if (this->messageHasError(tmpRet)) { return ret; }
+      if (this->messageHasError(tmpRet)) { hid_close(this->device_handle); hid_exit(); return ret; }
 
       // Read more messages, if there is any.
       for (;;) {
@@ -126,6 +128,8 @@ namespace ledger {
         ret.push_back(tmpRet);
       }
     }
+    hid_close(this->device_handle);
+    hid_exit();
     return ret;
   }
 }
