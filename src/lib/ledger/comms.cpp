@@ -78,8 +78,22 @@ namespace ledger {
 
     // Open connection with the device.
     if (hid_init()) { return {}; }
-    this->device_handle = hid_open(this->ledgerVID, this->ledgerPID, NULL);
-    if (!this->device_handle) { return {}; }
+    // TODO: Proper USB handling.
+    // https://github.com/libusb/hidapi/issues/381
+    #ifdef __APPLE__
+      struct hid_device_info *devs;
+      devs = hid_enumerate(this->ledgerVID, 0x0);
+      while (devs) {
+        if (devs->usage_page != this->fido) {
+          this->device_handle = hid_open_path(devs->path);
+        }
+        devs = devs->next;
+      }
+      hid_free_enumeration(devs);
+    #else
+      this->device_handle = hid_open(this->ledgerVID, this->ledgerPID, NULL);
+    #endif
+    if (!this->device_handle) { hid_close(this->device_handle); hid_exit(); return {}; }
 
     // Create packages of 3 buffers.
     // Ledger accepts up to 3 send messages (192 Bytes) before returning an answer.

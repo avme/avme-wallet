@@ -7,7 +7,7 @@
 int main(int argc, char *argv[]) {
   // Setup boost::filesystem environment, Qt's <APPNAME> for QStandardPaths
   // and Linux's fontconfig path
-  ledger::device ledgerDevice;
+
   boost::nowide::nowide_filesystem();
   QApplication::setApplicationName("AVME");
   #ifdef __linux__

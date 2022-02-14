@@ -147,7 +147,7 @@ namespace ledger {
        * Address is always on the second vector, starting at index 15 and ending
        * at index 15 + 40, where 40 is number of characters in a given address.
        */
-      if (receiveBuffer.size() == 1) { return ""; }
+      if (receiveBuffer.size() <= 1) { return ""; }
       for (size_t i = 15; i < (15+40); ++i) {
         std::stringstream ss;
         ss << std::hex << std::setfill('0');
