@@ -82,7 +82,7 @@ namespace ledger {
     // https://github.com/libusb/hidapi/issues/381
     #ifdef __APPLE__
       struct hid_device_info *devs;
-      devs = hid_enumerate(this->ledgerVID, 0x0);
+      devs = hid_enumerate(this->ledgerVID, this->ledgerPID);
       while (devs) {
         if (devs->usage_page != this->fido) {
           this->device_handle = hid_open_path(devs->path);
