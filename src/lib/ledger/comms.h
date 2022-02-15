@@ -32,9 +32,9 @@ namespace ledger {
     private:
       unsigned short ledgerVID = 0x0000;
       unsigned short ledgerPID = 0x0000;
-      #ifdef __APPLE__
-      unsigned short fido = 0xF1D0;
-      #endif
+      // https://github.com/LedgerHQ/ledger-wallet-chrome/blob/master/app/src/dongle/manager.coffee
+      unsigned short ledgerUsagePage = 0xffa0;
+
       hid_device *device_handle;
       bool messageHasError(encoding::receiveBuf message);
 
