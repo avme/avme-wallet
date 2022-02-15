@@ -8,7 +8,7 @@ import "qrc:/qml/components"
 
 import QmlApi 1.0
 
-// Popup for confirming a transaction with user input.
+// Popup for confirming a signature with user input.
 AVMEPopup {
   id: confirmSignPopup
   widthPct: 0.7
@@ -157,6 +157,7 @@ AVMEPopup {
         property bool view: false
         width: (confirmSignPopup.width * 0.1)
         height: passInput.height
+        visible: passInput.visible
         text: ""
         onClicked: view = !view
         AVMEAsyncImage {

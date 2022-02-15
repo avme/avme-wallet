@@ -240,6 +240,7 @@ AVMEPopup {
         property bool view: false
         width: (confirmTxPopup.width * 0.1)
         height: passInput.height
+        visible: passInput.visible
         text: ""
         onClicked: view = !view
         AVMEAsyncImage {
