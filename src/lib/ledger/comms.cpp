@@ -84,15 +84,12 @@ namespace ledger {
     while (devs) {
       if (devs->usage_page == this->ledgerUsagePage) {
         this->device_handle = hid_open_path(devs->path);
-        std::cout << "Connected!" << std::endl;
       }
       devs = devs->next;
     }
     hid_free_enumeration(devs);
 
-    std::cout << "Handle check" << std::endl;
     if (!this->device_handle) { hid_close(this->device_handle); hid_exit(); return {}; }
-    std::cout << "Handle checked" << std::endl;  
     // Create packages of 3 buffers.
     // Ledger accepts up to 3 send messages (192 Bytes) before returning an answer.
     // Trying to send more than 255 bytes will crash the device.
