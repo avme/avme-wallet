@@ -3,11 +3,40 @@
 // file LICENSE or http://www.opensource.org/licenses/mit-license.php.
 #include "main-gui.h"
 
+// Handler for clean exit on system signals
+void handleExit(int sig) {
+  std::string sigName;
+  switch (sig) {
+    case SIGABRT: sigName = "SIGABRT"; break;
+    case SIGINT: sigName = "SIGINT"; break;
+    case SIGSEGV: sigName = "SIGSEGV"; break;
+    case SIGTERM: sigName = "SIGTERM"; break;
+  }
+  boost::interprocess::named_mutex::remove("AVMEWallet");
+  std::cout << "Received " << sigName << ", exiting" << std::endl;
+  exit(sig);
+}
+
 // Implementation of AVME Wallet as a GUI (Qt) program.
 int main(int argc, char *argv[]) {
+  // Set up system signal handlers
+  signal(SIGABRT, handleExit);
+  signal(SIGINT, handleExit);
+  signal(SIGSEGV, handleExit);
+  signal(SIGTERM, handleExit);
+
+  // Prevent multiple instances of the program
+  try {
+    boost::interprocess::named_mutex progLock(
+      boost::interprocess::create_only, "AVMEWallet"
+    );
+  } catch (boost::interprocess::interprocess_exception &ex) {
+    std::cout << "Program is already running" << std::endl;
+    return 1;
+  }
+
   // Setup boost::filesystem environment, Qt's <APPNAME> for QStandardPaths
   // and Linux's fontconfig path
-
   boost::nowide::nowide_filesystem();
   QApplication::setApplicationName("AVME");
   #ifdef __linux__
@@ -24,9 +53,9 @@ int main(int argc, char *argv[]) {
   #endif
 
   // Create the actual application, register our custom classes into it and
-  // initialize the global thread pool to 128 threads.
-  // We should never reach this limit, but a high thread count should
-  // avoid taking too long to answer towards the websocket server.
+  // initialize the global thread pool.
+  // A high enough max thread count should avoid taking too long to answer
+  // towards the websocket server.
   QApplication app(argc, argv);
   QQmlApplicationEngine engine;
   QmlSystem qmlsystem;
@@ -45,15 +74,15 @@ int main(int argc, char *argv[]) {
   QApplication::setFont(font);
   app.setWindowIcon(QIcon(":/img/avme_logo.png"));
 
-  // Load the main screen, link the required signals/slots and start the app
+  // Start the app and websocket server
   engine.load(QUrl(QStringLiteral("qrc:/qml/screens/main.qml")));
   if (engine.rootObjects().isEmpty()) return -1;
-
-  // Create Websocket server object and connect close button signal
   qmlsystem.setWSServer();
   auto returnStatus = app.exec();
-  // Only after the wallet is closed...
+
+  // Properly close the app
   qmlsystem.cleanAndCloseWallet();
+  boost::interprocess::named_mutex::remove("AVMEWallet");
   return returnStatus;
 }
 

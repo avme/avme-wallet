@@ -58,6 +58,10 @@ Q_IMPORT_PLUGIN(QtChartsQml2Plugin)
 
 #include <hidapi/hidapi.h>
 
+#include <boost/interprocess/sync/named_mutex.hpp>
+
+#include <csignal>
+
 #include "version.h"
 
 #endif // MAIN_GUI_H
