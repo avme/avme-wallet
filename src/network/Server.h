@@ -51,6 +51,12 @@ class session : public std::enable_shared_from_this<session> {
       QmlSystem *sys
     ) : ws_(std::move(socket)), sessions_(sessions), sys_(sys) {}
 
+
+    /**
+     *  Atomic bool to know if listener is still running, so QmlSystem::handleServer can return properly
+     *  and not try to write blindly on it.
+     */
+    std::atomic_bool is_running;
     /**
      * Get on the correct executor.
      * We need to execute within a strand to perform async operations

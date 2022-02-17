@@ -16,7 +16,10 @@ void session::close() {
   m_lock.lock();
   if (ws_.is_open()) { // Check if it is even open before closing
     ws_.async_close(websocket::close_code::normal,beast::bind_front_handler(&session::on_closed, shared_from_this()));
+    is_running = false;
+    return;
   }
+  is_running = false;
   m_lock.unlock();
 }
 
@@ -44,6 +47,7 @@ void session::on_accept(beast::error_code ec) {
   if (ec.value() == 125) { Server::fail(ec, "read"); return; } // Operation cancelled
   if (ec.value() == 995) { Server::fail(ec, "read"); return; } // Interrupted by host
   if (ec) { return Server::fail(ec, "accept"); }
+  is_running = true;
   do_read();
 }
 
@@ -77,12 +81,14 @@ void session::do_write(std::string response) {
     ws_.async_write(answerBuffer_.data(), beast::bind_front_handler(
       &session::on_write, shared_from_this()
     ));
+    return;
   }
   m_lock.unlock();
 }
 
 void session::on_write(beast::error_code ec, std::size_t bytes_transferred) {
   boost::ignore_unused(bytes_transferred);
+  m_lock.unlock();
   if (ec) { return Server::fail(ec, "write"); }
 }
 
@@ -102,8 +108,8 @@ void Server::listener::do_accept() {
 void Server::listener::on_accept(beast::error_code ec, tcp::socket socket) {
   m_lock.lock();
   if (ec) {
-    if (ec.value() == 125) { return; } // Operation cancelled
     fail(ec, "accept");
+    m_lock.unlock();
     return; // Close the listener regardless of the error
   } else {
     if (socket.remote_endpoint().address().to_string() == "127.0.0.1") {
