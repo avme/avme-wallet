@@ -63,7 +63,11 @@ int main(int argc, char *argv[]) {
   qmlsystem.setApp(&app);
   engine.rootContext()->setContextProperty("qmlSystem", &qmlsystem);
   qmlRegisterType<QmlApi>("QmlApi", 1, 0, "QmlApi");
-  QThreadPool::globalInstance()->setMaxThreadCount(16);
+  #ifdef __APPLE__
+    QThreadPool::globalInstance()->setMaxThreadCount(16);
+  #else
+    QThreadPool::globalInstance()->setMaxThreadCount(32);
+  #endif
 
   // Set the app's text font and icon
   QFontDatabase::addApplicationFont(":/fonts/IBMPlexMono-Bold.ttf");
