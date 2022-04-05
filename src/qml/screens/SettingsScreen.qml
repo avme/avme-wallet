@@ -211,7 +211,7 @@ Item {
           anchors.left: parent.right
           anchors.leftMargin: 10
           label: "Host"
-          placeholder: "e.g. api.avme.io"
+          placeholder: "e.g. api.avax.network"
         }
         AVMEInput {
           id: walletAPIPort
@@ -228,7 +228,7 @@ Item {
           anchors.left: walletAPIPort.right
           anchors.leftMargin: 10
           label: "Target"
-          placeholder: "e.g. /"
+          placeholder: "e.g. /ext/bc/C/rpc"
         }
       }
 

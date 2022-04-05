@@ -241,9 +241,9 @@ bool QmlSystem::loadConfigDB() {
   std::string websocketAPIStr = this->getConfigValue("websocketAPI").toStdString();
   if (walletAPIStr == "NotFound: ") {
     json walletAPI;
-    walletAPI["host"] = "api.avme.io";
+    walletAPI["host"] = "api.avax.network";
     walletAPI["port"] = "443";
-    walletAPI["target"] = "/";
+    walletAPI["target"] = "/ext/bc/C/rpc";
     this->setConfigValue("walletAPI", QString::fromStdString(walletAPI.dump()));
   }
 
@@ -259,6 +259,15 @@ bool QmlSystem::loadConfigDB() {
   // Set the API to use the values from the configuration
   json walletAPI = json::parse(this->getConfigValue("walletAPI").toStdString());
   json websocketAPI = json::parse(this->getConfigValue("websocketAPI").toStdString());
+
+
+  // Reset API back to public API in the case of old API is found
+  if (walletAPI["host"] == "api.avme.io") {
+    walletAPI["host"] = "api.avax.network";
+    walletAPI["port"] = "443";
+    walletAPI["target"] = "/ext/bc/C/rpc";
+    this->setConfigValue("walletAPI", QString::fromStdString(walletAPI.dump()));
+  }
 
   this->s.setPort(boost::lexical_cast<unsigned short>(websocketAPI["pluginPort"].get<std::string>()));
 
